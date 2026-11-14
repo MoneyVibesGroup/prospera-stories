@@ -53,6 +53,46 @@ reserved_ranges:
       Plage large : le cadrage de ≈ 25 modules en consomme beaucoup. Les fiches sont écrites par
       celui qui code la story, juste avant de la coder.
 
+  - range: "STORY-902 → STORY-929"
+    status: "RÉSERVÉ"
+    owner: "Groupe A (poste principal) — relecture, restes du 14/11, fiscalité et plateforme (§3)"
+    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-2026-11-14.md"
+    reserved_on: "2026-11-14"
+    note: >-
+      Sous-plage de STORY-900 → STORY-1199 (Dev B), découpée le 2026-11-14 pour quatre sessions
+      parallèles sur deux machines : aucune ne voit les branches locales des autres, donc chacune puise
+      dans sa seule plage. Les fiches sont écrites juste avant de coder.
+
+  - range: "STORY-930 → STORY-979"
+    status: "RÉSERVÉ"
+    owner: "Groupe B — moteur d'installation (§4)"
+    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-2026-11-14.md"
+    reserved_on: "2026-11-14"
+    note: >-
+      Sous-plage de STORY-900 → STORY-1199 (Dev B), découpée le 2026-11-14 pour quatre sessions
+      parallèles sur deux machines : aucune ne voit les branches locales des autres, donc chacune puise
+      dans sa seule plage. Les fiches sont écrites juste avant de coder.
+
+  - range: "STORY-980 → STORY-1029"
+    status: "RÉSERVÉ"
+    owner: "Groupe C — assurance, chaîne des sinistres (§5)"
+    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-2026-11-14.md"
+    reserved_on: "2026-11-14"
+    note: >-
+      Sous-plage de STORY-900 → STORY-1199 (Dev B), découpée le 2026-11-14 pour quatre sessions
+      parallèles sur deux machines : aucune ne voit les branches locales des autres, donc chacune puise
+      dans sa seule plage. Les fiches sont écrites juste avant de coder.
+
+  - range: "FE-112 → FE-139 ; AP-38 → AP-49"
+    status: "RÉSERVÉ"
+    owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
+    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-2026-11-14.md"
+    reserved_on: "2026-11-14"
+    note: >-
+      FE-109 → FE-111 existent : l'app expert-comptable reprend à FE-112 (hors plage réservée jusqu'ici).
+      AP-38 → AP-49 est pris dans AP-38 → AP-99 (Dev B). Le groupe D ne crée aucun identifiant STORY- :
+      un manque de backend devient un ticket adressé au groupe qui tient le dépôt.
+
   - range: "EPIC-142 → EPIC-299"
     status: "RÉSERVÉ"
     owner: "Dev B — épics des modules cadrés en semaines 1 à 4 (contrat de module, moteur d'installation, coque, distributeur, microfinance, assurance, CRM, transverses)"
