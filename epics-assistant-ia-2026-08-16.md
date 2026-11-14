@@ -283,7 +283,7 @@ réservation du compteur de mandat doit faire **rougir** un test de concurrence,
 ## EPIC-100 : Surface pilote — mapping de comptes et l'écart annoncé/recalculé · 13 pts
 
 **Autonome :** ⛔ **non** — porte le volet `bilan-service` (story hors service **n°3**).
-**Amont :** EPIC-099.
+**Amont :** EPIC-099 ; EPIC-245 → 248 (socle de l'IA commune : service, contrat de proposition, garde-fous, catalogue des capacités et packs ; amendement du 2026-11-14). Le rattachement passe par le contrat de proposition d'EPIC-246.
 
 - Pour un compte que le référentiel ne reconnaît pas, l'assistant **propose un rattachement** à un poste,
   justifié par la règle comptable applicable.

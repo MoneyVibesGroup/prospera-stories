@@ -744,7 +744,7 @@ Une instance locale de l'IA commune sert, par le contrat Proposition, les règle
 
 - **Spine :** AD-14 ; spine du moteur AD-14, AD-39
 - **Dépôts :** service porteur de l'IA commune (à cadrer, spine Deferred), `prospera-imf-service` (port Proposition), `prospera-app`
-- **Dépend de :** EPIC-181, EPIC-185
+- **Dépend de :** EPIC-181, EPIC-185 ; EPIC-245 → 248 (socle de l'IA commune : service, contrat de proposition, garde-fous, catalogue des capacités et packs ; amendement du 2026-11-14)
 - **Fini quand :** UJ-1 affiche score, décision suggérée et analyse avec leur provenance ; couper l'IA ne bloque aucun parcours ; aucune variable interdite n'entre dans le score.
 
 ### EPIC-191 : La collecte terrain et le terrain de l'IMF ★
@@ -799,7 +799,7 @@ L'IA commune propose l'ordre et le canal des relances, la stratégie de recouvre
 
 - **Spine :** AD-14
 - **Dépôts :** service porteur de l'IA commune, modules concernés (port Proposition), `prospera-app`, `prospera-terrain`
-- **Dépend de :** EPIC-190 et l'épic de chaque module
+- **Dépend de :** EPIC-190 et l'épic de chaque module ; EPIC-245 → 248 (socle de l'IA commune : service, contrat de proposition, garde-fous, catalogue des capacités et packs ; amendement du 2026-11-14)
 - **Fini quand :** Chaque proposition porte sa provenance ; les zones de prospection s'affichent au RA ; le Copilot de l'AUD lit la piste d'audit seulement.
 
 ### EPIC-196 : La conformité BCEAO et l'audit
