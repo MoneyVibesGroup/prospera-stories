@@ -4,7 +4,7 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § AB-08 (contrôles & livraison) · `sprint-plan-atelier-balance-2026-07-12.md` § Coordination balance/bilan · patron e2e docker STORY-049 (chaîne KYC complète)
 **Priorité :** Must Have
 **Story Points :** 3
-**Statut :** ready-for-dev
+**Statut :** Terminée (2026-11-14) — jalon prononçable SOUS RÉSERVE (TPU non éprouvée)
 **Assigné à :** null
 **Créée le :** 2026-07-12
 **Sprint :** 19 (EXTENDED)
@@ -88,15 +88,15 @@ C'est l'équivalent, pour le module Atelier, de **STORY-049** (e2e chaîne KYC) 
 
 ## Acceptance Criteria
 
-- [ ] **Stack docker racine** démarre `healthy` (auth + document + balance + bilan + mongo rs0 + kafka + minio + mailhog).
-- [ ] **Scénario A (PME/cahiers-OCR)** vert de bout en bout : profil OCR → 2 axes → référentiel → cahiers/OCR → rattachement → balance stockée → rapprochement → fiscal → conseil → contrôles → validation → handoff.
-- [ ] **Scénario B (cabinet/Sage)** vert de bout en bout : import Sage → reprise à-nouveaux → contrôles → fiscal → conseil → validation → handoff.
+- [x] **Stack docker racine** démarre `healthy` (auth + document + balance + bilan + mongo rs0 + kafka + minio + mailhog).
+- [x] **Scénario A (PME/cahiers-OCR)** vert de bout en bout : profil OCR → 2 axes → référentiel → cahiers/OCR → rattachement → balance stockée → rapprochement → fiscal → conseil → contrôles → validation → handoff.
+- [x] **Scénario B (cabinet/Sage)** vert de bout en bout : import Sage → reprise à-nouveaux → contrôles → fiscal → conseil → validation → handoff.
 - [ ] **Moteur fiscal** vérifié : **IS = max(MFP, IS)** (assertion sur les deux termes), TVA due, **TPU** pour le régime synthétique, provisions intégrées (44/89).
-- [ ] **⚠️ Garde-fous NFR-A04 assertés** : chaque levier d'optimisation est **tracé + base légale + plafonné** ; **plancher MFP respecté** ; **comparatif déposé/optimisé conserve les deux versions** (immutabilité) ; **l'e2e échoue si un levier minore l'impôt sans justification**.
+- [x] **⚠️ Garde-fous NFR-A04 assertés** : chaque levier d'optimisation est **tracé + base légale + plafonné** ; **plancher MFP respecté** ; **comparatif déposé/optimisé conserve les deux versions** (immutabilité) ; **l'e2e échoue si un levier minore l'impôt sans justification**.
 - [ ] **Contrôles** : équilibre bloquant → validation **409** ; Actif=Passif ; articulation résultat/CA/TVA ; **statut de preuve** transporté jusqu'au handoff ; `majorite_estimée` **livrable mais annotée**.
-- [ ] **Handoff** : `balance.created` émis et **consommé** (round-trip Kafka) + `GET /api/v1/balance/…` retourne la `BalanceCanonique` **avec statut de preuve**.
-- [ ] **Isolation tenant** (403 hors org) et **gate** (`@RequiresBalanceAccess` refuse si KYC ≠ APPROVED) vérifiées.
-- [ ] **Idempotence** : ré-ingestion `orgId+exercice+source` ne crée pas de doublon.
+- [x] **Handoff** : `balance.created` émis et **consommé** (round-trip Kafka) + `GET /api/v1/balance/…` retourne la `BalanceCanonique` **avec statut de preuve**.
+- [x] **Isolation tenant** (403 hors org) et **gate** (`@RequiresBalanceAccess` refuse si KYC ≠ APPROVED) vérifiées.
+- [x] **Idempotence** : ré-ingestion `orgId+exercice+source` ne crée pas de doublon.
 - [ ] **Non-régression** : suites e2e des services touchés restent vertes ; **CI verte**.
 
 ---
@@ -174,12 +174,12 @@ expect(leviersNonJustifies).toHaveLength(0);
 
 ## Definition of Done
 
-- [ ] Suite e2e docker (scénarios A **et** B) implémentée et **verte** contre le stack racine
+- [x] Suite e2e docker (scénarios A **et** B) implémentée et **verte** contre le stack racine
 - [ ] IS = max(MFP, IS), TVA, TPU, provisions **vérifiés** par assertions
-- [ ] **Garde-fous NFR-A04 assertés** (base légale + traçabilité + plancher MFP + double version conservée)
+- [x] **Garde-fous NFR-A04 assertés** (base légale + traçabilité + plancher MFP + double version conservée)
 - [ ] Contrôles + statut de preuve + validation 409-si-bloquant vérifiés
-- [ ] Handoff `balance.created` (round-trip Kafka) + API GET **avec statut de preuve**
-- [ ] Isolation tenant, gate KYC, idempotence vérifiées
+- [x] Handoff `balance.created` (round-trip Kafka) + API GET **avec statut de preuve**
+- [x] Isolation tenant, gate KYC, idempotence vérifiées
 - [ ] Non-régression : suites des services touchés vertes ; **CI verte**
 - [ ] Jalon **Module 1-bis (Atelier Balance) livré** prononçable
 
@@ -189,3 +189,48 @@ expect(leviersNonJustifies).toHaveLength(0);
 **Created:** 2026-07-12
 **Dependencies:** STORY-078 (référentiel/paquet fiscal), 079/080/081 (profil & axes & OCR), 082/083/084/085 (cahiers/OCR/rattachement), 086/087/088 (Sage + reprise), 089/090 (rapprochement), 091/092/093/094/095 (moteur fiscal), 096/097 (conseil + garde-fous NFR-A04), 098 (contrôles + statut de preuve), 099 (handoff), 101 (contrat), 102 (ingestion directe). **Toutes les stories de l'Atelier doivent être livrées.**
 **Reference:** `prd-atelier-balance-2026-07-12.md` § AB-08 · patron e2e docker STORY-049 (chaîne KYC)
+
+---
+
+## Suivi — 2026-11-14 (recette verte, fusionnée ; jalon prononçable SOUS RÉSERVE)
+
+**PR :** MoneyVibesGroup/prospera-recette#14 (sur `dev`). Le fichier est
+`paquets/recette-croisee/recette/atelier-balance.recette.ts`.
+
+### Résultat
+
+Jouée sur une pile construite depuis `origin/dev` de chaque service : **50 étapes vertes, 3 `it.todo`
+nommés, 0 échec**, en environ 3 min.
+- Le cabinet est inscrit, vérifié par Mailhog et approuvé par les vraies routes.
+- Les dossiers viennent de `dossier-service`.
+- Aucun état n'est posé en base.
+
+Les cases cochées ci-dessus sont celles que la recette **asserte**. Les autres restent ouvertes, pour les raisons qui suivent.
+
+### Ce qui n'est PAS prouvé
+
+1. **TPU (STORY-095)** : `GET …/fiscal/tpu` rend 409 `BAREME_TPU_INDISPONIBLE`. Le paquet fiscal
+   togo@2026 ne publie pas le barème forfaitaire (CGI art. 130-131). Même refus sur les provisions
+   d'un dossier synthétique. ⇒ La case « Moteur fiscal » reste ouverte. **C'est la réserve du jalon.**
+2. **409 `CONTROLES_BLOQUANTS` à la validation** : aucune route publique ne laisse entrer une balance
+   dont un contrôle bloquant échoue (400 hors plan, 422 déséquilibre, refusés en amont). Seule une
+   écriture en base le produirait, et la recette se l'interdit. Le 409 `DEJA_VALIDEE`, lui, est asserté.
+3. **Non-régression / CI** : la story ne modifie aucun service, donc aucune suite de service n'a été rejouée.
+
+### ⚠️ Défaut probable trouvé : à ouvrir en story
+
+Côté `balance-service`, sur un même dossier, deux balances 2026 `source: sage` sont VALIDÉE en
+**version 3**, numérotées de deux façons :
+- celle des provisions (`origine: PROVISIONS_FISCALES`) est numérotée sur toute la source ;
+- l'import de clôture (`origine` nulle) est numéroté sur sa seule origine.
+
+L'index unique inclut `origine`, donc rien n'est violé, mais « la balance sage v3 de 2026 » désigne
+deux balances validées différentes. Il faut trancher : une suite de versions par source, ou par source et origine.
+
+### Précisions de lecture
+
+- **Le socle d'à-nouveaux porte les SOLDES de clôture** (sans mouvements, STORY-147). Les colonnes
+  `aNouveau*` se constatent sur les balances de N soumises après le socle (STORY-423), pas sur le
+  socle lui-même. Un premier jet de la recette attendait l'inverse ; il a été corrigé.
+- ⚠️ La mise en route de la recette fait un `compose up` (reconstruction et rééquilibrage Kafka). Il ne faut pas la
+  lancer en même temps qu'une autre suite lourde : on obtient sinon de faux « injoignable ».
