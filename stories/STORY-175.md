@@ -4,7 +4,7 @@
 **Réf. :** ticket §C · **AP-02** · ⚠️ **déjà relevé le 2026-07-21, jamais formulé en demande**
 **Priorité :** Must Have
 **Story Points :** 2
-**Statut :** À faire
+**Statut :** Terminée (2026-11-14) — requalifiée côté BFF
 **Créée le :** 2026-08-04
 **Sprint :** 21
 **Service :** `auth-service` (`:3001`) + relais `prospera-admin-panel-service` (`:3010`)
@@ -53,8 +53,51 @@ son test le vérifie explicitement, pour que personne ne « répare » ça côt�
 
 ## Definition of Done
 
-- [ ] Les 6 critères vérifiés · `lint` 0 · couverture ≥ 90 %
-- [ ] **Vérification docker** sur un jeu multi-pages
-- [ ] ⚡ La console est rebranchée : `fetchOrgs` renvoie le filtre, et son test « n'envoie AUCUN
+- [x] Les 6 critères vérifiés · `lint` 0 · couverture ≥ 90 %
+- [x] **Vérification docker** sur un jeu multi-pages
+- [x] ⚡ La console est rebranchée : `fetchOrgs` renvoie le filtre, et son test « n'envoie AUCUN
       filtre kycStatus » est **inversé** — c'est le signal que la dette est soldée
-- [ ] Branche `MNV-175`, PR rebase-mergée sur `dev`
+- [x] Branche `MNV-175`, PR rebase-mergée sur `dev`
+
+---
+
+## Suivi — 2026-11-14 (requalifiée côté BFF, fusionnée sur `dev`)
+
+**PR :** MoneyVibesGroup/prospera-admin-panel-service#31 (BFF) · MoneyVibesGroup/frontend-admin-panel#27 (console).
+`auth-service` n'est **pas** touché.
+
+### ⚡ Décision PO du 2026-11-14 : requalifiée côté BFF
+
+La fiche demandait le filtre à `auth-service`, qui **ne connaît pas** le statut KYC : il vit
+dans `kyc-service` (une base par service). Trois options ont été présentées (BFF, projection du
+KYC dans `auth` par événements, clôture au profit de la file STORY-107) ; le PO a retenu le BFF.
+
+`GET /admin/orgs?kycStatus=…` :
+1. lit chez `kyc` l'ensemble **complet** des organisations au statut demandé ; pour ce filtre,
+   `kyc` est une dépendance **dure** (panne ⇒ 503, refus ⇒ 403, jamais la liste entière) ;
+2. le passe à `auth` en `?ids=` avec `status`, `q`, `ownerEmailVerified` : pagination et `total`
+   sont ceux d'`auth`, donc exacts ;
+3. aucun dossier ⇒ page vide **sans** appeler `auth` (`ids` vide = parc entier) ;
+4. plus de 100 organisations (plafond `?ids=` d'`auth`) ⇒ `422 FILTRE_KYC_TROP_LARGE`, qui renvoie
+   vers `GET /admin/kyc-reviews` ;
+5. valeur inconnue ⇒ `400 STATUT_KYC_INCONNU` avec `{ message, code }`.
+
+**Écart aux critères :** AC-3 nomme `ids` ; le BFF n'expose pas `ids` sur cette route, la
+combinaison est donc prouvée avec `status`, `q` et `ownerEmailVerified`. AC-6 (« le BFF relaie
+tel quel ») ne tient plus par construction : le BFF résout le filtre lui-même.
+
+### Preuves
+
+Unitaires BFF 496/496 (11 nouveaux) ; console `src/features/orgs` 89/89. Docker (auth, kyc,
+catalogue, BFF ; 25 organisations et 124 dossiers semés) : sans filtre `total=26` ;
+`UNDER_REVIEW` `total=23` sur 3 pages de 10, **23 lignes distinctes** ; `+ status=SUSPENDED` = 5 ;
+`+ q=preuve-1` = 10 ; `REJECTED` = 0 ; `PENDING` ⇒ 400 nommé ; `APPROVED` (104) ⇒ 422 nommé.
+
+### Restes
+
+- ⚠️ **Le contrôle d'écran du filtre n'est pas remis** dans la console : modification d'écran,
+  donc maquette d'abord. Story d'écran à ouvrir (elle traitera aussi le 422).
+- ⚠️ **Constat** : sur une pile sans catalogue, le fan-out de comptage des droits (jusqu'à 10
+  appels vers un hôte non résolu) sature le pool DNS de Node (4 fils) pendant ~3 s, et l'appel
+  suivant vers `kyc` expire (503 intermittent). Un catalogue injoignable en production
+  dégraderait donc aussi les autres sources du BFF. Non corrigé.
