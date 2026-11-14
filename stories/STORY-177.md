@@ -5,7 +5,7 @@
 **Découverte par :** AP-INT-0, en branchant les entitlements
 **Priorité :** Should Have
 **Story Points :** 2
-**Statut :** À faire
+**Statut :** Terminée (2026-11-14)
 **Créée le :** 2026-08-04
 **Sprint :** 21
 **Service :** `platform-catalog-service` (`:3003`)
@@ -59,9 +59,54 @@ lecture ne peut distinguer un droit octroyé hier d'un droit ancien modifié hie
 
 ## Definition of Done
 
-- [ ] Les 5 critères vérifiés · `lint` 0 · couverture ≥ 90 %
-- [ ] **Vérification docker** : octroi → mise à jour → révocation → ré-octroi, en observant les deux
+- [x] Les 5 critères vérifiés · `lint` 0 · couverture ≥ 90 %
+- [x] **Vérification docker** : octroi → mise à jour → révocation → ré-octroi, en observant les deux
       dates à chaque étape
-- [ ] ⚡ La console lit `grantedAt` et **retire** la note « `grantedAt` n'existe pas amont » de
+- [x] ⚡ La console lit `grantedAt` et **retire** la note « `grantedAt` n'existe pas amont » de
       `entitlements-client.ts` — c'est le signal que la dette est soldée
-- [ ] Branche `MNV-177`, PR rebase-mergée sur `dev`
+- [x] Branche `MNV-177`, PR rebase-mergée sur `dev`
+
+---
+
+## Suivi — 2026-11-14 (livrée, fusionnée sur `dev`)
+
+**PR :** MoneyVibesGroup/prospera-platform-catalog-service#42 · MoneyVibesGroup/frontend-admin-panel#26 (console).
+
+### Ce qui a été fait
+
+- `grantedAt` posé à la création par un hook `pre('validate')` sur tout document **neuf** (octroi
+  par abonnement, par vertical, tout futur `Model.create`) ; le `PUT` le pose à la création **et**
+  au ré-octroi d'un droit `REVOKED`. Une mise à jour ou une révocation ne le touchent jamais.
+- Exposé dans `EntitlementResponseDto` (pas dans la vue « par module », qui exclut l'audit).
+- La console lit `grantedAt` ; la note « `grantedAt` n'existe pas amont » est retirée.
+
+### ⚡ Écart à la fiche : la migration prend `createdAt`, pas `updatedAt`
+
+Le schéma porte `timestamps: true` : `createdAt` **est** la date du premier octroi, exacte pour
+tout droit jamais révoqué puis ré-octroyé. `updatedAt` est faux dès la première mise à jour, le
+défaut même que la story corrige. `updatedAt` ne sert qu'à défaut ; sans aucune date, le droit
+reste sans `grantedAt` (jamais une date inventée). Commande : `npm run migrate:granted-at`, à
+lancer une fois après le déploiement.
+
+### Deux défauts trouvés par la vraie base, invisibles aux unitaires
+
+1. Sans `timestamps: false`, Mongoose ajoute `updatedAt = maintenant` à l'`updateMany`, pipeline
+   compris : chaque `updatedAt` migré était réécrit (AC-5), et un droit sans date recevait
+   l'instant de la migration comme date d'octroi.
+2. Le script ne rendait jamais la main : `AppModule` monte les consommateurs Kafka, qui se
+   reconnectent après `app.close()`. Sortie explicite. ⚠️ `migrate:terme-entitlements` (STORY-609)
+   suit le même patron et a sans doute le même blocage — non touché.
+
+### Preuves
+
+Unitaires 1 042/1 042, e2e des droits 54/54 ; console 631/631. Docker sur volumes neufs avec un
+vrai jeton : octroi 201 → mise à jour, révocation, mise à jour après ré-octroi = `grantedAt`
+**inchangé** ; ré-octroi = `grantedAt` **remis à la date du jour**. `Model.create` réel pose la
+date. Migration : un droit (12/01 créé, 03/03 modifié) reçoit 12/01 et garde son `updatedAt` ; un
+droit sans date reste sans ; code de sortie 0 ; rejouée, « 0 posée ».
+
+### Restes
+
+- ⚠️ Les types générés de la console sont en retard sur l'OpenAPI du catalogue : elle lit encore
+  `referentiel` (singulier) alors que le service renvoie `referentiels` depuis STORY-533. Seul
+  `grantedAt` a été ajouté à la main ; la régénération complète est une story à part.

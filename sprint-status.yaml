@@ -5030,7 +5030,7 @@ sprints:
         epic: "EPIC-007"
         points: 2
         service: "platform-catalog-service"
-        status: "not_started"  # `EntitlementResponseDto` porte `updatedAt` (dernière modification) et AUCUNE date d'octroi : un droit octroyé en janvier puis mis à jour en mars s'affiche « octroyé en mars ». Non réparable côté front — l'information n'existe pas. `grantedBy` est déjà là : le service sait QUI a octroyé, mais plus QUAND.
+        status: "done"  # ✅ 2026-11-14 — FUSIONNÉE sur dev : prospera-platform-catalog-service#42 + frontend-admin-panel#26 (console). `grantedAt` posé à la création (hook pre-validate sur tout document neuf + PUT) et au ré-octroi d'un REVOKED, jamais par une mise à jour. Migration `migrate:granted-at` = createdAt (et non updatedAt comme la fiche le disait : timestamps:true), jamais une date inventée. ⛔ 2 défauts trouvés en docker : `timestamps:false` obligatoire (Mongoose réécrivait updatedAt et l'injectait dans le $ifNull) ; script bloqué par la reconnexion Kafka après app.close() (sortie explicite ; migrate:terme-entitlements a le même patron). ⚠️ Types générés de la console en retard (lit `referentiel` singulier depuis STORY-533). AVANT : `EntitlementResponseDto` porte `updatedAt` (dernière modification) et AUCUNE date d'octroi : un droit octroyé en janvier puis mis à jour en mars s'affiche « octroyé en mars ». Non réparable côté front — l'information n'existe pas. `grantedBy` est déjà là : le service sait QUI a octroyé, mais plus QUAND.
         story_path: "stories/STORY-177.md"
         assigned_to: null
       - story_id: "STORY-176"
