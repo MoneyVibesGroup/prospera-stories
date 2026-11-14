@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M18 — Risque de portefeuille, PAR et provisionnement (format du contrat de module, clause C1,
 // amendée le 2026-11-10, le 2026-11-11 et le 2026-11-12).
 // Source : prds/prd-microfinance-2026-11-13/prd.md, annexe A.7 (C1 → C13) et §6.7 (FR-173 → FR-182, FR-272) ;
@@ -150,6 +151,7 @@ export const MANIFESTE_RISQUE_PAR = {
     // `instance.journal` par TOUS les services (outbox) ; seul le consommateur est l'agent. La piste d'audit
     // métier reste propre au module (spine IMF AD-17).
     'instance.journal@1', // [proposition, comme les autres manifestes] arrêtés, validations, export, effacement
+    'risque-par.realite.constatee@1', // [AD-14, spine IA] PAR constaté à la date de la prévision (issue : valeur en tranche ; `definitive` à la clôture de la période) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -182,6 +184,8 @@ export const MANIFESTE_RISQUE_PAR = {
     'produits-financiers.parametre-reglementaire.changed@1', // [proposition, AD-28] classes réglementaires et barème de provision
     'produits-financiers.produit.publie@1', // [proposition, AD-9] ventilation par produit (libellé, version)
     'coeur-sfd.produit.code@1', // [proposition, AD-9] code produit du cœur de chaque prêt
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   // C10 : profil de compose avec le tiret du code. Au compose, le service porte aussi les profils des six
@@ -278,14 +282,14 @@ export const MANIFESTE_RISQUE_PAR = {
   // provision ou une écriture (FR-176). Seuls des écarts anonymisés repartent, avec le consentement de l'IMF
   // (AD-14, moteur AD-13).
   ia: {
-    modeles: [
-      'prevision-par',
-      'scenarios-par',
-      'perte-attendue',
-      'secteur-moteur-risque',
-      'analyse-provisions',
-      'analyse-risque-sectoriel',
-      'analyse-macro-conjoncture',
+    capacites: [
+      'microfinance/prevision-par@1',
+      'microfinance/scenarios-par@1',
+      'microfinance/perte-attendue@1',
+      'microfinance/secteur-moteur-risque@1',
+      'microfinance/analyse-provisions@1',
+      'microfinance/analyse-risque-sectoriel@1',
+      'microfinance/analyse-macro-conjoncture@1',
     ],
     finalites: [
       'prevision-du-portefeuille-a-risque',

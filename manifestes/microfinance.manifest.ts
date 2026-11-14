@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M32 — Clients, KYC et LBC/FT (code `microfinance`), qui couvre aussi M17 « Épargne & dépôts » LUE du
 // cœur (format du contrat de module, clause C1, amendée le 2026-11-10, le 2026-11-11 et le 2026-11-12).
 // Source : prospera-stories, PRD microfinance (prds/prd-microfinance-2026-11-13, FINAL, PR #426), annexe A.3
@@ -171,6 +172,7 @@ export const MANIFESTE_MICROFINANCE = {
     // (changements de niveau de KYC, conversions, exports, effacement) ; il ne porte JAMAIS un acte de la LBC/FT
     // (AD-22) : ceux-là restent dans la collection cloisonnée de conformité.
     'instance.journal@1',
+    'microfinance.realite.constatee@1', // [AD-14, spine IA] client en défaut ou non à l'horizon ; compte épargne devenu dormant ou non ; évolution de l'encours d'épargne (issue : DEFAUT, SANS_DEFAUT, DORMANT, ACTIF) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -192,6 +194,8 @@ export const MANIFESTE_MICROFINANCE = {
     // propriétaire des domaines d'échange.
     'essai.horloge.changed@1',
     'connecteurs.domaine.changed@1', // propriétaire du domaine `microfinance.clients` (spine de Connecteurs, AD-3)
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   // C10 (annexe A.3) : `profiles: ["microfinance"]` ; socle + `reseau`. Au compose, le service démarre dès qu'un
@@ -351,18 +355,18 @@ export const MANIFESTE_MICROFINANCE = {
   // - Provenance affichée (règle ou modèle, version, date) ; l'IA propose, l'humain décide ; absente, rien ne
   //   bloque (AD-14).
   ia: {
-    modeles: [
-      'score-client',
-      'probabilite-defaut',
-      'signaux-faibles-client',
-      'analyse-sectorielle-micro-macro',
-      'couverture-zones-prospection',
-      'comptes-dormants',
-      'recommandation-epargne',
-      'fidelite-epargne',
-      'prevision-encours-epargne',
-      'segmentation-epargnants',
-      'cohesion-groupe',
+    capacites: [
+      'microfinance/score-client@1',
+      'microfinance/probabilite-defaut@1',
+      'microfinance/signaux-faibles-client@1',
+      'microfinance/analyse-sectorielle-micro-macro@1',
+      'microfinance/couverture-zones-prospection@1',
+      'microfinance/comptes-dormants@1',
+      'microfinance/recommandation-epargne@1',
+      'microfinance/fidelite-epargne@1',
+      'microfinance/prevision-encours-epargne@1',
+      'microfinance/segmentation-epargnants@1',
+      'microfinance/cohesion-groupe@1',
     ],
     finalites: [
       'evaluation-du-risque-client',

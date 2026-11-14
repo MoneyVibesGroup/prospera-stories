@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M13 — Conquête, territoires, objectifs et quotas (format du contrat de module, clause C1, amendée
 // le 2026-11-10, le 2026-11-11 et le 2026-11-12).
 // Source : prds/prd-distributeur-2026-11-12/prd.md, annexe A.5 (C1 → C13, tranchées) et §5.5 (FR-76 → FR-86).
@@ -93,6 +94,7 @@ export const MANIFESTE_CONQUETE_OBJECTIFS = {
     // plateforme (même nom chez stock et pdv), porterait ici les dérogations aux garde-fous (FR-79), les
     // changements de statut de zone, l'export et l'effacement. À confirmer par la story de publication.
     'instance.journal@1',
+    'conquete-objectifs.realite.constatee@1', // [AD-14, spine IA] prospect converti ou non à l'échéance de la campagne (issue : CONVERTI, NON_CONVERTI) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -108,6 +110,8 @@ export const MANIFESTE_CONQUETE_OBJECTIFS = {
     // première commande (FR-80 : « livrée », pas « saisie »), la visite clôturée (FR-77) et le commercial
     // destinataire d'une passation (FR-83, `reseau.commercial.changed@1`) n'ont pas de fait dans la liste de
     // l'annexe A.5 ; ils s'ajoutent en version mineure quand ces manifestes les nomment.
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   // C10 : profil de compose avec le tiret du code.
@@ -144,7 +148,10 @@ export const MANIFESTE_CONQUETE_OBJECTIFS = {
   // l'objectif est fixé par un humain qui détient `objectif:definir` (FR-84, FR-85 : « une proposition, pas
   // une action »). Le journal local des prédictions et corrections est une donnée du module (C11, point 2).
   ia: {
-    modeles: ['scoring-prospects', 'allocation-quotas'],
+    capacites: [
+      'distributeur/scoring-prospects@1',
+      'distributeur/allocation-quotas@1',
+    ],
     finalites: ['priorisation-prospects', 'suggestion-allocation'],
   },
 

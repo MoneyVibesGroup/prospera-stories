@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M08 — Commande (format du contrat de module, clause C1, amendée le 2026-11-10, le 2026-11-11 et
 // le 2026-11-12).
 // Source : PRD distributeur (prds/prd-distributeur-2026-11-12), annexe A.1, treize clauses C1 → C13 tranchées.
@@ -103,6 +104,7 @@ export const MANIFESTE_COMMANDE = {
     'commande.bon-livraison.emis@1',
     'commande.bon-livraison.livre@1', // quantités livrées confirmées, d'où naît la facture (FR-36, FR-42)
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] dérogations, annulations, export, effacement
+    'commande.realite.constatee@1', // [AD-14, spine IA] panier proposé accepté ou non, erreur de commande confirmée ou écartée à la livraison (issue : ACCEPTE, MODIFIE, REJETE, ERREUR_CONFIRMEE, ERREUR_ECARTEE) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -124,6 +126,8 @@ export const MANIFESTE_COMMANDE = {
     'recouvrement.credit.bloque@1', // [proposition, FR-33, FR-119 ; nom de l'annexe A.9 du PRD distributeur]
     'recouvrement.credit.debloque@1', // [proposition, idem]
     'reseau.portee.changed@1', // [proposition, C2 : portée zone et portefeuille]
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   profilCompose: 'commande',
@@ -200,7 +204,10 @@ export const MANIFESTE_COMMANDE = {
   // déterministe : le moteur est une règle en première version. Journal local des prédictions et corrections ;
   // prédiction affichée avec modèle, version, date.
   ia: {
-    modeles: ['recommandation-panier', 'detection-erreur-commande'],
+    capacites: [
+      'distributeur/recommandation-panier@1',
+      'distributeur/detection-erreur-commande@1',
+    ],
     finalites: ['suggestion-de-panier', 'controle-de-saisie'],
   },
 } as const;

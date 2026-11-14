@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M14 — Caisse des collecteurs (`caisse`) (format du contrat de module, clause C1, amendée le
 // 2026-11-10, le 2026-11-11 et le 2026-11-12).
 // Source : PRD microfinance (prds/prd-microfinance-2026-11-13), annexe A.5, treize clauses C1 → C13, corrigées par
@@ -110,6 +111,7 @@ export const MANIFESTE_CAISSE = {
     'caisse.ecart.detecte@1', // écart de CLÔTURE : deux montants, `nature` distinct de l'écart de remise de `collecte` (AD-2) ; valeur de `nature` : [proposition, non nommée par les sources]
     'caisse.ecart.resolu@1', // motif (erreur de comptage, perte, vol, ajustement) et auteur ; jamais effacé
     'instance.journal@1', // [proposition, convention des manifestes voisins] attributions de fonds, résolutions d'écart, validations de seuil, export, effacement
+    'caisse.realite.constatee@1', // [AD-14, spine IA] anomalie de caisse ou validation Mobile Money confirmée ou écartée après contrôle (issue : CONFIRMEE, ECARTEE) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -121,6 +123,8 @@ export const MANIFESTE_CAISSE = {
     'collecte.ecart.detecte@1', // `NON_SYNCHRONISE` bloque la clôture du collecteur ; `TROU_DE_PLAGE` à l'écran (AD-19)
     'coeur-sfd.caisse-guichet.changed@1', // caisse du guichet : trois champs `valeur`, `lueLe`, `cleOrigineCoeur` ; lue, jamais recalculée (FR-146)
     'paiement.encaissement.changed@1', // file des paiements Mobile Money et PI-SPI (FR-140, FR-147) ; la validation est un acte de `paiement` (`paiement:encaissement:valider`)
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   profilCompose: 'caisse',
@@ -224,7 +228,12 @@ export const MANIFESTE_CAISSE = {
   // consentement « IA commune » du client, contrairement à A.4). Provenance affichée. Absente : les seuils
   // d'écart et les règles de doublon de FR-139 restent actifs.
   ia: {
-    modeles: ['validation-mobile-money', 'anomalies-caisse', 'prevision-tresorerie-7j', 'reequilibrage-agences'],
+    capacites: [
+      'microfinance/validation-mobile-money@1',
+      'microfinance/anomalies-caisse@1',
+      'microfinance/prevision-tresorerie-7j@1',
+      'microfinance/reequilibrage-agences@1',
+    ],
     finalites: ['aide-a-la-validation', 'detection-d-anomalies', 'prevision-de-tresorerie', 'suggestion-de-reequilibrage'],
   },
 } as const;

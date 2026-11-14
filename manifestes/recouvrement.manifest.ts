@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M19 — Relances & Recouvrement (format du contrat de module, clause C1, amendée le 2026-11-10, le
 // 2026-11-11 et le 2026-11-12).
 // Source : PRD distributeur `prds/prd-distributeur-2026-11-12/prd.md`, annexe A.9 (13 clauses), FR-247,
@@ -145,6 +146,7 @@ export const MANIFESTE_RECOUVREMENT = {
     'recouvrement.contentieux.transfere@1',
     'recouvrement.perte.decidee@1',
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] blocages, déblocages, décisions, export, effacement
+    'recouvrement.realite.constatee@1', // [AD-14, spine IA] paiement obtenu ou non après la relance proposée, dossier devenu en retard de 30 jours ou non (issue : PAYE, PAYE_EN_RETARD, IMPAYE ; `definitive` à l'horizon de la capacité) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -165,6 +167,8 @@ export const MANIFESTE_RECOUVREMENT = {
     'coeur-sfd.mouvement.recu@1', // paiements et pénalités du cœur : affichage du journal seulement ; le reste dû vient de `paiement`
     'risque-par.classe.changed@1', // [proposition, AD-20 « jours de retard de risque-par » ; nom du catalogue d'AD-9]
     'microfinance.client.changed@1', // [proposition, A.10 C1 « clients, groupes, cautions » ; nom du catalogue d'AD-9]
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   profilCompose: 'recouvrement',
@@ -235,15 +239,20 @@ export const MANIFESTE_RECOUVREMENT = {
   // suivent la règle chiffrée de C6 ou une décision humaine (FR-218 → FR-221). Score : règle explicable v0, puis
   // modèle de l'IA commune avec sa provenance (FR-227).
   ia: {
-    modeles: [
-      'priorisation-par-probabilite',
-      'choix-du-canal',
-      'declenchement-par-profil',
-      'score-recouvrement',
-      'strategie-par-agence',
-      'analyse-comportement-retard',
-      'scripts-de-relance',
-      'copilot-recouvrement',
+    // Répartition par secteur à confirmer (module partagé : le secteur est celui du module qui demande, AD-47).
+    capacites: [
+      'distributeur/priorisation-par-probabilite@1',
+      'distributeur/choix-du-canal@1',
+      'distributeur/declenchement-par-profil@1',
+      'distributeur/scripts-de-relance@1',
+      'distributeur/copilot-recouvrement@1',
+      'microfinance/priorisation-par-probabilite@1',
+      'microfinance/choix-du-canal@1',
+      'microfinance/score-recouvrement@1',
+      'microfinance/strategie-par-agence@1',
+      'microfinance/analyse-comportement-retard@1',
+      'microfinance/scripts-de-relance@1',
+      'microfinance/copilot-recouvrement@1',
     ],
     finalites: [
       'priorisation-des-dossiers',

@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M15 — Crédit : cycle, comité et BIC (format du contrat de module, clause C1, amendée le 2026-11-10,
 // le 2026-11-11 et le 2026-11-12).
 // Source : PRD microfinance (prds/prd-microfinance-2026-11-13/prd.md), annexe A.1, treize clauses C1 → C13 ;
@@ -203,6 +204,7 @@ export const MANIFESTE_CREDIT = {
     'credit.derogation.accordee@1',
     'credit.alerte-audit.emise@1',
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock et commande] export, effacement
+    'credit.realite.constatee@1', // [AD-14, spine IA] remboursement ou retard du prêt issu du dossier (événement, jamais une photo : un rééchelonnement, une restructuration, une passation en perte ou un solde par un autre prêt compte comme retard) ; fraude de dossier confirmée ou écartée (issue : REMBOURSE_A_TERME, RETARD_30J, RETARD_90J, FRAUDE_CONFIRMEE, FRAUDE_ECARTEE ; `definitive` à l'échéance la plus longue, AD-43) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -230,6 +232,8 @@ export const MANIFESTE_CREDIT = {
     // Sans fait du catalogue d'AD-9 (aucun nom ne se consomme hors catalogue) : le « Flux Mobile Money du client »
     // (annexe C, objet facultatif) et la « part du secteur dans le portefeuille » de `risque-par` [À CONFIRMER :
     // fait à ajouter au catalogue par une PR qui amende AD-9, ou lecture par route].
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   profilCompose: 'credit',
@@ -350,16 +354,16 @@ export const MANIFESTE_CREDIT = {
   // matrimoniale, nationalité et religion n'entrent jamais dans un score. Les noms de modèles et de finalités
   // sont des propositions (annexe A, préambule).
   ia: {
-    modeles: [
-      'score-dossier',
-      'decision-suggeree',
-      'analyse-dossier',
-      'analyse-macro-sectorielle',
-      'detection-fraude-dossier',
-      'comportement-de-credit',
-      'perte-attendue-dossier',
-      'cohesion-groupe',
-      'recommandation-conditions',
+    capacites: [
+      'microfinance/score-dossier@1',
+      'microfinance/decision-suggeree@1',
+      'microfinance/analyse-dossier@1',
+      'microfinance/analyse-macro-sectorielle@1',
+      'microfinance/detection-fraude-dossier@1',
+      'microfinance/comportement-de-credit@1',
+      'microfinance/perte-attendue-dossier@1',
+      'microfinance/cohesion-groupe@1',
+      'microfinance/recommandation-conditions@1',
     ],
     finalites: [
       'aide-a-la-decision-credit',

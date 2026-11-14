@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M16 — Collecte (`collecte`) (format du contrat de module, clause C1, amendée le 2026-11-10, le
 // 2026-11-11 et le 2026-11-12).
 // Source : PRD microfinance (prds/prd-microfinance-2026-11-13), annexe A.4, treize clauses C1 → C13, corrigées
@@ -121,6 +122,7 @@ export const MANIFESTE_COLLECTE = {
     'collecte.ecart.detecte@1', // porte `nature` : écart de remise ; TROU_DE_PLAGE ; NON_SYNCHRONISE (AD-19). Valeur de `nature` pour l'écart de remise : [proposition, AD-2 exige un champ `nature` distinct de l'écart de clôture de `caisse`, la valeur n'est nommée nulle part]
     'collecte.liste-a-saisir.changed@1', // vue « à saisir dans le cœur » par agence et par jour, quand le cœur ne sait pas recevoir (FR-137)
     'instance.journal@1', // [proposition, convention des manifestes voisins] annulations, dérogations, plages perdues, export, effacement
+    'collecte.realite.constatee@1', // [AD-14, spine IA] collecte réalisée ou non à la visite proposée (issue : COLLECTE_FAITE, COLLECTE_NON_FAITE) ; réalité provisoire tant que la journée n'est pas clôturée ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -138,6 +140,8 @@ export const MANIFESTE_COLLECTE = {
     // clause C5 de l'annexe A.4 ; le restant dû affiché au collecteur est celui du cœur, lu par
     // `coeur-sfd.echeancier.changed@1` (FR-137). [À CONFIRMER] si l'écran du collecteur doit afficher le
     // `montantExigible` de `paiement` (AD-6 : un reste dû calculé par `paiement` seul).
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   profilCompose: 'collecte',
@@ -240,7 +244,9 @@ export const MANIFESTE_COLLECTE = {
   // du collecteur est enregistré pour mesurer, pas pour contrôler. Provenance affichée : règle ou modèle,
   // version, date. Absente : la règle de base sert (retards, puis échéances J-3, puis prospects).
   ia: {
-    modeles: ['priorites-du-jour'],
+    capacites: [
+      'microfinance/priorites-du-jour@1',
+    ],
     finalites: ['ordre-de-visite-propose'],
   },
 } as const;
