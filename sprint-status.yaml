@@ -5140,9 +5140,10 @@ sprints:
         epic: "EPIC-027"
         points: 5
         service: "fiscal-service"
-        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) et code commencé sur MNV-298 ; groupe B du plan du 14/11
+        status: "done"  # CLÔTURE 2026-11-14 — PR fiscal-service #23 rebase-mergée sur dev (5963420). FR-F69 : _meta.validations (valideur + date, héritage par l'ancêtre, fail-closed), route …/validation, résumé dans le paquet servi. FR-F70 : rattachements_paquet_exercice à l'ouverture (projection) ou à la 1re résolution, recalcul explicite tracé, refusé si une liasse acceptée relève de l'exercice. Conformité MongoDB réel 24/24, M1→M8, unitaires 1947/1947, e2e 140/140.
         assigned_to: "Dev B"
         story_path: "stories/STORY-298.md"
+        completed_date: "2026-11-14"
       - story_id: "STORY-300"
         title: "Habilitations graduées et séparation des natures d'accès"
         epic: "EPIC-027"
