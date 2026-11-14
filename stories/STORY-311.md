@@ -4,7 +4,7 @@ baseline_commit: c467640 (prospera-fiscal-service)
 
 # STORY-311 : Familles barème par tranches et forfait par tranche
 
-Status: in-progress
+Status: done
 
 **Complexité :** medium
 
@@ -70,13 +70,13 @@ depuis le paquet, afin qu'un changement de barème ne demande aucune livraison.
 
 ## Critères d'acceptation
 
-- [ ] **AC-1** — Barème IRPP réel à huit tranches : un revenu dans la tranche haute ne prend 35 % que
+- [x] **AC-1** — Barème IRPP réel à huit tranches : un revenu dans la tranche haute ne prend 35 % que
   sur la fraction au-delà de 20 000 000.
-- [ ] **AC-2** — Forfait par tranche : l'assiette tombe dans une tranche, le montant fixe de cette
+- [x] **AC-2** — Forfait par tranche : l'assiette tombe dans une tranche, le montant fixe de cette
   tranche est rendu.
-- [ ] **AC-3** — Assiette exactement égale à une borne : la tranche retenue est celle que le paquet
+- [x] **AC-3** — Assiette exactement égale à une borne : la tranche retenue est celle que le paquet
   déclare comme incluant la borne.
-- [ ] **AC-4** — Barème mal écrit (trou, chevauchement, ambiguïté de borne, taux hors [0 ; 1],
+- [x] **AC-4** — Barème mal écrit (trou, chevauchement, ambiguïté de borne, taux hors [0 ; 1],
   tranche ouverte au milieu) : refusé au chargement.
 
 ## Fichiers
@@ -84,6 +84,8 @@ depuis le paquet, afin qu'un changement de barème ne demande aucune livraison.
 - NEW `src/domain/familles/tranches.ts` — schéma et lecture des tranches, points de coupure,
   sélection de tranche.
 - NEW `src/domain/familles/bareme-tranches.ts`, `src/domain/familles/forfait-tranche.ts`.
+- NEW `src/domain/familles/montant-exact.ts` — socle commun (assiette, exposant, conclusion exacte
+  et arrondi), extrait de `proportionnelle.ts` (ajouté en cours).
 - UPDATE `src/domain/familles/arrondi.ts`, `proportionnelle.ts`, `famille-calcul.ts` — exposant
   (D-311-1), `defautsTaux` partagé, nouveaux refus.
 - UPDATE `src/modules/familles/familles.module.ts` — les deux classes enregistrées.
@@ -92,9 +94,9 @@ depuis le paquet, afin qu'un changement de barème ne demande aucune livraison.
 
 ## Definition of Done
 
-- [ ] Branche `MNV-311` (fiscal) depuis `origin/dev`, PR fusionnée en rebase ; fiche et tracker par
+- [x] Branche `MNV-311` (fiscal) depuis `origin/dev`, PR fusionnée en rebase ; fiche et tracker par
   PR sur `main`.
-- [ ] Portes vertes ; le paquet Togo réel se charge ; mutations rouges (borne attribuée à la mauvaise
+- [x] Portes vertes ; le paquet Togo réel se charge ; mutations rouges (borne attribuée à la mauvaise
   tranche, taux appliqué à toute l'assiette, exposant ignoré, trou accepté).
 
 ## Progress Tracking
@@ -102,3 +104,12 @@ depuis le paquet, afin qu'un changement de barème ne demande aucune livraison.
 **2026-11-14 — fiche écrite** (bmad-create-story) juste avant de coder, après lecture de l'entrée du
 tracker (aucun arbitrage), de l'épic, de FR-F11, du paquet Togo 2026 réel (`irpp`, TPU) et du code
 de STORY-310.
+
+**2026-11-14 — livrée.** fiscal-service #33, fusionnée en rebase sur `dev`.
+
+- IRPP réel : 25 000 000 ⇒ 5 413 000 (35 % sur les seuls 5 000 000 au-delà de 20 000 000) ;
+  en centimes (exposant 2) ⇒ 541 300 000.
+- Portes : tsc, lint, 2 199 unitaires, 172 e2e.
+- Mutations 7/7 tuées : borne à la tranche haute, taux sur toute l'assiette, exposant ignoré,
+  trou accepté, bornes partagées non déclarées acceptées, pas d'arrondi non mis à l'échelle,
+  assiette hors barème rendue à la dernière tranche.
