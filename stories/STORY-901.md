@@ -4,7 +4,7 @@ baseline_commit: ca638be (prospera-fiscal-service), 49327aa (balance-service)
 
 # STORY-901 : Le paquet fiscal Togo conforme au CGI — arrondis d'assiette, minimum du MFP, zone franche intégrée
 
-Status: ready-for-dev
+Status: review
 
 **Complexité :** large (trois volets, deux services)
 
@@ -89,41 +89,60 @@ fiscal-service #37.)
      l'agrément — voir dépendance STORY-313).
 - **D-901-5 — Aucune valeur sans texte officiel.** Si un point de la loi 2011-018 ne peut être lu (le
   PDF de FAOLEX est un scan sans texte), il reste `a-valider` et la story le dit — jamais comblé
-  depuis une source secondaire.
+  depuis une source secondaire. ⚠️ **Amendée par D-901-6 pour la zone franche.**
+- **D-901-6 — Zone franche : la base est Africarrières, et tout est paramétrable** (décision de
+  l'utilisateur, 2026-11-14 : « prends cela comme base tout en étant paramétrable après »). La
+  surcouche transcrit le guide employeur « Zones franches » (Togo) d'Africarrières, tableau vérifié au
+  06/08/2026 ; elle remplace les sources promotionnelles (manuel, Togo First, MCA-Togo). Chaque valeur
+  propre au régime est listée dans `_meta.parametrage` (valeur retenue, plage ou alternatives, ce qui
+  la confirmera). Les incohérences de la source sont tranchées et dites : IS après exonération 15 %
+  (le corps de la page ; sa FAQ dit 25 %, ailleurs 28 %), durée d'exonération 10 ans (borne basse de
+  « 10 à 15 ans selon le secteur »). Ce qui est confronté au texte officiel l'est : MFP (Art. 121 CGI)
+  et TVA (Art. 180-6, 175 CGI). Le texte de la loi sur la zone franche (n° 2011-018 selon la CNUCED,
+  n° 2012-016 selon la source retenue) et le fiscaliste restent les juges de paix.
 
 ## Critères d'acceptation
 
 ### Volet A — moteur (`fiscal-service`)
 
-- [ ] **AC-A1** — IS, bénéfice 1 234 567, `ARRONDI_ASSIETTE { INFERIEUR, 1000 }` ⇒ assiette 1 234 000,
+- [x] **AC-A1** — IS, bénéfice 1 234 567, `ARRONDI_ASSIETTE { INFERIEUR, 1000 }` ⇒ assiette 1 234 000,
   montant **333 180** ; le détail porte l'étape « arrondi d'assiette ».
-- [ ] **AC-A2** — IRPP réel, revenu 25 000 499 ⇒ assiette 25 000 000 ⇒ **5 413 000** ; un produit
+- [x] **AC-A2** — IRPP réel, revenu 25 000 499 ⇒ assiette 25 000 000 ⇒ **5 413 000** ; un produit
   fractionnaire est arrondi à la dizaine inférieure par l'arrondi déclaré.
-- [ ] **AC-A3** — Ordre d'AD-3 amendée tenu quel que soit l'ordre de déclaration ; un
+- [x] **AC-A3** — Ordre d'AD-3 amendée tenu quel que soit l'ordre de déclaration ; un
   `ARRONDI_ASSIETTE` mal formé ou en double fait échouer le chargement.
-- [ ] **AC-A4** — Spine `fiscal-service` : AD-3 amendée (date, raison, liste à six éléments).
+- [x] **AC-A4** — Spine `fiscal-service` : AD-3 amendée (date, raison, liste à six éléments).
 
 ### Volet B — données du paquet `togo@2026` (`balance-service`)
 
-- [ ] **AC-B1** — Le paquet structure l'arrondi d'assiette de l'IS (Art. 113) et de l'IRPP (Art. 74),
+- [x] **AC-B1** — Le paquet structure l'arrondi d'assiette de l'IS (Art. 113) et de l'IRPP (Art. 74),
   l'arrondi du produit IRPP (Art. 74) et le minimum de 20 000 F du MFP au réel (Art. 120), chacun
   avec son article et son texte.
-- [ ] **AC-B2** — Le moteur de `balance-service` applique les mêmes règles depuis la donnée (pas
+- [x] **AC-B2** — Le moteur de `balance-service` applique les mêmes règles depuis la donnée (pas
   d'écart entre les deux moteurs sur IS, IRPP, MFP) ; un test d'égalité le tient.
-- [ ] **AC-B3** — Nouvelle empreinte, registre et tests réépinglés, copies à l'octet chez
+- [x] **AC-B3** — Nouvelle empreinte, registre et tests réépinglés, copies à l'octet chez
   `dossier-service` et dans les fixtures de `fiscal-service` ; le paquet réel se charge dans
   `fiscal-service` (vérification des paramètres au chargement, STORY-310).
 
 ### Volet C — zone franche intégrée
 
-- [ ] **AC-C1** — Chaque valeur de `togo-zonefranche@2026` cite un article d'un texte officiel
-  (loi 2011-018, textes d'application, CGI) ; plus aucune source secondaire.
-- [ ] **AC-C2** — Plus aucune rubrique non consommée sans justification écrite ; les variantes
+- [x] **AC-C1** (amendé par D-901-6) — Chaque valeur de `togo-zonefranche@2026` cite sa source :
+  article du CGI là où le texte officiel est lu (MFP Art. 121, TVA Art. 180-6 et 175), Africarrières
+  sinon, PARAMÉTRABLE (`_meta.parametrage`) ; plus aucune source promotionnelle.
+- [x] **AC-C2** — Plus aucune rubrique non consommée sans justification écrite ; les variantes
   régionales sont transcrites depuis le texte ou retirées.
 - [ ] **AC-C3** — `_meta.validations` consigne la validation élément par élément ; `statut` ne dit
-  plus « amorce ».
+  plus « amorce ». ⚠️ **Partiel** : la mise en garde ne dit plus « amorce » (« Régime INTÉGRÉ ») et
+  `_meta.parametrage` nomme ce qui reste à confirmer ; mais aucune validation n'est consignée dans
+  `_meta.validations` — personne n'a encore validé (le fiscaliste, ou toi sur pièce). Le `statut` reste
+  `a-valider-par-expert`, comme le paquet de droit commun lui-même.
 - [ ] **AC-C4** — Un dossier en zone franche est liquidé par `balance-service` et ses obligations
-  dérivées par `fiscal-service` sur la surcouche intégrée, de bout en bout (recette).
+  dérivées par `fiscal-service` sur la surcouche intégrée, de bout en bout (recette). ⚠️ **Prouvé par
+  service, pas encore de bout en bout** : la liquidation zone franche de `balance-service` (tests de
+  service sur le vrai paquet effectif) et la dérivation sous dérogation de `fiscal-service` (e2e,
+  STORY-308) passent sur la surcouche intégrée ; la recette inter-services sous Docker n'a pas été
+  jouée, et l'e2e HTTP `regime-derogatoire` de `balance-service` répond 502 dans son harnais, déjà sur
+  `origin/dev` avant cette story.
 
 ## Dépendances et risques
 
@@ -161,3 +180,27 @@ fiscal-service #37.)
 au CGI OTR 2025 (Art. 74, 113, 120, 131, 134, 175, 180-6), la lecture de la surcouche zone franche et
 une recherche des textes de la zone franche. Décisions D-901-1 → D-901-5 validées par l'utilisateur le
 même jour.
+
+**2026-11-14 — volets A, B et C livrés** (D-901-6 pour C). balance-service #143, dossier-service #47,
+fiscal-service #40, fusionnées en rebase dans cet ordre ; fiche, tracker et spine par PR sur `main`.
+
+- **A** : `ARRONDI_ASSIETTE` (AD-3 amendée dans la spine), y compris pour le second calcul de
+  `MAXIMUM_DE`. Paquet réel : IS 1 234 567 ⇒ 333 180 ; IRPP 25 000 499 ⇒ 5 413 000.
+- **B** : paquet `togo@2026` régénéré (sha256 `17d66e23…`), schéma étendu ; moteur de
+  `balance-service` : IS sur l'assiette arrondie, MFP au minimum de 20 000 F au réel, seuil de
+  STORY-417 avec le pas (invariant F-417-2 éprouvé) ; le même cas rend le même chiffre dans les deux
+  moteurs. Copie de `dossier-service` RATTRAPÉE (elle avait manqué MNV-100 et STORY-568).
+- **C** : surcouche `togo-zonefranche@2026` (sha256 `da92a432…`) intégrée sur base Africarrières,
+  paramétrable ; nouveau mode d'exonération du MFP `REGIME_DEROGATOIRE` (Art. 121), ignoré dans un
+  paquet de droit commun (fail-closed).
+- **Tests déplacés par la loi** : dans `balance-service`, les jeux de données trop petits ont été
+  relevés (résultat 9 195 000 au lieu de 5 195 000 ; le cas de STORY-417 × 10) pour que le minimum du
+  MFP n'efface pas l'intention des tests ; les attendus zone franche suivent la nouvelle surcouche.
+- **Portes** : fiscal-service 2 279 unitaires, 187 e2e ; balance-service 5 374 unitaires, 1 876 e2e ;
+  dossier-service 129 (portefeuille). Restent, préexistants sur `origin/dev` : 5 e2e en 502
+  (`regime-derogatoire`) et 1 (`tpu` : « barème TPU indisponible », périmé depuis MNV-100) ; et deux
+  écarts propres au poste Windows (CRLF face à bilan-service, chemins `\`).
+- **Mutations** : 4/4 (A) et 5/5 (B, C) tuées.
+- **Reste** : AC-C3 (validation consignée), AC-C4 (recette Docker inter-services) ; le texte officiel
+  de la loi zone franche ; la limite connue de la STORY-417 sous Art. 113 — au seuil conseillé, l'IS
+  dépasse le plancher d'au plus taux × 1 000 F (ex. 4 806 000 pour 4 800 000 unités).

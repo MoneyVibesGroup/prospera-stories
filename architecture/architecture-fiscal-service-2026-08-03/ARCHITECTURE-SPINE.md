@@ -108,9 +108,16 @@ strictement descendant, et les retours passent par le bus.
 - **Prevents:** deux implémentations appliquant plancher, taux et minimum dans un ordre différent, donc
   deux montants différents pour la même taxe
 - **Rule:** l'ordre d'application est fixe et déclaré :
-  `assiette → PLANCHER/PLAFOND_ASSIETTE → AIGUILLAGE → famille → MAXIMUM_DE → MINIMUM_PERCEPTION`.
+  `assiette → PLANCHER/PLAFOND_ASSIETTE → ARRONDI_ASSIETTE → AIGUILLAGE → famille → MAXIMUM_DE → MINIMUM_PERCEPTION`.
   L'expressivité vient de la composition, pas d'un langage. Un modificateur hors de cette liste n'existe
   pas.
+- **Amendement du 2026-11-14 (STORY-901, D-901-2)** : `ARRONDI_ASSIETTE` entre dans la liste, après le
+  plancher et le plafond (des montants ronds) et avant l'aiguillage. **Raison** : le CGI arrondit
+  l'ASSIETTE avant de la taxer — Art. 113 (IS : « toute fraction du bénéfice imposable inférieure à
+  mille francs est négligée ») et Art. 74 (IRPP : revenu « arrondi au millier de francs inférieur ») —,
+  ce que l'arrondi du seul montant final (STORY-310) ne pouvait pas rendre : un bénéfice de 1 234 567
+  doit donner 333 180, pas 333 333. La règle est une donnée du paquet (`{ mode, pas }`, `pas` en unités
+  de la devise) ; le second calcul de `MAXIMUM_DE` peut déclarer le sien (`arrondiAssiette`).
 
 ### AD-4 — Une famille sans stratégie enregistrée refuse ; elle n'approxime jamais
 
