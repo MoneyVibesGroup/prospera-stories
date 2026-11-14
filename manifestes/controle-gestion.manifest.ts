@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M25 — Contrôle de gestion (format du contrat de module, clause C1, amendée le 2026-11-10, le
 // 2026-11-11 et le 2026-11-12).
 // Sources (dans cet ordre) : architecture/architecture-distributeur-2026-11-13 (AD-1, AD-15, AD-19, AD-20, AD-27) ;
@@ -100,6 +101,7 @@ export const MANIFESTE_CONTROLE_GESTION = {
     'controle-gestion.budget.fige@1', // version de budget figée (spine AD-20, annexe A.13)
     'controle-gestion.decision.changed@1', // [spine § propriétaires : « chaque module qui a des décisions à trancher en possède les siennes »] action suggérée devenue Décision à trancher adressée au DAF (FR-152) ; lue par `dashboard` seul
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] figeage, envoi, export, effacement
+    'controle-gestion.realite.constatee@1', // [AD-14, spine IA] cause d'un écart confirmée ou corrigée par le contrôleur ou le DAF, alerte de bande confirmée ou écartée (issue : CAUSE_CONFIRMEE, CAUSE_CORRIGEE, ALERTE_CONFIRMEE, ALERTE_ECARTEE ; `definitive` à la clôture du mois) ; aucun chiffre de l'écart sur le bus ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -115,6 +117,8 @@ export const MANIFESTE_CONTROLE_GESTION = {
     'reseau.decoupage.versionne@1', // [proposition] scission, fusion, transfert d'une zone : les axes se recalent
     'commande.commande.chiffree@1', // [proposition, spine AD-20 : montants, prix société] atterrissage du mois
     'finance-transactions.tresorerie.changed@1', // [proposition, FR-154 : trésorerie indicative et plancher]
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   profilCompose: 'controle-gestion',
@@ -175,8 +179,12 @@ export const MANIFESTE_CONTROLE_GESTION = {
   // prévision aussi (« règle de prévision, version, date », FR-154) : « aucun modèle d'IA n'est affiché » ; le texte
   // de la démo étiqueté « IA » et écrit à la main disparaît. Un chiffre (écart, atterrissage, prévision) ne vient
   // JAMAIS d'un modèle (AD-19) ; l'IA ne rédige que l'explication. Le contrôleur propose, le DAF arbitre.
+  // Amendé le 2026-11-14 : l'ancien `modeles` devient la capacité `distributeur/explication-ecarts@1` (AD-47) ; verticale unique : le
+  // distributeur.
   ia: {
-    modeles: ['synthese-ecarts'],
+    capacites: [
+      'distributeur/explication-ecarts@1',
+    ],
     finalites: ['explication-des-ecarts', 'alerte-de-bande'],
   },
 } as const;

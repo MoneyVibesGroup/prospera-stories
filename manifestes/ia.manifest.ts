@@ -89,8 +89,16 @@ export const MANIFESTE_IA = {
     'recouvrement.realite.constatee@1',
     'risque-par.realite.constatee@1',
     'terrain.realite.constatee@1',
-    // À ajouter par les manifestes des modules qui n'existent pas encore sur la branche : pdv, marketing, dashboard,
-    // equipe, sinistres, ged, expertises, assurance, balance, bilan, declarations, conseil.
+    'controle-gestion.realite.constatee@1',
+    'dashboard.realite.constatee@1',
+    'equipe.realite.constatee@1',
+    'expertises.realite.constatee@1',
+    'finance-transactions.realite.constatee@1',
+    'ged.realite.constatee@1',
+    'marketing.realite.constatee@1',
+    'sinistres.realite.constatee@1',
+    // À ajouter par les manifestes des modules qui n'existent pas encore sur la branche : balance, bilan, declarations,
+    // conseil. `pdv`, `support-client`, `assurance` et `liaison-assureur` n'ont aucune capacité (aucun fait de réalité).
     'ia.modele.signe@1', // `prospera-ia-centrale` : ligne de modèles distincte (AD-21)
     'ia.modele.publie@1',
     'ia.jeton.export@1', // jeton quotidien d'export, produit par `centrale-service` du moteur

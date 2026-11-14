@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M23 — Marketing et campagnes (format du contrat de module, clause C1, amendée le 2026-11-10, le
 // 2026-11-11 et le 2026-11-12).
 // Sources (dans cet ordre) : architecture/architecture-distributeur-2026-11-13 (AD-1, AD-15, AD-16, AD-19, AD-20,
@@ -145,6 +146,7 @@ export const MANIFESTE_MARKETING = {
     'marketing.attribution.etablie@1', // [IMF A.13, absent du catalogue de la spine] commande ou décaissement attribué à une campagne
     'marketing.decision.changed@1', // [spine § propriétaires : « chaque module qui a des décisions à trancher en possède les siennes et publie `<module>.decision.changed@1` »] validation DG d'un combo ou d'une campagne ; lue par `dashboard` seul
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] export, effacement, lancement, arrêt
+    'marketing.realite.constatee@1', // [AD-14, spine IA] impact mesuré d'un package ou d'une campagne à son horizon (durée du package puis 30 jours ; avant/après, groupe témoin « bientôt ») (issue : IMPACT_POSITIF, IMPACT_NUL, IMPACT_NEGATIF ; `definitive` à l'horizon ; jamais un montant, jamais une liste de personnes) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -172,6 +174,8 @@ export const MANIFESTE_MARKETING = {
     'reseau.zone-blanche.changed@1', // [IMF A.13, ABSENT du manifeste `reseau` et du catalogue : le signalement de zone blanche est de `reseau` (FR-183), son nom est à fixer par l'amendement `reseau`]
     'coeur-sfd.pret.changed@1', // [proposition] retard et dossier bloqué lus du cœur
     'microfinance.client.bloque@1', // [proposition] dossier BLOQUE par le ROC : exclu des envois commerciaux (FR-245)
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   profilCompose: 'marketing',
@@ -258,18 +262,24 @@ export const MANIFESTE_MARKETING = {
   //   locale ; seuls des écarts anonymisés sortent, avec consentement par finalité. Sans IA commune, des règles
   //   servent la note de prospect et le ciblage, et le disent. Le chatbot WhatsApp de qualification n'a pas de
   //   modèle déclaré (« bientôt »).
+  // Amendé le 2026-11-14 : les anciens `modeles` deviennent des capacités `secteur/code@majeure` (AD-47), une par secteur
+  // qui installe le module ; `segmentation-packages` couvre la segmentation et la proposition de package (distributeur).
   ia: {
-    modeles: [
-      'scoring-leads',
-      'segmentation-comportementale',
-      'ciblage-campagne',
-      'note-de-prospect',
-      'proposition-de-campagne',
-      'zone-de-prospection',
-      'proposition-de-package',
-      'mesure-d-impact',
+    capacites: [
+      'distributeur/scoring-leads@1',
+      'distributeur/segmentation-packages@1',
+      'distributeur/ciblage-campagne@1',
+      'distributeur/mesure-d-impact@1',
+      'distributeur/zones-de-prospection@1',
+      'microfinance/segmentation-clients@1',
+      'microfinance/ciblage-campagne@1',
+      'microfinance/note-de-prospect@1',
+      'microfinance/proposition-de-campagne@1',
+      'microfinance/mesure-d-impact@1',
+      'microfinance/zones-de-prospection@1',
     ],
     finalites: [
+      'scoring-de-leads',
       'ciblage-campagne',
       'segmentation',
       'note-de-prospect',

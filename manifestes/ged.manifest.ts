@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M07 — GED, numérisation et archives (format du contrat de module, clause C1, amendée le 2026-11-10,
 // le 2026-11-11 et le 2026-11-12).
 // Source : PRD assurance (prds/prd-assurance-2026-11-13/prd.md), annexe A.2, treize clauses C1 → C13 ; spine assurance
@@ -115,6 +116,7 @@ export const MANIFESTE_GED = {
     'ged.destruction.decidee@1',
     'ged.stockage.alerte@1', // sauvegarde en échec, NAS à 80 %
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] export, effacement refusé
+    'ged.realite.constatee@1', // [AD-14, spine IA] classement ou lecture d'une pièce confirmé ou corrigé par la personne au contrôle (issue : CONFIRMEE, CORRIGEE ; `definitive` à la clôture du dossier, valeur retenue en fin de dossier) ; AUCUNE valeur de champ, AUCUN contenu de pièce, JAMAIS de donnée de santé sur le bus ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -127,6 +129,8 @@ export const MANIFESTE_GED = {
     'sinistres.acces-sante.accorde@1', // table locale de lecture (AD-26)
     'sinistres.acces-sante.retire@1',
     'reprise.cles-rattachement.publiees@1', // numéro de police, de sinistre, `DEC-`, numéro d'archivage d'origine (FR-215)
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   // C10 (annexe A.2) : `profiles: ["ged"]` ; socle seul.
@@ -248,8 +252,12 @@ export const MANIFESTE_GED = {
   // contrôle avant archivage ; elle ne rejette aucune pièce ; sous le seuil bas (0,60) rien n'est pré-sélectionné ; un
   // champ sans extrait n'est pas proposé ; niveau `EXTRACTION` ; une pièce médicale est lue dans l'instance, jamais
   // affichée à `ACC`, et rien n'en sort (AD-8). Le contrôle de cohérence des pièces est déclaré par `sinistres`.
+  // Amendé le 2026-11-14 : l'ancien `modeles` devient la capacité `assurance/lecture-classement-pieces@1` (AD-47) ; la lecture des
+  // pièces KYC de la microfinance reste [À CONFIRMER] : aucune capacité `microfinance/…` n'est déclarée ici.
   ia: {
-    modeles: ['lecture-classement-pieces'],
+    capacites: [
+      'assurance/lecture-classement-pieces@1',
+    ],
     finalites: ['lecture-pieces'],
   },
 } as const;

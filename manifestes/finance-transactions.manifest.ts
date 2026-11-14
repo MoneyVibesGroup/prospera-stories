@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M22 — Comptabilité et finance, transactions (format du contrat de module, clause C1, amendée le
 // 2026-11-10, le 2026-11-11 et le 2026-11-12).
 // Sources (dans cet ordre) : architecture/architecture-distributeur-2026-11-13 (AD-1, AD-15, AD-19, AD-20, AD-27 ;
@@ -145,6 +146,7 @@ export const MANIFESTE_FINANCE_TRANSACTIONS = {
     'finance-transactions.budget.changed@1', // [IMF A.14, absent du catalogue de la spine] budget du DAF, version publiée ; lu par `dashboard`
     'finance-transactions.decision.changed@1', // [proposition, FR-14 et AD-20 « chaque module qui a des décisions en possède les siennes »] demande de crédit client ; lue par `dashboard` seul
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] export, effacement, actes de configuration
+    'finance-transactions.realite.constatee@1', // [AD-14, spine IA] rattachement de lettrage confirmé ou rejeté par le comptable, anomalie comptable confirmée ou écartée à la clôture du mois, trésorerie réalisée à 7 jours contre la prévision (issue : RATTACHEMENT_CONFIRME, RATTACHEMENT_REJETE, ANOMALIE_CONFIRMEE, ANOMALIE_ECARTEE, TRESORERIE_DANS_LA_BANDE, TRESORERIE_HORS_BANDE ; `definitive` à la clôture du mois ou à 7 jours) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -168,6 +170,8 @@ export const MANIFESTE_FINANCE_TRANSACTIONS = {
     'coeur-sfd.caisse-guichet.changed@1', // caisse du guichet lue du cœur (trésorerie)
     'risque-par.provision.proposee@1', // provisions à proposer en écriture (FR-252)
     'caisse.remise.constatee@1', // [IMF A.14, ABSENT du catalogue de la spine IMF, qui publie `caisse.fonds.changed@1`, `caisse.cloture.changed@1` et `collecte.remise.contresignee@1`] remises des collecteurs : nom à trancher avec `caisse`
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   profilCompose: 'finance-transactions',
@@ -259,8 +263,16 @@ export const MANIFESTE_FINANCE_TRANSACTIONS = {
   // « estimation », jamais une provision comptabilisée. `reconciliation-auto` et `detection-anomalies` sont sans
   // objet chez l'IMF (pas de lettrage). Sans IA commune, l'emplacement rend `NON_INSTALLE` et le processus
   // continue (règles de lettrage de base).
+  // Amendé le 2026-11-14 : les anciens `modeles` deviennent des capacités `secteur/code@majeure` (AD-47) ; l'assurance n'en a aucune
+  // ici (rapprochement des recours par règle). `perte-attendue` est celle de `risque-par` : sa réalité n'est pas constatée ici.
   ia: {
-    modeles: ['reconciliation-auto', 'detection-anomalies', 'prevision-tresorerie', 'perte-attendue'],
+    capacites: [
+      'distributeur/lettrage-assiste@1',
+      'distributeur/detection-anomalies-comptables@1',
+      'distributeur/prevision-tresorerie@1',
+      'microfinance/prevision-tresorerie-7j@1',
+      'microfinance/perte-attendue@1',
+    ],
     finalites: ['lettrage-assiste', 'alerte-anomalie', 'prevision-de-cash', 'perte-attendue'],
   },
 } as const;
