@@ -4,7 +4,7 @@ baseline_commit: 5963420c66eb9a24076425de54f54f18dd92a4d0
 
 # STORY-300 : Habilitations graduées et séparation des natures d'accès
 
-Status: ready-for-dev
+Status: done
 
 **Complexité :** medium
 
@@ -54,18 +54,18 @@ collaborateur puisse préparer sans pouvoir déposer.
 
 ## Critères d'acceptation
 
-- [ ] **AC-1 — Préparer sans déposer.** Un jeton portant `fiscalite:declaration:preparer` seul :
+- [x] **AC-1 — Préparer sans déposer.** Un jeton portant `fiscalite:declaration:preparer` seul :
   produire le livrable passe ; transmettre ou consigner l'accusé ⇒ 403 `DROIT_FISCAL_REFUSE`.
-- [ ] **AC-2 — Refus journalisé.** Ce 403 écrit `HABILITATION_REFUSEE` (droit, méthode, route,
+- [x] **AC-2 — Refus journalisé.** Ce 403 écrit `HABILITATION_REFUSEE` (droit, méthode, route,
   sans identifiant de ressource en clair) au journal chaîné `habilitation:<orgId>`.
-- [ ] **AC-3 — Aucun droit n'en implique un autre.** `deposer` seul ne permet pas de préparer ;
+- [x] **AC-3 — Aucun droit n'en implique un autre.** `deposer` seul ne permet pas de préparer ;
   `valider` seul ne permet ni l'un ni l'autre.
-- [ ] **AC-4 — Compatibilité.** Sans droit `fiscalite:*` dans le jeton, le comportement actuel est
+- [x] **AC-4 — Compatibilité.** Sans droit `fiscalite:*` dans le jeton, le comportement actuel est
   inchangé (e2e existants verts) : `TENANT_ADMIN` dépose et recalcule, `TENANT_USER` prépare et
   consigne un rejet, et rien d'autre.
-- [ ] **AC-5 — Cinq natures distinctes.** Le domaine les déclare ; aucune n'implique une autre ;
+- [x] **AC-5 — Cinq natures distinctes.** Le domaine les déclare ; aucune n'implique une autre ;
   tous les droits fiscaux relèvent de l'habilitation applicative.
-- [ ] **AC-6 — Ordre des gardes.** Une organisation sans accès fiscal reçoit le refus d'accès
+- [x] **AC-6 — Ordre des gardes.** Une organisation sans accès fiscal reçoit le refus d'accès
   (`FISCAL_NOT_ENTITLED`), jamais `DROIT_FISCAL_REFUSE`.
 
 ## Table de mutations
@@ -80,11 +80,39 @@ collaborateur puisse préparer sans pouvoir déposer.
 
 ## Definition of Done
 
-- [ ] Branche `MNV-300` depuis `origin/dev`, PR vers `dev` fusionnée en rebase ; fiche et tracker
+- [x] Branche `MNV-300` depuis `origin/dev`, PR vers `dev` fusionnée en rebase ; fiche et tracker
   par PR sur `main` fusionnée en rebase.
-- [ ] Porte qualité verte ; mutations rouges puis restaurées.
+- [x] Porte qualité verte ; mutations rouges puis restaurées.
 
 ## Progress Tracking
 
 **2026-11-14 — fiche écrite** (bmad-create-story) juste avant de coder, confrontée à `origin/dev`
 `5963420` (STORY-298 incluse) et à `auth-service` `origin/dev` (catalogue de tenant).
+
+**2026-11-14 — implémentation.**
+- `common/rbac/droits-fiscalite.ts` : `DroitFiscal` (`preparer`, `valider`, `deposer`), libellés,
+  `droitsFiscauxDe` (droits du jeton dès qu'il en porte un ; sinon compatibilité par le rôle, seul
+  endroit où un nom de rôle apparaît — test de présence et contre-preuve).
+- `common/guards/droits-fiscaux.guard.ts` + `@ExigeDroitFiscal` (garde de méthode, donc après la
+  porte d'accès globale) ; refus `DROIT_FISCAL_REFUSE` avec le droit manquant en détail ; refus
+  journalisé (`HABILITATION_REFUSEE`, périmètre `habilitation:<orgId>`, route en gabarit) ; panne du
+  journal ⇒ toujours 403.
+- Routes : transmettre et accusé ⇒ `deposer` ; rejet et livrables ⇒ `preparer` ; recalcul du
+  paquet d'un exercice ⇒ `valider`. Les `@Roles` de ces routes admettent les deux rôles de tenant :
+  c'est le droit qui tranche.
+- `domain/habilitations/natures-acces.ts` : les cinq natures, `implique` (réflexive seulement), le
+  traitement de chacune (seule l'habilitation applicative est vérifiée ; compte de canal,
+  certificat, accès bancaire jamais stockés).
+
+**2026-11-14 — preuves.** E2E dépôts : préparer sans déposer (403 journalisé, route en gabarit,
+identifiant absent), rejet par le droit de préparer, déposer sans être admin, `valider` seul
+refusé, un droit fiscal remplace la compatibilité d'un admin, organisation sans accès ⇒
+`FISCAL_NOT_ENTITLED` sans journal. Mutations M1 à M5 (+ M2 par l'e2e) rouges puis restaurées.
+
+⚠️ **Suite à créer** : `auth-service` — droits `fiscalite:declaration:*` au catalogue de tenant et
+rôles du cabinet (préparateur, déposant, valideur), pour que l'habilitation graduée devienne
+attribuable ; tant qu'elle n'existe pas, la compatibilité s'applique.
+
+**2026-11-14 — clôture.** Lint sans erreur, build vert, unitaires 1968/1968 (`-w 2`), e2e 146/146.
+Code `1af93d6` → PR `prospera-fiscal-service#24` rebase-mergée sur `dev` (`ea879c6`).
+

@@ -5149,9 +5149,10 @@ sprints:
         epic: "EPIC-027"
         points: 3
         service: "fiscal-service"
-        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) et code commencé sur MNV-300 ; groupe B du plan du 14/11
+        status: "done"  # CLÔTURE 2026-11-14 — PR fiscal-service #24 rebase-mergée sur dev (ea879c6). Droits fiscalite:declaration:preparer|valider|deposer, garde de méthode après la porte d'accès, refus journalisé (habilitation:<orgId>), cinq natures d'accès. ⚠️ Compatibilité par le rôle tant qu'auth-service n'attribue aucun droit fiscal (décision à confirmer PO) ; story auth-service à créer. M1→M5, unitaires 1968/1968, e2e 146/146.
         assigned_to: "Dev B"
         story_path: "stories/STORY-300.md"
+        completed_date: "2026-11-14"
   - sprint_number: 24
     start_date: "2027-05-20"
     end_date: "2027-06-03"
