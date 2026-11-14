@@ -5,7 +5,7 @@
 **Priorité :** Should Have
 **Story Points :** 2
 **Complexité :** low — mais **elle porte un arbitrage**, pas seulement une valeur
-**Statut :** review
+**Statut :** Terminée (2026-11-14)
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-08-07
 **Sprint :** 20
@@ -443,3 +443,18 @@ rend 422. Une ligne annoncée « à créer » part donc et échoue en vol, avec 
 - `GAP-version-sfd-console-vs-services` (`sprint-status.yaml` → `open_contract_gaps`)
 - **STORY-292** — même famille de défaut : ce que la console attribue doit être ce que les services
   savent charger. 292 étend le service, 293 corrige l'attribution.
+
+---
+
+## Suivi — 2026-11-14 (clôturée)
+
+Le statut restait `review` pour une seule raison, écrite au tracker : les AC 1 et 6 ne seraient
+vrais **dans `dev`** qu'après la fusion de la story console **AP-25**. Vérifié le 2026-11-14 :
+AP-25 est fusionnée dans `frontend-admin-panel/dev` depuis le **2026-08-18** (commit `f12a019`,
+ancêtre d'`origin/dev`) ; le pack Finance y épingle `sfd-bceao@2.0` et le jeu de référence
+`referentiels-servis.ts` est en place. La story est donc **terminée** ; aucun code nouveau.
+
+Les écarts ouverts par la story (`GAP-packs-verticaux-sans-module-balance`,
+`GAP-sfd-bceao-2-0-octets-divergents`, `GAP-console-ignore-referentiel-not-applicable`,
+`GAP-jeu-de-reference-referentiels-miroir-manuel`) restent ouverts au registre des écarts : ils ne
+font pas partie de son périmètre.
