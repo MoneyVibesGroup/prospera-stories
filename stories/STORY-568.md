@@ -1,6 +1,6 @@
 # STORY-568 : Avant de demander quoi que ce soit, dire à la personne SI elle doit déclarer — l'article 21 du LPF dispense la plupart des salariés
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-030 — Calendrier et responsabilité
 **Service :** `fiscal-service` (`:3012`) · **paquet :** `paquet-fiscal-togo-2026`
@@ -143,3 +143,50 @@ utile **sans rien saisir**, et ceux qui doivent déclarer ne saisissent que ce q
 - ⛔ **Faire valider l'arbitrage Art. 21 / gérant par un fiscaliste togolais avant de le figer.**
   C'est la seule question de cette story dont la réponse change le comportement pour **tous** les
   dirigeants du produit.
+
+---
+
+## Suivi — 2026-11-14 (livrée, fusionnée sur `dev`)
+
+**PR :**
+- MoneyVibesGroup/prospera-balance-service#142 : le paquet ;
+- MoneyVibesGroup/prospera-fiscal-service#38 : le moteur et les routes.
+
+**Arbitrage PO du 2026-11-14 (accès au paquet)** : le droit `declarations` du compte lui-même ; sinon celui du **cabinet d'un rattachement actif** (STORY-567) ; sinon refus nommé `FISCAL_NOT_ENTITLED`.
+
+### Ce qui a été fait
+
+- **Paquet `togo@2026`** : la rubrique `irpp.declarationAnnuelle` porte :
+  - l'échéance du 31 mars (LPF Art. 20) ;
+  - le questionnaire, **entièrement en donnée** (AC-4) : questions, effet de chacune, pièces, motifs et sources.
+
+  Les effets sont `CATEGORIE_DISPENSABLE`, `CONDITION_RETENUE`, `SORT_DE_LA_DISPENSE` et `A_ARBITRER`. Les textes sont relevés dans le corpus du dépôt et identiques dans « CGI et LPF 2026 ». Le catalogue gagne `IRPP_DECLARATION` pour les personnes physiques.
+- **Le moteur** (fiscal-service) est pur et fail-closed. Il ne connaît que la mécanique des effets, et son ordre ne dispense **jamais** par défaut :
+  1. une sortie de la dispense ⇒ doit déclarer ;
+  2. une retenue non opérée ⇒ doit déclarer ;
+  3. le gérant ⇒ **INDETERMINE**, avec ses deux lectures (AC-3) ;
+  4. seulement des revenus dispensables ⇒ dispensé ;
+  5. aucun revenu ⇒ indéterminé.
+- **Les routes** `GET /moi/qualification/questionnaire` et `POST /moi/qualification` rendent :
+  - un verdict citant son article et le millésime (AC-5) ;
+  - l'échéance du 31 mars si la déclaration est due (AC-2) ;
+  - les pièces des seules catégories déclarées (AC-6).
+
+  Un salarié aux seuls revenus d'emplois retenus est dispensé **sans saisir un montant** (AC-1).
+- **AC-8** : `IRPP_DECLARATION` place le 31 mars au calendrier du redevable personne physique, jamais à celui de l'entreprise.
+- **Forme** : le verdict informe, il n'accuse pas. Testé sur toutes les combinaisons : jamais de retard, de pénalité ni d'irrégularité. **Rien n'est stocké** : aucune liste de personnes « non en règle ».
+
+### Écarts à la fiche
+
+- ⚠️ **AC-7 (dirigeant pré-rempli) : non livrable.** `LigneDeRemuneration` n'existe pas (STORY-345). Le dirigeant répond au questionnaire comme un salarié.
+- ⛔ **À faire valider par un fiscaliste togolais** (déclaré dans `aValider` du paquet) :
+  - la lecture de l'Art. 21 pour le gérant : tant qu'elle n'est pas tranchée, le verdict est INDETERMINE ;
+  - l'exclusion de la résidence principale de la question « train de vie » (LPF 38 et 239).
+- Une dispense établie ne retire pas l'obligation `IRPP_DECLARATION` d'elle-même : le professionnel l'écarte avec un motif (FR-F08).
+
+### Preuves
+
+- Unitaires : 2254/2254.
+- E2e : 183/183, dont le parcours HTTP de la story.
+- Conformité sur le vrai MongoDB : 49/49.
+- Paquet : le build l'accepte (règles R4 et R9).
