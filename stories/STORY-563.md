@@ -1,6 +1,6 @@
 # STORY-563 : Un dossier porte deux redevables — l'entreprise et le dirigeant, chacun avec son NIF, ses obligations et son calendrier
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-030 — Calendrier et responsabilité
 **Service :** `fiscal-service` (`:3012`) — domaine, `application/remuneration`
@@ -114,3 +114,45 @@ moyen de savoir que la donnée existe.
 - ⚡ **Ce que ça change pour le cabinet, dit simplement** : aujourd'hui il tient l'entreprise dans
   Prospera et le dirigeant dans un tableur. Après, les deux échéanciers sont au même endroit — et
   c'est **l'oubli de l'IRPP du gérant** que ça supprime, pas des clics.
+
+---
+
+## Suivi — 2026-11-14 (livrée, fusionnée sur `dev`)
+
+**PR :** MoneyVibesGroup/prospera-fiscal-service#29 (rebase, `fbb30f7`).
+
+### Ce qui a été fait
+
+- **Agrégat `Redevable`** (`src/domain/redevables`).
+  - Le redevable `ENTREPRISE` est **dérivé du dossier**, jamais stocké (id stable `entreprise`), sur le patron de l'implantation `principale`. « Exactement un » tient par construction, sans reprise de données (AC-1).
+  - Les `PERSONNE_PHYSIQUE` (qualité `DIRIGEANT` ou `ASSOCIE`) sont stockées dans `redevables`, avec un NIF unique par dossier.
+- **Routes**
+  - `GET` et `POST /dossiers/:dossierId/redevables` : droit `preparer` pour créer.
+  - `POST /redevables/:id/mandat` : droit `valider`.
+- **L'obligation appartient à un redevable.** `redevableId` est porté par la clé d'idempotence, le journal (identifiant opaque, jamais le NIF : AC-8), la réponse et le rapport de dérivation.
+  - Une personne physique est dérivée sur le paquet du pays du dossier, avec les entrées `PERSONNE_PHYSIQUE` du catalogue.
+  - Aucune entrée de ce type ⇒ elle est nommée dans `redevablesSansObligation`.
+- **Calendrier par redevable** : `GET /exercices/:id/obligations?redevableId=`. Sans le paramètre, c'est l'entreprise, donc la réponse d'avant ; deux redevables ne sont jamais mélangés (AC-3).
+- **Blocage FR-F25** : `blocage: { motif: 'MANDAT_ABSENT', manque }`, calculé **à la lecture**. Attester le mandat débloque aussitôt (AC-6).
+- **Refus nommés** (AC-5, AC-7)
+  - Un salarié n'est jamais constitué redevable : 422 `SALARIE_NON_REDEVABLE`.
+  - Un redevable d'un autre dossier ou d'une autre organisation : 404 `REDEVABLE_INTROUVABLE`.
+- **AD-21 amendé, garde exécutable** (AC-4) : `garde-identifiant-fiscal.spec.ts` lit l'AST. Aucun type `*Remuneration*` ne déclare de NIF, et `identifiantFiscal` n'est déclaré que par le redevable et l'implantation.
+
+### ⚡ Migration à jouer une fois par environnement
+
+L'index unique des obligations devient `cle_redevable_implantation_taxe_periode`. Mongoose ne supprime pas l'ancien (`cle_implantation_taxe_periode`), qui refuserait la même taxe pour deux co-gérants. Il faut lancer `npm run migrate:cle-obligation-redevable` (avec `MONGODB_URI`).
+
+### Écarts à la fiche, écrits tels quels
+
+- **`LigneDeRemuneration` n'existe pas** : STORY-345 n'est pas commencée.
+  - La garde d'AC-4 la couvrira dès sa création.
+  - AC-5 côté ligne est la règle `verifierDesignation(typeBeneficiaire, redevable)`, que STORY-345 devra appeler.
+- **Dépôts et livrables de la liasse** : ils restent ceux de l'entreprise, par nature (états financiers de la société). Le dépôt du second redevable relève de STORY-565.
+- **Aucune obligation de personne physique n'est cataloguée** dans le paquet Togo (l'IRPP relève de STORY-564). Les tests utilisent une entrée fictive.
+
+### Preuves
+
+- Unitaires 2121/2121.
+- E2e 11/11 suites, dont le parcours HTTP de la story.
+- tsc, eslint et prettier sont propres.
