@@ -5131,9 +5131,10 @@ sprints:
         epic: "EPIC-027"
         points: 8
         service: "fiscal-service"
-        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) et code commencé sur MNV-299 ; groupe B du plan du 14/11
+        status: "done"  # CLÔTURE 2026-11-14 — PR fiscal-service #22 rebase-mergée sur dev (ab79274). Journal d'audit chaîné par périmètre (fiscal_service_audit.journal_audit, index unique chaine_par_perimetre posé au provisionnement), dans la transaction métier + outbox ; premier consommateur : le registre des dépôts ; GET /v1/depots/:id/audit. Conformité MongoDB réel 19/19, M1→M8 rouges puis restaurées, unitaires 1882/1882 (-w 2), e2e 128/128.
         assigned_to: "Dev B"
         story_path: "stories/STORY-299.md"
+        completed_date: "2026-11-14"
       - story_id: "STORY-298"
         title: "Statut de validation des éléments et rattachement version ↔ exercice"
         epic: "EPIC-027"
