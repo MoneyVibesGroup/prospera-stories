@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M05 — Sinistres (format du contrat de module, clause C1, amendée le 2026-11-10, le 2026-11-11 et
 // le 2026-11-12).
 // Source : PRD assurance (prds/prd-assurance-2026-11-13/prd.md), annexe A.1, treize clauses C1 → C13 ; spine assurance
@@ -180,6 +181,7 @@ export const MANIFESTE_SINISTRES = {
     'sinistres.reclamation.changed@1',
     'sinistres.ia.decision.enregistree@1',
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] dérogations, export, effacement
+    'sinistres.realite.constatee@1', // [AD-14, spine IA] fraude confirmée ou écartée à la clôture de la revue humaine (et à 12 mois pour un cas sans suite), offre ou contre-proposition de recours acceptée ou refusée, anomalie de pièces ou de qualité confirmée ou écartée, surcoût de devis confirmé ou écarté, règlement final EN TRANCHE hors volet corporel seulement (issue : FRAUDE_CONFIRMEE, FRAUDE_ECARTEE, OFFRE_ACCEPTEE, OFFRE_REFUSEE, ANOMALIE_CONFIRMEE, ANOMALIE_ECARTEE, SURCOUT_CONFIRME, SURCOUT_ECARTE, REGLEMENT_FINAL_EN_TRANCHE ; `definitive` à la clôture) ; JAMAIS un montant, une tranche ou un écart sur un dossier du volet corporel (`MONTANT_CORPOREL_INTERDIT`), JAMAIS une valeur de santé ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -206,6 +208,8 @@ export const MANIFESTE_SINISTRES = {
     'reseau.portee.changed@1',
     'reseau.affectation.changed@1',
     'reprise.feu-vert.changed@1',
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   // C10 (annexe A.1) : `profiles: ["sinistres"]` ; socle + `ged`. Sans autre module, un dossier va de `DECLARE` à `CLOTURE`.
@@ -322,21 +326,25 @@ export const MANIFESTE_SINISTRES = {
   // fermée sans genre, nationalité, situation matrimoniale ni religion ; aucune donnée de santé ne sort de l'instance ;
   // aucune dictée. L'orientation d'expertise, la complétude du rapport et la comparaison au portefeuille sont déclarées
   // par `expertises`. Les noms de modèles et de finalités sont des propositions (annexe A, préambule).
+  // Amendé le 2026-11-14 : les anciens `modeles` deviennent des capacités `assurance/code@majeure` (AD-47) ; la recherche en
+  // langage naturel est le vocabulaire assurance de la capacité unique `copilot` ; `qualite-dossier-simulation` est scindée en
+  // `qualite-dossier` et `simulation-charge`. Garde : aucune capacité ne rend un montant sur un dossier du volet corporel.
   ia: {
-    modeles: [
-      'declaration-assistee',
-      'controle-pieces',
-      'relance-pieces',
-      'pre-remplissage-instruction',
-      'analyse-devis',
-      'explication-montant',
-      'detection-fraude-liens',
-      'redaction-courrier',
-      'appreciation-recours',
-      'resume-dossier',
-      'recherche-langage-naturel',
-      'brief-du-matin',
-      'qualite-dossier-simulation',
+    capacites: [
+      'assurance/declaration-assistee@1',
+      'assurance/coherence-pieces@1',
+      'assurance/relance-pieces@1',
+      'assurance/preremplissage-instruction@1',
+      'assurance/analyse-devis@1',
+      'assurance/explication-montant@1',
+      'assurance/detection-fraude-liens@1',
+      'assurance/redaction-courrier@1',
+      'assurance/contre-proposition-recours@1',
+      'assurance/resume-dossier@1',
+      'assurance/copilot@1',
+      'assurance/brief-du-matin@1',
+      'assurance/qualite-dossier@1',
+      'assurance/simulation-charge@1',
     ],
     finalites: [
       'declaration-assistee',

@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M21 — Équipes et performance (format du contrat de module, clause C1, amendée le 2026-11-10, le
 // 2026-11-11 et le 2026-11-12).
 // Sources (dans cet ordre) : architecture/architecture-distributeur-2026-11-13 (AD-1, AD-15, AD-19, AD-20, AD-27,
@@ -141,6 +142,7 @@ export const MANIFESTE_EQUIPE = {
     'equipe.objectif.fixe@1', // [proposition, IMF A.12] objectif fixé par un supérieur (FR-241)
     'equipe.ecart.change@1', // [proposition, IMF A.12] niveau d'écart à l'objectif ; alimente les alertes de `dashboard`
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] actes de barème, export, effacement ; aucune rémunération individuelle
+    'equipe.realite.constatee@1', // [AD-14, spine IA] évolution des indicateurs de l'agent après l'entretien de coaching, à 30 puis 90 jours (issue : AMELIORE, STABLE, DEGRADE ; `definitive` à 90 jours ; l'agent n'est qu'un pseudonyme, aucune note individuelle ni rémunération) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -163,6 +165,8 @@ export const MANIFESTE_EQUIPE = {
     'coeur-sfd.pret.changed@1', // [IMF A.12] prêts et retards lus du cœur
     // Famille freelance (`facturation.facture-freelance.emise@1`, `paiement.creance-freelance.changed@1`, …) :
     // JAMAIS consommée ici (AD-31). Le « CA société généré » d'un freelance vient des faits au prix société.
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   // C10 : profil de compose avec le nom du code.
@@ -235,8 +239,15 @@ export const MANIFESTE_EQUIPE = {
   // (FR-C29) : le prix et la marge d'un freelance ne sont jamais une entrée d'une Proposition de la société
   // (AD-19). La prévision du PAR par zone vient de `risque-par` (module Risque de l'IA commune), lue ici. Chez
   // l'IMF le moteur tourne dans l'instance locale ; seuls des écarts anonymisés sortent, avec consentement.
+  // Amendé le 2026-11-14 : les anciens `modeles` deviennent des capacités `secteur/code@majeure` (AD-47) ; `ecart-de-performance`
+  // est un calcul de règle du module, sans capacité ; la réalité de `prevision-retard-par-zone` (PAR constaté) est celle de `risque-par`.
   ia: {
-    modeles: ['ecart-de-performance', 'coaching-cible', 'prevision-par-zone', 'benchmark-agences'],
+    capacites: [
+      'distributeur/coaching-cible@1',
+      'microfinance/coaching-cible@1',
+      'microfinance/benchmark-agences@1',
+      'microfinance/prevision-retard-par-zone@1',
+    ],
     finalites: ['coaching-individuel', 'benchmark-bonnes-pratiques', 'prevision-du-risque-par-zone'],
   },
 } as const;

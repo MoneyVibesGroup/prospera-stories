@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M29 — Expertises et intervenants (format du contrat de module, clause C1, amendée le 2026-11-10,
 // le 2026-11-11 et le 2026-11-12).
 // Source : PRD assurance (prds/prd-assurance-2026-11-13/prd.md), annexe A.3, treize clauses C1 → C13 ; spine assurance
@@ -133,6 +134,7 @@ export const MANIFESTE_EXPERTISES = {
     'expertises.expert.changed@1',
     'expertises.charge.changed@1', // pour `dashboard`
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] export, effacement
+    'expertises.realite.constatee@1', // [AD-14, spine IA] rapport validé ou contesté, mission d'expertise utile ou non après l'orientation proposée (issue : RAPPORT_VALIDE, RAPPORT_CONTESTE, MISSION_UTILE, MISSION_NON_UTILE ; `definitive` à la validation du rapport) ; aucun montant, aucune donnée de santé ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -143,6 +145,8 @@ export const MANIFESTE_EXPERTISES = {
     'sinistres.acces-sante.accorde@1', // table locale de lecture (AD-26)
     'sinistres.acces-sante.retire@1',
     'ged.piece.versionnee@1',
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   // C10 (annexe A.3) : `profiles: ["expertises"]` ; socle + `sinistres` + `ged`.
@@ -252,8 +256,14 @@ export const MANIFESTE_EXPERTISES = {
   // dossiers comparables. Destinataire : GEST. Garde-fous : l'IA propose, le gestionnaire décide, désigne et valide ;
   // aucune désignation, aucun rejet de rapport par l'IA ; JAMAIS de montant proposé sur un préjudice corporel (FR-71) ;
   // aucun contenu médical ne sort de l'instance (AD-8) ; niveau `RECOMMANDATION` ou `ANALYSE`. Les noms sont des propositions.
+  // Amendé le 2026-11-14 : les anciens `modeles` deviennent des capacités `assurance/code@majeure` (AD-47). La comparaison au
+  // portefeuille est interdite de montant, de médiane et d'écart sur un dossier du volet corporel.
   ia: {
-    modeles: ['orientation-expertise', 'completude-rapport-expert', 'comparaison-portefeuille'],
+    capacites: [
+      'assurance/orientation-expertise@1',
+      'assurance/completude-rapport-expert@1',
+      'assurance/comparaison-portefeuille@1',
+    ],
     finalites: ['orientation-expertise', 'completude-rapport-expert', 'comparaison-portefeuille'],
   },
 } as const;

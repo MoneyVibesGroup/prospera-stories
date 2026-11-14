@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M28 — Tableau de bord et pilotage (format du contrat de module, clause C1, amendée le 2026-11-10, le
 // 2026-11-11 et le 2026-11-12).
 // Sources (dans cet ordre) : architecture/architecture-distributeur-2026-11-13 (AD-1, AD-15, AD-19, AD-20, AD-27,
@@ -144,6 +145,7 @@ export const MANIFESTE_DASHBOARD = {
     'dashboard.alerte.changed@1', // [IMF A.11, absent du catalogue de la spine] cycle de vie d'une alerte : destinataire, délai, remontée
     'dashboard.alerte.remontee@1', // [IMF A.11, absent du catalogue de la spine] remontée à 48 h (FR-234)
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] règles d'alerte, seuils, envoi de rapport, export, effacement
+    'dashboard.realite.constatee@1', // [AD-14, spine IA] chiffre d'affaires réalisé contre la prévision à son échéance (issue : SOUS_LA_BANDE, DANS_LA_BANDE, AU_DESSUS_DE_LA_BANDE), achats du point de vente à 90 jours après le score de santé (issue : HAUSSE, STABLE, BAISSE), anomalie d'agence confirmée ou écartée (issue : CONFIRMEE, ECARTEE), ligne de priorité traitée ou écartée à 7 jours (issue : TRAITEE, ECARTEE) ; `definitive` à l'horizon de la capacité ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24) ; annexe A.15 : `etat-publie.changed.*@1`
@@ -200,6 +202,8 @@ export const MANIFESTE_DASHBOARD = {
     'sinistres.dossier.changed@1', // statut, volet, gestionnaire, montants, échéances
     'assurance.provision.changed@1', // annexe assurance : lu par `dashboard`
     'expertises.mission.changed@1',
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   profilCompose: 'dashboard',
@@ -284,14 +288,18 @@ export const MANIFESTE_DASHBOARD = {
   // l'assurance porte l'AFFICHAGE des capacités déclarées par `sinistres` (FR-208, FR-209) ; le moteur reste l'IA
   // commune. Sans IA commune, l'emplacement rend `NON_INSTALLE` et le processus continue (règles de base, Copilot
   // « bientôt »).
+  // Amendé le 2026-11-14 : les anciens `modeles` deviennent des capacités `secteur/code@majeure` (AD-47) ; l'assurance n'a
+  // aucune capacité ici (le tableau de bord de l'assurance affiche celles de `sinistres`).
   ia: {
-    modeles: [
-      'synthese-narrative',
-      'prevision-ca',
-      'scoring-sante-pdv',
-      'copilot-par-role',
-      'priorites-du-jour',
-      'anomalie-agence',
+    capacites: [
+      'distributeur/rapport-de-direction@1',
+      'distributeur/prevision-ca@1',
+      'distributeur/scoring-sante-pdv@1',
+      'distributeur/copilot@1',
+      'microfinance/rapport-de-direction@1',
+      'microfinance/copilot@1',
+      'microfinance/priorites-du-jour@1',
+      'microfinance/anomalie-agence@1',
     ],
     finalites: [
       'rapport-de-direction',
