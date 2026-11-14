@@ -5038,7 +5038,7 @@ sprints:
         epic: "EPIC-025"
         points: 3
         service: "prospera-admin-panel-service"
-        status: "not_started"  # ⚠️ ARBITRAGE À RENDRE AVANT DE CODER (deux issues défendables, écrites dans la story) : proxifier, ou acter le direct et le DIRE dans AP-03. Ce qui ne se défend pas, c'est de laisser la question ouverte — cf. `GAP-bff-admin-sans-consommateur`, trois routes commandées pour un front qui ne passait pas par le BFF. Aujourd'hui la console emprunte DEUX chemins pour un seul acte métier, et la jointure de droits se joue à deux endroits.
+        status: "done"  # ✅ 2026-11-14 — ARBITRAGE PO : ① PROXIFIER. FUSIONNÉE : prospera-admin-panel-service#32 + frontend-admin-panel#29. POST /admin/orgs/:orgId/kyc/documents/:documentId/approve|reject, pass-through strict (corps tel quel, 403/404/409 préservés, kyc:approve/kyc:reject), SANS corps ni If-Match (STORY-128 : pas de motif par pièce). Console : poserMarques par le BFF. ⚠️ DÉFAUT TROUVÉ : le motif saisi par pièce était envoyé et perdu sans bruit (kyc-service n'a pas de champ) — story à ouvrir. AVANT : ⚠️ ARBITRAGE À RENDRE AVANT DE CODER (deux issues défendables, écrites dans la story) : proxifier, ou acter le direct et le DIRE dans AP-03. Ce qui ne se défend pas, c'est de laisser la question ouverte — cf. `GAP-bff-admin-sans-consommateur`, trois routes commandées pour un front qui ne passait pas par le BFF. Aujourd'hui la console emprunte DEUX chemins pour un seul acte métier, et la jointure de droits se joue à deux endroits.
         story_path: "stories/STORY-176.md"
         assigned_to: null
       - story_id: "STORY-174"

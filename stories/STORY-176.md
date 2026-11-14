@@ -5,7 +5,7 @@
 **Découverte par :** AP-INT-0, en branchant la revue KYC
 **Priorité :** Should Have — ⚠️ **arbitrage à rendre avant de coder** *(voir §Décision attendue)*
 **Story Points :** 3
-**Statut :** À faire
+**Statut :** Terminée (2026-11-14) — issue ① proxifier
 **Créée le :** 2026-08-04
 **Sprint :** 21
 **Service :** `prospera-admin-panel-service` (`:3010`)
@@ -74,7 +74,41 @@ lit tout le dossier d'une organisation sous le même préfixe.
 
 ## Definition of Done
 
-- [ ] Arbitrage tranché et **consigné** dans `AP-03` et dans le ticket
-- [ ] Les 5 critères vérifiés *(issue ①)* · `lint` 0 · couverture ≥ 90 %
-- [ ] ⚡ La console est rebranchée : `submitDecision` n'emprunte **plus qu'un** amont
-- [ ] Branche `MNV-176`, PR rebase-mergée sur `dev`
+- [x] Arbitrage tranché et **consigné** dans `AP-03` et dans le ticket
+- [x] Les 5 critères vérifiés *(issue ①)* · `lint` 0 · couverture ≥ 90 %
+- [x] ⚡ La console est rebranchée : `submitDecision` n'emprunte **plus qu'un** amont
+- [x] Branche `MNV-176`, PR rebase-mergée sur `dev`
+
+---
+
+## Suivi — 2026-11-14 (issue ① retenue, fusionnée sur `dev`)
+
+**Arbitrage PO du 2026-11-14 : ① proxifier.** Consigné ici et dans le tracker.
+**PR :** MoneyVibesGroup/prospera-admin-panel-service#32 (BFF) · MoneyVibesGroup/frontend-admin-panel#29 (console).
+
+### Ce qui a été fait
+
+- BFF : `POST /admin/orgs/:orgId/kyc/documents/:documentId/approve|reject`, pass-through strict
+  vers `kyc-service` (corps amont tel quel, codes préservés, bearer relayé), mêmes permissions que
+  la décision du dossier (`kyc:approve` / `kyc:reject`).
+- Console : `poserMarques` passe par le BFF ; plus aucun acte de revue en direct vers `kyc-service`.
+  La **lecture** du détail (`/kyc-admin/:orgId`) reste directe, par conception (URL présignées et
+  OCR, mono-service) : hors du périmètre de cette story.
+
+### ⚡ Écart à la fiche : la marque par pièce n'a PAS de corps
+
+La fiche annonçait `reject` avec `{ reason }`. Depuis STORY-128, `kyc-service` n'a **aucun champ**
+pour un motif par pièce (le motif vit sur le dossier). Le proxy suit le contrat réel : ni corps ni
+`If-Match`. AC-4 (« motif refusé par l'amont ») est donc sans objet sur ces routes.
+
+⚠️ **Défaut trouvé** : la console envoyait le motif saisi par pièce, que `kyc-service` ignorait,
+donc **perdu sans bruit**, et un test affirmait qu'il « voyageait ». Test inversé, requête sans
+corps. **Story à ouvrir** : garder ce motif (champ amont) ou le retirer de l'écran.
+
+### Preuves
+
+BFF 509/509 ; console `src/features/kyc` 75/75. Docker (dossier de démonstration, 3 pièces) :
+approuver la pièce en attente ⇒ 200 ; rejeter puis ré-approuver une pièce ⇒ 200 / 200 ; pièce
+remplacée ⇒ 409 ; pièce inconnue ⇒ 404 ; membre d'un cabinet ⇒ 403 ; décision du dossier par le BFF
+⇒ 200 `APPROVED` ; marque après décision ⇒ 409. ⚠️ Preuve navigateur depuis `:3110` non faite (la
+console ne tournait pas dans la pile) : le rebranchement est prouvé par ses tests.
