@@ -5177,9 +5177,10 @@ sprints:
         epic: "EPIC-028"
         points: 8
         service: "fiscal-service"
-        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) et code commencé sur MNV-305 (balance, dossier, fiscal) ; catalogue d'obligations DANS le paquet (décision utilisateur du 2026-11-14)
+        status: "done"  # CLÔTURE 2026-11-14 — catalogue d'obligations DANS le paquet (décision utilisateur) : balance #138, dossier #45, fiscal #26 rebase-mergées sur dev. Dérivation unique (AD-17), clé idempotente, humains préservés, non dérivables nommées. Conformité MongoDB réel 33/33, M1→M6, unitaires 2065/2065, e2e 157/157.
         assigned_to: "Dev B"
         story_path: "stories/STORY-305.md"
+        completed_date: "2026-11-14"
       - story_id: "STORY-306"
         title: "Activation et désactivation manuelle d'une obligation"
         epic: "EPIC-028"
