@@ -5240,8 +5240,9 @@ sprints:
         epic: "EPIC-029"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) ; tranches à bornes déclarées par le paquet, montants du paquet mis à l'échelle de l'exposant (amende D-310-5 : pas d'arrondi en unités de la devise)
+        assigned_to: "Dev B"
+        story_path: "stories/STORY-311.md"
       - story_id: "STORY-312"
         title: "Pipeline de modificateurs ordonné"
         epic: "EPIC-029"
