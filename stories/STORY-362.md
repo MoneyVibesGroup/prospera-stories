@@ -1,123 +1,94 @@
-# STORY-362 : Implantations multiples — un dossier peut être imposé dans plusieurs pays
-
-**Epic :** EPIC-028 — Implantations multiples et catalogue d'obligations dérivé *(recadré le 2026-08-09)*
-**Réf. :** **STORY-302** *(dont cette story reprend le volet abandonné à la scission)* · ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — décision **D10** · `architecture-fiscal-service-2026-08-03.md` **AD-7**
-**Priorité :** Should Have
-**Story Points :** 5
-**Statut :** 📋 À faire
-**Complexité :** medium
-**Créée le :** 2026-08-09
-**Sprint :** 24
-**Service :** `fiscal-service`
-
+---
+baseline_commit: ea879c653da4d4a1dfaf0b30a1b5bd3335b91f9a
 ---
 
-## Le constat
+# STORY-362 : Implantations multiples — un dossier peut être imposé dans plusieurs pays
 
-STORY-302 portait deux choses qui n'ont ni le même moment ni le même propriétaire :
+Status: ready-for-dev
 
-1. **le type d'entité et le pays d'un dossier** — dont dépendent le référentiel comptable, le gabarit
-   de liasse et le paquet fiscal, donc **la balance et le bilan**, donc tout le produit ;
-2. **la capacité d'un dossier à porter N implantations** — un client imposé au Togo *et* au Bénin.
+**Complexité :** medium
 
-La première est un **préalable** : sans elle, aucune balance ne peut être calculée sur le bon plan de
-comptes. Elle est partie au socle (**STORY-302 réancrée**, EPIC-043, sprint 20), avec **D10 : un seul
-pays en v1**.
-
-La seconde est un **enrichissement**, et elle reste ici. Cette story est ce qui empêche la scission
-d'être une perte : sans elle, le multi-implantation aurait disparu du plan sans que personne ne s'en
-aperçoive — le défaut que ce dépôt a déjà documenté trois fois sous le nom d'« orpheline ».
+**Épic :** EPIC-028 — Implantations multiples et catalogue d'obligations dérivé *(recadré le 2026-08-09)*  
+**Service :** `fiscal-service` (dépôt `prospera-fiscal-service`, base `origin/dev`)  
+**Points :** 5 · **Sprint :** S24 du tracker ; groupe B du plan du 14/11  
+**Assigné à :** Dev B  
+**Réf. :** STORY-302 (volet abandonné à la scission) · ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` (D10) · spine fiscal AD-7, AD-13 · FR-F01, FR-F02, FR-F05  
+**Prérequis :** STORY-302, 304 (`dossier-service`, livrées) · STORY-299 (journal chaîné) · STORY-300 (droits fiscaux)
 
 ---
 
 ## User Story
 
-En tant que **collaborateur de cabinet**,
-je veux **déclarer plusieurs implantations pour un même client**,
-afin que **chaque contexte national ait son identité fiscale et ses obligations propres**.
+En tant que **collaborateur de cabinet**, je veux **déclarer plusieurs implantations pour un même
+client**, afin que **chaque contexte national ait son identité fiscale et ses obligations propres**.
 
----
+## Le constat (2026-08-09, inchangé)
 
-## Ce que la story livre
+STORY-302 portait deux choses de moments différents : le type d'entité et le pays du dossier
+(préalable, parti au socle `dossier-service` avec D10 « un seul pays en v1 ») et la capacité d'un
+dossier à porter N implantations — l'enrichissement qui reste ici. Sans cette story, le
+multi-implantation disparaissait du plan.
 
-- **`Implantation`** rattachée au dossier : `dossierId`, `pays`, `typeEntite`, `identifiantFiscal`,
-  `regimes { comptable, fiscal }`, `actif`. Unique sur `(orgId, pays, identifiantFiscal)`.
-- **L'implantation *est* l'entité comptable** (AD-7) : chaque implantation porte ses propres
-  obligations, sans mélange entre pays.
-- **Promotion sans migration** : le dossier mono-pays du socle **devient** sa première implantation.
-  La clé `(dossier, pays)` posée par STORY-302 réancrée a été choisie pour ça — la bascule est une
-  lecture, pas une reprise de données.
-- **Clôture d'implantation** pour cessation d'activité : les obligations passées **demeurent
-  intactes** et restent consultables ; seule la dérivation future s'arrête.
-- **Refus d'un secret de portail** : aucun champ du modèle n'accepte un identifiant ou un mot de passe
-  d'accès à un portail administratif. C'est un critère, pas une recommandation — un test échoue si un
-  tel champ apparaît au schéma.
+## Décisions confrontées au code réel (2026-11-14)
 
-## Hors périmètre
+- **Le dossier vit chez `dossier-service`** ; `fiscal-service` en a un read-model (`dossiers_fiscaux` :
+  pays, type d'entité, statut `ACTIF`/`ARCHIVE`) et lit son NIF (`nifSociete`) par `SourceDossier`,
+  qui porte aussi la **portée** de l'appelant.
+- **Promotion sans migration** : l'**implantation principale** n'est pas stockée, elle est
+  **dérivée** du dossier à la lecture (pays, type d'entité, NIF du dossier) — aucune reprise de
+  données, aucune copie qui pourrait diverger. Les implantations **stockées** sont les autres pays :
+  une implantation dans le pays du dossier est refusée (`IMPLANTATION_EXISTANTE`, 409).
+- **NIF normalisé** comme chez `dossier-service` (espaces retirés, majuscules) ; unique sur
+  `(orgId, pays, identifiantFiscalNormalise)` ; une seule implantation ACTIVE par
+  `(dossier, pays)`.
+- **Aucune obligation n'existe encore** (STORY-305) : « chaque implantation porte ses obligations
+  sans mélange » se livre comme **clé d'implantation stable** (`implantationId`, et `principale` pour
+  le pays du dossier) et code de paquet propre à chaque implantation
+  (`fiscal-<pays>-<type>`, fonction de STORY-298 réutilisée) ; 305 dérivera par implantation.
+- **Clôture** pour cessation : `CLOTUREE`, date et motif (motif au journal par son empreinte),
+  définitive (409 `IMPLANTATION_CLOTUREE` ensuite) ; rien n'est supprimé.
+- **Journal** : `IMPLANTATION_DECLAREE`, `IMPLANTATION_CLOTUREE` au journal chaîné
+  `implantation:<id>`, dans la transaction de l'écriture (STORY-299).
+- **Droits** (STORY-300) : déclarer ⇒ `preparer` ; clôturer (arrête toute dérivation future) ⇒
+  `valider`.
+- **Aucun secret de portail** (AD-13) : le DTO refuse tout champ inconnu (`forbidNonWhitelisted`) et
+  un test au schéma échoue si un champ d'accès (mot de passe, identifiant de portail, certificat,
+  jeton) apparaît.
 
-- Le **type d'entité et le pays du dossier** → **STORY-302** *(EPIC-043, sprint 20)*, déjà livrés
-  quand cette story démarre.
-- La **résolution référentiel + paquet** depuis le type d'entité → **STORY-304** *(EPIC-043)*. Ici on
-  la **réutilise** par implantation, on ne la réécrit pas.
-- Les **régimes** proposés puis confirmés → **STORY-303** *(EPIC-043)*, datée par exercice. Le volet
-  « par implantation » consomme cette mécanique.
-- La **dérivation du catalogue** d'obligations → **STORY-305**, qui consomme cette story.
+## Critères d'acceptation
 
----
+- [ ] **AC-1** — Un dossier porte N implantations, chacune avec pays, type d'entité, identifiant
+  fiscal et régimes ; la liste rend l'implantation principale (dérivée du dossier) puis les autres.
+- [ ] **AC-2** — Un dossier Togo + Bénin : deux implantations distinctes, chacune avec son
+  identifiant, son code de paquet (`fiscal-tg-…`, `fiscal-bj-…`), sans mélange.
+- [ ] **AC-3** — Le dossier mono-pays existant devient sa première implantation sans reprise de
+  données (lecture seule).
+- [ ] **AC-4** — Une implantation clôturée reste consultable, son historique intact ; une seconde
+  clôture ⇒ 409 `IMPLANTATION_CLOTUREE`.
+- [ ] **AC-5** — Un secret d'accès à un portail est refusé : 400 au bord, et aucun champ du schéma
+  ne l'accepte.
+- [ ] **AC-6** — `(orgId, pays, NIF)` unique ⇒ 409 `IDENTIFIANT_FISCAL_DEJA_UTILISE` ; une seconde
+  implantation active dans le même pays ⇒ 409 `IMPLANTATION_EXISTANTE`.
+- [ ] **AC-7** — Dossier archivé ⇒ 409 `DOSSIER_ARCHIVE` ; dossier d'une autre organisation ou hors
+  portée ⇒ 404 `DOSSIER_INTROUVABLE`.
 
-## Acceptance Criteria
+## Table de mutations
 
-- [ ] Un dossier peut porter **N implantations**, chacune avec pays, type d'entité, identifiant fiscal
-      et régimes propres.
-- [ ] Deux implantations du même dossier dans **deux pays** : chacune porte ses propres obligations,
-      **sans mélange** — vérifié sur un dossier Togo + Bénin.
-- [ ] Le dossier mono-pays existant **devient** sa première implantation sans reprise de données ni
-      interruption : ses balances et liasses restent rattachées.
-- [ ] Une implantation **clôturée** conserve son historique d'obligations intact ; aucune dérivation
-      nouvelle ne s'y produit.
-- [ ] Tenter d'enregistrer un **secret d'accès à un portail** → refusé : aucun champ du modèle ne
-      l'accepte. *(Test au schéma.)*
-- [ ] `(orgId, pays, identifiantFiscal)` est **unique** — le même numéro fiscal ne peut pas exister
-      deux fois dans la même organisation et le même pays.
-- [ ] Une implantation sur un dossier **archivé** → **409 `DOSSIER_ARCHIVE`** (règle héritée de
-      STORY-353).
-
----
-
-## Notes techniques
-
-- Le schéma `Implantation` de `architecture-fiscal-service-2026-08-03.md:302-309` est repris tel quel,
-  à une correction près : son `dossierId` n'est **plus** « un regroupement local au service » mais
-  **l'identifiant du dossier servi par `dossier-service`**, lu depuis le read-model. C'est
-  précisément le point que le ticket a fait bouger.
-- La résolution référentiel + paquet devient **par implantation** : la fonction de STORY-304 est
-  appelée avec le type d'entité de l'implantation, jamais redéveloppée.
-
----
-
-## Dépendances
-
-**Prérequises :** **STORY-301**, **STORY-302**, **STORY-304** *(EPIC-043, sprint 20)* ·
-**STORY-361** *(scaffold `fiscal-service`)*.
-**Débloque :** **STORY-305** *(dérivation du catalogue)* · **STORY-307** *(taxes sectorielles)*.
-
----
+| ID | Mutation | Témoin rouge |
+|---|---|---|
+| M1 | ne pas normaliser le NIF | unicité contournée par un espace (AC-6) |
+| M2 | accepter le pays du dossier | AC-6 |
+| M3 | autoriser la clôture d'une clôturée | AC-4 |
+| M4 | ignorer le statut ARCHIVE | AC-7 |
+| M5 | écrire la trace hors transaction | conformité |
 
 ## Definition of Done
 
-- [ ] Lint 0 · build OK · couverture ≥ seuils.
-- [ ] e2e : deux implantations dans deux pays sans mélange, promotion du mono-pays, clôture qui
-      préserve l'historique, unicité, refus du secret de portail, 409 sur dossier archivé.
-- [ ] Vérification docker sur un dossier réellement multi-pays.
-- [ ] `/code-review`.
+- [ ] Branche `MNV-362` depuis `origin/dev`, PR vers `dev` fusionnée en rebase ; fiche et tracker
+  par PR sur `main` fusionnée en rebase.
+- [ ] Porte qualité verte ; conformité Mongo réel (index, transaction) ; mutations rouges.
 
----
+## Progress Tracking
 
-## Story Points Breakdown
-
-- Modèle `Implantation` + unicité + rattachement au read-model `Dossier` : 1,5 pt
-- Promotion du dossier mono-pays en première implantation : 1 pt
-- Clôture préservant l'historique : 1 pt
-- Réutilisation de la résolution référentiel/paquet par implantation : 1 pt
-- Tests + vérification docker multi-pays : 0,5 pt
-- **Total : 5 points**
+**2026-11-14 — fiche réécrite.** Fiche du 2026-08-09 réécrite (bmad-create-story) juste avant de
+coder, confrontée à `origin/dev` `ea879c6` (STORY-299, 298, 300 incluses) et à `dossier-service`.

@@ -5167,9 +5167,9 @@ sprints:
         epic: "EPIC-028"
         points: 5
         service: "fiscal-service"
-        status: "not_started"  # ⚡ CRÉÉE le 2026-08-09 pour que la SCISSION de STORY-302 ne soit pas une PERTE. 302 portait deux choses de moments différents : (a) le type d'entité et le pays du dossier — préalable absolu, dont dépendent le référentiel, le gabarit de liasse et le paquet fiscal, donc la balance et le bilan ⇒ parti au socle (EPIC-043, S20) avec D10 « un seul pays en v1 » ; (b) la capacité à porter N implantations — enrichissement, qui reste ici. ⚠ SANS CETTE STORY, le multi-implantation disparaîsait du plan sans que personne ne le remarque : c'est le défaut d'ORPHELINE que ce dépôt a déjà documenté trois fois (STORY-133/134/135/136/144). ⚡ PROMOTION SANS MIGRATION : le dossier mono-pays DEVIENT sa première implantation — la clé (dossier, pays) de 302 réancrée a été choisie pour ça. Reprend les AC de 302 restés sans porteur : deux pays sans mélange, clôture préservant l'historique, refus de tout secret de portail au schéma.
+        status: "in_progress"  # 2026-11-14 — fiche réécrite (bmad-create-story) et code commencé sur MNV-362 ; groupe B du plan du 14/11. Historique : créée le 2026-08-09 pour que la scission de STORY-302 ne soit pas une perte.
         story_path: "stories/STORY-362.md"
-        assigned_to: null
+        assigned_to: "Dev B"
 
       - story_id: "STORY-305"
         title: "Dérivation du catalogue d'obligations"
