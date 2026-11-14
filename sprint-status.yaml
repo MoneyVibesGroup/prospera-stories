@@ -5249,8 +5249,9 @@ sprints:
         epic: "EPIC-029"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) ; liste fermée, ordre du CODE (AD-3), MAXIMUM_DE = second calcul, AIGUILLAGE déclarable mais refusé au calcul jusqu'à STORY-313
+        assigned_to: "Dev B"
+        story_path: "stories/STORY-312.md"
       - story_id: "STORY-313"
         title: "Aiguillage, y compris sur l'état d'un tiers"
         epic: "EPIC-029"
