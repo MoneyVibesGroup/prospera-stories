@@ -5204,8 +5204,9 @@ sprints:
         epic: "EPIC-028"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) ; code sur MNV-308 (balance, fiscal) ; source du régime = axes datés de dossier-service (corrige aussi le régime fiscal de la principale, toujours null hors tests depuis 305)
+        assigned_to: "Dev B"
+        story_path: "stories/STORY-308.md"
       - story_id: "STORY-309"
         title: "Agnosticisme de la source de balance"
         epic: "EPIC-028"
