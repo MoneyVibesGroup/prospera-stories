@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M09 — Facturation, proformas et e-facture (format du contrat de module, clause C1, amendée le
 // 2026-11-10, le 2026-11-11 et le 2026-11-12).
 // Source : prospera-stories, PRD distributeur (prds/prd-distributeur-2026-11-12, FINAL), annexe A.2 (treize
@@ -120,6 +121,7 @@ export const MANIFESTE_FACTURATION = {
     'facturation.facture.reprise@1', // facture ouverte reprise de Sage : `paiement` ouvre sa Créance au reste dû repris (FR-58, FR-216)
     'facturation.proforma.changed@1', // statut, relances, probabilité d'acceptation
     'instance.journal@1', // émissions, avoirs, initialisation de la suite, envois, effacement (journal d'émission, A.2 C3)
+    'facturation.realite.constatee@1', // [AD-14, spine IA] facture encaissée à l'échéance ou non, proforma acceptée ou non (issue : ENCAISSEE, ENCAISSEE_EN_RETARD, IMPAYEE, PROFORMA_ACCEPTEE, PROFORMA_REFUSEE) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -135,6 +137,8 @@ export const MANIFESTE_FACTURATION = {
     'connecteurs.domaine.changed@1', // propriétaire du domaine facturation.factures, plus tard (spine de Connecteurs, AD-3)
     // Les faits de `recouvrement` (crédit bloqué, via `pdv.plafond.changed@1`) et de `freelance` s'ajoutent
     // en version mineure quand leurs manifestes les nomment.
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   profilCompose: 'facturation',
@@ -189,7 +193,11 @@ export const MANIFESTE_FACTURATION = {
   //   négociable ») ;
   // - prevision-encaissement : prévision à 7 et 30 jours, lue des Créances de `paiement`.
   ia: {
-    modeles: ['score-acceptation-proforma', 'scoring-credit-client', 'prevision-encaissement'],
+    capacites: [
+      'distributeur/score-acceptation-proforma@1',
+      'distributeur/scoring-credit-client@1',
+      'distributeur/prevision-encaissement@1',
+    ],
     finalites: ['aide-a-la-decision-credit', 'priorisation-des-creances'],
   },
 

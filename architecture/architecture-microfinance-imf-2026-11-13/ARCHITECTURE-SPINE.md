@@ -7,7 +7,7 @@ paradigm: 'système d''engagement à côté d''un système d''enregistrement : P
 scope: 'Les modules propres à l''IMF du PRD prd-microfinance-2026-11-13 : credit, produits-financiers, microfinance, collecte, caisse, risque-par, conformite-bceao (prospera-imf-service), coeur-sfd (prospera-coeur-sfd-service) et le cœur fictif (prospera-coeur-fictif) ; leurs frontières avec paiement, recouvrement, terrain, reseau, notification, reprise, connecteurs, l''IA commune et le moteur d''installation. Hors champ : le paquet comptable prospera-microfinance-service (non installé chez l''IMF), le vrai connecteur vers le cœur (hors février), l''assurance.'
 status: final
 created: '2026-11-13'
-updated: '2026-11-13'
+updated: '2026-11-14'
 binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, 'FR-30 → FR-99', 'FR-100 → FR-199', 'FR-200 → FR-229', 'FR-230 → FR-274', 'NFR-1 → NFR-10', 'annexe C', 'annexe D', C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13]
 sources:
   - prds/prd-microfinance-2026-11-13/prd.md (final, #426) et addendum.md
@@ -20,6 +20,8 @@ companions: [.memlog.md]
 ---
 
 # Architecture Spine — Microfinance (IMF)
+
+*Amendée le 2026-11-14 par la spine de l'IA commune (`architecture/architecture-ia-commune-2026-11-13`, AD-39) : AD-14 (le `PropositionPort` est le contrat de proposition UNIQUE de l'IA commune, annexe B du PRD de l'IA commune, `origine: REGLE | MODELE | LANGAGE` ; service porteur `prospera-ia-service` :3417 ; `parametresVersion` devient `versionParametres`, `strategieVersion` est retiré, la stratégie étant dans la provenance ; faits `ia.prediction.enregistree@1` et `<module>.realite.constatee@1`)*
 
 Rédigée en mode rapide le 2026-11-13 à la demande du PO, juste après le PRD final. Elle fixe ce que deux unités construites séparément pourraient choisir de façon incompatible. Les raisons sont au `.memlog.md`. Les marques `[ASSUMPTION]` sont à confirmer par le PO.
 
@@ -280,6 +282,7 @@ Les faits des voisins consommés ici gardent leurs noms (`paiement.creance.chang
   - Les **écarts prédiction / réalité** sont enregistrés sur l'instance, préparés selon la spine du moteur (AD-14), puis envoyés par le tunnel sortant déclaré (AD-9 amendé). Un écart n'entre dans un lot d'export que si **les deux** conditions sont vraies à l'instant de la préparation : (1) le registre de l'agent couvre la finalité (moteur AD-13 ; vocabulaire fermé = finalités des clauses C11) ; (2) le client a un consentement « IA commune » en vigueur (`microfinance.consentement.changed@1`). Un retrait retire les écarts du client de la file d'export avant toute écriture ; les groupes de moins de 5 sont retirés ; la reconnaissance vocale exige un consentement propre (FR-207, FR-260) ; le niveau d'apprentissage est un champ du registre de l'agent, jamais un paramètre de module.
   - Une mise à jour de modèle est un artefact de la ligne de version vérifié hors ligne (moteur AD-7), le tunnel n'étant que le transport ; elle est appliquée à l'essai, puis promue à la date choisie par l'IMF ; la retirer repointe sur la calibration précédente (moteur AD-39).
   - Les entrées d'un score sont une **liste fermée de variables autorisées** ; genre, situation matrimoniale, nationalité et religion n'y entrent jamais.
+  - *Amendé le 2026-11-14 (spine de l'IA commune, AD-39)* : le `PropositionPort` n'a plus « son propre contrat » : c'est le **contrat de proposition unique de l'IA commune** (`origine: REGLE | MODELE | LANGAGE`) ; le service porteur n'est plus « à cadrer » : c'est `prospera-ia-service` (:3417, module `ia`) ; `parametresVersion` se lit `versionParametres` et `strategieVersion` est retiré ; chaque module déclare ses capacités `secteur/code@majeure` et ses faits `<module>.realite.constatee@1` à son manifeste (C5, C11).
   - Un chiffre d'un rapport réglementaire ne vient jamais d'un modèle (FR-190).
 
 ### AD-15 — La séparation des tâches se vérifie sur l'acteur, à chaque commande

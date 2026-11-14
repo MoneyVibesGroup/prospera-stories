@@ -7,7 +7,7 @@ paradigm: 'système d''engagement (le dossier sinistre) à côté d''un système
 scope: 'Les modules propres à l''assurance du PRD prd-assurance-2026-11-13 : sinistres et expertises (prospera-sinistres-service), assurance (prospera-assurance-service), ged (document-service), liaison-assureur (prospera-liaison-assureur-service) et le LC fictif (prospera-assureur-fictif) ; leurs frontières avec paiement, notification, reprise, connecteurs, reseau, dashboard, l''IA commune, le relais Money Vibes et le moteur d''installation. Hors champ : le connecteur du LC réel, le chatbot de l''assuré, toute fonction vocale, la comptabilité officielle, les données du barème corporel.'
 status: final
 created: '2026-11-13'
-updated: '2026-11-13'
+updated: '2026-11-14'
 binds: ['FR-1 → FR-29', 'FR-30 → FR-139', 'FR-140 → FR-219', 'FR-220 → FR-246', 'FR-250 → FR-264', 'annexe A', 'annexe C', 'annexe D', C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13]
 sources:
   - prds/prd-assurance-2026-11-13/prd.md (final) ; annexes A, C, D
@@ -21,6 +21,7 @@ companions: [.memlog.md]
 
 # Architecture Spine — Assurance (chaîne sinistres)
 
+*Amendée le 2026-11-14 par la spine de l'IA commune (`architecture/architecture-ia-commune-2026-11-13`, AD-39) : AD-10 (le `PropositionPort` est le contrat de proposition unique de l'IA commune, `origine: REGLE | MODELE | LANGAGE`, service porteur `prospera-ia-service` :3417 ; la garde « aucun montant corporel » est CONSERVÉE : le port refuse, `BLOQUEE` visible au registre seulement)*
 *Amendée le 2026-11-13 par les manifestes de l'assurance : AD-16 (faits `sinistres.sortie.decidee@1` et `sinistres.dossier.rouvert@1`, source de l'envoi C-17 au logiciel de la compagnie ; les honoraires payés se lisent dans `paiement.reglement.changed@1`, nature `HONORAIRES`).*
 
 Rédigée en mode rapide le 2026-11-13 à la demande du PO, après le PRD final. Elle fixe ce que deux unités construites séparément pourraient choisir de façon incompatible. Les raisons sont au `.memlog.md`. `[ADOPTED]` = tranché par le PO ou par la réalité du code ; `[ASSUMPTION]` = proposé ici, à confirmer.
@@ -250,6 +251,7 @@ Trait plein : dépendance dure (`depends`, l'installation est refusée sans elle
   - **Garde « aucun montant corporel »** : la liste blanche par volet (matériel, risques divers) est **une donnée versionnée unique** lue par le port et par le consommateur ; le port **refuse** toute proposition portant un montant, une fourchette, une médiane, un comparable ou un écart en pourcentage sur un dossier de volet `corporel`, et le consommateur refuse la **demande** avec un code nommé ; testé **par écran**. Un changement de volet vers `corporel` rend `PERIMEE` (masquée) toute Proposition chiffrée ; le volet est relu à l'affichage.
   - Chaque proposition est **sourcée jusqu'à la pièce** ; une proposition sans source n'est pas affichée. **Jamais bloquante** : sans IA commune, l'emplacement rend `NON_INSTALLE` et le circuit avance sur la saisie humaine.
   - Données envoyées à l'IA : sans identifiant, nom, téléphone ni donnée de santé ; écarts anonymisés vers l'apprentissage **seulement** si le registre de l'agent couvre la finalité (moteur AD-13) et que la compagnie a consenti ; groupes de moins de 5 retirés. Aucune capacité vocale au premier jour.
+  - *Amendé le 2026-11-14 (spine de l'IA commune, AD-39)* : le `PropositionPort` est le **contrat de proposition unique de l'IA commune** (`origine: REGLE | MODELE | LANGAGE`), porté par `prospera-ia-service` (:3417) ; `parametresVersion` se lit `versionParametres`, `strategieVersion` est retiré. La garde « montant interdit » est **gardée telle quelle** : une proposition chiffrée sur un dossier `corporel` est `BLOQUEE`, visible au registre et au rôle habilité, jamais rendue comme proposition acceptable. Le mode `AUTO` est refusé en assurance (`MODE_NON_PERMIS_ASSURANCE`).
 
 ### AD-11 — Provisions : `sinistres` propose, `assurance` est seul écrivain des mouvements et du PSAP `[ADOPTED]`
 

@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M47 — Échange avec le cœur de l'IMF (code `coeur-sfd`) (format du contrat de module, clause C1,
 // amendée le 2026-11-10, le 2026-11-11 et le 2026-11-12).
 // Source : prospera-stories, PRD microfinance (prds/prd-microfinance-2026-11-13, FINAL, PR #426), annexe A.6
@@ -209,6 +210,7 @@ export const MANIFESTE_COEUR_SFD = {
     // [proposition, C13 / journal d'instance, comme les autres manifestes] envois, rejets, résolutions d'écarts,
     // changements de transport, rapprochements validés, export, effacement.
     'instance.journal@1',
+    'coeur-sfd.realite.constatee@1', // [AD-14, spine IA] écart ou doublon avec le cœur confirmé ou écarté au rapprochement (issue : CONFIRME, ECARTE) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -250,6 +252,8 @@ export const MANIFESTE_COEUR_SFD = {
     // propriétaire des domaines d'échange.
     'essai.horloge.changed@1',
     'connecteurs.domaine.changed@1', // propriétaire des domaines `coeur-sfd.*` (spine de Connecteurs, AD-3)
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   // C10 (annexe A.6) : `profiles: ["coeur-sfd"]` ; socle + `reseau` + `produits-financiers`. Le cœur fictif s'y
@@ -606,7 +610,9 @@ export const MANIFESTE_COEUR_SFD = {
   // anonymisés repartent, avec le consentement de l'IMF. La proposition n'est pas un fait de module (AD-14) :
   // aucun fait `coeur-sfd.ecart.propose@1` (écart n° 4).
   ia: {
-    modeles: ['detection-ecarts-doublons'],
+    capacites: [
+      'microfinance/detection-ecarts-doublons@1',
+    ],
     finalites: ['rapprochement-assiste'],
   },
 } as const;

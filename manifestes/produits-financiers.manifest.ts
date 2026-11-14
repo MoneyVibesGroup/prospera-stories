@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M46 — Produits financiers (format du contrat de module, clause C1, amendée le 2026-11-10, le
 // 2026-11-11 et le 2026-11-12).
 // Source : PRD microfinance (prds/prd-microfinance-2026-11-13/prd.md), annexe A.2, treize clauses C1 → C13 ;
@@ -147,6 +148,8 @@ export const MANIFESTE_PRODUITS_FINANCIERS = {
     'essai.horloge.changed@1', // [proposition, spine AD-30 : date d'effet d'une version dans l'espace d'essai ; absent de la C5 de l'annexe A.2]
     'coeur-sfd.produit.code@1', // code produit du cœur (FR-110) ; projection datée, AD-1
     'microfinance.client.changed@1', // éligibilité : ancienneté (FR-104)
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   profilCompose: 'produits-financiers',
@@ -257,7 +260,10 @@ export const MANIFESTE_PRODUITS_FINANCIERS = {
   // choisit ; indisponible, rien ne bloque. Les noms de modèles et de finalités sont des propositions (annexe A,
   // préambule).
   ia: {
-    modeles: ['recommandation-produit', 'conditions-optimales'],
+    capacites: [
+      'microfinance/recommandation-produit@1',
+      'microfinance/conditions-optimales@1',
+    ],
     finalites: ['recommandation-de-produit', 'proposition-de-conditions'],
   },
 } as const;

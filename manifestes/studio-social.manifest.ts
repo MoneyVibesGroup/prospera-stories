@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M24 — Studio réseaux sociaux (format du contrat de module, clause C1, amendée le 2026-11-10,
 // le 2026-11-11 et le 2026-11-12).
 // Source : prds/prd-distributeur-2026-11-12/prd.md, annexe A.6 (C1 → C13, tranchées) et §5.6 (FR-87 → FR-92).
@@ -105,6 +106,8 @@ export const MANIFESTE_STUDIO_SOCIAL = {
     // `conquete-objectifs`. Ni l'un ni l'autre ne figure dans la ligne C5 de A.6 : à confirmer par le
     // manifeste de ce module avant de les ajouter en version mineure. De même, `pdv.point-de-vente.changed@1`
     // pour le client « déjà client » (`PROSPECT_DEJA_CLIENT`, FR-92) : proposition.
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   // C10 : profil de compose avec le tiret du code.
@@ -150,7 +153,10 @@ export const MANIFESTE_STUDIO_SOCIAL = {
   // étiquetée « classement automatique » (FR-90). Le journal local des prédictions et corrections est une
   // donnée du module (C11, point 2).
   ia: {
-    modeles: ['accroches-posts', 'classification-messages'],
+    capacites: [
+      'distributeur/accroches-posts@1',
+      'distributeur/classification-messages@1',
+    ],
     finalites: ['redaction-assistee', 'tri-de-la-boite'],
   },
 

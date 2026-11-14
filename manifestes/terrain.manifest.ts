@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M12 — Commercial terrain & application mobile (Terrain & Tournées ; Agents terrain) (format du
 // contrat de module, clause C1, amendée le 2026-11-10, le 2026-11-11 et le 2026-11-12).
 // Source : PRD distributeur `prds/prd-distributeur-2026-11-12/prd.md`, annexe A.8 (13 clauses) et PRD
@@ -135,6 +136,7 @@ export const MANIFESTE_TERRAIN = {
     'terrain.position.changed@1', // positions d'équipe (purge à 90 jours)
     'terrain.releve-stock.saisi@1', // relevé de stock du commercial (distributeur, FR-S56)
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] clôtures, appareils perdus, décisions de prospection, export, effacement
+    'terrain.realite.constatee@1', // [AD-14, spine IA] visite effectuée ou non, présence conforme ou non à la géolocalisation (issue : VISITEE, NON_VISITEE, PRESENCE_CONFORME, PRESENCE_NON_CONFORME) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -151,6 +153,8 @@ export const MANIFESTE_TERRAIN = {
     // ne publie pas (il publie `reseau.commercial.changed@1` et `reseau.portee.changed@1`). À trancher avec
     // l'amendement `reseau` de la microfinance (2026-11-13) [À CONFIRMER] :
     'reseau.commercial.changed@1', // [proposition, à la place de `reseau.affectation.changed@1`] agent ↔ zone
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   profilCompose: 'terrain',
@@ -233,14 +237,18 @@ export const MANIFESTE_TERRAIN = {
   // l'humain décide, la provenance est affichée ; rien ne bloque sans IA. Le compte rendu vocal du
   // distributeur (voice-to-CRM) reste « bientôt », sans date.
   ia: {
-    modeles: [
-      'optimisation-tournees',
-      'recommandation-panier',
-      'validation-geofencing',
-      'alerte-proximite',
-      'saisie-vocale',
-      'rapport-du-soir',
-      'zones-de-prospection',
+    // Répartition par secteur à confirmer (module partagé : le secteur est celui du module qui demande, AD-47).
+    capacites: [
+      'distributeur/optimisation-tournees@1',
+      'distributeur/recommandation-panier@1',
+      'distributeur/validation-geofencing@1',
+      'distributeur/zones-de-prospection@1',
+      'microfinance/optimisation-tournees@1',
+      'microfinance/validation-geofencing@1',
+      'microfinance/alerte-proximite@1',
+      'microfinance/saisie-vocale@1',
+      'microfinance/rapport-du-soir@1',
+      'microfinance/zones-de-prospection@1',
     ],
     finalites: [
       'planification-de-tournee',

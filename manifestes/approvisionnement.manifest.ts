@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M10 — Approvisionnement et fournisseurs (format du contrat de module, clause C1, amendée le
 // 2026-11-10, le 2026-11-11 et le 2026-11-12).
 // Source : PRD distributeur (PRD FINAL du 2026-11-13), annexe A.3 (treize clauses C1 → C13, tranchées) et §5.3.
@@ -88,6 +89,7 @@ export const MANIFESTE_APPROVISIONNEMENT = {
     'approvisionnement.escalade.demandee@1', // montée vers le DAF : plancher franchi ou plafond dépassé (FR-63, FR-64)
     'approvisionnement.retour.changed@1', // demande de retour fournisseur née d'un scénario de liquidation (FR-246)
     'instance.journal@1', // proposition (cité par le manifeste de stock, absent de l'annexe A.3) : suggestions et décisions
+    'approvisionnement.realite.constatee@1', // [AD-14, spine IA] réception conforme ou rupture constatée après une suggestion de réapprovisionnement (issue : SUIVIE_CONFORME, SUIVIE_RUPTURE, NON_SUIVIE_RUPTURE, NON_SUIVIE_SANS_RUPTURE) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'stock.alerte.changed@1', // rupture, couverture, dormant : déclencheurs du réapprovisionnement
@@ -98,6 +100,8 @@ export const MANIFESTE_APPROVISIONNEMENT = {
     'stock.mouvement.enregistre@1', // sans entrepot : entrée RECEPTION_FOURNISSEUR avec la référence de la commande fournisseur
     'finance-transactions.tresorerie.changed@1', // plancher de trésorerie, hors février ; sans lui `NON_INSTALLE`
     'etat-publie.changed.*@1', // l'espace du service seulement (spine du moteur, AD-24)
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   profilCompose: 'approvisionnement',
@@ -154,7 +158,10 @@ export const MANIFESTE_APPROVISIONNEMENT = {
   // modèle ; il n'est jamais contourné par la prédiction. Journal local de chaque prédiction et correction,
   // calibration locale jamais écrasée (C11, points 2 et 3).
   ia: {
-    modeles: ['prevision-demande', 'scoring-fournisseur-explicable'],
+    capacites: [
+      'distributeur/prevision-demande@1',
+      'distributeur/scoring-fournisseur-explicable@1',
+    ],
     finalites: ['reapprovisionnement-propose', 'choix-fournisseur-justifie'],
   },
 

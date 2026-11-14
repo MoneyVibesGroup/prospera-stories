@@ -1,3 +1,4 @@
+// Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M20 — Conformité BCEAO, audit et LBC/FT (format du contrat de module, clause C1, amendée le
 // 2026-11-10, le 2026-11-11 et le 2026-11-12).
 // Source : prds/prd-microfinance-2026-11-13/prd.md, annexe A.8 (C1 → C13) et §6.8 (FR-183 → FR-195) ;
@@ -180,6 +181,7 @@ export const MANIFESTE_CONFORMITE_BCEAO = {
     // `instance.journal` par TOUS les services (outbox) ; seul le consommateur est l'agent. La piste d'audit
     // métier reste propre au module (spine IMF AD-17).
     'instance.journal@1', // [proposition, comme les autres manifestes] arrêtés, validations, export, effacement
+    'conformite-bceao.realite.constatee@1', // [AD-14, spine IA] alerte réglementaire ou anomalie opérationnelle confirmée ou écartée (issue : CONFIRMEE, ECARTEE) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
   consomme: [
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
@@ -211,6 +213,8 @@ export const MANIFESTE_CONFORMITE_BCEAO = {
     'reseau.noeud.closed@1', // [proposition, idem]
     // États annuels DIMF (FR-184) : « par le module `bilan` quand il est installé ».
     'liasse.etat.change', // [proposition, manifeste bilan : nom existant, sans suffixe de version] cycle de vie du jeu d'états
+    'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
+    'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
 
   // C10 : profil de compose avec le tiret du code. Au compose, le service porte aussi les profils des six
@@ -314,12 +318,12 @@ export const MANIFESTE_CONFORMITE_BCEAO = {
   // local des prédictions et corrections (C11, point 2) ; provenance affichée ; seuls des écarts anonymisés
   // repartent, avec le consentement de l'IMF (AD-14, moteur AD-13).
   ia: {
-    modeles: [
-      'score-conformite',
-      'alertes-reglementaires',
-      'commentaire-rapport-bceao',
-      'detection-anomalies-operationnelles',
-      'correlation-evenements-trace',
+    capacites: [
+      'microfinance/score-conformite@1',
+      'microfinance/alertes-reglementaires@1',
+      'microfinance/commentaire-rapport-bceao@1',
+      'microfinance/detection-anomalies-operationnelles@1',
+      'microfinance/correlation-evenements-trace@1',
     ],
     finalites: [
       'score-de-conformite-global',

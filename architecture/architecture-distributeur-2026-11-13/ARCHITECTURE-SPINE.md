@@ -7,7 +7,7 @@ paradigm: 'système d''enregistrement modulaire piloté par des faits : un écri
 scope: 'Les modules du PRD prd-distributeur-2026-11-12 : partie 2 (commande, facturation, approvisionnement, entrepot, conquete-objectifs, studio-social, freelance), partie 3 (terrain, recouvrement, equipe, finance-transactions, marketing, controle-gestion, automatisations, dashboard, support-client), leurs frontières avec les modules de la partie 4 (reseau, pdv, catalogue, stock, paiement, notification, reprise, connecteurs), l''application terrain prospera-terrain et le jeu de démonstration. Hors champ : l''export vers Sage, la facture normalisée OTR, la comptabilité de référence (hors février), les consignes de bouteilles, le détail interne des modules de la partie 4 (leurs spines).'
 status: final
 created: '2026-11-13'
-updated: '2026-11-13'
+updated: '2026-11-14'
 binds: ['FR-1 → FR-25', 'FR-30 → FR-99', 'FR-100 → FR-179', 'FR-180 → FR-219', 'FR-220 → FR-249', 'NFR-1 → NFR-10', 'annexe A', 'annexe B', 'D-1 → D-24', C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13]
 sources:
   - prds/prd-distributeur-2026-11-12/prd.md (final, 230 FR) et son .memlog.md
@@ -24,6 +24,8 @@ companions: [.memlog.md, arbitrages-relectures-spine.md]
 # Architecture Spine — Distributeur
 
 *Amendée le 2026-11-13 : assistant-service passe à :3417 ; :3011 reste à prospera-microfinance-service (déjà codé)*
+
+*Amendée le 2026-11-14 par la spine de l'IA commune (`architecture/architecture-ia-commune-2026-11-13`, AD-39) : AD-19 (le `PropositionPort` est le contrat de proposition unique de l'IA commune, `origine: REGLE | MODELE | LANGAGE`, service porteur `prospera-ia-service` :3417 ; le Copilot est servi au jour 1, en texte et en lecture seule ; packages de vente = capacité `distributeur/segmentation-packages@1`)*
 
 Rédigée en mode rapide le 2026-11-13 à la demande du PO, après le PRD final, comme les spines de la microfinance et de l'assurance, puis corrigée après trois relectures (arbitrages : `arbitrages-relectures-spine.md`). Elle fixe ce que deux unités construites séparément pourraient choisir de façon incompatible. Les raisons sont au `.memlog.md`. `[ADOPTED]` = tranché par le PO, un manifeste ou le code ; `[ASSUMPTION]` = proposé ici, à confirmer. Le client de février est nommé « le distributeur ».
 
@@ -352,6 +354,7 @@ Trait plein : dépendance dure (`depends`, l'installation est refusée sans elle
   - Toute prédiction affichée porte sa **provenance** : `origine` (`REGLE` ou `MODELE`), version, date, facteurs ; une règle déterministe s'appelle « règle ». Une prédiction sans provenance ne s'affiche pas. Le score de santé est une règle de `dashboard`, déposée dans `pdv` avec sa provenance.
   - Le décideur est un humain ; le scoring de crédit est une aide qui n'accorde ni ne refuse seul (le plafond de crédit n'est pas négociable par l'IA). Un chiffre financier affiché ne vient jamais d'un modèle. Le prix et la marge d'un freelance ne sont jamais une entrée d'une Proposition de la société.
   - Sans IA commune, l'emplacement rend `NON_INSTALLE` et le processus continue (relances par règle de base, Copilot « bientôt »). Les écarts prédiction / réalité n'en sortent que préparés sur l'instance (moteur AD-14).
+  - *Amendé le 2026-11-14 (spine de l'IA commune, AD-39)* : le contrat est celui de l'IA commune (`origine: REGLE | MODELE | LANGAGE`) et le service porteur est `prospera-ia-service` (:3417), plus « à cadrer » ; `parametresVersion` se lit `versionParametres`, `strategieVersion` est retiré. **Le Copilot est servi au jour 1**, en texte et en lecture seule (module `assistant`) : « bientôt » ne vaut plus que pour la voix et le chatbot ; les **packages de vente** sont la capacité `distributeur/segmentation-packages@1`.
 
 ### AD-20 — Un seul catalogue de contrats nommés `[ASSUMPTION]`
 
