@@ -156,3 +156,23 @@ L'index unique des obligations devient `cle_redevable_implantation_taxe_periode`
 - Unitaires 2121/2121.
 - E2e 11/11 suites, dont le parcours HTTP de la story.
 - tsc, eslint et prettier sont propres.
+
+### Suivi — 2026-11-14 (soir) : prouvée sur le vrai MongoDB
+
+**PR :** MoneyVibesGroup/prospera-fiscal-service#34, fusionnée. Elle ajoute `test/redevables.conformite-spec.ts`.
+
+La spec tourne sur un MongoDB `rs-fiscal` authentifié, levé par les scripts du dépôt (`mongo/`), avec le compte applicatif `fiscal_app`.
+
+- **La migration de la clé** est jouée sur une collection qui porte l'ancien index et une obligation d'avant la story :
+  - la nouvelle clé est créée et l'ancienne supprimée ;
+  - aucune donnée n'est réécrite ;
+  - rejouée, elle ne fait rien ;
+  - le compte applicatif suffit.
+- **La clé réelle** : deux co-gérants ont chacun leur obligation, et l'entreprise reste unique (absent ≡ `null`).
+- **Registres réels** :
+  - les calendriers sont séparés par redevable ;
+  - la trace d'une obligation porte `redevableId`, jamais le NIF ;
+  - le NIF est unique par dossier ;
+  - le mandat ne s'atteste qu'une fois ;
+  - la chaîne d'audit est intacte, sans NIF, sans nom, sans référence de mandat.
+- **Conformité complète du service : 6 suites, 44 tests passent**, sur `origin/dev` à jour.
