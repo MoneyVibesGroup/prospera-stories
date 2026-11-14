@@ -4,7 +4,7 @@ baseline_commit: 3334be0 (prospera-fiscal-service)
 
 # STORY-312 : Pipeline de modificateurs ordonné
 
-Status: in-progress
+Status: done
 
 **Complexité :** medium
 
@@ -63,13 +63,13 @@ même ordre, afin que deux calculs de la même taxe donnent le même montant.
 
 ## Critères d'acceptation
 
-- [ ] **AC-1** — IS et MFP : un IS de droit commun inférieur au minimum ⇒ `MAXIMUM_DE` retient le
+- [x] **AC-1** — IS et MFP : un IS de droit commun inférieur au minimum ⇒ `MAXIMUM_DE` retient le
   minimum (taux réels du paquet).
-- [ ] **AC-2** — TPU calculée sous le minimum de perception (20 000 F réels) ⇒ le montant rendu vaut
+- [x] **AC-2** — TPU calculée sous le minimum de perception (20 000 F réels) ⇒ le montant rendu vaut
   le minimum.
-- [ ] **AC-3** — Assiette sociale sous le salaire minimum ⇒ `PLANCHER_ASSIETTE` retient le plancher.
-- [ ] **AC-4** — Un modificateur absent de la liste déclarée dans un paquet ⇒ le chargement échoue.
-- [ ] **AC-5** — Même déclaration dans un autre ordre ⇒ même montant (AD-3).
+- [x] **AC-3** — Assiette sociale sous le salaire minimum ⇒ `PLANCHER_ASSIETTE` retient le plancher.
+- [x] **AC-4** — Un modificateur absent de la liste déclarée dans un paquet ⇒ le chargement échoue.
+- [x] **AC-5** — Même déclaration dans un autre ordre ⇒ même montant (AD-3).
 
 ## Fichiers
 
@@ -82,9 +82,9 @@ même ordre, afin que deux calculs de la même taxe donnent le même montant.
 
 ## Definition of Done
 
-- [ ] Branche `MNV-312` (fiscal) depuis `origin/dev`, PR fusionnée en rebase ; fiche et tracker par
+- [x] Branche `MNV-312` (fiscal) depuis `origin/dev`, PR fusionnée en rebase ; fiche et tracker par
   PR sur `main`.
-- [ ] Portes vertes ; le paquet Togo réel se charge ; mutations rouges (ordre inversé
+- [x] Portes vertes ; le paquet Togo réel se charge ; mutations rouges (ordre inversé
   minimum/maximum, plancher ignoré, modificateur inconnu accepté, référence absente ignorée).
 
 ## Progress Tracking
@@ -92,3 +92,14 @@ même ordre, afin que deux calculs de la même taxe donnent le même montant.
 **2026-11-14 — fiche écrite** (bmad-create-story) juste avant de coder, après lecture de l'entrée du
 tracker (aucun arbitrage), de l'épic, de FR-F12, d'AD-3, du paquet Togo 2026 réel (IS, MFP, TPU,
 CNSS) et du code de STORY-310/311.
+
+**2026-11-14 — livrée.** fiscal-service #35, fusionnée en rebase sur `dev` (rebasée d'abord sur
+le commit de conformité de STORY-563, arrivé entre-temps, sans conflit).
+
+- IS 1 000 000 × 27 % = 270 000 < MFP 100 000 000 × 1 % = 1 000 000 ⇒ 1 000 000 ; TPU
+  500 000 × 2 % = 10 000 ⇒ minimum 20 000 (2 000 000 en centimes).
+- Portes : tsc, lint, 2 210 unitaires, 172 e2e.
+- Mutations 8/8 tuées : minimum et maximum en `min()`, plancher ignoré, modificateur hors liste
+  accepté, référence vide ignorée, doublon accepté, aiguillage ignoré, plancher > plafond accepté.
+- Au catalogue, `parametres` reste une RÉFÉRENCE (STORY-307) : un taux écrit en clair est lu
+  comme absent — les tests le placent dans une rubrique.
