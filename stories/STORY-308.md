@@ -4,7 +4,7 @@ baseline_commit: e30692d (prospera-fiscal-service), 8f19e6a (balance-service)
 
 # STORY-308 : Régime dérogatoire et signalement
 
-Status: in-progress
+Status: done
 
 **Complexité :** medium
 
@@ -64,26 +64,42 @@ signalé, afin de ne jamais lui appliquer le droit commun par inadvertance.
   **dérivé** (actualisé à chaque dérivation, `null` en droit commun).
 - **D-308-6 — `balance-service`** : la surcouche zone franche déclare `fiscal-service` parmi ses
   consommateurs ; régénération par `build.mjs` et réépinglage (aucune valeur fiscale modifiée).
+- **D-308-7 — Les personnes physiques restent en droit commun** (ajoutée au rebase sur STORY-563,
+  2026-11-14) : la zone franche est un régime de l'ENTREPRISE ; les obligations d'un dirigeant ou
+  d'un associé se dérivent sur le paquet de droit commun rattaché, `derogation: null`.
 - **Hors périmètre** : le régime dérogatoire d'une implantation SECONDAIRE (les axes sont ceux du
   dossier, donc du pays principal) ; le calcul du barème dégressif selon `dateAgrement` (EPIC-029) ;
   la publication au catalogue du code `fiscal-tg-entreprise-zone-franche` (geste d'administration).
 
 ## Critères d'acceptation
 
-- [ ] **AC-1** — Un dossier en zone franche : la dérivation s'appuie sur le paquet dérogatoire
+- [x] **AC-1** — Un dossier en zone franche : la dérivation s'appuie sur le paquet dérogatoire
   (`fiscal-tg-entreprise-zone-franche`), fusionné sur la version de droit commun rattachée à
   l'exercice — jamais sur le seul droit commun.
-- [ ] **AC-2** — Ses obligations portent un signalement explicite (`derogation`), relu à la liste.
-- [ ] **AC-3** — Paquet dérogatoire absent ou incohérent : implantation non dérivée, motif nommé.
-- [ ] **AC-4** — Le régime fiscal de la principale vient des axes datés de l'exercice.
+- [x] **AC-2** — Ses obligations portent un signalement explicite (`derogation`), relu à la liste.
+- [x] **AC-3** — Paquet dérogatoire absent ou incohérent : implantation non dérivée, motif nommé.
+- [x] **AC-4** — Le régime fiscal de la principale vient des axes datés de l'exercice.
 
 ## Definition of Done
 
-- [ ] Branches `MNV-308` (balance, fiscal) depuis `origin/dev`, PR fusionnées en rebase (balance puis
+- [x] Branches `MNV-308` (balance, fiscal) depuis `origin/dev`, PR fusionnées en rebase (balance puis
   fiscal) ; fiche et tracker par PR sur `main`.
-- [ ] Portes vertes ; mutations rouges.
+- [x] Portes vertes ; mutations rouges.
 
 ## Progress Tracking
 
 **2026-11-14 — fiche écrite** (bmad-create-story) juste avant de coder, après lecture de l'entrée du
 tracker (aucun arbitrage) et du code des trois services.
+
+**2026-11-14 — livrée.** balance-service #140 (surcouche zone franche consommée par
+`fiscal-service`, sha256 `c11e121e…`, réépinglée) puis fiscal-service #30, fusionnées en rebase sur
+`dev`. La branche fiscal a été rebasée sur STORY-563 (fusionnée entre-temps) : conflits additifs
+(redevables et dérogation côte à côte), D-308-7 ajoutée.
+
+- Portes fiscal-service : tsc, lint, 2 150 unitaires, 169 e2e, conformité MongoDB réel 37/37.
+- Mutations 7/7 tuées : repli sur le droit commun, garde de régime, régime fiscal des axes, suffixe
+  du code de paquet, fusion des scalaires, agrément perdu, signalement non persisté. La dernière ne
+  rougissait qu'en conformité : test ajouté (signalement persisté, puis retiré par une
+  re-dérivation en droit commun).
+- balance-service : tests de surcouche verts ; deux rouges propres au poste Windows, sans lien
+  (comparaison à l'octet avec bilan-service en CRLF/LF, séparateurs de chemin `\`).
