@@ -5,7 +5,7 @@
 **Découverte par :** AP-INT-0, en essayant simplement de se connecter à la console
 **Priorité :** Must Have — ⚡ **bloque toute première installation**
 **Story Points :** 2
-**Statut :** À faire
+**Statut :** En revue (2026-11-14)
 **Créée le :** 2026-08-04
 **Sprint :** 21
 **Service :** `auth-service` (`:3001`)
@@ -70,9 +70,55 @@ Rotation ou expiration du mot de passe initial — autre question, autre story.
 
 ## Definition of Done
 
-- [ ] Les 6 critères vérifiés · `lint` 0 · couverture ≥ 90 %
-- [ ] ⚡ **Vérification sur volume vierge**, pas sur la base de développement existante — c'est le
+- [x] Les 6 critères vérifiés · `lint` 0 · couverture ≥ 90 %
+- [x] ⚡ **Vérification sur volume vierge**, pas sur la base de développement existante — c'est le
       seul scénario où le défaut se manifeste, et le vérifier sur une base déjà peuplée ne prouve
       rien
-- [ ] La note de prérequis en tête de `e2e/integration-gate.spec.ts` est **retirée** côté console
+- [x] La note de prérequis en tête de `e2e/integration-gate.spec.ts` est **retirée** côté console
 - [ ] Branche `MNV-178`, PR rebase-mergée sur `dev`
+
+---
+
+## Suivi — 2026-11-14 (livrée, en revue)
+
+**PR :** MoneyVibesGroup/prospera-auth-service#35 (code) · MoneyVibesGroup/frontend-admin-panel#25 (e2e de la console, à fusionner après #35).
+
+### ⚡ Décision prise contre « il n'y a qu'à le brancher » : CRÉATION SEULE au démarrage
+
+`seedPlatformAdmin` **réécrit** le mot de passe, réactive le compte, efface sa suppression et lui
+rend `PLATFORM_ADMIN` à chaque appel. Branché tel quel au démarrage, un simple redémarrage aurait
+annulé le changement de mot de passe de l'administrateur (le mot de passe du compose serait resté
+valable pour toujours) et ressuscité un compte suspendu après une compromission. Le critère 1 dit
+« créé s'il est absent, **retrouvé** sinon » : `PlatformAdminSeedService` fait exactement cela.
+
+| Ce que le démarrage trouve | Ce qu'il fait |
+|---|---|
+| aucun compte | le **crée** (`PLATFORM_ADMIN`, actif, e-mail vérifié) |
+| administrateur actif | **retrouvé**, rien n'est écrit |
+| compte suspendu, supprimé ou simple locataire | **conflit nommé** au journal, rien n'est écrit |
+| variables absentes ou vides | avertissement, démarrage normal |
+
+`npm run seed:admin` reste le geste délibéré pour rétablir un compte (critère 6, inchangé).
+
+### Preuves
+
+- Unitaires : 13 tests ; le double de `UsersService` est une petite base en mémoire (leçon de
+  STORY-180 : un double figé ne garde pas l'ordre lecture/écriture). Suite complète 1 228/1 229 ;
+  le seul échec est un test de durée (`svg-sanitizer` < 2 s) pendant un build docker parallèle,
+  vert rejoué seul. Nouveau fichier : 100 % des lignes. Garde de câblage (STORY-643) verte.
+- **Docker sur volumes vierges** (projet compose à part, `down -v`) : ① « créé » au premier
+  démarrage ; ② connexion 200 sans aucune commande, jeton `roles: [PLATFORM_ADMIN]` + 17
+  permissions ; ③ mot de passe changé en base puis redémarrage ⇒ « retrouvé (compte inchangé) »,
+  1 seul compte, le mot de passe du compose est refusé (401) ; ④ `node dist/seeds/seed-platform-admin.js`
+  ⇒ 200 de nouveau ; ⑤ compte `SUSPENDED` puis redémarrage ⇒ conflit nommé, il reste suspendu ;
+  ⑥ variables vides ⇒ avertissement nommant les deux, conteneur `healthy`.
+
+### Restes et pièges
+
+- ⚠️ Le compose racine écrit `${PLATFORM_ADMIN_EMAIL:-…}` : une variable **vide** y réactive le
+  défaut. Le cas ⑥ a été joué par `docker compose run -e PLATFORM_ADMIN_EMAIL=`. Passer à
+  `${VAR-…}` (comme `DEMO_ORG_*`) se fait dans le compose racine, qui n'est dans aucun dépôt.
+- Le script manuel monte `AppModule` : le semis du démarrage s'y exécute avant lui. Sans effet
+  (création seule), mais sur une base vide le script journalise « mis à jour » au lieu de « créé ».
+- Sur ce poste, Herd tient les ports 9001 et 8025 : une pile de vérification à part doit retirer
+  les ports publiés de MinIO et Mailhog (surcouche `ports: !reset []`).
