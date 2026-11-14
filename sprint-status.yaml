@@ -5158,8 +5158,8 @@ sprints:
     end_date: "2027-06-03"
     capacity_points: 34
     committed_points: 32  # ⬆ 27→32 le 2026-08-09 : +STORY-362 (5 pts, implantations multiples) — le volet que la scission de STORY-302 avait laissé SANS PORTEUR. Le sprint reste sous la capacité (32/34). Historique : ⬇ 32→27 (STORY-303 réancrée au S20).
-    completed_points: 0
-    status: "not_started"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. ⚡ PÉRIMÈTRE CORRIGÉ le 2026-08-16 (la version ci-dessous était PÉRIMÉE, et elle l'était SUR LES 9 SPRINTS DU MODULE À LA FOIS — une note de périmètre recopiée ne se met pas à jour toute seule) : PRD prds/prd-fiscalite-2026-07-31/prd.md **v0.4** (et non v0.3) · découpage epics-fiscalite-2026-08-03.md **RÉALIGNÉ sur la v0.4 le 2026-08-16** — il disait encore « par salarié » et ignorait FR-F79/FR-F80 · architecture architecture/architecture-fiscal-service-2026-08-03/ARCHITECTURE-SPINE.md **AD-1→AD-21** (et non AD-19 : AD-20 agrégat de rémunération, AD-21 donnée personnelle de tiers, ajoutées le 2026-08-15).
+    completed_points: 5  # 2026-11-14 : STORY-362 (5) done ; somme recalculée sur le fichier
+    status: "in_progress"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. ⚡ PÉRIMÈTRE CORRIGÉ le 2026-08-16 (la version ci-dessous était PÉRIMÉE, et elle l'était SUR LES 9 SPRINTS DU MODULE À LA FOIS — une note de périmètre recopiée ne se met pas à jour toute seule) : PRD prds/prd-fiscalite-2026-07-31/prd.md **v0.4** (et non v0.3) · découpage epics-fiscalite-2026-08-03.md **RÉALIGNÉ sur la v0.4 le 2026-08-16** — il disait encore « par salarié » et ignorait FR-F79/FR-F80 · architecture architecture/architecture-fiscal-service-2026-08-03/ARCHITECTURE-SPINE.md **AD-1→AD-21** (et non AD-19 : AD-20 agrégat de rémunération, AD-21 donnée personnelle de tiers, ajoutées le 2026-08-15).
     goal: "Le catalogue d'obligations se dérive tout seul 🏁 EPIC-028 — propriétaire unique, trois déclencheurs, clé d'idempotence — et le moteur de familles démarre."
     stories:
       - story_id: "STORY-362"
