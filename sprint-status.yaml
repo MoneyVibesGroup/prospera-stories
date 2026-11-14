@@ -5149,8 +5149,9 @@ sprints:
         epic: "EPIC-027"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) et code commencé sur MNV-300 ; groupe B du plan du 14/11
+        assigned_to: "Dev B"
+        story_path: "stories/STORY-300.md"
   - sprint_number: 24
     start_date: "2027-05-20"
     end_date: "2027-06-03"
