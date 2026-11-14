@@ -4,7 +4,7 @@ baseline_commit: e91dcc6 (prospera-fiscal-service)
 
 # STORY-310 : Registre de familles, famille proportionnelle et détail de calcul
 
-Status: in-progress
+Status: done
 
 **Complexité :** medium
 
@@ -89,13 +89,13 @@ défendre.
 
 ## Critères d'acceptation
 
-- [ ] **AC-1** — `PROPORTIONNELLE` au taux de 18 % sur une assiette de 10 000 000 ⇒ 1 800 000, en
+- [x] **AC-1** — `PROPORTIONNELLE` au taux de 18 % sur une assiette de 10 000 000 ⇒ 1 800 000, en
   unités mineures entières.
-- [ ] **AC-2** — Un calcul restitue son détail : entrées, étapes, arrondis, résultat.
-- [ ] **AC-3** — Des paramètres de paquet non conformes au schéma de leur famille font échouer le
+- [x] **AC-2** — Un calcul restitue son détail : entrées, étapes, arrondis, résultat.
+- [x] **AC-3** — Des paramètres de paquet non conformes au schéma de leur famille font échouer le
   chargement, jamais le calcul.
-- [ ] **AC-4** — Aucune évaluation dynamique d'expression dans le code (garde AST).
-- [ ] **AC-5** (AD-4) — Une famille sans stratégie, hors v1 ou sans montant refuse nommément.
+- [x] **AC-4** — Aucune évaluation dynamique d'expression dans le code (garde AST).
+- [x] **AC-5** (AD-4) — Une famille sans stratégie, hors v1 ou sans montant refuse nommément.
 
 ## Fichiers
 
@@ -103,6 +103,7 @@ défendre.
 - NEW `src/domain/familles/registre-familles.ts` — registre pur.
 - NEW `src/domain/familles/proportionnelle.ts` — stratégie + arithmétique décimale exacte.
 - NEW `src/domain/familles/arrondi.ts` — règle d'arrondi, lecture et application.
+- NEW `src/domain/familles/decimal-exact.ts` — taux en fraction décimale exacte (ajouté en cours).
 - NEW `src/domain/familles/parametres-paquet.ts` — validation des paramètres du catalogue d'un paquet.
 - UPDATE `src/domain/obligations/catalogue.ts` — `arrondi` optionnel sur l'entrée (lu, jamais
   exigé).
@@ -114,9 +115,9 @@ défendre.
 
 ## Definition of Done
 
-- [ ] Branche `MNV-310` (fiscal) depuis `origin/dev`, PR fusionnée en rebase ; fiche et tracker par
+- [x] Branche `MNV-310` (fiscal) depuis `origin/dev`, PR fusionnée en rebase ; fiche et tracker par
   PR sur `main`.
-- [ ] Portes vertes (tsc, lint, unitaires, e2e) ; le paquet Togo réel et la surcouche zone franche se
+- [x] Portes vertes (tsc, lint, unitaires, e2e) ; le paquet Togo réel et la surcouche zone franche se
   chargent toujours ; mutations rouges (taux flottant non exact, arrondi silencieux, validation
   déplacée au calcul, `eval` introduit).
 
@@ -125,3 +126,13 @@ défendre.
 **2026-11-14 — fiche écrite** (bmad-create-story) juste avant de coder, après lecture de l'entrée du
 tracker (aucun arbitrage), de l'épic EPIC-029, de FR-F11→F15, d'AD-1→AD-4, du paquet Togo 2026 réel
 et du code du catalogue et du chargeur de paquet.
+
+**2026-11-14 — livrée.** fiscal-service #32, fusionnée en rebase sur `dev`.
+
+- Portes : tsc, lint, 2 182 unitaires, 172 e2e ; le paquet Togo 2026 réel se charge (TAF : un
+  taux ; TCA : taux par nature ; TVA et IS_ACOMPTE : paramètres absents, pas un défaut).
+- Mutations 8/8 tuées sur assertion : résultat en flottant, arrondi silencieux, validation
+  retirée du chargeur, paquet effectif d'une dérogation non vérifié, `eval` introduit, famille
+  inconnue acceptée, demie arrondie en dessous, taux > 1 accepté.
+- E2e : `FamillesModule` importé par les modules de test qui montent le vrai `PaquetsService`.
+- ⚠️ D-310-5 (arrondi déclaré ou refus) reste **à confirmer par le PO**.
