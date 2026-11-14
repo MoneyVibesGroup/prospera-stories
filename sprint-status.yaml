@@ -5046,7 +5046,7 @@ sprints:
         epic: "EPIC-007"
         points: 5
         service: "platform-catalog-service"
-        status: "not_started"  # ⚡ LE PLUS GRAVE DU TICKET. `CreateModuleVersionDto` = { version, releasedAt? } : le service n'a ni `supersedesMajor` ni notion de fenêtre de support. Le garde-fou « pas de 3ᵉ majeure active sans dépréciation datée », que la console croyait REPRODUIRE du backend, n'existe QUE côté front — il se contourne par un appel direct sans rien signaler, et personne ne peut le découvrir en lisant le service. Second effet : faute de geste atomique, la console déprécie PUIS crée ; si la création échoue, l'ancienne majeure reste dépréciée.
+        status: "done"  # ✅ 2026-11-14 — BACKEND DÉJÀ LIVRÉ PAR STORY-188 (12/08 : supersedesMajor + deprecationDate, 422 nommés, transaction) ; 174 n'avait jamais été refermée. Reste livré : frontend-admin-panel#28 — la console envoie l'arbitrage dans le POST au lieu de PATCH-puis-POST non atomique ; commentaires remis à jour. Prouvé par appel direct (3 refus nommés, nominal) et ATOMICITÉ SUR LE VRAI MONGO (validateur refusant l'insertion ⇒ 500, la sortante reste ACTIVE). AVANT : ⚡ LE PLUS GRAVE DU TICKET. `CreateModuleVersionDto` = { version, releasedAt? } : le service n'a ni `supersedesMajor` ni notion de fenêtre de support. Le garde-fou « pas de 3ᵉ majeure active sans dépréciation datée », que la console croyait REPRODUIRE du backend, n'existe QUE côté front — il se contourne par un appel direct sans rien signaler, et personne ne peut le découvrir en lisant le service. Second effet : faute de geste atomique, la console déprécie PUIS crée ; si la création échoue, l'ancienne majeure reste dépréciée.
         story_path: "stories/STORY-174.md"
         assigned_to: null
 

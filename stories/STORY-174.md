@@ -5,7 +5,7 @@
 **Découverte par :** AP-INT-0, en branchant le catalogue sur le vrai service
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** À faire
+**Statut :** Terminée (2026-11-14) — backend par STORY-188, console ici
 **Créée le :** 2026-08-04
 **Sprint :** 21
 **Service :** `platform-catalog-service` (`:3003`)
@@ -83,8 +83,40 @@ Déprécier la sortante et créer la nouvelle dans **la même transaction**. Un 
 
 ## Definition of Done
 
-- [ ] Les 6 critères vérifiés · `lint` 0 · couverture ≥ 90 %
-- [ ] **Vérification docker** : les trois refus, le cas nominal, et l'atomicité
-- [ ] ⚡ **La console est ALLÉGÉE en conséquence** : son garde-fou reste, mais son commentaire
+- [x] Les 6 critères vérifiés · `lint` 0 · couverture ≥ 90 %
+- [x] **Vérification docker** : les trois refus, le cas nominal, et l'atomicité
+- [x] ⚡ **La console est ALLÉGÉE en conséquence** : son garde-fou reste, mais son commentaire
       « reproduit le garde-fou du backend » redevient vrai — il était faux depuis le début
-- [ ] Branche `MNV-174`, PR rebase-mergée sur `dev`
+- [x] Branche `MNV-174`, PR rebase-mergée sur `dev`
+
+---
+
+## Suivi — 2026-11-14 (terminée, fusionnée sur `dev`)
+
+**PR :** MoneyVibesGroup/frontend-admin-panel#28 (console). Aucun changement côté service.
+
+### ⚡ Le backend de cette story était déjà livré par STORY-188 (12/08)
+
+`platform-catalog-service` porte la fenêtre N/N-1 depuis STORY-188 : `supersedesMajor` et
+`deprecationDate` dans `CreateModuleVersionDto`, refus nommés (`422` avec `code` et `field`),
+dépréciation et création dans **une** transaction. 174 n'avait jamais été refermée.
+
+### Ce qui restait : la console
+
+La console faisait encore **PATCH de dépréciation puis POST** : si le POST échouait, la majeure
+sortante restait dépréciée sans remplaçante, l'état intermédiaire que la story décrit.
+`publishVersion` envoie désormais l'arbitrage dans le POST ; un arbitrage incomplet part tel
+quel et c'est le service qui le refuse. Les commentaires (« le service n'a ni `supersedesMajor`
+ni fenêtre de support ») sont remis à jour ; le garde-fou d'écran reste, pour guider avant
+l'appel, et sa phrase « refusé côté backend » est désormais vraie.
+
+### Preuves
+
+- Console : Vitest `src/features/catalog` 99/99 + `catalog-view` 41/41, `tsc` 0, lint 0.
+- **Appel direct au service** (pile docker, module `stock`) : mineure 1.1 ⇒ 201 ; 2ᵉ majeure ⇒
+  201 ; 3ᵉ majeure sans arbitrage ⇒ 422 `SUPPORT_WINDOW_ARBITRATION_REQUIRED` ; sortante sans date
+  ⇒ 422 `DEPRECATION_DATE_REQUIRED` ; date sans sortante ⇒ 422 `SUPERSEDES_MAJOR_REQUIRED` ;
+  arbitrage complet ⇒ 201, 1.0 et 1.1 `DEPRECATED` au 30/06/2027.
+- ⚡ **Atomicité prouvée sur le vrai Mongo** (l'e2e de 188 prévient qu'il ne la prouve pas, faute de
+  replica set) : validateur de collection refusant l'insertion de 4.0, publication de 4.0 avec 2
+  comme sortante ⇒ 500, **2.0 reste `ACTIVE`**, aucune 4.0 écrite. Validateur retiré ensuite.
