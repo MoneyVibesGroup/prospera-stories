@@ -24,6 +24,8 @@ companions: [.memlog.md, reviews/]
 
 # Architecture Spine — Moteur d'installation
 
+*Amendée le 2026-11-13 par la spine de l'IA commune (`architecture-ia-commune-2026-11-13`, AD-39) : AD-3 (une ligne de modèles, distincte de la ligne de plateforme et de celle de l'agent), AD-7 et AD-28 (usage `modele` dans la chaîne de clés, classe d'effet signée, validité vérifiée à l'installation), AD-9 (signal fermé : écarts nommés et `ia.indicateurs` de l'IA), AD-12 (types du journal de l'IA), AD-13 (finalités « apprentissage commun » et « agrégats de mesure »), AD-14 (le niveau « apprentissage », à part des niveaux 0 à 3, va à `prospera-ia-centrale` ; manifeste type approuvé une fois), AD-17 (faits « prédiction » et « réalité », contrats de l'IA), AD-22 (cible de la ligne de modèles et date du DSI dans l'état voulu), AD-32 (une régression de qualité ou d'équité d'un modèle est un incident), AD-37 (commande `modele.revenir`).*
+
 *Amendée le 2026-11-13 par les spines du distributeur (Q-9) et de l'assurance (Q-4) : AD-9 (les messages entrants passent par le relais, AD-44), AD-16 (renvoi au profil d'instance hébergée, AD-43), AD-43 (profil d'instance hébergée : jeu de répliques à 3 membres, `w: majority`, RPO 0 pour les séries, factures, avoirs, bons, encaissements et compteurs), AD-44 (le relais Money Vibes, `prospera-relais`).*
 
 *Amendée le 2026-11-11 par la spine de la Reprise de données (`architecture-reprise-donnees-2026-11-11`, AD-22) : AD-12 (types du journal), AD-17 (feu vert par module, réception avec ses modules, contrats de la Reprise, chemins C13), AD-23 (mise en service lue par module), AD-26 (schémas d'objets, JSON Schema draft-07), conventions d'erreurs.*
@@ -122,6 +124,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   - Il se met à jour **hors plan** seulement (aucune promotion ni retour arrière en cours), en lançant sa nouvelle image ; l'ancienne reste sur le disque pour revenir.
   - Un **bail exclusif**, renouvelé dans le magasin de l'agent, garantit qu'un seul agent écrit le journal, l'horloge et les plans. La nouvelle image prend le bail seulement après son contrôle de santé ; l'ancienne s'arrête alors d'elle-même.
   - Une version de l'agent lit tous les formats de plan, de journal et d'état écrits par la précédente. Elle ne migre le format du magasin qu'après sa propre validation (AD-34).
+  - **Amendement (2026-11-13, spine de l'IA commune, AD-21 et AD-22).** Les modèles communs, les gabarits de langage, les jeux de référence et les packs de secteur de l'IA voyagent sur une **ligne de modèles distincte** de la ligne de version de la plateforme et de celle de l'agent : ses propres versions, son **manifeste de modèles signé**, son plan de promotion (essai, ombre, canari, général, date du DSI en local) et son retour arrière en une action. Elle suit la fenêtre N/N-1 (AD-30) mais n'est ni promue ni rétrogradée avec une version de plateforme ; l'agent la tire et la vérifie comme le reste (AD-7), le service d'IA la promeut.
 
 ### AD-4 — L'ancrage de l'état de confiance : le magasin, un miroir qui n'avance que, un témoin `[ADOPTED]`
 
@@ -164,6 +167,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
 - **Prevents:** une image ou une licence fabriquée ; une vérification qui exige internet sur une instance coupée ; une clé compromise qui bloque sa remplaçante.
 - **Rule:**
   - **Chaîne de clés** : une **clé racine hors ligne** (AD-28) signe un **certificat de clé** (JWS Ed25519 : `kid`, clé publique, période de validité, `usage`) pour chaque **clé de signature**. Deux familles, d'`usage` distinct (AD-28) : `ci` (images, manifeste, ligne de version de l'agent) et `centrale` (licence, état voulu, heure de référence, jeton d'export, fichiers de rétablissement et de prolongation). L'agent refuse un artefact signé par une clé dont l'`usage` ne le couvre pas. La vérification de cette chaîne est **du code de l'agent** : cosign par clé ne porte pas de chaîne. L'agent vérifie le certificat avec la racine, puis utilise la clé publique certifiée.
+  - **Amendement (2026-11-13, spine de l'IA commune, AD-21 et AD-34).** La **validité** d'un artefact de modèle (chaîne, usage, période de validité du paquet) est vérifiée **une seule fois, à l'installation** ; un artefact installé ne tombe que par la liste de révocation ou le fichier d'urgence, jamais par l'écoulement du temps. La famille `ci` couvre aussi un **`usage` « modele »** : les artefacts de la ligne de modèles (poids, gabarits, jeux de référence, packs, manifeste de modèles) sont signés par une clé de `ci` dont le certificat porte cet usage (et jamais par la clé `centrale`), et l'instance refuse un artefact de modèle dont la clé ne le couvre pas. Une capacité qui touche une personne exige une double signature avant publication (vérifiée à la centrale de l'IA). Le manifeste de modèles porte une **classe d'effet** par artefact (`INVISIBLE`, `VISIBLE`, `COUPE_OU_RETOUR`) que l'agent vérifie ; un correctif d'urgence de modèle ne peut que couper ou revenir, signé par Money Vibes sous l'usage `modele`, jamais auto-déclaré.
   - **Images** : signées par `cosign sign --key … --tlog-upload=false`, bundle conservé à côté de l'image. Vérification hors ligne : `cosign verify --key … --bundle … --insecure-ignore-tlog`. Ni `--offline` (déprécié en v3) ni Sigstore sans clé. La clé passée à cosign est celle que l'agent vient de certifier.
   - **Version de plateforme** : un **manifeste signé** (JWS) liste les empreintes de toutes les images (coque comprise, spine `prospera-app` AD-20), les migrations (AD-33), les schémas d'événements (AD-27), les interrupteurs, `retourArriere`, le niveau de correctif et la date de fin de maintenance.
   - **État voulu, licence (qui porte les sanctions), heure de référence, jeton d'export, fichiers d'urgence, de rétablissement et de prolongation, certificat de clé** : des **JWS Ed25519** (AD-26), avec un numéro qui ne fait que croître par clé.
@@ -201,6 +205,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   - **Registre des consentements** : à chaque changement du registre (retrait compris), l'agent joint sa copie signée au contact suivant ; la centrale la garde pour le fichier de rétablissement (AD-13, AD-35).
   - **Alertes de silence** : la centrale alerte à **J+7** depuis le dernier contact qu'**elle** a vu, au DSI et à Money Vibes.
   - **Panne de la centrale** : voir AD-35.
+  - **Amendement (2026-11-13, spine de l'IA commune, AD-9 et AD-25).** Le schéma fermé du signal accepte les écarts nommés `CALIBRATION_DISCORDANTE`, `MODELE_REFUSE_SIGNATURE` et `PALIER_INSUFFISANT` et l'objet `ia.indicateurs` (indicateurs de niveau 0 de l'IA, sans champ libre) ; le test « un champ non déclaré ne sort pas » les couvre.
 
 ### AD-10 — Exécuter : Docker Compose, deux projets, l'agent seul aux commandes `[ADOPTED]`
 
@@ -239,6 +244,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   - La livraison est **au moins une fois** ; l'agent dédoublonne par `idempotence`. Si Kafka est arrêté, l'agent met en tampon localement et écrit un fait « trou ».
   - **Pseudonymisation** : elle remplace `acteurRef` par un pseudonyme stable ; la chaîne porte sur le pseudonyme. La table de correspondance nominative est **hors chaîne**, et seule elle est effaçable. Le journal d'un prospect effacé est pseudonymisé, jamais supprimé.
   - **Rétention** : le journal survit à la fin d'un contrat selon la durée légale ; à l'effacement final (AD-38), seule la table de correspondance disparaît.
+  - **Amendement (2026-11-13, spine de l'IA commune, AD-21, AD-22 et AD-19).** Types du journal ajoutés pour l'IA : `ia.modele.installe`, `ia.modele.refuse`, `ia.modele.promu`, `ia.modele.retour-arriere`, `ia.calibration.activee`, `ia.lot-apprentissage.envoye`. Sans eux, `JOURNAL_FORME_INVALIDE` les rejetterait.
 
 ### AD-13 — Les consentements vivent sur l'instance ; Money Vibes n'en a qu'une copie signée `[ADOPTED]`
 
@@ -251,6 +257,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   - **Retrait** : l'agent vide sa file d'export de la finalité retirée **avant** d'écrire le retrait au registre. `apprentissage-service` refuse toute donnée dont la finalité n'est pas couverte par la copie la plus récente par `rangRegistre`, et **met en quarantaine ou supprime**, journalisé, toute donnée reçue pour une finalité qu'une copie ultérieure retire. Une copie plus ancienne que 14 jours n'autorise rien.
   - **Plateforme** : le registre de la plateforme est tenu par l'agent de la plateforme et alimenté à la signature du contrat d'abonnement par le contrat `abonnement.contrat.signe` de `paiement-service` (AD-17), que l'agent consomme : une ligne de niveau 3 par finalité. L'IA lit par un **compte de service dédié** (contrat C11 amendé, pas AD-P16) dont **toute lecture passe par la garde du registre** (`CONSENTEMENT_ABSENT`). Les lectures d'exploitation (AD-P16) sont journalisées à part, jamais pour l'apprentissage, et comptent dans SM-4. Les routes AD-P16 sont inaccessibles sur site hors tunnel ouvert (AD-20).
   - La console lit le registre par `apprentissage-service` (AD-17).
+  - **Amendement (2026-11-13, spine de l'IA commune, AD-19 et AD-48).** Le vocabulaire fermé des finalités gagne **« apprentissage commun »** (écarts mûrs) et **« agrégats de mesure »** (comptages de sous-groupes pour la porte d'équité, sur l'instance, effectif minimal `k`). Chacune est consentie et retirable séparément ; le retrait vide d'abord la file de la finalité.
 
 ### AD-14 — La partie C : un service à part, des données qui ne sortent que préparées `[ADOPTED]`
 
@@ -264,6 +271,8 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   - **Niveau 2** : fermé tant que le poste d'accès enregistré n'existe pas (ordre de sacrifice).
   - **Niveau 3** : les contributions suivent le chemin du niveau 1. La contribution non transmise sous 30 jours est **purgée** sur l'instance ; chez Money Vibes elle est gardée jusqu'au tour d'entraînement, puis supprimée.
   - **Modèle commun** (FR-31) : il redescend comme un **artefact signé de la ligne de version** (AD-7), jamais autrement.
+  - **Amendement (2026-11-13, spine de l'IA commune, AD-19 à AD-21).** Le modèle commun de l'IA redescend comme un artefact signé de la **ligne de modèles** (AD-3, usage `modele`), non de la ligne de version. Les envois du niveau d'export **« apprentissage »** (écarts mûrs agrégés, k, schéma fermé) vont à **`prospera-ia-centrale`**, par le même tunnel mTLS et avec le **même jeton d'export** ; Le niveau « apprentissage » est **un niveau à part, distinct des niveaux 0 à 3**, qui restent entièrement ceux d'`apprentissage-service` (le niveau 3 n'est ni retiré ni partagé). Le jeton reste le seul lien entre la centrale du moteur et la centrale de l'IA.
+  - **Amendement explicite (2026-11-13, spine de l'IA commune, AD-19) : manifeste approuvé une fois.** Pour ce seul niveau, la règle « sans les deux approbations, pas d'export » est assouplie : un **manifeste type** par capacité (champs et agrégats autorisés) est approuvé **une fois** au contrat par le DG et par le responsable des données de Money Vibes ; l'approbation est portée par `approbationsExport` de l'état voulu, **liée au condensat du manifeste type**, **caduque à tout changement de manifeste**, **révocable** par un nouvel état voulu ; un lot conforme part sans nouvelle approbation, un lot qui s'en écarte est refusé (`LOT_HORS_MANIFESTE`). Les niveaux 1 et 3 gardent l'approbation par export.
 
   `apprentissage-service` a sa base, son compte de service dédié (contrat C11) et ne se connecte à aucun autre service du poste central.
 
@@ -344,6 +353,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   | approbation d'export du responsable des données, élément `approbationsExport` de l'état voulu | centrale-service | agent |
   | envoi d'échantillons (mTLS) | agent | apprentissage-service |
   | lecture du registre des consentements, et copie signée du registre | apprentissage-service ; agent | console Money Vibes ; apprentissage-service |
+| **Amendement (2026-11-13, spine de l'IA commune, AD-14 et AD-32).** Faits de l'IA : `ia.prediction.enregistree@1` et `<module>.realite.constatee@1` (schéma versionné, testé des deux côtés) ; `ia.proposition.rendue@1`, `ia.proposition.decidee@1`, `ia.proposition.statut.change@1`, `ia.capacite.changed@1`, `ia.ecart.enregistre@1`, `ia.desaccord.tranche@1`, `ia.modele.promu@1`, `ia.modele.retire@1`, `ia.derive.alertee@1` ; `ia.contribution.recue@1` (contrat de charge du `POST` de réception, pas un topic), `ia.modele.signe@1`, `ia.modele.publie@1` (centrale de l'IA) ; `assistant.*` et `automatisations.*` (liste complète : AD-32 de la spine de l'IA) | `prospera-ia-service`, modules qui publient une réalité, `prospera-ia-centrale` | `prospera-ia-service`, agent, consommateurs |
 
 ### AD-18 — Reprise, Connecteurs et adaptateurs : des voisins aux frontières fixées `[ADOPTED]`
 
@@ -389,6 +399,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   - Une `versionCible` **antérieure** à l'installée est une **proposition de retour arrière soumise au DSI**, jamais appliquée seule (FR-18).
   - Une `versionCible` que l'agent ne sait pas opérer (AD-3) attend la mise à jour de l'agent.
   - Un refus rend `ETAT_VOULU_REFUSE` sans dire quelle vérification a échoué ; le détail va au journal.
+  - **Amendement (2026-11-13, spine de l'IA commune, AD-22).** L'état voulu porte aussi `cibleModeles` (version cible de la ligne de modèles, distincte de `versionCible`) et `fenetreDSI` (fenêtre de promotion choisie par le DSI, champ signé lu par l'agent) ; l'IA ne joue une étape de promotion locale que sur un ordre de l'agent portant la fenêtre ; une fenêtre manquée est reportée, jamais rattrapée.
 
 ### AD-23 — La partie A : manifeste, point de décision, neuf états, bascule
 
@@ -453,11 +464,12 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
 - **Rule:**
   - **Racine** : sur **deux clés matérielles hors ligne** au coffre de Money Vibes, deux détenteurs (le DG de Money Vibes et Dev B, à nommer), **cérémonie annuelle** journalisée. Une **racine de secours** est pré-installée dans l'agent et active la première en cas de perte ou de compromission ; la rotation de la racine passe par une nouvelle version de l'agent signée par la racine de secours.
   - **Deux familles de clés de signature**, d'`usage` distinct inscrit dans leur certificat (AD-7), toutes certifiées par la racine :
-    - **clés de CI** (`ci`), annuelles, **scellées dans la CI de publication** de `prospera-plateforme`, jamais en clair, jamais sur un poste de développeur : elles ne signent que les **images, le manifeste et la ligne de version de l'agent** ;
+    - **clés de CI** (`ci`), annuelles, **scellées dans la CI de publication** de `prospera-plateforme`, jamais en clair, jamais sur un poste de développeur : elles ne signent que les **images, le manifeste, la ligne de version de l'agent et, sous l'`usage` « modele », les artefacts de la ligne de modèles de l'IA** (amendement du 2026-11-13) ;
     - **clé d'exécution de la centrale** (`centrale`), qui signe les **licences (sanctions comprises), l'état voulu, l'heure de référence, les jetons d'export, les approbations d'export et les fichiers de rétablissement et de prolongation** : **scellée sur l'hôte de la centrale**, jamais dans la CI, **renouvelée chaque trimestre**.
   - Aucune signature de licence ou de sanction hors de la centrale ; un agent refuse une licence signée par une clé de CI.
   - **Compromission** d'une clé de signature, de CI ou de la centrale : fichier d'urgence (AD-7).
   - **Jeux distincts** dev, recette, production ; l'agent de production refuse une racine qui n'est pas de production.
+  - **Amendement (2026-11-13, spine de l'IA commune, AD-34 et AD-44).** La clé `centrale` **ne signe jamais** un artefact de modèle (ses signatures restent celles listées ci-dessus) ; les artefacts de la ligne de modèles, leur **classe d'effet** et les fichiers d'urgence de modèle (couper ou revenir seulement) sont signés par la famille `ci` sous l'`usage` « modele ».
 
 ### AD-29 — L'identité de l'instance : une autorité de certificats mTLS `[ADOPTED]`
 
@@ -495,7 +507,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
 
 - **Binds:** FR-20, FR-17, A-1, §3
 - **Prevents:** une version qui passe à tout le parc avant d'avoir été vue ; deux promotions dans la même semaine.
-- **Rule:** La centrale fixe l'ordre : un **client pilote** d'abord, la plateforme comptant comme une instance. Une version passe à la vague suivante après **7 jours sans incident**, avec un plafond d'attente de **14 jours** par instance qui ne promeut pas. Un **incident** est un retour arrière demandé, une anomalie grave ou bloquante imputée à la version, ou un contrôle de santé en échec après promotion ; il remonte par le signal (AD-9). La centrale peut arrêter une vague. Une version de l'agent suit les mêmes vagues (pilote d'abord) ; un incident remonté suspend la vague suivante jusqu'à décision de Money Vibes. Les correctifs ne suivent pas les vagues. La centrale tient « pas deux promotions en 7 jours » pour la plateforme, et la garde « une seule version d'interrupteurs ouverte à la fois ».
+- **Rule:** La centrale fixe l'ordre : un **client pilote** d'abord, la plateforme comptant comme une instance. Une version passe à la vague suivante après **7 jours sans incident**, avec un plafond d'attente de **14 jours** par instance qui ne promeut pas. Un **incident** est un retour arrière demandé, une anomalie grave ou bloquante imputée à la version, ou un contrôle de santé en échec après promotion ; il remonte par le signal (AD-9). La centrale peut arrêter une vague. Une version de l'agent suit les mêmes vagues (pilote d'abord) ; un incident remonté suspend la vague suivante jusqu'à décision de Money Vibes. Les correctifs ne suivent pas les vagues. La centrale tient « pas deux promotions en 7 jours » pour la plateforme, et la garde « une seule version d'interrupteurs ouverte à la fois ». **Amendement (2026-11-13, spine de l'IA commune, AD-22 et AD-35).** Une **régression de qualité ou d'équité d'un modèle** de l'IA (porte franchie en canari, dérive grave, écart d'équité au-delà du seuil sur le modèle en service), comme un retour arrière de modèle demandé, est un **incident de modèle** au même titre : il remonte par le signal (AD-9) et suspend la vague suivante de la **ligne de modèles** (AD-3).
 
 ### AD-33 — Les migrations : déclarées au manifeste, jouées par l'agent, sous verrou
 
@@ -539,6 +551,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
 - **Rule:** Les actions de l'écran Administration (planifier ou revenir sur une mise à jour, déposer un fichier, ouvrir un tunnel, consentir, exporter) et les opérations de la partie A (`module.installer`, `module.retirer`, `espace.rafraichir`, qu'elle dépose elle-même) passent par `POST /api/instance/v1/commandes` de la partie A. Elle vérifie le droit `instance:*` du jeton de l'appelant et dépose une **commande idempotente** (`instance.commande.deposee`) **qui porte ce jeton** et que l'agent tire.
   - **Revérification par l'agent** : la signature du jeton par l'`auth-service` de l'espace et son droit `instance:*` ; pour le consentement et l'export, l'identité de l'appelant contre le **DG enregistré de l'état voulu** (AD-22), ou la personne qu'il a désignée par écrit au registre (AD-13).
   - L'agent exécute `module.installer`, `module.retirer` et `espace.rafraichir` sous le verrou de composition (AD-33), puis publie `instance.commande.executee`. Hors de l'intersection en gel (FR-35), seules les commandes de fichier et de support passent.
+  - **Amendement (2026-11-13, spine de l'IA commune, AD-22).** Commande `modele.revenir` (retour arrière d'un modèle, par organisation et par capacité, repointe sur la paire modèle et calibration précédents) : idempotente, droit `instance:*` revérifié par l'agent, exécutée hors verrou de composition d'images, en moins de 15 minutes ; en ligne, action équivalente de Money Vibes.
 
 ### AD-38 — L'effacement : l'essai prospect et l'acheteur hébergé
 
