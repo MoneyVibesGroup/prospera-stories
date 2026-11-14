@@ -1,6 +1,6 @@
 # STORY-569 : L'employeur invite, il ne crée pas — et il ne saura jamais ce que son salarié déclare
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-027 — Natures d'accès et habilitations graduées
 **Service :** `fiscal-service` (`:3012`) · `auth-service` · `notification-service`
@@ -107,3 +107,47 @@ pré-coché.
 - ⛔ **Le jour où un employeur demandera « qui de mes salariés est en règle ? », la réponse est
   non**, et elle doit rester non même si elle est demandée par un client important. Cette story
   écrit cette réponse dans un enum, pas dans une politique.
+
+---
+
+## Suivi — 2026-11-14 (livrée, fusionnée sur `dev`)
+
+**PR :**
+- MoneyVibesGroup/prospera-notification-service#86 : le message ;
+- MoneyVibesGroup/prospera-fiscal-service#39 : les invitations.
+
+**Arbitrage PO du 2026-11-14** : la liste des destinataires est **saisie** par l'employeur (un nom, et un e-mail ou un téléphone). La base de rémunération par période (STORY-345) n'existe pas encore ; seule la source de la liste changera le jour où elle existera.
+
+### Ce qui a été fait
+
+- **notification-service** : le modèle système `invitation-declarant` (e-mail et SMS, fr et en).
+  - Ses seules variables sont l'offreur, le lien et la date limite : **le même message pour tous** (AC-4).
+  - Il est marqué porteur de secret (le lien porte un jeton à usage unique).
+  - L'appelant `fiscal-service` est autorisé pour ce seul propos.
+- **fiscal-service**
+  - Invitations en lot (1 à 100, refusées en entier au premier destinataire invalide), et un **seul** rappel avec un lien neuf.
+  - L'employeur ne lit que `{ id, nom, statut }`, avec l'enum fermé `INVITE / COMPTE_OUVERT / NON_ABOUTIE` (AC-2). Décliné, expiré, révoqué et non remis sont **indistinguables** (AC-3, AC-6).
+  - Le salarié accepte depuis le compte qu'il a ouvert lui-même : ni compte créé, ni mandat (AC-1, AC-5). Il décline sans compte, et la réponse ne dit jamais si le lien était valide. Il révoque sans que l'employeur l'apprenne.
+  - ⛔ Les décisions du salarié n'entrent pas dans la chaîne d'audit de l'employeur, qui ne trace que ses propres actes (envoi, rappel), adresse par empreinte.
+  - Isolation (AC-8) : l'employeur n'atteint rien de l'espace du salarié, et inversement.
+
+### Configuration à poser
+
+- fiscal-service : `NOTIFICATION_SERVICE_URL`, `NOTIFICATION_JETON_DE_SERVICE`, `ESPACE_DECLARANT_URL`.
+- notification-service : `JETONS_DE_SERVICE` doit contenir `fiscal-service:<jeton>`.
+
+Sans cette configuration, rien ne part, et l'employeur lit « non aboutie ».
+
+### Écarts à la fiche
+
+- **La liste vient d'une saisie**, pas de `LigneDeRemuneration` (STORY-345 absente).
+- **AC-7** : le compte et l'acceptation survivent au départ (rien ne les supprime). Le « pré-remplissage qui cesse » n'existe pas encore, faute de base de rémunération.
+- **L'espace déclarant (front)** qui ouvre le lien reste à faire : la route d'acceptation est prête.
+
+### Preuves
+
+- fiscal-service :
+  - unitaires 2269/2271 (les 2 échecs, `xlsx/balayage-lineaire`, tiennent à la charge ; la suite passe seule, 26/26) ;
+  - e2e 187/187 ;
+  - conformité sur le vrai MongoDB 53/53.
+- notification-service : la suite complète passe, sauf un échec qui existe déjà sur `dev` (inventaire de `aucun-contact-depuis-identite`, sans lien avec cette story).
