@@ -811,7 +811,7 @@ Le module `automatisations` (M26) porté par `assistant-service` : la règle est
 
 - **Spine :** AD-12, AD-19, AD-20 ; Q-7
 - **Dépôts :** `assistant-service` (module `automatisations`), `prospera-ventes-service`, `prospera-recouvrement-service`, `prospera-croissance-service`, `prospera-app`
-- **Dépend de :** EPIC-222, EPIC-225 (garde-fous) ; EPIC-237 (réappro), EPIC-235 (relances), EPIC-240 (campagnes) pour les règles qu'il exécute ; EPIC-095 et suivants (existants : `assistant-service`)
+- **Dépend de :** EPIC-222, EPIC-225 (garde-fous) ; EPIC-237 (réappro), EPIC-235 (relances), EPIC-240 (campagnes) pour les règles qu'il exécute ; EPIC-095 et suivants (existants : `assistant-service`, renommé `prospera-ia-service` par EPIC-245) ; EPIC-245 → 248 (socle de l'IA commune : service, contrat de proposition, garde-fous, catalogue des capacités et packs ; amendement du 2026-11-14)
 - **Fini quand :** Une règle activée s'exécute pour de vrai et laisse une ligne au journal de la nuit ; en mode `AUTO`, aucun garde-fou n'est contourné ; une action passée en arbitrage attend « Valider » ; le badge compte le travail réel (modifier une donnée fait bouger le compte) ; une règle désactivée ne s'exécute plus.
 
 ### EPIC-243 : Le tableau de bord, les indicateurs et la provenance des règles « IA »
@@ -822,7 +822,7 @@ Le module `dashboard` de `prospera-pilotage-service` : un cockpit par rôle relu
 
 - **Spine :** AD-1, AD-15, AD-19, AD-20 ; AD-27
 - **Dépôts :** `prospera-pilotage-service` (module `dashboard`), `pdv-service` (dépôt du score), `prospera-app`, IA commune
-- **Dépend de :** EPIC-230, EPIC-231, EPIC-228, EPIC-229 (faits lus) ; EPIC-227 (score et attributs) ; EPIC-235 (alertes de créance)
+- **Dépend de :** EPIC-230, EPIC-231, EPIC-228, EPIC-229 (faits lus) ; EPIC-227 (score et attributs) ; EPIC-235 (alertes de créance) ; EPIC-245 → 248 (socle de l'IA commune : service, contrat de proposition, garde-fous, catalogue des capacités et packs ; amendement du 2026-11-14)
 - **Fini quand :** UJ-5 : le DG lit ses 8 chiffres, ouvre les décisions à trancher, en valide deux et en reporte une avec la trace, télécharge le rapport de direction en PDF et l'envoie au DAF ; modifier une donnée fait bouger l'indicateur (SM-5) ; un score de santé s'affiche avec sa règle, sa version et sa date ou ne s'affiche pas ; le rang de zone et le taux de service se lisent des modules qui ont la donnée ; chaque alerte a une règle écrite et paramétrable ; un cockpit de commercial ne montre aucun écran de pilotage.
 
 ### EPIC-244 : La reprise depuis Sage : fichiers, contrôle chez la cible et bascule ★

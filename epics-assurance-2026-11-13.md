@@ -807,7 +807,7 @@ Le socle : `PropositionPort` (décision humaine chez le consommateur, jamais blo
 
 - **Spine :** AD-8, AD-10, AD-23 ; spine microfinance AD-14 (`PropositionPort`)
 - **Dépôts :** instance locale de l'IA commune (service porteur à cadrer, Deferred), `prospera-sinistres-service`, `document-service`, `prospera-app`
-- **Dépend de :** EPIC-201, EPIC-206 (déclaration), EPIC-214 (pièces), EPIC-209 (offre)
+- **Dépend de :** EPIC-201, EPIC-206 (déclaration), EPIC-214 (pièces), EPIC-209 (offre) ; EPIC-245 → 248 (socle de l'IA commune : service, contrat de proposition, garde-fous, catalogue des capacités et packs ; amendement du 2026-11-14)
 - **Fini quand :** Chaque usage rend une Proposition avec sa provenance et la décision humaine (acceptée, modifiée, rejetée, motif) s'écrit chez le consommateur ; coupée, l'IA ne bloque aucun geste ; un test vérifie qu'aucune donnée nominative ni de santé ne sort de l'instance ; le rapport mensuel compte les décisions par usage.
 
 ### EPIC-218 : L'IA avancée : orientation d'expertise, devis, complétude, courriers de refus, recours et graphe de fraude ★
@@ -817,7 +817,7 @@ Les usages d'ordre 3 de la construction : orientation d'expertise assistée (pro
 
 - **Spine :** AD-8, AD-10
 - **Dépôts :** instance locale de l'IA commune, `prospera-sinistres-service`, `prospera-app`
-- **Dépend de :** EPIC-217 et l'épic de chaque module consommateur (EPIC-208, EPIC-211, EPIC-212)
+- **Dépend de :** EPIC-217 et l'épic de chaque module consommateur (EPIC-208, EPIC-211, EPIC-212) ; EPIC-245 → 248 (socle de l'IA commune : service, contrat de proposition, garde-fous, catalogue des capacités et packs ; amendement du 2026-11-14)
 - **Fini quand :** Chaque usage fonctionne en règles explicables puis par modèle sans changer le port ; l'orientation d'expertise ne crée aucune mission ; le graphe de fraude n'ouvre qu'une revue humaine.
 
 ### EPIC-219 : La reprise des archives et la vie en parallèle ★
