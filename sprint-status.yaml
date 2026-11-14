@@ -5222,8 +5222,9 @@ sprints:
         epic: "EPIC-029"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) ; domain/familles, registre pur + provider Nest, PROPORTIONNELLE exacte en BigInt, paramètres validés au CHARGEMENT du paquet ; arrondi déclaré ou refus (D-310-5, à confirmer PO)
+        assigned_to: "Dev B"
+        story_path: "stories/STORY-310.md"
   - sprint_number: 25
     start_date: "2027-06-03"
     end_date: "2027-06-17"
