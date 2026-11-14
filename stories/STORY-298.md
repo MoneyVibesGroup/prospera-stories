@@ -4,7 +4,7 @@ baseline_commit: ab79274d76a42acea4bd74318903a5a79f58d0b1
 
 # STORY-298 : Statut de validation des éléments et rattachement version ↔ exercice
 
-Status: ready-for-dev
+Status: done
 
 **Complexité :** medium
 
@@ -76,22 +76,22 @@ expert, afin de ne pas déposer sur la foi d'une amorce.
 
 ## Critères d'acceptation
 
-- [ ] **AC-1 — Statut par élément.** Un élément sans validation complète (lui ou un ancêtre) est
+- [x] **AC-1 — Statut par élément.** Un élément sans validation complète (lui ou un ancêtre) est
   `A_VALIDER` ; validé ⇒ `VALIDE` avec valideur et date ; une entrée sans valideur ou sans date ne
   valide rien.
-- [ ] **AC-2 — Signalement nommé.** `signalementsNonValides` rend, pour les éléments utilisés,
+- [x] **AC-2 — Signalement nommé.** `signalementsNonValides` rend, pour les éléments utilisés,
   chaque élément non validé avec son chemin ; la route `…/validation` rend la même chose.
-- [ ] **AC-3 — Rattachement à l'ouverture.** Un exercice nouveau `OUVERT` est rattaché à la
+- [x] **AC-3 — Rattachement à l'ouverture.** Un exercice nouveau `OUVERT` est rattaché à la
   version octroyée à ce moment ; l'entrée d'audit `PAQUET_RATTACHE` est écrite dans la même
   transaction.
-- [ ] **AC-4 — Pas d'effet rétroactif.** Après publication d'une version plus récente, l'exercice
+- [x] **AC-4 — Pas d'effet rétroactif.** Après publication d'une version plus récente, l'exercice
   se résout toujours sur sa version rattachée (même empreinte), la plus récente n'est qu'affichée ;
   aucun recalcul automatique.
-- [ ] **AC-5 — Recalcul explicite et tracé.** Le recalcul exige un motif (400 sinon), re-rattache à
+- [x] **AC-5 — Recalcul explicite et tracé.** Le recalcul exige un motif (400 sinon), re-rattache à
   la version courante et écrit `PAQUET_RECALCULE` (motif par empreinte).
-- [ ] **AC-6 — Refus sur déclaration déposée.** Une liasse acceptée de l'exercice (ou d'exerciceId
+- [x] **AC-6 — Refus sur déclaration déposée.** Une liasse acceptée de l'exercice (ou d'exerciceId
   inconnu) ⇒ 409 `RECALCUL_DECLARATION_DEPOSEE`, rien n'est écrit.
-- [ ] **AC-7 — Portée.** Exercice d'une autre organisation ou dossier hors portée ⇒ 404
+- [x] **AC-7 — Portée.** Exercice d'une autre organisation ou dossier hors portée ⇒ 404
   `EXERCICE_INTROUVABLE`.
 
 ## Table de mutations obligatoire
@@ -105,6 +105,7 @@ expert, afin de ne pas déposer sur la foi d'une amorce.
 | M5 | traiter un jeu sans `exerciceId` comme non déposé | unitaire AC-6 |
 | M6 | écraser un rattachement existant à la projection | unitaire AC-3 (`$setOnInsert`) |
 | M7 | motif en clair dans l'entrée d'audit | unitaire AC-5 |
+| M8 | rattacher à chaque événement d'exercice, pas au seul nouveau | unitaire projection |
 
 ## Tests
 
@@ -114,11 +115,41 @@ expert, afin de ne pas déposer sur la foi d'une amorce.
 
 ## Definition of Done
 
-- [ ] Branche `MNV-298` depuis `origin/dev`, PR vers `dev` fusionnée en rebase ; fiche et tracker
+- [x] Branche `MNV-298` depuis `origin/dev`, PR vers `dev` fusionnée en rebase ; fiche et tracker
   par PR sur `main` fusionnée en rebase.
-- [ ] Porte qualité verte ; mutations rouges puis restaurées.
+- [x] Porte qualité verte ; mutations rouges puis restaurées.
 
 ## Progress Tracking
 
 **2026-11-14 — fiche écrite** (bmad-create-story) juste avant de coder, confrontée à `origin/dev`
 `ab79274` (STORY-299 incluse).
+
+**2026-11-14 — implémentation.**
+- Domaine `domain/paquet-fiscal/` : `validation-paquet.ts` (convention `_meta.validations`,
+  héritage par l'ancêtre le plus proche, entrées incomplètes ignorées et nommées, `ABSENT` pour un
+  élément inexistant, `signalementsNonValides` pour STORY-305), `selection-version.ts` (extrait de
+  `PaquetsService`, comportement inchangé), `audit-rattachement.ts` (`PAQUET_RATTACHE`,
+  `PAQUET_RECALCULE` avec le motif par son empreinte).
+- `PaquetsService` : `referenceCourante`, `chargerReference` (même cache, mêmes contrôles), résumé
+  `validation` dans la réponse, `statutsElements` ; route `…/:annee/validation?chemins=`.
+- Collection `rattachements_paquet_exercice` (`SchemaTypes.ObjectId`, unique par exercice),
+  `MongoRattachementsPaquet` (`$setOnInsert` + trace dans la transaction ; recalcul conditionnel
+  sur la version attendue + `$push` à l'historique + trace) ; course perdue d'une première
+  résolution = relecture du gagnant, jamais un 500.
+- Projection d'exercice : nouveau et `OUVERT` ⇒ rattaché dans la même transaction.
+- `GET /v1/exercices/:exerciceId/paquet-fiscal`, `POST …/paquet-fiscal/recalcul` (TENANT_ADMIN) ;
+  `JeuDepose.exerciceId` lu chez `bilan-service` ; `RegistreDepots.acceptesDuDossier`.
+
+**2026-11-14 — preuves.**
+- Conformité MongoDB réel (`mongo:7`, `rs-fiscal`, volume neuf) : **24/24** (5 nouveaux :
+  rattachement unique et tracé, pas de déplacement après publication, deux ouvertures concurrentes
+  ⇒ un rattachement et une trace — stable sur 3 passages —, recalcul conditionnel historisé et
+  tracé sans motif en clair, recalcul d'une autre organisation sans effet).
+- E2E : paquets + exercices 16/16 (dont AC-4 par la route, AC-6 409, AC-7 404 identiques).
+- Mutations M1 à M8 rouges puis restaurées (M1 réécrite une fois : la première forme ne compilait
+  pas).
+
+**2026-11-14 — clôture.** Lint sans erreur, build vert, unitaires 1947/1947 (`-w 2`), e2e 140/140.
+Code `551831f` → PR `prospera-fiscal-service#23` rebase-mergée sur `dev` (`5963420`). Docker de
+conformité arrêté.
+
