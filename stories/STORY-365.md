@@ -1,6 +1,6 @@
 # STORY-365 : Le RBAC s'étend au périmètre tenant — `perms[]` cesse d'être vide, et sa croissance est bornée
 
-Status: not_started
+Status: done
 
 **Epic :** EPIC-025 — RBAC plateforme (D15)
 **Points :** 8 · **Sprint :** 21 (backend) · **Service :** `auth-service` (`:3001`)
@@ -109,12 +109,49 @@ critère**, et pas au cas par cas par le module suivant.
 
 ## Definition of Done
 
-- [ ] Un utilisateur de tenant porteur d'un rôle métier reçoit un `perms[]` **non vide**.
-- [ ] **Test de non-régression sur l'existant** : tout porteur sans rôle métier reçoit exactement ce
+- [x] Un utilisateur de tenant porteur d'un rôle métier reçoit un `perms[]` **non vide**.
+- [x] **Test de non-régression sur l'existant** : tout porteur sans rôle métier reçoit exactement ce
       qu'il recevait avant.
-- [ ] La **borne est chiffrée**, appliquée, et son dépassement produit un **échec nommé**.
-- [ ] ⚡ **Test du discriminant** : tenter d'enregistrer un droit non borné fait **virer un test au
+- [x] La **borne est chiffrée**, appliquée, et son dépassement produit un **échec nommé**.
+- [x] ⚡ **Test du discriminant** : tenter d'enregistrer un droit non borné fait **virer un test au
       rouge**. Sans lui, la règle centrale de la story n'est tenue par rien.
-- [ ] L'espace de nommage des droits tenant est documenté, avec sa règle d'ajout.
-- [ ] ⚠️ **`AD-P15` est mise à jour** dans `architecture-prospera-ecosystem-2026-07-04.md` : la borne y
+- [x] L'espace de nommage des droits tenant est documenté, avec sa règle d'ajout.
+- [x] ⚠️ **`AD-P15` est mise à jour** dans `architecture-prospera-ecosystem-2026-07-04.md` : la borne y
       est **écrite en clair**, puisque c'est le document dont toutes les spines héritent.
+
+---
+
+## Suivi — 2026-11-14 (requalifiée, fusionnée sur `dev`)
+
+**PR :** MoneyVibesGroup/prospera-auth-service#36.
+
+### Requalification (plan du 14/11 : « 166 et 167 ont avancé sur le même terrain »)
+
+Déjà livré par **STORY-166/167**, et donc pas refait ici : catalogue des droits de tenant
+(13 codes, fichier distinct du catalogue plateforme) ; `perms[]` = union des deux portées ;
+membre sans rôle métier toujours à `[]` ; format fermé `<module>:<objet>:<acte>` et **test du
+discriminant** (identifiants, jokers et casse refusés) ; rôles plateforme inchangés.
+
+**Ce que 365 seule portait, et qu'elle livre : la borne.**
+
+| Constante | Valeur | D'où |
+|---|---|---|
+| `MAX_JETON_OCTETS` | 3 584 | cookie httpOnly de 4 096 octets, moins 512 pour le nom et la marge |
+| `MAX_PERMS_PAR_JETON` | **44** | mesuré : ~909 octets à vide, ~57 par permission de 40 caractères |
+| `MAX_LONGUEUR_CODE_PERMISSION` | 40 | hypothèse de la mesure, testée sur les deux catalogues |
+
+- `issueTokens` vérifie le **nombre** avant la signature et la **taille** après : au-delà,
+  `JETON_HORS_BORNE` (500 nommé), jamais un jeton tronqué.
+- ⚡ La mesure est rejouée par un test qui **signe un vrai jeton RS256** au pire cas. C'est ce test
+  qui a fait descendre la borne de 48 à 44 : l'estimation initiale portait sur des codes de 37
+  caractères, et 48 codes de 40 caractères font 3 662 octets.
+- Croissance bornée : un test rougit si l'union des deux catalogues (aujourd'hui 17 + 13 = 30)
+  dépasse 44, ou si un code dépasse 40 caractères.
+- Règle d'ajout de l'espace de nommage tenant écrite en tête de `tenant-permission.enum.ts`.
+- **AD-P15** porte désormais la borne en clair (architecture programme, v1.12).
+
+### Preuves
+
+Unitaires 1 236/1 237 (le seul échec, bcrypt sous charge, est vert rejoué seul). Docker :
+administrateur plateforme 17 permissions (1 418 octets) ; membre sans rôle métier `perms: []` ;
+membre `DIST_ADMIN` 6 permissions (1 236 octets).
