@@ -1,6 +1,6 @@
 # STORY-567 : Trois portes vers un même redevable — le salarié, le dirigeant et le cabinet ouvrent chacun un compte « déclaration », et le dirigeant reste lié à sa société
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-027 — Natures d'accès et habilitations graduées
 **Service :** `fiscal-service` (`:3012`) · `auth-service` · `platform-catalog-service`
@@ -125,3 +125,40 @@ moitié des écrans se bloquent sur une balance absente**.
   le support et l'accompagnement** — pas l'acquisition.
 - ⛔ **STORY-563 doit être amendée** : son hors-périmètre exclut ce que cette story livre. Une
   fiche qui affirme le contraire de sa voisine encode l'ancienne vérité et la garde active.
+
+---
+
+## Suivi — 2026-11-14 (livrée, fusionnée sur `dev`)
+
+**PR :** MoneyVibesGroup/prospera-fiscal-service#36.
+
+### Arbitrages PO du 2026-11-14
+
+- **Compte personnel = organisation personnelle.** La personne s'inscrit par le parcours existant d'auth-service, qui lui crée son organisation d'un membre. Le modèle de l'IdP ne change pas ; tout se joue dans fiscal-service.
+- **Périmètre : dirigeant + cabinet.** La porte du salarié suit avec STORY-568, qui lui donne sa matière.
+
+### Ce qui a été fait
+
+- **Le rattachement**, sur le `Redevable` de STORY-563 et sans second modèle (AC-1) :
+  1. Le cabinet propose (`POST /redevables/:id/rattachement`, droit `valider`). Un code à usage unique, valable 7 jours, est rendu une seule fois ; seule son empreinte est stockée.
+  2. La personne accepte depuis **son** compte (`POST /moi/rattachements`).
+  3. Le cabinet lit ce qui manque (`consentementManquant`, AC-3).
+- **Révocation** : chacun révoque de son côté, avec un motif, **sans rien supprimer** (AC-5). Une nouvelle proposition reste possible ensuite.
+- **Espace `moi/rattachements`** : il n'expose que le calendrier du redevable rattaché (AC-2, AC-8), sans la garde fiscale du cabinet. Le compte personnel n'a ni KYC ni module. Les routes du cabinet lui restent fermées (403).
+- **Aucun lien automatique (AC-4)** : la garde vérifie que le code des rattachements ne lit ni NIF ni nom. Le cabinet ne peut pas accepter son propre code, et le code reste alors au dirigeant.
+- **Isolation (AC-7)** : la personne n'atteint la matière du cabinet que par un rattachement ACTIF qui nomme **son** organisation.
+- **AC-6** : avec le seul module `declarations` et aucune balance, le calendrier du dirigeant se dérive et se lit (témoin e2e).
+- **Audit** : propositions, acceptation et révocation sont tracées dans la chaîne du cabinet, sans code, ni NIF, ni nom, ni motif en clair.
+
+### Hors périmètre, écrit tel quel
+
+- **La porte salarié** : STORY-568, puis STORY-569.
+- **L'envoi du code par SMS ou e-mail** : le cabinet le remet lui-même.
+- **L'associé** : `QUALITE_NON_OUVERTE`.
+
+### Preuves
+
+- E2e des obligations : 26/26, dont 7 sur le parcours de STORY-567.
+- E2e complet : 11 suites, 179 tests.
+- Conformité sur le vrai MongoDB `rs-fiscal` : 7 suites, 49 tests (index partiel, code à usage unique, révocation sans suppression, chaîne d'audit intacte).
+- Unitaires : verts. `livrable-ac7` a échoué en lot sous la charge et passe seul (83/83).
