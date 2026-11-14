@@ -5131,8 +5131,9 @@ sprints:
         epic: "EPIC-027"
         points: 8
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) et code commencé sur MNV-299 ; groupe B du plan du 14/11
+        assigned_to: "Dev B"
+        story_path: "stories/STORY-299.md"
       - story_id: "STORY-298"
         title: "Statut de validation des éléments et rattachement version ↔ exercice"
         epic: "EPIC-027"
