@@ -5195,8 +5195,9 @@ sprints:
         epic: "EPIC-028"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) et code commencé sur MNV-307 (balance, dossier, fiscal) ; DSF des SFD non datée (décision utilisateur du 2026-11-14)
+        assigned_to: "Dev B"
+        story_path: "stories/STORY-307.md"
       - story_id: "STORY-308"
         title: "Régime dérogatoire et signalement"
         epic: "EPIC-028"
