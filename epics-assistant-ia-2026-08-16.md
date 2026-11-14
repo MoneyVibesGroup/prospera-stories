@@ -17,6 +17,9 @@ inputDocuments:
 
 # Assistant IA socle (`assistant-service`) — Découpage en épics
 
+*Remplacé / repris par EPIC-245 → EPIC-261 (IA commune, `epics-ia-commune-2026-11-13.md`, 2026-11-14). Repris tels quels : EPIC-099, EPIC-100. Repris, renommés et étendus : EPIC-095 (EPIC-245), EPIC-096 (EPIC-255), EPIC-098 (EPIC-246), EPIC-101 → 105 (plan de construction d'EPIC-254). Remplacé : EPIC-097 (la Proposition d'août), par le contrat unique d'EPIC-246.*
+
+
 *Amendée le 2026-11-13 : assistant-service passe à :3417 ; :3011 reste à prospera-microfinance-service (déjà codé). Les mentions de `:3011` ci-dessous sont à lire `:3417` ; le texte d'origine n'est pas réécrit.*
 
 ## Vue d'ensemble
