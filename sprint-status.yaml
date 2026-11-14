@@ -5186,9 +5186,10 @@ sprints:
         epic: "EPIC-028"
         points: 3
         service: "fiscal-service"
-        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) et code commencé sur MNV-306 ; groupe B du plan du 14/11
+        status: "done"  # CLÔTURE 2026-11-14 — PR fiscal-service #27 rebase-mergée sur dev (53941d3). active/desactivation champs humains (), jamais réactivée par une dérivation ; désactivation/réactivation motivées, tracées, droit valider. Conformité MongoDB réel 35/35, M1→M4, unitaires 2076/2076, e2e 160/160.
         assigned_to: "Dev B"
         story_path: "stories/STORY-306.md"
+        completed_date: "2026-11-14"
       - story_id: "STORY-307"
         title: "Taxes sectorielles et échéances portées par le type d'entité"
         epic: "EPIC-028"

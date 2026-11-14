@@ -4,7 +4,7 @@ baseline_commit: 08ded31 (prospera-fiscal-service, STORY-305 incluse)
 
 # STORY-306 : Activation et désactivation manuelle d'une obligation
 
-Status: ready-for-dev
+Status: done
 
 **Complexité :** low
 
@@ -42,19 +42,37 @@ afin que le référentiel propose sans décider à ma place.
 
 ## Critères d'acceptation
 
-- [ ] **AC-1** — Désactiver sans motif ⇒ 400.
-- [ ] **AC-2** — Une désactivation motivée est journalisée ; l'obligation disparaît du calendrier
+- [x] **AC-1** — Désactiver sans motif ⇒ 400.
+- [x] **AC-2** — Une désactivation motivée est journalisée ; l'obligation disparaît du calendrier
   sans être supprimée (visible avec `inclureDesactivees`).
-- [ ] **AC-3** — Une re-dérivation ne la réactive pas (Mongo réel).
-- [ ] **AC-4** — La réactivation est explicite, motivée, journalisée.
-- [ ] **AC-5** — Obligation d'une autre organisation ou hors portée ⇒ 404 ; droit `valider` exigé.
+- [x] **AC-3** — Une re-dérivation ne la réactive pas (Mongo réel).
+- [x] **AC-4** — La réactivation est explicite, motivée, journalisée.
+- [x] **AC-5** — Obligation d'une autre organisation ou hors portée ⇒ 404 ; droit `valider` exigé.
 
 ## Definition of Done
 
-- [ ] Branche `MNV-306` depuis `origin/dev`, PR vers `dev` fusionnée en rebase ; fiche et tracker
+- [x] Branche `MNV-306` depuis `origin/dev`, PR vers `dev` fusionnée en rebase ; fiche et tracker
   par PR sur `main`.
-- [ ] Porte qualité verte ; conformité Mongo réel ; mutations rouges.
+- [x] Porte qualité verte ; conformité Mongo réel ; mutations rouges.
 
 ## Progress Tracking
 
 **2026-11-14 — fiche écrite** (bmad-create-story) juste avant de coder.
+
+**2026-11-14 — implémentation.** `active` et `desactivation` champs humains de l'obligation
+(`$setOnInsert` à la création, absents ⇒ active) ; `RegistreObligations.trouver` /
+`changerActivation` (écriture conditionnelle sur l'état inverse + trace
+`OBLIGATION_DESACTIVEE|REACTIVEE`, motif par empreinte, dans la transaction) ;
+`ActivationObligationsService` (portée via `dossier-service`, 404 `OBLIGATION_INTROUVABLE`, 409
+`OBLIGATION_DEJA_DESACTIVEE|ACTIVE`) ; `POST /v1/obligations/:id/desactivation|reactivation`
+(droit `valider`, motif 3..500) ; `GET …/obligations?inclureDesactivees=true`.
+
+**2026-11-14 — preuves.** Conformité MongoDB réel 35/35 dont : écartée puis re-dérivée ⇒ reste
+écartée, hors calendrier, rétablie, chaîne `DERIVEE → DESACTIVEE → REACTIVEE` intacte ; obligation
+antérieure sans le champ ⇒ au calendrier. E2E 7/7 (motif exigé, calendrier / historique, 409, 403
+sans `valider`, 404 hors portée). Mutations M1 (+Mongo réel : la suite entière tombe), M2, M3, M4
+rouges puis restaurées.
+
+**2026-11-14 — clôture.** Lint sans erreur, build vert, unitaires 2076/2076 (`-w 2`), e2e 160/160.
+Code `81c6f67` → PR `prospera-fiscal-service#27` rebase-mergée sur `dev` (`53941d3`).
+
