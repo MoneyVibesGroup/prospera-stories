@@ -30,8 +30,8 @@
   5. ~~STORY-902~~ : **auth #37**, puis **fiscal #43** (rôles du cabinet, rôle par défaut du vertical, fin de la
      compatibilité) ;
   6. ~~STORY-903~~ : **admin-panel #33** (coupe-circuit du catalogue, fan-out borné) ;
-  7. **STORY-313** ← **prochaine étape** ;
-  8. STORY-314 ;
+  7. ~~STORY-313~~ : **fiscal #44** (aiguillage, état daté d'un tiers) ;
+  8. **STORY-314** ← **prochaine étape** ;
   9. **STORY-904** (neuve) ;
   10. relecture finale §3.4.
 - **STORY-904 réservée par A** (fiche à écrire juste avant de la coder) : *le fiscal tient sur un vrai MongoDB*.
@@ -183,6 +183,9 @@ octets de `balance-service` du tag déployé.
 `RETIRED` tant que des exercices y sont rattachés : le catalogue cesse alors de la servir et de l'octroyer.
 
 ## Pièges rencontrés
+
+- **Une suite qui ne COMPILE pas n'apparaît pas dans un filtre `grep "●.*›"`** : « Tests: 47 passed » venait des
+  AUTRES suites. Il faut toujours lire `Test Suites: … failed` et lancer le fichier seul.
 
 - **Un témoin « avant la correction » fait par `git switch dev` est FAUX** : le switch emporte les modifications
   non commitées, et `compose up --build` peut même ne pas recréer le conteneur (« Running »). Il faut mettre de côté
