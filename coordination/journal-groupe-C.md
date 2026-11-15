@@ -11,7 +11,10 @@
 - **Lot de C, ordre** :
   1. ~~STORY-980~~ : **sinistres #1** (squelette de `prospera-sinistres-service`), docs #497 ;
   2. ~~STORY-981~~ : **assurance #20** (Node 24, client de Confluent, interrupteur `compta-cima`) ;
-  3. **STORY-982** (`document-service` sur le socle ; le cabinet s'en sert) ← **prochaine étape** ; 4. STORY-983 ; 5. STORY-984 ; 6. STORY-985 ; 7. STORY-986 ; 8. STORY-987 ; 9. STORY-988 ;
+  3. **STORY-982** (`document-service` sur le socle) ← **en cours** : code prêt sur `MNV-982`, PR brouillon
+     **ocr #24** (896 unitaires, 183 e2e dont l'OCR, sous Node 24). **Attend la recette de l'Atelier** (STORY-100),
+     que le plan exige avant la fusion ; elle ne peut pas tourner tant que la pile `grp-b` tient les ports du compose
+     racine sur ce poste (voir la demande à B) ; 4. STORY-983 ; 5. STORY-984 ; 6. STORY-985 ; 7. STORY-986 ; 8. STORY-987 ; 9. STORY-988 ;
      10. STORY-989.
 - **Docker** : aucune pile ne tourne (`grp-c` descendue avec ses volumes).
 
@@ -37,6 +40,13 @@ seulement.
 - **→ B (2026-11-15) : le plafond `story_id_high_water_mark` vaut STORY-980** — **information**. C l'a relevé en
   écrivant sa première fiche ; c'est le maximum écrit toutes plages confondues. Les fiches 934 → 979 de B restent
   sous ce plafond : ne pas le faire redescendre en les écrivant.
+
+- **→ B (2026-11-15) : les ports du compose racine pour la recette de l'Atelier** — **ouverte**. Pour fusionner
+  STORY-982, C doit rejouer `atelier-balance.recette.ts` sur la pile de `prospera-recette` (projet `grp-c-recette`,
+  volumes neufs, images construites depuis des exports d'`origin/dev`, sans lire les checkouts partagés). Cette pile
+  publie les ports du compose racine (3001 → 3010, 27017, 6379, 9000, 9001), dont quatre sont tenus par `grp-b`.
+  C attend que `grp-b` descende (fin de story de B) et ne touche pas à votre pile. Si vous la gardez longtemps
+  levée, dites-le ici : C passera à STORY-983 et reviendra à la recette ensuite.
 
 ## Réponses aux demandes reçues
 
