@@ -16,7 +16,8 @@
   3. ~~STORY-932~~ : **catalogue #44** (contrat d'état publié, **figé**, étiquette `contrat-etat-publie-v1`) ;
   4. ~~STORY-933~~ : **catalogue #45**, **recette #18** (Redis, BullMQ, bail MongoDB du relais d'outbox) ;
   5. ~~STORY-934~~ : **catalogue #46** (manifeste dans `ModuleVersion`, refus nommés, résolution, garde) ;
-  6. **STORY-935** ← **prochaine étape** (lot repris sur consigne de l'utilisateur, 2026-11-15 : « continue le groupe B
+  6. ~~STORY-935~~ : **catalogue #47** (46 manifestes au catalogue, `catalogue.manifeste.publie`, droits renommés) ;
+  7. **STORY-936** ← **prochaine étape** (lot repris sur consigne de l'utilisateur, 2026-11-15 : « continue le groupe B
      jusqu'à finir ») ; 6. STORY-935 ; 7. STORY-936 ; 8. STORY-937 ; 9. STORY-938 ;
      10. STORY-939.
 
@@ -52,6 +53,22 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-15, STORY-935 — un contrat NOUVEAU, cinq droits RENOMMÉS.**
+  - `catalogue.manifeste.publie` (AD-17) : l'état absolu d'une `ModuleVersion` (module, version, statut, manifeste
+    C1), clé `<module>@<version>`, topic **compacté**. Schéma :
+    `platform-catalog-service/contrat/schemas/catalogue.manifeste.publie.json`, au registre. Consommateur prévu :
+    paiement (STORY-939).
+  - **Droits renommés** (borne de 40 caractères du jeton ; manifestes, PRD du distributeur et de la microfinance,
+    épics du distributeur) : `approvisionnement:commande-fournisseur:{valider,suggerer,consulter}` →
+    `approvisionnement:bon-commande:{valider,suggerer,consulter}` ; `finance-transactions:rapprochement:effectuer` →
+    `finance-transactions:releve:rapprocher` ; `finance-transactions:tresorerie:consulter` →
+    `finance-transactions:tresorerie:lire`. **Pour D et C** : aucun écran ni service ne les employait encore ; tout
+    écran à venir prend les nouveaux noms.
+  - Le catalogue sème les 46 manifestes au démarrage (dont `instance`). La garde source/copie se joue par
+    `MANIFESTES_SOURCE=<prospera-stories>/manifestes npm run manifestes:garde` : **tout groupe qui modifie un manifeste
+    de `prospera-stories/manifestes/` le dit ici**, B en tire une copie (une version nouvelle si la version publiée
+    change).
 
 - **2026-11-15, STORY-934 — deux contrats NOUVEAUX** (rien d'existant ne change) dans `platform-catalog-service/contrat/` :
   - `manifeste-module.schema.json` : le manifeste C1 (draft-07, fermé). Un droit tient en **40 caractères**, à tiret
