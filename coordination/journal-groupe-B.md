@@ -20,8 +20,9 @@
   7. ~~STORY-936~~ : **catalogue #48** (matrice exécutée, vraie route, émetteur de `etat-publie.changed`) ;
   8. ~~STORY-937~~ : **plateforme #2** (garde partagée, `garde-etat-publie-v1`), **paiement #117** (Node 24, Confluent,
      double lecture) ;
-  9. **STORY-938** ← **prochaine étape** (lot repris sur consigne de l'utilisateur, 2026-11-15 : « continue le groupe B
-     jusqu'à finir ») ; 10. STORY-939.
+  9. ~~STORY-938~~ : **auth #38**, **recette #19**, ADR « droits hors du jeton » ;
+  10. **STORY-939** ← **prochaine étape** (lot repris sur consigne de l'utilisateur, 2026-11-15 : « continue le groupe B
+      jusqu'à finir »).
 
   Puis la story du seed du catalogue, puis la relecture finale de A rejouée.
 - **Docker** : aucune pile ne tourne (`grp-b` descendue avec ses volumes).
@@ -55,6 +56,20 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-15, STORY-938 — `auth-service` :**
+  - **`identity.org.created` : `createdByUserId` devient FACULTATIF** (absent pour une organisation née du moteur),
+    plus un champ facultatif `origine` (`INSCRIPTION` | `MOTEUR`). Lecteurs :
+    - `dossier-service` tolère (chaîne vide) ;
+    - `expert-comptable` range la valeur telle quelle ;
+    - **pour C** : le type de `document-service` (`src/kafka/events/identity-events.ts`) le déclare obligatoire, à
+      relâcher (lecteur tolérant, C12).
+  - **Catalogue de tenant : 16 → 24 codes** (8 droits `instance:*`, hors souscription). La regex des droits admet le
+    tiret dans les trois segments. **Pour D** : l'écran des rôles reçoit les droits `instance:*`, toujours
+    disponibles.
+  - Route interne nouvelle : `POST /api/v1/interne/organisations` (jeton de service du moteur, `MOTEUR_JETON_SERVICE`).
+  - Décision d'architecture : **les droits de tenant sortent du jeton**
+    (`architecture/decisions/ADR-droits-hors-du-jeton-2026-11-15.md`) ; rien ne change avant ses stories.
 
 - **2026-11-15, STORY-937 — la GARDE PARTAGÉE est publiée** (`prospera-plateforme/paquets/garde-etat-publie`, étiquette
   `garde-etat-publie-v1`). **Pour tout groupe qui garde un module** (C : sinistres, assurance ; A et les propriétaires de
@@ -117,6 +132,12 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   requis ajouté, un type changé ou une propriété retirée sont refusés (`npm run schemas:compatibilite`, code 1).
 
 ## Questions à l'utilisateur ou au PO
+
+- **ADR « droits hors du jeton » (STORY-938)** : adoptée par défaut, sur la recommandation de A. **Contestable** par le
+  PO jusqu'à sa première story de mise en œuvre.
+- **Passation d'auth, reste non traité** : la console affiche « sans rôle métier » pour un membre qui reçoit le rôle
+  par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif). À nommer en story (B, lot
+  suivant).
 
 - **Réglages de `prospera-plateforme`** (plan §10, action 1) : « Rebase and merge » seul n'a pas pu être posé par la
   session (commande refusée par le mode automatique). Commits de fusion et squash y sont encore permis. À poser dans

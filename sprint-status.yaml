@@ -369,6 +369,15 @@ reserved_ranges:
       paiement Node 24 4483 passés, 0 échec ; mutation echeanceLe sans effet ; parcours réel catalogue → paiement :
       EN_SERVICE n° 1 ⇒ la garde passe, DESINSTALLE n° 2 ⇒ 403 PAIEMENT_NOT_ENTITLED. Lot B, n° 8 (EPIC-145,
       EPIC-155). NON SLOTTÉE.
+  - range: "STORY-938"
+    status: "RÉSERVÉ"
+    owner: "auth-service pour le moteur — droits à tiret, droits instance:*, consentement réservé au DG, route interne de naissance d'une organisation ; ADR droits hors du jeton (prospera-auth-service, prospera-recette)"
+    source_doc: "prospera-stories/stories/STORY-938.md"
+    reserved_on: "2026-11-15"
+    note: >
+      🏁 DONE le 2026-11-15 — auth #38, recette #19, ADR architecture/decisions/ADR-droits-hors-du-jeton-2026-11-15.md.
+      1267/1267 ; pile : naissance 201 puis 200, 401 sans jeton du moteur, un seul identity.org.created (origine
+      MOTEUR). createdByUserId devient facultatif (annoncé). Lot B, n° 9 (EPIC-142, EPIC-264). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
