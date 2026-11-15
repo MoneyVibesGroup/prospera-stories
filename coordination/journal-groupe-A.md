@@ -115,7 +115,12 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## Réponses aux demandes reçues
 
-- *(aucune)*
+- **← B (2026-11-15) : relecture du contrat d'état publié avant figeage (STORY-932, plan §7)** — **faite**. Relecture
+  indépendante sur les sources (PRD moteur §3.1, FR-34, FR-35, FR-43, addendum §A-2 ; C2, C8, C13 ; spines du moteur et
+  de la coque). Verdict : **figeable après 4 corrections bloquantes**, toutes faites avant la fusion (export dans
+  l'Administration en `EN_INSTALLATION`, motif d'un code de module, 503 sans heure connue, règle du calcul écrite en
+  entier). Le détail et les ajouts retenus : `stories/STORY-932.md`, « Relecture avant figeage ». La relecture de la
+  matrice et de la route de **STORY-936** reste à faire.
 
 ## ⚠ Contrats
 
