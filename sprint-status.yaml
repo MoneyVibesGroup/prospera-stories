@@ -253,10 +253,11 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-901.md"
     reserved_on: "2026-11-14"
     note: >
-      ⚡ LIVRÉE EN REVUE le 2026-11-14 : balance #143, dossier #47, fiscal #40 fusionnées ; volets A, B, C
-      (C sur base Africarrières, paramétrable — D-901-6) ; AC-C4 recette Docker VERTE à froid le 2026-11-15
-      (prospera-recette #16) ; reste AC-C3 (validation consignée) ; constat : familles fiscal-tg-* absentes du seed
-      `declarations` du catalogue. NON SLOTTÉE. Ouverte le 2026-11-14 à la demande de l'utilisateur, après la confrontation du lot
+      🏁 DONE le 2026-11-15 — le PO valide l'AC-C3 (D-901-7 : validation consignée dans la fiche,
+      `_meta.validations` à la prochaine régénération, statut reste a-valider-par-expert). Livrée le 2026-11-14 :
+      balance #143, dossier #47, fiscal #40 fusionnées ; volets A, B, C (C sur base Africarrières, paramétrable —
+      D-901-6) ; AC-C4 recette Docker VERTE à froid le 2026-11-15 (prospera-recette #16). Hors story : familles
+      fiscal-tg-* absentes du seed `declarations` du catalogue (story à ouvrir), texte officiel de la loi, fiscaliste. NON SLOTTÉE. Ouverte le 2026-11-14 à la demande de l'utilisateur, après la confrontation du lot
       fiscal 308 → 312 au CGI OTR 2025 (Art. 74, 113, 120, 134, 175, 180-6). 13 pts estimés (A moteur 3,
       B données 3, C zone franche 7), découpable au slotting. Décisions D-901-1 → D-901-5 validées par
       l'utilisateur le 2026-11-14 (dont D-310-5 confirmée et AD-3 amendée par ARRONDI_ASSIETTE).

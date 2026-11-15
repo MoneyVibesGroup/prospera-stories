@@ -4,7 +4,7 @@ baseline_commit: ca638be (prospera-fiscal-service), 49327aa (balance-service)
 
 # STORY-901 : Le paquet fiscal Togo conforme au CGI — arrondis d'assiette, minimum du MFP, zone franche intégrée
 
-Status: review
+Status: done
 
 **Complexité :** large (trois volets, deux services)
 
@@ -100,6 +100,16 @@ fiscal-service #37.)
   « 10 à 15 ans selon le secteur »). Ce qui est confronté au texte officiel l'est : MFP (Art. 121 CGI)
   et TVA (Art. 180-6, 175 CGI). Le texte de la loi sur la zone franche (n° 2011-018 selon la CNUCED,
   n° 2012-016 selon la source retenue) et le fiscaliste restent les juges de paix.
+- **D-901-7 — Validation du PO, consignée dans la fiche** (décision de l'utilisateur, 2026-11-15 :
+  « je valide l'AC-C3 de la story 901, tu peux la considérer done »). Le PO valide la surcouche
+  `togo-zonefranche@2026` telle que livrée (sha256 `da92a432…`) : chaque valeur de
+  `_meta.parametrage` à sa valeur retenue, les justifications de non-consommation, l'exonération du
+  MFP (Art. 121) et le champ de la TVA (Art. 180-6, 175). La validation est consignée ICI, pas dans
+  `_meta.validations` : l'écrire dans la donnée change l'empreinte et oblige à réépingler trois dépôts
+  (balance, dossier, fixtures de fiscal) pour une métadonnée ; elle y entrera à la prochaine
+  régénération de la surcouche (texte officiel de la loi, ou signature du fiscaliste). Le `statut`
+  reste `a-valider-par-expert` : `certifie` est réservé à la validation d'un professionnel qualifié
+  (PRD §13), que la validation du PO ne remplace pas.
 
 ## Critères d'acceptation
 
@@ -131,11 +141,11 @@ fiscal-service #37.)
   sinon, PARAMÉTRABLE (`_meta.parametrage`) ; plus aucune source promotionnelle.
 - [x] **AC-C2** — Plus aucune rubrique non consommée sans justification écrite ; les variantes
   régionales sont transcrites depuis le texte ou retirées.
-- [ ] **AC-C3** — `_meta.validations` consigne la validation élément par élément ; `statut` ne dit
-  plus « amorce ». ⚠️ **Partiel** : la mise en garde ne dit plus « amorce » (« Régime INTÉGRÉ ») et
-  `_meta.parametrage` nomme ce qui reste à confirmer ; mais aucune validation n'est consignée dans
-  `_meta.validations` — personne n'a encore validé (le fiscaliste, ou toi sur pièce). Le `statut` reste
-  `a-valider-par-expert`, comme le paquet de droit commun lui-même.
+- [x] **AC-C3** (amendé par D-901-7) — La validation est consignée élément par élément ; `statut` ne
+  dit plus « amorce ». ✅ **Validée par le PO le 2026-11-15** (D-901-7) : la mise en garde dit
+  « Régime INTÉGRÉ », `_meta.parametrage` nomme chaque valeur validée à sa valeur retenue ; la
+  validation est consignée dans la fiche, `_meta.validations` la recevra à la prochaine régénération.
+  Le `statut` reste `a-valider-par-expert`, comme le paquet de droit commun lui-même.
 - [x] **AC-C4** — Un dossier en zone franche est liquidé par `balance-service` et ses obligations
   dérivées par `fiscal-service` sur la surcouche intégrée, de bout en bout (recette). ✅ **Recette
   Docker verte à froid** (2026-11-15, `prospera-recette` #16, `recette/zone-franche.recette.ts`,
@@ -166,11 +176,11 @@ fiscal-service #37.)
 
 ## Definition of Done
 
-- [ ] Branches `MNV-901` (fiscal-service, balance-service, dossier-service) depuis `origin/dev`, PR
+- [x] Branches `MNV-901` (fiscal-service, balance-service, dossier-service) depuis `origin/dev`, PR
   fusionnées en rebase (balance, dossier, puis fiscal) ; fiche, tracker et spine par PR sur `main`.
-- [ ] Portes vertes dans les trois services ; conformité MongoDB réel pour fiscal-service ; mutations
+- [x] Portes vertes dans les trois services ; conformité MongoDB réel pour fiscal-service ; mutations
   rouges (arrondi d'assiette ignoré, appliqué après la famille, minimum MFP ignoré).
-- [ ] Recette de bout en bout d'un dossier en zone franche (AC-C4).
+- [x] Recette de bout en bout d'un dossier en zone franche (AC-C4).
 
 ## Progress Tracking
 
@@ -209,6 +219,10 @@ fiscal-service #40, fusionnées en rebase dans cet ordre ; fiche, tracker et spi
   `declarations` (seulement `syscohada-revise`, `zone-franche-togo`) ⇒ `422 REFERENTIEL_INCOMPATIBLE`
   à l'octroi. Sans le geste d'administration (`PATCH /admin/modules/declarations`), fiscal-service ne
   reçoit AUCUN paquet en production. À semer dans `platform-catalog-service` (story à ouvrir).
-- **Reste** : AC-C3 (validation consignée) ; les familles `fiscal-tg-*` du module `declarations` au seed du catalogue ; le texte officiel
-  de la loi zone franche ; la limite connue de la STORY-417 sous Art. 113 — au seuil conseillé, l'IS
+- **Reste, hors de cette story** : les familles `fiscal-tg-*` du module `declarations` au seed du catalogue ; le texte officiel
+  de la loi zone franche ; la signature du fiscaliste ; `_meta.validations` à la prochaine régénération (D-901-7) ; la limite connue de la STORY-417 sous Art. 113 — au seuil conseillé, l'IS
   dépasse le plancher d'au plus taux × 1 000 F (ex. 4 806 000 pour 4 800 000 unités).
+
+**2026-11-15 — CLÔTURE.** Le PO valide l'AC-C3 (D-901-7) et déclare la story terminée. Tous les AC
+cochés, DoD tenue : balance #143, dossier #47, fiscal #40, prospera-recette #16 fusionnées ; docs #475,
+#479, #482, puis cette clôture.
