@@ -437,6 +437,16 @@ reserved_ranges:
       classification-sante 27/27 ; garde prouvée contre un Karapace 6.2 réel (0 propre, 1 champ de santé dans
       une v2, 2 injoignable) ; 3 mutations rouges. Décisions D-983-1 → 8 (registre dans classification-sante/,
       node:crypto, index par organisation et nature, noms normalisés). Lot C, n° 4 (EPIC-201). NON SLOTTÉE.
+  - range: "STORY-984"
+    status: "RÉSERVÉ"
+    owner: "L'échange avec la compagnie par fichier — le contrat de l'annexe C (C-1 → C-19, prospera-plateforme), le service prospera-liaison-assureur-service, le transport Excel/JSON et l'intégration idempotente des lots"
+    source_doc: "prospera-stories/stories/STORY-984.md"
+    reserved_on: "2026-11-15"
+    note: >
+      🏁 DONE le 2026-11-15 — prospera-plateforme#4 (dev 65ea9e7), prospera-liaison-assureur-service#1 (dev fae6ab6 ;
+      main et dev posées). Node 24 : 367 unitaires + 17 e2e, lint 0 ; contrat 79/79. Pile réelle : ordre de
+      dépendance, Excel, lot partiel, version inconnue, rejeu sans doublon, DOUBLON sans écrasement. Envois, API,
+      écarts, numéros et faits : STORY-985 (D-984-1). Lot C, n° 5 (EPIC-203). NON SLOTTÉE.
   - range: "STORY-990"
     status: "RÉSERVÉ"
     owner: "Les consommateurs Kafka de C voient un topic neuf en secondes : création avant l'abonnement et métadonnées toutes les 10 s (sinistres, assurance, document-service)"
