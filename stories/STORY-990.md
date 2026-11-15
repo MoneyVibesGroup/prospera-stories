@@ -1,6 +1,6 @@
 # STORY-990 : les consommateurs Kafka de C voient un topic neuf en secondes, pas en cinq minutes
 
-Status: review
+Status: done
 
 **Complexité :** petite (une correction, trois dépôts, une mesure sur pile neuve)
 
@@ -60,6 +60,5 @@ l'Atelier était verte parce que sa mise en place dure plus de cinq minutes : el
 - Sous Node 24, depuis des exports LF : sinistres **292** unitaires + **11** e2e ; assurance **2 200** + **347** ;
   document **902** + **183** ; lint 0 et build pour les trois.
 - La configuration du consommateur (`metadataMaxAge: 10_000`) est assertée dans les tests : la retirer les rougit.
-- **Reste AC-5** : la recette de l'Atelier rejouée depuis `dev`, images reconstruites (image de `document-service`
-  construite depuis `7068952`). Elle attend que la pile `grp-b` libère les ports du compose racine ; une tâche la
-  lance dès la descente.
+- **AC-5** : la recette de l'Atelier rejouée depuis `dev`, images reconstruites (`document-service` depuis
+  `7068952`) : **51/51** sur volumes neufs.
