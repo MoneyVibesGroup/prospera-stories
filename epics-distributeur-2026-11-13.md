@@ -750,7 +750,7 @@ L'add-on `freelance`, hébergé par `pdv-service` derrière sa propre gate `FREE
 
 ### EPIC-237 : L'approvisionnement et les fournisseurs
 
-Le module `approvisionnement` de `prospera-ventes-service` : registre des fournisseurs, note du fournisseur (30 / 25 / 25 / 10 / 10), réapprovisionnement proposé automatiquement, commande fournisseur de `SUGGEREE` à `RECUE`, plafonds de validation par montant, plancher de trésorerie qui bloque, fournisseur alternatif, garde-fou anti-stock-mort à l'achat, dette fournisseurs et échéancier. La réception d'une commande fournisseur appartient à `entrepot` (D-22) ; `approvisionnement` en consomme le fait pour le statut, la dette et la note. Les ordres de paiement aux fournisseurs passent par `paiement` (EPIC-232) ; lecture seule par le droit `approvisionnement:commande-fournisseur:consulter` (D-23). Objet de reprise : `approvisionnement.fournisseur@1`.
+Le module `approvisionnement` de `prospera-ventes-service` : registre des fournisseurs, note du fournisseur (30 / 25 / 25 / 10 / 10), réapprovisionnement proposé automatiquement, commande fournisseur de `SUGGEREE` à `RECUE`, plafonds de validation par montant, plancher de trésorerie qui bloque, fournisseur alternatif, garde-fou anti-stock-mort à l'achat, dette fournisseurs et échéancier. La réception d'une commande fournisseur appartient à `entrepot` (D-22) ; `approvisionnement` en consomme le fait pour le statut, la dette et la note. Les ordres de paiement aux fournisseurs passent par `paiement` (EPIC-232) ; lecture seule par le droit `approvisionnement:bon-commande:consulter` (D-23). Objet de reprise : `approvisionnement.fournisseur@1`.
 
 **FRs covered:** FR-59 → FR-67
 

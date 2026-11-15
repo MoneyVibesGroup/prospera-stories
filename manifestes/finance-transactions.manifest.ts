@@ -41,14 +41,14 @@
 // - Écrans : module d'écran `finance-transactions` dans `prospera-app` (C8), tous les écrans par Dev B.
 //   `/comptabilite` (poste du COMPTABLE ; vue analytique en lecture seule pour les autres rôles),
 //   `/pilotage-financier` (`PilotageDAFView` pour le DAF, `ComptabiliteDGView` pour le DG et le DC). Entrées de menu :
-//   « Rapprochement » (`finance-transactions:rapprochement:effectuer`), « Trésorerie »
-//   (`finance-transactions:tresorerie:consulter`), « Run fournisseurs » (`finance-transactions:run:consulter`).
+//   « Rapprochement » (`finance-transactions:releve:rapprocher`), « Trésorerie »
+//   (`finance-transactions:tresorerie:lire`), « Run fournisseurs » (`finance-transactions:run:consulter`).
 //   Chez l'IMF : tableau Budget et Rentabilité dans le cockpit du DAF (FR-253), export des écritures proposées,
 //   prévision de trésorerie ; « Payer » un fournisseur passe par les ordres de `paiement` (FR-209), jamais par ce
 //   module.
 // - Rôles proposés (annexe B.2, à confirmer avec les rôles du vertical) :
-//   · `rapprochement:effectuer`, `suspens:traiter` : COMPTABLE (assurance : CPT) ;
-//   · `tresorerie:consulter` : DG, DC, DAF ; · `run:consulter` : DG, DAF ;
+//   · `releve:rapprocher`, `suspens:traiter` : COMPTABLE (assurance : CPT) ;
+//   · `tresorerie:lire` : DG, DC, DAF ; · `run:consulter` : DG, DAF ;
 //   · `ecriture:exporter`, `budget:saisir` : DAF (IMF : DAF réseau, CPT son agence, DG en lecture).
 //   Préparer et valider un ordre de paiement exigent en plus les droits de `paiement` : DEUX droits, DEUX personnes
 //   (FR-P66). La marge par facture reste cachée du contrôle de gestion et du superviseur (AD-1).
@@ -123,9 +123,10 @@ export const MANIFESTE_FINANCE_TRANSACTIONS = {
 
   // C7, forme ÉLARGIE (voir l'avertissement en tête). Annexe A.11 (distributeur) puis annexe IMF A.14. Chaque droit
   // demande en outre une PR `auth-service` à la livraison du module (catalogue de droits à enum fermé).
+  // STORY-935 (2026-11-15) : `rapprochement:effectuer` → `releve:rapprocher`, `tresorerie:consulter` → `tresorerie:lire` (40 caractères au plus, borne du jeton).
   droits: [
-    'finance-transactions:rapprochement:effectuer', // lettrer, rapprocher un compte de trésorerie (FR-132, FR-175)
-    'finance-transactions:tresorerie:consulter', // trésorerie à 7 jours, BFR (FR-137, FR-138)
+    'finance-transactions:releve:rapprocher', // lettrer, rapprocher un compte de trésorerie (FR-132, FR-175)
+    'finance-transactions:tresorerie:lire', // trésorerie à 7 jours, BFR (FR-137, FR-138)
     'finance-transactions:run:consulter', // état du run fournisseurs ; préparer et valider un ordre exige en plus `paiement:*`
     'finance-transactions:suspens:traiter', // mettre en suspens, traiter un suspens (FR-132)
     // Annexe IMF A.14 :
