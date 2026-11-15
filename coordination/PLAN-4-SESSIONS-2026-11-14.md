@@ -1,6 +1,7 @@
 # Quatre sessions en parallèle : qui fait quoi, et comment se parler
 
-> **Date :** 2026-11-14 · **Statut :** décidé par l'utilisateur (Dev B), en vigueur dès la fusion de ce document
+> **Date :** 2026-11-14 · **Statut :** décidé par l'utilisateur (Dev B), en vigueur dès la fusion de ce document ·
+> **Amendé le 2026-11-15** : FE-069 et le dépôt du cabinet passent à A (§2, §6)
 > **Lu par :** les quatre sessions. Le groupe A tourne sur le poste principal ; deux groupes tournent sur d'autres
 > machines. **Ce dossier `coordination/` est le seul canal entre elles** : aucune session ne voit les branches locales,
 > la mémoire ni les fichiers non suivis d'une autre.
@@ -56,7 +57,8 @@ ne commence qu'après avoir lu cette ligne.
 | `prospera-plateforme` (**neuf**, créé par B, STORY-931) | B, **par dossiers** | C écrit dans `contrats/assurance/`, `champs-sensibles/`, `classification-sante/` ; B dans tout le reste. Aucun fichier commun. |
 | `prospera-assurance-service`, `prospera-ocr-service` (= `document-service`) | C | — |
 | `prospera-sinistres-service`, `prospera-liaison-assureur-service`, `prospera-assureur-fictif` (**neufs**, créés par C) | C | — |
-| `prospera-frontend-expert-comptable`, `frontend-admin-panel` (console) | D | — |
+| `prospera-frontend-expert-comptable` | **A jusqu'à la fusion de FE-069**, puis D | **amendement du 2026-11-15** (décision de l'utilisateur) : FE-069 revient à A, qui l'avait entamée ; A rend le dépôt à D par une ligne de son journal |
+| `frontend-admin-panel` (console) | D | — |
 | `prospera-stories` | **tous** | chacun n'écrit que **ses** fiches, **son** journal et **les entrées de ses stories** au tracker |
 | `prospera-microfinance-service`, `prospera-expert-comptable` | personne | — |
 
@@ -204,6 +206,19 @@ plus une ligne « → A/B/C » dans le journal de D.
 | 12 | **AP-38** (neuve) la console garde le motif par pièce de la revue KYC | console | suite de STORY-176 ; ticket écrit par A |
 
 **Remplaçantes** si une story est bloquée : FE-036, FE-037, FE-038 (prévisionnel, `ready-for-dev`).
+
+**⚡ Amendement du 2026-11-15 (décision de l'utilisateur).**
+
+- **FE-069 (n° 1) passe au groupe A**, qui la reprend cette semaine : D n'avait pas démarré. Son périmètre a été
+  revérifié et étendu (A1 → A13, B1 → B25, 13 points).
+- **Le bloc C de FE-069 et les écrans fiscaux sont triés** dans `tri-frontend-fevrier-2026-11-15.md` : 14 fiches
+  neuves écrites par A (**FE-112 → FE-125** ; FE-112 reste « les obligations fiscales »), 23 fiches d'août réancrées.
+  La plage libre de D devient **FE-126 → FE-139**.
+- **D commence donc par AP-38** (console), puis par les **maquettes** des stories de février dans l'ordre du §4.1 du
+  tri, et reprend le dépôt du cabinet à la fusion de FE-069. Son étape 0 (remettre le tracker frontend à jour) est
+  allégée : les statuts des stories triées ont été remis à jour le 15/11 ; restent les 61 stories « en revue ».
+- **FE-074** : son option « sans objet backend » est périmée, la balance s'exporte côté serveur (STORY-555).
+- **FE-094, FE-102** : débloquées (STORY-539, 298 et 493 livrées).
 
 **Règle des maquettes (inchangée) :** aucun écran neuf n'est codé avant que sa maquette, ajoutée à
 `prototypes/prospera-prototype.html`, soit validée par l'utilisateur. Les chiffres d'une maquette viennent du référentiel.

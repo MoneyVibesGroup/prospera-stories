@@ -92,6 +92,9 @@ reserved_ranges:
       FE-109 → FE-111 existent : l'app expert-comptable reprend à FE-112 (hors plage réservée jusqu'ici).
       AP-38 → AP-49 est pris dans AP-38 → AP-99 (Dev B). Le groupe D ne crée aucun identifiant STORY- :
       un manque de backend devient un ticket adressé au groupe qui tient le dépôt.
+      ⚡ 2026-11-15 (décision de l'utilisateur) : FE-112 → FE-125 sont ÉCRITES par le groupe A (tri du front
+      cabinet pour février, tri-frontend-fevrier-2026-11-15.md). La plage libre du groupe D devient
+      FE-126 → FE-139 ; AP-38 → AP-49 inchangée.
 
   - range: "EPIC-142 → EPIC-299"
     status: "RÉSERVÉ"
