@@ -49,7 +49,22 @@ cahiers de l'Atelier lus par OCR et transformés en balance. La migration ne doi
 
 ## Ce qui a été livré
 
-*(en cours au 2026-11-15)* — code sur `MNV-982`, PR **brouillon** `prospera-ocr-service` #24 (`1562be1`). Sous Node 24,
-depuis un export LF : 896 unitaires, 183 e2e (tests OCR compris, Tesseract réel), lint 0, build ; 3 mutations rouges
-(BullMQ en 5, `kafkajs`, image Node 22). **Reste AC-4 : la recette de l'Atelier**, bloquée tant que la pile `grp-b`
-tient les ports du compose racine (3003, 27017, 6379, 9000) sur ce poste. La PR ne sera fusionnée qu'après elle.
+*(en cours au 2026-11-15)* — code sur `MNV-982`, PR **brouillon** `prospera-ocr-service` #24 (tête `851ab6a`).
+
+- **Premier passage** (`1562be1`) : sous Node 24, depuis un export LF, 896 unitaires, 183 e2e (tests OCR compris,
+  Tesseract réel), lint 0, build ; 3 mutations rouges (BullMQ en 5, `kafkajs`, image Node 22).
+- **La recette de l'Atelier a trouvé une régression de la migration** (pile neuve `grp-c-recette`, 50/51) : le seul
+  test rouge est celui de `document-service` (profil société par OCR, 502). Cause : `kafkajs` créait un topic absent
+  en s'y abonnant ; le client de Confluent ne le crée pas, et ne voit le topic créé ensuite par son producteur qu'au
+  rafraîchissement des métadonnées (5 minutes). Le premier `dossier.created` n'était donc pas dans le read-model quand
+  la requête est arrivée (404 « Dossier introuvable pour cette organisation »).
+- **Corrigé** (`d71a294`, `851ab6a`) : la supervision crée les topics abonnés absents avant de s'abonner, aux réglages
+  du broker ; un refus est journalisé et n'empêche pas l'abonnement (3 tests). Et `identity.org.created` est lu en
+  lecteur tolérant (`8bd1a2f`, annonce de B en STORY-938 : `createdByUserId` facultatif, `origine`). Sous Node 24 :
+  **902 unitaires, 183 e2e, lint 0, build**.
+- **Reste AC-4 : rejouer la recette de l'Atelier sur une pile neuve** avec l'image corrigée. Le relancement a été
+  refusé par Docker (port 18025 pris) : la pile `grp-b` s'est relevée pour la story du seed. La PR ne sera fusionnée
+  qu'après une recette verte.
+- **Rencontré en chemin, hors de C** : sur une pile neuve, la recette d'`origin/dev` ne démarre pas, le groupe
+  `platform-catalog-abonnements` du catalogue n'existant pas (même cause : ses topics `paiement.abonnement.*` ne sont
+  pas créés). Contourné sur la pile jetable de C en créant ces trois topics ; demande à B dans le journal de C.
