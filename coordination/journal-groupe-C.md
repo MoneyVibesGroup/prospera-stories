@@ -16,8 +16,10 @@
      Karapace réel) ;
   5. ~~STORY-990~~ (insérée par C) : **sinistres #2, assurance #21, ocr #25** ; un topic neuf vu en secondes
      (291 s → 6,9 s mesurés) ;
-  6. **STORY-984** ← **en cours** : le contrat de l'annexe C (plateforme, `MNV-984`), le service
-     `prospera-liaison-assureur-service` (`main` et `dev` posées), le transport par fichiers ; 7. STORY-985 ; 8. STORY-986 ; 9. STORY-987 ; 10. STORY-988 ; 11. STORY-989.
+  6. ~~STORY-984~~ : **plateforme #4** (le contrat de l'annexe C, C-1 → C-19) et **liaison-assureur #1** (le
+     service, le transport par fichiers, l'intégration idempotente des lots, prouvés sur pile réelle) ;
+  7. **STORY-985** ← **suivante** (envois, API, journal, file des écarts, numéros, faits) ; 8. STORY-986 ;
+     9. STORY-987 ; 10. STORY-988 ; 11. STORY-989.
 - **Ensuite (consigne de l'utilisateur du 2026-11-15)** : « ajoute les stories suivantes 201 à 211 », soit les stories
   restantes des épics **EPIC-201 → EPIC-211** d'`epics-assurance-2026-11-13.md` (rôles et portées, déclaration,
   instruction, expertises, décision, paiement, clôture), écrites juste avant d'être codées, dans la plage de C
@@ -28,7 +30,7 @@
 
 `prospera-assurance-service` (« Rebase and merge » seul depuis le 2026-11-15 ; il acceptait encore les commits de
 fusion), `prospera-ocr-service` (`document-service`), et les trois dépôts neufs :
-`prospera-sinistres-service` (**`main` et `dev` posées le 2026-11-15**, « Rebase and merge » seul), `prospera-liaison-assureur-service`,
+`prospera-sinistres-service` (**`main` et `dev` posées le 2026-11-15**, « Rebase and merge » seul), `prospera-liaison-assureur-service` (**`main` et `dev` posées par STORY-984**, « Rebase and merge » seul),
 `prospera-assureur-fictif` (créés vides par l'utilisateur, branches à poser par STORY-984 et 986). Dans
 `prospera-plateforme` (créé par B) : dossiers `contrats/assurance/`, `champs-sensibles/`, `classification-sante/`
 seulement.
@@ -67,9 +69,10 @@ seulement.
 - **→ B (2026-11-15) : `prospera-plateforme`, deux points** — **ouverte**. (1) `npm ci` échoue : le `package-lock.json`
   ne connaît pas l'espace de travail `@prospera/garde-etat-publie` (« Missing: @prospera/garde-etat-publie@1.0.0
   from lock file ») ; C a installé sans réécrire le verrou. (2) Le `npm test` et le `typecheck` racines ne lisent pas
-  `champs-sensibles/` ni `classification-sante/` (STORY-983) ; ajouter `"champs-sensibles/test/**/*.test.ts"
-  "classification-sante/test/**/*.test.ts"` au script `test`, et leurs `src`, `test`, `scripts` à l'`include` du
-  `tsconfig.json` racine. D'ici là, chaque dossier a son `package.json` et se teste seul.
+  `champs-sensibles/`, `classification-sante/` (STORY-983) ni `contrats/assurance/` (STORY-984) ; ajouter
+  `"champs-sensibles/test/**/*.test.ts" "classification-sante/test/**/*.test.ts" "contrats/assurance/test/**/*.test.ts"`
+  au script `test`, et leurs `src`, `test`, `scripts` à l'`include` du `tsconfig.json` racine. D'ici là, chaque
+  dossier a son `package.json` et se teste seul.
 
 ## Réponses aux demandes reçues
 
@@ -108,6 +111,15 @@ seulement.
   santé du registre dans **n'importe quel** schéma (JSON ou Avro, noms normalisés) ; elle se joue contre Karapace par
   `SCHEMA_REGISTRY_URL=… node classification-sante/scripts/verifier-karapace.ts`. Les trois schémas du catalogue
   passent aujourd'hui. Les règles d'exhaustivité et de données personnelles ne visent que les modules de C.
+
+- **2026-11-15, STORY-984 — un service NEUF et un contrat NOUVEAU, rien sur le fil.**
+  - `prospera-plateforme/contrats/assurance/echange-lc/` : le contrat d'échange avec le LC (annexe C corrigée, C-1 →
+    C-19, `@1`), pour le LC fictif (STORY-986) et tout futur connecteur. Fichiers `<objet>_<lotId>_<version>.(json|xlsx)`.
+  - `prospera-liaison-assureur-service` (port 3410, profil `liaison-assureur`) : routes gardées
+    `POST /api/v1/liaison-assureur/echange/releves`, `GET …/echange/lots`, `…/echange/refus`,
+    `…/echange/projections/{objet}/{cleOrigine}` ; refus `LIAISON_ASSUREUR_NOT_ENTITLED`, `ABONNEMENT_EXPIRE`,
+    `PROJECTION_INCONNUE` (404). Consomme `entitlement.changed` (groupe `liaison-assureur-service.droits`) ; ne publie
+    rien encore (les faits `liaison-assureur.*@1` arrivent avec STORY-985, tous ensemble).
 
 ## Questions à l'utilisateur ou au PO
 
