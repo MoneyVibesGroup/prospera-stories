@@ -378,6 +378,15 @@ reserved_ranges:
       🏁 DONE le 2026-11-15 — auth #38, recette #19, ADR architecture/decisions/ADR-droits-hors-du-jeton-2026-11-15.md.
       1267/1267 ; pile : naissance 201 puis 200, 401 sans jeton du moteur, un seul identity.org.created (origine
       MOTEUR). createdByUserId devient facultatif (annoncé). Lot B, n° 9 (EPIC-142, EPIC-264). NON SLOTTÉE.
+  - range: "STORY-939"
+    status: "RÉSERVÉ"
+    owner: "Le read-model de manifestes de paiement — la vente résout une offre comme la console ; module sans manifeste non vendable ; ticket des écrans pour D (prospera-paiement-service, prospera-stories)"
+    source_doc: "prospera-stories/stories/STORY-939.md"
+    reserved_on: "2026-11-15"
+    note: >
+      🏁 DONE le 2026-11-15 — paiement #118, ticket tickets/TICKET-FRONTEND-console-manifestes.md. Node 24 :
+      4502 passés ; pile : 46 manifestes projetés, résolution 200 avec raisons, 422 MODULE_NON_VENDABLE (annoncé),
+      casse indifférente. Lot B, n° 10 (EPIC-143) : le lot de B est fini. NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

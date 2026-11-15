@@ -33,7 +33,7 @@ Il refuse à la publication ce qui casserait l'installation (AD-23).
 
    Sur les 45 manifestes de `prospera-stories/manifestes/`, 43 passent. Les 2 refusés portent les 5 droits trop longs
    que STORY-935 renomme.
-2. **`ModuleVersion.manifeste`** et `POST /api/v1/admin/modules/:code/versions` avec `manifeste`. Une version d'avant le
+2. **`ModuleVersion.manifeste`** et `POST /api/v1/catalog/admin/modules/:code/versions` avec `manifeste`. Une version d'avant le
    moteur n'en a pas, et elle n'est ni installable ni vendable (FR-37).
 3. **Les refus à la publication** (422, avec un détail nommé), dans cet ordre :
    1. `MANIFESTE_INVALIDE` : la forme, un autre code ou une autre version que la `ModuleVersion`, un droit étranger au
