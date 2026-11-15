@@ -27,8 +27,9 @@
      un scan sans texte) est consignée dans sa fiche (D-901-5) ;
   3. ~~STORY-901~~ ;
   4. ~~STORY-345~~ : **fiscal #42** (base de rémunération versionnée, D-345-1 → 5) ;
-  5. **STORY-902** (élargie, voir la relecture) ← **prochaine étape** ;
-  6. STORY-903 ;
+  5. ~~STORY-902~~ : **auth #37**, puis **fiscal #43** (rôles du cabinet, rôle par défaut du vertical, fin de la
+     compatibilité) ;
+  6. **STORY-903** ← **prochaine étape** ;
   7. STORY-313 ;
   8. STORY-314 ;
   9. **STORY-904** (neuve) ;
@@ -52,14 +53,18 @@
 ## Dépôts tenus
 
 `prospera-fiscal-service`, `prospera-balance-service`, `prospera-bilan-service`, `prospera-dossier-service`,
-`prospera-kyc-service`, `prospera-admin-panel-service`, `prospera-recette`, `prospera-auth-service` (jusqu'à STORY-902),
-et plus `prospera-notification-service` (cédé à B, voir Passations).
+`prospera-kyc-service`, `prospera-admin-panel-service`, `prospera-recette`. Plus ni `prospera-notification-service`
+ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## Passations
 
 - **2026-11-14 : `prospera-notification-service` cédé à B**, dernier commit sur `dev` : `8916ee4`
   (STORY-569 livrée). A n'y touche plus.
-- Prévue : `prospera-auth-service` → B à la fusion de STORY-902.
+- **2026-11-15 : `prospera-auth-service` cédé à B**, dernier commit sur `dev` : **`456035f`** (STORY-902 fusionnée).
+  A n'y touche plus. À reprendre par B :
+  - STORY-938, droits à tiret dans les trois segments (demande ci-dessous) ;
+  - la console, qui affiche « sans rôle métier » pour un membre qui reçoit le rôle par défaut. L'API
+    d'administration rend le `tenantRole` stocké, pas le rôle effectif (écart de STORY-902).
 - **2026-11-14 (nuit) : FE-069 remise à D** (sur demande de l'utilisateur), branche **`fe-069`** poussée
   dans `prospera-frontend-expert-comptable`, commit **`4148d65`**, sans PR. A ne touche plus ce dépôt.
 
@@ -118,6 +123,7 @@ et plus `prospera-notification-service` (cédé à B, voir Passations).
   reste-t-il, et jusqu'à quand ? **Retenu par défaut (2026-11-15)**, selon la règle de l'utilisateur : « appliquer ce
   que A recommande, contestable après coup ».
   - Le mode reste jusqu'à la fusion de STORY-902, qui y met fin : un jeton sans droit fiscal est alors refusé.
+    ✅ **Fait le 2026-11-15** : auth #37, puis fiscal #43.
   - STORY-902 attribue d'abord les droits `fiscalite:*` aux rôles du cabinet existants, pour que personne ne perde
     l'accès.
   - STORY-902 garde donc sa place (n° 5 du lot), sans attendre 313 et 314.
