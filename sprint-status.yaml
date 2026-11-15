@@ -5307,7 +5307,7 @@ sprints:
     end_date: "2027-06-17"
     capacity_points: 34
     committed_points: 31  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
-    completed_points: 10  # 2026-11-14 : STORY-311 (5) + STORY-312 (5) done
+    completed_points: 15  # 2026-11-15 : STORY-311 (5) + STORY-312 (5) + STORY-313 (5) done — somme refaite sur le fichier résolu
     status: "in_progress"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. ⚡ PÉRIMÈTRE CORRIGÉ le 2026-08-16 (la version ci-dessous était PÉRIMÉE, et elle l'était SUR LES 9 SPRINTS DU MODULE À LA FOIS — une note de périmètre recopiée ne se met pas à jour toute seule) : PRD prds/prd-fiscalite-2026-07-31/prd.md **v0.4** (et non v0.3) · découpage epics-fiscalite-2026-08-03.md **RÉALIGNÉ sur la v0.4 le 2026-08-16** — il disait encore « par salarié » et ignorait FR-F79/FR-F80 · architecture architecture/architecture-fiscal-service-2026-08-03/ARCHITECTURE-SPINE.md **AD-1→AD-21** (et non AD-19 : AD-20 agrégat de rémunération, AD-21 donnée personnelle de tiers, ajoutées le 2026-08-15).
     goal: "Le moteur de calcul est complet et explicable 🏁 EPIC-029 (barèmes, forfaits, pipeline de modificateurs, aiguillage, refus nommé hors périmètre), puis le calendrier s'ouvre."
     stories:
@@ -5334,7 +5334,8 @@ sprints:
         epic: "EPIC-029"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        status: "done"  # ✅ 2026-11-15 — FUSIONNÉE : prospera-fiscal-service#44 (dev 7b93ddd). AIGUILLAGE { critere, correspondance?, exigeConstat? } ; refus CRITERE_D_AIGUILLAGE_ABSENT / NON_DATE / HORS_CORRESPONDANCE ; prouvé sur les vraies sections TPU (2 %/8 %, minimum 20 000) et RSH (3/5/20 %) du paquet Togo 2026 ; mutations. ÉCART : TPU et RSH absentes du catalogue d'obligations du paquet ; registre des tiers inexistant.
+        story_path: "stories/STORY-313.md"
         assigned_to: null
       - story_id: "STORY-314"
         title: "Familles hors périmètre : déclarables, non calculables"
