@@ -136,13 +136,11 @@ fiscal-service #37.)
   `_meta.parametrage` nomme ce qui reste à confirmer ; mais aucune validation n'est consignée dans
   `_meta.validations` — personne n'a encore validé (le fiscaliste, ou toi sur pièce). Le `statut` reste
   `a-valider-par-expert`, comme le paquet de droit commun lui-même.
-- [ ] **AC-C4** — Un dossier en zone franche est liquidé par `balance-service` et ses obligations
-  dérivées par `fiscal-service` sur la surcouche intégrée, de bout en bout (recette). ⚠️ **Prouvé par
-  service, pas encore de bout en bout** : la liquidation zone franche de `balance-service` (tests de
-  service sur le vrai paquet effectif) et la dérivation sous dérogation de `fiscal-service` (e2e,
-  STORY-308) passent sur la surcouche intégrée ; la recette inter-services sous Docker n'a pas été
-  jouée, et l'e2e HTTP `regime-derogatoire` de `balance-service` répond 502 dans son harnais, déjà sur
-  `origin/dev` avant cette story.
+- [x] **AC-C4** — Un dossier en zone franche est liquidé par `balance-service` et ses obligations
+  dérivées par `fiscal-service` sur la surcouche intégrée, de bout en bout (recette). ✅ **Recette
+  Docker verte à froid** (2026-11-15, `prospera-recette` #16, `recette/zone-franche.recette.ts`,
+  projet `recette901`, volumes neufs, 5/5) : catalogue → dossier → balance → fiscal, le même artefact
+  (empreinte `da92a432…`) des deux côtés.
 
 ## Dépendances et risques
 
@@ -201,6 +199,16 @@ fiscal-service #40, fusionnées en rebase dans cet ordre ; fiche, tracker et spi
   (`regime-derogatoire`) et 1 (`tpu` : « barème TPU indisponible », périmé depuis MNV-100) ; et deux
   écarts propres au poste Windows (CRLF face à bilan-service, chemins `\`).
 - **Mutations** : 4/4 (A) et 5/5 (B, C) tuées.
-- **Reste** : AC-C3 (validation consignée), AC-C4 (recette Docker inter-services) ; le texte officiel
+- **Recette Docker (2026-11-15, `prospera-recette` #16)** : fiscal-service levé pour la première fois
+  dans la pile de recette (`docker-compose.fiscal.yml`, MongoDB replica set authentifié, audience de
+  l'IdP). Le catalogue publie les deux paquets comme de vrais artefacts et les octroie ; trois
+  dossiers, même balance (résultat 9 195 000) : zone franche 3ᵉ année ⇒ impôt 0 ; 12ᵉ année ⇒
+  1 365 000 ; droit commun ⇒ 2 457 000 (MFP au minimum 2 000 000) ; fiscal-service dérive 17
+  obligations signalées `ZONE_FRANCHE`, même empreinte que balance-service.
+- ⚠️ **Constat de la recette — catalogue** : le seed n'ouvre aucune famille `fiscal-tg-*` au module
+  `declarations` (seulement `syscohada-revise`, `zone-franche-togo`) ⇒ `422 REFERENTIEL_INCOMPATIBLE`
+  à l'octroi. Sans le geste d'administration (`PATCH /admin/modules/declarations`), fiscal-service ne
+  reçoit AUCUN paquet en production. À semer dans `platform-catalog-service` (story à ouvrir).
+- **Reste** : AC-C3 (validation consignée) ; les familles `fiscal-tg-*` du module `declarations` au seed du catalogue ; le texte officiel
   de la loi zone franche ; la limite connue de la STORY-417 sous Art. 113 — au seuil conseillé, l'IS
   dépasse le plancher d'au plus taux × 1 000 F (ex. 4 806 000 pour 4 800 000 unités).
