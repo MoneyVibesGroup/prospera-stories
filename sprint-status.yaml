@@ -459,6 +459,15 @@ reserved_ranges:
       🏁 DONE le 2026-11-15 — prospera-liaison-assureur-service#2 (dev 3a2a6f0). Node 24 : 409 unitaires + 20 e2e,
       lint 0. Pile réelle : 201/200/409/422, refus du LC → écart, RENVOYER signé, renvoi, numéro rattaché AUTO.
       Faits, fraîcheur, liste « à saisir » : STORY-991 (D-985-1). Lot C, n° 6 (EPIC-203). NON SLOTTÉE.
+  - range: "STORY-986"
+    status: "RÉSERVÉ"
+    owner: "La compagnie fictive — un logiciel de compagnie d'essai qui parle l'annexe C par les deux transports et sait tomber en panne, refuser, doubler, retarder, changer une police (prospera-assureur-fictif)"
+    source_doc: "prospera-stories/stories/STORY-986.md"
+    reserved_on: "2026-11-15"
+    note: >
+      🏁 DONE le 2026-11-15 — prospera-assureur-fictif#1 (dev 0464171 ; main et dev posées). Node 24 : 346
+      unitaires + 14 e2e, lint 0. Pile réelle avec liaison-assureur : fichiers et API, numéros LCF-AAAA-NNNNNN,
+      jeu de base intégré, police changée, refus et panne réglés. Lot C, n° 8 (EPIC-204). NON SLOTTÉE.
   - range: "STORY-990"
     status: "RÉSERVÉ"
     owner: "Les consommateurs Kafka de C voient un topic neuf en secondes : création avant l'abonnement et métadonnées toutes les 10 s (sinistres, assurance, document-service)"

@@ -20,7 +20,9 @@
      service, le transport par fichiers, l'intégration idempotente des lots, prouvés sur pile réelle) ;
   7. ~~STORY-985~~ : **liaison-assureur #2** (file d'envoi acquittée, accusés, numéro officiel, file des écarts,
      transport par API, prouvés sur pile réelle) ;
-  8. **STORY-986** ← **suivante** (la compagnie fictive) ; 9. STORY-987 ; 10. STORY-988 ; 11. STORY-989 ;
+  8. ~~STORY-986~~ : **assureur-fictif #1** (le LC fictif, les deux transports, ses réglages, prouvé avec
+     `liaison-assureur` sur pile réelle) ;
+  9. **STORY-987** ← **suivante** (le jeu de la compagnie de démonstration) ; 10. STORY-988 ; 11. STORY-989 ;
      puis **STORY-991** (faits `liaison-assureur.*@1`, fraîcheur, liste « à saisir »).
 - **Ensuite (consigne de l'utilisateur du 2026-11-15)** : « ajoute les stories suivantes 201 à 211 », soit les stories
   restantes des épics **EPIC-201 → EPIC-211** d'`epics-assurance-2026-11-13.md` (rôles et portées, déclaration,
@@ -33,7 +35,7 @@
 `prospera-assurance-service` (« Rebase and merge » seul depuis le 2026-11-15 ; il acceptait encore les commits de
 fusion), `prospera-ocr-service` (`document-service`), et les trois dépôts neufs :
 `prospera-sinistres-service` (**`main` et `dev` posées le 2026-11-15**, « Rebase and merge » seul), `prospera-liaison-assureur-service` (**`main` et `dev` posées par STORY-984**, « Rebase and merge » seul),
-`prospera-assureur-fictif` (créés vides par l'utilisateur, branches à poser par STORY-984 et 986). Dans
+`prospera-assureur-fictif` (**`main` et `dev` posées par STORY-986**, « Rebase and merge » seul). Dans
 `prospera-plateforme` (créé par B) : dossiers `contrats/assurance/`, `champs-sensibles/`, `classification-sante/`
 seulement.
 
@@ -129,6 +131,13 @@ seulement.
   `POST …/echange/ecarts/{id}/resolution` (`{ decision, motif }` : 404 `ECART_INCONNU`, 409 `ECART_DEJA_RESOLU`, 422),
   `GET …/echange/numeros/{DEC-}` (404 `NUMERO_INCONNU`). Le transport par API du LC (`GET entree`, `GET entree/{nom}`,
   `PUT sortie/{nom}`, jeton porteur) est ce que le LC fictif (STORY-986) servira.
+
+- **2026-11-15, STORY-986 — une application d'ESSAI NEUVE, rien sur le fil.** `prospera-assureur-fictif` (port 3411,
+  profil `assureur-fictif`) : API du LC `GET/PUT /api/v1/lc/echange/…` (jeton porteur propre), administration
+  `/api/v1/assureur-fictif/{reglages,jeu-de-base,polices/{n}/changement,cycle,recus}` derrière
+  `ASSUREUR_FICTIF_NOT_ENTITLED`. Refuse de démarrer hors essai (`FICTIF_ESPACE=essai`, sinon
+  `ASSUREUR_FICTIF_INTERDIT`). **Pour le moteur (B)** : le drapeau `assureurFictifAutorise` de l'état voulu signé
+  remplacera cette variable quand l'agent le portera.
 
 ## Questions à l'utilisateur ou au PO
 
