@@ -340,6 +340,16 @@ reserved_ranges:
       autres = 5 droits > 40 car., renommés en 935) ; contrat/resolution-dependances.json (7 cas, rejoués par
       paiement en 939). MODULE_DEPENDANCE_MANQUANTE / MODULE_REQUIS_PAR dans la résolution pure, pas sur le PUT
       (D-934-3). Lot B, n° 5 (EPIC-143). NON SLOTTÉE.
+  - range: "STORY-935"
+    status: "RÉSERVÉ"
+    owner: "Enregistrer les manifestes du cabinet et des démos — 46 copies (dont instance), semis transactionnel, catalogue.manifeste.publie, cinq droits renommés (platform-catalog-service, prospera-stories)"
+    source_doc: "prospera-stories/stories/STORY-935.md"
+    reserved_on: "2026-11-15"
+    note: >
+      🏁 DONE le 2026-11-15 — catalogue #47. Verification Node 24 1142/1142 ; compose : 27 créés + 19 rattachés,
+      0 refus ; topic compacté, 46 messages ; redémarrage idempotent ; 4 sujets au registre. Droits renommés :
+      approvisionnement:bon-commande:*, finance-transactions:releve:rapprocher, finance-transactions:tresorerie:lire.
+      Lot B, n° 6 (EPIC-143). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
