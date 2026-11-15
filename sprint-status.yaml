@@ -330,6 +330,16 @@ reserved_ranges:
       🏁 DONE le 2026-11-15 — catalogue #45, recette #18. Verification Node 24 1098/1098 ; test:socle 7/7 sur vrai
       Redis et vrai MongoDB, mutation ; compose healthy (redis up), Redis arrêté ⇒ 503. Verrou d'outbox = bail
       MongoDB (D-933-1). Déclencheur amorcé jusqu'à STORY-936. Lot B, n° 4 (EPIC-142). NON SLOTTÉE.
+  - range: "STORY-934"
+    status: "RÉSERVÉ"
+    owner: "Le manifeste dans ModuleVersion — contrat C1, refus nommés à la publication, résolution des dépendances, garde source/copie (platform-catalog-service)"
+    source_doc: "prospera-stories/stories/STORY-934.md"
+    reserved_on: "2026-11-15"
+    note: >
+      🏁 DONE le 2026-11-15 — catalogue #46. contrat/manifeste-module.schema.json (43/45 manifestes valides, les 2
+      autres = 5 droits > 40 car., renommés en 935) ; contrat/resolution-dependances.json (7 cas, rejoués par
+      paiement en 939). MODULE_DEPENDANCE_MANQUANTE / MODULE_REQUIS_PAR dans la résolution pure, pas sur le PUT
+      (D-934-3). Lot B, n° 5 (EPIC-143). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
