@@ -29,8 +29,8 @@
   4. ~~STORY-345~~ : **fiscal #42** (base de rémunération versionnée, D-345-1 → 5) ;
   5. ~~STORY-902~~ : **auth #37**, puis **fiscal #43** (rôles du cabinet, rôle par défaut du vertical, fin de la
      compatibilité) ;
-  6. **STORY-903** ← **prochaine étape** ;
-  7. STORY-313 ;
+  6. ~~STORY-903~~ : **admin-panel #33** (coupe-circuit du catalogue, fan-out borné) ;
+  7. **STORY-313** ← **prochaine étape** ;
   8. STORY-314 ;
   9. **STORY-904** (neuve) ;
   10. relecture finale §3.4.
@@ -183,6 +183,12 @@ octets de `balance-service` du tag déployé.
 `RETIRED` tant que des exercices y sont rattachés : le catalogue cesse alors de la servir et de l'octroyer.
 
 ## Pièges rencontrés
+
+- **Un témoin « avant la correction » fait par `git switch dev` est FAUX** : le switch emporte les modifications
+  non commitées, et `compose up --build` peut même ne pas recréer le conteneur (« Running »). Il faut mettre de côté
+  (`git stash push -u`), puis `up --build --force-recreate`, et vérifier dans l'image que le code neuf est absent.
+- **Un test qui compare à la constante qu'il teste ne mord pas** : la mutation de la borne du fan-out l'a montré. La
+  valeur attendue s'écrit dans le test.
 
 - **Deux sessions « groupe A » sur le même poste (2026-11-15)**. La même consigne a été donnée à deux sessions,
   qui ont codé STORY-345 dans le **même checkout** et se sont écrasé les fichiers. L'utilisateur a tranché : **une
