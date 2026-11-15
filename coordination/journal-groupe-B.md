@@ -14,8 +14,9 @@
   2. ~~STORY-931~~ : **plateforme #1** (contrats, vecteurs signés, `@prospera/signature`, point de décision amorcé ;
      dépôt créé par l'utilisateur) ;
   3. ~~STORY-932~~ : **catalogue #44** (contrat d'état publié, **figé**, étiquette `contrat-etat-publie-v1`) ;
-  4. **STORY-933** ← **prochaine étape** (reprise du lot sur consigne de l'utilisateur, 2026-11-15 : « continue le
-     groupe B jusqu'à finir ») ; 5. STORY-934 ; 6. STORY-935 ; 7. STORY-936 ; 8. STORY-937 ; 9. STORY-938 ;
+  4. ~~STORY-933~~ : **catalogue #45**, **recette #18** (Redis, BullMQ, bail MongoDB du relais d'outbox) ;
+  5. **STORY-934** ← **prochaine étape** (lot repris sur consigne de l'utilisateur, 2026-11-15 : « continue le groupe B
+     jusqu'à finir ») ; 6. STORY-935 ; 7. STORY-936 ; 8. STORY-937 ; 9. STORY-938 ;
      10. STORY-939.
 
   Puis la story du seed du catalogue, puis la relecture finale de A rejouée.
@@ -78,6 +79,15 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **BullMQ 6 refuse un identifiant de tâche qui contient `:`** (`Custom Id cannot contain :`) : la clef d'AD-6 en porte
+  (et la date ISO aussi). Identifiant = clef avec `|` ; la clef d'origine reste dans les données (STORY-933).
+- **BullMQ 6 n'a plus `queue.client` ni `ping`** : passer par l'API de la file (`getJobCounts`) pour une santé Redis.
+- **Le `docker-compose.yml` racine n'est pas versionné** : une dépendance de service (ex. `depends_on: redis`) se pose
+  dans `prospera-recette/docker-compose.recette.yml`. Pour démarrer l'image d'une branche dans la pile :
+  `docker build --target runtime -t grp-b-platform-catalog-service .` depuis le worktree, puis `up --no-build`.
+- **Un heredoc mange les antislashs d'un JSON** (`"^.+\\.(t|j)s$"`) : écrire les configurations par un script
+  Python ou par l'outil d'écriture.
 
 - **Le client de Confluent est un binding natif** (librdkafka) : ses tests se jouent sous Node 24, dans le stage
   `verification` du Dockerfile (`docker build --target verification`), pas sur le poste en Node 25.
