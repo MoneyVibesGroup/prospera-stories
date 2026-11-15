@@ -31,8 +31,8 @@
      compatibilité) ;
   6. ~~STORY-903~~ : **admin-panel #33** (coupe-circuit du catalogue, fan-out borné) ;
   7. ~~STORY-313~~ : **fiscal #44** (aiguillage, état daté d'un tiers) ;
-  8. **STORY-314** ← **prochaine étape** ;
-  9. **STORY-904** (neuve) ;
+  8. ~~STORY-314~~ : **fiscal #45** (montant à saisir, contre-métrique) ;
+  9. **STORY-904** (neuve) ← **prochaine étape** ;
   10. relecture finale §3.4.
 - **STORY-904 réservée par A** (fiche à écrire juste avant de la coder) : *le fiscal tient sur un vrai MongoDB*.
   Elle couvre :
