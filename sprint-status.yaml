@@ -5307,7 +5307,7 @@ sprints:
     end_date: "2027-06-17"
     capacity_points: 34
     committed_points: 31  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
-    completed_points: 15  # 2026-11-15 : STORY-311 (5) + STORY-312 (5) + STORY-313 (5) done — somme refaite sur le fichier résolu
+    completed_points: 18  # 2026-11-15 : STORY-311 (5) + STORY-312 (5) + STORY-313 (5) + STORY-314 (3) done — somme refaite sur le fichier résolu
     status: "in_progress"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. ⚡ PÉRIMÈTRE CORRIGÉ le 2026-08-16 (la version ci-dessous était PÉRIMÉE, et elle l'était SUR LES 9 SPRINTS DU MODULE À LA FOIS — une note de périmètre recopiée ne se met pas à jour toute seule) : PRD prds/prd-fiscalite-2026-07-31/prd.md **v0.4** (et non v0.3) · découpage epics-fiscalite-2026-08-03.md **RÉALIGNÉ sur la v0.4 le 2026-08-16** — il disait encore « par salarié » et ignorait FR-F79/FR-F80 · architecture architecture/architecture-fiscal-service-2026-08-03/ARCHITECTURE-SPINE.md **AD-1→AD-21** (et non AD-19 : AD-20 agrégat de rémunération, AD-21 donnée personnelle de tiers, ajoutées le 2026-08-15).
     goal: "Le moteur de calcul est complet et explicable 🏁 EPIC-029 (barèmes, forfaits, pipeline de modificateurs, aiguillage, refus nommé hors périmètre), puis le calendrier s'ouvre."
     stories:
@@ -5342,7 +5342,8 @@ sprints:
         epic: "EPIC-029"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
+        story_path: "stories/STORY-314.md"
+        status: "done"  # ✅ 2026-11-15 — FUSIONNÉE : prospera-fiscal-service#45 (dev 0fd32fc). montantASaisir + refusCalcul dérivés (familles ENREGISTRÉES) ; POST /obligations/:id/montant (champ HUMAIN, jamais effacé par une dérivation, tracé) ; GET /obligations/indicateurs/montants (contre-métrique, TENANT_ADMIN). Conformité 62/62, mutation.
         assigned_to: null
       - story_id: "STORY-315"
         title: "Calendrier fiscal centralisé, filtres et tri"
