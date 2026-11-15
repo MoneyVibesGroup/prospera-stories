@@ -21,11 +21,12 @@
   8. ~~STORY-937~~ : **plateforme #2** (garde partagée, `garde-etat-publie-v1`), **paiement #117** (Node 24, Confluent,
      double lecture) ;
   9. ~~STORY-938~~ : **auth #38**, **recette #19**, ADR « droits hors du jeton » ;
-  10. **STORY-939** ← **prochaine étape** (lot repris sur consigne de l'utilisateur, 2026-11-15 : « continue le groupe B
-      jusqu'à finir »).
+  10. ~~STORY-939~~ : **paiement #118** (read-model des manifestes, la vente résout comme la console), ticket des
+      écrans pour D. **Le lot de B (930 → 939) est fini.**
 
-  Puis la story du seed du catalogue, puis la relecture finale de A rejouée.
-- **Docker** : aucune pile ne tourne (`grp-b` descendue avec ses volumes).
+  Suite (consigne de l'utilisateur) : la story du seed du catalogue (`fiscal-tg-*` octroyables pour `declarations`),
+  puis la relecture finale de A rejouée.
+- **Docker** : la pile `grp-b` tourne pour les gates ; elle sera descendue avec ses volumes après la story du seed.
 
 ## Dépôts tenus
 
@@ -56,6 +57,17 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-15, STORY-939 — `paiement` :**
+  - **`POST /api/v1/abonnements` peut répondre 422 `MODULE_NON_VENDABLE`** (champ `modules`) pour un module à la
+    carte sans manifeste vendable au catalogue, ou dont une dépendance n'en a pas. La casse ne compte pas
+    (`MICROFINANCE` = `microfinance`). Tant que le catalogue n'a publié aucun manifeste, rien n'est refusé. Les
+    modules vendus par la recette (`conseil`, `microfinance`, `assurance`, ceux des packages) ont tous un manifeste :
+    rien ne change pour elle.
+  - Route nouvelle : `GET /api/v1/offres/resolution?modules=a,b` (surface plateforme, droit
+    `paiement:demande:emettre`), réponse `{ modules: [{ code, ajoutePar: { code, raison } | null }], inconnus }`.
+  - Consommateur nouveau de `catalogue.manifeste.publie`, groupe `paiement-manifestes`.
+  - **Pour D** : `tickets/TICKET-FRONTEND-console-manifestes.md` (les écrans de la console pour les manifestes).
 
 - **2026-11-15, STORY-938 — `auth-service` :**
   - **`identity.org.created` : `createdByUserId` devient FACULTATIF** (absent pour une organisation née du moteur),
@@ -107,7 +119,7 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
     chaque service ; le catalogue garde une copie, comparée par une garde (motif obligatoire pour toute divergence) ;
   - `resolution-dependances.json` : les cas de la résolution des dépendances dures. **paiement** (STORY-939) et la
     **console** (D) en gardent une copie et les rejouent : la même offre se résout à l'identique.
-  - `POST /api/v1/admin/modules/:code/versions` accepte un champ facultatif `manifeste` ; refus 422 nommés
+  - `POST /api/v1/catalog/admin/modules/:code/versions` accepte un champ facultatif `manifeste` ; refus 422 nommés
     (`MANIFESTE_INVALIDE`, `MANIFESTE_OBJET_HORS_MODULE`, `MANIFESTE_ARGENT_SANS_CONTROLE`,
     `AVEC_PERTE_INTERDIT_PLATEFORME`, `MANIFESTE_DEPENDANCE_MINEURE`, `MANIFESTE_CYCLE`).
 
