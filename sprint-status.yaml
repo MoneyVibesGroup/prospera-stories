@@ -361,6 +361,16 @@ reserved_ranges:
       compose --profile sinistres healthy ; projection prouvée sur vrai Mongo et Kafka ; 5 mutations rouges.
       Gate par module (D-980-1), port EtatDesModules alimenté par entitlement.changed en attendant 936/937
       (D-980-2). Lot C, n° 1 (EPIC-201). NON SLOTTÉE.
+  - range: "STORY-981"
+    status: "RÉSERVÉ"
+    owner: "prospera-assurance-service sur le socle du moteur — Node 24, client Kafka de Confluent (supervision réécrite), interrupteur compta-cima éteint par défaut (prospera-assurance-service)"
+    source_doc: "prospera-stories/stories/STORY-981.md"
+    reserved_on: "2026-11-15"
+    note: >
+      🏁 DONE le 2026-11-15 — prospera-assurance-service#20 (dev c813294). Node 24 : 2 197 unitaires, 347 e2e,
+      lint 0 ; compose --profile assurance healthy, droit réel projeté avec son interrupteur ; 6 mutations rouges.
+      Comptabilité CIMA existante ⇒ 403 COMPTA_CIMA_ETEINTE tant que compta-cima est éteint (D-981-1, D-981-2) ;
+      « Rebase and merge » seul posé. Lot C, n° 2 (EPIC-201). NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"

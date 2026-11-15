@@ -9,16 +9,17 @@
   A et tient maintenant celui de B. Le lot de A (le plus lourd en Docker) est terminé ; C préfixe ses piles `grp-c`,
   ne publie sur l'hôte que le port de son service, et descend sa pile avec ses volumes à la fin de chaque story.
 - **Lot de C, ordre** :
-  1. ~~STORY-980~~ : **sinistres #1** (squelette de `prospera-sinistres-service`, docs dans la PR de cette entrée) ;
-  2. **STORY-981** (`prospera-assurance-service` sur le socle) ← **prochaine étape** ;
-  3. STORY-982 ; 4. STORY-983 ; 5. STORY-984 ; 6. STORY-985 ; 7. STORY-986 ; 8. STORY-987 ; 9. STORY-988 ;
+  1. ~~STORY-980~~ : **sinistres #1** (squelette de `prospera-sinistres-service`), docs #497 ;
+  2. ~~STORY-981~~ : **assurance #20** (Node 24, client de Confluent, interrupteur `compta-cima`) ;
+  3. **STORY-982** (`document-service` sur le socle ; le cabinet s'en sert) ← **prochaine étape** ; 4. STORY-983 ; 5. STORY-984 ; 6. STORY-985 ; 7. STORY-986 ; 8. STORY-987 ; 9. STORY-988 ;
      10. STORY-989.
 - **Docker** : aucune pile ne tourne (`grp-c` descendue avec ses volumes).
 
 ## Dépôts tenus
 
-`prospera-assurance-service`, `prospera-ocr-service` (`document-service`), et les trois dépôts neufs :
-`prospera-sinistres-service` (**`main` et `dev` posées le 2026-11-15**), `prospera-liaison-assureur-service`,
+`prospera-assurance-service` (« Rebase and merge » seul depuis le 2026-11-15 ; il acceptait encore les commits de
+fusion), `prospera-ocr-service` (`document-service`), et les trois dépôts neufs :
+`prospera-sinistres-service` (**`main` et `dev` posées le 2026-11-15**, « Rebase and merge » seul), `prospera-liaison-assureur-service`,
 `prospera-assureur-fictif` (créés vides par l'utilisateur, branches à poser par STORY-984 et 986). Dans
 `prospera-plateforme` (créé par B) : dossiers `contrats/assurance/`, `champs-sensibles/`, `classification-sante/`
 seulement.
@@ -52,6 +53,15 @@ seulement.
   lectureSeule }`). Codes de refus : `SINISTRES_NOT_ENTITLED`, `EXPERTISES_NOT_ENTITLED`, `ABONNEMENT_EXPIRE`,
   `EMAIL_NOT_VERIFIED`. Audience attendue du jeton : `sinistres-service`.
 
+- **2026-11-15, STORY-981 — un refus NOUVEAU dans `prospera-assurance-service`** (rien d'autre ne change sur le fil :
+  même format, même clé, même en-tête `eventId` pour l'outbox ; le client Kafka devient celui de Confluent). La
+  comptabilité CIMA existante (toutes les routes `/api/v1/dossiers/{dossierId}/assurance/...` : contrats, provisions,
+  provisions techniques, réassurance, état C10b, registre des sinistres, référentiel) rend **403
+  `COMPTA_CIMA_ETEINTE`** tant que l'interrupteur `compta-cima` de l'organisation est éteint, **ce qui est le défaut**.
+  Il s'allume dans la configuration du droit `assurance` : `config.interrupteurs: [{ "code": "compta-cima", "allume":
+  true }]` (forme du contrat d'état publié). Aucun appelant n'existait (ni recette, ni front, ni pile racine) ; ⚠️
+  annonce faite avec la PR de docs, juste après la fusion du code, et non avant : rien ne l'appelait.
+
 ## Questions à l'utilisateur ou au PO
 
 Retenu par défaut le 2026-11-15, selon la règle de l'utilisateur (« appliquer ce que je recommande, contestable après
@@ -60,6 +70,10 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
 - **D-980-1** : le plan dit « gate `assurance` » pour STORY-980 ; la spine (AD-3) et le manifeste disent **un gate par
   module**. Retenu : `SINISTRES_NOT_ENTITLED` et `EXPERTISES_NOT_ENTITLED`. Le code `assurance` reste celui de
   `prospera-assurance-service`.
+- **D-981-1 / D-981-2** : en attendant l'état publié, la position de `compta-cima` se lit dans la configuration du droit
+  `assurance` (même forme que le contrat figé), **éteint par défaut** ; refus nommé `COMPTA_CIMA_ETEINTE`, après le droit
+  et avant la lecture seule. Si le PO veut la comptabilité CIMA **allumée par défaut** pour les cabinets, c'est un
+  changement d'une ligne, mais il contredit « un nom absent se lit éteint ».
 - **D-980-3** : **pas de KYC** dans le gate de `sinistres-service` (C2 ne demande que le droit du module). Si le PO veut
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
@@ -78,3 +92,12 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   ne le découvre qu'à la relecture des métadonnées (environ 4 minutes mesurées). Attendre avant de conclure.
 - **Une route absente rend 404 avant toute garde** : le refus d'écriture en lecture seule ne se prouve en e2e qu'avec
   une vraie route d'écriture ; en attendant, il est prouvé sur la garde.
+- **`git archive` sous `core.autocrlf=true` sort les fichiers en CRLF**, même quand l'index est en LF (`git ls-files
+  --eol` : `i/lf`). Pour construire une image de vérification fidèle : `git -c core.autocrlf=false archive HEAD | tar -x`.
+  Sinon les empreintes des artefacts JSON sont fausses et le lint compte des dizaines de milliers d'erreurs.
+- **`git checkout -- <fichier>` ne réécrit pas un fichier qu'il croit intact** : pour ramener les artefacts en LF dans
+  le checkout, les SUPPRIMER puis `git -c core.autocrlf=false checkout -- <dossier>`.
+- **Une mutation qui rend un import ou une variable inutilisés rougit par erreur de compilation** (`noUnusedLocals`),
+  ce qui ne prouve rien : retirer aussi l'import, ou garder la variable lue.
+- **Le client de Confluent ne crashe pas sur un `eachMessage` qui lève** : il journalise et relit le même message
+  (`lib/kafkajs/_consumer.js`). La santé d'un consommateur bloqué se mesure donc aux échecs consécutifs par partition.
