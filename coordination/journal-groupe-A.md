@@ -142,7 +142,8 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 - **STORY-300, lecture du fichier déposé** : `GET /depots/:id/fichier` et `/audit` n'exigent que le rôle. Tout membre
   du cabinet lit donc le fichier déposé. **Retenu par défaut : on garde**, conformément à la règle d'or de 300 (la
   lecture suit le rôle). Si le PO veut un droit `fiscalite:declaration:lire`, il le dit.
-- **Production : le seed du catalogue** (constat de STORY-901). Le catalogue n'autorise aucun paquet `fiscal-tg-*`
+- ✅ **Production : le seed du catalogue** — **réglée par STORY-940** (catalogue #49, recette #20 ; semis
+  corrigé, migration pour les bases existantes, contournement de la recette retiré). Constat d'origine (STORY-901) : Le catalogue n'autorise aucun paquet `fiscal-tg-*`
   pour le module `declarations`, puisque `fiscalite` est retiré de l'offre. L'octroi échoue donc en
   `422 REFERENTIEL_INCOMPATIBLE`, et fiscal-service ne recevrait aucun paquet en production. La recette contourne
   par `PATCH /admin/modules/declarations`. **Demandée par l'utilisateur le 2026-11-15** : à faire **après le lot de
@@ -179,10 +180,10 @@ octets de `balance-service` du tag déployé.
    `POST /admin/referentiels/<code>/<version>/artifact` (multipart : `file`, `expectedChecksum=sha256:<empreinte>`).
    Le catalogue écrit l'objet, puis crée la version `ACTIVE`. Un **409** veut dire que `(code, version)` est déjà
    pris : une version publiée ne se réécrit jamais.
-3. **Ouvrir le module.** Tant que la story du seed n'est pas faite, on ajoute les deux codes aux familles du module :
-   `PATCH /admin/modules/declarations`, corps `{ "referentielFamilies": [<familles actuelles>, "fiscal-tg-entreprise", "fiscal-tg-entreprise-zone-franche"] }`.
-   On ne garde que des familles **connues du registre**, sinon le catalogue refuse toute la liste. C'est le geste que
-   fait la recette (`prospera-recette`, `zone-franche.recette.ts`, `accueillirLeCabinet`).
+3. **Ouvrir le module.** Depuis STORY-940, le semis du catalogue donne à `declarations` les deux familles
+   `fiscal-tg-*`. Sur une base semée **avant** 940, on joue une fois la migration du catalogue :
+   `npm run migrate:familles-fiscales` (ou `node dist/migrations/familles-fiscales-de-declarations.js` dans l'image).
+   Elle ajoute seulement, et nomme les paquets pas encore déposés au registre. Plus de `PATCH` à la main.
 4. **Octroyer** à chaque cabinet abonné :
    `PUT /entitlements/<organisationId>/declarations`, corps `{ "versionCode": "1.0", "status": "ACTIVE", "referentiels": [{ "code": "fiscal-tg-entreprise", "version": "2026.1" }, …] }`.
    Un utilisateur du cabinet ne voit les droits qu'après le **renouvellement** de son jeton.

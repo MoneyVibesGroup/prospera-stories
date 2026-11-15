@@ -387,6 +387,16 @@ reserved_ranges:
       🏁 DONE le 2026-11-15 — paiement #118, ticket tickets/TICKET-FRONTEND-console-manifestes.md. Node 24 :
       4502 passés ; pile : 46 manifestes projetés, résolution 200 avec raisons, 422 MODULE_NON_VENDABLE (annoncé),
       casse indifférente. Lot B, n° 10 (EPIC-143) : le lot de B est fini. NON SLOTTÉE.
+  - range: "STORY-940"
+    status: "RÉSERVÉ"
+    owner: "declarations s'ouvre aux paquets fiscaux fiscal-tg-* — semis et migration du catalogue, recette sans contournement ; consommateurs Confluent qui créent leurs topics abonnés (platform-catalog-service, prospera-paiement-service, prospera-recette)"
+    source_doc: "prospera-stories/stories/STORY-940.md"
+    reserved_on: "2026-11-15"
+    note: >
+      🏁 DONE le 2026-11-15 — catalogue #49, paiement #119, recette #20. Catalogue 1207/1207 ; recettes à froid
+      zone-franche 5/5 (sans PATCH) et atelier-balance 51/51 = relecture finale de A rejouée 56/56 ; migration
+      jouée dans l'image (modifie puis deja). Régression de 930/937 corrigée au gate (topics abonnés créés avant
+      subscribe, correctif de C). Hors lot B, demandée par l'utilisateur (EPIC-264). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

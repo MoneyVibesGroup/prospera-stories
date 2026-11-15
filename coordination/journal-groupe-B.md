@@ -24,9 +24,12 @@
   10. ~~STORY-939~~ : **paiement #118** (read-model des manifestes, la vente résout comme la console), ticket des
       écrans pour D. **Le lot de B (930 → 939) est fini.**
 
-  Suite (consigne de l'utilisateur) : la story du seed du catalogue (`fiscal-tg-*` octroyables pour `declarations`),
-  puis la relecture finale de A rejouée.
-- **Docker** : la pile `grp-b` tourne pour les gates ; elle sera descendue avec ses volumes après la story du seed.
+- **Hors lot, consigne de l'utilisateur** : ~~STORY-940~~ (le seed du catalogue : `declarations` s'ouvre aux paquets
+  `fiscal-tg-*`) : **catalogue #49**, **paiement #119**, **recette #20**. Puis la relecture finale de A rejouée (les recettes
+  `atelier-balance` et `zone-franche`, jouées au gate de 940 : **56/56**).
+- **Docker** : aucune pile de B ne tourne. ⚡ Règle de l'utilisateur (2026-11-15) : une pile se lève pour le gate de sa
+  story et **se descend avec ses volumes à la fin de cette story**, même si la suivante en aura besoin ; elle se relève
+  alors au gate suivant.
 
 ## Dépôts tenus
 
@@ -51,12 +54,38 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
+- **← C (2026-11-15) : la recette d'`origin/dev` ne démarre pas sur une pile NEUVE** — **servie par STORY-940**
+  (catalogue et paiement créent leurs topics abonnés absents avant `subscribe`, le correctif de C). Plus besoin de
+  créer les trois topics `paiement.abonnement.*` à la main une fois les images reconstruites depuis `dev`.
+- **← C (2026-11-15) : `prospera-plateforme`, verrou et scripts racines** — **prise en charge**, pas encore servie
+  (lot suivant de B).
+- **← C (2026-11-15) : les ports du compose racine pour la recette de l'Atelier** — **servie**. `grp-b` est descendue
+  avec ses volumes après STORY-939, et B ne garde plus de pile levée entre deux stories. La recette de 940 a attendu
+  que `grp-c-recette` libère les ports.
+
 - **← A (2026-11-15) : borne du jeton face aux verticales** — **prise en charge**, pas encore servie :
   1. regex des droits à tiret ⇒ **STORY-938** ;
   2. cinq codes de plus de 40 caractères ⇒ **STORY-935** ;
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-15, STORY-940 — catalogue : `declarations` consomme les paquets fiscaux.**
+  - Le semis donne à `declarations` les familles `syscohada-revise`, `zone-franche-togo`, **`fiscal-tg-entreprise`**,
+    **`fiscal-tg-entreprise-zone-franche`**. L'octroi d'un paquet `fiscal-tg-*` à `declarations` est accepté (il
+    partait en 422 `REFERENTIEL_INCOMPATIBLE`) ; aucun refus nouveau.
+  - **Une base déjà semée** se répare par `npm run migrate:familles-fiscales` (ajout seul, idempotent), à jouer au
+    déploiement du catalogue. Le semis ne réécrit jamais un module présent.
+  - **Pour A et la recette** : `zone-franche.recette.ts` ne patche plus `declarations` ; elle vérifie le semis.
+  - **Pour D** : `GET /api/v1/catalog/admin/modules` rend deux familles de plus pour `declarations` ; l'écran
+    d'octroi les propose.
+  - **Régression de STORY-930/937 corrigée (catalogue et paiement)** : sous le client de Confluent, un consommateur
+    abonné à un topic que personne n'a encore écrit ne crée pas son groupe, et ne voit le topic qu'au
+    rafraîchissement des métadonnées (5 minutes) ; kafkajs le faisait créer. Sur une pile neuve,
+    `platform-catalog-abonnements` n'existait donc pas, et **le `globalSetup` de la recette s'arrêtait**. Correctif de
+    C (`document-service`, STORY-982) repris : les deux consommateurs du catalogue et la supervision de paiement
+    **créent les topics abonnés absents avant `subscribe`**, aux réglages du broker ; un échec est journalisé et
+    n'empêche pas l'abonnement. (`allow.auto.create.topics` ne suffit pas : la couche de compatibilité le pose déjà.)
 
 - **2026-11-15, STORY-939 — `paiement` :**
   - **`POST /api/v1/abonnements` peut répondre 422 `MODULE_NON_VENDABLE`** (champ `modules`) pour un module à la
@@ -181,6 +210,10 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 - **`.dockerignore` du catalogue exclut `test/`** : `test:schemas` se joue depuis le poste
   (`SCHEMA_REGISTRY_URL=http://127.0.0.1:8081 npx jest --config ./test/jest-schemas.json`), les scripts `schemas:*`
   depuis l'image (`--network grp-b_default -e SCHEMA_REGISTRY_URL=http://karapace:8081`).
+- **`RECETTE_SURCOUCHES` sous Git Bash** : MSYS réécrit une liste de chemins séparés par `;` en liste POSIX à `:`,
+  et la recette cherche une surcouche nommée `C`. Lancer la recette depuis PowerShell (STORY-940).
+- **Une pile de recette publie des ports fixes** (3001 → 3010, 27017, 6379, 9000) : deux sessions ne peuvent pas
+  avoir chacune la sienne en même temps. Regarder `docker ps` avant de lever (STORY-940, `grp-c-recette`).
 - **Une signature base64url altérée sur ses DERNIERS caractères reste valide** : ils portent des bits de bourrage
   qu'un décodeur ignore. Un vecteur de signature altérée change un caractère du milieu (STORY-931).
 - **Lint sur ce poste** : les fichiers suivis sortent en CRLF (`autocrlf`) ; ne linter que les fichiers touchés, avec
