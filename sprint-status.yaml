@@ -450,6 +450,15 @@ reserved_ranges:
       main et dev posées). Node 24 : 367 unitaires + 17 e2e, lint 0 ; contrat 79/79. Pile réelle : ordre de
       dépendance, Excel, lot partiel, version inconnue, rejeu sans doublon, DOUBLON sans écrasement. Envois, API,
       écarts, numéros et faits : STORY-985 (D-984-1). Lot C, n° 5 (EPIC-203). NON SLOTTÉE.
+  - range: "STORY-985"
+    status: "RÉSERVÉ"
+    owner: "L'échange par API, la file d'envoi acquittée, les accusés, le numéro officiel et la file des écarts (prospera-liaison-assureur-service)"
+    source_doc: "prospera-stories/stories/STORY-985.md"
+    reserved_on: "2026-11-15"
+    note: >
+      🏁 DONE le 2026-11-15 — prospera-liaison-assureur-service#2 (dev 3a2a6f0). Node 24 : 409 unitaires + 20 e2e,
+      lint 0. Pile réelle : 201/200/409/422, refus du LC → écart, RENVOYER signé, renvoi, numéro rattaché AUTO.
+      Faits, fraîcheur, liste « à saisir » : STORY-991 (D-985-1). Lot C, n° 6 (EPIC-203). NON SLOTTÉE.
   - range: "STORY-990"
     status: "RÉSERVÉ"
     owner: "Les consommateurs Kafka de C voient un topic neuf en secondes : création avant l'abonnement et métadonnées toutes les 10 s (sinistres, assurance, document-service)"

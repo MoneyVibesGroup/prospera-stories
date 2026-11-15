@@ -18,8 +18,10 @@
      (291 s → 6,9 s mesurés) ;
   6. ~~STORY-984~~ : **plateforme #4** (le contrat de l'annexe C, C-1 → C-19) et **liaison-assureur #1** (le
      service, le transport par fichiers, l'intégration idempotente des lots, prouvés sur pile réelle) ;
-  7. **STORY-985** ← **suivante** (envois, API, journal, file des écarts, numéros, faits) ; 8. STORY-986 ;
-     9. STORY-987 ; 10. STORY-988 ; 11. STORY-989.
+  7. ~~STORY-985~~ : **liaison-assureur #2** (file d'envoi acquittée, accusés, numéro officiel, file des écarts,
+     transport par API, prouvés sur pile réelle) ;
+  8. **STORY-986** ← **suivante** (la compagnie fictive) ; 9. STORY-987 ; 10. STORY-988 ; 11. STORY-989 ;
+     puis **STORY-991** (faits `liaison-assureur.*@1`, fraîcheur, liste « à saisir »).
 - **Ensuite (consigne de l'utilisateur du 2026-11-15)** : « ajoute les stories suivantes 201 à 211 », soit les stories
   restantes des épics **EPIC-201 → EPIC-211** d'`epics-assurance-2026-11-13.md` (rôles et portées, déclaration,
   instruction, expertises, décision, paiement, clôture), écrites juste avant d'être codées, dans la plage de C
@@ -120,6 +122,13 @@ seulement.
     `…/echange/projections/{objet}/{cleOrigine}` ; refus `LIAISON_ASSUREUR_NOT_ENTITLED`, `ABONNEMENT_EXPIRE`,
     `PROJECTION_INCONNUE` (404). Consomme `entitlement.changed` (groupe `liaison-assureur-service.droits`) ; ne publie
     rien encore (les faits `liaison-assureur.*@1` arrivent avec STORY-985, tous ensemble).
+
+- **2026-11-15, STORY-985 — des routes NOUVELLES dans `prospera-liaison-assureur-service`, rien sur le fil.**
+  `POST /api/v1/liaison-assureur/echange/envois` (`{ objet, ligne }` : 201, 200 si identique, 409 `ENVOI_EN_CONFLIT`,
+  422 `ENVOI_INVALIDE` / `OBJET_NON_SORTANT`), `GET …/echange/envois`, `GET …/echange/ecarts?etat=`,
+  `POST …/echange/ecarts/{id}/resolution` (`{ decision, motif }` : 404 `ECART_INCONNU`, 409 `ECART_DEJA_RESOLU`, 422),
+  `GET …/echange/numeros/{DEC-}` (404 `NUMERO_INCONNU`). Le transport par API du LC (`GET entree`, `GET entree/{nom}`,
+  `PUT sortie/{nom}`, jeton porteur) est ce que le LC fictif (STORY-986) servira.
 
 ## Questions à l'utilisateur ou au PO
 
