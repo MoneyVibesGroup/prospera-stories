@@ -359,6 +359,16 @@ reserved_ranges:
       🏁 DONE le 2026-11-15 — catalogue #48. 33 cas rejoués ; verification Node 24 1193/1193 ; test:socle 9/9 ;
       pile : octroi ⇒ pdv EN_SERVICE (n° 1), retrait ⇒ DESINSTALLE (n° 2), réponse réelle conforme au contrat figé.
       Axe 2 déduit du droit jusqu'à EPIC-144 (D-936-1). Lot B, n° 7 (EPIC-145). NON SLOTTÉE.
+  - range: "STORY-937"
+    status: "RÉSERVÉ"
+    owner: "La garde partagée de l'état publié (prospera-plateforme) ; paiement sur le nouveau socle (Node 24, Confluent) et en double lecture (prospera-paiement-service)"
+    source_doc: "prospera-stories/stories/STORY-937.md"
+    reserved_on: "2026-11-15"
+    note: >
+      🏁 DONE le 2026-11-15 — plateforme #2 (étiquette garde-etat-publie-v1), paiement #117. Plateforme 37/37 ;
+      paiement Node 24 4483 passés, 0 échec ; mutation echeanceLe sans effet ; parcours réel catalogue → paiement :
+      EN_SERVICE n° 1 ⇒ la garde passe, DESINSTALLE n° 2 ⇒ 403 PAIEMENT_NOT_ENTITLED. Lot B, n° 8 (EPIC-145,
+      EPIC-155). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

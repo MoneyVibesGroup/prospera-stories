@@ -18,8 +18,10 @@
   5. ~~STORY-934~~ : **catalogue #46** (manifeste dans `ModuleVersion`, refus nommés, résolution, garde) ;
   6. ~~STORY-935~~ : **catalogue #47** (46 manifestes au catalogue, `catalogue.manifeste.publie`, droits renommés) ;
   7. ~~STORY-936~~ : **catalogue #48** (matrice exécutée, vraie route, émetteur de `etat-publie.changed`) ;
-  8. **STORY-937** ← **prochaine étape** (lot repris sur consigne de l'utilisateur, 2026-11-15 : « continue le groupe B
-     jusqu'à finir ») ; 9. STORY-938 ; 10. STORY-939.
+  8. ~~STORY-937~~ : **plateforme #2** (garde partagée, `garde-etat-publie-v1`), **paiement #117** (Node 24, Confluent,
+     double lecture) ;
+  9. **STORY-938** ← **prochaine étape** (lot repris sur consigne de l'utilisateur, 2026-11-15 : « continue le groupe B
+     jusqu'à finir ») ; 10. STORY-939.
 
   Puis la story du seed du catalogue, puis la relecture finale de A rejouée.
 - **Docker** : aucune pile ne tourne (`grp-b` descendue avec ses volumes).
@@ -53,6 +55,13 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-15, STORY-937 — la GARDE PARTAGÉE est publiée** (`prospera-plateforme/paquets/garde-etat-publie`, étiquette
+  `garde-etat-publie-v1`). **Pour tout groupe qui garde un module** (C : sinistres, assurance ; A et les propriétaires de
+  bilan, balance, microfinance, notification) : copier `src/index.ts` à cette étiquette dans le service, garder son
+  sha256 (patron : `prospera-paiement-service/src/vendor/garde-etat-publie/`), projeter `etat-publie.changed.<espace>`
+  (appliquer si `(epoque, numero)` est plus récent), puis jouer la double lecture. Aucun contrat existant ne change :
+  paiement continue de lire `entitlement.changed` pour l'ancienne garde.
 
 - **2026-11-15, STORY-936 — la vraie route est servie, rien ne change au contrat.**
   `GET /api/instance/v1/etat-publie/{organisationId}` (service `/api/v1/…`) répond au contrat figé
@@ -114,6 +123,14 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Client de Confluent, supervision** : ni `CRASH` ni `GROUP_JOIN`. Un message dont le traitement lève une erreur est
+  RELIVRÉ, et le blocage se compte sur ses échecs consécutifs (STORY-937, paiement).
+- **Paiement, invariants qui mordent à juste titre** : la garde ne lit aucune configuration (STORY-606) ; aucun
+  identifiant ne contient « change » (STORY-284) ; seul le service des demandes écrit `$set: { etat }` (STORY-260).
+- **Paiement, routes `@SurfacePlateforme()`** : elles rendent 404 à un client AVANT la garde des droits (STORY-728).
+  Pour éprouver la garde du module, prendre une route sans surface plateforme (`GET /api/v1/creances`).
+- **`.dockerignore` de paiement excluait `test/`** : l'étage `verification` en a besoin (`test/utils`).
 
 - **BullMQ 6 refuse un identifiant de tâche qui contient `:`** (`Custom Id cannot contain :`) : la clef d'AD-6 en porte
   (et la date ISO aussi). Identifiant = clef avec `|` ; la clef d'origine reste dans les données (STORY-933).
