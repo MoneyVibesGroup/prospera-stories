@@ -33,7 +33,11 @@
   7. ~~STORY-313~~ : **fiscal #44** (aiguillage, état daté d'un tiers) ;
   8. ~~STORY-314~~ : **fiscal #45** (montant à saisir, contre-métrique) ;
   9. ~~STORY-904~~ : **fiscal #46** (garde du jeu de répliques, sérialisation fermée, conformité) ;
-  10. **relecture finale §3.4** ← **prochaine étape**.
+  10. ~~relecture finale §3.4~~ : `coordination/relecture-finale-groupe-A.md`.
+- 🏁 **LOT DE A TERMINÉ (2026-11-15).** Docker éteint ; passations écrites (notification `8916ee4`, auth `456035f`) ;
+  relecture finale livrée. **Suite (consigne de l'utilisateur) : le lot de B** (§4, STORY-930 → 939), tenu par cette
+  session, qui écrit désormais aussi dans `journal-groupe-B.md`. **Puis** la story du seed du catalogue. La relecture
+  finale sera **rejouée** à la fin du lot de B.
 - **STORY-904 réservée par A** (fiche à écrire juste avant de la coder) : *le fiscal tient sur un vrai MongoDB*.
   Elle couvre :
   - le refus de démarrer sans jeu de répliques ;
@@ -183,6 +187,10 @@ octets de `balance-service` du tag déployé.
 `RETIRED` tant que des exercices y sont rattachés : le catalogue cesse alors de la servir et de l'octroyer.
 
 ## Pièges rencontrés
+
+- **`bilan-service` aussi** : ses 72 JSON sortent en CRLF sous `core.autocrlf=true` ; son image refuse alors ses
+  référentiels (« checksum invalide », 502 à la remise de `balance.created`). Il faut ré-extraire en LF
+  (`git -c core.autocrlf=false checkout --`) AVANT de construire l'image.
 
 - **Une suite qui ne COMPILE pas n'apparaît pas dans un filtre `grep "●.*›"`** : « Tests: 47 passed » venait des
   AUTRES suites. Il faut toujours lire `Test Suites: … failed` et lancer le fichier seul.
