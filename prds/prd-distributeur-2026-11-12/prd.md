@@ -4044,7 +4044,7 @@ Toutes les questions posées au PO (Q1 à Q12) sont tranchées. Il ne reste que 
 | D-20 | **Cadrage** : un seul PRD ; le front de démo définit ce qu'on veut ; les deux moments (facture juste, tournée finie) comptent à égalité ; moyens de paiement PI-SPI et FedaPay ; application terrain en Flutter ; jeu de démonstration fictif ; boutons non branchés « bientôt », jamais simulés. | PO, `.memlog.md` |
 | D-21 | **Dérogation au plafond de crédit = droit propre `commande:plafond:deroger`** (DG et DAF par défaut, attribuable). Celui qui valide n'est pas celui qui déroge : le comptable valide, il ne déroge pas. La dérogation vaut pour une commande, avec motif, tracée ; elle ne lève jamais un crédit bloqué et ne change pas le plafond du client (`pdv:plafond:modifier`). | PO, 2026-11-13 (PR #423) |
 | D-22 | **La réception d'une commande fournisseur appartient à `entrepot`** (FR-71). Seul fait : `entrepot.reception.enregistree@1`, que `approvisionnement` consomme (statut, dette, note). Fait `approvisionnement.reception.enregistree@1` et droit `approvisionnement:reception:enregistrer` retirés. Sans `entrepot`, l'entrée en stock porte la référence de la commande fournisseur. | PO, 2026-11-13 (PR #423) |
-| D-23 | **Lecture seule des achats : `approvisionnement:commande-fournisseur:consulter`** (DG, DAF, COMPTABLE, CONTROLE_GESTION) : lire sans pouvoir agir, comme les autres modules. | PO, 2026-11-13 (PR #423) |
+| D-23 | **Lecture seule des achats : `approvisionnement:bon-commande:consulter`** (DG, DAF, COMPTABLE, CONTROLE_GESTION) : lire sans pouvoir agir, comme les autres modules. | PO, 2026-11-13 (PR #423) |
 | D-24 | **`freelance` est un module installable, vendu comme add-on** (pas une option de pack). Sans code de module : ni gate, ni « non installé » (FR-99), ni compteur par freelance actif. **Hébergé dans `pdv-service`**, derrière sa propre gate et avec ses collections (exception au critère du §4 du contrat, à écrire dans la spine du distributeur). `catalogue`, `reseau` et `pdv` listent `freelance` en `enrichiPar` : sans lui, grilles freelance et « Mes prix », statut indépendant et révélation au départ sont `NON_INSTALLE`. Compteur de l'add-on : `freelance.freelance.active@1`, lu par `paiement`. | PO, 2026-11-13 (20e séance de la salle, PR #425) |
 
 Par défaut, et modifiable, la balance âgée garde cinq tranches paramétrables, et un dossier de recouvrement est ouvert par tiers.
@@ -4138,8 +4138,8 @@ Le contrat `CONTRAT-DE-MODULE-2026-11-09.md` (§6) demande à chaque PRD une sec
 | C4 Emplacements vides | `finance-transactions` absent : plancher de trésorerie = `NON_INSTALLE` (l'écran le dit, garde-fou non vérifié) ; `paiement` absent : « Payer » = `NON_INSTALLE` ; `entrepot` absent : réception saisie directement dans `stock`. |
 | C5 Contrats nommés | Publie `approvisionnement.commande-fournisseur.changed@1`, `approvisionnement.fournisseur.changed@1`, `approvisionnement.escalade.demandee@1`, `approvisionnement.retour.changed@1`. Consomme `stock.alerte.changed@1`, `stock.disponible.changed@1`, `stock.liquidation.lancee@1`, `catalogue.article.changed@1`, `entrepot.reception.enregistree@1` (seul fait de réception, D-22), `stock.mouvement.enregistre@1` (sans `entrepot` : entrée `RECEPTION_FOURNISSEUR` portant la référence de la commande fournisseur), `finance-transactions.tresorerie.changed@1`, `etat-publie.changed.*@1`. |
 | C6 Paramètres | Règles de réappro (seuil, couverture cible), plancher de trésorerie avant tout envoi automatique, barème de note de fournisseur, regroupement franco/volume. Données, jamais code. |
-| C7 Droits | `approvisionnement:fournisseur:gerer`, `approvisionnement:commande-fournisseur:valider`, `approvisionnement:commande-fournisseur:suggerer`, `approvisionnement:commande-fournisseur:consulter` (lecture seule, D-23), `approvisionnement:regle:definir`. `approvisionnement:reception:enregistrer` est retiré : la réception appartient à `entrepot` (D-22). Format conforme. |
-| C8 Module d'écran | `/approvisionnement` (Réappro IA, Commandes fournisseurs, Fournisseurs, Règles). Entrées visibles avec `approvisionnement:fournisseur:gerer` ou `…:commande-fournisseur:valider`. « Basculer sur le fournisseur alternatif » : « bientôt ». |
+| C7 Droits | `approvisionnement:fournisseur:gerer`, `approvisionnement:bon-commande:valider`, `approvisionnement:bon-commande:suggerer`, `approvisionnement:bon-commande:consulter` (lecture seule, D-23), `approvisionnement:regle:definir`. `approvisionnement:reception:enregistrer` est retiré : la réception appartient à `entrepot` (D-22). Format conforme. |
+| C8 Module d'écran | `/approvisionnement` (Réappro IA, Commandes fournisseurs, Fournisseurs, Règles). Entrées visibles avec `approvisionnement:fournisseur:gerer` ou `…:bon-commande:valider`. « Basculer sur le fournisseur alternatif » : « bientôt ». |
 | C9 Installer/désinstaller | Rien supprimé ; commandes fournisseurs en cours conservées ; avertissement : « Les suggestions de réapprovisionnement cessent ; les commandes ouvertes ne sont plus suivies. » |
 | C10 Démarrer seul | `profiles: ["approvisionnement"]` ; socle + `catalogue` + `stock`. |
 | C11 IA | `ia: { modeles: ['prevision-demande', 'scoring-fournisseur-explicable'], finalites: ['reapprovisionnement-propose', 'choix-fournisseur-justifie'] }`. Le garde-fou de trésorerie est une règle, non un modèle ; il n'est jamais contourné par la prédiction. |
@@ -4282,8 +4282,8 @@ Le contrat `CONTRAT-DE-MODULE-2026-11-09.md` (§6) demande à chaque PRD une sec
 | C4 Emplacements vides | `facturation` absent : lettrage = `NON_INSTALLE` ; `approvisionnement` absent : run fournisseurs = `NON_INSTALLE` ; `balance` absent : écritures = `NON_INSTALLE`. |
 | C5 Contrats nommés | Publie `finance-transactions.tresorerie.changed@1`, `finance-transactions.rapprochement.effectue@1`. Consomme `paiement.encaissement.valide`, `paiement.encaissement.ecart.constate`, `paiement.creance.changed@1`, `approvisionnement.commande-fournisseur.changed@1`. |
 | C6 Paramètres | Plancher de trésorerie, horizon de prévision, règles de lettrage automatique (montant et référence), tolérance d'arrondi. |
-| C7 Droits | `finance-transactions:rapprochement:effectuer`, `finance-transactions:tresorerie:consulter`, `finance-transactions:run:consulter`, `finance-transactions:suspens:traiter`. Préparer et valider un ordre exigent en plus `paiement:*` (deux droits, deux personnes, FR-P66). |
-| C8 Module d'écran | `/comptabilite`, `/pilotage-financier` (DAF). Menus : « Rapprochement » (`…:rapprochement:effectuer`), « Trésorerie » (`…:tresorerie:consulter`), « Run fournisseurs » (`…:run:consulter`). Module hors février : ses boutons « Accorder », « Refuser » et « Télédéclarer sur le portail OTR » restent « bientôt », sans date. « Payer » un fournisseur passe par les ordres de `paiement` (FR-209), exigés en février. |
+| C7 Droits | `finance-transactions:releve:rapprocher`, `finance-transactions:tresorerie:lire`, `finance-transactions:run:consulter`, `finance-transactions:suspens:traiter`. Préparer et valider un ordre exigent en plus `paiement:*` (deux droits, deux personnes, FR-P66). |
+| C8 Module d'écran | `/comptabilite`, `/pilotage-financier` (DAF). Menus : « Rapprochement » (`…:releve:rapprocher`), « Trésorerie » (`…:tresorerie:lire`), « Run fournisseurs » (`…:run:consulter`). Module hors février : ses boutons « Accorder », « Refuser » et « Télédéclarer sur le portail OTR » restent « bientôt », sans date. « Payer » un fournisseur passe par les ordres de `paiement` (FR-209), exigés en février. |
 | C9 Installer/désinstaller | Rien supprimé ; rapprochements conservés. Avertissement : « Les rapprochements cessent ; les paiements restent chez le module paiement. » |
 | C10 Démarrer seul | `profiles: ["finance-transactions"]` ; socle + `paiement`. |
 | C11 IA | `ia: { modeles: ['reconciliation-auto', 'detection-anomalies', 'prevision-tresorerie'], finalites: ['lettrage-assiste', 'alerte-anomalie', 'prevision-de-cash'] }`. Un rapprochement proposé est toujours confirmé par un humain en v1. |
@@ -4549,9 +4549,9 @@ Droits de l'annexe A (modules des parties 2 et 3) et des manifestes (modules de 
 | ★ `facturation` | `facturation:balance:consulter` | DG, DC, RESP_VENTES, DAF, COMPTABLE, CONTROLE_GESTION, RECOUVREMENT |
 | ★ `facturation` | `facturation:numerotation:administrer` | DAF (initialisation par la reprise, une fois) |
 | `approvisionnement` | `approvisionnement:fournisseur:gerer` | RESP_STOCK, DAF |
-| `approvisionnement` | `approvisionnement:commande-fournisseur:suggerer` | RESP_STOCK |
-| `approvisionnement` | `approvisionnement:commande-fournisseur:valider` | RESP_STOCK sous son plafond de validation ; au-delà DAF, puis DG |
-| `approvisionnement` | `approvisionnement:commande-fournisseur:consulter` *(nouveau, D-23)* | DG, DAF, COMPTABLE, CONTROLE_GESTION |
+| `approvisionnement` | `approvisionnement:bon-commande:suggerer` | RESP_STOCK |
+| `approvisionnement` | `approvisionnement:bon-commande:valider` | RESP_STOCK sous son plafond de validation ; au-delà DAF, puis DG |
+| `approvisionnement` | `approvisionnement:bon-commande:consulter` *(nouveau, D-23)* | DG, DAF, COMPTABLE, CONTROLE_GESTION |
 | `approvisionnement` | `approvisionnement:regle:definir` | DG, RESP_STOCK |
 | `entrepot` | `entrepot:preparation:realiser`, `entrepot:chargement:gerer`, `entrepot:reception:controler` | GEST_ENTREPOT |
 | `entrepot` | `entrepot:expedition:gerer` | GEST_ENTREPOT, RESP_STOCK |
@@ -4584,8 +4584,8 @@ Droits de l'annexe A (modules des parties 2 et 3) et des manifestes (modules de 
 | `equipe` | `equipe:classement:consulter` | DG, DC, RESP_VENTES, SUPERVISEUR |
 | `equipe` | `equipe:coaching:gerer` | SUPERVISEUR, RESP_VENTES, DC |
 | `equipe` | `equipe:remuneration:consulter` *(nouveau, FR-8)* | DG, DC, DAF ; chaque agent pour lui-même ; jamais SUPERVISEUR ni CONTROLE_GESTION |
-| `finance-transactions` (hors février) | `finance-transactions:rapprochement:effectuer`, `finance-transactions:suspens:traiter` | COMPTABLE |
-| `finance-transactions` (hors février) | `finance-transactions:tresorerie:consulter` | DG, DC, DAF |
+| `finance-transactions` (hors février) | `finance-transactions:releve:rapprocher`, `finance-transactions:suspens:traiter` | COMPTABLE |
+| `finance-transactions` (hors février) | `finance-transactions:tresorerie:lire` | DG, DC, DAF |
 | `finance-transactions` (hors février) | `finance-transactions:run:consulter` | DG, DAF |
 | `marketing` | `marketing:campagne:gerer`, `marketing:segment:gerer` | MARKETING |
 | `marketing` | `marketing:campagne:valider` | DG, DC |

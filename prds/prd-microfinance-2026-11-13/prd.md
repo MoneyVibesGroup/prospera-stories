@@ -4097,7 +4097,7 @@ Comme PRD-D A.11 pour tout ce qui n'est pas ci-dessous. **Hors périmètre du pr
 | C4 Emplacements vides | `coeur-sfd` absent : export = `NON_INSTALLE`, le fichier reste téléchargeable ; balance du cœur absente : résultat et rentabilité = « en attente des données du cœur » ; budget non saisi : écart = « budget non saisi », jamais 0. |
 | C5 Contrats nommés | Publie `finance-transactions.ecriture.proposee@1`, `finance-transactions.budget.changed@1`, `finance-transactions.tresorerie.changed@1`. Consomme `coeur-sfd.balance.recue@1`, `coeur-sfd.caisse-guichet.changed@1`, `risque-par.provision.proposee@1`, `caisse.remise.constatee@1`. |
 | C6 Paramètres | Plan comptable du cœur (correspondance des comptes), journal d'export, horizon de prévision (7 jours), plancher de liquidité, périodicité d'export. Données, jamais code. |
-| C7 Droits | `finance-transactions:ecriture:exporter`, `finance-transactions:budget:saisir`, `finance-transactions:tresorerie:consulter`. Format conforme (code à tiret). |
+| C7 Droits | `finance-transactions:ecriture:exporter`, `finance-transactions:budget:saisir`, `finance-transactions:tresorerie:lire`. Format conforme (code à tiret). |
 | C8 Module d'écran | Tableau Budget et Rentabilité du DAF (dans le cockpit du DAF, FR-253), export des écritures proposées, prévision de trésorerie. Boutons non branchés : « bientôt », sans date ; en particulier l'export, tant que le module n'est pas livré, et les sous-onglets de démo listés ci-dessus. |
 | C9 Installer/désinstaller | Comme PRD-D A.11 : rien supprimé, budgets et écritures proposées conservés. Avertissement : « L'export des écritures cesse ; la comptabilité reste dans le cœur. » |
 | C10 Démarrer seul | `profiles: ["finance-transactions"]` ; socle + `paiement`. |

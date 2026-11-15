@@ -15,19 +15,19 @@
 //   acheter à la main (§5.3, notes).
 // - Écrans : module d'écran `approvisionnement` dans `prospera-app` (C8), tous les écrans par Dev B. Route
 //   `/approvisionnement`, quatre onglets : Réappro IA, Commandes fournisseurs, Fournisseurs, Règles. Les entrées
-//   sont visibles avec `approvisionnement:fournisseur:gerer`, `approvisionnement:commande-fournisseur:valider`
-//   ou `approvisionnement:commande-fournisseur:consulter` (annexe A.3, C8 ; lecture ajoutée par décision du PO du 2026-11-13) ; onglet d'entrée : RESP_STOCK et DG = réapprovisionnement, DAF et COMPTABLE = fournisseurs
+//   sont visibles avec `approvisionnement:fournisseur:gerer`, `approvisionnement:bon-commande:valider`
+//   ou `approvisionnement:bon-commande:consulter` (annexe A.3, C8 ; lecture ajoutée par décision du PO du 2026-11-13) ; onglet d'entrée : RESP_STOCK et DG = réapprovisionnement, DAF et COMPTABLE = fournisseurs
 //   (FR-61). « Basculer sur le fournisseur alternatif » : « bientôt » (annexe A.3, C8) ; « Relancer un
 //   fournisseur » : « bientôt ». « Payer une échéance » : saisie (FR-67) ; l'ordre de paiement vient de
 //   `paiement` (FR-209), « non installé » sans lui.
 // - Rôles du socle distributeur, tirés de l'annexe B.2, à confirmer avec les rôles du vertical :
-//   `fournisseur:gerer` = RESP_STOCK, DAF ; `commande-fournisseur:suggerer` = RESP_STOCK ;
-//   `commande-fournisseur:valider` = RESP_STOCK sous son plafond de validation, au-delà DAF, puis DG (FR-63) ;
-//   `commande-fournisseur:consulter` = DG, DAF, COMPTABLE, CONTROLE_GESTION (décision du PO du 2026-11-13) ;
+//   `fournisseur:gerer` = RESP_STOCK, DAF ; `bon-commande:suggerer` = RESP_STOCK ;
+//   `bon-commande:valider` = RESP_STOCK sous son plafond de validation, au-delà DAF, puis DG (FR-63) ;
+//   `bon-commande:consulter` = DG, DAF, COMPTABLE, CONTROLE_GESTION (décision du PO du 2026-11-13) ;
 //   `regle:definir` = DG, RESP_STOCK. Les plafonds sont
 //   des paramètres par organisation (C6). Le magasinier n'a accès ni aux fiches fournisseurs ni à
 //   l'approvisionnement ; DG, RESP_STOCK, DAF et COMPTABLE lisent les fiches (FR-59) par
-//   `commande-fournisseur:consulter`.
+//   `bon-commande:consulter`.
 // - Service porteur : à créer [À CONFIRMER : l'annexe A.3 ne nomme pas le dépôt ; le PRD dit « module non
 //   codé »].
 // - Périmètre : par entrepôt pour le responsable stock (annexe A.3, C2). Achats en XOF seulement ; l'import
@@ -73,12 +73,13 @@ export const MANIFESTE_APPROVISIONNEMENT = {
   // C7 : droits de tenant (format `^[a-z]+:[a-z-]+:[a-z]+$`, conforme). Chaque droit demande une PR
   // `auth-service` à la livraison du module (catalogue fermé, C7). Par rapport à l'annexe A.3 (décision du PO du 2026-11-13) :
   // `reception:enregistrer` RETIRÉ (la réception appartient à entrepot, droit `entrepot:reception:controler`) ;
-  // `commande-fournisseur:consulter` AJOUTÉ (lire sans pouvoir agir, comme `stock:etat:consulter`).
+  // `bon-commande:consulter` AJOUTÉ (lire sans pouvoir agir, comme `stock:etat:consulter`).
+  // STORY-935 (2026-11-15) : `commande-fournisseur:*` renommés `bon-commande:*` (un droit tient en 40 caractères, borne du jeton).
   droits: [
     'approvisionnement:fournisseur:gerer', // créer, modifier, suspendre, évaluer ; lire les fiches (FR-59)
-    'approvisionnement:commande-fournisseur:valider', // échelle par montant, plafonds paramétrables (FR-63) ; plancher de trésorerie (FR-64)
-    'approvisionnement:commande-fournisseur:suggerer', // proposer et préparer une commande, y compris manuelle (FR-61, FR-62)
-    'approvisionnement:commande-fournisseur:consulter', // lecture seule : commandes fournisseurs, résultats de réception, fiches, dettes et échéances (FR-59, FR-67)
+    'approvisionnement:bon-commande:valider', // échelle par montant, plafonds paramétrables (FR-63) ; plancher de trésorerie (FR-64)
+    'approvisionnement:bon-commande:suggerer', // proposer et préparer une commande, y compris manuelle (FR-61, FR-62)
+    'approvisionnement:bon-commande:consulter', // lecture seule : commandes fournisseurs, résultats de réception, fiches, dettes et échéances (FR-59, FR-67)
     'approvisionnement:regle:definir', // règles de réapprovisionnement : seuil, couverture, mode, niveau d'automatisme (FR-61)
   ],
 
