@@ -424,11 +424,9 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-982.md"
     reserved_on: "2026-11-15"
     note: >
-      REVIEW le 2026-11-15 — prospera-ocr-service#24 fusionnée sur dev (e46606b). Node 24 : 902 unitaires,
-      183 e2e (OCR réel), lint 0, build ; recette de l'Atelier 51/51 sur volumes neufs (image de la branche).
-      La recette a trouvé que le client de Confluent ne voit pas un topic neuf avant 5 min ; complété par
-      STORY-990. Reste la recette rejouée depuis dev (images reconstruites), en attente des ports tenus par
-      grp-b. Lot C, n° 3 (EPIC-201). NON SLOTTÉE.
+      🏁 DONE le 2026-11-15 — prospera-ocr-service#24 (dev e46606b), complétée par STORY-990 (ocr #25).
+      Node 24 : 902 unitaires, 183 e2e (OCR réel), lint 0, build. Recette de l'Atelier 51/51 rejouée DEPUIS
+      DEV, images reconstruites, volumes neufs. Lot C, n° 3 (EPIC-201). NON SLOTTÉE.
   - range: "STORY-983"
     status: "RÉSERVÉ"
     owner: "Les champs sensibles (chiffrement par champ, index aveugle) et le registre classification-sante avec sa garde (prospera-plateforme, dossiers de C)"
@@ -445,10 +443,10 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-990.md"
     reserved_on: "2026-11-15"
     note: >
-      REVIEW le 2026-11-15 — prospera-sinistres-service#2, prospera-assurance-service#21, prospera-ocr-service#25,
-      fusionnées sur dev. Mesuré sur pile neuve : 291 s → 6,9 s entre la publication d'un droit et sa
-      projection. Node 24 : sinistres 292 + 11 e2e, assurance 2 200 + 347, document 902 + 183 ; lint 0.
-      Reste la recette de l'Atelier depuis dev. Insérée par C (corrige 980, 981, 982). NON SLOTTÉE.
+      🏁 DONE le 2026-11-15 — prospera-sinistres-service#2, prospera-assurance-service#21, prospera-ocr-service#25.
+      Mesuré sur pile neuve : 291 s → 6,9 s entre la publication d'un droit et sa projection. Node 24 :
+      sinistres 292 + 11 e2e, assurance 2 200 + 347, document 902 + 183 ; lint 0 ; recette de l'Atelier 51/51
+      depuis dev. Insérée par C (corrige 980, 981, 982). NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"

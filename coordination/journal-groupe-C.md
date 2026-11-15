@@ -11,15 +11,13 @@
 - **Lot de C, ordre** :
   1. ~~STORY-980~~ : **sinistres #1** (squelette de `prospera-sinistres-service`), docs #497 ;
   2. ~~STORY-981~~ : **assurance #20** (Node 24, client de Confluent, interrupteur `compta-cima`) ;
-  3. **STORY-982** (`document-service` sur le socle) ← **review** : **ocr #24 fusionnée** (`e46606b`) ; recette de
-     l'Atelier **51/51** sur volumes neufs avec l'image de la branche. Reste la recette **rejouée depuis `dev`**
-     (images reconstruites), qui attend que `grp-b` libère les ports ; une tâche de C la lance à la descente ;
+  3. ~~STORY-982~~ : **ocr #24** (`document-service` sur le socle) ; recette de l'Atelier **51/51 depuis `dev`** ;
   4. ~~STORY-983~~ : **plateforme #3** (champs sensibles, registre `classification-sante`, garde prouvée contre un
      Karapace réel) ;
-  5. **STORY-990** (insérée par C) ← **review** : **sinistres #2, assurance #21, ocr #25** fusionnées. Les
-     consommateurs Kafka de C voient un topic neuf en secondes (création avant l'abonnement **et** métadonnées
-     toutes les 10 s) : mesuré **291 s → 6,9 s** sur pile neuve. Même recette depuis `dev` que 982 ;
-  6. STORY-984 ← **suivante** ; 7. STORY-985 ; 8. STORY-986 ; 9. STORY-987 ; 10. STORY-988 ; 11. STORY-989.
+  5. ~~STORY-990~~ (insérée par C) : **sinistres #2, assurance #21, ocr #25** ; un topic neuf vu en secondes
+     (291 s → 6,9 s mesurés) ;
+  6. **STORY-984** ← **en cours** : le contrat de l'annexe C (plateforme, `MNV-984`), le service
+     `prospera-liaison-assureur-service` (`main` et `dev` posées), le transport par fichiers ; 7. STORY-985 ; 8. STORY-986 ; 9. STORY-987 ; 10. STORY-988 ; 11. STORY-989.
 - **Ensuite (consigne de l'utilisateur du 2026-11-15)** : « ajoute les stories suivantes 201 à 211 », soit les stories
   restantes des épics **EPIC-201 → EPIC-211** d'`epics-assurance-2026-11-13.md` (rôles et portées, déclaration,
   instruction, expertises, décision, paiement, clôture), écrites juste avant d'être codées, dans la plage de C
