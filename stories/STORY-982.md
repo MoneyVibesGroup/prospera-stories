@@ -1,6 +1,6 @@
 # STORY-982 : `document-service` sur le socle du moteur
 
-Status: in-progress
+Status: review
 
 **Complexité :** moyenne (migration du bus, de la file de tâches et de Node ; un service dont le cabinet dépend)
 
@@ -49,7 +49,7 @@ cahiers de l'Atelier lus par OCR et transformés en balance. La migration ne doi
 
 ## Ce qui a été livré
 
-*(en cours au 2026-11-15)* — code sur `MNV-982`, PR **brouillon** `prospera-ocr-service` #24 (tête `851ab6a`).
+*(review au 2026-11-15)* — `prospera-ocr-service` **#24**, fusionnée sur `dev` (`e46606b`).
 
 - **Premier passage** (`1562be1`) : sous Node 24, depuis un export LF, 896 unitaires, 183 e2e (tests OCR compris,
   Tesseract réel), lint 0, build ; 3 mutations rouges (BullMQ en 5, `kafkajs`, image Node 22).
@@ -62,9 +62,16 @@ cahiers de l'Atelier lus par OCR et transformés en balance. La migration ne doi
   du broker ; un refus est journalisé et n'empêche pas l'abonnement (3 tests). Et `identity.org.created` est lu en
   lecteur tolérant (`8bd1a2f`, annonce de B en STORY-938 : `createdByUserId` facultatif, `origine`). Sous Node 24 :
   **902 unitaires, 183 e2e, lint 0, build**.
-- **Reste AC-4 : rejouer la recette de l'Atelier sur une pile neuve** avec l'image corrigée. Le relancement a été
-  refusé par Docker (port 18025 pris) : la pile `grp-b` s'est relevée pour la story du seed. La PR ne sera fusionnée
-  qu'après une recette verte.
+- **Recette de l'Atelier VERTE, 51/51, sur volumes neufs**, image construite depuis `851ab6a` ; journal du service :
+  « topics créés avant l'abonnement (dossier.updated) », « (cahier.piece.rattachee) ». PR **#24 fusionnée** en
+  « Rebase and merge » sur `dev` (`e46606b`, arbre identique à `851ab6a`) ; le dépôt n'accepte plus que ce mode.
+- ⚠️ **Ce que cette recette ne prouvait pas** (trouvé par STORY-990) : créer le topic ne suffit pas. Abonné à un topic
+  à peine créé, sans leader encore, le client attend encore le rafraîchissement de 5 minutes ; la recette passait
+  parce que sa mise en place dure plus longtemps. **Complété par STORY-990** (ocr #25 : métadonnées toutes les 10 s ;
+  mesuré 291 s → 6,9 s).
+- **Reste : la recette rejouée depuis `dev`**, images reconstruites (règle de C : jamais « identique à l'octet » à la
+  place). Elle attend la descente de `grp-b` ; une tâche la lance dès que les ports sont libres. 982 passe en `done`
+  avec elle.
 - **Rencontré en chemin, hors de C** : sur une pile neuve, la recette d'`origin/dev` ne démarre pas, le groupe
   `platform-catalog-abonnements` du catalogue n'existant pas (même cause : ses topics `paiement.abonnement.*` ne sont
   pas créés). Contourné sur la pile jetable de C en créant ces trois topics ; demande à B dans le journal de C.

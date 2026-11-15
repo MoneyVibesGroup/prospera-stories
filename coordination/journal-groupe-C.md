@@ -11,15 +11,15 @@
 - **Lot de C, ordre** :
   1. ~~STORY-980~~ : **sinistres #1** (squelette de `prospera-sinistres-service`), docs #497 ;
   2. ~~STORY-981~~ : **assurance #20** (Node 24, client de Confluent, interrupteur `compta-cima`) ;
-  3. **STORY-982** (`document-service` sur le socle) ← **en cours** : PR brouillon **ocr #24** (tête `851ab6a` ;
-     902 unitaires, 183 e2e dont l'OCR, sous Node 24). La recette de l'Atelier (50/51 sur pile neuve) a trouvé une
-     **régression de la migration**, corrigée (voir Pièges) ; **reste à la rejouer verte sur pile neuve**, ce qui
-     attend de nouveau la descente de `grp-b` (relevée pour la story du seed) ;
+  3. **STORY-982** (`document-service` sur le socle) ← **review** : **ocr #24 fusionnée** (`e46606b`) ; recette de
+     l'Atelier **51/51** sur volumes neufs avec l'image de la branche. Reste la recette **rejouée depuis `dev`**
+     (images reconstruites), qui attend que `grp-b` libère les ports ; une tâche de C la lance à la descente ;
   4. ~~STORY-983~~ : **plateforme #3** (champs sensibles, registre `classification-sante`, garde prouvée contre un
      Karapace réel) ;
-  5. **STORY-990** (inséré par C, plage de C) : la même régression dans `prospera-assurance-service` (STORY-981) et
-     `prospera-sinistres-service` (STORY-980) : leurs consommateurs doivent créer les topics abonnés absents ;
-  6. STORY-984 ; 7. STORY-985 ; 8. STORY-986 ; 9. STORY-987 ; 10. STORY-988 ; 11. STORY-989.
+  5. **STORY-990** (insérée par C) ← **review** : **sinistres #2, assurance #21, ocr #25** fusionnées. Les
+     consommateurs Kafka de C voient un topic neuf en secondes (création avant l'abonnement **et** métadonnées
+     toutes les 10 s) : mesuré **291 s → 6,9 s** sur pile neuve. Même recette depuis `dev` que 982 ;
+  6. STORY-984 ← **suivante** ; 7. STORY-985 ; 8. STORY-986 ; 9. STORY-987 ; 10. STORY-988 ; 11. STORY-989.
 - **Ensuite (consigne de l'utilisateur du 2026-11-15)** : « ajoute les stories suivantes 201 à 211 », soit les stories
   restantes des épics **EPIC-201 → EPIC-211** d'`epics-assurance-2026-11-13.md` (rôles et portées, déclaration,
   instruction, expertises, décision, paiement, clôture), écrites juste avant d'être codées, dans la plage de C
@@ -62,8 +62,10 @@ seulement.
   faisait) et ne voit un topic créé plus tard qu'au rafraîchissement des métadonnées (5 minutes). Constaté sur pile
   neuve `grp-c-recette` : « La pile de recette n'est pas prête : platform-catalog-service : le groupe Kafka
   platform-catalog-abonnements n'existe pas ». C l'a contourné sur sa pile jetable en créant les trois topics à la
-  main. Correctif possible, celui de C pour `document-service` (ocr #24, `d71a294`) : créer les topics abonnés absents
-  avant `subscribe`. **Même risque** pour tout consommateur migré vers Confluent (paiement, notification…).
+  main. Correctif possible, celui de C (STORY-990, ocr #25 : `src/kafka/supervision-consommateur.util.ts`) : créer
+  les topics abonnés absents avant `subscribe` **et** passer `metadataMaxAge: 10_000` au consommateur ; l'un sans
+  l'autre ne suffit pas (291 s → 6,9 s mesurés). **Même risque** pour tout consommateur migré vers Confluent
+  (paiement, notification…).
 - **→ B (2026-11-15) : `prospera-plateforme`, deux points** — **ouverte**. (1) `npm ci` échoue : le `package-lock.json`
   ne connaît pas l'espace de travail `@prospera/garde-etat-publie` (« Missing: @prospera/garde-etat-publie@1.0.0
   from lock file ») ; C a installé sans réécrire le verrou. (2) Le `npm test` et le `typecheck` racines ne lisent pas
@@ -151,9 +153,15 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
 - **⛔ Le client de Confluent ne crée pas un topic en s'y abonnant** (`kafkajs` le faisait ; `allowAutoTopicCreation`
   vaut pourtant `true` par défaut dans sa couche KafkaJS, et le broker l'autorise). Un topic créé ensuite par son
   producteur n'est vu qu'au rafraîchissement des métadonnées : **5 minutes**. Sur une pile neuve, un read-model rate
-  donc les premiers faits : la recette de l'Atelier a rendu 502 (404 « Dossier introuvable »). Correctif : créer les
-  topics abonnés absents avant `subscribe` (`admin.createTopics`, réglages du broker). Les « environ 4 minutes »
-  relevés en STORY-980 étaient ce même défaut, à tort rangé en simple attente.
+  donc les premiers faits : la recette de l'Atelier a rendu 502 (404 « Dossier introuvable »). Les « environ 4
+  minutes » relevés en STORY-980 étaient ce même défaut, à tort rangé en simple attente.
+  **⛔ Créer le topic ne suffit pas** (STORY-990) : abonné à un topic à peine créé, sans leader encore, le client
+  prend « Unknown topic or partition » et attend encore 5 minutes. Mesuré : **291 s** avec `createTopics` seul,
+  **6,9 s** en ajoutant `metadataMaxAge: 10_000` au consommateur. Il faut les deux. **Pour B** : même correctif pour
+  le catalogue, paiement et notification.
+- **Une recette verte ne mesure pas une latence** : la mise en place de la recette dure plus de 5 minutes, donc elle
+  passe APRÈS le rafraîchissement des métadonnées et masque ce défaut. Mesurer la latence à part, chronomètre en main,
+  sur pile neuve.
 - **Une recette sur pile neuve se joue d'un bout à l'autre** : la même recette sur une pile déjà servie passait (les
   topics existaient). Ne conclure qu'avec des volumes neufs.
 - **Karapace, juste après son démarrage**, répond 500 « Error while forwarding the request to the master » le temps
