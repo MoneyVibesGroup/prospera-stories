@@ -11,9 +11,10 @@
 - **Lot de B, ordre** :
   1. ~~STORY-930~~ : **catalogue #43**, **recette #17** (client de Confluent, Node 24, Karapace, schéma de
      `entitlement.changed` enregistré) ;
-  2. **STORY-931** (dépôt `prospera-plateforme`) ← **prochaine étape**. La création du dépôt GitHub demande la
-     confirmation de l'utilisateur (plan §10, action 1) ;
-  3. STORY-932 ; 4. STORY-933 ; 5. STORY-934 ; 6. STORY-935 ; 7. STORY-936 ; 8. STORY-937 ; 9. STORY-938 ;
+  2. ~~STORY-931~~ : **plateforme #1** (contrats, vecteurs signés, `@prospera/signature`, point de décision amorcé ;
+     dépôt créé par l'utilisateur) ;
+  3. **STORY-932** (contrat d'état publié) ← **prochaine étape**, après les instructions de l'utilisateur (pause
+     demandée le 2026-11-15 après 931) ; 4. STORY-933 ; 5. STORY-934 ; 6. STORY-935 ; 7. STORY-936 ; 8. STORY-937 ; 9. STORY-938 ;
      10. STORY-939.
 
   Puis la story du seed du catalogue, puis la relecture finale de A rejouée.
@@ -34,7 +35,11 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
-- *(aucune)*
+- **→ C (2026-11-15) : `prospera-plateforme` est prêt** (plan §7, « B → C ») — **information**. `main` et `dev`
+  existent ; le README dit qui écrit où : C écrit dans `contrats/assurance/`, `champs-sensibles/` et
+  `classification-sante/`, et nulle part ailleurs. Les contrats sont en JSON Schema **draft-07**, sans `$ref` entre
+  fichiers, objets fermés (`test/contrats.test.ts` le garde aussi pour les dossiers de C). STORY-983 et 987 peuvent
+  démarrer.
 
 ## Réponses aux demandes reçues
 
@@ -53,7 +58,9 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Questions à l'utilisateur ou au PO
 
-- *(aucune)*
+- **Réglages de `prospera-plateforme`** (plan §10, action 1) : « Rebase and merge » seul n'a pas pu être posé par la
+  session (commande refusée par le mode automatique). Commits de fusion et squash y sont encore permis. À poser dans
+  les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
 
@@ -64,5 +71,7 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 - **`.dockerignore` du catalogue exclut `test/`** : `test:schemas` se joue depuis le poste
   (`SCHEMA_REGISTRY_URL=http://127.0.0.1:8081 npx jest --config ./test/jest-schemas.json`), les scripts `schemas:*`
   depuis l'image (`--network grp-b_default -e SCHEMA_REGISTRY_URL=http://karapace:8081`).
+- **Une signature base64url altérée sur ses DERNIERS caractères reste valide** : ils portent des bits de bourrage
+  qu'un décodeur ignore. Un vecteur de signature altérée change un caractère du milieu (STORY-931).
 - **Lint sur ce poste** : les fichiers suivis sortent en CRLF (`autocrlf`) ; ne linter que les fichiers touchés, avec
   `--rule '{"prettier/prettier":["error",{"endOfLine":"auto"}]}'`.
