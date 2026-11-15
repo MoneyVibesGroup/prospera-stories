@@ -71,10 +71,23 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
     d'administration rend le `tenantRole` stocké, pas le rôle effectif (écart de STORY-902).
 - **2026-11-14 (nuit) : FE-069 remise à D** (sur demande de l'utilisateur), branche **`fe-069`** poussée
   dans `prospera-frontend-expert-comptable`, commit **`4148d65`**, sans PR. A ne touche plus ce dépôt.
+- **2026-11-15 : FE-069 et `prospera-frontend-expert-comptable` REVIENNENT à A** (décision de l'utilisateur : « le
+  travail a été remis au groupe D, qui n'a pas démarré ; il faut que quelqu'un la reprenne cette semaine »). Le
+  journal de D dit « lot pas encore commencé » ; aucun commit de D sur `fe-069` (tête `4148d65`, la mienne). A tient
+  le dépôt **jusqu'à la fusion de FE-069**, puis le rend à D par une ligne ici. D garde `frontend-admin-panel` et
+  `prototypes/`. Amendement : `PLAN-4-SESSIONS-2026-11-14.md` §2 et §6.
 
 ## Demandes aux autres groupes
 
-- **À D — reprendre FE-069 sur la branche `fe-069`** (plan, ligne FE-069 du lot de D : « D la reprend où elle en est »).
+- **→ B (2026-11-15) : le rôle métier effectif dans la liste des membres** —
+  `tickets/TICKET-BACKEND-role-metier-absent-de-la-reponse-des-membres.md`. Bloque **FE-115** (février). C'est le même
+  écart que la console « sans rôle métier » de la passation d'auth ci-dessus, vu côté cabinet.
+- **→ D (2026-11-15) : nouveau point de départ.** FE-069 revient à A (voir « Passations »). D commence par **AP-38**
+  (console) et par les **maquettes** des stories de février, dans l'ordre de `tri-frontend-fevrier-2026-11-15.md`
+  §4.1 ; il reprend le dépôt du cabinet à la fusion de FE-069. Les fiches FE-112 → FE-125 sont écrites par A ; la
+  plage libre de D devient **FE-126 → FE-139**.
+- ~~**À D — reprendre FE-069 sur la branche `fe-069`**~~ *(close le 2026-11-15 : FE-069 revient à A ; le détail
+  ci-dessous reste juste et sert à A)* (plan, ligne FE-069 du lot de D : « D la reprend où elle en est »).
   - **À lire d'abord** : la section « Recensement des écarts frontend ↔ backend (2026-11-14) » de la fiche
     `frontend-stories/FE-069.md` (#480) — ruptures A1→A3, écarts de schéma B1→B17, routes sans écran C1→C17,
     et le découpage proposé au PO (A+B dans FE-069, C en stories nommées — **pas encore validé**).
@@ -128,6 +141,24 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 ## ⚠ Contrats
 
 - *(aucun changement annoncé)*
+
+## Front cabinet : revérification et tri du 2026-11-15
+
+- **Demande de l'utilisateur** : remettre le front à niveau sans rien ajouter (FE-069, blocs A et B) ; transformer le
+  bloc C en stories nommées et les trier pour février ; « vérifier tout avant », la logique ayant beaucoup changé
+  (type de société, paquet fiscal…), en lisant les stories livrées sur la période.
+- **Fait** : relecture du backend du 15/11 contre `origin/fe-069`, sur les ≈ 200 stories livrées depuis le 27/08 ;
+  FE-069 étendue (A1 → A13, B1 → B25, 13 pts) ; 14 fiches neuves **FE-112 → FE-125** ; 23 fiches d'août réancrées ;
+  FE-042 remplacée par FE-118 ; tracker frontend à jour (185 stories). Document de référence :
+  **`tri-frontend-fevrier-2026-11-15.md`**.
+- **Mes recommandations, appliquées** (règle de l'utilisateur, contestables après coup) — classées sans consigne
+  explicite du PO : en février, FE-034 (cycle de la liasse, prérequis du dépôt), FE-038 (export de la liasse),
+  FE-096 et FE-095 (classeur e-DSF, rejet), FE-118 (zone franche) ; après février, FE-119 (espace déclarant, aucune
+  app pour le porter) et tout ce que le PO n'a pas nommé (§4.2 du tri, marqué ◆).
+- **STORY-905, nommée par A** (fiche juste avant de la coder ; dépôts de A : balance, bilan) : *une simulation est une
+  lecture*. Un abonnement échu met le service en lecture seule, mais `refuseeEnLectureSeule` juge sur la méthode HTTP
+  (`bilan-service`, `read-models/guards/lecture-seule.ts` ; même patron dans balance) : les `POST …/dry-run` sont
+  refusés en `403 ABONNEMENT_EXPIRE` alors qu'ils n'écrivent rien. Vu par le relevé du front (FE-069 A10).
 
 ## Questions à l'utilisateur ou au PO
 
