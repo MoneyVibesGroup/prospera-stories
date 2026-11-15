@@ -350,6 +350,15 @@ reserved_ranges:
       0 refus ; topic compacté, 46 messages ; redémarrage idempotent ; 4 sujets au registre. Droits renommés :
       approvisionnement:bon-commande:*, finance-transactions:releve:rapprocher, finance-transactions:tresorerie:lire.
       Lot B, n° 6 (EPIC-143). NON SLOTTÉE.
+  - range: "STORY-936"
+    status: "RÉSERVÉ"
+    owner: "La matrice des neuf états exécutée et la vraie route GET /api/instance/v1/etat-publie/{organisationId} ; l'émetteur de etat-publie.changed (platform-catalog-service)"
+    source_doc: "prospera-stories/stories/STORY-936.md"
+    reserved_on: "2026-11-15"
+    note: >
+      🏁 DONE le 2026-11-15 — catalogue #48. 33 cas rejoués ; verification Node 24 1193/1193 ; test:socle 9/9 ;
+      pile : octroi ⇒ pdv EN_SERVICE (n° 1), retrait ⇒ DESINSTALLE (n° 2), réponse réelle conforme au contrat figé.
+      Axe 2 déduit du droit jusqu'à EPIC-144 (D-936-1). Lot B, n° 7 (EPIC-145). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

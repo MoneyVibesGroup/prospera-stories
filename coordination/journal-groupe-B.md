@@ -17,9 +17,9 @@
   4. ~~STORY-933~~ : **catalogue #45**, **recette #18** (Redis, BullMQ, bail MongoDB du relais d'outbox) ;
   5. ~~STORY-934~~ : **catalogue #46** (manifeste dans `ModuleVersion`, refus nommés, résolution, garde) ;
   6. ~~STORY-935~~ : **catalogue #47** (46 manifestes au catalogue, `catalogue.manifeste.publie`, droits renommés) ;
-  7. **STORY-936** ← **prochaine étape** (lot repris sur consigne de l'utilisateur, 2026-11-15 : « continue le groupe B
-     jusqu'à finir ») ; 6. STORY-935 ; 7. STORY-936 ; 8. STORY-937 ; 9. STORY-938 ;
-     10. STORY-939.
+  7. ~~STORY-936~~ : **catalogue #48** (matrice exécutée, vraie route, émetteur de `etat-publie.changed`) ;
+  8. **STORY-937** ← **prochaine étape** (lot repris sur consigne de l'utilisateur, 2026-11-15 : « continue le groupe B
+     jusqu'à finir ») ; 9. STORY-938 ; 10. STORY-939.
 
   Puis la story du seed du catalogue, puis la relecture finale de A rejouée.
 - **Docker** : aucune pile ne tourne (`grp-b` descendue avec ses volumes).
@@ -53,6 +53,13 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-15, STORY-936 — la vraie route est servie, rien ne change au contrat.**
+  `GET /api/instance/v1/etat-publie/{organisationId}` (service `/api/v1/…`) répond au contrat figé
+  `contrat-etat-publie-v1`, et `etat-publie.changed.reel` est émis (topic par espace, `numero` croissant). **Pour D** :
+  la doublure de la coque peut être comparée à la vraie route dès maintenant. Écarts connus, sans changement de forme :
+  l'axe 2 se déduit du droit jusqu'à EPIC-144 ; pas encore de 404 ni de jeton de service (STORY-938) ; `interrupteurs`
+  vide, `estDG` faux (STORY-936, D-936-1 → 4).
 
 - **2026-11-15, STORY-935 — un contrat NOUVEAU, cinq droits RENOMMÉS.**
   - `catalogue.manifeste.publie` (AD-17) : l'état absolu d'une `ModuleVersion` (module, version, statut, manifeste

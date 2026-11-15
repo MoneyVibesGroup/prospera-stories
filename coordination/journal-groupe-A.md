@@ -119,8 +119,11 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   indépendante sur les sources (PRD moteur §3.1, FR-34, FR-35, FR-43, addendum §A-2 ; C2, C8, C13 ; spines du moteur et
   de la coque). Verdict : **figeable après 4 corrections bloquantes**, toutes faites avant la fusion (export dans
   l'Administration en `EN_INSTALLATION`, motif d'un code de module, 503 sans heure connue, règle du calcul écrite en
-  entier). Le détail et les ajouts retenus : `stories/STORY-932.md`, « Relecture avant figeage ». La relecture de la
-  matrice et de la route de **STORY-936** reste à faire.
+  entier). Le détail et les ajouts retenus : `stories/STORY-932.md`, « Relecture avant figeage ».
+- **← B (2026-11-15) : relecture de la matrice et de la route de STORY-936** — **sans objet de contrat** : ni la matrice
+  ni la route n'ont changé depuis l'étiquette `contrat-etat-publie-v1`. Leur conformité est prouvée par les 33 cas
+  rejoués par le calcul et par la réponse réelle de la route, validée contre le schéma figé (`stories/STORY-936.md`,
+  D-936-5).
 
 ## ⚠ Contrats
 
