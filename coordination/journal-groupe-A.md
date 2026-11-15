@@ -18,15 +18,16 @@
   volumes.
 - **Consigne de l'utilisateur (2026-11-15)** : A termine son lot, **puis fait le lot de B** (§4, B n'a pas démarré),
   puis finit par la story du seed du catalogue (`fiscal-tg-*` octroyables pour `declarations`, voir « Questions »).
-  Chaque story fusionnée est suivie d'un `/clear` : **ce journal est la seule mémoire d'une session à l'autre.**
+  Les stories s'enchaînent **sans s'arrêter** (la consigne d'un `/clear` après chaque story est annulée). **Ce
+  journal reste la mémoire du lot** si le contexte d'une session est résumé.
 - **Lot de A, ordre à jour** :
   1. ~~relecture §3.1~~ ;
   2. ~~restes §3.2~~ : ticket pour D écrit, procédure écrite (voir « Procédures »), question 300 retenue par
      défaut ; STORY-903 nommée (fiche juste avant de la coder) ; la partie bloquée de 901 (texte de la loi 2011-018 :
      un scan sans texte) est consignée dans sa fiche (D-901-5) ;
   3. ~~STORY-901~~ ;
-  4. **STORY-345** ← **prochaine étape** ;
-  5. STORY-902 (élargie, voir la relecture) ;
+  4. ~~STORY-345~~ : **fiscal #42** (base de rémunération versionnée, D-345-1 → 5) ;
+  5. **STORY-902** (élargie, voir la relecture) ← **prochaine étape** ;
   6. STORY-903 ;
   7. STORY-313 ;
   8. STORY-314 ;
@@ -176,6 +177,14 @@ octets de `balance-service` du tag déployé.
 `RETIRED` tant que des exercices y sont rattachés : le catalogue cesse alors de la servir et de l'octroyer.
 
 ## Pièges rencontrés
+
+- **Deux sessions « groupe A » sur le même poste (2026-11-15)**. La même consigne a été donnée à deux sessions,
+  qui ont codé STORY-345 dans le **même checkout** et se sont écrasé les fichiers. L'utilisateur a tranché : **une
+  seule session porte le lot** (`moneyvibes-apps-32`). Avant d'écrire dans un dépôt partagé du poste : `git status`,
+  et si des fichiers qu'on n'a pas écrits apparaissent, `ListAgents`, puis s'arrêter.
+- `@Prop` de `@nestjs/mongoose` sur un champ typé par une **union** (`'A' | 'B'`) fait échouer le **chargement du
+  module** (« Cannot determine a type »). `tsc` ne le voit pas ; l'invariant `app.module` et `docker compose up` le
+  voient. Il faut toujours `type: String` avec un `enum`.
 
 - La recette de `prospera-recette` fait `up` **sans** `--build` : reconstruire à la main l'image du service modifié.
 - `prospera-fiscal-service` : `test:conformite` exige un MongoDB en jeu de répliques ; un `mongo:7` jetable lancé avec
