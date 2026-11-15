@@ -5,14 +5,32 @@
 ## État
 
 - **2026-11-14** : journal ouvert, lot pas encore commencé.
+- **2026-11-15** : le lot de B est tenu par **la session qui a tenu le lot de A**, sur le poste principal (Windows), sur
+  consigne de l'utilisateur : A, puis B, puis la story du seed du catalogue (`fiscal-tg-*` octroyables pour
+  `declarations`). Les stories s'enchaînent sans arrêt. **Ce journal est la mémoire du lot.**
+- **Lot de B, ordre** :
+  1. ~~STORY-930~~ : **catalogue #43**, **recette #17** (client de Confluent, Node 24, Karapace, schéma de
+     `entitlement.changed` enregistré) ;
+  2. **STORY-931** (dépôt `prospera-plateforme`) ← **prochaine étape**. La création du dépôt GitHub demande la
+     confirmation de l'utilisateur (plan §10, action 1) ;
+  3. STORY-932 ; 4. STORY-933 ; 5. STORY-934 ; 6. STORY-935 ; 7. STORY-936 ; 8. STORY-937 ; 9. STORY-938 ;
+     10. STORY-939.
+
+  Puis la story du seed du catalogue, puis la relecture finale de A rejouée.
+- **Docker** : aucune pile ne tourne (`grp-b` descendue avec ses volumes).
 
 ## Dépôts tenus
 
-`prospera-platform-catalog-service`, `prospera-paiement-service`, `prospera-plateforme` (à créer, STORY-931). À recevoir de A : `prospera-notification-service` (après STORY-569), `prospera-auth-service` (après STORY-902).
+`prospera-platform-catalog-service`, `prospera-paiement-service`, `prospera-plateforme` (à créer, STORY-931),
+`prospera-notification-service` et `prospera-auth-service` (reçus de A, voir Passations). Pendant ce lot, la même
+session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Passations
 
-- *(aucune)*
+- **Reçue le 2026-11-14 : `prospera-notification-service`**, de A, dernier commit sur `dev` : `8916ee4`.
+- **Reçue le 2026-11-15 : `prospera-auth-service`**, de A, dernier commit sur `dev` : `456035f` (STORY-902). À
+  reprendre : STORY-938 (droits à tiret dans les trois segments) ; la console affiche « sans rôle métier » pour un
+  membre qui reçoit le rôle par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif).
 
 ## Demandes aux autres groupes
 
@@ -20,11 +38,18 @@
 
 ## Réponses aux demandes reçues
 
-- *(aucune)*
+- **← A (2026-11-15) : borne du jeton face aux verticales** — **prise en charge**, pas encore servie :
+  1. regex des droits à tiret ⇒ **STORY-938** ;
+  2. cinq codes de plus de 40 caractères ⇒ **STORY-935** ;
+  3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
 
-- *(aucun changement annoncé)*
+- **2026-11-15, STORY-930 — aucun changement sur le fil.** Le catalogue publie `entitlement.changed` avec le client
+  de Confluent : même JSON, même clé (`orgId`), aucun en-tête de registre. Le **schéma** du payload v2 est désormais
+  versionné (`platform-catalog-service/contrat/schemas/entitlement.changed.json`, modèle fermé) et enregistré sous
+  le sujet `entitlement.changed-value`, en compatibilité BACKWARD : tout ajout doit être **facultatif**. Un champ
+  requis ajouté, un type changé ou une propriété retirée sont refusés (`npm run schemas:compatibilite`, code 1).
 
 ## Questions à l'utilisateur ou au PO
 
@@ -32,4 +57,12 @@
 
 ## Pièges rencontrés
 
-- *(aucun)*
+- **Le client de Confluent est un binding natif** (librdkafka) : ses tests se jouent sous Node 24, dans le stage
+  `verification` du Dockerfile (`docker build --target verification`), pas sur le poste en Node 25.
+- **Un consommateur abonné à un topic absent** ne le découvre qu'à la relecture des métadonnées (≈ 5 min), comme avec
+  `kafkajs`. Sur une pile neuve, un premier message peut donc attendre quelques minutes ; il n'est pas perdu.
+- **`.dockerignore` du catalogue exclut `test/`** : `test:schemas` se joue depuis le poste
+  (`SCHEMA_REGISTRY_URL=http://127.0.0.1:8081 npx jest --config ./test/jest-schemas.json`), les scripts `schemas:*`
+  depuis l'image (`--network grp-b_default -e SCHEMA_REGISTRY_URL=http://karapace:8081`).
+- **Lint sur ce poste** : les fichiers suivis sortent en CRLF (`autocrlf`) ; ne linter que les fichiers touchés, avec
+  `--rule '{"prettier/prettier":["error",{"endOfLine":"auto"}]}'`.
