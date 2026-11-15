@@ -21,9 +21,11 @@
   Chaque story fusionnée est suivie d'un `/clear` : **ce journal est la seule mémoire d'une session à l'autre.**
 - **Lot de A, ordre à jour** :
   1. ~~relecture §3.1~~ ;
-  2. **restes §3.2** (ticket pour D, procédure de republication du paquet) ← **prochaine étape** ;
+  2. ~~restes §3.2~~ : ticket pour D écrit, procédure écrite (voir « Procédures »), question 300 retenue par
+     défaut ; STORY-903 nommée (fiche juste avant de la coder) ; la partie bloquée de 901 (texte de la loi 2011-018 :
+     un scan sans texte) est consignée dans sa fiche (D-901-5) ;
   3. ~~STORY-901~~ ;
-  4. STORY-345 ;
+  4. **STORY-345** ← **prochaine étape** ;
   5. STORY-902 (élargie, voir la relecture) ;
   6. STORY-903 ;
   7. STORY-313 ;
@@ -93,6 +95,14 @@ et plus `prospera-notification-service` (cédé à B, voir Passations).
 
   Détail : `coordination/relecture-groupe-A-2026-11-14.md`, section STORY-365.
 
+- **→ D (2026-11-15) : le motif saisi pièce par pièce dans la revue KYC est perdu sans bruit** (reste de STORY-176)
+  — **ouverte**. Le ticket est `tickets/TICKET-FRONTEND-motif-par-piece-revue-kyc.md`, et il devient **AP-38** (lot de
+  D, n° 12).
+  - Choix de A : **aucun changement de backend**. La console reporte les motifs par pièce dans le motif du dossier
+    (`reason`, au plus 1 000 caractères), qui est déjà persisté, journalisé et envoyé au cabinet.
+  - L'opérateur voit le texte composé avant d'envoyer, et un dépassement est refusé sans troncature.
+  - D inscrit AP-38 à son tracker.
+
 ## Réponses aux demandes reçues
 
 - *(aucune)*
@@ -127,7 +137,43 @@ et plus `prospera-notification-service` (cédé à B, voir Passations).
 
 ## Procédures
 
-- *(à écrire)* republication du paquet fiscal Togo 2026 au catalogue, à la mise en service.
+### Publier le paquet fiscal Togo 2026 au catalogue, à la mise en service (geste d'administration)
+
+Le paquet a été modifié quatre fois le 14/11 (305, 307, 308, 901). En production, **aucun** paquet `fiscal-tg-*` n'a
+jamais été publié, puisque le seed ne les autorise pas : on publie donc la version `2026.1` **une fois**, avec les
+octets de `balance-service` du tag déployé.
+
+**Qui :** un administrateur de la plateforme (`PLATFORM_ADMIN`), avec son jeton, contre `platform-catalog-service`.
+
+1. **Prendre les octets.** Le fichier se lit dans le tag de `balance-service` effectivement déployé, extrait en **LF**
+   (`git -c core.autocrlf=false show <tag>:<chemin>`), et non dans un checkout Windows. Empreintes au 2026-11-15
+   (`origin/dev`) :
+
+   | Code, version | Fichier (`balance-service/src/modules/referentiel/assets/`) | sha256 |
+   |---|---|---|
+   | `fiscal-tg-entreprise@2026.1` | `paquet-fiscal-togo-2026.json` | `17d66e23564d4c77c3d4da87d6bd0a4ed43439e9479e09f8cf4df178d00f6a71` |
+   | `fiscal-tg-entreprise-zone-franche@2026.1` | `paquet-fiscal-togo-zonefranche-2026.json` | `da92a432ed175189d46a71f2c526579194cb9b250f04e017b2d31c380f360f74` |
+
+   L'empreinte calculée doit être celle qu'épinglent `balance-service` et `prospera-dossier-service`. Sinon, on
+   s'arrête : les copies ont divergé.
+2. **Publier chaque paquet** :
+   `POST /admin/referentiels/<code>/<version>/artifact` (multipart : `file`, `expectedChecksum=sha256:<empreinte>`).
+   Le catalogue écrit l'objet, puis crée la version `ACTIVE`. Un **409** veut dire que `(code, version)` est déjà
+   pris : une version publiée ne se réécrit jamais.
+3. **Ouvrir le module.** Tant que la story du seed n'est pas faite, on ajoute les deux codes aux familles du module :
+   `PATCH /admin/modules/declarations`, corps `{ "referentielFamilies": [<familles actuelles>, "fiscal-tg-entreprise", "fiscal-tg-entreprise-zone-franche"] }`.
+   On ne garde que des familles **connues du registre**, sinon le catalogue refuse toute la liste. C'est le geste que
+   fait la recette (`prospera-recette`, `zone-franche.recette.ts`, `accueillirLeCabinet`).
+4. **Octroyer** à chaque cabinet abonné :
+   `PUT /entitlements/<organisationId>/declarations`, corps `{ "versionCode": "1.0", "status": "ACTIVE", "referentiels": [{ "code": "fiscal-tg-entreprise", "version": "2026.1" }, …] }`.
+   Un utilisateur du cabinet ne voit les droits qu'après le **renouvellement** de son jeton.
+5. **Contrôler.** fiscal-service sert le paquet d'un exercice (`GET …/exercices/:exerciceId/paquet-fiscal`) avec la
+   même empreinte ;
+   `balance-service` applique le même artefact.
+
+**Toute modification ultérieure du paquet** passe par une **nouvelle version** (`2026.2`…), publiée par les étapes 1
+à 4. L'ancienne passe ensuite en `DEPRECATED` (`PATCH /admin/referentiels/<code>/<version>`). Elle ne passe **pas** en
+`RETIRED` tant que des exercices y sont rattachés : le catalogue cesse alors de la servir et de l'octroyer.
 
 ## Pièges rencontrés
 
