@@ -195,6 +195,31 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-16, STORY-951 — essai ou réel (catalogue #56, ouverte), annoncé AVANT la fusion.** Tout est AJOUT :
+  rien d'existant ne change de forme. Contrat : `platform-catalog-service/contrat/mise-en-service.openapi.json`.
+  - **Routes nouvelles** (service `/api/v1`, public `/api/instance/v1`) :
+    - `POST /sorties-essai/{organisationId}/verifier` `{ module, destination: { type, adresse } }` : 200
+      `{ autorisee: true, motif: REEL | LISTE_BLANCHE }`, ou **403 `ECRITURE_REELLE_DEPUIS_ESSAI`** (avec
+      `interceptionId`), journalisé ; jeton du membre ou identité de service, limité à l'organisation ;
+    - `GET|POST /sorties-essai/liste-blanche`, `DELETE /sorties-essai/liste-blanche/{id}`,
+      `GET /sorties-essai/{organisationId}/interceptions` (console) ;
+    - `POST|GET /mises-en-service/{organisationId}` (`entitlement:grant` / `org:read`) : 201, puis 200 au rejeu ;
+      refus **409** `MISE_EN_SERVICE_HORS_DU_REEL`, `MISE_EN_SERVICE_MODULE_NON_INSTALLE` (`modules`),
+      `MISE_EN_SERVICE_REPRISE_D_ABORD`, **`MISE_EN_SERVICE_SANS_FEU_VERT`** (`modules` :
+      `{ module, etat, epoque, numero }`), **503** `VERIFICATION_DONNEES_IMPORTEES_NON_EXECUTEE` (`raison`).
+  - **Topic nouveau, produit** : `reception-definitive.enregistree` (AD-17), clé `organisationId`, schéma
+    `contrat/schemas/reception-definitive.enregistree.json` (fermé ; registre au prochain `schemas:enregistrer`).
+    Consommateur prévu : reprise-service.
+  - **Topic nouveau, consommé** (réel seulement) : `reprise.feu-vert.changed`, groupe `platform-catalog-feux-verts`,
+    lu au contrat publié par la plateforme (`kit-cible-v1.0.0`).
+  - **La partie A appelle la Reprise** : `POST /api/v1/instance/reprise/{org}/verifications/donnees-importees`, à
+    l'adresse du module `reprise` (`INSTALLATION_SERVICES`), sous `INSTALLATION_JETON_SERVICE`.
+  - **Pour tout module qui écrit vers l'extérieur** (notification : courriels et SMS ; paiement ; Connecteurs ;
+    C : sinistres, liaison-assureur) : dans l'espace d'essai, appeler `verifier` avant chaque envoi, et ne pas envoyer
+    sur un 403. Rien n'est imposé aujourd'hui (aucun module n'est encore déployé en essai) ; chaque groupe le branchera
+    avec son espace d'essai. **Pour D** : les écrans de la liste blanche, du journal et de la mise en service viendront
+    au lot frontend.
+
 - **2026-11-16, STORY-945 — la bascule (catalogue #55, PAS ENCORE FUSIONNÉE : avec A-917), annoncée AVANT la
   fusion.**
   - **`PUT /api/v1/catalog/entitlements/{org}/{module}`** : même chemin, même corps, mêmes succès (201, 200). Mais :
@@ -493,6 +518,10 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   requis ajouté, un type changé ou une propriété retirée sont refusés (`npm run schemas:compatibilite`, code 1).
 
 ## Questions à l'utilisateur ou au PO
+
+- **STORY-951, l'invitation au réel** (AD-15 : « l'invitation au réel part à la mise en service ») : **pas faite**
+  dans 951 (D-951-8). Il manque une route d'invitation pour l'identité de service du moteur dans auth. Choix retenu
+  par défaut : elle viendra avec la console de mise en service, dans une story de B. Contestable.
 
 - **Réglages de `centrale-service` et `agent-instance`** (STORY-955) : la fusion par commit, par squash et par rebase
   est permise dans les deux dépôts. « Rebase and merge » seul est **à poser par l'utilisateur** dans les réglages
