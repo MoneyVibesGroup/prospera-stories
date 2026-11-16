@@ -1,8 +1,23 @@
 # Journal du groupe A (poste principal)
 
-> Écrit par le groupe A seulement. Lot : `PLAN-4-SESSIONS-2026-11-14.md` §3.
+> Écrit par le groupe A seulement. Lot 1 : `PLAN-4-SESSIONS-2026-11-14.md` §3 (terminé). **Lot 2 :**
+> `PLAN-4-SESSIONS-LOT-2-2026-11-16.md` §2 (STORY-905 → 919), en cours.
 
 ## État
+
+### Lot 2 (depuis le 2026-11-16) — l'état courant
+
+- **Consigne de l'utilisateur (2026-11-16)** : « prends le groupe A pour le terminer, celui du lot 2 » : STORY-905 →
+  919 dans l'ordre du §2, sans s'arrêter ; remplaçante du §2 si une story attend B (917, 918 attendent B-945 ; 919
+  attend B-949). C tourne sur le même poste : verrou `MoneyVibes_Apps\.verrou-docker`, piles `grp-a-…`.
+- ~~1. **STORY-905**~~ ✅ **DONE (2026-11-16)** — balance #145 (dev `4a2abec`), bilan #173 (dev `663063d`). La garde
+  d'accès lit `@LectureSeule()` ; `ROUTES_SANS_ECRITURE` déclarée (4 routes balance, 8 bilan) et balayée sur tous les
+  contrôleurs ; 4 mutations rouges ; pile `grp-a-905` : dry-run en 200 avec un droit échu (témoin dev : 403).
+- **Suivante : 2. STORY-906** (la balance dit son dossier et son référentiel).
+- **Docker** : aucune pile de A ne tourne (`grp-a-905` descendue avec ses volumes). Deux conteneurs arrêtés d'une
+  session précédente restent : `grp-a-kafka-1`, `grp-a-karapace-1`.
+
+### Lot 1 (14 → 15/11), archivé
 
 - **2026-11-14 (soir)** : journal ouvert. Prochaine étape : la relecture de STORY-299, 300, 365 et 563 (§3.1).
 - **2026-11-14 (soir)** : STORY-569 livrée (fiscal #39, notification #86) ; elle sort du lot, remplacée par STORY-345.
