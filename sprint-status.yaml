@@ -316,6 +316,15 @@ reserved_ranges:
       🏁 DONE le 2026-11-15 — fiscal-service#46 (dev 8fdfc14). Réservée par la relecture de A (299, 563).
       Docker : MongoDB autonome ⇒ sortie 1 nommée ; rs-fiscal ⇒ démarré. Conformité 65/65 ; mutations.
       Lot A, n° 9. NON SLOTTÉE.
+  - range: "STORY-905"
+    status: "RÉSERVÉ"
+    owner: "Une simulation est une lecture — la garde d'accès lit @LectureSeule() : les dry-run, la simulation, l'analyse et la réévaluation passent la lecture seule d'un abonnement échu ; liste déclarée et balayée (balance-service, bilan-service)"
+    source_doc: "prospera-stories/stories/STORY-905.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — balance-service#145 (dev 4a2abec), bilan-service#173 (dev 663063d). Invariant 6/6 dans
+      chaque service, 4 mutations rouges ; pile grp-a-905 : dry-run 200 avec un droit échu (témoin dev 403), écritures
+      403. Lot 2 de A, n° 1. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
