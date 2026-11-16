@@ -539,6 +539,16 @@ reserved_ranges:
       GET /users et le détail console ; 6 schémas identity.* au registre, test:schemas 12/12, fil inchangé et
       conforme. Ticket role-metier-absent-de-la-reponse-des-membres servi (FE-115 débloquée). Lot 2 de B,
       n° 2 (EPIC-155, 264). NON SLOTTÉE.
+  - range: "STORY-954"
+    status: "RÉSERVÉ"
+    owner: "Les contrats de Connecteurs (seuils-fraicheur@1, contrats/echange/) et le point d'écriture unique ; le catalogue rejoue les règles de domainesEchange (prospera-plateforme, platform-catalog-service)"
+    source_doc: "prospera-stories/stories/STORY-954.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — plateforme #9 (b4c5c46 ; étiquettes seuils-fraicheur-v1, contrats-echange-v1,
+      point-ecriture-unique-v1), catalogue #51 (60473e1). Node 24 : plateforme 345 passés / 0 échec ; catalogue
+      1225/1225. 5 + 2 mutations rougissent. Refus MANIFESTE_ARGENT_SANS_CONTROLE déjà livré par 934, désormais
+      prouvé contre les cas publiés. Lot 2 de B, n° 14 (EPIC-169). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
