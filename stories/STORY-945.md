@@ -1,6 +1,6 @@
 # STORY-945 : la bascule — retrait des quatre chemins d'octroi
 
-Status: review
+Status: done
 
 **Complexité :** grande (quatre chemins retirés ou rebranchés, une garde d'exécution, une migration, l'axe 2)
 
@@ -38,7 +38,7 @@ d'installation (D-944-2), et les souscrits n'étaient que l'offre choisie (D-944
 | Le `PUT` de la console reste servi, mais passe par le plan | oui : `PassageParLeMoteur` (voir « Ce qui a été livré », 3) |
 | Annonce « ⚠ Contrats » avant la fusion | oui : journal de B, dans la PR de docs, **avant** toute fusion du code (la PR de code reste ouverte, voir « Fusion ») |
 
-## Ce qui a été livré (catalogue #55, branche `MNV-945`)
+## Ce qui a été livré (catalogue #55, `99ba2db` et `9798ff5` sur `dev`)
 
 1. **L'échéance soldée (chemin 2) n'ouvre plus rien.**
    - Elle prolonge les modules installés, comme avant (axe 3).
@@ -167,16 +167,17 @@ d'installation (D-944-2), et les souscrits n'étaient que l'offre choisie (D-944
 - **D-945-8 — Paiement ne change pas.** Son seul chemin d'octroi est le `PUT` de son amorçage (`paiement`,
   `notification`, sans dépendance), toujours servi, désormais par un plan. Le retrait demandé « dans le catalogue et
   paiement » (D-L2-2) n'y trouve rien d'autre à retirer.
-- **D-945-9 — Fusion liée à A-917 : la PR de code reste ouverte.** Règle retenue au lancement de la story (décision du
-  coordinateur de B) : si les recettes restent vertes, B fusionne seul ; si l'une rougit à cause de 945 et que la
-  corriger demande de toucher `prospera-recette` (dépôt de A), B ne fusionne pas, écrit la demande à A et s'arrête.
-  C'est le second cas (voir « Fusion »).
+- **D-945-9 — Fusion AVANT A-917, sur décision de l'utilisateur (2026-11-16).** La règle de départ voulait la PR de code
+  ouverte jusqu'à A-917 (D-L2-2), puisque les recettes croisées rougissent. A est à STORY-913, A-917 est loin ;
+  l'utilisateur a décidé de fusionner 945 maintenant. A corrigera les recettes rouges (`atelier-balance`,
+  `zone-franche`, `referentiel-par-dossier`, `abonnement`) à sa vérification. **Les recettes de `dev` sont donc
+  rouges, et c'est connu** (voir « Fusion »).
 
 ## Fusion
 
-**La PR de code (catalogue #55) n'est PAS fusionnée** : les recettes croisées de `prospera-recette` rougiraient,
-et les corriger demande d'écrire dans le dépôt de A. C'est le couplage voulu par D-L2-2 : « les deux PR se fusionnent
-ensemble ». Ce qui rougit, et pourquoi :
+**Catalogue #55 fusionnée le 2026-11-16** (`99ba2db`, `9798ff5` sur `dev`), avant A-917, sur décision de
+l'utilisateur (D-945-9). **Les recettes croisées de `prospera-recette` sont rouges sur `dev` à partir de ce commit**,
+jusqu'à leur correction par A. Ce qui rougit, et pourquoi :
 
 | Recette | Ligne(s) | Ce qui casse | Correctif (A-917) |
 |---|---|---|---|
@@ -189,9 +190,20 @@ Le `PUT` de la console reste servi et garde son corps et ses succès (201, 200).
 `source` du droit changent pour un appelant. Après la fusion conjointe : jouer `migrate:reamorcage-moteur` sur toute
 base existante (les piles neuves de recette n'en ont pas besoin).
 
+**Vérification finale** :
+- sur le commit rebasé sur 948, 949 et 952 (`88ac181`) :
+  - Node 24, étage `verification`, constructeur classique depuis les images en cache : **94 suites, 1 374/1 374**,
+    lint et build verts ;
+  - `test:socle` : **18/18** ;
+- GitHub a rejoué la PR sur 953 (`4dfde25`), fusionnée entre-temps. Sur le `dev` qui en résulte :
+  - typecheck, garde statique et specs de l'essai, de l'installation et de l'état publié : **215/215** ;
+  - 953 n'écrit aucun `ACTIVE` ;
+  - la suite complète n'a pas été rejouée sur ce commit.
+
 ## Suite
 
-- **A-917** : réécrire les recettes croisées sur le moteur (voir la demande du journal de B), puis fusionner avec 945.
+- **A** (à sa vérification) : corriger les recettes croisées rouges (demande du journal de B), et jouer
+  `migrate:reamorcage-moteur` au déploiement.
 - **D** (lot frontend) : la console lit les nouveaux refus du `PUT` et l'offre (`acquis`) ; ticket à écrire avec les
   écrans d'EPIC-144.
 - **Déploiement** : jouer `migrate:reamorcage-moteur` après le catalogue de 945.
