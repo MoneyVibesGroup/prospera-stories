@@ -26,7 +26,8 @@
   - **STORY-1038** ✅ — redécoupage versionné, période passée restituée avec sa version (PR reseau-service#9, `dev`
     a8a047a).
   - **STORY-1039** ✅ — rattachements et résolution (PR reseau-service#10, `dev` 9117794).
-  - Suivante : **STORY-1040** (couverture, zones blanches, candidats).
+  - **STORY-1040** ✅ — couverture, zones blanches, candidats (PR reseau-service#11, `dev` 98ed21c).
+  - Suivante : **STORY-1041** (administration, import tout ou rien, journal lisible).
 
 ## Dépôts tenus
 
