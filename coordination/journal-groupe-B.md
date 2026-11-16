@@ -47,6 +47,8 @@
       fusion (stories #548) : l'essai d'un prospect (J+30, une prolongation, 60 jours au plus, `ESSAI_TERMINE`, signer
       rouvre sans perte), avis J-7 par la route directe de notification, horloge de recette du catalogue. Pour 953 :
       l'effacement s'accroche à l'échéance `EFFACEMENT` et au statut de l'essai (fiche, « Pour STORY-953 »).
+  13. STORY-953 : le contrat du jeu de démonstration, l'effacement, cinq essais simultanés — **en cours** ;
+      plateforme et catalogue en PR, contrats annoncés ci-dessous AVANT la fusion du code.
   14. ~~STORY-954~~ : **plateforme #9** (`b4c5c46` ; étiquettes `seuils-fraicheur-v1`, `contrats-echange-v1`,
       `point-ecriture-unique-v1`), **catalogue #51** (`60473e1`) : les contrats de Connecteurs publiés avant février
       (seuils de fraîcheur, enveloppe et réponse d'échange, `connecteurs.domaine.changed`, `domainesEchange` et ses
@@ -104,6 +106,21 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   membre qui reçoit le rôle par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif).
 
 ## Demandes aux autres groupes
+
+- **→ A, C, D (2026-11-16) : le contrat du jeu de démonstration est publié** (STORY-953, `contrats-instance-v1`, jalon
+  du 14/12) — **ouverte**. Pour l'essai prospect du 15/01, chaque verticale livre :
+  1. **son jeu**, au format `jeu-demonstration@1`, vérifié par `npm run jeu:verifier -- <dossier>` dans
+     `prospera-plateforme`. C : le générateur à graine fixe (STORY-987) se déclare dans `generateur`, avec nom,
+     source à une étiquette, graine et paramètres. Chaque objet est un fichier, un tableau JSON d'enregistrements au
+     format du schéma d'objet du module ;
+  2. **les routes C13 d'import et d'effacement** de chaque module de démo, aux chemins déclarés dans `routesInstance`,
+     au corps exact de `contrats/instance/` :
+     - l'import est idempotent et traite un objet par lot ;
+     - l'effacement efface tout ce que le module tient de l'organisation, puis accuse.
+
+  Un module sans route d'effacement figure au certificat comme `SANS_ROUTE`, ce qui veut dire qu'il ne garde rien de
+  l'organisation : à ne laisser que si c'est vrai. Les jeux se déposent dans le dossier `JEUX_DEMONSTRATION_DIR` du
+  catalogue de l'espace d'essai, un sous-dossier par jeu.
 
 - **→ A (2026-11-16) : A-917, réécrire les recettes croisées pour la bascule (STORY-945)** — **ouverte**. La PR
   catalogue #55 (`MNV-945`) est prête et prouvée, mais **pas fusionnée** : elle se fusionne avec A-917 (D-L2-2), car
@@ -200,6 +217,48 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-16, STORY-953 — les contrats de l'essai prospect (plateforme, étiquette `contrats-instance-v1`) et leur
+  usage par le catalogue, annoncés AVANT la fusion.** Tout est AJOUT : rien d'existant ne change de forme. **Jalon du
+  14/12 (EPIC-147) : contrat du jeu de démonstration publié.**
+  - **Plateforme, `contrats/instance/`** (générés par `npm run contrats:instance`), pour **tout groupe qui écrit un
+    module** (A, C, D) :
+    - `jeu-demonstration@1` : un jeu est un dossier, `jeu.json` et ses fichiers de données. Le `jeu.json` porte le
+      code, la version, la verticale et un générateur à graine fixe éventuel. Il a une part par module, dans l'ordre
+      d'import, et, par objet, un fichier (un tableau JSON), son nombre d'enregistrements et son sha256.
+      `npm run jeu:verifier -- <dossier>` le vérifie avant livraison. Jeu témoin de B : `jeux-demonstration/temoin/`.
+    - `import-c13-demande@1` et `-reponse@1` : la forme GÉNÉRIQUE de `POST /api/v1/instance/<code>/{organisationId}/import`
+      (la route `routesInstance.import` du manifeste). Un lot porte les enregistrements d'**un** objet. Il est
+      idempotent sur `idempotence` : `IMPORTE`, puis `DEJA_IMPORTE` au rejeu. `source` vaut `JEU_DEMONSTRATION`
+      (avec `jeu`) ou `DOSSIER_INSTALLATION`.
+    - `effacement-c13-demande@1` et `-accuse@1` : la forme GÉNÉRIQUE de
+      `POST /api/v1/instance/<code>/{organisationId}/effacement` (`routesInstance.effacement`). Le module efface tout
+      ce qu'il tient de l'organisation dans l'espace servi, puis accuse : `EFFACE`, ou `DEJA_EFFACE` au rejeu. Tout
+      autre statut ou un corps hors contrat n'est PAS un effacement.
+    - `certificat-effacement@1` : la charge du JWS `prospera-certificat-effacement+jws`, signé par une clé d'usage
+      `centrale`, audience `prospect`. Il donne chaque propriétaire et son accusé (`EFFACE`, `DEJA_EFFACE`, ou
+      `SANS_ROUTE` s'il ne déclare aucune route), et la date d'expiration de la dernière sauvegarde.
+      `@prospera/signature` reconnaît ce `typ` (ajout à `SIGNATAIRE_DE`).
+    - `instance-c13.openapi.json` : les deux routes génériques.
+  - **Catalogue (`contrat/essai-prospect.openapi.json`, ajouts facultatifs)** :
+    - `POST /api/instance/v1/essais` accepte `jeuDemonstration: { code, version }`. Un jeu inconnu rend
+      **422 `JEU_DEMONSTRATION_INCONNU`**.
+    - L'essai porte `jeu` (code, version, état d'import par part : `A_IMPORTER`, `IMPORTE`, `NON_IMPORTE` et sa
+      raison) et `effaceLe`. Son `statut` gagne **`EFFACE`** (lecteur tolérant : une valeur de plus).
+    - Routes nouvelles :
+      - `POST …/essais/{organisationId}/jeu-demonstration` : rejouer l'import ;
+      - `POST` et `GET …/essais/{organisationId}/effacement` : le plan, les accusés et le certificat. Refus :
+        **409 `EFFACEMENT_PREMATURE`** avant `effacementLe`, `ESSAI_SIGNE`, `ESSAI_SANS_JEU`, `ESSAI_EFFACE`, 404
+        `EFFACEMENT_INCONNU`.
+    - L'effacement part **seul** à `effacementLe` (file BullMQ `effacements-d-essai`). Une fois effacée,
+      l'organisation voit ses modules `DESINSTALLE` dans l'espace d'essai.
+    - Configuration nouvelle : `JEUX_DEMONSTRATION_DIR` (le jeu témoin est dans l'image), `JEUX_DEMONSTRATION_LOT`,
+      `EFFACEMENT_KID`, `EFFACEMENT_CLE_PRIVEE_JWK`, `EFFACEMENT_CERTIFICAT_DE_CLE`,
+      `EFFACEMENT_RETENTION_SAUVEGARDES_JOURS` (92 par défaut). Sans clé, ou avec une clé hors de sa validité,
+      l'organisation est effacée mais le certificat attend (`CLE_DE_SIGNATURE_ABSENTE`,
+      `CLE_DE_SIGNATURE_HORS_VALIDITE`).
+  - **Pour A, C et D** : chaque module de démo (EPIC-160) sert ces deux routes C13 à ses chemins déclarés, et livre son
+    jeu au format `jeu-demonstration@1`. Voir « Demandes aux autres groupes ».
 
 - **2026-11-16, STORY-951 — essai ou réel (catalogue #56, ouverte), annoncé AVANT la fusion.** Tout est AJOUT :
   rien d'existant ne change de forme. Contrat : `platform-catalog-service/contrat/mise-en-service.openapi.json`.
