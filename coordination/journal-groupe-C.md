@@ -37,7 +37,10 @@
      → garanties) ;
   15. ~~STORY-994~~ : **plateforme #15, sinistres #7, assurance #23** (proposition par `sinistres`, mouvements en
      ajout seul chez `assurance`, seuil glissant, décision du `RESP`) ;
-  16. **STORY-995** ← **suivante** : les pièces du dossier, module `ged` de `document-service`.
+  16. ~~STORY-995~~ : **plateforme #16, document-service #26** (module `ged` : versions immuables, « à rattacher »,
+     port S3 et contrat sur MinIO, santé chiffrée, gate `GED_NOT_ENTITLED`) ;
+  17. **STORY-996** ← **suivante** : l'OCR réel et le contrôle humain avant archivage ; **STORY-998** codée en avance
+     (files de travail par rôle, `MNV-998`), preuve en file.
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -223,6 +226,15 @@ seulement.
     `GET /api/v1/assurance/provisions/{référence}`, `…/a-revoir`, `…/grille-ouverture`,
     `POST …/{référence}/propositions/{id}/decision`.
 
+- **2026-11-16, STORY-995 — contrats NOUVEAUX ; `document-service` gagne un module.**
+  - `ged.piece.recue`, `.versionnee`, `.rattachee`, `.a-rattacher` (clés, empreinte, type ; `DOCUMENT_MEDICAL` pour la
+    santé) ; `ged` consomme `sinistres.dossier.changed` (groupe `ged.sinistres`).
+  - `document-service` : socle « état des modules » (consomme `entitlement.changed`, groupe
+    `document-service.etat-des-modules` ; gate `<CODE>_NOT_ENTITLED`), `AuthenticatedUser.roles` (tous les rôles du
+    jeton, à côté de `role`) ; module `ged` : collections `ged_*`, bucket `ged-pieces` (`GED_BUCKET`), clé de santé
+    `GED_CLE_SANTE` (sans défaut) ; routes `POST/GET /api/v1/ged/pieces…`, `GET /api/v1/ged/a-rattacher`.
+  - ⚠️ Pour B (catalogue) : le module `ged` attend son droit `ged` dans `entitlement.changed`.
+
 ## Questions à l'utilisateur ou au PO
 
 Retenu par défaut le 2026-11-15, selon la règle de l'utilisateur (« appliquer ce que je recommande, contestable après
@@ -245,6 +257,9 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-995-1 → D-995-7** (`stories/STORY-995.md`) : dossier connu par `sinistres.dossier.changed` ; noms de routes et
+  bucket proposés ; rôles lus dans le jeton ; types de la démo reliés aux classes du registre ; AES-256-GCM sans clé par
+  défaut ; antivirus absent ⇒ « à scanner » ; `recue` au dépôt.
 - **D-994-1 → D-994-6** (`stories/STORY-994.md`) : périmètre (lecture par `sinistres` et ouverture par la commande
   avec 1001) ; clé `DEC-` ; seuil glissant depuis la dernière validation du `RESP` ; grille chez `assurance` ; décision
   chez `assurance` ; propositions rejetées gardées sans fait.
