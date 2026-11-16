@@ -743,6 +743,17 @@ reserved_ranges:
       👀 REVIEW le 2026-11-16 — contrats annoncés AVANT la fusion du code (catalogue #56, ouverte). Node 24 :
       1402/1402 ; pile grp-b-951 (essai + réel + doublure de la Reprise, module cible temoin) 28/28 ; 9 mutations
       rougissent. Lot 2 de B, n° 11 (EPIC-146). NON SLOTTÉE.
+  - range: "STORY-953"
+    status: "RÉSERVÉ"
+    owner: "Le contrat du jeu de démonstration, l'effacement, cinq essais simultanés — contrats de l'essai prospect (jeu, import et effacement C13, certificat), jeu témoin ; import du jeu à l'ouverture, effacement certifié à effacementLe (prospera-plateforme, platform-catalog-service)"
+    source_doc: "prospera-stories/stories/STORY-953.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — plateforme #17 (5a50249, étiquette contrats-instance-v1 : jalon du 14/12 tenu),
+      catalogue #58 (4dfde25), contrats annoncés avant la fusion (stories #562). Node 24 : plateforme 424/0,
+      catalogue 1457/1457 ; 8 mutations rouges. Pile : 5 essais simultanés avec le jeu témoin en 433 ms sans mélange ;
+      effacement automatique à effacementLe, certificat vérifié par @prospera/signature et le schéma ; 4 autres
+      intacts. Lot 2 de B, n° 13 (EPIC-147). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
