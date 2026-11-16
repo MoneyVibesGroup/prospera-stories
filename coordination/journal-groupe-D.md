@@ -23,7 +23,9 @@
     le 16/11**.
   - **STORY-1037** ✅ — suite de conformité (étiquette `conformite-portee-reseau-v1`) et registre des consommateurs
     (PR reseau-service#8, `dev` 91b7f63).
-  - Suivante : **STORY-1038** (le redécoupage versionné).
+  - **STORY-1038** ✅ — redécoupage versionné, période passée restituée avec sa version (PR reseau-service#9, `dev`
+    a8a047a).
+  - Suivante : **STORY-1039** (rattachement lieux ↔ zones et résolution).
 
 ## Dépôts tenus
 
