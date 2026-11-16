@@ -383,6 +383,15 @@ reserved_ranges:
     note: >
       🏁 DONE le 2026-11-16 — balance-service#146 (dev 921b333). 4 mutations rouges ; pile grp-a-906 : SFD ⇒ SN
       refusé en 409, SFD-BCEAO 201 avec dossierId ; témoin dev : SN accepté. Lot 2 de A, n° 2. NON SLOTTÉE.
+  - range: "STORY-907"
+    status: "RÉSERVÉ"
+    owner: "La TPU déclarative et la RSH au catalogue d'obligations — paquet togo@2026 régénéré (sha256 e8e94c84…), TPU, TPU_ACOMPTE et RSH dérivées (balance-service, dossier-service, fiscal-service)"
+    source_doc: "prospera-stories/stories/STORY-907.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — balance-service#147 (dev 7a885bb), dossier-service#48 (dev 249b2ed),
+      fiscal-service#47 (dev 8487497). Conformité 65/65 ; recette zone-franche 5/5 ; 2 mutations rouges.
+      Lot 2 de A, n° 3. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
