@@ -335,6 +335,14 @@ reserved_ranges:
       🏁 DONE le 2026-11-16 — balance-service#145 (dev 4a2abec), bilan-service#173 (dev 663063d). Invariant 6/6 dans
       chaque service, 4 mutations rouges ; pile grp-a-905 : dry-run 200 avec un droit échu (témoin dev 403), écritures
       403. Lot 2 de A, n° 1. NON SLOTTÉE.
+  - range: "STORY-906"
+    status: "RÉSERVÉ"
+    owner: "La balance dit son dossier et son référentiel — dossierId publié, tag servi par referentiels/actifs, tag contradictoire en 409 REFERENTIEL_CONTRADICTOIRE, import Sage au tag du dossier (balance-service)"
+    source_doc: "prospera-stories/stories/STORY-906.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — balance-service#146 (dev 921b333). 4 mutations rouges ; pile grp-a-906 : SFD ⇒ SN
+      refusé en 409, SFD-BCEAO 201 avec dossierId ; témoin dev : SN accepté. Lot 2 de A, n° 2. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
