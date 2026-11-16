@@ -26,9 +26,12 @@
      relevé par Prospera sur pile réelle ; remise à zéro) ;
   10. ~~STORY-988~~ : **sinistres #3** (la machine à états du dossier : table `2026.1`, 43 lignes ; décision au
      serveur ; piste d'audit chaînée ; un dossier de `DECLARE` à `CLOTURE` sur pile réelle, rejoué depuis `dev`) ;
-  11. **STORY-989** ← **suivante** (versions et échéances du dossier) ; puis **STORY-991** (faits
-     `liaison-assureur.*@1`, fraîcheur, liste « à saisir »).
-- **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** : C attend ses consignes avant d'ouvrir 989.
+  11. ~~STORY-989~~ : **sinistres #4** (« modifié par X à hh:mm », référentiel des échéances, échéancier BullMQ
+     qu'une restauration ne rejoue pas ; prouvé sur pile en époque 2, rejoué depuis `dev`) ;
+  12. **STORY-991** ← **suivante** (lot 2, §4) : faits `liaison-assureur.*@1` et `sinistres.dossier.changed@1`,
+     fraîcheur, liste « à saisir ».
+- **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
+  terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
   stories backend par groupe) : le lot de C devient **989, 991 → 1004** (§4 de ce plan). Il remplace l'ordre
   ci-dessus à partir de 991.
@@ -156,6 +159,13 @@ seulement.
   écrans du circuit)** : le rôle exercé doit figurer dans la revendication `roles` du jeton (D-988-2), en attendant les
   rôles et portées d'EPIC-202 ; l'écran ne propose que `transitionsPossibles`, le serveur revérifie tout.
 
+- **2026-11-16, STORY-989 — des routes NOUVELLES et Redis dans `prospera-sinistres-service`, rien sur le fil.**
+  `GET /api/v1/sinistres/dossiers/{id}/echeances`, `POST …/{id}/echeances/{code}/suspensions` (`{ roleExerce,
+  versionLue, cleIdempotence, article, debut, fin, motif }` : 400 `SUSPENSION_NON_MOTIVEE`, 404 `ECHEANCE_INCONNUE`,
+  409 `ECHEANCE_ARRETEE`) ; la création accepte `survenuLe` (400 `SURVENANCE_FUTURE`) ; `ETAT_PERIME` porte désormais
+  `details.modifiePar`, `modifieLe`, `heure` et `commande`. Le service exige **Redis** (`REDIS_HOST`, `REDIS_PORT`) ;
+  l'époque se lit dans `INSTANCE_EPOQUE` et `INSTANCE_EPOQUE_OUVERTE_LE` **en attendant l'agent (B, EPIC-148)**.
+
 ## Questions à l'utilisateur ou au PO
 
 Retenu par défaut le 2026-11-15, selon la règle de l'utilisateur (« appliquer ce que je recommande, contestable après
@@ -170,6 +180,9 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   changement d'une ligne, mais il contredit « un nom absent se lit éteint ».
 - **D-983-8** : la liste des champs et pièces de santé du registre est un **défaut** tiré de FR-9, FR-70 et R5 ; le
   médecin-conseil et le juriste la relisent (J-02).
+- **D-989-1 → D-989-8** (`stories/STORY-989.md`) : tâche différée à identifiant stable ; époque par la configuration ;
+  constater sans envoyer (STORY-999) ; `survenuLe` à la création ; heures ouvrées = heures des jours ouvrés ; une
+  échéance plus courte que sa fenêtre d'alerte est sous alerte dès son départ.
 - **D-988-1 → D-988-7** (`stories/STORY-988.md`) : conditions lues dans les constats du dossier en échec fermé ; rôle
   exercé lu dans le jeton ; création minimale ; `COMITE` est une instance ; la version lue se contrôle avant la
   transition ; seule une commande acceptée consomme sa clé d'idempotence.
@@ -177,6 +190,10 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **BullMQ 6.7 ne joint pas Redis si `ioredis` n'est pas déclaré** dans `package.json` (« could not load the optional
+  'ioredis' package ») : les tests en mémoire passent, le service ne joint jamais Redis. Seul un banc sur un vrai Redis
+  le voit.
 
 - **`docker exec … /opt/kafka/bin/…` depuis Git Bash** : le chemin est réécrit en `C:/Program Files/Git/opt/…`.
   Préfixer `MSYS_NO_PATHCONV=1`.

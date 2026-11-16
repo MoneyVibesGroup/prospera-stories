@@ -565,6 +565,16 @@ reserved_ranges:
       décision au serveur, refus tracés, idempotence ; Node 24 : 673 unitaires + 17 e2e, lint 0 ; vrai MongoDB :
       course → ETAT_PERIME ; pile grp-c : DECLARE → CLOTURE par HTTP, piste de 17 lignes intègre, rejouée depuis dev.
       Lot C, n° 10 (EPIC-205). NON SLOTTÉE.
+  - range: "STORY-989"
+    status: "RÉSERVÉ"
+    owner: "Versions et échéances du dossier — « modifié par X à hh:mm », échéancier BullMQ qu'une restauration ne rejoue pas (prospera-sinistres-service)"
+    source_doc: "prospera-stories/stories/STORY-989.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — prospera-sinistres-service#4 (dev 4a1b817). Référentiel des échéances 2026.1 (26 lignes),
+      temps de la compagnie, échéancier BullMQ (clé dossier, échéance, jalon, époque), suspensions ; Node 24 : 746 + 19,
+      lint 0 ; vrais MongoDB et Redis ; pile grp-c : époque 2, aucun jalon rejoué ; rejouée depuis dev.
+      Lot 2 de C, n° 1 (EPIC-205). NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
