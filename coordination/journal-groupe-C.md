@@ -35,7 +35,9 @@
   14. ~~STORY-993~~ : **plateforme #13, liaison-assureur #5, assurance #22** (faits « reçus » avec
      contenu non personnel ; module `assurance` : copie de lecture, fraîcheur, routes polices, table type de sinistre
      → garanties) ;
-  15. **STORY-994** ← **suivante** : la provision dossier par dossier (`prospera-assurance-service`).
+  15. ~~STORY-994~~ : **plateforme #15, sinistres #7, assurance #23** (proposition par `sinistres`, mouvements en
+     ajout seul chez `assurance`, seuil glissant, décision du `RESP`) ;
+  16. **STORY-995** ← **suivante** : les pièces du dossier, module `ged` de `document-service`.
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -213,6 +215,14 @@ seulement.
   codé 994 et 995 sans pile pendant l'attente (branches poussées, PR ouvertes seulement après la preuve) ; les preuves
   de 993 (rejeu depuis `dev`), 994 et 995 passent l'une après l'autre, chacune prend et rend le verrou.
 
+- **2026-11-16, STORY-994 — contrats NOUVEAUX.**
+  - `sinistres` publie `sinistres.provision.revisee` (route `POST …/dossiers/{id}/provision`) ; `assurance` le consomme
+    (groupe `assurance.sinistres`) et publie `assurance.provision.changed` et `assurance.provision.a-valider` (premiers
+    faits du module `assurance`, entré au registre `classification-sante`).
+  - `assurance` : collections `assurance_provisions_mouvements`, `assurance_provisions_propositions` ; routes
+    `GET /api/v1/assurance/provisions/{référence}`, `…/a-revoir`, `…/grille-ouverture`,
+    `POST …/{référence}/propositions/{id}/decision`.
+
 ## Questions à l'utilisateur ou au PO
 
 Retenu par défaut le 2026-11-15, selon la règle de l'utilisateur (« appliquer ce que je recommande, contestable après
@@ -235,6 +245,9 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-994-1 → D-994-6** (`stories/STORY-994.md`) : périmètre (lecture par `sinistres` et ouverture par la commande
+  avec 1001) ; clé `DEC-` ; seuil glissant depuis la dernière validation du `RESP` ; grille chez `assurance` ; décision
+  chez `assurance` ; propositions rejetées gardées sans fait.
 - **D-993-3 → D-993-9** (`stories/STORY-993.md`) : version de la table choisie à l'ouverture du dossier ; gardes
   comptables par route ; `NON_INSTALLE` chez l'appelant ; `JAMAIS_LUE` sans fraîcheur reçue ; groupe
   `assurance.liaison-assureur` ; routes portées par l'organisation, pas par un dossier ; droits fins `assurance:*` pas

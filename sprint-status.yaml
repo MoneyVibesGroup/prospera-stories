@@ -917,6 +917,16 @@ reserved_ranges:
       (dev 135f4a4), prospera-assurance-service#22 (dev b03e9a4). Faits « reçus » avec contenu
       non personnel (D-993-1) ; module assurance : copie de lecture ajout seul, fraîcheur, routes polices et
       correspondances ; gardes comptables par route (AD-3). Pile verte. Lot 2 de C, n° 4. NON SLOTTÉE.
+  - range: "STORY-994"
+    status: "RÉSERVÉ"
+    owner: "La provision dossier par dossier — sinistres propose, assurance seul écrivain des mouvements (plateforme, sinistres, assurance)"
+    source_doc: "prospera-stories/stories/STORY-994.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — prospera-plateforme#15 (dev f666c36), prospera-sinistres-service#7 (dev b8d6a22),
+      prospera-assurance-service#23 (dev 4eeab2d). Proposition par sinistres, mouvements en ajout seul, grille
+      d'ouverture arrondie à 5 000, seuil glissant 2 000 000, décision du RESP. Pile verte. Lot 2 de C, n° 5.
+      NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
