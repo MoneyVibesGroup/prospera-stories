@@ -22,13 +22,15 @@
      transport par API, prouvés sur pile réelle) ;
   8. ~~STORY-986~~ : **assureur-fictif #1** (le LC fictif, les deux transports, ses réglages, prouvé avec
      `liaison-assureur` sur pile réelle) ;
-  9. **STORY-987** ← **suivante** (le jeu de la compagnie de démonstration) ; 10. STORY-988 ; 11. STORY-989 ;
+  9. ~~STORY-987~~ : **plateforme #5** et **assureur-fictif #2** (le jeu de la démo à graine fixe, 205 915 objets,
+     relevé par Prospera sur pile réelle ; remise à zéro) ;
+     **STORY-988** ← **suivante** (la machine à états du dossier) ; 10. STORY-988 ; 11. STORY-989 ;
      puis **STORY-991** (faits `liaison-assureur.*@1`, fraîcheur, liste « à saisir »).
 - **Ensuite (consigne de l'utilisateur du 2026-11-15)** : « ajoute les stories suivantes 201 à 211 », soit les stories
   restantes des épics **EPIC-201 → EPIC-211** d'`epics-assurance-2026-11-13.md` (rôles et portées, déclaration,
   instruction, expertises, décision, paiement, clôture), écrites juste avant d'être codées, dans la plage de C
   (STORY-991 → 1029). Backend d'abord ; les écrans attendent la coque `prospera-app`.
-- **Docker** : aucune pile de C ne tourne (`grp-c-recette` et `grp-c-k` descendues avec leurs volumes).
+- **Docker** (2026-11-16) : aucune pile de C ne tourne (`grp-c-recette` et `grp-c-k` descendues avec leurs volumes).
 
 ## Dépôts tenus
 
