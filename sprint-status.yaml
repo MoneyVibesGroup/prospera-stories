@@ -488,6 +488,17 @@ reserved_ranges:
       services ; topic recréé après l'abonnement retrouvé en 19,1 s (catalogue) ; projection en régime 1,7 s.
       Sans Kafka, le HTTP répond (avant : 107 s de blocage). Mutation echeanceLe : 5 tests rougissent.
       Lot 2 de B, n° 10 (EPIC-155, 145). NON SLOTTÉE.
+  - range: "STORY-942"
+    status: "RÉSERVÉ"
+    owner: "auth-service sur le socle (client Kafka de Confluent, Node 24, BullMQ 6, schémas identity.* au registre) ; le rôle métier effectif dans la liste des membres (prospera-auth-service)"
+    source_doc: "prospera-stories/stories/STORY-942.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — auth #39 (08fc1a0 sur dev). Node 24 : 1289/1289 ; compose grp-b-942 healthy,
+      round-trip Kafka OK ; roleMetier (ATTRIBUE | PAR_DEFAUT, droits après surcharge) prouvé en direct dans
+      GET /users et le détail console ; 6 schémas identity.* au registre, test:schemas 12/12, fil inchangé et
+      conforme. Ticket role-metier-absent-de-la-reponse-des-membres servi (FE-115 débloquée). Lot 2 de B,
+      n° 2 (EPIC-155, 264). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

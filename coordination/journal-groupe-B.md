@@ -14,7 +14,8 @@
   explicitement par l'utilisateur (« le rebase doit marcher »). B fusionne lui-même, comme au lot 1.
 - **Ordre du lot 2** (941 → 955) :
   1. ~~STORY-941~~ : **plateforme #6** (`9f43fa9`) : verrou npm, scripts racines sur les dossiers de C et de D, README ;
-  2. STORY-942 : auth-service sur le socle ; le rôle métier effectif dans la liste des membres — **suivante**.
+  2. ~~STORY-942~~ : **auth #39** (`08fc1a0`) : auth-service sur le socle (Confluent, Node 24, BullMQ 6, six schémas
+     `identity.*` au registre) ; le rôle métier effectif (`roleMetier`) dans `GET /users` et le détail console ;
   3. ~~STORY-943~~ : **plateforme #7** (`5883740`, étiquette `point-de-decision-v1`) : la logique du point de
      décision, tous les refus dans l'ordre d'AD-23, mode sur site, conformité et mutation ;
   6. ~~STORY-946~~ : **plateforme #8** (`300779e`) : le kit des cibles (1), les contrats de la Reprise
@@ -92,12 +93,28 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   avec ses volumes après STORY-939, et B ne garde plus de pile levée entre deux stories. La recette de 940 a attendu
   que `grp-c-recette` libère les ports.
 
+- **← A (2026-11-15) : le rôle métier effectif dans la liste des membres**
+  (`TICKET-BACKEND-role-metier-absent-de-la-reponse-des-membres`) — **servie par STORY-942** (auth #39, `08fc1a0`).
+  Les quatre critères du ticket sont prouvés en direct ; **FE-115 est débloquée**. C'est aussi le reste de la
+  passation d'auth (« sans rôle métier » dans la console) : le détail d'organisation publie le même `roleMetier`.
+
 - **← A (2026-11-15) : borne du jeton face aux verticales** — **prise en charge**, pas encore servie :
   1. regex des droits à tiret ⇒ **STORY-938** ;
   2. cinq codes de plus de 40 caractères ⇒ **STORY-935** ;
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-16, STORY-942 — `auth-service` : un champ AJOUTÉ, rien de changé sur le fil.**
+  - **`GET /api/v1/users`** et **`GET /api/v1/admin/organizations/{id}`** (membres) gagnent `roleMetier`, facultatif :
+    `{ code, libelle | null, origine: ATTRIBUE | PAR_DEFAUT, droits: string[] }`, ou `null` pour un membre sans rôle
+    métier. Mêmes règle et droits que le jeton (surcharge appliquée). `role` et `tenantRole` ne changent pas. **Pour D**
+    (et A, FE-115) : régénérer les types depuis l'OpenAPI ; l'écran n'a plus à deviner le rôle par défaut.
+  - **Les six événements `identity.*` ont un schéma** (`auth-service/contrat/schemas/`), enregistrés au registre en
+    BACKWARD (sujets `<topic>-value`) : désormais, **ajouts facultatifs seulement**. Le format sur le fil est
+    inchangé (JSON nu, mêmes clés, aucun en-tête de registre). `identity.org.created` garde `createdByUserId`
+    facultatif (STORY-938).
+  - Le client Kafka d'auth-service passe à Confluent : aucun effet pour les lecteurs.
 
 - **2026-11-16, STORY-950 — aucun contrat ne change sur le fil.** notification lit désormais
   `etat-publie.changed.<espace>` (groupe nouveau `notification-etat-publie` ; variables facultatives
@@ -252,6 +269,16 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **`minio/minio` n'est plus servi** par Docker Hub (« pull access denied »), ni `quay.io/minio/minio` sans
+  authentification (401) : une pile neuve du compose racine ne lève plus `minio` sur ce poste. Pour la preuve
+  d'auth (STORY-942), une surcouche locale non versionnée a retiré la dépendance (`depends_on: !override`, pas
+  `!reset`, qui vide tout). **Pour A** (`prospera-recette`) : choisir une image MinIO disponible avant la
+  prochaine recette à froid.
+- **Karapace 6.2 accepte qu'un champ facultatif existant devienne requis** (BACKWARD) : le registre ne garde pas ce
+  cas, un test unitaire qui confronte un événement sans ce champ au schéma le fait (STORY-942).
+- **auth-service, étage `verification`** : `sm-1.invariant.spec.ts` parcourt `test/` et lit `.env.example` ; le
+  `.dockerignore` excluait `test/` (STORY-942).
 
 - **Client de Confluent : `producer.connect()` vers un broker absent ne rejette pas vite.** L'attendre dans
   `onModuleInit` retient tout l'amorçage de Nest (107 s mesurées sur notification, Kafka arrêté). Ne jamais l'attendre
