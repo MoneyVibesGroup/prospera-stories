@@ -1,11 +1,11 @@
 # STORY-951 : essai ou réel — la répétition générale et la mise en service
 
-Status: review
+Status: done
 
 **Complexité :** moyenne (deux règles pures, une projection Kafka, deux routes, un filtre d'erreurs)
 
 **Épic :** EPIC-146 (deux espaces : essayer, puis mettre en service)
-**Dépôts :** `MoneyVibesGroup/prospera-platform-catalog-service`
+**Dépôts :** `MoneyVibesGroup/prospera-platform-catalog-service` (PR #56, `8f3e321` sur `dev`)
 **Plage :** groupe B, n° 11 du lot 2 (`coordination/PLAN-4-SESSIONS-LOT-2-2026-11-16.md` §3). Dépend de 948 (naissance)
 et de 947 (`kit-cible-v1.0.0`, contrats de la Reprise).
 
@@ -81,8 +81,11 @@ mise en service la première dans le réel ; un sous-ensemble dont un module att
 
 ## Preuves
 
-- **Node 24**, étage `verification` construit depuis un export `git archive` de la branche : **94 suites, 1 402/1 402**,
-  `tsc` et build verts. Les fichiers touchés passent le lint.
+- **Node 24**, étage `verification` construit depuis un export `git archive` de la tête finale (rebasée sur 952, 949,
+  953 et 945) : **99 suites, 1 511/1 511**, `tsc` et build verts. Les fichiers touchés passent le lint.
+- **Un test de 944 fiabilisé** (`installation/verifications.spec.ts`) : son délai de 300 ms faisait sortir un appel
+  local `VERT` en `DELAI_DEPASSE` sous la charge de la suite complète (2 échecs au premier passage après rebase,
+  20/20 seul). Le délai passe à 1 s, et la réponse lente du cas « délai dépassé » à 3 s.
 - **Pile `grp-b-951`**, sur les images de la branche :
   - deux parties A, **essai** et **réel**, dans un Mongo 8 en jeu de répliques (une base par espace), avec Kafka et
     Redis ;
@@ -90,7 +93,15 @@ mise en service la première dans le réel ; un sous-ensemble dont un module att
   - la doublure de la Reprise ;
   - sans MinIO, introuvable, comme en 942 et 948.
 
-  La preuve de bout en bout compte **28 vérifications sur 28** :
+  La preuve de bout en bout compte **28 vérifications sur 28**. Elle a été rejouée sur la tête finale, après les
+  fusions de 945, 949, 952 et 953 : toujours 28/28, le catalogue du réel `healthy` d'un bout à l'autre.
+
+  Un passage intermédiaire s'est arrêté sur un `ECONNRESET` du client de preuve, pendant un épisode de DNS instable
+  du poste. Docker Hub et `registry.npmjs.org` ne se résolvaient plus, d'où les images construites avec
+  `--network host`. Rejoué avec les journaux du conteneur, il n'y avait aucun redémarrage. Ce n'était pas une
+  régression de 945.
+
+  Les vérifications :
   - **naissance** de la même organisation dans les deux espaces : 201 `NEE` ;
   - **essai** :
     - liste blanche `*@essai.prospera.io` : 201, puis 200 au rejeu ; `*` : 422 `SORTIE_INVALIDE` ;
