@@ -709,6 +709,17 @@ reserved_ranges:
       👀 REVIEW le 2026-11-16 — contrats annoncés au journal de B avant la fusion du code (route /moi/droits, claim dv,
       topic identity.droits.changed@1). Lot 2 de B, n° 9 (EPIC-145, 264), ADR « droits hors du jeton » étapes 1 et 2 ;
       attendue par A-919. NON SLOTTÉE.
+  - range: "STORY-945"
+    status: "RÉSERVÉ"
+    owner: "La bascule : aucun ACTIVE hors du moteur — l'échéance soldée note « acquis, à installer », vertical et propagation des packages retirés, le PUT de la console passe par un plan, l'axe 2 ne se déduit plus du droit, réamorçage par le moteur (platform-catalog-service)"
+    source_doc: "prospera-stories/stories/STORY-945.md"
+    reserved_on: "2026-11-16"
+    note: >
+      👀 REVIEW le 2026-11-16 — catalogue #55 OUVERTE, à fusionner AVEC A-917 (D-L2-2) : les recettes croisées
+      rougiraient (ordre des dépendances au PUT, échéance soldée et vertical qui n'ouvrent plus rien) ; demande à A
+      au journal de B. Node 24 : 1310/1310 ; test:socle 18/18 ; 4 mutations ; pile grp-b-945 (PUT par plan,
+      échéance et vertical sans droit, réamorçage NON_INSTALLE ⇒ EN_SERVICE). Contrats annoncés avant la fusion.
+      Lot 2 de B, n° 5 (EPIC-144). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

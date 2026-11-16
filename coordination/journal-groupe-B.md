@@ -32,6 +32,10 @@
      (`POST /api/instance/v1/naissances`), le registre des organisations et le 404 `ORGANISATION_INCONNUE` (fin de
      D-936-2), le jeton de service limité à une organisation, lu par l'état publié (fin de D-936-3), `reprise:lot:valider`
      réservé au DG ;
+  5. STORY-945 : la bascule — **catalogue #55 OUVERTE, à fusionner AVEC A-917** (D-L2-2) : aucun `ACTIVE` hors du
+     moteur ; l'échéance soldée note « acquis, à installer » ; vertical et propagation des packages retirés ; le `PUT`
+     de la console passe par un plan ; l'axe 2 ne se déduit plus du droit (`migrate:reamorcage-moteur`). Les recettes
+     croisées rougiraient : demande à A ci-dessous. Contrats annoncés ci-dessous, avant la fusion ;
   9. STORY-949 : droits hors du jeton, étapes 1 et 2 — **en cours** (contrats annoncés ci-dessous, avant la fusion).
   10. ~~STORY-950~~ : **notification #87** (`e895c79`), **catalogue #50** (`9713dff`), **paiement #120** (`aa985c8`) :
       notification sur le socle (Node 24, Confluent) et la garde en double lecture ; `metadataMaxAge` 10 s dans les
@@ -94,6 +98,28 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   membre qui reçoit le rôle par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif).
 
 ## Demandes aux autres groupes
+
+- **→ A (2026-11-16) : A-917, réécrire les recettes croisées pour la bascule (STORY-945)** — **ouverte**. La PR
+  catalogue #55 (`MNV-945`) est prête et prouvée, mais **pas fusionnée** : elle se fusionne avec A-917 (D-L2-2), car
+  ces recettes rougiraient sur des images reconstruites depuis elle. B ne les a pas jouées : sur son poste, MinIO
+  n'est pas téléchargeable, et les recettes y déposent des paquets de référentiels. Ce qu'il faut changer
+  (détail : `stories/STORY-945.md`, § Fusion) :
+  1. **`atelier-balance` (l. 333-334), `zone-franche` (l. 445-446), `referentiel-par-dossier` (l. 295-296)** : le
+     `PUT` passe par le point de décision ; `bilan` dépend durement de `balance` ⇒ **ouvrir `balance` AVANT `bilan`**
+     (sinon 422 `MODULE_DEPENDANCE_MANQUANTE`, champ `refus`) ;
+  2. **`referentiel-par-dossier` (l. 390)** : `microfinance` dépend de `reseau` ⇒ ouvrir `reseau` d'abord ;
+  3. **`abonnement` (631, 632, 649, 650/651, 727, 728 ; l. 634, 944, 1098, 770)** :
+     - l'échéance soldée n'ouvre plus rien. Le module est « acquis, à installer », lisible par
+       `GET /api/v1/offres/{org}` (champ `acquis`, avec l'échéance couverte, le palier et les packages) ;
+     - pour l'ouvrir : `PUT /catalog/entitlements/{org}/{module}`, ou `PUT /offres` puis `POST /installations`. Le
+       droit naît `source: moteur:<plan>`, `terme: ECHEANCE`, avec l'échéance et le palier du contrat ;
+     - l'échéance suivante le prolonge comme avant ;
+     - **le vertical n'ouvre plus rien** (`vertical:distributeur`, l. 770) : l'attente tombe.
+
+  Rien d'autre ne change pour la recette : le `PUT` garde son corps et ses succès, et le groupe Kafka
+  `platform-catalog-identite` existe toujours. Quand A-917 est prête : B fusionne #55 **juste avant** A-917, et
+  rejoue avec A les recettes sur des images reconstruites depuis `dev`. Sur une base existante, jouer
+  `npm run migrate:reamorcage-moteur` après le déploiement du catalogue.
 
 - **→ A (2026-11-16) : `/moi/droits` est servi, pour A-919 (étape 3 de l'ADR, côté fiscal)** — **information**
   (STORY-949).
@@ -168,6 +194,29 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-16, STORY-945 — la bascule (catalogue #55, PAS ENCORE FUSIONNÉE : avec A-917), annoncée AVANT la
+  fusion.**
+  - **`PUT /api/v1/catalog/entitlements/{org}/{module}`** : même chemin, même corps, mêmes succès (201, 200). Mais :
+    - le droit est posé **par un plan** (`origine: CONSOLE_PUT`, joué avant la réponse) ;
+    - `source` vaut `moteur:<plan>` et non plus `admin` (une sanction `SUSPENDED` reste `admin`) ;
+    - **refus nouveaux** : 422 `MODULE_DEPENDANCE_MANQUANTE` (champ `refus` : ouvrir la dépendance d'abord),
+      422 `MODULE_INCONNU` (module sans manifeste), 409 `INSTALLATION_EN_COURS`, 409 `INSTALLATION_INACHEVEE`
+      (champ `planId`) ;
+    - **pour D** (console, lot frontend) : ces codes entrent dans l'union des refus du `PUT`.
+  - **L'échéance soldée n'ouvre plus aucun module** (PRD FR-4, chemin 2) : elle prolonge ceux qui sont installés et
+    note les autres « acquis, à installer ». `entitlement.changed` n'est émis que pour une prolongation. **Pour A** (le
+    cabinet) : un cabinet qui paie n'a son module qu'une fois installé par le moteur ; c'est l'objet d'A-917.
+  - **Le vertical n'ouvre plus rien** : plus de droit `source: vertical:<v>`. Plus de propagation d'un package modifié
+    aux titulaires : il ne vaut que pour les nouveaux contrats.
+  - **`GET /api/v1/offres/{org}`** : champ nouveau `acquis` (`code`, `source`, `depuisLe`, et pour le contrat
+    `echeanceLe`, `dossiersMax`, `packs`, `referentiels`) ; les souscrits du point de décision l'incluent. Plans :
+    champ nouveau `origine` (`INSTALLATION` | `CONSOLE_PUT`).
+  - **L'état publié** : un module **sans ligne d'installation est `NON_INSTALLE`**, droit ou pas (fin de D-936-1). Les
+    droits d'avant le moteur se réamorcent par `npm run migrate:reamorcage-moteur`, à jouer au déploiement : sans
+    elle, une base existante lit ses modules `NON_INSTALLE`. Les gardes du cabinet, qui lisent encore
+    `entitlement.changed`, ne voient rien changer. Notification et paiement, en double lecture, voient un écart
+    jusqu'au réamorçage.
 
 - **2026-11-16, STORY-949 — les droits hors du jeton (ADR, étapes 1 et 2) : ajouts, annoncés AVANT la fusion du
   code** (auth, catalogue). Rien d'existant ne change : `perms[]` reste dans le jeton, avec sa borne.
