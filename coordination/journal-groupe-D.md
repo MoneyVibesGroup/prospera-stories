@@ -32,7 +32,8 @@
   - **STORY-1042** ✅ — socle de `prospera-ventes-service` (PR #1, `dev` 80c2cfb) ; **reste** : `vocabulaires/` et
     `contrats/distributeur/` dans la plateforme (D-1042-3).
   - **STORY-1043** ✅ — terrain, recouvrement, pilotage, croissance (PR #1 de chacun).
-  - Suivante : **STORY-1044** (la bibliothèque `series` dans la plateforme).
+  - **STORY-1044** ✅ — bibliothèque `series` (plateforme #14, étiquette `series-v1`), copiée et éprouvée dans ventes.
+  - **Le lot 2 de D est fini : 15 stories sur 15** (1030 → 1044), le 2026-11-16.
 
 ## Dépôts tenus
 
@@ -48,7 +49,18 @@
 
 ## Passations
 
-- *(aucune)* — D-L2-5 : passation à Dev A **avant le 04/12**.
+- **→ Dev A (2026-11-16, D-L2-5, avant le 04/12) : le distributeur.** Ce que D laisse :
+  - `reseau-service` complet pour le lot (EPIC-044 → 053) : `dev` 5922180 ; contrat `reseau.portee.changed@1` publié
+    et au registre ; suite de conformité `conformite-portee-reseau-v1` ; C-1004 est le premier consommateur attendu.
+  - Les cinq services du distributeur en squelette (garde par module, profil, manifestes, piste d'audit chaînée,
+    aucun import croisé) : ventes 3412, terrain 3413, recouvrement 3414, pilotage 3415, croissance 3416.
+  - `prospera-plateforme/series/` (étiquette `series-v1`), copiée dans ventes (`src/socle/series/`).
+  - **Reste à faire** : `vocabulaires/` et `contrats/distributeur/` dans la plateforme (D-1042-3) ; le volet Reprise
+    de l'import réseau (après B-947, D-1041-3) ; la republication de `reseau.commercial.changed@1` quand seul l'état
+    du compte change (D-1034-5) ; les droits hors du jeton (B-949) à la place de la table rôle → droits (D-1032-2) ;
+    la bascule de la garde sur l'état publié (D-1030-2).
+  - Outils : banc HTTP d'intégration sur MongoDB réel (`test/integration/application-http.ts`), émetteur de jetons de
+    recette (profil compose `recette`), Karapace (profil `registre`).
 
 ## Demandes aux autres groupes
 
