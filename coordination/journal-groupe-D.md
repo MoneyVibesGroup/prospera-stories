@@ -17,7 +17,9 @@
     rendu (PR reseau-service#4, `dev` 2ddbebd).
   - **STORY-1034** ✅ — affectations datées, responsable unique, commerciaux et état de leur compte (PR
     reseau-service#5, `dev` 3ff9958).
-  - Suivante : **STORY-1035** (modèle de portée).
+  - **STORY-1035** ✅ — modèle de portée, héritage, gouvernance, journal avant/après (PR reseau-service#6, `dev`
+    b12a988).
+  - Suivante : **STORY-1036** (publication de `reseau.portee.changed@1`, jalon du 27/11 pour C-1004).
 
 ## Dépôts tenus
 
@@ -59,6 +61,10 @@
   de `kyc-service`. **Choix par défaut : KYC exigé partout** (D-1031-2), à revoir avec l'agent d'instance.
 - **Q-D-2 (2026-11-16, STORY-1034) — Q3 du PRD réseau** : une personne peut-elle être affectée à des nœuds de branches
   différentes ? **Choix par défaut : oui** (avis du PRD, le superviseur itinérant ; D-1034-1).
+- **Q-D-3 (2026-11-16, STORY-1035) — Qui est la racine de l'autorité sur les portées ?** Sans racine, personne ne peut
+  attribuer la première portée (AD-8 : nul n'attribue plus que la sienne). **Choix par défaut : le `TENANT_ADMIN` de
+  l'organisation**, qui détient par son rôle une portée totale pour la gouvernance, non publiée (D-1035-3). Les portées
+  « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
 
