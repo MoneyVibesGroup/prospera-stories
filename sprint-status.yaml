@@ -927,6 +927,15 @@ reserved_ranges:
       prospera-assurance-service#23 (dev 4eeab2d). Proposition par sinistres, mouvements en ajout seul, grille
       d'ouverture arrondie à 5 000, seuil glissant 2 000 000, décision du RESP. Pile verte. Lot 2 de C, n° 5.
       NON SLOTTÉE.
+  - range: "STORY-995"
+    status: "RÉSERVÉ"
+    owner: "Les pièces du dossier — réception, versions, pièces non rattachées ; module ged de document-service (plateforme, document-service)"
+    source_doc: "prospera-stories/stories/STORY-995.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — prospera-plateforme#16 (dev c5fd205), prospera-ocr-service#26 (document-service, dev
+      a682bd1). Module ged : versions immuables, file « à rattacher », port S3 et test de contrat (vrai MinIO), santé
+      chiffrée, gate GED_NOT_ENTITLED, rien ne se supprime. Pile verte. Lot 2 de C, n° 6. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
