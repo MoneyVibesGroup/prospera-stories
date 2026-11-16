@@ -13,7 +13,14 @@
 - ~~1. **STORY-905**~~ ✅ **DONE (2026-11-16)** — balance #145 (dev `4a2abec`), bilan #173 (dev `663063d`). La garde
   d'accès lit `@LectureSeule()` ; `ROUTES_SANS_ECRITURE` déclarée (4 routes balance, 8 bilan) et balayée sur tous les
   contrôleurs ; 4 mutations rouges ; pile `grp-a-905` : dry-run en 200 avec un droit échu (témoin dev : 403).
-- **Suivante : 2. STORY-906** (la balance dit son dossier et son référentiel).
+- ~~2. **STORY-906**~~ ✅ **DONE (2026-11-16)** — balance #146 (dev `921b333`). `dossierId` publié ; `tag` servi par
+  `…/referentiels/actifs` ; `409 REFERENTIEL_CONTRADICTOIRE` (`details`) ; import Sage au tag du dossier. Pile
+  `grp-a-906` : SFD ⇒ `SN` refusé, `SFD-BCEAO` 201 ; témoin dev : `SN` accepté.
+- **Suivante : 3. STORY-907** (TPU déclarative et RSH au catalogue d'obligations). ⚠️ À reprendre en 907 :
+  `balance-service` `tpu.e2e-spec.ts` « CA 18 M ⇒ 409 BAREME_TPU_INDISPONIBLE » rend 200 **sur `dev`** (préexistant).
+- **Piège (906)** : le `docker-compose.override.yml` racine monte le dépôt et lance `start:dev` ; une preuve sur
+  image se lève avec `docker compose -f docker-compose.yml`. Le générateur de « barrels » de l'éditeur recrée des
+  `index.ts` pendant la session : les purger avant chaque build.
 - **Docker** : aucune pile de A ne tourne (`grp-a-905` descendue avec ses volumes). Deux conteneurs arrêtés d'une
   session précédente restent : `grp-a-kafka-1`, `grp-a-karapace-1`.
 

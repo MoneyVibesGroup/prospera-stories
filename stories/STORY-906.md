@@ -1,6 +1,6 @@
 # STORY-906 : La balance dit son dossier et son référentiel
 
-Status: in-progress
+Status: done
 
 **Complexité :** petite (un service, deux champs servis, un refus nommé)
 
@@ -41,7 +41,8 @@ Status: in-progress
 - **AC-2** : `GET …/referentiels/actifs` rend `tag` ; pour un dossier SYSCOHADA, `SN` ; pour un dossier SFD,
   `SFD-BCEAO` ; le champ est typé dans l'OpenAPI.
 - **AC-3** : `POST …/balances` et l'essai à blanc avec un tag autre que celui du dossier ⇒ `409
-  REFERENTIEL_CONTRADICTOIRE`, `attendu` et `declare` dans le corps ; rien n'est écrit.
+  REFERENTIEL_CONTRADICTOIRE`, `details: { declare, attendu, referentiel }` (le filtre d'exceptions ne propage que
+  `code` et `details`) ; rien n'est écrit.
 - **AC-4** : l'import Sage d'un dossier SFD produit une balance `SFD-BCEAO` ; d'un dossier SYSCOHADA, `SN`.
 - **AC-5** : prouvé sur pile réelle.
 
@@ -60,7 +61,14 @@ Status: in-progress
 
 ## Definition of Done
 
-- [ ] Unitaires, e2e touchés, lint, typecheck verts.
-- [ ] Mutations : retirer le contrôle ⇒ rouge ; retirer `dossierId` du mapper ⇒ rouge ; `SN` en dur ⇒ rouge.
-- [ ] Preuve sur pile.
-- [ ] PR code (dev) et docs (main) fusionnées.
+- [x] Lint et typecheck verts. Unitaires et e2e des fichiers touchés verts (`balance`, `sage-import`, `referentiel`,
+  `openapi-contract` : 352/352). Suites complètes sous Windows : les échecs relancés en série passent tous, sauf
+  `tpu.e2e-spec.ts` « CA 18 M ⇒ 409 BAREME_TPU_INDISPONIBLE », qui rend 200 **aussi sur `dev`** (vérifié en remisant
+  les changements) : préexistant, repris en STORY-907.
+- [x] Mutations rouges : contrôle retiré de `submit` ; mapper qui sert `orgId` à la place du dossier ; `SN` en dur dans
+  le normaliseur ; tag non servi par le diagnostic.
+- [x] Preuve sur pile `grp-a-906` (image construite, volumes neufs, JWKS local) : dossier `MICROFINANCE` ⇒
+  `GET …/referentiels/actifs` `tag: SFD-BCEAO` ; `POST …/balances` tag `SN` ⇒ `409 REFERENTIEL_CONTRADICTOIRE`,
+  `details { declare: SN, attendu: SFD-BCEAO, referentiel: sfd-bceao@2.0 }` ; tag `SFD-BCEAO` ⇒ 201, `dossierId` servi
+  (et dans `GET …/balances`). Témoin (image `origin/dev`) : `SN` accepté en 201, aucun `tag`, `dossierId` absent.
+- [x] PR code fusionnée : balance #146 (dev `921b333`).

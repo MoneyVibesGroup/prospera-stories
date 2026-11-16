@@ -3,7 +3,9 @@
 **Cible :** `balance-service` (:3007)
 **Ouvert par :** **FE-056** (barry thierno alhassane, 2026-08-07) — constat d'**intégration**, pas de maquette
 **Priorité :** Should — le front s'en sort avec un sélecteur, mais au prix exact de ce que FE-056 vient de retirer
-**État :** ⛔ ouvert
+**État :** ✅ résolu par **STORY-906** (balance #146) : options 1 et 3. `GET …/referentiels/actifs` rend `tag` ;
+un tag contradictoire est refusé en `409 REFERENTIEL_CONTRADICTOIRE`. Pas l'option 2 : le tag est scellé dans le
+checksum que le client calcule.
 
 ---
 

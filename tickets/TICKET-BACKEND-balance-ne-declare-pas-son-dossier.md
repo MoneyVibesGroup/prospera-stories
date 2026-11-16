@@ -3,7 +3,9 @@
 **Cible :** `balance-service` (:3007)
 **Ouvert par :** **FE-063** (barry thierno alhassane, 2026-08-19) — constat d'**intégration**, pas de maquette
 **Priorité :** Should — le front n'est pas bloqué, mais il perd toute possibilité de **vérifier** ce qu'il affiche
-**État :** ⛔ ouvert
+**État :** 🟡 servi pour la balance par **STORY-906** (balance #146) : `BalanceResponseDto.dossierId`, hors du
+checksum ; question 3 (`balance.submitted`) : la balance ingérée porte le dossier résolu par l'ingestion. Reste
+ouvert pour les autres familles (imports, cahiers, rejets, rapprochement).
 
 ---
 
