@@ -25,8 +25,16 @@
   client de Confluent ; deux défauts du patron de 950 trouvés et corrigés (relance sur consommateur neuf ; `/health`
   borné à 5 s) — **demande à B et C** ci-dessous. Recettes `zone-franche` + `atelier-balance` **56/56 depuis `dev`**
   (valent aussi pour 907).
-- **Suivante : 5. STORY-909** (fiscal-service sur le socle) : copie `_wt-a-fiscal-909` (branche `story-909`, rien
-  d'écrit). Patron : celui de 908, avec les deux correctifs.
+- ~~5. **STORY-909**~~ ✅ **DONE (2026-11-16)** — fiscal #48 (dev `a552d77`). Node 24, client de Confluent, les deux
+  correctifs de 908 ; conformité 65/65 sous Node 24 ; pile : topic neuf vu en 6,6 s, `/health` 503 en 6,8 s sans Kafka,
+  200 en 16 s au retour. Recette depuis `dev` jouée au gate de 910 (qui recette la même pile).
+- ✅ **Relecture de `kit-cible` 1.0.0 (demande de B)** : `coordination/relecture-kit-cible-1.0.0-groupe-A.md`. Verdict :
+  **1.0.1 nécessaire** (D1 bloquant : une clé en double dans un lot perd une ligne en silence ; D2 messages hors
+  contrat ; D3 montants requis non appliqués ; trous de la suite : cloisonnement, atomicité, `controles`).
+- **Suivante : 6. STORY-910** (dossier-service et kyc-service sur le socle).
+- **Piège (909)** : le build de fiscal vérifie l'empreinte de ses artefacts (`paquets-depot/assets`,
+  `completude-depot/assets`) ; une copie de travail Windows les a en CRLF ⇒ `PAQUET_DEPOT_INTEGRITE` au `nest build`.
+  Réextraire en LF (`rm` puis `git -c core.autocrlf=false checkout --`) avant une image construite depuis la copie.
 - **Piège (906)** : le `docker-compose.override.yml` racine monte le dépôt et lance `start:dev` ; une preuve sur
   image se lève avec `docker compose -f docker-compose.yml`. Le générateur de « barrels » de l'éditeur recrée des
   `index.ts` pendant la session : les purger avant chaque build.
