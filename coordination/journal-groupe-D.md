@@ -25,7 +25,8 @@
     (PR reseau-service#8, `dev` 91b7f63).
   - **STORY-1038** ✅ — redécoupage versionné, période passée restituée avec sa version (PR reseau-service#9, `dev`
     a8a047a).
-  - Suivante : **STORY-1039** (rattachement lieux ↔ zones et résolution).
+  - **STORY-1039** ✅ — rattachements et résolution (PR reseau-service#10, `dev` 9117794).
+  - Suivante : **STORY-1040** (couverture, zones blanches, candidats).
 
 ## Dépôts tenus
 
