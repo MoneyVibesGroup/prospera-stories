@@ -32,10 +32,10 @@
      (`POST /api/instance/v1/naissances`), le registre des organisations et le 404 `ORGANISATION_INCONNUE` (fin de
      D-936-2), le jeton de service limité à une organisation, lu par l'état publié (fin de D-936-3), `reprise:lot:valider`
      réservé au DG ;
-  5. STORY-945 : la bascule — **catalogue #55 OUVERTE, à fusionner AVEC A-917** (D-L2-2) : aucun `ACTIVE` hors du
-     moteur ; l'échéance soldée note « acquis, à installer » ; vertical et propagation des packages retirés ; le `PUT`
-     de la console passe par un plan ; l'axe 2 ne se déduit plus du droit (`migrate:reamorcage-moteur`). Les recettes
-     croisées rougiraient : demande à A ci-dessous. Contrats annoncés ci-dessous, avant la fusion ;
+  5. ~~STORY-945~~ : **catalogue #55** (`99ba2db`, `9798ff5`), fusionnée **avant A-917 sur décision de
+     l'utilisateur** : aucun `ACTIVE` hors du moteur ; l'échéance soldée note « acquis, à installer » ; vertical et
+     propagation des packages retirés ; le `PUT` de la console passe par un plan ; l'axe 2 ne se déduit plus du droit
+     (`migrate:reamorcage-moteur`). **Recettes croisées rouges sur `dev`** : demande à A ci-dessous ;
   9. ~~STORY-949~~ : **auth #41** (`a30e78f`), **catalogue #54** (`abc5716`), contrats annoncés avant la fusion
      (stories #552) : droits hors du jeton, étapes 1 et 2. Côté auth : `GET /moi/droits`, `dv` dans le jeton,
      `identity.droits.changed@1`. Côté catalogue : `droitsEffectifs` en double lecture, avec un cache invalidé par
@@ -125,27 +125,27 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   l'organisation : à ne laisser que si c'est vrai. Les jeux se déposent dans le dossier `JEUX_DEMONSTRATION_DIR` du
   catalogue de l'espace d'essai, un sous-dossier par jeu.
 
-- **→ A (2026-11-16) : A-917, réécrire les recettes croisées pour la bascule (STORY-945)** — **ouverte**. La PR
-  catalogue #55 (`MNV-945`) est prête et prouvée, mais **pas fusionnée** : elle se fusionne avec A-917 (D-L2-2), car
-  ces recettes rougiraient sur des images reconstruites depuis elle. B ne les a pas jouées : sur son poste, MinIO
-  n'est pas téléchargeable, et les recettes y déposent des paquets de référentiels. Ce qu'il faut changer
-  (détail : `stories/STORY-945.md`, § Fusion) :
-  1. **`atelier-balance` (l. 333-334), `zone-franche` (l. 445-446), `referentiel-par-dossier` (l. 295-296)** : le
-     `PUT` passe par le point de décision ; `bilan` dépend durement de `balance` ⇒ **ouvrir `balance` AVANT `bilan`**
-     (sinon 422 `MODULE_DEPENDANCE_MANQUANTE`, champ `refus`) ;
-  2. **`referentiel-par-dossier` (l. 390)** : `microfinance` dépend de `reseau` ⇒ ouvrir `reseau` d'abord ;
-  3. **`abonnement` (631, 632, 649, 650/651, 727, 728 ; l. 634, 944, 1098, 770)** :
-     - l'échéance soldée n'ouvre plus rien. Le module est « acquis, à installer », lisible par
-       `GET /api/v1/offres/{org}` (champ `acquis`, avec l'échéance couverte, le palier et les packages) ;
-     - pour l'ouvrir : `PUT /catalog/entitlements/{org}/{module}`, ou `PUT /offres` puis `POST /installations`. Le
-       droit naît `source: moteur:<plan>`, `terme: ECHEANCE`, avec l'échéance et le palier du contrat ;
-     - l'échéance suivante le prolonge comme avant ;
-     - **le vertical n'ouvre plus rien** (`vertical:distributeur`, l. 770) : l'attente tombe.
+- **→ A (2026-11-16) : 945 FUSIONNÉE avant 917 sur décision de l'utilisateur** — **ouverte**. Catalogue #55
+  (`99ba2db`, `9798ff5` sur `dev`). Sur des images reconstruites depuis `dev`, les recettes croisées sont **rouges**
+  jusqu'à ta correction, faite à ta vérification. **À corriger dans `prospera-recette`** (détail :
+  `stories/STORY-945.md`, § Fusion) :
+  1. **`atelier-balance.recette.ts` l. 333-334, `zone-franche.recette.ts` l. 445-446,
+     `referentiel-par-dossier.recette.ts` l. 295-296** : `octroyer(bilan)` avant `octroyer(balance)`. Le `PUT` passe
+     par le point de décision et `bilan` dépend durement de `balance` ⇒ 422 `MODULE_DEPENDANCE_MANQUANTE` (champ
+     `refus`). **Ouvrir `balance` avant `bilan`** ; `declarations` après `bilan` est déjà dans le bon ordre ;
+  2. **`referentiel-par-dossier.recette.ts` l. 390** : `microfinance` dépend de `reseau` ⇒ ouvrir `reseau` d'abord ;
+  3. **`abonnement.recette.ts`** (631, 632, 649, 650/651, 727, 728) :
+     - **l. 634, 944, 1098** : l'échéance soldée n'ouvre plus rien, donc plus de droit `source: abonnement:<id>`. Le
+       module est « acquis, à installer » (`GET /api/v1/offres/{org}`, champ `acquis` : échéance couverte, palier,
+       packages). Pour l'ouvrir : `PUT /catalog/entitlements/{org}/{module}`, ou `PUT /offres` puis
+       `POST /installations`. Le droit naît `source: moteur:<plan>`, `terme: ECHEANCE`, avec l'échéance et le palier
+       du contrat. L'échéance suivante le prolonge comme avant ;
+     - **l. 770** : le vertical n'ouvre plus rien (`vertical:distributeur`) ⇒ l'attente tombe.
 
   Rien d'autre ne change pour la recette : le `PUT` garde son corps et ses succès, et le groupe Kafka
-  `platform-catalog-identite` existe toujours. Quand A-917 est prête : B fusionne #55 **juste avant** A-917, et
-  rejoue avec A les recettes sur des images reconstruites depuis `dev`. Sur une base existante, jouer
-  `npm run migrate:reamorcage-moteur` après le déploiement du catalogue.
+  `platform-catalog-identite` existe toujours. **Migration** : `npm run migrate:reamorcage-moteur` (ou
+  `node dist/migrations/reamorcage-par-le-moteur.js` dans l'image), à jouer au déploiement du catalogue sur toute base
+  existante. Sans elle, les modules ouverts avant le moteur se lisent `NON_INSTALLE` à l'état publié.
 
 - **→ A (2026-11-16) : `/moi/droits` est servi, pour A-919 (étape 3 de l'ADR, côté fiscal)** — **information**
   (STORY-949).
@@ -288,8 +288,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
     avec son espace d'essai. **Pour D** : les écrans de la liste blanche, du journal et de la mise en service viendront
     au lot frontend.
 
-- **2026-11-16, STORY-945 — la bascule (catalogue #55, PAS ENCORE FUSIONNÉE : avec A-917), annoncée AVANT la
-  fusion.**
+- **2026-11-16, STORY-945 — la bascule (catalogue #55, `99ba2db`, `9798ff5`), annoncée AVANT la fusion ; fusionnée
+  avant A-917 sur décision de l'utilisateur.**
   - **`PUT /api/v1/catalog/entitlements/{org}/{module}`** : même chemin, même corps, mêmes succès (201, 200). Mais :
     - le droit est posé **par un plan** (`origine: CONSOLE_PUT`, joué avant la réponse) ;
     - `source` vaut `moteur:<plan>` et non plus `admin` (une sanction `SUSPENDED` reste `admin`) ;

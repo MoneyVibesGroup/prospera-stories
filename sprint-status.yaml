@@ -729,10 +729,10 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-945.md"
     reserved_on: "2026-11-16"
     note: >
-      👀 REVIEW le 2026-11-16 — catalogue #55 OUVERTE, à fusionner AVEC A-917 (D-L2-2) : les recettes croisées
-      rougiraient (ordre des dépendances au PUT, échéance soldée et vertical qui n'ouvrent plus rien) ; demande à A
-      au journal de B. Node 24 : 1310/1310 ; test:socle 18/18 ; 4 mutations ; pile grp-b-945 (PUT par plan,
-      échéance et vertical sans droit, réamorçage NON_INSTALLE ⇒ EN_SERVICE). Contrats annoncés avant la fusion.
+      🏁 DONE le 2026-11-16 — catalogue #55 (99ba2db, 9798ff5 sur dev), fusionnée AVANT A-917 sur décision de
+      l'utilisateur (D-945-9) : les recettes croisées sont rouges sur dev, à corriger par A (journal de B).
+      Node 24 : 1374/1374 ; test:socle 18/18 ; 4 mutations ; pile grp-b-945 (PUT par plan, échéance et vertical
+      sans droit, réamorçage NON_INSTALLE ⇒ EN_SERVICE). Migration migrate:reamorcage-moteur au déploiement.
       Lot 2 de B, n° 5 (EPIC-144). NON SLOTTÉE.
   - range: "STORY-951"
     status: "RÉSERVÉ"
