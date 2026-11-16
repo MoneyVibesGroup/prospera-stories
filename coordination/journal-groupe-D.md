@@ -19,7 +19,9 @@
     reseau-service#5, `dev` 3ff9958).
   - **STORY-1035** ✅ — modèle de portée, héritage, gouvernance, journal avant/après (PR reseau-service#6, `dev`
     b12a988).
-  - Suivante : **STORY-1036** (publication de `reseau.portee.changed@1`, jalon du 27/11 pour C-1004).
+  - **STORY-1036** ✅ — `reseau.portee.changed@1` publié (PR reseau-service#7, `dev` 17dcf14) : **jalon du 27/11 tenu
+    le 16/11**.
+  - Suivante : **STORY-1037** (suite de conformité et registre des consommateurs).
 
 ## Dépôts tenus
 
@@ -52,7 +54,7 @@
 
 ## ⚠ Contrats
 
-- **ANNONCE (2026-11-16, STORY-1036) — `reseau.portee.changed@1`, contrat neuf** (rien d'existant ne change). Producteur
+- **PUBLIÉ (2026-11-16, STORY-1036, reseau-service#7, `dev` 17dcf14) — `reseau.portee.changed@1`, contrat neuf** (rien d'existant ne change). Producteur
   unique : `reseau-service`. Consommateurs attendus : **C-1004** (sinistres), puis pdv, stock et le distributeur.
   - **Topic** `reseau.portee.changed` (le `@1` est la version du contrat, pas du nom) ; **clé** `<organisationId>:<userId>` ;
     schéma `reseau-service/contrat/schemas/reseau.portee.changed.json`, enregistré dans Karapace sur
