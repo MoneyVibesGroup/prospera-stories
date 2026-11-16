@@ -36,7 +36,10 @@
      moteur ; l'échéance soldée note « acquis, à installer » ; vertical et propagation des packages retirés ; le `PUT`
      de la console passe par un plan ; l'axe 2 ne se déduit plus du droit (`migrate:reamorcage-moteur`). Les recettes
      croisées rougiraient : demande à A ci-dessous. Contrats annoncés ci-dessous, avant la fusion ;
-  9. STORY-949 : droits hors du jeton, étapes 1 et 2 — **en cours** (contrats annoncés ci-dessous, avant la fusion).
+  9. ~~STORY-949~~ : **auth #41** (`a30e78f`), **catalogue #54** (`abc5716`), contrats annoncés avant la fusion
+     (stories #552) : droits hors du jeton, étapes 1 et 2. Côté auth : `GET /moi/droits`, `dv` dans le jeton,
+     `identity.droits.changed@1`. Côté catalogue : `droitsEffectifs` en double lecture, avec un cache invalidé par
+     l'événement. **A-919 peut démarrer** (voir « → A »).
   10. ~~STORY-950~~ : **notification #87** (`e895c79`), **catalogue #50** (`9713dff`), **paiement #120** (`aa985c8`) :
       notification sur le socle (Node 24, Confluent) et la garde en double lecture ; `metadataMaxAge` 10 s dans les
       trois services ; le producteur ne retient plus l'amorçage sans Kafka.
@@ -545,6 +548,14 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **DNS de la VM Docker en panne** (STORY-949, 16/11) : `lookup auth.docker.io: no such host`, alors que npm répondait.
+  La ligne `# syntax=docker/dockerfile:1` fait télécharger le frontal à **chaque** construction. Pour une preuve,
+  construire depuis l'export `git archive` avec cette ligne retirée (le dépôt n'est pas modifié), si les images de
+  base sont locales.
+- **`docker run --rm` long et client détaché** (« error waiting for container: unexpected EOF ») : le conteneur
+  continue, mais `--rm` l'efface avant qu'on lise ses journaux. Pour une suite longue : `docker run -d --name …`, puis
+  `docker wait` et `docker logs`.
 
 - **Deux suites jest sous Node 24 en même temps saturent la VM Docker de ce poste** (8 Go ; catalogue et notification
   ensemble ≈ 6,5 Go). Le démon a répondu `EOF`, puis 500, et une construction d'image est tombée. Une suite à la fois.
