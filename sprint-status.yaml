@@ -419,6 +419,15 @@ reserved_ranges:
       🏁 DONE le 2026-11-16 — plateforme #6 (9f43fa9 sur dev). Node 24 : npm ci, typecheck, 212 passés / 0 échec ;
       garde scripts-racines (2 mutations rougissent). Demande de C du 15/11 servie. Lot 2 de B, n° 1 (EPIC-142).
       NON SLOTTÉE.
+  - range: "STORY-943"
+    status: "RÉSERVÉ"
+    owner: "La logique du point de décision — tous les refus dans l'ordre d'AD-23, mode sur site (licence à l'horloge scellée), conformité et mutation (prospera-plateforme)"
+    source_doc: "prospera-stories/stories/STORY-943.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — plateforme #7 (5883740 sur dev), étiquette point-de-decision-v1. Node 24 : 253 passés /
+      0 échec ; conformite.json 14 cas ; 10 mutations rougissent ; lireLicence sur les vecteurs signés. Lot 2 de B,
+      n° 3 (EPIC-144). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
