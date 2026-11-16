@@ -936,6 +936,15 @@ reserved_ranges:
       🏁 DONE le 2026-11-16 — prospera-plateforme#16 (dev c5fd205), prospera-ocr-service#26 (document-service, dev
       a682bd1). Module ged : versions immuables, file « à rattacher », port S3 et test de contrat (vrai MinIO), santé
       chiffrée, gate GED_NOT_ENTITLED, rien ne se supprime. Pile verte. Lot 2 de C, n° 6. NON SLOTTÉE.
+  - range: "STORY-998"
+    status: "RÉSERVÉ"
+    owner: "Les files de travail par rôle — corbeilles, file du responsable, validation, comptabilité, guichet (sinistres)"
+    source_doc: "prospera-stories/stories/STORY-998.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — prospera-sinistres-service#8 (dev 6ef224b) ; manifeste amendé prospera-stories#570. Files
+      servies, triées (échéance puis ancienneté) et comptées au serveur, gestes ouverts ou fermés avec leur code ;
+      prochainTermeLe dérivé et indexé. Pile verte, rejouée depuis dev. Lot 2 de C, n° 9. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
