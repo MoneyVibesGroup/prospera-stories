@@ -43,6 +43,11 @@
   10. ~~STORY-950~~ : **notification #87** (`e895c79`), **catalogue #50** (`9713dff`), **paiement #120** (`aa985c8`) :
       notification sur le socle (Node 24, Confluent) et la garde en double lecture ; `metadataMaxAge` 10 s dans les
       trois services ; le producteur ne retient plus l'amorçage sans Kafka.
+  11. ~~STORY-951~~ : **catalogue #56** (`8f3e321`) : essai ou réel. Dans l'essai, la liste blanche des sorties et
+      le journal des interceptions (`ECRITURE_REELLE_DEPUIS_ESSAI`) ; dans le réel, la mise en service d'un
+      sous-ensemble (la Reprise d'abord, la vérification `donnees-importees` relue, `MISE_EN_SERVICE_SANS_FEU_VERT`,
+      `reception-definitive.enregistree`) ; projection de `reprise.feu-vert.changed`. Prouvé sur la pile grp-b-951
+      (module cible `temoin`, doublure de la Reprise), 28/28.
   12. ~~STORY-952~~ : **catalogue #57** (`45c3b33`), **notification #88** (`9d6f3ae`), contrats annoncés avant la
       fusion (stories #548) : l'essai d'un prospect (J+30, une prolongation, 60 jours au plus, `ESSAI_TERMINE`, signer
       rouvre sans perte), avis J-7 par la route directe de notification, horloge de recette du catalogue. Pour 953 :
@@ -263,7 +268,7 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   - **Pour A, C et D** : chaque module de démo (EPIC-160) sert ces deux routes C13 à ses chemins déclarés, et livre son
     jeu au format `jeu-demonstration@1`. Voir « Demandes aux autres groupes ».
 
-- **2026-11-16, STORY-951 — essai ou réel (catalogue #56, ouverte), annoncé AVANT la fusion.** Tout est AJOUT :
+- **2026-11-16, STORY-951 — essai ou réel (catalogue #56, `8f3e321`), annoncé AVANT la fusion.** Tout est AJOUT :
   rien d'existant ne change de forme. Contrat : `platform-catalog-service/contrat/mise-en-service.openapi.json`.
   - **Routes nouvelles** (service `/api/v1`, public `/api/instance/v1`) :
     - `POST /sorties-essai/{organisationId}/verifier` `{ module, destination: { type, adresse } }` : 200

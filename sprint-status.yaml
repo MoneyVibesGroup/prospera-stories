@@ -766,9 +766,9 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-951.md"
     reserved_on: "2026-11-16"
     note: >
-      👀 REVIEW le 2026-11-16 — contrats annoncés AVANT la fusion du code (catalogue #56, ouverte). Node 24 :
-      1402/1402 ; pile grp-b-951 (essai + réel + doublure de la Reprise, module cible temoin) 28/28 ; 9 mutations
-      rougissent. Lot 2 de B, n° 11 (EPIC-146). NON SLOTTÉE.
+      🏁 DONE le 2026-11-16 — catalogue #56 (8f3e321 sur dev), contrats annoncés avant la fusion. Node 24 :
+      1511/1511 sur la tête rebasée ; pile grp-b-951 (essai + réel + doublure de la Reprise, module cible temoin) 28/28 ; 9 mutations
+      rougissent ; un test de 944 fiabilisé (délai 300 ms ⇒ 1 s). Lot 2 de B, n° 11 (EPIC-146). NON SLOTTÉE.
   - range: "STORY-953"
     status: "RÉSERVÉ"
     owner: "Le contrat du jeu de démonstration, l'effacement, cinq essais simultanés — contrats de l'essai prospect (jeu, import et effacement C13, certificat), jeu témoin ; import du jeu à l'ouverture, effacement certifié à effacementLe (prospera-plateforme, platform-catalog-service)"
