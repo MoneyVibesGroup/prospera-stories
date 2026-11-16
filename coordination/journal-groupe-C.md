@@ -30,8 +30,10 @@
      qu'une restauration ne rejoue pas ; prouvé sur pile en époque 2, rejoué depuis `dev`) ;
   12. ~~STORY-991~~ : **plateforme #10, liaison-assureur #3, sinistres #5** (outbox, treize faits de
      `liaison-assureur` et `sinistres.dossier.changed@1`, chaque champ classé, Karapace réel ; fraîcheur) ;
-  13. **STORY-992** ← **suivante** : le circuit quand le LC est muet ou ne reçoit pas, la liste « à saisir » (reportée de
-     991, D-991-1), le numéro officiel qui remplace la référence.
+  13. ~~STORY-992~~ : **plateforme #12, liaison-assureur #4, sinistres #6** (voie `SAISIE_MANUELLE` et liste
+     « à saisir », report du numéro ; numéro officiel rattaché ; table `2026.2`, garde `POLICE_A_RELIRE`) ;
+  14. **STORY-993** ← **suivante** : la copie de lecture des polices et la table type de sinistre → garanties
+     (`prospera-assurance-service`).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -180,6 +182,15 @@ seulement.
   - `sinistres` : `sinistres.dossier.changed` (état absolu ; `versionEtat` = version du dossier).
   - **Pour le registre `classification-sante`** : `champsOrdinaires` de `sinistres` et `liaison-assureur` remplis.
 
+- **2026-11-16, STORY-992 — routes et faits NOUVEAUX ; la table du dossier passe en `2026.2`.**
+  - `liaison-assureur` : `GET …/echange/a-saisir`, `GET …/a-saisir/export`, `POST …/a-saisir/{id}/saisie`,
+    `POST …/echange/numeros` ; fait `liaison-assureur.liste-a-saisir.changed` ; `envoi.etat` gagne l'état
+    `SAISIE_MANUELLE` (ajout, BACKWARD) ; paramètre `LIAISON_NATURES_NON_RECUES`.
+  - `sinistres` : consomme `numero-sinistre.attribue` et `fraicheur.changed` (groupe `sinistres-service.liaison`) ;
+    `dossier.changed` gagne `numeroOfficiel` (facultatif) ; les dossiers neufs s'ouvrent sous la table `2026.2`
+    (garde `POLICE_A_RELIRE` aux transitions 17 et 18 : **sans fraîcheur reçue, l'émission d'un règlement est
+    refusée**).
+
 ## Questions à l'utilisateur ou au PO
 
 Retenu par défaut le 2026-11-15, selon la règle de l'utilisateur (« appliquer ce que je recommande, contestable après
@@ -194,6 +205,9 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   changement d'une ligne, mais il contredit « un nom absent se lit éteint ».
 - **D-983-8** : la liste des champs et pièces de santé du registre est un **défaut** tiré de FR-9, FR-70 et R5 ; le
   médecin-conseil et le juriste la relisent (J-02).
+- **D-992-1 → D-992-6** (`stories/STORY-992.md`) : natures non reçues en paramètre ; correspondance des natures ;
+  police « à relire » jugée sur l'objet `police` de l'organisation ; garde par une table `2026.2` ; alerte « sans
+  numéro » avec 999 ; `numeroOfficiel` facultatif dans `dossier.changed`.
 - **D-991-2 — question au PO** : C-17 (rejet, sans suite, réouverture vers le LC) n'a pas de fait source pour
   `liaison-assureur` : la liste fermée d'AD-16 ne fait pas de lui un consommateur de `sinistres.dossier.changed@1`.
   **Recommandé** : amender AD-16 pour l'y ajouter ; sans réponse, C le retient par défaut avec STORY-992.

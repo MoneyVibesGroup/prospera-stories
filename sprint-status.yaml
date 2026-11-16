@@ -771,6 +771,16 @@ reserved_ranges:
       prospera-sinistres-service#5 (dev 3aa085b). Treize faits de liaison-assureur et sinistres.dossier.changed@1,
       chaque champ classé ; Karapace réel : 15 sujets, garde 0 refus, un champ de santé refusé ; pile : 5 189 faits,
       0 échec, aucun doublon au rejeu. Liste « à saisir » reportée à 992 (D-991-1). Lot 2 de C, n° 2. NON SLOTTÉE.
+  - range: "STORY-992"
+    status: "RÉSERVÉ"
+    owner: "Le circuit quand le LC est muet ou ne reçoit pas — liste « à saisir », numéro officiel, police à relire (liaison-assureur, sinistres, plateforme)"
+    source_doc: "prospera-stories/stories/STORY-992.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — prospera-plateforme#12 (dev cadee2b), prospera-liaison-assureur-service#4 (dev f943791),
+      prospera-sinistres-service#6 (dev 6ccb9ec). Voie SAISIE_MANUELLE et liste C-18 ; report du numéro ; numéro
+      officiel rattaché par le fait ; table 2026.2 et garde POLICE_A_RELIRE ; piles vertes, rejouées depuis dev.
+      Lot 2 de C, n° 3. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
