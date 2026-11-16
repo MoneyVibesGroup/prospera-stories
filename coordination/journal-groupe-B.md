@@ -20,6 +20,9 @@
   6. ~~STORY-946~~ : **plateforme #8** (`300779e`) : le kit des cibles (1), les contrats de la Reprise
      (`contrats/reprise/`) et `@prospera/kit-cible` 0.1.0 (point d'import `SIMULER`/`APPLIQUER`, valeurs de contrôle) ;
      suite : STORY-947 (conformité publiée, cible témoin, `kit-cible` 1.0.0 **avant le 04/12**, relu par A).
+  10. ~~STORY-950~~ : **notification #87** (`e895c79`), **catalogue #50** (`9713dff`), **paiement #120** (`aa985c8`) :
+      notification sur le socle (Node 24, Confluent) et la garde en double lecture ; `metadataMaxAge` 10 s dans les
+      trois services ; le producteur ne retient plus l'amorçage sans Kafka.
 
 ### Lot 1 (fini le 2026-11-15)
 
@@ -95,6 +98,12 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-16, STORY-950 — aucun contrat ne change sur le fil.** notification lit désormais
+  `etat-publie.changed.<espace>` (groupe nouveau `notification-etat-publie` ; variables facultatives
+  `KAFKA_ETAT_PUBLIE_GROUP_ID` et `INSTANCE_ESPACE`, défaut `REEL`). Ce qu'il publie est inchangé. **Pour A**
+  (recette) : aucune variable à ajouter au compose. **Pour tous** : sans Kafka, notification, le catalogue et paiement
+  démarrent désormais leur HTTP tout de suite (le producteur n'est plus attendu à l'amorçage).
 
 - **2026-11-16, STORY-946 — les CONTRATS DE LA REPRISE et le KIT DES CIBLES sont publiés** (`prospera-plateforme`,
   commit `300779e`). Contrats neufs, rien d'existant ne change. **Pour A, C et D, qui écriront des cibles :**
@@ -243,6 +252,18 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Client de Confluent : `producer.connect()` vers un broker absent ne rejette pas vite.** L'attendre dans
+  `onModuleInit` retient tout l'amorçage de Nest (107 s mesurées sur notification, Kafka arrêté). Ne jamais l'attendre
+  à l'amorçage : `void this.ensureConnected().catch(…)` (STORY-950, corrigé dans notification, catalogue, paiement).
+  **Même risque** chez tout service migré (C : sinistres, assurance, document-service).
+- **Aucune image MinIO tirable sur le second poste** (`minio/minio` : « pull access denied » ; `quay.io` : 401). La
+  pile de B y remplace MinIO par un bouche-trou ; une recette qui dépose un artefact de référentiel n'y tournera pas.
+- **Supprimer un topic abonné efface les offsets du groupe** : après recréation, le client repart du début
+  (`Offset out of range` ⇒ `BEGINNING`) et consomme, mais `kafka-consumer-groups` montre un offset commité vide. Pour
+  chronométrer, lire la projection en base plutôt que l'offset (STORY-950).
+- **L'étage `verification` révèle des gardes déjà rouges sur `dev`** (notification : l'inventaire AD-12 depuis
+  MNV-607) : avant cet étage, la suite n'était jouée sur aucune image.
 
 - **Client de Confluent, supervision** : ni `CRASH` ni `GROUP_JOIN`. Un message dont le traitement lève une erreur est
   RELIVRÉ, et le blocage se compte sur ses échecs consécutifs (STORY-937, paiement).
