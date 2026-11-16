@@ -35,6 +35,7 @@
   10. ~~STORY-950~~ : **notification #87** (`e895c79`), **catalogue #50** (`9713dff`), **paiement #120** (`aa985c8`) :
       notification sur le socle (Node 24, Confluent) et la garde en double lecture ; `metadataMaxAge` 10 s dans les
       trois services ; le producteur ne retient plus l'amorçage sans Kafka.
+  12. STORY-952 : l'essai prospect et ses avis — **en cours** (contrats annoncés ci-dessous, avant la fusion).
   14. ~~STORY-954~~ : **plateforme #9** (`b4c5c46` ; étiquettes `seuils-fraicheur-v1`, `contrats-echange-v1`,
       `point-ecriture-unique-v1`), **catalogue #51** (`60473e1`) : les contrats de Connecteurs publiés avant février
       (seuils de fraîcheur, enveloppe et réponse d'échange, `connecteurs.domaine.changed`, `domainesEchange` et ses
@@ -147,6 +148,29 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-16, STORY-952 — l'essai d'un prospect : ajouts, annoncés AVANT la fusion du code** (catalogue et
+  notification, branches `MNV-952`).
+  - **Catalogue, contrat NOUVEAU `contrat/essai-prospect.openapi.json`**, servi par la partie A de l'**espace
+    d'essai** seulement (409 `ESSAI_HORS_ESPACE_D_ESSAI` dans le réel) :
+    - `POST /api/instance/v1/essais` (`entitlement:grant`) ouvre l'essai (J0 → J+30), idempotent sur
+      l'organisation. Corps : `organisationId`, `administrateur`, `commercial` (e-mails), `langue?`. L'organisation
+      doit être née dans l'espace d'essai (404 `ORGANISATION_INCONNUE`, 409 `NAISSANCE_EN_COURS`) ;
+    - `GET …/essais/{organisationId}` (`org:read`) ;
+    - `POST …/prolongation` (`jours?` de 1 à 30) : 409 `ESSAI_DEJA_PROLONGE`, `ESSAI_TERMINE` ou `ESSAI_SIGNE`, 422
+      `PROLONGATION_AU_DELA_DE_60_JOURS` ;
+    - `POST …/signature` : 409 `DELAI_DE_SIGNATURE_ECOULE` passé `effacementLe` ;
+    - **pour D** : les écrans d'essai de la console (créer, prolonger, signer) se génèrent depuis ce fichier.
+  - **État publié (contrat figé, forme inchangée)** : un module installé d'une organisation en essai se lit
+    `ESSAI_PROSPECT` (`finLe`), puis `ESSAI_TERMINE` (`effacementLe`), comme la matrice figée le prévoyait. Une fois
+    signé, il se lit `EN_SERVICE`. Les événements `etat-publie.changed.essai` suivent.
+  - **Notification** : deux modèles système nouveaux, `essai-fin-proche` et `essai-effacement-proche` (e-mail,
+    `fr`/`en`). `platform-catalog-service` entre au périmètre de la route directe, limité à ces deux avis.
+    **Déploiement** : ajouter `platform-catalog-service:<jeton>` à `JETONS_DE_SERVICE` de notification, et
+    `NOTIFICATION_URL` et `NOTIFICATION_JETON_SERVICE` au catalogue. Sans eux, l'essai court et l'avis ne part pas
+    (journal : `AVIS_NON_CONFIGURE`).
+  - **Recette (A)** : `RECETTE_HORLOGE_AVANCE_JOURS` existe désormais aussi au catalogue (heure de référence avancée
+    d'un nombre entier de jours ; **refusée en production** au démarrage).
 
 - **2026-11-16, STORY-948 — la naissance, le jeton de service, le 404 : ajouts, annoncés AVANT la fusion du code**
   (catalogue #53, auth #40 ; annonce fusionnée par stories #543, avant le code).
