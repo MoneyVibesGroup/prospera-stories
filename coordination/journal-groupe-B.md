@@ -32,6 +32,7 @@
      (`POST /api/instance/v1/naissances`), le registre des organisations et le 404 `ORGANISATION_INCONNUE` (fin de
      D-936-2), le jeton de service limité à une organisation, lu par l'état publié (fin de D-936-3), `reprise:lot:valider`
      réservé au DG ;
+  9. STORY-949 : droits hors du jeton, étapes 1 et 2 — **en cours** (contrats annoncés ci-dessous, avant la fusion).
   10. ~~STORY-950~~ : **notification #87** (`e895c79`), **catalogue #50** (`9713dff`), **paiement #120** (`aa985c8`) :
       notification sur le socle (Node 24, Confluent) et la garde en double lecture ; `metadataMaxAge` 10 s dans les
       trois services ; le producteur ne retient plus l'amorçage sans Kafka.
@@ -94,6 +95,22 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-16) : `/moi/droits` est servi, pour A-919 (étape 3 de l'ADR, côté fiscal)** — **information**
+  (STORY-949).
+  - **La route** : `GET {AUTH}/api/v1/moi/droits?organisationId=<org du jeton>`, en présentant le jeton de
+    l'utilisateur tel quel. 200 : `droits` (tenant), `droitsPlateforme`, `dv`. Ce que la garde fiscale compare à
+    `perms[]`, c'est `droits ∪ droitsPlateforme`.
+  - **`dv`** : la version des droits du membre dans l'organisation, entier croissant (absent ou 0 : jamais changé
+    depuis 949). Le jeton la porte (claim `dv`) : un cache tenu à une version **inférieure** au `dv` du jeton se relit.
+  - **L'invalidation** : `identity.droits.changed@1` (clé `organisationId`, champs `userId`, `organisationId`, `dv`).
+    Retirer l'entrée seulement si l'événement porte un `dv` **supérieur** à celui du cache.
+  - **Le cache** : 60 s au plus. Auth injoignable : la double lecture se tait, le jeton décide (pendant la double
+    lecture) ; après la bascule, on ferme.
+  - **Le patron** : `platform-catalog-service/src/droits-hors-du-jeton/` (cache, client, consommateur, double lecture,
+    et leurs tests).
+  - Un jeton dont le `dv` est plus ancien que la résolution donne un écart **attendu** (`JETON_PLUS_ANCIEN`) : ne pas
+    le compter comme un défaut.
+
 - **→ A, C, D (2026-11-16) : servir les routes de vérification de vos modules** — **information** (STORY-944). Le moteur
   installe un module seulement si chacune de ses vérifications répond `VERT` au contrat
   `verification-installation@1` (voir « ⚠ Contrats »). À faire à la gate de chaque module, avant son installation
@@ -146,8 +163,27 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   1. regex des droits à tiret ⇒ **STORY-938** ;
   2. cinq codes de plus de 40 caractères ⇒ **STORY-935** ;
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
+  — **avancée par STORY-949** (2026-11-16) : l'ADR, écrite avec 938, a ses étapes 1 et 2 (`/moi/droits`, `dv`,
+  `identity.droits.changed@1`, double lecture dans la partie A). La borne reste jusqu'au retrait de `perms[]` (étape 4) ;
+  les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-16, STORY-949 — les droits hors du jeton (ADR, étapes 1 et 2) : ajouts, annoncés AVANT la fusion du
+  code** (auth, catalogue). Rien d'existant ne change : `perms[]` reste dans le jeton, avec sa borne.
+  - **Route nouvelle (auth)** : `GET /api/v1/moi/droits?organisationId=<org du jeton>`, avec le jeton de l'utilisateur.
+    Réponse `{ organisationId, userId, dv, roleMetier: { code, origine } | null, droits: string[], droitsPlateforme:
+    string[] }` ; `droits ∪ droitsPlateforme` = le `perms[]` du jeton. Refus : 400 `ORGANISATION_REQUISE`, 403
+    `ORGANISATION_HORS_JETON`, 403 `APPARTENANCE_INACTIVE` ; un jeton de service : 401. Contrat :
+    `auth-service/contrat/moi-droits.openapi.json`.
+  - **Claim nouveau (jeton d'accès)** : `dv`, entier, la version des droits du porteur dans `org` (absent sans
+    organisation et sur un jeton antérieur). Les lecteurs l'ignorent tant qu'ils ne lisent pas `/moi/droits`.
+  - **Topic nouveau** : `identity.droits.changed` (contrat `@1`, sujet `identity.droits.changed-value` en BACKWARD),
+    clé `organisationId`, `{ schemaVersion: 1, eventId, occurredAt, userId, organisationId, dv, cause }`, **sans les
+    droits**. Une version plus récente que celle d'un cache l'invalide. Producteur : auth-service seul.
+  - **Champ nouveau en base** : `memberships.dv` (absent = 0).
+  - **Catalogue** : un consommateur de plus (groupe `platform-catalog-droits`) ; les réglages `DROITS_*` sont
+    facultatifs (adresse d'auth par défaut : `NAISSANCE_AUTH_URL`). La réponse de l'état publié ne change pas.
 
 - **2026-11-16, STORY-952 — l'essai d'un prospect : ajouts, annoncés AVANT la fusion du code** (catalogue et
   notification, branches `MNV-952`).
