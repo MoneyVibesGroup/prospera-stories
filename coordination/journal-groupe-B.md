@@ -15,6 +15,8 @@
 - **Ordre du lot 2** (941 → 955) :
   1. ~~STORY-941~~ : **plateforme #6** (`9f43fa9`) : verrou npm, scripts racines sur les dossiers de C et de D, README ;
   2. STORY-942 : auth-service sur le socle ; le rôle métier effectif dans la liste des membres — **suivante**.
+  3. ~~STORY-943~~ : **plateforme #7** (`5883740`, étiquette `point-de-decision-v1`) : la logique du point de
+     décision, tous les refus dans l'ordre d'AD-23, mode sur site, conformité et mutation ;
 
 ### Lot 1 (fini le 2026-11-15)
 
@@ -90,6 +92,19 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-16, STORY-943 — le POINT DE DÉCISION est publié** (`prospera-plateforme/paquets/point-de-decision`,
+  étiquette `point-de-decision-v1`, commit `5883740`). Contrat neuf, rien d'existant ne change.
+  - `decider({ lieu: 'PLATEFORME' | 'SITE', organisationId, module, souscrits, licence: string[] | null, dependances,
+    installes, planifies? })` ⇒ `{ ouvert: true }` ou `{ ouvert: false, code, refus: [{ code, modules? }] }` :
+    **tous** les refus, dans l'ordre `MODULE_NON_SOUSCRIT`, `MODULE_HORS_LICENCE`, `MODULE_DEPENDANCE_MANQUANTE`
+    (`modules` : dépendances manquantes) ; `code` est le premier. Sur site, `MODULE_HORS_LICENCE` seul, et pas de
+    licence = fermé ; sur la plateforme, `licence: null` = hébergé.
+  - **Copie** : `src/index.ts` (sha256 `de37c40e…d940`) et `conformite.json` (sha256 `6f3eb92c…af97b`), recopiés
+    depuis le blob de l'étiquette, avec un `ORIGINE.json` ; le consommateur rejoue `conformite.json` contre sa copie.
+    Consommateurs prévus : le catalogue (STORY-944), la centrale (STORY-955).
+  - `@prospera/point-de-decision/licence` : `lireLicence` (sur site ; horloge scellée ; refus `HORLOGE_INDISPONIBLE`,
+    `LICENCE_AUTRE_INSTANCE`, `LICENCE_ANTERIEURE`, `LICENCE_INVALIDE`).
 
 - **2026-11-15, STORY-940 — catalogue : `declarations` consomme les paquets fiscaux.**
   - Le semis donne à `declarations` les familles `syscohada-revise`, `zone-franche-togo`, **`fiscal-tg-entreprise`**,
