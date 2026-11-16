@@ -617,6 +617,17 @@ reserved_ranges:
       agent 52/52 ; 16 vecteurs rejoués des deux côtés, jeu croisé appliqué ; 7 mutations rougissent ; pile grp-b-955
       (centrale, exécuteur, contact) saine, licence appliquée, état gardé au redémarrage. Lot 2 de B, n° 15
       (EPIC-148). NON SLOTTÉE.
+  - range: "STORY-948"
+    status: "RÉSERVÉ"
+    owner: "La naissance d'une organisation ; l'identité de la Reprise — POST /api/instance/v1/naissances, registre des organisations et 404 ORGANISATION_INCONNUE, jeton de service limité à une organisation, reprise:lot:valider réservé au DG (platform-catalog-service, auth-service)"
+    source_doc: "prospera-stories/stories/STORY-948.md"
+    reserved_on: "2026-11-16"
+    note: >
+      👀 REVIEW le 2026-11-16 — contrats annoncés au journal de B avant la fusion du code. Node 24 : catalogue
+      1331/1331, auth 1302/1302 ; pile grp-b-948 : 27/27 (naissance réelle, identity.org.created origine MOTEUR,
+      instance EN_SERVICE, rejeu, 409, 422, trois identités de service, 403, 404, coupure d'auth) ; 10 mutations.
+      Fin de D-936-2 et D-936-3. Les six reprise:* au catalogue de tenant : STORY-949 (borne du jeton). Lot 2 de B,
+      n° 8 (EPIC-146, EPIC-264). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

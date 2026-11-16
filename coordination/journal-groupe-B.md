@@ -27,6 +27,10 @@
   7. ~~STORY-947~~ : **plateforme #11** (`789a11a`, étiquette **`kit-cible-v1.0.0`**) : le kit des cibles (2), la suite
      de conformité publiée, la cible témoin, l'adaptateur MongoDB, la distribution CommonJS ; **jalon du 04/12 tenu**,
      relecture de A demandée.
+  8. STORY-948 : **en revue** (contrats annoncés ci-dessous AVANT la fusion du code) : la naissance d'une organisation
+     (`POST /api/instance/v1/naissances`), le registre des organisations et le 404 `ORGANISATION_INCONNUE` (fin de
+     D-936-2), le jeton de service limité à une organisation, lu par l'état publié (fin de D-936-3), `reprise:lot:valider`
+     réservé au DG ;
   10. ~~STORY-950~~ : **notification #87** (`e895c79`), **catalogue #50** (`9713dff`), **paiement #120** (`aa985c8`) :
       notification sur le socle (Node 24, Confluent) et la garde en double lecture ; `metadataMaxAge` 10 s dans les
       trois services ; le producteur ne retient plus l'amorçage sans Kafka.
@@ -142,6 +146,33 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-16, STORY-948 — la naissance, le jeton de service, le 404 : ajouts, annoncés AVANT la fusion du code**
+  (catalogue et auth, PR en revue).
+  - **Catalogue, contrat NOUVEAU `contrat/naissance.openapi.json`** :
+    - `POST /api/instance/v1/naissances` (`entitlement:grant`) et `GET …/naissances/{organisationId}` (`org:read`) ;
+    - refus : 409 `NAISSANCE_DIVERGENTE` (`champs`), 422 `NAISSANCE_REFUSEE` (`cause`), 503 `AUTH_INJOIGNABLE`
+      (`cause`) et `HORLOGE_INDISPONIBLE`, 404 `NAISSANCE_INCONNUE` ;
+    - **pour D** : l'écran de naissance de la console se génère depuis ce fichier ; la console choisit
+      `organisationId` une fois et le donne aux deux espaces.
+  - **État publié (contrat figé `contrat-etat-publie-v1`, forme inchangée)** :
+    - la route rend désormais le **404 `ORGANISATION_INCONNUE`** déjà au contrat, après le 403 ;
+    - elle **admet les identités de service** `MOTEUR`, `REPRISE`, `CONNECTEURS` (claim `organisationId`), comme le
+      contrat le décrivait. `utilisateur.id` = `service:<identité>`, sans droit effectif.
+  - **Auth, route NOUVELLE `POST /api/v1/interne/jetons-de-service`** :
+    - le secret de l'identité (`MOTEUR_JETON_SERVICE`, **`REPRISE_JETON_SERVICE`**, **`CONNECTEURS_JETON_SERVICE`**,
+      nouveaux) donne un jeton RS256 de 300 s : `sub: service:<identité>`, `identite`, `organisationId`, sans `org`,
+      `roles: []`, `perms: []`, `emailVerified: false` ;
+    - **pour C et D** (et la Reprise) : c'est le jeton qu'un service présente aux routes `…/{organisationId}/…`
+      d'une cible (AD-27). Un service qui ne connaît pas la claim `identite` le refuse par sa garde d'e-mail (403) :
+      il faut l'admettre expressément, comme le catalogue le fait (`@AdmetIdentitesDeService`) ;
+    - auth-service refuse ce jeton sur ses propres routes (401 `IDENTITE_DE_SERVICE_REFUSEE`).
+  - **Auth, refus NOUVEAU** : `VALIDATION_DE_REPRISE_RESERVEE_AU_DG` (403) quand un autre que le DG fait gagner
+    `reprise:lot:valider`. Le code n'est pas encore au catalogue de tenant (STORY-949, borne du jeton).
+  - **Catalogue, filtre d'erreurs** : `cause` et `champs` passent la liste blanche (chaîne, liste de chaînes).
+  - **Recette (A)** : `NAISSANCE_AUTH_URL` (`http://auth-service:3001/api/v1`) et `MOTEUR_JETON_SERVICE` (la valeur
+    d'auth) sont à poser sur le catalogue de `docker-compose.recette.yml` pour que la naissance y passe ; sans eux,
+    elle répond 503 `AUTH_INJOIGNABLE`, `cause: NAISSANCE_NON_CONFIGUREE`, et rien d'autre ne change.
 
 - **2026-11-16, STORY-944 — l'installation : routes et un contrat NOUVEAUX, rien d'existant ne change** (catalogue #52,
   annoncé avec la PR de docs, juste après la fusion du code : écart à la règle « avant la fusion », sans effet ici
@@ -372,6 +403,13 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **La borne du jeton bloque les droits de la Reprise** (STORY-948) : `borne-du-jeton.spec.ts` exige que les deux
+  catalogues tiennent dans un jeton (17 + 24 = 41 ≤ 44). Les six `reprise:*` le feraient passer à 47 : ils attendent
+  STORY-949 (droits hors du jeton). Tout droit de tenant nouveau bute sur la même borne d'ici là.
+- **`npm ci` sur le poste en Node 25** échoue sur les bindings natifs (`@confluentinc/kafka-javascript`, `bcrypt`).
+  `npm ci --ignore-scripts` suffit pour `tsc`, le lint et les tests unitaires qui ne les chargent pas ; le reste se
+  joue dans l'étage `verification` (Node 24).
 
 - **`minio/minio` n'est plus servi** par Docker Hub (« pull access denied »), ni `quay.io/minio/minio` sans
   authentification (401) : une pile neuve du compose racine ne lève plus `minio` sur ce poste. Pour la preuve
