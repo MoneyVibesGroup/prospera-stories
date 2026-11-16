@@ -598,6 +598,16 @@ reserved_ranges:
       MongoDB 8 en jeu de répliques) ; 7 mutations rougissent. Pile grp-b-944 : docker kill au milieu d'une
       vérification, reprise à cette étape, rien de doublé ; rejeu idempotent. Fin de D-936-1 pour les modules
       installés par un plan (le reste attend le réamorçage de 945). Lot 2 de B, n° 4 (EPIC-144). NON SLOTTÉE.
+  - range: "STORY-955"
+    status: "RÉSERVÉ"
+    owner: "Agent et centrale, premier incrément — la centrale émet l'état voulu signé, l'agent le vérifie hors ligne et applique la licence ; test croisé des vecteurs (centrale-service, agent-instance, prospera-plateforme en lecture)"
+    source_doc: "prospera-stories/stories/STORY-955.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — centrale-service #1 (5671fab), agent-instance #1 (db1dd58). Node 24 : centrale 41/41,
+      agent 52/52 ; 16 vecteurs rejoués des deux côtés, jeu croisé appliqué ; 7 mutations rougissent ; pile grp-b-955
+      (centrale, exécuteur, contact) saine, licence appliquée, état gardé au redémarrage. Lot 2 de B, n° 15
+      (EPIC-148). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
