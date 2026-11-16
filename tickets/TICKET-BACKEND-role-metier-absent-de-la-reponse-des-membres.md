@@ -6,7 +6,8 @@
 **Ouvert par :** groupe A, 2026-11-15.
 **Bloque :** **FE-115** (les rôles du cabinet), classée en février.
 **Priorité :** Must pour février.
-**Statut :** ouvert.
+**Statut :** **servi** le 2026-11-16 par STORY-942 (auth #39, `08fc1a0`) : `roleMetier` dans `GET /users` et dans le
+détail d'organisation de la console ; les quatre critères sont prouvés en direct (fiche `stories/STORY-942.md`).
 
 ---
 
