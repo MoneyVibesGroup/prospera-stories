@@ -753,6 +753,16 @@ reserved_ranges:
       temps de la compagnie, échéancier BullMQ (clé dossier, échéance, jalon, époque), suspensions ; Node 24 : 746 + 19,
       lint 0 ; vrais MongoDB et Redis ; pile grp-c : époque 2, aucun jalon rejoué ; rejouée depuis dev.
       Lot 2 de C, n° 1 (EPIC-205). NON SLOTTÉE.
+  - range: "STORY-991"
+    status: "RÉSERVÉ"
+    owner: "Les faits de l'échange et du dossier — outbox, quatorze faits classés au registre, fraîcheur par objet et par transport (liaison-assureur, sinistres, plateforme)"
+    source_doc: "prospera-stories/stories/STORY-991.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — prospera-plateforme#10 (dev a7da946), prospera-liaison-assureur-service#3 (dev 1e0ad73),
+      prospera-sinistres-service#5 (dev 3aa085b). Treize faits de liaison-assureur et sinistres.dossier.changed@1,
+      chaque champ classé ; Karapace réel : 15 sujets, garde 0 refus, un champ de santé refusé ; pile : 5 189 faits,
+      0 échec, aucun doublon au rejeu. Liste « à saisir » reportée à 992 (D-991-1). Lot 2 de C, n° 2. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
