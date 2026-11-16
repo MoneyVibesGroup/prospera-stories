@@ -294,6 +294,7 @@ export const MANIFESTE_SINISTRES = {
     'GET /api/v1/sinistres/dossiers/{id}', // [proposition]
     'GET /api/v1/sinistres/recherche', // [proposition, FR-150]
     'GET /api/v1/sinistres/journal', // [proposition, `sinistres:journal:consulter`]
+    'GET /api/v1/sinistres/files/{file}', // STORY-998 : les files de travail par rôle (FR-147, FR-148), figée
     'GET /api/v1/instance/sinistres/{organisationId}/export',
   ],
 
