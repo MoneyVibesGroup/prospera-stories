@@ -18,6 +18,9 @@
      `identity.*` au registre) ; le rôle métier effectif (`roleMetier`) dans `GET /users` et le détail console ;
   3. ~~STORY-943~~ : **plateforme #7** (`5883740`, étiquette `point-de-decision-v1`) : la logique du point de
      décision, tous les refus dans l'ordre d'AD-23, mode sur site, conformité et mutation ;
+  4. ~~STORY-944~~ : **catalogue #52** (`c3c63c8`) : l'installation, un plan enregistré. Point de décision copié
+     (`point-de-decision-v1`), offre (souscrits), plan idempotent aux étapes horodatées, reprise après coupure prouvée
+     par `docker kill` ; l'axe 2 se lit dans le plan (fin de D-936-1 pour les modules installés par un plan) ;
   6. ~~STORY-946~~ : **plateforme #8** (`300779e`) : le kit des cibles (1), les contrats de la Reprise
      (`contrats/reprise/`) et `@prospera/kit-cible` 0.1.0 (point d'import `SIMULER`/`APPLIQUER`, valeurs de contrôle) ;
      suite : STORY-947 (conformité publiée, cible témoin, `kit-cible` 1.0.0 **avant le 04/12**, relu par A).
@@ -76,6 +79,11 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ A, C, D (2026-11-16) : servir les routes de vérification de vos modules** — **information** (STORY-944). Le moteur
+  installe un module seulement si chacune de ses vérifications répond `VERT` au contrat
+  `verification-installation@1` (voir « ⚠ Contrats »). À faire à la gate de chaque module, avant son installation
+  par le moteur : pour le cabinet, avant A-918.
+
 - **→ A (2026-11-16) : relire `kit-cible` 1.0.0 avant le 04/12** (EPIC-161 : « relu par Dev A ») — **ouverte**.
   Étiquette `kit-cible-v1.0.0` sur `prospera-plateforme` (`789a11a`, STORY-947). À lire : `bibliotheques/kit-cible/src/`
   (`cible.ts`, `conformite.ts`, `mongodb.ts`), la fiche `stories/STORY-947.md` (D-947-1 → 10) et le README de la
@@ -125,6 +133,32 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-16, STORY-944 — l'installation : routes et un contrat NOUVEAUX, rien d'existant ne change** (catalogue #52,
+  annoncé avec la PR de docs, juste après la fusion du code : écart à la règle « avant la fusion », sans effet ici
+  puisque tout est ajout).
+  - **Routes neuves de la console** (surface plateforme, `entitlement:grant` pour écrire, `org:read` pour lire) :
+    - `PUT|GET /api/v1/offres/{organisationId}` : l'offre, dépendances dures ajoutées avec leur raison ;
+    - `POST /api/v1/installations` : `Idempotency-Key` ; 201 pour un plan créé, 200 pour un plan rejoué ;
+    - `GET /api/v1/installations?organisationId=` et `GET /api/v1/installations/{planId}` : étapes horodatées, bilan,
+      `interrompueA` ;
+    - `POST /api/v1/installations/{planId}/reprendre`.
+  - **Refus** :
+    - 422 `MODULE_NON_SOUSCRIT`, `MODULE_HORS_LICENCE`, `MODULE_DEPENDANCE_MANQUANTE` : tous rendus dans `refus`, dans
+      l'ordre d'AD-23 ; `MODULE_INCONNU` ;
+    - 409 `MODULE_DEJA_INSTALLE`, `INSTALLATION_EN_COURS`, `CLE_IDEMPOTENCE_REUTILISEE`.
+  - **Corps d'erreur du catalogue** : trois champs facultatifs de plus, `refus`, `modules` et `planId`.
+  - **Pour A, C et D, propriétaires de modules : le contrat des routes de vérification**
+    (`platform-catalog-service/contrat/verification-installation.schema.json`, C13 points 2 et 8).
+    - La route : `POST /api/v1/instance/<code>/{organisationId}/verifications/<code-de-verification>`, appelée sous
+      l'identité du moteur avec `Idempotency-Key`. Elle répond 200 et `{ schemaVersion: 1, code, voyant:
+      VERT|ORANGE|ROUGE, mesure?, detail?, action? }`.
+    - Tant qu'un module ne la sert pas, chacune de ses vérifications est `NON_EXECUTEE` : il **ne s'installe pas**
+      par le moteur.
+    - L'adresse du service se déclare au catalogue : `INSTALLATION_SERVICES=code=url,…`.
+  - **État publié** : l'axe 2 d'un module installé par un plan vient du plan. Pour un consommateur, un tel module passe
+    `EN_INSTALLATION` avant `EN_SERVICE`. Les autres modules ne changent pas.
+  - **Droits** : un droit posé par le moteur porte `source: moteur:<planId>`. `entitlement.changed` ne change pas.
 
 - **2026-11-16, STORY-947 — `kit-cible` 1.0.0 est publié** (`prospera-plateforme`, étiquette `kit-cible-v1.0.0`).
   **Pour A (Dev A, `pdv` en S5), C et D-1041, et tout module cible** :
