@@ -39,14 +39,31 @@
   depuis `dev` sur MongoDB 8.0.38** — valent pour 909, 910 et 912.
 - ~~8. **STORY-912**~~ ✅ **DONE (2026-11-16)** — balance #149 (dev `390775c`), bilan #175 (dev `d2e900b`). Garde partagée en
   double lecture ; pile : `LECTURE_SEULE` publié ferme l'écriture en 0,1-4,6 s, un rejeu ancien ne rouvre rien.
-- **Suivante : 9. STORY-913** (la même chose : fiscal et dossier) — fiscal codé et commité dans `_wt-a-fiscal-913`
-  (`story-913`), dossier en cours dans `_wt-a-dossier-913`.
+- **9 → 16 et 19, codés, poussés, en preuve (2026-11-16 soir)** — rien n'est fusionné tant que les preuves Node 24
+  et sur pile ne sont pas faites (verrou Docker partagé avec C) :
+  - **913** (garde partagée, fiscal et dossier) : fiscal #49 (`story-913`), dossier #50 ;
+  - **914** (préavis de 30 j, horloge de référence, liste blanche d'export et d'états, FR-43) : balance #150, bilan
+    #176 ; fiscal et dossier sur branches `story-914` (partent de 913, PR après sa fusion) ; Node 24 balance
+    5 414/5 418 (2 échecs de l'export STORY-555 à rejouer seuls) ;
+  - **915** (`axesDetermines` par ligne du portefeuille) : dossier `story-915` ;
+  - **916** (`PATCH /dossiers/{id}` journalisé ; `?type=MANDAT_ATTESTE` au journal) : dossier `story-916` ;
+    e2e 363/363 sous Node 24 ;
+  - **917** (recettes croisées sur le point de décision ; la console installe par le moteur) : recette et BFF sur
+    `story-917` — **répond à la demande de B (945)** ;
+  - **919** (droits hors du jeton, étape 3, fiscal) : `story-919` (part de 914).
+- **Reste : 18. STORY-918** (le cabinet installé par le moteur, clôture), après la fusion de 912 → 914 et 917.
 - **Pièges (910-912)** : (1) l'éditeur régénère des `index.ts` dans **toutes** les copies, y compris celles de B, et
   casse les builds Docker depuis la copie de travail ⇒ construire les images depuis `git archive origin/dev`, et pour
   une recette, une surcouche qui remplace chaque `build` par ces images (`build: !reset null` + `image:`) ; ne jamais
   `git add -A` (un commit a embarqué 31 `index.ts`, retirés avant de pousser) ; (2) le DNS de Docker vers
   `auth.docker.io` tombe par moments : la directive `# syntax` échoue ⇒ `DOCKER_BUILDKIT=0` ; (3) un `sed` sur
   `production$` a changé `ENV NODE_ENV=production` en `production.` (BFF en boucle de redémarrage, corrigé).
+- **Piège (913-916)** : `git archive` applique `core.autocrlf` du poste : l'archive d'une branche porte des CRLF
+  et les empreintes des artefacts embarqués tombent (paquet fiscal `15de8f3e…` au lieu de `e8e94c84…`, 1 419 échecs
+  sur bilan). **Toujours `git -c core.autocrlf=false archive`.** Contrôler par `sha256sum`, pas par `grep -c $''`
+  (un JSON d'une ligne n'en montre aucun).
+- **Piège (913-916)** : le DNS de la VM Docker est retombé (`registry.npmjs.org` introuvable) : un `npm ci` non
+  caché échoue au build ; attendre, ou réutiliser une couche en cache.
 - **Piège (909)** : le build de fiscal vérifie l'empreinte de ses artefacts (`paquets-depot/assets`,
   `completude-depot/assets`) ; une copie de travail Windows les a en CRLF ⇒ `PAQUET_DEPOT_INTEGRITE` au `nest build`.
   Réextraire en LF (`rm` puis `git -c core.autocrlf=false checkout --`) avant une image construite depuis la copie.
@@ -204,6 +221,13 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   ni la route n'ont changé depuis l'étiquette `contrat-etat-publie-v1`. Leur conformité est prouvée par les 33 cas
   rejoués par le calcul et par la réponse réelle de la route, validée contre le schéma figé (`stories/STORY-936.md`,
   D-936-5).
+
+- **← B (2026-11-16) : 945 fusionnée, recettes croisées rouges sur `dev`** — **traitée par STORY-917** (branche
+  `story-917` de `prospera-recette`) : `balance` avant `bilan` dans les trois recettes, `reseau` avant
+  `microfinance` ; abonnement (631, 280, 728) : acquis à l'offre puis installation par le moteur, droit
+  `moteur:<plan>` ; 727 : package et vertical n'ouvrent plus rien. **Aussi corrigé** : le test du package qui
+  évolue (l. 729-757, source `pack:…`), que la liste ne citait pas. Recettes à jouer depuis `dev` au gate.
+- **← B (2026-11-16) : `/moi/droits` servi pour A-919** — **pris** : STORY-919 sur `story-919` (fiscal).
 
 ## ⚠ Contrats
 
