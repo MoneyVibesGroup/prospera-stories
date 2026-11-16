@@ -31,7 +31,8 @@
     5922180). **`reseau-service` : les douze stories du lot sont livrées.**
   - **STORY-1042** ✅ — socle de `prospera-ventes-service` (PR #1, `dev` 80c2cfb) ; **reste** : `vocabulaires/` et
     `contrats/distributeur/` dans la plateforme (D-1042-3).
-  - Suivante : **STORY-1043** (les quatre autres services du distributeur).
+  - **STORY-1043** ✅ — terrain, recouvrement, pilotage, croissance (PR #1 de chacun).
+  - Suivante : **STORY-1044** (la bibliothèque `series` dans la plateforme).
 
 ## Dépôts tenus
 
@@ -68,7 +69,7 @@
 
 - **`reseau-service` : poser « Rebase and merge » seul.** Au 2026-11-16, la fusion par squash et par commit de fusion
   est encore permise. La session ne fusionne qu'en `gh pr merge --rebase`.
-- ~~Créer les cinq dépôts du distributeur~~ : **faits** (constaté le 2026-11-16, vides). **Poser « Rebase and merge »
+- ~~Créer les cinq dépôts du distributeur~~ : **faits** ; D y a posé `main` et `dev`. **Poser « Rebase and merge »
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
