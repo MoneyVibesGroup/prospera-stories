@@ -24,8 +24,11 @@
      `liaison-assureur` sur pile réelle) ;
   9. ~~STORY-987~~ : **plateforme #5** et **assureur-fictif #2** (le jeu de la démo à graine fixe, 205 915 objets,
      relevé par Prospera sur pile réelle ; remise à zéro) ;
-     **STORY-988** ← **suivante** (la machine à états du dossier) ; 10. STORY-988 ; 11. STORY-989 ;
-     puis **STORY-991** (faits `liaison-assureur.*@1`, fraîcheur, liste « à saisir »).
+  10. ~~STORY-988~~ : **sinistres #3** (la machine à états du dossier : table `2026.1`, 43 lignes ; décision au
+     serveur ; piste d'audit chaînée ; un dossier de `DECLARE` à `CLOTURE` sur pile réelle, rejoué depuis `dev`) ;
+  11. **STORY-989** ← **suivante** (versions et échéances du dossier) ; puis **STORY-991** (faits
+     `liaison-assureur.*@1`, fraîcheur, liste « à saisir »).
+- **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** : C attend ses consignes avant d'ouvrir 989.
 - **Ensuite (consigne de l'utilisateur du 2026-11-15)** : « ajoute les stories suivantes 201 à 211 », soit les stories
   restantes des épics **EPIC-201 → EPIC-211** d'`epics-assurance-2026-11-13.md` (rôles et portées, déclaration,
   instruction, expertises, décision, paiement, clôture), écrites juste avant d'être codées, dans la plage de C
@@ -141,6 +144,15 @@ seulement.
   `ASSUREUR_FICTIF_INTERDIT`). **Pour le moteur (B)** : le drapeau `assureurFictifAutorise` de l'état voulu signé
   remplacera cette variable quand l'agent le portera.
 
+- **2026-11-16, STORY-988 — des routes NOUVELLES dans `prospera-sinistres-service`, rien sur le fil.**
+  `POST /api/v1/sinistres/dossiers` (`{ volet, branche?, roleExerce, cleIdempotence }` : 201 au statut `DECLARE`,
+  référence `DEC-AAAA-NNNNN`), `GET …/dossiers/{id}` (le dossier et `transitionsPossibles`), `POST …/{id}/transitions`
+  (`{ transition, roleExerce, motif?, versionLue, cleIdempotence }`), `GET …/{id}/audit`. Refus : `DROIT_INSUFFISANT`
+  (403), `MOTIF_ECRIT` (400), `DOSSIER_INTROUVABLE` (404), `TRANSITION_INCONNUE`, `ETAT_PERIME`, `CLE_REUTILISEE`,
+  `TABLE_INCONNUE` (409) et, pour une condition non remplie, **le code de la condition** (409, FR-136). **Pour D (les
+  écrans du circuit)** : le rôle exercé doit figurer dans la revendication `roles` du jeton (D-988-2), en attendant les
+  rôles et portées d'EPIC-202 ; l'écran ne propose que `transitionsPossibles`, le serveur revérifie tout.
+
 ## Questions à l'utilisateur ou au PO
 
 Retenu par défaut le 2026-11-15, selon la règle de l'utilisateur (« appliquer ce que je recommande, contestable après
@@ -155,10 +167,19 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   changement d'une ligne, mais il contredit « un nom absent se lit éteint ».
 - **D-983-8** : la liste des champs et pièces de santé du registre est un **défaut** tiré de FR-9, FR-70 et R5 ; le
   médecin-conseil et le juriste la relisent (J-02).
+- **D-988-1 → D-988-7** (`stories/STORY-988.md`) : conditions lues dans les constats du dossier en échec fermé ; rôle
+  exercé lu dans le jeton ; création minimale ; `COMITE` est une instance ; la version lue se contrôle avant la
+  transition ; seule une commande acceptée consomme sa clé d'idempotence.
 - **D-980-3** : **pas de KYC** dans le gate de `sinistres-service` (C2 ne demande que le droit du module). Si le PO veut
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **`docker exec … /opt/kafka/bin/…` depuis Git Bash** : le chemin est réécrit en `C:/Program Files/Git/opt/…`.
+  Préfixer `MSYS_NO_PATHCONV=1`.
+- **Sur une pile neuve, le consommateur journalise « Unknown topic or partition » une fois**, juste après avoir créé
+  `entitlement.changed` : c'est sa relance, pas une panne ; le droit est projeté quelques secondes plus tard
+  (STORY-990). Une preuve qui publie un droit doit **attendre la projection** avant d'appeler une route gardée.
 
 - **Un renommage en masse touche aussi les copies à l'octet.** Un `sed` `assurance-service` → `sinistres-service` sur
   `src/` a modifié la copie d'un manifeste ; le test d'empreinte l'a vu. Recopier depuis le blob :

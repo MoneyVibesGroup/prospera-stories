@@ -487,6 +487,16 @@ reserved_ranges:
       Mesuré sur pile neuve : 291 s → 6,9 s entre la publication d'un droit et sa projection. Node 24 :
       sinistres 292 + 11 e2e, assurance 2 200 + 347, document 902 + 183 ; lint 0 ; recette de l'Atelier 51/51
       depuis dev. Insérée par C (corrige 980, 981, 982). NON SLOTTÉE.
+  - range: "STORY-988"
+    status: "RÉSERVÉ"
+    owner: "La machine à états du dossier — 42 transitions en donnée versionnée, un seul écrivain, piste d'audit chaînée (prospera-sinistres-service)"
+    source_doc: "prospera-stories/stories/STORY-988.md"
+    reserved_on: "2026-11-15"
+    note: >
+      🏁 DONE le 2026-11-16 — prospera-sinistres-service#3 (dev a445102). Table 2026.1 (15 statuts, 43 lignes),
+      décision au serveur, refus tracés, idempotence ; Node 24 : 673 unitaires + 17 e2e, lint 0 ; vrai MongoDB :
+      course → ETAT_PERIME ; pile grp-c : DECLARE → CLOTURE par HTTP, piste de 17 lignes intègre, rejouée depuis dev.
+      Lot C, n° 10 (EPIC-205). NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
