@@ -13,7 +13,9 @@
     transactionnelle (PR reseau-service#2, `dev` 64537b1).
   - **STORY-1032** ✅ — zones et agences, codes jamais réattribués, fermeture refusée et nommée, montants entiers,
     droits du module (PR reseau-service#3, `dev` e96d5da).
-  - Suivante : **STORY-1033** (hiérarchie récursive).
+  - **STORY-1033** ✅ — hiérarchie récursive, 3 → 4 niveaux par configuration, anti-cycle, déplacement sur compte
+    rendu (PR reseau-service#4, `dev` 2ddbebd).
+  - Suivante : **STORY-1034** (personnes, commerciaux, affectations).
 
 ## Dépôts tenus
 
