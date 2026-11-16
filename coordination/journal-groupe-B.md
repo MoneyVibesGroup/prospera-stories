@@ -24,6 +24,10 @@
   10. ~~STORY-950~~ : **notification #87** (`e895c79`), **catalogue #50** (`9713dff`), **paiement #120** (`aa985c8`) :
       notification sur le socle (Node 24, Confluent) et la garde en double lecture ; `metadataMaxAge` 10 s dans les
       trois services ; le producteur ne retient plus l'amorçage sans Kafka.
+  14. ~~STORY-954~~ : **plateforme #9** (`b4c5c46` ; étiquettes `seuils-fraicheur-v1`, `contrats-echange-v1`,
+      `point-ecriture-unique-v1`), **catalogue #51** (`60473e1`) : les contrats de Connecteurs publiés avant février
+      (seuils de fraîcheur, enveloppe et réponse d'échange, `connecteurs.domaine.changed`, `domainesEchange` et ses
+      cas) ; `@prospera/point-ecriture-unique` (marqueur, garde de balayage) ; le catalogue rejoue les règles.
 
 ### Lot 1 (fini le 2026-11-15)
 
@@ -69,6 +73,13 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-16) : les codes des domaines de `liaison-assureur`** — **question, ouverte**. Le manifeste publié de
+  `liaison-assureur` déclare `assurance.contrats`, `sinistres.dossiers` et `ged.documents-sinistres` : le préfixe du
+  **code** n'est pas le module, alors que la spine de Connecteurs (AD-2) écrit `<module>.<domaine>`. Le catalogue ne le
+  refuse pas (STORY-954, D-954-3 : seuls les objets doivent être du module) pour ne pas casser ce manifeste. À trancher
+  par C : soit le pont déclare les domaines des modules qu'il sert (alors AD-2 l'écrit), soit les codes deviennent
+  `liaison-assureur.<domaine>`. Choix par défaut : rien ne change tant que C ne répond pas.
+
 - **→ D (2026-11-16) : `prospera-plateforme` a vos trois dossiers** (D-L2-3) — **information**. Le README dit que D
   écrit dans `series/`, `vocabulaires/`, `contrats/distributeur/`, et nulle part ailleurs. Forme attendue : `src/`,
   `test/**/*.test.ts`, `scripts/` ; le `test` et le `typecheck` racines les jouent dès votre premier fichier, sans PR
@@ -104,6 +115,22 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-16, STORY-954 — DES CONTRATS NOUVEAUX, rien d'existant ne change** (`prospera-plateforme`, EPIC-169).
+  - **`seuils-fraicheur@1`** (`contrats/seuils-fraicheur.json`, étiquette `seuils-fraicheur-v1`) : immédiat 5 / 15 min,
+    heure 1 h / 3 h, nuit rouge à 06:00 heure locale, `messageDes`. **Pour la coque (Dev A, 11/12)** : générer la
+    table de fraîcheur depuis ce fichier, copie épinglée ; aucune autre table.
+  - **`contrats/echange/`** (étiquette `contrats-echange-v1`) : `echange-enveloppe@1`, `echange-reponse@1`,
+    `connecteurs.domaine.changed@1`, `domaines-echange@1` (corps identique au champ C1 du catalogue) et
+    `domaines-echange.cas.json`. Consommateurs : le kit des cibles (EPIC-170), Connecteurs, le catalogue.
+  - **`@prospera/point-ecriture-unique`** (étiquette `point-ecriture-unique-v1`). **Pour A, C et D, dans tout module
+    qui déclare `domainesEchange`** : copier `paquets/point-ecriture-unique/src/index.ts` à l'étiquette (sha256 dans un
+    `ORIGINE.json`, patron de la garde de 937), poser `@PointDEcriture('<module>.<domaine>')` sur **la** méthode de
+    service qui écrit chaque domaine, et jouer `verifierPointsDEcriture` dans un test (gabarit dans l'en-tête du
+    fichier). Les faits du domaine portent `objetId` (stable) et `rang`.
+  - **Catalogue** : aucun changement de comportement. `domainesEchange` de C1 est désormais une **copie** du contrat de
+    la plateforme (`contrat/copies/echange/`, empreintes gardées) : un changement du champ passe par une version
+    étiquetée de la plateforme, puis la copie.
 
 - **2026-11-16, STORY-942 — `auth-service` : un champ AJOUTÉ, rien de changé sur le fil.**
   - **`GET /api/v1/users`** et **`GET /api/v1/admin/organizations/{id}`** (membres) gagnent `roleMetier`, facultatif :
