@@ -1,6 +1,6 @@
 # STORY-914 : La lecture seule et l'export suivent l'état publié — préavis, horloge, liste blanche
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (une règle, quatre services, une liste blanche par module)
 
@@ -71,7 +71,16 @@ Aujourd'hui, dans les services du cabinet :
 
 ## Definition of Done
 
-- [ ] Unitaires (Node 24, étage `verification`), conformité fiscale, lint, `tsc` verts.
-- [ ] Mutations : préavis retiré ⇒ rouge ; sorte d'export ignorée ⇒ rouge.
-- [ ] Pile réelle : export sous `SUSPENDU` (200) et écriture en préavis (2xx) prouvés.
-- [ ] PR code et docs fusionnées.
+- [x] Unitaires (Node 24, étage `verification`), conformité fiscale, lint, `tsc` verts.
+- [x] Mutations : préavis retiré ⇒ rouge ; sorte d'export ignorée ⇒ rouge.
+- [x] Pile réelle : export sous `SUSPENDU` (200) et écriture en préavis (2xx) prouvés.
+- [x] PR code et docs fusionnées.
+
+## Livraison (2026-11-16)
+
+🏁 **DONE** — balance #150 (dev `34a1ae1`), bilan #176 (dev `31e4a55`), fiscal #50 (dev `9e28d56`), dossier #51 (dev
+`6ce9f1b`). Préavis de 30 jours (`preavisJusquau`, sinon échéance + 30 j), horloge injectée (plus de `Date.now()`
+dans les gardes), liste blanche `@SorteDeRoute('export' | 'etat-reglementaire')` tenue par un invariant
+(`ROUTES_D_EXPORT_ET_D_ETATS`). Node 24 : dossier 1 817 unitaires et 353 e2e ; balance, bilan et fiscal verts, les
+seuls échecs (export STORY-555, minutages) passent rejoués seuls. Mutations rouges (préavis retiré, sorte d'export
+ignorée) ; pile : export sous `SUSPENDU` en 200, écriture en préavis en 2xx.

@@ -1,10 +1,10 @@
 # STORY-916 : `PATCH /dossiers/{id}` journalisé, et l'attestation de mandat lisible
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (une route d'écriture sur un patron existant, un filtre de lecture)
 
-**Ticket :** `tickets/TICKET-BACKEND-fiche-dossier-trois-surfaces.md` (ouvert par FE-061), surfaces 1 et 3
+**Ticket :** `tickets/TICKET-BACKEND-fiche-dossier-trois-surfaces-annoncees-inexistantes.md` (ouvert par FE-061), surfaces 1 et 3
 **Service :** `dossier-service`
 **Plage :** groupe A, n° 12 du lot 2 (`coordination/PLAN-4-SESSIONS-LOT-2-2026-11-16.md` §2). Sans dépendance.
 Fiche écrite **avant** de coder.
@@ -57,6 +57,14 @@ par … » ne peut pas la demander seule.
 
 ## Definition of Done
 
-- [ ] Unitaires et e2e (Node 24, étage `verification`), lint, `tsc` verts.
-- [ ] Pile réelle : `PATCH` puis journal relus sur MongoDB 8.0 ; version périmée ⇒ 409.
-- [ ] PR code et docs fusionnées ; ticket mis à jour (surfaces 1 et 3 fermées, 2 ouverte).
+- [x] Unitaires et e2e (Node 24, étage `verification`), lint, `tsc` verts.
+- [x] Pile réelle : `PATCH` puis journal relus sur MongoDB 8.0 ; version périmée ⇒ 409.
+- [x] PR code et docs fusionnées ; ticket mis à jour (surfaces 1 et 3 fermées, 2 ouverte).
+
+## Livraison (2026-11-16)
+
+🏁 **DONE** — dossier #53 (dev `7092e69`). `PATCH /dossiers/{id}` (`version` exigée, `null` retire un champ facultatif,
+`409 CONFLIT_CONCURRENT`, `ABONNEMENT_EXPIRE` en lecture seule, journal `IDENTITE_MODIFIEE` avant / après) ;
+`?type=MANDAT_ATTESTE` au journal. Node 24 : 1 808 unitaires, 363 e2e. Pile : `PATCH` puis journal relus ; version
+périmée ⇒ 409. Ticket `TICKET-BACKEND-fiche-dossier-trois-surfaces-annoncees-inexistantes.md` : surfaces 1 et 3 fermées, la 2 (complétude)
+reste ouverte.

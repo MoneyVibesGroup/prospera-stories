@@ -1,6 +1,6 @@
 # STORY-915 : Le portefeuille porte l'état des axes de chaque dossier
 
-Status: in-progress
+Status: done
 
 **Complexité :** petite (un champ dérivé dans une agrégation existante)
 
@@ -51,7 +51,14 @@ contre `$lte: [x, null]`) : un dossier aux axes décidés y passerait pour « ax
 
 ## Definition of Done
 
-- [ ] Unitaires (Node 24, étage `verification`), lint, `tsc` verts.
-- [ ] Pile réelle : AC-1 → AC-3 prouvés sur MongoDB 8.0 par `GET /api/v1/dossiers`.
-- [ ] Mutation : `$ifNull` retiré (sans exercice ⇒ jamais déterminé) ⇒ rouge sur la pile.
-- [ ] PR code et docs fusionnées ; ticket fermé.
+- [x] Unitaires (Node 24, étage `verification`), lint, `tsc` verts.
+- [x] Pile réelle : AC-1 → AC-3 prouvés sur MongoDB 8.0 par `GET /api/v1/dossiers`.
+- [x] Mutation : `$ifNull` retiré (sans exercice ⇒ jamais déterminé) ⇒ rouge sur la pile.
+- [x] PR code et docs fusionnées ; ticket fermé.
+
+## Livraison (2026-11-16)
+
+🏁 **DONE** — dossier #52 (dev `9a8bf36`). `axesDetermines` par ligne du portefeuille (décision d'axe effective au
+début de l'exercice ouvert, sinon à la date du jour). Node 24 : 1 805 unitaires, 353 e2e. Pile MongoDB 8.0 : AC-1 → AC-3
+relus par `GET /api/v1/dossiers` ; mutation (`$ifNull` retiré) rouge. Ticket
+`TICKET-BACKEND-portefeuille-ne-porte-plus-l-etat-des-axes.md` fermé.

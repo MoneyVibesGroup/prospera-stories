@@ -1,6 +1,6 @@
 # STORY-919 : Droits hors du jeton, étape 3 — la garde fiscale lit `/moi/droits` en double lecture
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (le patron de STORY-949, posé dans fiscal)
 
@@ -47,7 +47,14 @@ aux décisions. Côté fiscal, c'est la garde des habilitations (`DroitsFiscauxG
 
 ## Definition of Done
 
-- [ ] Unitaires (Node 24, étage `verification`), lint, `tsc` verts.
-- [ ] Pile réelle : auth de `dev` (949) et fiscal ; un écart provoqué (rôle changé) se lit au journal, la décision ne
+- [x] Unitaires (Node 24, étage `verification`), lint, `tsc` verts.
+- [x] Pile réelle : auth de `dev` (949) et fiscal ; un écart provoqué (rôle changé) se lit au journal, la décision ne
   bouge pas.
-- [ ] PR code et docs fusionnées.
+- [x] PR code et docs fusionnées.
+
+## Livraison (2026-11-16)
+
+🏁 **DONE** — fiscal #51 (dev `f1e21f8`). `/moi/droits` lu en double lecture par la garde fiscale (cache 60 s,
+invalidé par `identity.droits.changed@1`), verdicts journalisés `IDENTIQUE` / `ECART` / `JETON_PLUS_ANCIEN` /
+`INDISPONIBLE` / `IGNOREE` ; la décision reste celle du jeton. Node 24 vert hors minutages connus (rejoués seuls) ;
+pile : `/moi/droits` répond 200 depuis fiscal, un écart provoqué se lit au journal sans changer la décision.

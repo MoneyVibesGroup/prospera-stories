@@ -1,6 +1,6 @@
 # STORY-913 : La garde partagée en double lecture — fiscal et dossier
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (le patron de 912, deux services aux règles propres)
 
@@ -43,8 +43,15 @@ Comme balance et bilan (912), fiscal et dossier doivent appliquer l'état publi�
 
 ## Definition of Done
 
-- [ ] Unitaires (Node 24, étage `verification`), conformité fiscale, lint, `tsc` verts.
-- [ ] Mutations : la garde ignore l'état publié connu ⇒ rouge (fiscal) ; la lecture seule ignore les états publiés ⇒
+- [x] Unitaires (Node 24, étage `verification`), conformité fiscale, lint, `tsc` verts.
+- [x] Mutations : la garde ignore l'état publié connu ⇒ rouge (fiscal) ; la lecture seule ignore les états publiés ⇒
   rouge (dossier).
-- [ ] Pile réelle : un `etat-publie.changed.reel` change la décision en secondes.
-- [ ] PR code et docs fusionnées.
+- [x] Pile réelle : un `etat-publie.changed.reel` change la décision en secondes.
+- [x] PR code et docs fusionnées.
+
+## Livraison (2026-11-16)
+
+🏁 **DONE** — fiscal #49 (dev `6d424cc`), dossier #50 (dev `45f8ecd`). Unitaires et conformité fiscale sous Node 24
+(étage `verification`) ; mutations rouges (fiscal : la garde ignore l'état publié ; dossier : la lecture seule ignore
+les états publiés) ; pile : un `etat-publie.changed.reel` change la décision en secondes. La double lecture est
+retirée par STORY-918.
