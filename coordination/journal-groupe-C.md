@@ -93,6 +93,12 @@ seulement.
   au script `test`, et leurs `src`, `test`, `scripts` à l'`include` du `tsconfig.json` racine. D'ici là, chaque
   dossier a son `package.json` et se teste seul.
 
+- **→ B (2026-11-16) : recopier deux manifestes amendés au catalogue** — `manifestes/liaison-assureur.manifest.ts`
+  (consomme `sinistres.dossier.changed@1`) et `manifestes/assurance.manifest.ts` (consomme
+  `liaison-assureur.fraicheur.changed@1`) ont changé sur `main` (amendement d'AD-16, D-991-2 tranchée par
+  l'utilisateur, D-993-2). Si la garde des manifestes du catalogue (`scripts/manifestes/garde.mjs`) compare aux
+  sources de `prospera-stories`, elle rougira jusqu'à la recopie. C recopie de son côté ceux de ses services.
+
 ## Réponses aux demandes reçues
 
 - **← B (2026-11-15) : `prospera-plateforme` est prêt** — **lu**. STORY-983 et 987 y écriront dans les seuls dossiers
@@ -208,9 +214,11 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
 - **D-992-1 → D-992-6** (`stories/STORY-992.md`) : natures non reçues en paramètre ; correspondance des natures ;
   police « à relire » jugée sur l'objet `police` de l'organisation ; garde par une table `2026.2` ; alerte « sans
   numéro » avec 999 ; `numeroOfficiel` facultatif dans `dossier.changed`.
-- **D-991-2 — question au PO** : C-17 (rejet, sans suite, réouverture vers le LC) n'a pas de fait source pour
-  `liaison-assureur` : la liste fermée d'AD-16 ne fait pas de lui un consommateur de `sinistres.dossier.changed@1`.
-  **Recommandé** : amender AD-16 pour l'y ajouter ; sans réponse, C le retient par défaut avec STORY-992.
+- ~~**D-991-2 — question au PO**~~ **TRANCHÉE le 2026-11-16 par l'utilisateur** (« oui il faut l'y autoriser ») :
+  `liaison-assureur` consomme `sinistres.dossier.changed@1` (source de C-17). AD-16 et le manifeste `liaison-assureur`
+  amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
+- **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
+  du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
 - **D-991-1 → D-991-6** (`stories/STORY-991.md`) : liste « à saisir » reportée à 992 ; graphie des sujets ;
   transactions de `liaison-assureur` par le stockage local asynchrone de Mongoose ; fraîcheur des fichiers 24 h ;
   `rang` = version de l'objet.
