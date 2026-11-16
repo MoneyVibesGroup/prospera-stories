@@ -27,7 +27,9 @@
     a8a047a).
   - **STORY-1039** ✅ — rattachements et résolution (PR reseau-service#10, `dev` 9117794).
   - **STORY-1040** ✅ — couverture, zones blanches, candidats (PR reseau-service#11, `dev` 98ed21c).
-  - Suivante : **STORY-1041** (administration, import tout ou rien, journal lisible).
+  - **STORY-1041** ✅ — import tout ou rien, journal lisible, vérifications du manifeste (PR reseau-service#12, `dev`
+    5922180). **`reseau-service` : les douze stories du lot sont livrées.**
+  - Suivante : **STORY-1042** (le socle de `prospera-ventes-service`).
 
 ## Dépôts tenus
 
