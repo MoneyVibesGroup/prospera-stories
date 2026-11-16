@@ -493,6 +493,32 @@ reserved_ranges:
       🏁 DONE le 2026-11-16 — fiscal-service#48 (dev a552d77). Conformité 65/65 sous Node 24 ; pile : topic neuf en
       6,6 s, /health 503 en 6,8 s sans Kafka, 200 en 16 s au retour. Recette depuis dev au gate de 910. Lot 2 de A, n° 5.
       NON SLOTTÉE.
+  - range: "STORY-910"
+    status: "RÉSERVÉ"
+    owner: "dossier-service et kyc-service sur le socle du moteur — Node 24, client Kafka de Confluent, supervision de 908 (dossier-service, kyc-service)"
+    source_doc: "prospera-stories/stories/STORY-910.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — dossier-service#49 (dev 2e7e0dc), kyc-service#28 (dev d4932c6). Node 24 : 113/113 et 50/50 ;
+      pile : topic neuf en 3,2 s, /health 503 en 3,1 s sans Kafka, 200 en 8 s au retour. Lot 2 de A, n° 6. NON SLOTTÉE.
+  - range: "STORY-911"
+    status: "RÉSERVÉ"
+    owner: "Le BFF de la console et les piles de recette sur le socle — Node 24, MongoDB 8.0, garde du profil réalignée (prospera-admin-panel-service, prospera-recette)"
+    source_doc: "prospera-stories/stories/STORY-911.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — admin-panel#34 (dev 84120a5), prospera-recette#21 (dev 979ec45). BFF 41/41 ; coupe-circuit
+      de 903 rejoué 20/20 ; recettes pile + zone-franche + atelier-balance 63/63 depuis dev sur MongoDB 8.0.38. Lot 2 de A, n° 7.
+      NON SLOTTÉE.
+  - range: "STORY-912"
+    status: "RÉSERVÉ"
+    owner: "La garde partagée en double lecture — balance et bilan : garde-etat-publie-v1 copiée, projection de etat-publie.changed, l'état publié décide (balance-service, bilan-service)"
+    source_doc: "prospera-stories/stories/STORY-912.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — balance-service#149 (dev 390775c), bilan-service#175 (dev d2e900b). Node 24 : 271/271 et 325/325 ;
+      mutation rouge ; pile : LECTURE_SEULE publié ferme l'écriture en 0,1-4,6 s, rejeu ancien sans effet. Lot 2 de A, n° 8.
+      NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
