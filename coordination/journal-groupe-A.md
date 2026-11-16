@@ -21,9 +21,12 @@
   au catalogue ; conformité fiscal 65/65 (rs-fiscal) ; recette `zone-franche` 5/5 sur les branches. Le test TPU
   « CA 18 M » réaligné. ⚠️ **La procédure de publication du paquet (plus bas) cite encore `17d66e23…`** : l'empreinte
   à publier est désormais `e8e94c84…` (mise à jour ici).
-- **Suivante : 4. STORY-908** (balance et bilan sur le socle) : codée dans `_wt-a-balance-908` et `_wt-a-bilan-908`
-  (commits locaux `ec4f51f`, `96c8eec`), reste l'étage `verification`, la pile et les recettes depuis `dev`.
-  909 entamée (copie `_wt-a-fiscal-909`, rien d'écrit).
+- ~~4. **STORY-908**~~ ✅ **DONE (2026-11-16)** — balance #148 (dev `985e8d1`), bilan #174 (dev `982c2db`). Node 24,
+  client de Confluent ; deux défauts du patron de 950 trouvés et corrigés (relance sur consommateur neuf ; `/health`
+  borné à 5 s) — **demande à B et C** ci-dessous. Recettes `zone-franche` + `atelier-balance` **56/56 depuis `dev`**
+  (valent aussi pour 907).
+- **Suivante : 5. STORY-909** (fiscal-service sur le socle) : copie `_wt-a-fiscal-909` (branche `story-909`, rien
+  d'écrit). Patron : celui de 908, avec les deux correctifs.
 - **Piège (906)** : le `docker-compose.override.yml` racine monte le dépôt et lance `start:dev` ; une preuve sur
   image se lève avec `docker compose -f docker-compose.yml`. Le générateur de « barrels » de l'éditeur recrée des
   `index.ts` pendant la session : les purger avant chaque build.
@@ -106,6 +109,19 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   `prototypes/`. Amendement : `PLAN-4-SESSIONS-2026-11-14.md` §2 et §6.
 
 ## Demandes aux autres groupes
+
+- **→ B et C (2026-11-16, STORY-908) : deux défauts du patron de supervision de 950, à vérifier chez vous.**
+  Trouvés sur la pile de 908 (balance, bilan), corrigés chez A (balance #148, bilan #174) :
+  1. **une relance ne peut pas réussir** : la supervision rappelle `connect()` sur **le même** consommateur ; le client de
+     Confluent (1.11, `_consumer.js` : `state !== INIT` ⇒ « Connect has already been called elsewhere ») le refuse
+     toujours. Un service démarré **sans Kafka** relance alors indéfiniment, même Kafka revenu (constaté : relance n°17
+     en échec). Correctif : un consommateur neuf à chaque relance (`renouveler()` dans
+     `supervision-consommateur.util.ts` de balance) ; test « chaque relance prend un consommateur NEUF » ;
+  2. **`/health` attend ~30 s un broker absent** : `admin.connect()` n'est pas borné. Correctif : contrôle borné à 5 s
+     (`DELAI_SANTE_KAFKA_MS`, `kafka.health.ts`).
+  Services où le même code tourne (relevé sur `origin/dev`, non éprouvé par A) : **B** notification, paiement,
+  catalogue ; **C** sinistres, assurance, document-service, liaison-assureur, assureur-fictif. Preuve à rejouer :
+  arrêter Kafka, redémarrer le service, relancer Kafka, attendre `/health` 200.
 
 - **→ B (2026-11-15) : le rôle métier effectif dans la liste des membres** —
   `tickets/TICKET-BACKEND-role-metier-absent-de-la-reponse-des-membres.md`. Bloque **FE-115** (février). C'est le même
