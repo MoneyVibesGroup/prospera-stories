@@ -15,7 +15,9 @@
     droits du module (PR reseau-service#3, `dev` e96d5da).
   - **STORY-1033** ✅ — hiérarchie récursive, 3 → 4 niveaux par configuration, anti-cycle, déplacement sur compte
     rendu (PR reseau-service#4, `dev` 2ddbebd).
-  - Suivante : **STORY-1034** (personnes, commerciaux, affectations).
+  - **STORY-1034** ✅ — affectations datées, responsable unique, commerciaux et état de leur compte (PR
+    reseau-service#5, `dev` 3ff9958).
+  - Suivante : **STORY-1035** (modèle de portée).
 
 ## Dépôts tenus
 
@@ -55,6 +57,8 @@
 - **Q-D-1 (2026-11-16, STORY-1031) — Le KYC dans la garde de `reseau` en mode « sur site ».** La spine (AD-10)
   exige le KYC Money Vibes de l'organisation ; une instance installée chez le client (EPIC-148) n'aura pas forcément
   de `kyc-service`. **Choix par défaut : KYC exigé partout** (D-1031-2), à revoir avec l'agent d'instance.
+- **Q-D-2 (2026-11-16, STORY-1034) — Q3 du PRD réseau** : une personne peut-elle être affectée à des nœuds de branches
+  différentes ? **Choix par défaut : oui** (avis du PRD, le superviseur itinérant ; D-1034-1).
 
 ## Pièges rencontrés
 
