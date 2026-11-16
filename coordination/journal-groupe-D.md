@@ -29,9 +29,14 @@
   - **STORY-1040** ✅ — couverture, zones blanches, candidats (PR reseau-service#11, `dev` 98ed21c).
   - **STORY-1041** ✅ — import tout ou rien, journal lisible, vérifications du manifeste (PR reseau-service#12, `dev`
     5922180). **`reseau-service` : les douze stories du lot sont livrées.**
-  - Suivante : **STORY-1042** (le socle de `prospera-ventes-service`).
+  - **STORY-1042** ✅ — socle de `prospera-ventes-service` (PR #1, `dev` 80c2cfb) ; **reste** : `vocabulaires/` et
+    `contrats/distributeur/` dans la plateforme (D-1042-3).
+  - Suivante : **STORY-1043** (les quatre autres services du distributeur).
 
 ## Dépôts tenus
+
+- Distributeur (lot 2) : `prospera-ventes-service` (3412), `prospera-terrain-service` (3413),
+  `prospera-recouvrement-service` (3414), `prospera-pilotage-service` (3415), `prospera-croissance-service` (3416).
 
 - `reseau-service` (lot 2) : `main` et `dev` posées le 2026-11-16 ; port de développement **3419** ; piles Docker
   `grp-d`.
