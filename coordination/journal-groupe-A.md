@@ -31,7 +31,22 @@
 - ✅ **Relecture de `kit-cible` 1.0.0 (demande de B)** : `coordination/relecture-kit-cible-1.0.0-groupe-A.md`. Verdict :
   **1.0.1 nécessaire** (D1 bloquant : une clé en double dans un lot perd une ligne en silence ; D2 messages hors
   contrat ; D3 montants requis non appliqués ; trous de la suite : cloisonnement, atomicité, `controles`).
-- **Suivante : 6. STORY-910** (dossier-service et kyc-service sur le socle).
+- ~~6. **STORY-910**~~ ✅ **DONE (2026-11-16)** — dossier #49 (dev `2e7e0dc`), kyc #28 (dev `d4932c6`). Node 24 : 113/113 et
+  50/50 suites ; pile : topic neuf vu en 3,2 s par dossier, `/health` 503 en 3,1 s sans Kafka, 200 en 8 s au retour.
+- ~~7. **STORY-911**~~ ✅ **DONE (2026-11-16)** — BFF #34 (dev `84120a5`), recette #21 (dev `979ec45`). BFF sous Node 24
+  (41/41), coupe-circuit de 903 rejoué (20/20 en 200) ; piles de recette sur **MongoDB 8.0** ; garde du profil de
+  recette réalignée (rouge sur `dev` depuis 933/938). **Recettes `pile` + `zone-franche` + `atelier-balance` : 63/63
+  depuis `dev` sur MongoDB 8.0.38** — valent pour 909, 910 et 912.
+- ~~8. **STORY-912**~~ ✅ **DONE (2026-11-16)** — balance #149 (dev `390775c`), bilan #175 (dev `d2e900b`). Garde partagée en
+  double lecture ; pile : `LECTURE_SEULE` publié ferme l'écriture en 0,1-4,6 s, un rejeu ancien ne rouvre rien.
+- **Suivante : 9. STORY-913** (la même chose : fiscal et dossier) — fiscal codé et commité dans `_wt-a-fiscal-913`
+  (`story-913`), dossier en cours dans `_wt-a-dossier-913`.
+- **Pièges (910-912)** : (1) l'éditeur régénère des `index.ts` dans **toutes** les copies, y compris celles de B, et
+  casse les builds Docker depuis la copie de travail ⇒ construire les images depuis `git archive origin/dev`, et pour
+  une recette, une surcouche qui remplace chaque `build` par ces images (`build: !reset null` + `image:`) ; ne jamais
+  `git add -A` (un commit a embarqué 31 `index.ts`, retirés avant de pousser) ; (2) le DNS de Docker vers
+  `auth.docker.io` tombe par moments : la directive `# syntax` échoue ⇒ `DOCKER_BUILDKIT=0` ; (3) un `sed` sur
+  `production$` a changé `ENV NODE_ENV=production` en `production.` (BFF en boucle de redémarrage, corrigé).
 - **Piège (909)** : le build de fiscal vérifie l'empreinte de ses artefacts (`paquets-depot/assets`,
   `completude-depot/assets`) ; une copie de travail Windows les a en CRLF ⇒ `PAQUET_DEPOT_INTEGRITE` au `nest build`.
   Réextraire en LF (`rm` puis `git -c core.autocrlf=false checkout --`) avant une image construite depuis la copie.
