@@ -16,8 +16,14 @@
 - ~~2. **STORY-906**~~ ✅ **DONE (2026-11-16)** — balance #146 (dev `921b333`). `dossierId` publié ; `tag` servi par
   `…/referentiels/actifs` ; `409 REFERENTIEL_CONTRADICTOIRE` (`details`) ; import Sage au tag du dossier. Pile
   `grp-a-906` : SFD ⇒ `SN` refusé, `SFD-BCEAO` 201 ; témoin dev : `SN` accepté.
-- **Suivante : 3. STORY-907** (TPU déclarative et RSH au catalogue d'obligations). ⚠️ À reprendre en 907 :
-  `balance-service` `tpu.e2e-spec.ts` « CA 18 M ⇒ 409 BAREME_TPU_INDISPONIBLE » rend 200 **sur `dev`** (préexistant).
+- ~~3. **STORY-907**~~ ✅ **DONE (2026-11-16)** — balance #147 (dev `7a885bb`), dossier #48 (dev `249b2ed`), fiscal #47
+  (dev `8487497`). Paquet `togo@2026` régénéré (sha256 **`e8e94c84…`**, était `17d66e23…`) : `TPU`, `TPU_ACOMPTE`, `RSH`
+  au catalogue ; conformité fiscal 65/65 (rs-fiscal) ; recette `zone-franche` 5/5 sur les branches. Le test TPU
+  « CA 18 M » réaligné. ⚠️ **La procédure de publication du paquet (plus bas) cite encore `17d66e23…`** : l'empreinte
+  à publier est désormais `e8e94c84…` (mise à jour ici).
+- **Suivante : 4. STORY-908** (balance et bilan sur le socle) : codée dans `_wt-a-balance-908` et `_wt-a-bilan-908`
+  (commits locaux `ec4f51f`, `96c8eec`), reste l'étage `verification`, la pile et les recettes depuis `dev`.
+  909 entamée (copie `_wt-a-fiscal-909`, rien d'écrit).
 - **Piège (906)** : le `docker-compose.override.yml` racine monte le dépôt et lance `start:dev` ; une preuve sur
   image se lève avec `docker compose -f docker-compose.yml`. Le générateur de « barrels » de l'éditeur recrée des
   `index.ts` pendant la session : les purger avant chaque build.
@@ -224,7 +230,7 @@ octets de `balance-service` du tag déployé.
 
    | Code, version | Fichier (`balance-service/src/modules/referentiel/assets/`) | sha256 |
    |---|---|---|
-   | `fiscal-tg-entreprise@2026.1` | `paquet-fiscal-togo-2026.json` | `17d66e23564d4c77c3d4da87d6bd0a4ed43439e9479e09f8cf4df178d00f6a71` |
+   | `fiscal-tg-entreprise@2026.1` | `paquet-fiscal-togo-2026.json` | `e8e94c846227e9429b4e7e641bc7ea0c8364f774616359d22ce0970f97df0dc6` (STORY-907) |
    | `fiscal-tg-entreprise-zone-franche@2026.1` | `paquet-fiscal-togo-zonefranche-2026.json` | `da92a432ed175189d46a71f2c526579194cb9b250f04e017b2d31c380f360f74` |
 
    L'empreinte calculée doit être celle qu'épinglent `balance-service` et `prospera-dossier-service`. Sinon, on
