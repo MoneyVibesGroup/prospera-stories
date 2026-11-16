@@ -698,8 +698,10 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-952.md"
     reserved_on: "2026-11-16"
     note: >
-      🚧 EN COURS le 2026-11-16 — contrats annoncés avant la fusion du code (essai-prospect.openapi.json, modèles
-      essai-fin-proche et essai-effacement-proche). Lot 2 de B, n° 12 (EPIC-147). NON SLOTTÉE.
+      🏁 DONE le 2026-11-16 — catalogue #57 (45c3b33), notification #88 (9d6f3ae) ; contrats annoncés avant la
+      fusion (stories #548). Node 24 : catalogue 1360/1360, notification 3834 passés ; 5 mutations ; pile grp-b-952 :
+      J0 ESSAI_PROSPECT, J+23 deux avis reçus et une prolongation (la seconde 409), J+61 ESSAI_TERMINE puis signature
+      ⇒ EN_SERVICE sans perte ; horloge de recette refusée en production. Lot 2 de B, n° 12 (EPIC-147). NON SLOTTÉE.
   - range: "STORY-949"
     status: "RÉSERVÉ"
     owner: "Droits hors du jeton, étapes 1 et 2 — GET /moi/droits, dv dans le jeton, identity.droits.changed@1 (auth) ; droitsEffectifs en double lecture contre la résolution (catalogue) (prospera-auth-service, prospera-platform-catalog-service)"
