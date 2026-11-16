@@ -32,8 +32,10 @@
      `liaison-assureur` et `sinistres.dossier.changed@1`, chaque champ classé, Karapace réel ; fraîcheur) ;
   13. ~~STORY-992~~ : **plateforme #12, liaison-assureur #4, sinistres #6** (voie `SAISIE_MANUELLE` et liste
      « à saisir », report du numéro ; numéro officiel rattaché ; table `2026.2`, garde `POLICE_A_RELIRE`) ;
-  14. **STORY-993** ← **suivante** : la copie de lecture des polices et la table type de sinistre → garanties
-     (`prospera-assurance-service`).
+  14. ~~STORY-993~~ : **plateforme #13, liaison-assureur #5, assurance #22** (faits « reçus » avec
+     contenu non personnel ; module `assurance` : copie de lecture, fraîcheur, routes polices, table type de sinistre
+     → garanties) ;
+  15. **STORY-994** ← **suivante** : la provision dossier par dossier (`prospera-assurance-service`).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -197,6 +199,20 @@ seulement.
     (garde `POLICE_A_RELIRE` aux transitions 17 et 18 : **sans fraîcheur reçue, l'émission d'un règlement est
     refusée**).
 
+- **2026-11-16, STORY-993 — contrats NOUVEAUX.**
+  - Les faits `liaison-assureur.*.recu` portent désormais les champs métier non personnels de leur objet (ajouts
+    facultatifs, BACKWARD ; liste blanche `CHAMPS_PUBLIES`) : un consommateur qui ignorait les champs inconnus n'a rien
+    à changer.
+  - `assurance-service` : module `assurance` (`src/modules/assurance/`), groupe `assurance.liaison-assureur` (huit
+    faits « reçus » et `fraicheur.changed`), collections `assurance_contrats_versions`, `assurance_contrats_courants`,
+    `assurance_fraicheur_lc` ; routes `GET /api/v1/assurance/polices/{cleOrigine}`, `…/versions`,
+    `GET /api/v1/assurance/correspondances/type-sinistre`. Décorateur `@FonctionDuCircuit()` : ni `compta-cima`, ni
+    KYC, ni référentiel comptable sur ces routes (AD-3).
+
+- **2026-11-16, verrou Docker** : tenu par A de 09:36 à 13:35 (série 910 → 912), aucune pile de C entre-temps. C a
+  codé 994 et 995 sans pile pendant l'attente (branches poussées, PR ouvertes seulement après la preuve) ; les preuves
+  de 993 (rejeu depuis `dev`), 994 et 995 passent l'une après l'autre, chacune prend et rend le verrou.
+
 ## Questions à l'utilisateur ou au PO
 
 Retenu par défaut le 2026-11-15, selon la règle de l'utilisateur (« appliquer ce que je recommande, contestable après
@@ -219,6 +235,10 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-993-3 → D-993-9** (`stories/STORY-993.md`) : version de la table choisie à l'ouverture du dossier ; gardes
+  comptables par route ; `NON_INSTALLE` chez l'appelant ; `JAMAIS_LUE` sans fraîcheur reçue ; groupe
+  `assurance.liaison-assureur` ; routes portées par l'organisation, pas par un dossier ; droits fins `assurance:*` pas
+  encore posés (rôles tenant).
 - **D-991-1 → D-991-6** (`stories/STORY-991.md`) : liste « à saisir » reportée à 992 ; graphie des sujets ;
   transactions de `liaison-assureur` par le stockage local asynchrone de Mongoose ; fraîcheur des fichiers 24 h ;
   `rang` = version de l'objet.
@@ -232,6 +252,14 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **`git archive` applique `core.autocrlf`** : l'export d'un dépôt Windows sort en CRLF (65 354 erreurs de lint, et
+  les empreintes des référentiels embarqués fausses). Toujours `git -c core.autocrlf=false archive`.
+- **`prettier --write` sur tout `src/` réécrit les fins de ligne de tous les fichiers** du dépôt `assurance` (CRLF de
+  la copie de travail → LF) : sans changement de contenu, `git add` ne les retient pas, mais `git status` les montre
+  tous ; ne formater que les fichiers touchés.
+- **Trois images construites en parallèle par `docker compose up --build`** : BuildKit tombe (« frontend grpc server
+  closed unexpectedly »). Construire service par service, puis `up`.
 
 - **`prettier --write src` reformate aussi les `.json`** : il a cassé les copies à l'octet du contrat d'échange. Ne le
   passer que sur `"src/**/*.ts"`.
