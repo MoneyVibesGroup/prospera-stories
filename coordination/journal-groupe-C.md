@@ -28,8 +28,10 @@
      serveur ; piste d'audit chaînée ; un dossier de `DECLARE` à `CLOTURE` sur pile réelle, rejoué depuis `dev`) ;
   11. ~~STORY-989~~ : **sinistres #4** (« modifié par X à hh:mm », référentiel des échéances, échéancier BullMQ
      qu'une restauration ne rejoue pas ; prouvé sur pile en époque 2, rejoué depuis `dev`) ;
-  12. **STORY-991** ← **suivante** (lot 2, §4) : faits `liaison-assureur.*@1` et `sinistres.dossier.changed@1`,
-     fraîcheur, liste « à saisir ».
+  12. ~~STORY-991~~ : **plateforme #10, liaison-assureur #3, sinistres #5** (outbox, treize faits de
+     `liaison-assureur` et `sinistres.dossier.changed@1`, chaque champ classé, Karapace réel ; fraîcheur) ;
+  13. **STORY-992** ← **suivante** : le circuit quand le LC est muet ou ne reçoit pas, la liste « à saisir » (reportée de
+     991, D-991-1), le numéro officiel qui remplace la référence.
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -166,6 +168,18 @@ seulement.
   `details.modifiePar`, `modifieLe`, `heure` et `commande`. Le service exige **Redis** (`REDIS_HOST`, `REDIS_PORT`) ;
   l'époque se lit dans `INSTANCE_EPOQUE` et `INSTANCE_EPOQUE_OUVERTE_LE` **en attendant l'agent (B, EPIC-148)**.
 
+- **2026-11-16, STORY-991 — DES FAITS NOUVEAUX SUR LE FIL** (annoncés ici, fusionnés le même jour ; aucun
+  consommateur n'existait encore). Topics **sans** la version (`liaison-assureur.police.recue`), version dans
+  l'enveloppe et l'en-tête `schemaVersion` (`1`), clé `organisationId`, `eventId` en en-tête et dans la charge ; schémas
+  JSON draft-07 dans `prospera-plateforme/contrats/assurance/<module>/`, sujets `<topic>-value`, BACKWARD.
+  - `liaison-assureur` : `assure.recu`, `produit.recu`, `police.recue`, `garantie.recue`, `prime.recue`,
+    `intermediaire.recu`, `coassurance.recue`, `traite.recu`, `sinistre-existant.recu` (clés et empreinte : le contenu
+    se lit par `GET …/echange/projections/{objet}/{cle}`), `numero-sinistre.attribue`, `envoi.etat` (état absolu),
+    `ecart.ouvert`, `ecart.resolu`, `fraicheur.changed` (état absolu par objet et transport) ; route
+    `GET /api/v1/liaison-assureur/echange/fraicheur`.
+  - `sinistres` : `sinistres.dossier.changed` (état absolu ; `versionEtat` = version du dossier).
+  - **Pour le registre `classification-sante`** : `champsOrdinaires` de `sinistres` et `liaison-assureur` remplis.
+
 ## Questions à l'utilisateur ou au PO
 
 Retenu par défaut le 2026-11-15, selon la règle de l'utilisateur (« appliquer ce que je recommande, contestable après
@@ -180,6 +194,12 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   changement d'une ligne, mais il contredit « un nom absent se lit éteint ».
 - **D-983-8** : la liste des champs et pièces de santé du registre est un **défaut** tiré de FR-9, FR-70 et R5 ; le
   médecin-conseil et le juriste la relisent (J-02).
+- **D-991-2 — question au PO** : C-17 (rejet, sans suite, réouverture vers le LC) n'a pas de fait source pour
+  `liaison-assureur` : la liste fermée d'AD-16 ne fait pas de lui un consommateur de `sinistres.dossier.changed@1`.
+  **Recommandé** : amender AD-16 pour l'y ajouter ; sans réponse, C le retient par défaut avec STORY-992.
+- **D-991-1 → D-991-6** (`stories/STORY-991.md`) : liste « à saisir » reportée à 992 ; graphie des sujets ;
+  transactions de `liaison-assureur` par le stockage local asynchrone de Mongoose ; fraîcheur des fichiers 24 h ;
+  `rang` = version de l'objet.
 - **D-989-1 → D-989-8** (`stories/STORY-989.md`) : tâche différée à identifiant stable ; époque par la configuration ;
   constater sans envoyer (STORY-999) ; `survenuLe` à la création ; heures ouvrées = heures des jours ouvrés ; une
   échéance plus courte que sa fenêtre d'alerte est sous alerte dès son départ.
@@ -190,6 +210,15 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **`prettier --write src` reformate aussi les `.json`** : il a cassé les copies à l'octet du contrat d'échange. Ne le
+  passer que sur `"src/**/*.ts"`.
+- **Le générateur de barrels de l'éditeur modifie aussi des `index.ts` SUIVIS** (dans `prospera-plateforme` : ceux de
+  B, `bibliotheques/kit-cible/`, `paquets/point-de-decision/`) : vérifier `git status` avant chaque commit et restaurer
+  ce qui n'est pas à soi.
+- **Un dossier neuf à la racine d'un service (`contrat/`, `scripts/`) doit entrer dans l'étage `verification` du
+  Dockerfile**, sinon ses tests ne s'y jouent pas (« suite failed to run » noyé dans un total vert).
+- **L'IdP de test réécrit son jeton à chaque démarrage** : le lire APRÈS avoir levé la pile.
 
 - **BullMQ 6.7 ne joint pas Redis si `ioredis` n'est pas déclaré** dans `package.json` (« could not load the optional
   'ioredis' package ») : les tests en mémoire passent, le service ne joint jamais Redis. Seul un banc sur un vrai Redis
