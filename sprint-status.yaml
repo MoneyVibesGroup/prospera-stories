@@ -446,6 +446,15 @@ reserved_ranges:
       🏁 DONE le 2026-11-16 — balance-service#148 (dev 985e8d1), bilan-service#174 (dev 982c2db). Node 24 : 269/269 et
       323/323 suites ; pile : topic neuf vu en 3-4 s, /health 503 en 3,1 s sans Kafka, groupes rejoints en 8 s au retour ;
       recettes zone-franche + atelier-balance 56/56 depuis dev. Lot 2 de A, n° 4. NON SLOTTÉE.
+  - range: "STORY-909"
+    status: "RÉSERVÉ"
+    owner: "fiscal-service sur le socle du moteur — Node 24, client Kafka de Confluent, supervision de 908 (topics avant subscribe, metadataMaxAge, consommateur neuf à chaque relance), /health borné (prospera-fiscal-service)"
+    source_doc: "prospera-stories/stories/STORY-909.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — fiscal-service#48 (dev a552d77). Conformité 65/65 sous Node 24 ; pile : topic neuf en
+      6,6 s, /health 503 en 6,8 s sans Kafka, 200 en 16 s au retour. Recette depuis dev au gate de 910. Lot 2 de A, n° 5.
+      NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
