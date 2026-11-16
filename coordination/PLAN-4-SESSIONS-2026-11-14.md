@@ -2,6 +2,8 @@
 
 > **Date :** 2026-11-14 · **Statut :** décidé par l'utilisateur (Dev B), en vigueur dès la fusion de ce document ·
 > **Amendé le 2026-11-15** : FE-069 et le dépôt du cabinet passent à A (§2, §6)
+> **Lot 2 (2026-11-16)** : les lots des §3 → §6 sont remplacés par `PLAN-4-SESSIONS-LOT-2-2026-11-16.md` (15 stories
+> backend par groupe ; D passe au backend). Le rituel, les journaux et les règles communes restent ceux d'ici.
 > **Lu par :** les quatre sessions. Le groupe A tourne sur le poste principal ; deux groupes tournent sur d'autres
 > machines. **Ce dossier `coordination/` est le seul canal entre elles** : aucune session ne voit les branches locales,
 > la mémoire ni les fichiers non suivis d'une autre.

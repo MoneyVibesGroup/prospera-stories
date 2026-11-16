@@ -29,6 +29,9 @@
   11. **STORY-989** ← **suivante** (versions et échéances du dossier) ; puis **STORY-991** (faits
      `liaison-assureur.*@1`, fraîcheur, liste « à saisir »).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** : C attend ses consignes avant d'ouvrir 989.
+- **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
+  stories backend par groupe) : le lot de C devient **989, 991 → 1004** (§4 de ce plan). Il remplace l'ordre
+  ci-dessus à partir de 991.
 - **Ensuite (consigne de l'utilisateur du 2026-11-15)** : « ajoute les stories suivantes 201 à 211 », soit les stories
   restantes des épics **EPIC-201 → EPIC-211** d'`epics-assurance-2026-11-13.md` (rôles et portées, déclaration,
   instruction, expertises, décision, paiement, clôture), écrites juste avant d'être codées, dans la plage de C
