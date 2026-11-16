@@ -1,8 +1,22 @@
 # Journal du groupe B
 
-> Écrit par le groupe B seulement. Lot : `PLAN-4-SESSIONS-2026-11-14.md` §4 (le moteur).
+> Écrit par le groupe B seulement. Lot 1 : `PLAN-4-SESSIONS-2026-11-14.md` §4 (le moteur). **Lot 2 :
+> `PLAN-4-SESSIONS-LOT-2-2026-11-16.md` §3** (le socle partout, le kit des cibles, l'installation, l'essai).
 
 ## État
+
+### Lot 2 (ouvert le 2026-11-16)
+
+- **Machine** : le lot 2 de B tourne sur **un autre poste Windows** que le poste principal (plan du lot 2, §9.3).
+  D y tourne aussi (worktree `_wt-d-stories`) : piles Docker préfixées `grp-b`, jamais de `down` sans `-p`. Copie de
+  travail de B pour `prospera-stories` : le worktree `_wt-b-stories`.
+- **Fusion** : `gh pr merge --rebase` d'abord refusé par le mode automatique de la session, puis autorisé
+  explicitement par l'utilisateur (« le rebase doit marcher »). B fusionne lui-même, comme au lot 1.
+- **Ordre du lot 2** (941 → 955) :
+  1. ~~STORY-941~~ : **plateforme #6** (`9f43fa9`) : verrou npm, scripts racines sur les dossiers de C et de D, README ;
+  2. STORY-942 : auth-service sur le socle ; le rôle métier effectif dans la liste des membres — **suivante**.
+
+### Lot 1 (fini le 2026-11-15)
 
 - **2026-11-14** : journal ouvert, lot pas encore commencé.
 - **2026-11-15** : le lot de B est tenu par **la session qui a tenu le lot de A**, sur le poste principal (Windows), sur
@@ -46,6 +60,11 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ D (2026-11-16) : `prospera-plateforme` a vos trois dossiers** (D-L2-3) — **information**. Le README dit que D
+  écrit dans `series/`, `vocabulaires/`, `contrats/distributeur/`, et nulle part ailleurs. Forme attendue : `src/`,
+  `test/**/*.test.ts`, `scripts/` ; le `test` et le `typecheck` racines les jouent dès votre premier fichier, sans PR
+  de B. Pas de dépendance propre : une dépendance nouvelle se demande ici (STORY-941, plateforme #6).
+
 - **→ C (2026-11-15) : `prospera-plateforme` est prêt** (plan §7, « B → C ») — **information**. `main` et `dev`
   existent ; le README dit qui écrit où : C écrit dans `contrats/assurance/`, `champs-sensibles/` et
   `classification-sante/`, et nulle part ailleurs. Les contrats sont en JSON Schema **draft-07**, sans `$ref` entre
@@ -57,8 +76,10 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 - **← C (2026-11-15) : la recette d'`origin/dev` ne démarre pas sur une pile NEUVE** — **servie par STORY-940**
   (catalogue et paiement créent leurs topics abonnés absents avant `subscribe`, le correctif de C). Plus besoin de
   créer les trois topics `paiement.abonnement.*` à la main une fois les images reconstruites depuis `dev`.
-- **← C (2026-11-15) : `prospera-plateforme`, verrou et scripts racines** — **prise en charge**, pas encore servie
-  (lot suivant de B).
+- **← C (2026-11-15) : `prospera-plateforme`, verrou et scripts racines** — **servie par STORY-941** (plateforme #6,
+  `9f43fa9`). `npm ci` passe ; `npm test` et `npm run typecheck` racines jouent `champs-sensibles/`,
+  `classification-sante/`, `contrats/assurance/` (et `demo/`). Garde `test/scripts-racines.test.ts` : un fichier de C
+  que la racine ne joue pas fait rougir la CI. Vos `package.json` restent, sans dépendance propre (D-941-2).
 - **← C (2026-11-15) : les ports du compose racine pour la recette de l'Atelier** — **servie**. `grp-b` est descendue
   avec ses volumes après STORY-939, et B ne garde plus de pile levée entre deux stories. La recette de 940 a attendu
   que `grp-c-recette` libère les ports.

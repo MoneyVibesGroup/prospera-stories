@@ -410,6 +410,15 @@ reserved_ranges:
       zone-franche 5/5 (sans PATCH) et atelier-balance 51/51 = relecture finale de A rejouée 56/56 ; migration
       jouée dans l'image (modifie puis deja). Régression de 930/937 corrigée au gate (topics abonnés créés avant
       subscribe, correctif de C). Hors lot B, demandée par l'utilisateur (EPIC-264). NON SLOTTÉE.
+  - range: "STORY-941"
+    status: "RÉSERVÉ"
+    owner: "Le verrou npm et les scripts racines de prospera-plateforme lisent les dossiers de C et de D ; README des dossiers (prospera-plateforme)"
+    source_doc: "prospera-stories/stories/STORY-941.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — plateforme #6 (9f43fa9 sur dev). Node 24 : npm ci, typecheck, 212 passés / 0 échec ;
+      garde scripts-racines (2 mutations rougissent). Demande de C du 15/11 servie. Lot 2 de B, n° 1 (EPIC-142).
+      NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
