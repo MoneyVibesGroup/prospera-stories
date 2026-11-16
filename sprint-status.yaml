@@ -907,6 +907,16 @@ reserved_ranges:
       prospera-sinistres-service#6 (dev 6ccb9ec). Voie SAISIE_MANUELLE et liste C-18 ; report du numéro ; numéro
       officiel rattaché par le fait ; table 2026.2 et garde POLICE_A_RELIRE ; piles vertes, rejouées depuis dev.
       Lot 2 de C, n° 3. NON SLOTTÉE.
+  - range: "STORY-993"
+    status: "RÉSERVÉ"
+    owner: "La copie de lecture des polices dans assurance — datée, jamais modifiée, « à relire » sur fraîcheur ; table type de sinistre → garanties (plateforme, liaison-assureur, assurance)"
+    source_doc: "prospera-stories/stories/STORY-993.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — prospera-plateforme#13 (dev 123b086), prospera-liaison-assureur-service#5
+      (dev 135f4a4), prospera-assurance-service#22 (dev b03e9a4). Faits « reçus » avec contenu
+      non personnel (D-993-1) ; module assurance : copie de lecture ajout seul, fraîcheur, routes polices et
+      correspondances ; gardes comptables par route (AD-3). Pile verte. Lot 2 de C, n° 4. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
