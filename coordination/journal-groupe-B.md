@@ -47,8 +47,11 @@
       fusion (stories #548) : l'essai d'un prospect (J+30, une prolongation, 60 jours au plus, `ESSAI_TERMINE`, signer
       rouvre sans perte), avis J-7 par la route directe de notification, horloge de recette du catalogue. Pour 953 :
       l'effacement s'accroche à l'échéance `EFFACEMENT` et au statut de l'essai (fiche, « Pour STORY-953 »).
-  13. STORY-953 : le contrat du jeu de démonstration, l'effacement, cinq essais simultanés — **en cours** ;
-      plateforme et catalogue en PR, contrats annoncés ci-dessous AVANT la fusion du code.
+  13. ~~STORY-953~~ : **plateforme #17** (`5a50249`, étiquette **`contrats-instance-v1`** : jalon du 14/12 tenu),
+      **catalogue #58** (`4dfde25`), contrats annoncés avant la fusion (stories #562) : le contrat du jeu de
+      démonstration et les formes génériques des routes C13 d'import et d'effacement ; le jeu importé à l'ouverture de
+      l'essai ; l'effacement à `effacementLe` (plan idempotent, accusé de chaque propriétaire, certificat signé avec la
+      date de la dernière sauvegarde) ; cinq essais simultanés prouvés sur la pile (433 ms, sans mélange).
   14. ~~STORY-954~~ : **plateforme #9** (`b4c5c46` ; étiquettes `seuils-fraicheur-v1`, `contrats-echange-v1`,
       `point-ecriture-unique-v1`), **catalogue #51** (`60473e1`) : les contrats de Connecteurs publiés avant février
       (seuils de fraîcheur, enveloppe et réponse d'échange, `connecteurs.domaine.changed`, `domainesEchange` et ses
@@ -607,6 +610,12 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **`structuredClone` sous jest rend un `Date` d'un autre royaume** : `instanceof Date` le refuse. Un faux modèle
+  Mongoose qui compare des dates doit tester `Object.prototype.toString.call(v) === '[object Date]'`, sinon un test de
+  bail ou d'échéance passe pour une mauvaise raison (STORY-953).
+- **La clé `centrale-test-2026` des vecteurs expire le 01/01/2027** : une preuve qui avance l'horloge au-delà (essai à
+  J+60) doit certifier sa propre clé de test par `racine-test-2026` (`certifier`), sans la versionner (STORY-953).
 
 - **DNS de la VM Docker en panne** (STORY-949, 16/11) : `lookup auth.docker.io: no such host`, alors que npm répondait.
   La ligne `# syntax=docker/dockerfile:1` fait télécharger le frontal à **chaque** construction. Pour une preuve,
