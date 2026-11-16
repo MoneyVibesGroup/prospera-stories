@@ -519,6 +519,65 @@ reserved_ranges:
       🏁 DONE le 2026-11-16 — balance-service#149 (dev 390775c), bilan-service#175 (dev d2e900b). Node 24 : 271/271 et 325/325 ;
       mutation rouge ; pile : LECTURE_SEULE publié ferme l'écriture en 0,1-4,6 s, rejeu ancien sans effet. Lot 2 de A, n° 8.
       NON SLOTTÉE.
+  - range: "STORY-913"
+    status: "RÉSERVÉ"
+    owner: "La garde partagée en double lecture — fiscal et dossier (prospera-fiscal-service, dossier-service)"
+    source_doc: "prospera-stories/stories/STORY-913.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — prospera-fiscal-service#49 (dev 6d424cc), dossier-service#50 (dev 45f8ecd). Node 24 vert ;
+      mutations rouges ; pile : etat-publie.changed.reel change la décision en secondes. Lot 2 de A, n° 9. NON SLOTTÉE.
+  - range: "STORY-914"
+    status: "RÉSERVÉ"
+    owner: "La lecture seule et l'export suivent l'état publié — préavis de 30 j, horloge, liste blanche FR-43 (balance-service, bilan-service, prospera-fiscal-service, dossier-service)"
+    source_doc: "prospera-stories/stories/STORY-914.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — balance-service#150 (dev 34a1ae1), bilan-service#176 (dev 31e4a55), prospera-fiscal-service#50
+      (dev 9e28d56), dossier-service#51 (dev 6ce9f1b). Mutations rouges ; pile : export sous SUSPENDU en 200, écriture en
+      préavis en 2xx. Lot 2 de A, n° 10. NON SLOTTÉE.
+  - range: "STORY-915"
+    status: "RÉSERVÉ"
+    owner: "Le portefeuille porte l'état des axes de chaque dossier — axesDetermines (dossier-service)"
+    source_doc: "prospera-stories/stories/STORY-915.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — dossier-service#52 (dev 9a8bf36). Node 24 1 805 + 353 e2e ; pile MongoDB 8.0 ; mutation rouge.
+      Ticket portefeuille fermé. Lot 2 de A, n° 11. NON SLOTTÉE.
+  - range: "STORY-916"
+    status: "RÉSERVÉ"
+    owner: "PATCH /dossiers/{id} journalisé, et l'attestation de mandat lisible au journal (dossier-service)"
+    source_doc: "prospera-stories/stories/STORY-916.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — dossier-service#53 (dev 7092e69). Node 24 1 808 + 363 e2e ; pile : PATCH puis journal relus,
+      version périmée ⇒ 409. Ticket trois surfaces : 1 et 3 fermées, 2 ouverte. Lot 2 de A, n° 12. NON SLOTTÉE.
+  - range: "STORY-917"
+    status: "RÉSERVÉ"
+    owner: "Les recettes croisées sur le point de décision unique ; la console installe par le moteur (prospera-recette, prospera-admin-panel-service)"
+    source_doc: "prospera-stories/stories/STORY-917.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — prospera-recette#22 (dev 97cf8d7), prospera-admin-panel-service#35 (dev f27d10a). BFF 527/527 ;
+      recettes depuis dev 87/87. Demande de B (945) close. Lot 2 de A, n° 13. NON SLOTTÉE.
+  - range: "STORY-918"
+    status: "RÉSERVÉ"
+    owner: "Le cabinet installé par le moteur — fin de la double lecture, l'état publié décide seul (balance-service, bilan-service, prospera-fiscal-service, dossier-service, prospera-recette)"
+    source_doc: "prospera-stories/stories/STORY-918.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — balance-service#151 (dev e282c22), bilan-service#177 (dev 68c6de8), prospera-fiscal-service#52
+      (dev a587b88), dossier-service#54 (dev d6dfac5), prospera-recette#23 (dev 58ebabd). Inconnu ⇒ refus ; mutation (ancienne
+      garde) rouge ×4 ; recettes sur pile neuve 91/91 dont cabinet-moteur. Déploiement : migrate:reamorcage-moteur AVANT
+      (D-918-3). Lot 2 de A, n° 14 — lot terminé. NON SLOTTÉE.
+  - range: "STORY-919"
+    status: "RÉSERVÉ"
+    owner: "Droits hors du jeton, étape 3 — la garde fiscale lit /moi/droits en double lecture (prospera-fiscal-service)"
+    source_doc: "prospera-stories/stories/STORY-919.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — prospera-fiscal-service#51 (dev f1e21f8). Node 24 vert ; pile : /moi/droits 200 depuis fiscal,
+      un écart provoqué se lit au journal, la décision ne bouge pas. Lot 2 de A, n° 15. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"

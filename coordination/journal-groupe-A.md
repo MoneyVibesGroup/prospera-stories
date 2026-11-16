@@ -1,7 +1,7 @@
 # Journal du groupe A (poste principal)
 
 > Écrit par le groupe A seulement. Lot 1 : `PLAN-4-SESSIONS-2026-11-14.md` §3 (terminé). **Lot 2 :**
-> `PLAN-4-SESSIONS-LOT-2-2026-11-16.md` §2 (STORY-905 → 919), en cours.
+> `PLAN-4-SESSIONS-LOT-2-2026-11-16.md` §2 (STORY-905 → 919), **terminé le 2026-11-16**.
 
 ## État
 
@@ -39,19 +39,30 @@
   depuis `dev` sur MongoDB 8.0.38** — valent pour 909, 910 et 912.
 - ~~8. **STORY-912**~~ ✅ **DONE (2026-11-16)** — balance #149 (dev `390775c`), bilan #175 (dev `d2e900b`). Garde partagée en
   double lecture ; pile : `LECTURE_SEULE` publié ferme l'écriture en 0,1-4,6 s, un rejeu ancien ne rouvre rien.
-- **9 → 16 et 19, codés, poussés, en preuve (2026-11-16 soir)** — rien n'est fusionné tant que les preuves Node 24
-  et sur pile ne sont pas faites (verrou Docker partagé avec C) :
-  - **913** (garde partagée, fiscal et dossier) : fiscal #49 (`story-913`), dossier #50 ;
-  - **914** (préavis de 30 j, horloge de référence, liste blanche d'export et d'états, FR-43) : balance #150, bilan
-    #176 ; fiscal et dossier sur branches `story-914` (partent de 913, PR après sa fusion) ; Node 24 balance
-    5 414/5 418 (2 échecs de l'export STORY-555 à rejouer seuls) ;
-  - **915** (`axesDetermines` par ligne du portefeuille) : dossier `story-915` ;
-  - **916** (`PATCH /dossiers/{id}` journalisé ; `?type=MANDAT_ATTESTE` au journal) : dossier `story-916` ;
-    e2e 363/363 sous Node 24 ;
-  - **917** (recettes croisées sur le point de décision ; la console installe par le moteur) : recette et BFF sur
-    `story-917` — **répond à la demande de B (945)** ;
-  - **919** (droits hors du jeton, étape 3, fiscal) : `story-919` (part de 914).
-- **Reste : 18. STORY-918** (le cabinet installé par le moteur, clôture), après la fusion de 912 → 914 et 917.
+- ~~9. **STORY-913**~~ ✅ **DONE (2026-11-16)** — fiscal #49 (dev `6d424cc`), dossier #50 (dev `45f8ecd`). Garde
+  partagée en double lecture dans fiscal et dossier.
+- ~~10. **STORY-914**~~ ✅ **DONE (2026-11-16)** — balance #150, bilan #176, fiscal #50, dossier #51. Préavis de 30 j,
+  horloge injectée, liste blanche d'export et d'états (FR-43) tenue par un invariant.
+- ~~11. **STORY-915**~~ ✅ **DONE (2026-11-16)** — dossier #52. `axesDetermines` par ligne du portefeuille ; ticket fermé.
+- ~~12. **STORY-916**~~ ✅ **DONE (2026-11-16)** — dossier #53. `PATCH /dossiers/{id}` journalisé ;
+  `?type=MANDAT_ATTESTE` ; ticket « trois surfaces » : 1 et 3 fermées, **2 (complétude) ouverte**.
+- ~~13. **STORY-917**~~ ✅ **DONE (2026-11-16)** — recette #22, BFF #35. Recettes sur le point de décision ; la console
+  relaie les routes d'installation du moteur. Recettes depuis `dev` 87/87.
+- ~~14. **STORY-918**~~ ✅ **DONE (2026-11-16)** — balance #151 (dev `e282c22`), bilan #177 (dev `68c6de8`), fiscal #52 (dev `a587b88`),
+  dossier #54 (dev `d6dfac5`), recette #23 (dev `58ebabd`). Les gardes décident par l'état publié seul, **inconnu ⇒
+  refus** ; mutation (ancienne garde rebranchée) rouge ×4 ; recettes sur pile neuve **91/91**, dont la nouvelle
+  `cabinet-moteur` (inconnu refusé, installé par le moteur ouvert, `SUSPENDU` garde l'export). Deux défauts de recette
+  corrigés au passage (`abonnement` dépendait de l'ordre ; `cabinet-moteur` sans axes).
+- ~~15. **STORY-919**~~ ✅ **DONE (2026-11-16)** — fiscal #51. `/moi/droits` en double lecture dans la garde fiscale ;
+  la décision reste celle du jeton.
+- **Lot 2 de A terminé.** À l'ordre de la mise en service : `migrate:reamorcage-moteur` du catalogue (945) **avant** les
+  images de 918 (D-918-3), sinon un cabinet installé avant le moteur est refusé.
+- **Pièges (918)** : (1) une recette ne doit rien attendre d'une autre : sur une pile **neuve** (`down -v`), `abonnement`
+  rendait 422 parce que `sfd-bceao@2.0` n'était déclaré que par `referentiel-par-dossier` ; une pile réutilisée cachait
+  le défaut (917 « verte seule »). Rejouer les recettes sur une pile neuve avant de fusionner. (2) `zone-franche` lève
+  fiscal-service en cours de passage : sur ce poste saturé, des appels voisins prennent `ECONNRESET` ; seule, sur la
+  même pile, elle passe. (3) Un passage jest complet dans une image, sur un poste chargé, laisse des échecs de minutage :
+  relancer **par chemin de fichier**, jamais par `-t` (qui charge toutes les suites).
 - **Pièges (910-912)** : (1) l'éditeur régénère des `index.ts` dans **toutes** les copies, y compris celles de B, et
   casse les builds Docker depuis la copie de travail ⇒ construire les images depuis `git archive origin/dev`, et pour
   une recette, une surcouche qui remplace chaque `build` par ces images (`build: !reset null` + `image:`) ; ne jamais
@@ -70,7 +81,7 @@
 - **Piège (906)** : le `docker-compose.override.yml` racine monte le dépôt et lance `start:dev` ; une preuve sur
   image se lève avec `docker compose -f docker-compose.yml`. Le générateur de « barrels » de l'éditeur recrée des
   `index.ts` pendant la session : les purger avant chaque build.
-- **Docker** : aucune pile de A ne tourne (`grp-a-905` descendue avec ses volumes). Deux conteneurs arrêtés d'une
+- **Docker** : aucune pile de A ne tourne (piles de 918 descendues avec leurs volumes, verrou rendu). Deux conteneurs arrêtés d'une
   session précédente restent : `grp-a-kafka-1`, `grp-a-karapace-1`.
 
 ### Lot 1 (14 → 15/11), archivé
@@ -226,8 +237,9 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   `story-917` de `prospera-recette`) : `balance` avant `bilan` dans les trois recettes, `reseau` avant
   `microfinance` ; abonnement (631, 280, 728) : acquis à l'offre puis installation par le moteur, droit
   `moteur:<plan>` ; 727 : package et vertical n'ouvrent plus rien. **Aussi corrigé** : le test du package qui
-  évolue (l. 729-757, source `pack:…`), que la liste ne citait pas. Recettes à jouer depuis `dev` au gate.
-- **← B (2026-11-16) : `/moi/droits` servi pour A-919** — **pris** : STORY-919 sur `story-919` (fiscal).
+  évolue (l. 729-757, source `pack:…`), que la liste ne citait pas. **Close** : 917 fusionnée (recette #22),
+  recettes depuis `dev` 87/87.
+- **← B (2026-11-16) : `/moi/droits` servi pour A-919** — **close** : STORY-919 fusionnée (fiscal #51).
 
 ## ⚠ Contrats
 
@@ -273,6 +285,18 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   recette.
 
 ## Dette relevée
+
+- **Lot 2 (918, 2026-11-16)** :
+  1. **Ingestion de balance** : le service d'ingestion autorise encore l'organisation par `OrgBalanceEntitlement` (identité
+     de service, que la garde partagée ne modélise pas : `identite: 'UTILISATEUR'` seulement). À reprendre quand la
+     matrice aura une identité de service (D-918-5).
+  2. **`double-lecture.ts`** (balance, bilan, fiscal) : `decisionAncienne`, `memeDecision`, `libelle` ne servent plus
+     depuis 918 ; copies identiques laissées en place, à retirer ensemble.
+  3. **Recette `cabinet-moteur`** : installe par le `PUT` de la console (plan `CONSOLE_PUT`) ; passer à
+     `POST /installations` quand balance et bilan serviront leurs routes de vérification (C13, D-918-4).
+  4. **BFF** : `PATCH /dossiers/{id}` (916) n'est pas relayé pour le collaborateur ; le 409 de version doit rester muet
+     côté écran. La console doit migrer vers les routes d'installation (lot de D).
+  5. **Fiche dossier, surface 2 (complétude)** : ouverte, `tickets/TICKET-BACKEND-fiche-dossier-trois-surfaces.md`.
 
 - **Audit fiscal (299)** : la suppression de la **dernière** entrée d'une chaîne est indétectable. Seul le rôle
   find+insert du compte l'empêche. L'ancre externe (empreinte de tête publiée) sera à décider avec la spine fiscale.

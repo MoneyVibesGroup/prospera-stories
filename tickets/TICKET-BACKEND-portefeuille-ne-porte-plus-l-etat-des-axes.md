@@ -3,7 +3,7 @@
 **Cible :** `dossier-service` (:3009) — route `GET /api/v1/dossiers`
 **Ouvert par :** **FE-061** (barry thierno alhassane, 2026-08-19) — **retombée directe de STORY-303**, constatée en régénérant les types
 **Priorité :** Should — une fonction du portefeuille (FE-059a) a été **retirée** faute de donnée, pas dégradée
-**État :** ⛔ ouvert
+**État :** ✅ fermé le 2026-11-16 par **STORY-915** (dossier-service #52) : chaque ligne de `GET /api/v1/dossiers` porte `axesDetermines` (décision d'axe effective au début de l'exercice ouvert, sinon à la date du jour) ; le tri « à traiter d'abord » peut revenir côté écran.
 
 ---
 

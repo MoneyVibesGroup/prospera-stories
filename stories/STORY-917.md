@@ -1,6 +1,6 @@
 # STORY-917 : Les recettes croisées sur le point de décision unique ; la console installe par le moteur
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (cinq recettes réordonnées ou réécrites, six routes relayées)
 
@@ -54,6 +54,14 @@ console passe par un plan `CONSOLE_PUT` joué par le point de décision unique. 
 
 ## Definition of Done
 
-- [ ] BFF : unitaires, lint, `tsc` verts (Node 24, étage `verification`).
-- [ ] Recettes vertes depuis `dev` (catalogue de 945).
-- [ ] PR code et docs fusionnées ; demande de B close dans son journal.
+- [x] BFF : unitaires, lint, `tsc` verts (Node 24, étage `verification`).
+- [x] Recettes vertes depuis `dev` (catalogue de 945).
+- [x] PR code et docs fusionnées ; demande de B close dans son journal.
+
+## Livraison (2026-11-16)
+
+🏁 **DONE** — prospera-recette #22 (dev `97cf8d7`), admin-panel #35 (dev `f27d10a`). Recettes réordonnées sur les
+dépendances du catalogue (balance → bilan → declarations ; reseau → microfinance) ; `abonnement` installe par le moteur
+(acquis à l'offre, puis installation). BFF : 527 unitaires sous Node 24 ; six routes d'installation relayées, codes du
+moteur en liste blanche. Recettes depuis `dev` vertes (87/87, `abonnement` 15/15 rejouée seule après une pile
+recréée). La demande de B (945) est close.
