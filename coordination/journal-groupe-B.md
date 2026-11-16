@@ -27,7 +27,8 @@
   7. ~~STORY-947~~ : **plateforme #11** (`789a11a`, étiquette **`kit-cible-v1.0.0`**) : le kit des cibles (2), la suite
      de conformité publiée, la cible témoin, l'adaptateur MongoDB, la distribution CommonJS ; **jalon du 04/12 tenu**,
      relecture de A demandée.
-  8. STORY-948 : **en revue** (contrats annoncés ci-dessous AVANT la fusion du code) : la naissance d'une organisation
+  8. ~~STORY-948~~ : **catalogue #53** (`102f7e2`), **auth #40** (`017b938`), contrats annoncés avant la fusion
+     (stories #543) : la naissance d'une organisation
      (`POST /api/instance/v1/naissances`), le registre des organisations et le 404 `ORGANISATION_INCONNUE` (fin de
      D-936-2), le jeton de service limité à une organisation, lu par l'état publié (fin de D-936-3), `reprise:lot:valider`
      réservé au DG ;
@@ -148,7 +149,7 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-16, STORY-948 — la naissance, le jeton de service, le 404 : ajouts, annoncés AVANT la fusion du code**
-  (catalogue et auth, PR en revue).
+  (catalogue #53, auth #40 ; annonce fusionnée par stories #543, avant le code).
   - **Catalogue, contrat NOUVEAU `contrat/naissance.openapi.json`** :
     - `POST /api/instance/v1/naissances` (`entitlement:grant`) et `GET …/naissances/{organisationId}` (`org:read`) ;
     - refus : 409 `NAISSANCE_DIVERGENTE` (`champs`), 422 `NAISSANCE_REFUSEE` (`cause`), 503 `AUTH_INJOIGNABLE`

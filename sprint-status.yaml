@@ -623,7 +623,8 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-948.md"
     reserved_on: "2026-11-16"
     note: >
-      👀 REVIEW le 2026-11-16 — contrats annoncés au journal de B avant la fusion du code. Node 24 : catalogue
+      🏁 DONE le 2026-11-16 — catalogue #53 (102f7e2), auth #40 (017b938) ; contrats annoncés avant la fusion
+      (stories #543). Node 24 : catalogue
       1331/1331, auth 1302/1302 ; pile grp-b-948 : 27/27 (naissance réelle, identity.org.created origine MOTEUR,
       instance EN_SERVICE, rejeu, 409, 422, trois identités de service, 403, 404, coupure d'auth) ; 10 mutations.
       Fin de D-936-2 et D-936-3. Les six reprise:* au catalogue de tenant : STORY-949 (borne du jeton). Lot 2 de B,
