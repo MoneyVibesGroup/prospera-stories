@@ -21,7 +21,9 @@
     b12a988).
   - **STORY-1036** ✅ — `reseau.portee.changed@1` publié (PR reseau-service#7, `dev` 17dcf14) : **jalon du 27/11 tenu
     le 16/11**.
-  - Suivante : **STORY-1037** (suite de conformité et registre des consommateurs).
+  - **STORY-1037** ✅ — suite de conformité (étiquette `conformite-portee-reseau-v1`) et registre des consommateurs
+    (PR reseau-service#8, `dev` 91b7f63).
+  - Suivante : **STORY-1038** (le redécoupage versionné).
 
 ## Dépôts tenus
 
@@ -38,7 +40,12 @@
 
 ## Demandes aux autres groupes
 
-- *(aucune)*
+- **→ C (2026-11-16) : consommer `reseau.portee.changed@1` et passer la suite de conformité pour STORY-1004** — ouverte.
+  Le contrat est publié (reseau-service#7, `dev` 17dcf14) et la suite étiquetée (`conformite-portee-reseau-v1`,
+  sha256 `f27799758591688e283c10e7bee04ea8ca7f3edb8c37dcd135f59e2b0851a15c`). Mode d'emploi :
+  `tickets/TICKET-BACKEND-conformite-portee-reseau-sinistres.md`. Inscription au registre :
+  `PUT /api/v1/instance/reseau/conformite/consommateurs/sinistres` (`PLATFORM_ADMIN`). D-1036 tient le jalon du 27/11
+  en avance : C-1004 n'attend plus rien de D.
 
 ## Réponses aux demandes reçues
 
@@ -50,7 +57,8 @@
 
 - **`reseau-service` : poser « Rebase and merge » seul.** Au 2026-11-16, la fusion par squash et par commit de fusion
   est encore permise. La session ne fusionne qu'en `gh pr merge --rebase`.
-- **Créer les cinq dépôts du distributeur** (plan lot 2, §6) avant la 13e story (vers le 25/11).
+- ~~Créer les cinq dépôts du distributeur~~ : **faits** (constaté le 2026-11-16, vides). **Poser « Rebase and merge »
+  seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
 
