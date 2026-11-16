@@ -468,6 +468,18 @@ reserved_ranges:
       (une source, Ajv strict) ; @prospera/kit-cible 0.1.0. Node 24 : 318 passés / 0 échec / 1 sauté ; 15 mutations
       rougissent sur une assertion. Suite : STORY-947 (conformité publiée, cible témoin, kit-cible 1.0.0 avant le
       04/12). Lot 2 de B, n° 6 (EPIC-161). NON SLOTTÉE.
+  - range: "STORY-950"
+    status: "RÉSERVÉ"
+    owner: "notification-service sur le socle (Node 24, client de Confluent), garde partagée en double lecture ; metadataMaxAge dans le catalogue et paiement ; le producteur ne retient plus l'amorçage (prospera-notification-service, platform-catalog-service, prospera-paiement-service)"
+    source_doc: "prospera-stories/stories/STORY-950.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — notification #87 (e895c79), catalogue #50 (9713dff), paiement #120 (aa985c8).
+      Node 24 : notification 3815 passés (276/276 suites), catalogue 1209/1209, paiement 4506 passés.
+      Pile grp-b-950 : un message publié au démarrage consommé en 15,8 s (démarrage compris) dans les trois
+      services ; topic recréé après l'abonnement retrouvé en 19,1 s (catalogue) ; projection en régime 1,7 s.
+      Sans Kafka, le HTTP répond (avant : 107 s de blocage). Mutation echeanceLe : 5 tests rougissent.
+      Lot 2 de B, n° 10 (EPIC-155, 145). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
