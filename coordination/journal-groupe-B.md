@@ -17,6 +17,9 @@
   2. STORY-942 : auth-service sur le socle ; le rôle métier effectif dans la liste des membres — **suivante**.
   3. ~~STORY-943~~ : **plateforme #7** (`5883740`, étiquette `point-de-decision-v1`) : la logique du point de
      décision, tous les refus dans l'ordre d'AD-23, mode sur site, conformité et mutation ;
+  6. ~~STORY-946~~ : **plateforme #8** (`300779e`) : le kit des cibles (1), les contrats de la Reprise
+     (`contrats/reprise/`) et `@prospera/kit-cible` 0.1.0 (point d'import `SIMULER`/`APPLIQUER`, valeurs de contrôle) ;
+     suite : STORY-947 (conformité publiée, cible témoin, `kit-cible` 1.0.0 **avant le 04/12**, relu par A).
 
 ### Lot 1 (fini le 2026-11-15)
 
@@ -92,6 +95,25 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-16, STORY-946 — les CONTRATS DE LA REPRISE et le KIT DES CIBLES sont publiés** (`prospera-plateforme`,
+  commit `300779e`). Contrats neufs, rien d'existant ne change. **Pour A, C et D, qui écriront des cibles :**
+  - `contrats/reprise/` (draft-07, `@1`, ajouts facultatifs seulement, annoncés ici) : `enveloppe-reprise`,
+    `reponse-reprise`, `refus-reprise`, `controles-demande`, `controles-reponse`, `declaration-objet` (`x-reprise`),
+    `reprise.feu-vert.changed` (réel seulement), `reprise.historique.livre`, `verification-donnees-importees`, `sante`,
+    et deux OpenAPI 3.1 (`reprise-cible`, `reprise-c13`). Générés par `npm run contrats:reprise` : n'éditez pas les
+    fichiers.
+  - **Un schéma d'objet** (votre module, `contrats/objets/<code>/<objet>@<n>.<m>.json`) : JSON Schema draft-07 FERMÉ des
+    `champs`, `$id` terminé par `/objets/<code>/<objet>@<n>.<m>.json`, déclaration de reprise dans `x-reprise`
+    (`references`, `regimes`, `etats`, `champEtat`, `montantsRequis`, `valeursDeControle`).
+  - **`@prospera/kit-cible` 0.1.0** (`bibliotheques/kit-cible`) : `creerCible({ code, objets: [{ schema, raccord }],
+    transactions, etatPublie })` puis `traiterRequete(cible, { methode, chemin, appelant, corps, octets })` dans votre
+    contrôleur. Refus de requête : 404 `OBJET_INCONNU`, 403 `ORGANISATION_HORS_JETON` ou code de garde de la matrice,
+    413 `LOT_TROP_GROS`, 422 `ENVELOPPE_NON_CONFORME` | `SCHEMA_NON_CONFORME` | `VALIDATION_ABSENTE`. Codes d'objet :
+    `REFERENCE_INCONNUE`, `VERDICT_DIFFERENT`, `ALIAS_DEJA_UTILISE`, `VERSION_ANTERIEURE` (avec `INCHANGE`),
+    `OBJET_HISTORIQUE`, `RATTACHE` (avec `INCHANGE`), `REFUSE_PAR_LA_CIBLE`. ⚠ Réglez votre analyseur de corps
+    au-dessus de 1 Mio : c'est le kit qui répond 413. **0.x : la forme peut encore bouger jusqu'à la 1.0.0 de
+    STORY-947** ; ne l'embarquez pas avant.
 
 - **2026-11-16, STORY-943 — le POINT DE DÉCISION est publié** (`prospera-plateforme/paquets/point-de-decision`,
   étiquette `point-de-decision-v1`, commit `5883740`). Contrat neuf, rien d'existant ne change.

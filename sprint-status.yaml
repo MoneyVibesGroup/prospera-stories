@@ -448,6 +448,16 @@ reserved_ranges:
       🏁 DONE le 2026-11-16 — plateforme #7 (5883740 sur dev), étiquette point-de-decision-v1. Node 24 : 253 passés /
       0 échec ; conformite.json 14 cas ; 10 mutations rougissent ; lireLicence sur les vecteurs signés. Lot 2 de B,
       n° 3 (EPIC-144). NON SLOTTÉE.
+  - range: "STORY-946"
+    status: "RÉSERVÉ"
+    owner: "Le kit des cibles (1) : contrats de la Reprise, point d'import SIMULER/APPLIQUER et valeurs de contrôle (prospera-plateforme : contrats/reprise/, bibliotheques/kit-cible/)"
+    source_doc: "prospera-stories/stories/STORY-946.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — plateforme #8 (300779e sur dev). 10 contrats et 2 OpenAPI dans contrats/reprise/
+      (une source, Ajv strict) ; @prospera/kit-cible 0.1.0. Node 24 : 318 passés / 0 échec / 1 sauté ; 15 mutations
+      rougissent sur une assertion. Suite : STORY-947 (conformité publiée, cible témoin, kit-cible 1.0.0 avant le
+      04/12). Lot 2 de B, n° 6 (EPIC-161). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
