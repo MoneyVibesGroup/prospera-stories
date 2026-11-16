@@ -149,6 +149,7 @@ export const MANIFESTE_LIAISON_ASSUREUR = {
     'etat-publie.changed.reel@1',
     'identity.*', // topics existants, nom sans suffixe de version [proposition, comme stock]
     'kyc.status.changed', // [proposition, comme stock]
+    'sinistres.dossier.changed@1', // amendement d'AD-16 du 2026-11-16 (D-991-2, tranché par l'utilisateur) : la source de C-17
     'sinistres.declaration.enregistree@1',
     'sinistres.garantie.decidee@1',
     'sinistres.evaluation.arretee@1',

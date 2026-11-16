@@ -35,6 +35,8 @@
 //   AD-16 ; les règlements sont lus de `paiement.reglement.changed@1`, AJOUTÉ, AD-2) ; `liaison-assureur.fraicheur.changed@1`
 //   et `reprise.feu-vert.changed@1` RETIRÉS (la fraîcheur est calculée et publiée par `liaison-assureur` seul, `assurance`
 //   en lit la valeur dans les faits `.recu`, `lueLe` ; la Reprise livre par son point d'import, pas par un fait) ;
+//   ⚠️ amendé le 2026-11-16 (STORY-993, D-993-2) : `liaison-assureur.fraicheur.changed@1` est RÉTABLI — une relecture
+//   identique ne publie pas de fait `.recu`, le `lueLe` d'une copie vieillit alors que la donnée est fraîche ;
 //   `liaison-assureur.produit.recu@1` AJOUTÉ (7 produits).
 // - C5, publie : `assurance.provision.changed@1` ne publie que la provision EFFECTIVE (une révision cumulée au-dessus du
 //   seuil attend `RESP` et n'est pas effective avant, `assurance.provision.a-valider@1`) ; `sinistres` n'affiche comme
@@ -148,6 +150,7 @@ export const MANIFESTE_ASSURANCE = {
     'liaison-assureur.coassurance.recue@1',
     'liaison-assureur.traite.recu@1',
     'liaison-assureur.produit.recu@1',
+    'liaison-assureur.fraicheur.changed@1', // amendement d'AD-16 du 2026-11-16 (D-993-2) : « à relire » se juge sur la fraîcheur publiée
     'sinistres.provision.revisee@1', // proposition de `sinistres` : `assurance` seul écrit les mouvements
     'sinistres.dossier.cloture@1', // provision ramenée à zéro, motif « clôture »
     'sinistres.recours.encaisse@1',
