@@ -1,6 +1,6 @@
 # STORY-948 : la naissance d'une organisation ; l'identité de la Reprise
 
-Status: review
+Status: done
 
 **Complexité :** moyenne (deux dépôts, une route neuve, un jeton neuf, un registre)
 
@@ -40,7 +40,7 @@ Trois écarts de STORY-936 attendaient cette naissance :
 
 ## Ce qui a été livré
 
-### `auth-service` (auth #…)
+### `auth-service` (auth #40, `017b938` sur `dev`)
 
 1. **`POST /api/v1/interne/jetons-de-service`** : un jeton de service limité à une organisation.
    - L'identité s'authentifie par **son** secret : `MOTEUR_JETON_SERVICE`, `REPRISE_JETON_SERVICE` ou
@@ -60,7 +60,7 @@ Trois écarts de STORY-936 attendaient cette naissance :
    - `instance:consentement:donner`, refusé par `CONSENTEMENT_RESERVE_AU_DG` (inchangé) ;
    - `reprise:lot:valider`, refusé par `VALIDATION_DE_REPRISE_RESERVEE_AU_DG` (PRD Reprise FR-13).
 
-### `platform-catalog-service` (catalogue #…)
+### `platform-catalog-service` (catalogue #53, `102f7e2` sur `dev`)
 
 1. **`POST /api/v1/naissances`** (public : `/api/instance/v1/naissances`). Contrat **nouveau** :
    `contrat/naissance.openapi.json`.
