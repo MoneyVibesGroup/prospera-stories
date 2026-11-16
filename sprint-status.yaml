@@ -720,6 +720,15 @@ reserved_ranges:
       au journal de B. Node 24 : 1310/1310 ; test:socle 18/18 ; 4 mutations ; pile grp-b-945 (PUT par plan,
       échéance et vertical sans droit, réamorçage NON_INSTALLE ⇒ EN_SERVICE). Contrats annoncés avant la fusion.
       Lot 2 de B, n° 5 (EPIC-144). NON SLOTTÉE.
+  - range: "STORY-951"
+    status: "RÉSERVÉ"
+    owner: "Essai ou réel : les sorties de l'essai (liste blanche, journal des interceptions, ECRITURE_REELLE_DEPUIS_ESSAI) et la mise en service dans le réel (la Reprise d'abord, feu vert relu, MISE_EN_SERVICE_SANS_FEU_VERT, reception-definitive.enregistree) (platform-catalog-service)"
+    source_doc: "prospera-stories/stories/STORY-951.md"
+    reserved_on: "2026-11-16"
+    note: >
+      👀 REVIEW le 2026-11-16 — contrats annoncés AVANT la fusion du code (catalogue #56, ouverte). Node 24 :
+      1402/1402 ; pile grp-b-951 (essai + réel + doublure de la Reprise, module cible temoin) 28/28 ; 9 mutations
+      rougissent. Lot 2 de B, n° 11 (EPIC-146). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
