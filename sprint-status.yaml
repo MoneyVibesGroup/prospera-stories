@@ -549,6 +549,17 @@ reserved_ranges:
       point-ecriture-unique-v1), catalogue #51 (60473e1). Node 24 : plateforme 345 passés / 0 échec ; catalogue
       1225/1225. 5 + 2 mutations rougissent. Refus MANIFESTE_ARGENT_SANS_CONTROLE déjà livré par 934, désormais
       prouvé contre les cas publiés. Lot 2 de B, n° 14 (EPIC-169). NON SLOTTÉE.
+  - range: "STORY-947"
+    status: "RÉSERVÉ"
+    owner: "Le kit des cibles (2) — suite de conformité publiée, cible témoin, adaptateur MongoDB, distribution CommonJS, kit-cible 1.0.0 (prospera-plateforme)"
+    source_doc: "prospera-stories/stories/STORY-947.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — plateforme #11 (789a11a sur dev), étiquette kit-cible-v1.0.0 (jalon du 04/12 tenu).
+      Node 24 : 399 passés / 0 échec ; conformité du témoin 13/13 en mémoire, 14/14 sur MongoDB 8.0 en jeu de
+      répliques (grp-b-947) ; 15 mutations font rougir la suite de conformité (dont les 3 d'EPIC-161) ; distribution
+      compilée en CommonJS et jouée par require. Relecture de A demandée (journal de B). Lot 2 de B, n° 7
+      (EPIC-161). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

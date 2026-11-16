@@ -21,6 +21,9 @@
   6. ~~STORY-946~~ : **plateforme #8** (`300779e`) : le kit des cibles (1), les contrats de la Reprise
      (`contrats/reprise/`) et `@prospera/kit-cible` 0.1.0 (point d'import `SIMULER`/`APPLIQUER`, valeurs de contrôle) ;
      suite : STORY-947 (conformité publiée, cible témoin, `kit-cible` 1.0.0 **avant le 04/12**, relu par A).
+  7. ~~STORY-947~~ : **plateforme #11** (`789a11a`, étiquette **`kit-cible-v1.0.0`**) : le kit des cibles (2), la suite
+     de conformité publiée, la cible témoin, l'adaptateur MongoDB, la distribution CommonJS ; **jalon du 04/12 tenu**,
+     relecture de A demandée.
   10. ~~STORY-950~~ : **notification #87** (`e895c79`), **catalogue #50** (`9713dff`), **paiement #120** (`aa985c8`) :
       notification sur le socle (Node 24, Confluent) et la garde en double lecture ; `metadataMaxAge` 10 s dans les
       trois services ; le producteur ne retient plus l'amorçage sans Kafka.
@@ -73,6 +76,13 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-16) : relire `kit-cible` 1.0.0 avant le 04/12** (EPIC-161 : « relu par Dev A ») — **ouverte**.
+  Étiquette `kit-cible-v1.0.0` sur `prospera-plateforme` (`789a11a`, STORY-947). À lire : `bibliotheques/kit-cible/src/`
+  (`cible.ts`, `conformite.ts`, `mongodb.ts`), la fiche `stories/STORY-947.md` (D-947-1 → 10) et le README de la
+  plateforme (section du kit). Ce qu'on attend de la relecture : la suite de conformité couvre-t-elle ce qu'un point
+  d'import de `pdv` doit prouver ? la distribution CommonJS se copie-t-elle sans heurt dans un service NestJS ? Verdict
+  dans le journal de A ; un défaut devient une **1.0.1**, corrigée par B dans le kit, jamais dans le dépôt de la cible.
+
 - **→ C (2026-11-16) : les codes des domaines de `liaison-assureur`** — **question, ouverte**. Le manifeste publié de
   `liaison-assureur` déclare `assurance.contrats`, `sinistres.dossiers` et `ged.documents-sinistres` : le préfixe du
   **code** n'est pas le module, alors que la spine de Connecteurs (AD-2) écrit `<module>.<domaine>`. Le catalogue ne le
@@ -115,6 +125,21 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   3. décision d'architecture « droits hors du jeton » ⇒ à écrire avant février, au plus tard avec STORY-938.
 
 ## ⚠ Contrats
+
+- **2026-11-16, STORY-947 — `kit-cible` 1.0.0 est publié** (`prospera-plateforme`, étiquette `kit-cible-v1.0.0`).
+  **Pour A (Dev A, `pdv` en S5), C et D-1041, et tout module cible** :
+  - **Comment le prendre** : copier `bibliotheques/kit-cible/distribution/` à l'étiquette, à l'octet
+    (`git -c core.autocrlf=false show kit-cible-v1.0.0:bibliotheques/kit-cible/distribution/<fichier>`), dans le
+    service (par ex. `src/vendor/kit-cible/`), avec `EMPREINTES.json` et un test qui revérifie les sha256. Elle se
+    compile en CommonJS ; le service déclare `ajv` ^8 (`mongodb` vient de Mongoose).
+  - **Ce que chaque module cible joue** : `casDeConformite(profil)` (`conformite.ts`), dans sa CI, sous jest
+    (`it(c.nom, c.jouer)`) : objet simple, objet chaîné, et s'il en a, montant requis et ouverture.
+  - **Sur MongoDB** : `ouvrirMagasinMongo(client, { base })` exige un **jeu de répliques** (`JEU_DE_REPLIQUES_EXIGE`) ;
+    le kit pose ses collections `reprise_*`.
+  - **Contrat `refus-reprise@1`** : `OUVERTURE_CLOSE` (409) **ajouté** aux codes ; `reprise-cible.openapi.json` gagne
+    une réponse 409. Rien de retiré ni de renommé.
+  - **API ajoutée au kit** : `saisirMontant` (motif exigé, trace), `lireFiche`, `lireTraces`, `ouvertureClose` /
+    `ouvertureCloseHorsInstallation`. `Session` gagne `tracer` et `lireTraces` (un raccord maison les implémente).
 
 - **2026-11-16, STORY-954 — DES CONTRATS NOUVEAUX, rien d'existant ne change** (`prospera-plateforme`, EPIC-169).
   - **`seuils-fraicheur@1`** (`contrats/seuils-fraicheur.json`, étiquette `seuils-fraicheur-v1`) : immédiat 5 / 15 min,
