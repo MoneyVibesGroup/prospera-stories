@@ -34,6 +34,12 @@
       `point-ecriture-unique-v1`), **catalogue #51** (`60473e1`) : les contrats de Connecteurs publiés avant février
       (seuils de fraîcheur, enveloppe et réponse d'échange, `connecteurs.domaine.changed`, `domainesEchange` et ses
       cas) ; `@prospera/point-ecriture-unique` (marqueur, garde de balayage) ; le catalogue rejoue les règles.
+  15. ~~STORY-955~~ : **centrale-service #1** (`5671fab`), **agent-instance #1** (`db1dd58`) : agent et centrale,
+      premier incrément. La centrale émet l'état voulu signé (licence, heure de référence, liste de révocation, signées
+      à part ; compteur par clé ; contacts idempotents). L'agent le vérifie hors ligne, l'applique tout ou rien et
+      ouvre la licence au point de décision sur site ; horloge scellée (AD-5), journal chaîné. Test croisé : les 16
+      vecteurs rejoués des deux côtés, et le jeu de la vraie centrale appliqué par l'agent. `main` et `dev` posées dans
+      les deux dépôts neufs.
 
 ### Lot 1 (fini le 2026-11-15)
 
@@ -69,6 +75,9 @@
 `prospera-platform-catalog-service`, `prospera-paiement-service`, `prospera-plateforme` (à créer, STORY-931),
 `prospera-notification-service` et `prospera-auth-service` (reçus de A, voir Passations). Pendant ce lot, la même
 session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
+
+**Lot 2** : en plus, les dépôts neufs **`centrale-service`** et **`agent-instance`** (créés par l'utilisateur, `main` et
+`dev` posées par STORY-955).
 
 ## Passations
 
@@ -343,6 +352,14 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   requis ajouté, un type changé ou une propriété retirée sont refusés (`npm run schemas:compatibilite`, code 1).
 
 ## Questions à l'utilisateur ou au PO
+
+- **Réglages de `centrale-service` et `agent-instance`** (STORY-955) : la fusion par commit, par squash et par rebase
+  est permise dans les deux dépôts. « Rebase and merge » seul est **à poser par l'utilisateur** dans les réglages
+  GitHub ; la session ne touche pas aux réglages.
+- **D-955-2 : pas de NestJS au premier incrément de l'agent et de la centrale.** Ils tournent en TypeScript natif
+  sous Node 24, comme `prospera-plateforme`, dont ils copient le code. L'exécuteur doit rester minimal (AD-36), et
+  `jose` 6 est ESM seul. La centrale passera à NestJS, MongoDB et Kafka avec le parc et le contact mTLS (suite
+  d'EPIC-148). **Contestable.**
 
 - **ADR « droits hors du jeton » (STORY-938)** : adoptée par défaut, sur la recommandation de A. **Contestable** par le
   PO jusqu'à sa première story de mise en œuvre.
