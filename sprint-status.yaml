@@ -560,6 +560,16 @@ reserved_ranges:
       répliques (grp-b-947) ; 15 mutations font rougir la suite de conformité (dont les 3 d'EPIC-161) ; distribution
       compilée en CommonJS et jouée par require. Relecture de A demandée (journal de B). Lot 2 de B, n° 7
       (EPIC-161). NON SLOTTÉE.
+  - range: "STORY-944"
+    status: "RÉSERVÉ"
+    owner: "L'installation, un plan enregistré — point de décision copié (point-de-decision-v1), offre, plan idempotent aux étapes horodatées, reprise après coupure, axe 2 lu depuis le plan (platform-catalog-service)"
+    source_doc: "prospera-stories/stories/STORY-944.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-16 — catalogue #52 (c3c63c8 sur dev). Node 24 : 1288/1288 ; test:socle 15/15 (vrai
+      MongoDB 8 en jeu de répliques) ; 7 mutations rougissent. Pile grp-b-944 : docker kill au milieu d'une
+      vérification, reprise à cette étape, rien de doublé ; rejeu idempotent. Fin de D-936-1 pour les modules
+      installés par un plan (le reste attend le réamorçage de 945). Lot 2 de B, n° 4 (EPIC-144). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
