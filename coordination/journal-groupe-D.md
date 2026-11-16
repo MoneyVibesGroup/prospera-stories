@@ -9,7 +9,9 @@
 - **2026-11-16** : lot 2 lancé par l'utilisateur (« prends le lot 2 du groupe D et tu fais toutes les stories de ce
   lot »). La session tourne sur un poste à part (`C:\Users\USER\…`), pas sur le poste principal de A et C.
   - **STORY-1030** ✅ — le squelette de `reseau-service` (PR reseau-service#1, `dev` 80a4a29 ; `main` dc44bbf).
-  - Suivante : **STORY-1031** (gate complète avec le KYC, read-models, cloisonnement, outbox).
+  - **STORY-1031** ✅ — gate complète (KYC), read-models KYC et identité, cloisonnement par le jeton, outbox
+    transactionnelle (PR reseau-service#2, `dev` 64537b1).
+  - Suivante : **STORY-1032** (zones et agences).
 
 ## Dépôts tenus
 
@@ -46,9 +48,15 @@
 
 ## Questions à l'utilisateur ou au PO
 
-- *(aucune)*
+- **Q-D-1 (2026-11-16, STORY-1031) — Le KYC dans la garde de `reseau` en mode « sur site ».** La spine (AD-10)
+  exige le KYC Money Vibes de l'organisation ; une instance installée chez le client (EPIC-148) n'aura pas forcément
+  de `kyc-service`. **Choix par défaut : KYC exigé partout** (D-1031-2), à revoir avec l'agent d'instance.
 
 ## Pièges rencontrés
+
+- Le poste de D est **partagé avec B** (piles `grp-b`) : toujours `docker compose -p grp-d …`, jamais un `down` sans
+  `-p` ; ne jamais écrire dans les copies de travail de B (`_wt-b-stories`, `prospera-plateforme`).
+- Un JSON écrit par heredoc perd ses antislashs (`"^.+\.(t|j)s$"` de `jest-int.json`) : outil d'écriture seulement.
 
 - Poste de D : Node 25 en local. Le client Kafka de Confluent est natif : les tests se jouent dans le stage
   `verification` du `Dockerfile` (Node 24), `npm ci --ignore-scripts` suffit en local pour `tsc` et le lint.
