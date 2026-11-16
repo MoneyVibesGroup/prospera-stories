@@ -83,6 +83,16 @@ reserved_ranges:
       parallèles sur deux machines : aucune ne voit les branches locales des autres, donc chacune puise
       dans sa seule plage. Les fiches sont écrites juste avant de coder.
 
+  - range: "STORY-1030 → STORY-1079"
+    status: "RÉSERVÉ"
+    owner: "Groupe D — backend : reseau-service, puis le socle du distributeur (lot 2)"
+    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-LOT-2-2026-11-16.md"
+    reserved_on: "2026-11-16"
+    note: >-
+      Sous-plage de STORY-900 → STORY-1199 (Dev B), ouverte le 2026-11-16 quand l'utilisateur a fait passer D au
+      backend (lot 2 : 15 stories backend par groupe). La plage de Dev A (STORY-730 → 899) n'est pas touchée. Les
+      fiches sont écrites juste avant de coder.
+
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
