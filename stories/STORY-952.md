@@ -1,11 +1,12 @@
 # STORY-952 : l'essai prospect et ses avis
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (un fait neuf, trois ordres, une file d'avis ; deux dépôts)
 
 **Épic :** EPIC-147 (le prospect essaie avant de signer)
-**Dépôts :** `MoneyVibesGroup/prospera-platform-catalog-service`, `MoneyVibesGroup/prospera-notification-service`
+**Dépôts :** `MoneyVibesGroup/prospera-platform-catalog-service` (#57, `45c3b33` sur `dev`),
+`MoneyVibesGroup/prospera-notification-service` (#88, `9d6f3ae` sur `dev`) ; contrats annoncés avant la fusion (stories #548)
 **Plage :** groupe B, n° 12 du lot 2 (`coordination/PLAN-4-SESSIONS-LOT-2-2026-11-16.md` §3).
 
 ---
@@ -64,7 +65,44 @@ la matrice figée) ; rien ne l'alimentait.
 
 ## Preuves
 
-À compléter au gate.
+- **Node 24** (étage `verification`, export `git archive` de chaque branche) :
+  - catalogue : `tsc`, lint de `src`, **92/92 suites, 1360/1360** ;
+  - notification : `tsc`, lint des dossiers touchés, **276/276 suites, 3834 passés, 1 sauté**.
+- **Mutations** :
+  - catalogue, 5 mutations, toutes rouges sur une assertion : une seconde prolongation permise, un essai signé qui garde
+    ses dates, un avis envoyé après la signature, une signature acceptée après l'effacement, un avis posé à la fin au
+    lieu de J-7. Un premier essai de la quatrième rendait un paramètre inutilisé, donc une erreur de compilation ; il a
+    été réécrit pour rougir sur l'assertion ;
+  - notification : élargir le périmètre du catalogue à `abonnement-echeance-proche` fait rougir la garde.
+- **Gardes de notification** : trois rougissaient à juste titre, et le texte et les tests ont été corrigés :
+  - l'inventaire écrit en toutes lettres ;
+  - les positions dans l'inventaire ;
+  - aucun texte ne signe « Prospera » en dur (la signature est la variable de marque).
+- **Pile `grp-b-952`** : catalogue de l'espace d'**essai** et notification, images `runtime` des branches, MongoDB 8,
+  Kafka, Redis, mailhog, un JWKS de test. L'horloge est avancée par redémarrage (`RECETTE_HORLOGE_AVANCE_JOURS`).
+  - **J0** :
+    - `POST /essais` rend 201 ; le rejeu, 200 ; un autre commercial, 409 `ESSAI_DIVERGENT` ; une organisation
+      inconnue, 404 ;
+    - `stock` passe `ESSAI_PROSPECT` (`finLe` à J+30), événement n° 1 ;
+    - deux avis sont en file (fin J+30, effacement J+60).
+  - **J+23** :
+    - **2 courriels** reçus, un pour l'administrateur et un pour le commercial : « Votre essai se termine dans 7
+      jours » ; le corps porte « L'essai de Distrib SA se termine le 16 décembre 2026, dans 7 jours » ;
+    - `avisEnvoyes` porte les deux ;
+    - la prolongation rend 200 : fin à J+60, effacement à J+90 ; la seconde rend 409 `ESSAI_DEJA_PROLONGE` ;
+    - événement n° 2 ; les avis sont reposés sur les nouvelles fins.
+  - **J+61** :
+    - `stock` passe `ESSAI_TERMINE` (`effacementLe`), les droits effectifs sont vides, événement n° 3 ;
+    - l'avis de la fin J+60, devenu périmé, ne part pas (toujours 2 courriels) ;
+    - une prolongation rend 409 `ESSAI_TERMINE` ;
+    - la **signature** rend 200, et 200 de nouveau au rejeu. `stock` repasse `EN_SERVICE`, événement n° 4, les avis
+      en attente sont retirés ;
+    - le droit, l'installation et une donnée saisie pendant l'essai sont intacts.
+  - **Production** : `NODE_ENV=production` avec une avance fait échouer le démarrage, et le message nomme
+    `RECETTE_HORLOGE_AVANCE_JOURS`.
+  - Pile descendue avec ses volumes, verrou Docker rendu.
+- **Ce qui n'est pas prouvé sur la pile** : la naissance et l'installation y sont amorcées en base (prouvées par 948 et
+  944) ; la pile n'a pas MinIO, comme pour 942 et 950.
 
 ## Décisions
 

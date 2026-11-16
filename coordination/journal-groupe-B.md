@@ -40,7 +40,10 @@
   10. ~~STORY-950~~ : **notification #87** (`e895c79`), **catalogue #50** (`9713dff`), **paiement #120** (`aa985c8`) :
       notification sur le socle (Node 24, Confluent) et la garde en double lecture ; `metadataMaxAge` 10 s dans les
       trois services ; le producteur ne retient plus l'amorçage sans Kafka.
-  12. STORY-952 : l'essai prospect et ses avis — **en cours** (contrats annoncés ci-dessous, avant la fusion).
+  12. ~~STORY-952~~ : **catalogue #57** (`45c3b33`), **notification #88** (`9d6f3ae`), contrats annoncés avant la
+      fusion (stories #548) : l'essai d'un prospect (J+30, une prolongation, 60 jours au plus, `ESSAI_TERMINE`, signer
+      rouvre sans perte), avis J-7 par la route directe de notification, horloge de recette du catalogue. Pour 953 :
+      l'effacement s'accroche à l'échéance `EFFACEMENT` et au statut de l'essai (fiche, « Pour STORY-953 »).
   14. ~~STORY-954~~ : **plateforme #9** (`b4c5c46` ; étiquettes `seuils-fraicheur-v1`, `contrats-echange-v1`,
       `point-ecriture-unique-v1`), **catalogue #51** (`60473e1`) : les contrats de Connecteurs publiés avant février
       (seuils de fraîcheur, enveloppe et réponse d'échange, `connecteurs.domaine.changed`, `domainesEchange` et ses
@@ -259,8 +262,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   - **Catalogue** : un consommateur de plus (groupe `platform-catalog-droits`) ; les réglages `DROITS_*` sont
     facultatifs (adresse d'auth par défaut : `NAISSANCE_AUTH_URL`). La réponse de l'état publié ne change pas.
 
-- **2026-11-16, STORY-952 — l'essai d'un prospect : ajouts, annoncés AVANT la fusion du code** (catalogue et
-  notification, branches `MNV-952`).
+- **2026-11-16, STORY-952 — l'essai d'un prospect : ajouts, annoncés AVANT la fusion du code** (catalogue #57,
+  notification #88 ; annonce fusionnée par stories #548, avant le code).
   - **Catalogue, contrat NOUVEAU `contrat/essai-prospect.openapi.json`**, servi par la partie A de l'**espace
     d'essai** seulement (409 `ESSAI_HORS_ESPACE_D_ESSAI` dans le réel) :
     - `POST /api/instance/v1/essais` (`entitlement:grant`) ouvre l'essai (J0 → J+30), idempotent sur
@@ -542,6 +545,11 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Deux suites jest sous Node 24 en même temps saturent la VM Docker de ce poste** (8 Go ; catalogue et notification
+  ensemble ≈ 6,5 Go). Le démon a répondu `EOF`, puis 500, et une construction d'image est tombée. Une suite à la fois.
+  Lancer le conteneur **nommé, sans `--rm`**, puis `docker wait` et `docker logs` : un `--rm` perd le journal si le
+  client se déconnecte, et un `npm test | tail` dans `sh -c` masque le code de retour (STORY-952).
 
 - **La borne du jeton bloque les droits de la Reprise** (STORY-948) : `borne-du-jeton.spec.ts` exige que les deux
   catalogues tiennent dans un jeton (17 + 24 = 41 ≤ 44). Les six `reprise:*` le feraient passer à 47 : ils attendent
