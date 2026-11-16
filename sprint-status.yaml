@@ -663,6 +663,15 @@ reserved_ranges:
     note: >
       🚧 EN COURS le 2026-11-16 — contrats annoncés avant la fusion du code (essai-prospect.openapi.json, modèles
       essai-fin-proche et essai-effacement-proche). Lot 2 de B, n° 12 (EPIC-147). NON SLOTTÉE.
+  - range: "STORY-949"
+    status: "RÉSERVÉ"
+    owner: "Droits hors du jeton, étapes 1 et 2 — GET /moi/droits, dv dans le jeton, identity.droits.changed@1 (auth) ; droitsEffectifs en double lecture contre la résolution (catalogue) (prospera-auth-service, prospera-platform-catalog-service)"
+    source_doc: "prospera-stories/stories/STORY-949.md"
+    reserved_on: "2026-11-16"
+    note: >
+      👀 REVIEW le 2026-11-16 — contrats annoncés au journal de B avant la fusion du code (route /moi/droits, claim dv,
+      topic identity.droits.changed@1). Lot 2 de B, n° 9 (EPIC-145, 264), ADR « droits hors du jeton » étapes 1 et 2 ;
+      attendue par A-919. NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
