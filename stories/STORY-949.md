@@ -1,6 +1,6 @@
 # STORY-949 : droits hors du jeton, étapes 1 et 2
 
-Status: review
+Status: done
 
 **Complexité :** moyenne (une route, une version des droits sur chaque appartenance, un événement neuf, une double
 lecture côté partie A)
@@ -80,9 +80,69 @@ premières étapes : la route, `dv` et l'événement dans `auth-service` (1), pu
    `DROITS_DOUBLE_LECTURE`, `DROITS_CACHE_TTL_MS` (≤ 60 000), `DROITS_DELAI_MS`, `DROITS_CONSOMMATEUR_ACTIF`,
    `DROITS_GROUP_ID`.
 
+## Livraison
+
+- **auth #41** : `6bd5560`, `e29b457`, `a30e78f` sur `dev`.
+- **catalogue #54** : `abc5716` sur `dev`, rebasé sur STORY-952 (conflits additifs dans l'état publié, les deux
+  côtés gardés).
+- Contrats annoncés avant la fusion : stories #552.
+
 ## Preuves
 
-*(complétées au gate, avant le passage à `done`)*
+- **Node 24**, étage `verification`, images construites depuis un export `git archive` :
+  - auth : **97 suites, 1 331/1 331**, `tsc` et build verts. Un test de forme (`auth.service.spec`, le sujet exact du
+    jeton) ne tournait pas sur le poste (bcrypt natif) : il a rougi sous Node 24, `dv: 0` y est ajouté ;
+  - catalogue : **94 suites, 1 395/1 395**, `tsc` et build verts.
+- **Lint** des fichiers touchés : vert dans les deux dépôts.
+- **Karapace** (pile `grp-b-949`) :
+  - `schemas:enregistrer` pose 7 sujets, dont `identity.droits.changed-value` ; `schemas:compatibilite` : tous
+    compatibles BACKWARD ;
+  - `test:schemas` **16/16** : un ajout facultatif à `identity.droits.changed` passe, les droits ajoutés comme champ
+    requis et `dv` changé en chaîne sont refusés.
+- **Pile `grp-b-949`** : auth et catalogue sur les images de la branche, MongoDB 8 en jeu de répliques, Kafka,
+  Redis, Karapace ; sans MinIO, introuvable, comme en 942. Les deux services démarrent `healthy`.
+  La preuve de bout en bout (`preuve.mjs`) compte **24 vérifications sur 24** :
+  - **Inscription d'un cabinet** :
+    - le jeton porte `dv = 1` et garde `perms[]` ;
+    - `/moi/droits` rend `CAB_ASSOCIE` (`PAR_DEFAUT`), `dv = 1`, et `droits ∪ droitsPlateforme` = `perms[]` ;
+    - 403 `ORGANISATION_HORS_JETON`, 400 `ORGANISATION_REQUISE`, 401 sans jeton.
+  - **Première lecture de l'état publié** : aucun écart journalisé.
+  - **Un changement réel**, la surcharge de `CAB_ASSOCIE` qui gagne `instance:bilan:consulter` :
+    - `memberships.dv` passe à 2, dans la transaction ;
+    - `/moi/droits`, avec l'**ancien** jeton, rend `dv = 2` et le droit gagné.
+  - **Sur le fil**, `identity.droits.changed` :
+    - deux messages pour ce membre, `APPARTENANCE` (dv 1) puis `SURCHARGE` (dv 2) ;
+    - clé de partition = `organisationId` ;
+    - aucun droit transporté.
+  - **Le cache invalidé par l'événement** :
+    - l'ancien jeton (dv 1) fait relire la résolution : `DROITS_HORS_DU_JETON_JETON_PLUS_ANCIEN`, avec
+      `absentsDuJeton: ["instance:bilan:consulter"]`, `dvDuJeton: 1`, `dvResolu: 2` ;
+    - la réponse servie ne change pas : le jeton décide encore.
+  - **Nouveau jeton** (dv 2) : le droit est servi, aucun écart.
+  - **Un écart réel est vu** : la surcharge est retirée en base sans avancer `dv`, ce que le code n'écrit jamais.
+    Le jeton suivant reste à dv 2 sans le droit ; le cache tient la résolution à dv 2 avec le droit :
+    `DROITS_HORS_DU_JETON_ECART`, avec le droit nommé.
+  - **Auth arrêté** : l'état publié reste servi (200).
+- **Mutations** : chacune rougit sur une assertion. Trois d'entre elles faisaient d'abord échouer la compilation
+  (paramètre ou import devenu inutile) ; elles ont été réécrites pour compiler.
+  - auth, 6 mutations :
+    - `dv` n'avance plus ;
+    - `dv` absent du jeton ;
+    - organisation non comparée au jeton ;
+    - appartenance suspendue ouverte ;
+    - mauvaise cause pour la surcharge ;
+    - `dv` absent lu 1 ;
+  - catalogue, 6 mutations :
+    - `dv` du jeton ignoré par le cache ;
+    - un événement en retard qui invalide ;
+    - résolution non filtrée par les modules ouverts ;
+    - jeton plus ancien lu comme un écart ;
+    - comparaison sur les `perms` bruts ;
+    - un 401 lu comme une panne.
+- Pile descendue avec ses volumes (`down -v`), images retirées, verrou Docker rendu.
+- ⚠ **Piège** : le DNS de la VM Docker ne résolvait plus `auth.docker.io`, et la ligne `# syntax=docker/dockerfile:1`
+  des Dockerfile fait télécharger le frontal à chaque construction. Les images de preuve ont été construites depuis
+  l'export, ligne retirée (le dépôt n'est pas modifié) ; les images de base étaient locales.
 
 ## Décisions
 

@@ -718,9 +718,11 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-949.md"
     reserved_on: "2026-11-16"
     note: >
-      👀 REVIEW le 2026-11-16 — contrats annoncés au journal de B avant la fusion du code (route /moi/droits, claim dv,
-      topic identity.droits.changed@1). Lot 2 de B, n° 9 (EPIC-145, 264), ADR « droits hors du jeton » étapes 1 et 2 ;
-      attendue par A-919. NON SLOTTÉE.
+      🏁 DONE le 2026-11-16 — auth #41 (a30e78f), catalogue #54 (abc5716), contrats annoncés avant la fusion
+      (stories #552). Node 24 : auth 1331/1331, catalogue 1395/1395 ; Karapace 7 sujets BACKWARD, test:schemas 16/16 ;
+      pile grp-b-949 24/24 (dv avancé, événement sur le fil, cache invalidé, JETON_PLUS_ANCIEN puis ECART détectés) ;
+      12 mutations rougissent. Lot 2 de B, n° 9 (EPIC-145, 264), ADR « droits hors du jeton » étapes 1 et 2 ;
+      A-919 peut démarrer. NON SLOTTÉE.
   - range: "STORY-945"
     status: "RÉSERVÉ"
     owner: "La bascule : aucun ACTIVE hors du moteur — l'échéance soldée note « acquis, à installer », vertical et propagation des packages retirés, le PUT de la console passe par un plan, l'axe 2 ne se déduit plus du droit, réamorçage par le moteur (platform-catalog-service)"
