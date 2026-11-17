@@ -1,6 +1,6 @@
 # STORY-925 : Le référentiel effectif d'un dossier déclare son dossier et sa famille
 
-Status: in-progress
+Status: done
 
 **Complexité :** petite (un service, deux champs servis, aucune route nouvelle)
 
@@ -71,7 +71,8 @@ Sur `GET /api/v1/dossiers/{dossierId}/referentiels/actifs` (ajouts seuls, §1.8)
 
 ## Definition of Done
 
-- [ ] tsc, lint des fichiers touchés, e2e `referentiel` + `openapi-contract`, unitaires `referentiel` verts.
-- [ ] Mutations rouges sur l'assertion (dossier remplacé par l'organisation ; famille `SN` au lieu de SYSCOHADA).
-- [ ] Docker non requis (un contrôleur existant, deux champs de réponse, aucun module/provider/dépendance).
-- [ ] PR code fusionnée ; ticket fermé ; journal de A.
+- [x] `tsc` propre ; lint des fichiers touchés propre ; e2e `referentiel` + `openapi-contract` 275/275 ; unitaires `src/modules/referentiel` 18 suites, 470/470 (le test `diagnostic` de `referentiel.service.spec.ts` attendait le corps exact : réaligné, ajout seul).
+- [x] Mutations rouges sur l'assertion : `dossierId` remplacé par l'organisation (2 tests rouges : deux dossiers, archivé) ; famille `SN` servie au lieu de `SYSCOHADA` (2 rouges : deux dossiers, SMT).
+- [x] Docker non requis (contrôleur existant, deux champs de réponse, aucun module/provider/dépendance) ; verrou non pris.
+- [x] PR code fusionnée : balance #154 (dev `055b423`) ; contrat annoncé avant la fusion : prospera-stories #602.
+- [x] Ticket `referentiel-effectif-non-resolu-par-dossier` fermé.
