@@ -34,10 +34,20 @@
      jeton du membre), référentiel du dossier (`GET …/dossiers/{d}/exercices/{e}/referentiel`), piste d'audit
      append-only avec `provenance` (Q3), manifeste `comptabilite`, **port 3420** (D-958-1). Node 24 180/0/2, socle
      20/20 sur MongoDB 8.0 rs0 et Kafka, 20 mutations ; pile `grp-b` : `/health` 200.
-  - **Story suivante : STORY-959** (les exercices et la tenue, dans `prospera-comptabilite-service`). À lire avant :
-    `stories/STORY-958.md`, « Pour la suite ». La première écriture : `ResolveurDePortee` pour la portée,
-    `PisteAuditService.consigner(portee, …, session)` dans la transaction de l'acte, droits par `/moi/droits`, premier
-    fait par une outbox, schéma dans `contrat/schemas/` et annonce ici avant la fusion.
+  4. ~~STORY-959~~ : **prospera-comptabilite-service #2** (`a8784cb` sur `dev`), contrat annoncé avant la fusion
+     (stories #609). Les exercices et la tenue.
+     - `POST …/exercices/{e}/ouverture { tenue }` ouvre à la comptabilité un exercice OUVERT de dossier-service.
+       L'exercice reste celui de dossier-service (D-959-1).
+     - La tenue est exclusive (CAHIERS ou JOURNAL) : index unique et collection append-only. L'autre tenue rend 409
+       `TENUE_EXCLUSIVE` ; la même, rejouée, rend 200 sans rien écrire.
+     - La bascule se lit sur l'exercice précédent du dossier (`bascule`, `precedente`).
+     - La piste reçoit `EXERCICE_OUVERT`, avec la provenance déduite de la proposition citée.
+     - Un 4e maillon global, `GardeDesDroits`, lit `@DroitRequis` par `GET /moi/droits`.
+     Node 24 : 248/0/2 ; `test:socle` 36/36 (MongoDB 8.0 rs0, Kafka) ; 25 mutations ; pile `grp-b` : `/health` 200.
+     **Aucun rôle n'a encore `comptabilite:*`** : en réel, l'ouverture rend 403 (D-959-4, à lever avant B-967).
+  - **Story suivante : STORY-960** (les 15 rôles du distributeur dans auth, `prospera-auth-service`, EPIC-223). D-1053
+    l'attend. À lire avant : le PRD distributeur, annexe B (table d'accès), et la passation d'auth (« Passations »).
+    Le checkout local d'auth-service est sur `MNV-942` : repartir d'`origin/dev`.
 
 ### Lot 2 (ouvert le 2026-11-16)
 
@@ -181,6 +191,14 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   membre qui reçoit le rôle par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif).
 
 ## Demandes aux autres groupes
+
+- **→ A (2026-11-17) : la tenue d'un exercice est déclarée dans la comptabilité** — **information**, aucune action
+  demandée (STORY-959, D-959-5 et D-959-6). Q1 (D-L3-4) est appliquée côté comptabilité : un exercice ouvert aux
+  `CAHIERS` ne s'ouvre pas au `JOURNAL`, et l'inverse (409 `TENUE_EXCLUSIVE`). La comptabilité ne lit pas les cahiers
+  de balance-service. L'Atelier ne sait donc pas encore qu'un exercice est tenu au journal. Pour le savoir sans rien
+  attendre : `GET {COMPTABILITE}/api/v1/dossiers/{d}/exercices/{e}/tenue` (404 `EXERCICE_NON_OUVERT` si rien n'est
+  choisi), avec le jeton du membre. Si vous voulez refuser un cahier sur un exercice tenu au journal, dites-le ici :
+  B publiera `comptabilite.tenue.changed@1` (outbox, registre), annoncé dans « ⚠ Contrats ».
 
 - **→ A (2026-11-17) : `prospera-comptabilite-service` existe, port 3420** — **information**, aucune action avant
   B-967 (STORY-958, D-958-8). Le service n'entre pas encore dans la recette : le catalogue ne connaît pas encore le
@@ -382,7 +400,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-17, STORY-959 — les exercices et la tenue, annoncé AVANT la fusion du code**
-  (`prospera-comptabilite-service`). Tout est AJOUT : rien d'existant ne change de forme.
+  (`prospera-comptabilite-service`). **Fusionné le 17/11** : comptabilite #2, `a8784cb` sur `dev` (annonce : stories
+  #609). Tout est AJOUT : rien d'existant ne change de forme.
   - **Trois routes neuves** :
     - `POST /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ouverture`, corps `{ tenue: CAHIERS|JOURNAL,
       proposition? }`. 201 à l'ouverture ; 200 si la même tenue est déjà choisie (rien n'est écrit). Droit exigé :
@@ -847,6 +866,16 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une mutation qui casse un rétrécissement de type rougit par compilation** (STORY-959). Exemples :
+  `if (deja && false) return f(deja)` (`deja` redevient `T | null`) ; un garde de type qui n'est plus appelé
+  (`noUnusedLocals`). Muter en gardant le rétrécissement (`deja && deja.tenue === 'JAMAIS'`), ou muter le corps du
+  garde plutôt que son appel. Le script de mutations doit exiger `Tests: … failed` ET l'absence de `TS\d{4}`.
+- **Le manifeste de `_wt-b-stories` sort en CRLF** (`core.autocrlf=true` dans le worktree). Un script qui le
+  remplace doit normaliser les fins de ligne avant de chercher. La copie dans le service se fait depuis le blob de
+  `main`, après la fusion de l'annonce : `git -c core.autocrlf=false show origin/main:manifestes/… > src/module.manifest.ts`.
+- **`cat > fichier` sans heredoc attend l'entrée standard** : la commande ne rend jamais la main (STORY-959, un appel
+  perdu). Écrire les scripts avec l'outil d'écriture.
 
 - **`prettier --write "src/**/*.ts"` reformate aussi `src/vendor/`** (STORY-958) : la copie épinglée de la garde
   partagée a changé d'empreinte (`01f9e769…` au lieu de `a830c449…`). Seul le test d'empreinte l'a vu, sous Node 24

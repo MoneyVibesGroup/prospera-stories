@@ -1015,8 +1015,11 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-959.md"
     reserved_on: "2026-11-17"
     note: >
-      🚧 EN COURS le 2026-11-17 — contrat annoncé avant la fusion du code (routes neuves, manifeste amendé). Lot 3 de
-      B, n° 4 (EPIC-111). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-comptabilite-service #2 (dev a8784cb) ; contrat annoncé avant la fusion
+      (stories #609 : trois routes, refus nommés, manifeste amendé). Node 24 : 248 passés / 0 échec / 2 sautés ;
+      test:socle 36/36 sur MongoDB 8.0 rs0 et Kafka (tenue exclusive 409 TENUE_EXCLUSIVE, idempotence 200, bascule
+      CAHIERS → JOURNAL avec provenance, course à quatre ⇒ une tenue et une entrée de piste) ; 25 mutations rouges.
+      Pile grp-b : /health 200. Droits lus par /moi/droits (4e garde globale). Lot 3 de B, n° 4 (EPIC-111). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
