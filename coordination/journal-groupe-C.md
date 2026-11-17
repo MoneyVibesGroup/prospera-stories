@@ -48,7 +48,10 @@
      LC par empreinte HMAC, réserves, urgence) ;
   22. ~~STORY-1001~~ : **assurance #24, sinistres #12** (+ correctif #11 des codes de type) ; recevabilité,
      garantie, pièces attendues, courrier ; constats posés par commande ;
-  23. **STORY-1002** ← **suivante** : attribuer (charge pondérée, réaffectation motivée ; la prise en instruction).
+  23. ~~STORY-1002~~ : **sinistres #13** (manifeste #584) ; registre des gestionnaires, charge pondérée,
+     affectation et réaffectation motivée ; parcours joué contre le LC fictif ;
+  24. **STORY-1003** ← **suivante** : parties au dossier, cumuls interdits, matrice de délégation datée ; puis
+     **STORY-1004** (portées par volet : D-1036 est livré, plus rien n'attend D).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -293,7 +296,26 @@ seulement.
     (route de lecture `recevabilite`).
   - ⚠️ STORY-1000 corrigée (#11) : codes de type `MRH`, `ACCIDENT_TRAVAIL` (ceux de la démo et d'`assurance`).
 
+- **2026-11-17, STORY-1002 — le registre des gestionnaires, et le parcours contre le LC fictif.**
+  - `sinistres` tient le registre des gestionnaires (`sinistres_gestionnaires`) tant que `reseau` n'est pas là
+    (AD-26) ; quand `reseau.affectation.changed@1` existera, son consommateur l'écrira.
+  - Nouvelles routes : `PUT/GET /api/v1/sinistres/gestionnaires`, `GET …/dossiers/{id}/affectation/candidats`
+    (lectures au manifeste, #584), `POST …/dossiers/{id}/affectation`.
+  - ⚠️ **Écart de contrat** : `sinistres.declaration.enregistree@1` (AD-16 : `liaison-assureur` le consomme) n'a ni
+    schéma, ni producteur, ni consommateur, et aucune story ne le porte. La preuve de 1002 a enfilé la déclaration à
+    la main chez `liaison-assureur` (`POST …/echange/envois`). Voir la question au PO ci-dessous.
+  - Observation pour la reprise : le LC fictif type ses sinistres existants dans son propre vocabulaire (`COLLISION`,
+    `VOL_VEHICULE`, `ACCIDENT_DU_TRAVAIL`, `RESPONSABILITE_CIVILE`…), différent de celui de `sinistres` et
+    d'`assurance` (`AUTO_MATERIEL`, `ACCIDENT_TRAVAIL`, `RC_GENERALE`…). Une correspondance sera nécessaire quand ces
+    sinistres seront repris.
+
 ## Questions à l'utilisateur ou au PO
+
+- **❓ 2026-11-17 — STORY-1002, question au PO : qui porte `sinistres.declaration.enregistree@1` ?** La spine (AD-16)
+  le fait consommer par `liaison-assureur` ; aucune story ne le crée. Proposition de C : une story de C dans son lot 3
+  (schéma dans `prospera-plateforme`, publication par `sinistres` à la déclaration, consommation par
+  `liaison-assureur` qui enfile la ligne C-13), avec `sinistres.garantie.decidee@1` (différé par D-1001-5). En
+  attendant, la déclaration ne part pas seule au LC.
 
 Retenu par défaut le 2026-11-15, selon la règle de l'utilisateur (« appliquer ce que je recommande, contestable après
 coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défaut » :
@@ -315,6 +337,9 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-1002-1 → D-1002-8** (`stories/STORY-1002.md`) : registre tenu par `sinistres` ; poids de type à 1, poids de
+  dossier non arrondi ; capacité de 20 points ; affecter est une commande hors transition ; cible surchargée ou absente
+  = motif ; `RESP` seul ; fait du dossier inchangé ; envoi de la déclaration à la main dans la preuve.
 - **D-1001-1 → D-1001-8** (`stories/STORY-1001.md`) : `assurance` calcule, `sinistres` lit par un port (jeton
   transmis) ; recevabilité ajoutée et datée ; pièce reçue = validée au contrôle ; délai de la garantie en jours
   calendaires, jamais sous le plancher ; différés nommés ; pièce de santé = première pièce médicale attendue ; un seul
