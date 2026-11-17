@@ -1461,6 +1461,18 @@ reserved_ranges:
       PIECES_NON_NOMMEES (+ 6 autres refus nommés). Relances de 999 reprises ; correctif du constat RELANCES_EPUISEES levé
       avec les relances. Aucune route neuve, aucun fait neuf. Node 24 : 1080 unitaires sur MongoDB réel, 25 e2e, build 0 ;
       pas de pile. Lot 3 de C, n° 6. NON SLOTTÉE.
+  - range: "STORY-1011"
+    status: "RÉSERVÉ"
+    owner: "Un formulaire d'instruction par type de sinistre : paramètre versionné, contrôlé par le serveur, version figée sur le dossier (sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1011.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-stories#635 (manifeste, main 36da9fd) et prospera-sinistres-service#21 (dev
+      520e7d4). formulaires-2026.1 : six familles (véhicule, biens, vol, transport, RC, divers), accident du travail et
+      décès renvoyés au barème corporel ; CHAMP_OBLIGATOIRE_ABSENT liste tous les champs manquants, CHAMP_INCONNU,
+      VALEUR_INVALIDE ; version figée à l'entrée en instruction ; POST et GET …/dossiers/{id}/instruction (lecture au
+      manifeste) ; enregistrer rend partie « instruire » ; aucune valeur dans un fait, aucun champ de santé. Node 24 :
+      1110 unitaires sur MongoDB réel, 25 e2e, build 0 ; pas de pile. Lot 3 de C, n° 7. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
