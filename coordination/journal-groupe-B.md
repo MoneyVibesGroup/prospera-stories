@@ -537,6 +537,39 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-17, STORY-964 — la validation inaltérable, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
+  EPIC-113 et 120 ; fiche `stories/STORY-964.md`, D-964-1 → 9). Tout est AJOUT, sauf un champ de la vue d'une écriture
+  qui devient facultatif (`numeroProvisoire`, absent d'une contre-passation) ; aucun client ne lit encore ces routes.
+  - **Routes neuves** (sous `/api/v1/dossiers/{d}/exercices/{e}`) :
+    - `POST …/ecritures/{id}/validation`, droit `comptabilite:ecriture:valider`, corps vide : brouillard → définitif,
+      numéro `VE-000001` continu par journal et par exercice, émis dans la transaction de la validation. 201, puis 200
+      au rejeu (rien d'écrit) ;
+    - `POST …/ecritures/{id}/contre-passation`, droit `comptabilite:ecriture:valider`, corps `{ dateEcriture, motif }`
+      → 201, l'écriture inverse, née validée, numérotée, liée (`contrePasse`) ;
+    - `PUT …/ecritures/{id}` (corps de la saisie sans `journal`) et `DELETE …/ecritures/{id}` (204), droit
+      `comptabilite:ecriture:saisir` : corriger et abandonner un BROUILLARD ;
+    - `GET …/piste/verification`, droit `comptabilite:piste:consulter` → `{ dossierId, exerciceId, intacte, entrees,
+      tete: { rang, empreinte } | null, rupture?: { rang, motif, entreeId? }, verifieeLe }`. Motifs :
+      `ENTREE_HORS_CHAINE`, `RANG_INATTENDU`, `EMPREINTE_ALTEREE`, `MAILLON_ROMPU`, `TETE_DISCORDANTE`. Au manifeste en
+      `routesLectureSeule`.
+  - **Vue d'une écriture** : `statut` admet `VALIDEE` ; champs facultatifs neufs `numero`, `valideePar`, `valideeLe`,
+    `corrigeePar`, `corrigeeLe`, `contrePasse: { ecritureId, numero }`, `contrePasseePar: { ecritureId, numero }`.
+    `numeroProvisoire` devient facultatif (absent d'une contre-passation). La liste trie par journal, puis brouillards,
+    puis numéro définitif.
+  - **Refus nommés neufs** : 409 `ECRITURE_VALIDEE_INALTERABLE` (`details.numero`), `ECRITURE_NON_VALIDEE`
+    (`details.statut`), `ECRITURE_DEJA_CONTREPASSEE` (`details.contrePassation`, `numero`),
+    `CONTREPASSATION_NON_CONTREPASSABLE` (`details.contrePasse`) ; 422 `DATE_ANTERIEURE_A_L_ORIGINALE`
+    (`details.date`, `dateOriginale`).
+  - **Piste** : actes neufs `ECRITURE_VALIDEE`, `ECRITURE_CONTREPASSEE`, `ECRITURE_CORRIGEE`, `ECRITURE_ABANDONNEE` ;
+    champs neufs sur chaque entrée : `rang` (continu par exercice), `empreintePrecedente`, `empreinte` (SHA-256 hex de
+    la forme canonique, version 1). Collection neuve `chaines_de_piste` (la tête de chaque exercice).
+  - **Base** : l'index `un_numero_provisoire_par_journal` devient `un_numero_provisoire_par_journal_v2` (partiel) ;
+    index neufs `un_numero_definitif_par_journal`, `une_contre_passation_par_ecriture`, `un_rang_par_exercice`.
+  - **Manifeste** (`manifestes/comptabilite.manifest.ts`, amendé dans cette PR) : la route de vérification en
+    `routesLectureSeule` ; commentaire des droits (pas de séparation des pouvoirs au niveau de l'acteur, D-964-7) et de
+    l'inaltérabilité.
+  - Aucun topic, aucun schéma au registre, aucune variable.
+
 - **2026-11-17, STORY-963 — la Créance (1), annoncé AVANT la fusion du code** (`prospera-paiement-service`, EPIC-231 ;
   fiche `stories/STORY-963.md`, D-963-1 → 12). **Fusionné le 17/11** : paiement #122, `716059c` sur `dev` (annonce :
   stories #633). Tout est AJOUT : rien d'existant ne change de forme.

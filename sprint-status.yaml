@@ -1151,6 +1151,17 @@ reserved_ranges:
       conformité sur MongoDB rs-paiement : 20 ouvertures concurrentes ⇒ 1 Créance, 1 trace, 1 fait, rejeu sans
       écriture ; 21 mutations rouges. Pile grp-b : /health 200. Droit : paiement:demande:emettre (D-963-7). → D :
       comment ouvrir une Créance (D-1059). Lot 3 de B, n° 8 (EPIC-231). NON SLOTTÉE.
+  - range: "STORY-964"
+    status: "RÉSERVÉ"
+    owner: "La validation inaltérable — brouillard → définitif (numéro VE-000001 émis dans la transaction de la validation, ni trou ni doublon), une écriture validée ne se modifie ni ne se supprime (ECRITURE_VALIDEE_INALTERABLE), elle se contre-passe (écriture inverse liée, née validée, une seule) ; piste d'audit chaînée par empreinte, par exercice, vérifiable (GET …/piste/verification) ; correction et abandon du brouillard tracés (prospera-comptabilite-service)"
+    source_doc: "prospera-stories/stories/STORY-964.md"
+    reserved_on: "2026-11-17"
+    note: >
+      EN COURS le 2026-11-17 — fiche écrite et contrat annoncé avant le code (POST …/validation, POST
+      …/contre-passation, PUT et DELETE …/ecritures/{id}, GET …/piste/verification ; refus
+      ECRITURE_VALIDEE_INALTERABLE, ECRITURE_NON_VALIDEE, ECRITURE_DEJA_CONTREPASSEE,
+      CONTREPASSATION_NON_CONTREPASSABLE, DATE_ANTERIEURE_A_L_ORIGINALE ; champs de chaînage sur la piste ;
+      manifeste amendé). Lot 3 de B, n° 9 (EPIC-113, 120). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
