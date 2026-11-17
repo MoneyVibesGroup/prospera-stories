@@ -399,6 +399,29 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-17, STORY-960 — les 15 rôles du distributeur dans auth, annoncé AVANT la fusion du code**
+  (`prospera-auth-service`, EPIC-223 ; fiche `stories/STORY-960.md`, D-960-1 → 11). Tout est AJOUT ; deux rôles du
+  socle perdent ou gagnent des droits (ci-dessous).
+  - **Rôles** : les 15 rôles `DIST_*` reçoivent la table de l'annexe B.2 du PRD distributeur (131 droits). Aucun rôle
+    n'est plus « en attente de module » (ils passent `partiel`). **Changements de droits existants** : `DIST_ADMIN`
+    perd `paiement:journal:consulter` et `notification:modele:rediger` ; `DIST_COMPTABLE` déclare, valide et annule
+    (cumul signalé ; paiement refuse toujours de valider sa propre déclaration) ; `DIST_SUPERVISEUR` valide les
+    encaissements (remises d'espèces). Attribuer `DIST_DG` ou `DIST_DAF` est réservé au dirigeant (ils portent
+    `reprise:lot:valider`, 403 `VALIDATION_DE_REPRISE_RESERVEE_AU_DG`).
+  - **Catalogue de tenant : 24 → 142 codes.** Les 118 nouveaux sont **hors du jeton** : jamais dans `perms[]`. Le
+    jeton reste borné à ses 24 droits (17 + 24 = 41 ≤ 44). `support-client:*` n'y est pas.
+  - **`GET /api/v1/moi/droits`** (contrat `moi-droits.openapi.json` 1.1.0) : champ AJOUTÉ `droitsHorsJeton`
+    (tableau trié). `droits ∪ droitsPlateforme` reste exactement le `perms[]` du jeton ; **les droits de tenant
+    effectifs sont `droits ∪ droitsHorsJeton`**. Pour un lecteur, absent = `[]`.
+  - **Jeton d'accès** : claim AJOUTÉ `roleMetier` (code du rôle métier effectif, absent sans rôle). `roles` ne change
+    pas.
+  - **`identity.droits.changed@1`** : propriété AJOUTÉE, facultative, `roleMetierAttribue` (chaîne ou `null`, 64
+    caractères au plus), sujet `identity.droits.changed-value` en **BACKWARD** au registre.
+  - **Refus NOUVEAU** : 422 `DONNEE_PRIVEE_HORS_DU_ROLE` (`permissions`) sur la surcharge d'un rôle du socle qui
+    gagnerait une donnée privée interdite (rémunérations, commissions, prix d'achat, marge : D-960-4). La résolution
+    les retire aussi du jeton et de `/moi/droits`.
+  - **Écritures de rôle** : `permissions`, `ajouts`, `retraits` acceptent 256 codes au plus (au lieu de 44).
+
 - **2026-11-17, STORY-959 — les exercices et la tenue, annoncé AVANT la fusion du code**
   (`prospera-comptabilite-service`). **Fusionné le 17/11** : comptabilite #2, `a8784cb` sur `dev` (annonce : stories
   #609). Tout est AJOUT : rien d'existant ne change de forme.

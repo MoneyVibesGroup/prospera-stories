@@ -1036,6 +1036,14 @@ reserved_ranges:
       test:socle 36/36 sur MongoDB 8.0 rs0 et Kafka (tenue exclusive 409 TENUE_EXCLUSIVE, idempotence 200, bascule
       CAHIERS → JOURNAL avec provenance, course à quatre ⇒ une tenue et une entrée de piste) ; 25 mutations rouges.
       Pile grp-b : /health 200. Droits lus par /moi/droits (4e garde globale). Lot 3 de B, n° 4 (EPIC-111). NON SLOTTÉE.
+  - range: "STORY-960"
+    status: "RÉSERVÉ"
+    owner: "Les 15 rôles du distributeur dans auth — la table d'accès de l'annexe B (131 droits) appliquée par la résolution du jeton et de /moi/droits, droits neufs hors du jeton (droitsHorsJeton), claim roleMetier, données privées interdites (DONNEE_PRIVEE_HORS_DU_ROLE), roleMetierAttribue sur identity.droits.changed@1 au registre (prospera-auth-service)"
+    source_doc: "prospera-stories/stories/STORY-960.md"
+    reserved_on: "2026-11-17"
+    note: >
+      EN COURS le 2026-11-17 — contrat annoncé avant la fusion du code (journal de B, « ⚠ Contrats »). Lot 3 de B,
+      n° 5 (EPIC-223). Débloque D-1053. NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
