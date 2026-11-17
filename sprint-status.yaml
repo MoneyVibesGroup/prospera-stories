@@ -1335,6 +1335,16 @@ reserved_ranges:
       d'avant 968 refusé à la validation puis corrigé ; balance publiée identique avec ou sans tiers) ; 46/46
       mutations unitaires et 9/9 du socle rouges. Pile grp-b 25/25 : même checksum que la preuve de 967
       (16a6e637…), ingérée par balance-service d'origin/dev. Lot 3 de B, n° 14 (EPIC-115). NON SLOTTÉE.
+  - range: "STORY-972"
+    status: "RÉSERVÉ"
+    owner: "Les demandes de D et de C — le jeu « Grossiste du Golfe » chez B (ligne du README de la plateforme ; INSTALLATION_SERVICES de l'espace d'essai avec commande et terrain ; comptes du jeu et connexion « en tant que » dans auth, essai seul, FR-21) ; la comptabilité au catalogue (manifeste comptabilite et manifestes amendés de C recopiés, installable et publiée EN_SERVICE par le vrai catalogue) (prospera-auth-service, prospera-platform-catalog-service, prospera-plateforme)"
+    source_doc: "prospera-stories/stories/STORY-972.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🔄 EN COURS le 2026-11-17 — story neuve de la plage de B (930 → 979), insérée avant STORY-969 par la session du
+      groupe B (demandes de D, STORY-1058, et de C, relevée par 966 ; module comptabilite au catalogue) : contestable.
+      Contrat annoncé avant la fusion du code (routes neuves d'auth, INSTANCE_ESPACE). Lot 3 de B (EPIC-226, EPIC-111).
+      NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
