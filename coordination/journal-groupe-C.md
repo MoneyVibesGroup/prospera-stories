@@ -44,7 +44,10 @@
   18. ~~STORY-998~~ : **sinistres #8** (files de travail par rôle ; route au manifeste, #570) ;
   19. ~~STORY-997~~ : **plateforme #19, document-service #28** (versement, numéro `ARC-`, scellé, vérification, `/C1`) ;
   20. ~~STORY-999~~ : **sinistres #9** (relances, attente d'un tiers, dossiers muets, agents inactifs ; manifeste #573) ;
-  21. **STORY-1000** ← **suivante** : déclarer (canaux, saisie commune, doublon, réserves, urgence corporelle).
+  21. ~~STORY-1000~~ : **plateforme #20, liaison #6, sinistres #10** (formulaire commun, secours, doublon Prospera et
+     LC par empreinte HMAC, réserves, urgence) ;
+  22. **STORY-1001** ← **suivante** : ouvrir (recevabilité, garantie, pièces attendues et courrier ; provision
+     d'ouverture).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -269,6 +272,16 @@ seulement.
   - ⚠️ Pour tous les dépôts Mongo : `$set` IGNORE un champ devenu `undefined` (il reste en base) ; un champ qui
     disparaît se retire par `$unset` — le banc mémoire ne le voit pas.
 
+- **2026-11-17, STORY-1000 — un secret d'instance PARTAGÉ entre deux services.**
+  - `SINISTRES_CLE_DOUBLON` (sinistres) et `LIAISON_CLE_DOUBLON` (liaison-assureur) doivent porter la MÊME clé
+    (32 octets en base64), sans défaut : sans elle, le contrôle de doublon est éteint (la déclaration s'enregistre).
+    ⚠️ Pour B (installation, moteur) : à générer une fois par instance et à remettre aux deux services.
+  - `liaison-assureur.sinistre-existant.recu` gagne `empreinteDeDoublon` (facultatif) ; `sinistres` le consomme
+    (groupe `sinistres-service.liaison`).
+  - `POST /api/v1/sinistres/dossiers` accepte `declaration` et `doublon` (facultatifs, D-1000-6) ; la réponse porte
+    `accuse` ; nouveaux refus `DECLARATION_INCOMPLETE`, `RECEPTION_FUTURE`, `FORMULAIRE_SECOURS_DEJA_SAISI`,
+    `DOUBLON_PROBABLE`, `MOTIF_ECRIT`, `DOSSIER_HORS_DOUBLON`.
+
 ## Questions à l'utilisateur ou au PO
 
 Retenu par défaut le 2026-11-15, selon la règle de l'utilisateur (« appliquer ce que je recommande, contestable après
@@ -291,6 +304,10 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-1000-1 → D-1000-7** (`stories/STORY-1000.md`) : déclaration rangée au dossier, jamais dans un fait ; doublon
+  par empreinte HMAC à clé d'instance partagée ; le choix de l'agent dans la même commande ; délais de déclaration en
+  paramètre (planchers légaux), celui de la garantie avec 1001 ; pas d'envoi de l'accusé ici ; formulaire facultatif
+  pour cette version ; l'urgence trie les files.
 - **D-996-1 → D-996-10**, **D-997-1 → D-997-7**, **D-999-1 → D-999-6** (fiches) : lecture par version et file
   BullMQ ; moteur du service hors des modules (`ocr` admis par l'invariant) ; seuils de lecture en paramètre `2026.2` ;
   contrôle par NUM, l'agent récepteur, GEST/GREC/RESP ; lots par NUM/RESP ; numéro `ARC-` par compteur, jamais rendu ;
