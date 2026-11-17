@@ -441,8 +441,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1058.md"
     reserved_on: "2026-11-17"
     note: >
-      🔄 EN COURS le 2026-11-17 — fiche écrite, annonce « ⚠ Contrats » avant le code. Lot D, n° 14 du lot 3 (EPIC-226).
-      NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-plateforme#30 (dev d36623b, étiquette jeu-grossiste-golfe-v1) ; prospera-ventes-service#7
+      (dev 88ee146 → 7f674ef) ; prospera-terrain-service#3 (dev cefe9b9, 068e1c0) ; annonce « ⚠ Contrats » avant le code (docs
+      #662). Jeu « Grossiste du Golfe » au format jeu-demonstration@1 en trois tailles (476, 2 120, 6 937 enregistrements),
+      graine 20270115, parts commande (point-de-vente, plafond, prix) puis terrain (commercial, point-de-vente,
+      plan-de-journee) ; jeu:verifier conforme. Routes C13 d'import et d'effacement de commande et de terrain : MOTEUR seul,
+      espace d'essai seul, IMPORTE puis DEJA_IMPORTE, EFFACE puis DEJA_EFFACE, témoin intact. Node 24 vert ; mutations
+      11/11, 16/16, 10/10. Pile grp-d (25/25, 22/22 ; une commande du jeu validée BL-2026-000001), rejouée depuis
+      origin/dev. Lot D, n° 14 du lot 3 (EPIC-226). NON SLOTTÉE.
 
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"

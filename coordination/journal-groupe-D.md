@@ -158,11 +158,32 @@
     volumes neufs : verte, rejouée, tables identiques.
   - Décisions D-1057-1 → 9 (fiche) ; Q-D-7 et Q-D-8 au PO ; → C, → A, → B. **Verrou Docker pris à 17:10 sans attente**
     (B l'avait rendu avant 17:00), rendu à 17:45.
-- **STORY-1058** 🔄 🚚 — en cours : fiche écrite, annonce « ⚠ Contrats » avant le code.
-- **Suivante (fiche en cours) : STORY-1058** 🚚 le jeu « Grossiste du Golfe » (EPIC-226), dans `ventes`, `terrain` et la plateforme : un
-  jeu au format `jeu-demonstration@1` (vérifié par `jeu:verifier`), avec les routes C13 d'import et d'effacement ;
-  dépend de 1056, faite. Patron : STORY-1046 (le jeu de l'assurance, `jeux-demonstration/` de la plateforme, routes
-  C13 sous `MOTEUR`) et STORY-1057 (les routes de vérification C13, contrat `verification-installation@1`).
+- **STORY-1058** ✅ 🚚 — le jeu « Grossiste du Golfe » (prospera-plateforme#30, `dev` d36623b, étiquette
+  **`jeu-grossiste-golfe-v1`** ; prospera-ventes-service#7, `dev` 88ee146 → 7f674ef ; prospera-terrain-service#3, `dev`
+  cefe9b9, 068e1c0 ; annonce « ⚠ Contrats » #662 avant le code).
+  - **Le jeu**, `jeu-demonstration@1`, graine 20270115, trois tailles versionnées (FR-10) : `grossiste-golfe-petit`
+    (476 enregistrements), `grossiste-golfe` (la démo de FR-9 : 2 120), `grossiste-golfe-grand` (6 937) ; deux parts,
+    **`commande`** (point-de-vente, plafond, prix) puis **`terrain`** (commercial, point-de-vente, plan-de-journee) ;
+    générateur sans dépendance dans `jeux-demonstration/grossiste-golfe/generateur/` ; `jeu:verifier` conforme.
+  - **Les routes C13** d'import et d'effacement de `commande` et de `terrain` : `MOTEUR` seul, espace d'essai seul
+    (`INSTANCE_ESPACE=ESSAI`), corps de `contrats-instance-v1` copiés à l'octet ; `IMPORTE` puis `DEJA_IMPORTE` ;
+    `EFFACE` puis `DEJA_EFFACE` ; témoin intact. Un jeton de service ailleurs : 403 `IDENTITE_DE_SERVICE_REFUSEE`.
+    Exemption de la table d'accès : `@RoutesDInstance` + `MOTEUR` seul + routes de `routesInstance`, gardée par
+    `acces.invariant.spec.ts`.
+  - **`reseau` n'a pas de route C13** (D-1058-2) ; ses nœuds et les comptes du jeu prendront les identifiants de
+    `identifiantDuJeu` (D-1058-4). Les read-models `commande_points_de_vente`, `commande_plafonds`, `commande_prix`
+    sont remplis par l'import ; les sources de l'encours ne le sont pas (une commande à crédit attend 1059).
+  - Node 24 : plateforme 616 tests (615 pass, 1 sauté), générateur 25/25 ; ventes 444 unitaires, 24 e2e, 82
+    d'intégration ; terrain 341, 24, 15 ; mutations 11/11, 16/16, 10/10.
+  - Pile `grp-d` (branches) : ventes 25/25 (une vente du jeu saisie et validée `BL-2026-000001`), terrain 22/22 (Kodjo :
+    14 visites au jour 0) ; espace réel 403. Rejeu sur images reconstruites depuis origin/dev (--no-cache, volumes neufs) : ventes 25/25 et espace réel 403 ; terrain NON rejoué depuis origin/dev (session bloquée pendant ce rejeu, verrou rendu à B pour 968 ; à rejouer à la prochaine prise du verrou).
+  - Décisions D-1058-1 → 14 (fiche) ; Q-D-9 au PO ; → B. Verrou Docker attendu ~30 min (B, 967), pris à 18:32 ; rendu à B par la session de groupe après le blocage du rejeu de terrain ; aucun conteneur, volume ni réseau grp-d ne reste.
+- **Suivante : STORY-1059** 🚚 la facture juste (1) (EPIC-230), dans `ventes` : une facture ouvre sa Créance dans
+  `paiement` (`PUT /api/v1/creances/sources/FACTURE/{sourceId}`), de façon idempotente. **Ses dépendances sont
+  fusionnées** (vérifié le 2026-11-17 sur `origin/dev` de `prospera-paiement-service`) : **B-963** (`716059c`, la Créance
+  (1), source `FACTURE`, droit `paiement:demande:emettre`) et **B-965** (`96c385f` → `ad35786`,
+  `paiement.creance.changed@1` au registre en BACKWARD, crédit du tiers). 1059 pose aussi le consommateur qui remplit
+  `commande_creances`, `commande_credits_tiers` et `commande_sources_encours` (fin de `ENCOURS_NON_INSTALLE`).
 
 ### Lots 1 et 2
 
@@ -202,7 +223,9 @@
   `prospera-recouvrement-service` (3414), `prospera-pilotage-service` (3415), `prospera-croissance-service` (3416).
 - `prospera-plateforme` : `series/` (`series-v1`, **`series-v1.1`** depuis STORY-1052), `vocabulaires/` (`vocabulaires-v1`), `contrats/distributeur/`
   (`contrats-distributeur-v1` ; **`acces-distributeur-v1`** depuis STORY-1053, `src/acces.ts`) ; **lot 3** : `encours/` (inscrit au README par B-956) ;
-  `contrats/objets/reseau/` (module `reseau`, README ; **`objets-reseau-v1`** depuis STORY-1055).
+  `contrats/objets/reseau/` (module `reseau`, README ; **`objets-reseau-v1`** depuis STORY-1055) ;
+  `jeux-demonstration/grossiste-golfe-petit/`, `grossiste-golfe/` (avec son générateur), `grossiste-golfe-grand/`
+  (**`jeu-grossiste-golfe-v1`** depuis STORY-1058).
 - **`prospera-assureur-fictif`** (lot 3, reçu de C, passation constatée le 2026-11-17 au rituel de 1046) : port 3411,
   profil `assureur-fictif`, « Rebase and merge » seul ; dans `prospera-plateforme`, le jeu
   `jeux-demonstration/assurance-compagnie-demo-reduite/` (étiquette `jeu-assurance-v1`). Le générateur reste dans le
@@ -366,10 +389,34 @@
       `.changed@1`, `.annulee@1` ; marge (coût de `stock`) ; livraison et reliquat (`livre@1`) ; allocation du matin ; PDF
       du bon ; alertes à N jours ; les consommateurs qui remplissent les read-models ; la rétention sans expiration du
       topic `commande.serie.changed` (réglage du broker) ; l'API de réservation de `stock`.
-  - **Prochaine story du distributeur : 1058** (le jeu « Grossiste du Golfe », `jeu-demonstration@1`, routes C13 ;
-    dépend de 1056, faite).
+  - **Le jeu « Grossiste du Golfe » et les routes C13** (STORY-1058, étiquette `jeu-grossiste-golfe-v1` ; ventes
+    `dev` 7f674ef, terrain `dev` 068e1c0) :
+    - **le jeu** : `prospera-plateforme/jeux-demonstration/grossiste-golfe*/` ; le régénérer :
+      `node jeux-demonstration/grossiste-golfe/generateur/generer.mjs <dossier> PETIT|MOYEN|GRAND`, puis
+      `node --test …/generer.test.mjs` (les empreintes des `jeu.json` y sont figées : une version neuve du jeu les
+      refige et change `version`) ; une part de plus (pdv, catalogue, stock, facturation…) s'ajoute au générateur, dans
+      l'ordre des dépendances ;
+    - **la règle des identifiants** : `src/socle/instance/identifiant-du-jeu.ts` (24 hex de
+      `sha256("jeu-demonstration|<org>|<objet>|<clef>")`) ; tout module qui reçoit une part l'applique ;
+    - **le socle C13** : `src/socle/instance/` (identique dans ventes et terrain, `diff -r`) ; un module de plus sert ses
+      routes avec un contrôleur `@RoutesDInstance('<code>')` + `@AdmetIdentitesDeService('MOTEUR')`, une `PartDuModule`
+      (objets, `ouVivent`, plan d'effacement), un invariant d'inventaire du plan, et son code dans
+      `MODULES_AVEC_ROUTES_C13` (`src/droits-des-modules.ts`) ;
+    - **la recette** : pilote de la partie A et surcouche (émetteur RS256, `INSTANCE_ESPACE=ESSAI`) décrits dans la fiche ;
+    - **reste** : les routes C13 de `facturation`, `approvisionnement`, `entrepot`, `conquete-objectifs` ; la part
+      `reseau` (nœuds sous les identifiants du jeu) ; les routes de lecture des tournées (EPIC-233).
+  - **Prochaine story du distributeur : 1059** (la facture juste (1) ; B-963 et B-965 fusionnées).
 
 ## Demandes aux autres groupes
+
+- **→ B (2026-11-17) : le jeu « Grossiste du Golfe » (STORY-1058)** — **ouverte**. (1) **README de la plateforme** :
+  une ligne du tableau pour `jeux-demonstration/grossiste-golfe-petit/`, `grossiste-golfe/`, `grossiste-golfe-grand/`
+  (groupe D, étiquette `jeu-grossiste-golfe-v1`) ; aucun fichier de B touché. (2) **Catalogue** : `INSTALLATION_SERVICES`
+  doit nommer `commande` (prospera-ventes-service, 3412) et `terrain` (prospera-terrain-service, 3413) dans l'espace
+  d'essai, et ces services y tournent avec `INSTANCE_ESPACE=ESSAI`. (3) **Auth (FR-21)** : les comptes du jeu (connexion
+  « en tant que ») sous `identifiantDuJeu(organisationId, 'commercial', 'COM-nn')` pour les agents. (4) **Pour
+  information** : `facturation`, `approvisionnement`, `entrepot` et `conquete-objectifs` déclarent des routes C13 qu'ils ne
+  servent pas encore : installés dans un essai, ils laisseraient le plan d'effacement `EN_COURS` (D-953-4).
 
 - **→ C (2026-11-17) : la part Prospera de l'annexe E (STORY-1057)** — **information, et trois demandes ouvertes**.
   La recette du LC fictif (`npm run recette:demo`, `prospera-assureur-fictif` `dev` f9bbea5) joue ce que le LC tient de
@@ -560,7 +607,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-17, STORY-1058), avant la fusion du code. — `prospera-ventes-service` (module `commande`),
+- **PUBLIÉ (2026-11-17, STORY-1058 ; prospera-ventes-service#7 `dev` 88ee146 → 7f674ef, prospera-terrain-service#3
+  `dev` cefe9b9, 068e1c0, prospera-plateforme#30 `dev` d36623b) ; ANNONCÉ avant la fusion du code (prospera-stories
+  #662). Aucun écart avec l'annonce ; le `commercial` du jeu porte aussi sa `commune`. — `prospera-ventes-service` (module `commande`),
   `prospera-terrain-service` (module `terrain`) : les routes C13 d'import et d'effacement ; `prospera-plateforme` : le
   jeu « Grossiste du Golfe ».** Fiche : `stories/STORY-1058.md` (D-1058-1 → 14). Tout est AJOUT : aucune route, aucun
   topic, aucun champ existants ne changent.
@@ -946,6 +995,11 @@
 
 ## Questions à l'utilisateur ou au PO
 
+- **Q-D-9 (2026-11-17, STORY-1058) — Les jours d'un plan de journée du jeu sautent-ils le seul dimanche ?** Le jeu dit
+  « aujourd'hui et les dix jours ouvrés suivants » (FR-9). **Choix par défaut : le dimanche est chômé, le samedi
+  travaillé** (commerce de gros au Togo) ; les jours fériés ne sont pas sautés. Alternative : un calendrier en
+  paramètre de l'organisation (C6), qui changerait la résolution à l'import.
+
 - **Q-D-8 (2026-11-17, STORY-1057) — La vérification C13 `objets-de-l-annexe-c` est-elle verte sans documents
   (C-10) ?** Le générateur du jeu n'en produit pas. **Choix par défaut : `VERT`**, C-10 nommé `SANS_OBJET` dans le
   détail (avec C-18 et C-19, exports tirés de Prospera, jamais déposés au LC) ; demande à C pour les documents.
@@ -981,6 +1035,19 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1058** :
+  - (1) **`terrain-service` hors `NODE_ENV=production` ne démarre pas** dans l'image `runtime` : `pino-pretty` (dépendance
+    de développement) y manque ; `ventes` lit `LOG_PRETTY`, `terrain` non. Une surcouche de recette de `terrain` garde
+    `production` (à corriger avec une story du socle de terrain).
+  - (2) **Une mutation qui laisse un import ou un paramètre inutilisé ne compile pas** (`noUnusedLocals`,
+    `noUnusedParameters`) : muter la condition (`… && false`, `'REPRISE'` pour `'MOTEUR'`), jamais retirer la ligne.
+  - (3) **Un banc qui lève « aucun refus »** fait rougir le test sur une exception, pas sur l'assertion : rendre un
+    résultat sentinelle (`AUCUN_REFUS`) que l'`expect` compare.
+  - (4) **Express plafonne un corps JSON à 100 Ko** : un lot C13 de 500 plans de journée le dépasse ;
+    `app.useBodyParser('json', { limit: '10mb' })` dans `main.ts`.
+  - (5) **Une suite longue (rejeu complet) lancée en arrière-plan avec une attente qui boucle** a bloqué la session :
+    commandes courtes, une étape à la fois, et le verrou rendu aussitôt la pile descendue.
 
 - **STORY-1057** :
   - (1) **Un `foo.ts` et un `foo.json` dans le même dossier** (`annexe-e.ts`, `annexe-e.json`) : `import … from
