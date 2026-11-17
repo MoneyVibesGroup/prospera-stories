@@ -4,7 +4,7 @@
 **Ouvert par :** revue d'usage « expert-comptable venant de Sage » du **2026-08-25** (barry thierno alhassane) — constat de **conception**, pas d'intégration
 **Consommateur nommé :** **FE-075** *(`blocked` sur ce ticket — nommée dès l'ouverture, pour ne pas rejouer l'orphelinat de STORY-144)*
 **Priorité :** Should — aucune panne, mais le geste le plus fréquent du métier est impossible, et il l'est **en silence**
-**État :** ⛔ ouvert
+**État :** ✅ **FERMÉ le 2026-11-17** — **STORY-926** (balance-service #155, dev `6df0ce6`). Forme retenue : les deux options, dans leur version légère — un champ `provenance` (énumération courte, dérivée à la lecture, hors sceau) sur chaque ligne, **et** la route de détail `GET /dossiers/{dossierId}/balance/{id}/lignes/{compte}/provenance` (option (b), recommandée) ; « provenance non enregistrée » (`NON_ENREGISTREE`) distinguée de « aucune pièce ». STORY-391/392 étaient livrées depuis le 26/08. **Reste nommé, non fait** : poser `adaptateur: cahiers` sur les balances `ocr` d'avant la story serait une migration (supposition) ; relais BFF de la route.
 
 ---
 
