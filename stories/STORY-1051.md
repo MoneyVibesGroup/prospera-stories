@@ -1,6 +1,6 @@
 # STORY-1051 : prévenir l'assuré (1) — les modèles de messages de l'assurance, sans interdit, et les relances de pièces espacées de 5 jours
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-220 (prévenir : notification, relais Money Vibes et portail des cabinets) · **Dépôt :**
 `prospera-notification-service` (tenu par D depuis la fusion de B-957, port 3008) · **Plage :** groupe D, n° 7 du lot 3
@@ -94,6 +94,15 @@ story lui donne les modèles, le déclenchement par le fait d'état absolu du do
 - **D-1051-8 — Ce qui part de la file passe par `EnvoisService.demander`**, module appelant `sinistres` : consentement,
   suppression, rendu et audit de la remise sont ceux de tout envoi transactionnel. Un refus métier (désabonné,
   `CANAL_ABSENT`) arrête la chaîne de ce cycle et se journalise.
+- **D-1051-9 — Une seconde porte de service, inventoriée.** La garde `appel-de-service.invariant.spec.ts` (STORY-589)
+  n'admettait qu'un contrôleur `@AppelDeService()`. Elle tient désormais un **inventaire** de deux portes, chacune avec
+  son motif : la route directe d'envoi, et la route du destinataire de l'assuré (ce n'est pas une demande d'envoi). Les
+  deux restent ni publiques, ni ouvertes au jeton d'un utilisateur. Une troisième s'ajoute par une revue.
+- **D-1051-10 — Les trois collections neuves partent avec l'organisation** (`assurance_dossiers_suivis`,
+  `assurance_cycles_relances`, `assurance_destinataires` dans `COLLECTIONS_A_SUPPRIMER`, exigé par la garde de
+  suppression complète) ; le consommateur neuf est au relevé des consommateurs supervisés (STORY-703).
+- **D-1051-11 — La copie de la garde de C s'appelle `garde.ts`** (`src/vendor/classification-sante/garde.ts`, à
+  l'octet) : sous le même nom de base que `classification-sante.json`, jest résolvait le JSON à la place du module.
 
 ## Ce qui n'est pas fait ici
 
@@ -104,8 +113,59 @@ personnes (dette nommée pour 1054) ; l'appel de la route par `sinistres` (C).
 
 ## Livré
 
-(à compléter)
+- **PR prospera-notification-service#90**, fusionnée en rebase : `dev` **7d4b24d** (branche 1d9d272, le corps de la
+  story), **cdbcd8a** (f1d2a62 : D-1051-9, D-1051-10) et **b3d4388** (75a6bbb : la même version avec un autre statut
+  ne reparle pas). Arbre de `dev` identique à celui éprouvé (`d8145414…`).
+- Annonce « ⚠ Contrats » fusionnée **avant** le code : prospera-stories **#620** (`main` ecf25d9).
+- Code : `src/domain/assurance/` (matrice, interdits, relances, registre), `src/modules/assurance/` (consommateur,
+  service, route de service, schémas), `src/adapters/bullmq/relances-pieces-*.ts`, neuf modèles au socle
+  (`catalogue-socle.ts`, `modeles-systeme.ts`), `sinistres-service` au périmètre des appelants, contrôle des surcharges
+  (`modeles.service.ts`), copie `src/vendor/classification-sante/`.
 
 ## Preuves
 
-(à compléter)
+- **Copie à l'octet** de `classification-sante` (`git -c core.autocrlf=false show dba6ce0:<chemin>`) : `garde.ts`
+  sha256 `4984d60bb51b4ca37358a88245d65edbfc8259f464df9379cf6edba2245211da`, `classification-sante.json`
+  `0f5b10cab47ba3cb0def33f53289a2506213f52931b93b729cc08ca93cb0c5e7`, figées par `src/domain/assurance/registre-sante.spec.ts`.
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive HEAD`) : `tsc --noEmit`
+  vert ; `npm run lint` (tout le dépôt) vert ; `npm run build` vert ; unitaires **Test Suites: 281 passed, 281 total ;
+  Tests: 4114 passed, 1 skipped**.
+- **Le test des interdits** (`src/modules/modeles/socle/interdits-a-l-assure.spec.ts`) parcourt les **36 textes** de
+  l'assurance (9 clés × SMS, e-mail × fr, en), objet, corps et variables : aucun interdit. Seize modèles fautifs le font
+  rougir (« fraude », « FRAUDÉ », « Fraude », « fraudulent », « indemnité », « INDEMNITÉ », 150 000 FCFA, 75 000 F CFA,
+  lésions, taux d'incapacité, certificat médical, DIAGNOSTIC, variables `tauxIncapacite`, `taux_incapacité`,
+  `montantIndemnite`, `nomDuGestionnaire`) ; chacun des 36 textes muté par « fraude » est pris ; « un document
+  médical » reste permis. La surcharge fautive d'une organisation est refusée `CONTENU_INTERDIT_A_L_ASSURE` à la
+  création et à la version suivante (`modeles.service.spec.ts`).
+- **e2e** : la suite neuve `test/assurance-destinataire.e2e-spec.ts` verte (5 : 200 sans écho de l'adresse, 401, 403
+  `APPELANT_HORS_PERIMETRE`, 422 `IDENTIFIANT_NON_NORMALISABLE`, 400 WhatsApp). ⚠️ **Quatre suites e2e sont rouges, à
+  l'identique sur `origin/dev` avant 1051** (témoin rejoué : `appel-de-service`, `envois`, `rail-notification` —
+  `UtilisateurModel` absent du banc depuis STORY-651 —, et `health` — `admin.listTopics` absent du faux Kafka depuis
+  STORY-957 ; 68 tests rouges des deux côtés). Dette héritée de la passation, nommée au journal.
+- **Intégration sur MongoDB et Redis réels** (`test/assurance-relances.conformite-spec.ts`, pile `grp-d`) : **9/9** —
+  déclaration puis attente de pièces : deux messages, relance 1 planifiée à J+5 (délai 5 j, identifiant sans `:`) ;
+  rejeu et fait ancien sans effet ; à J+4 trop tôt (replacée à J+5) ; à J+5 envoyée, la 2 due à J+10 ; réessai de la
+  relance 1 sans envoi de plus ; redémarrage : la 2 replanifiée à J+10, une seule tâche ; dossier sorti : la 2 ne part
+  pas ; fraude suspectée : rien ; sans destinataire : rien.
+- **Mutations : 15/15 rouges sur une assertion** (script hors dépôt, image Node 24) : « fraude » dans un modèle ; un
+  montant écrit ; une donnée de santé ; la racine « fraud » non cherchée ; accents non retirés ; variable de montant non
+  reconnue ; registre non lu pour les variables ; fraude suspectée qui prévient ; fait rejoué (même version) qui
+  reparle ; intervalle de 4 jours ; relance avant l'échéance ; suivante jugée sur la demande ; identifiant avec `:` ;
+  surcharge non contrôlée ; copie du registre retouchée. (La 9e survivait au premier tour : test ajouté, 75a6bbb.)
+- **Pile `grp-d`** (compose racine + surcouche locale non versionnée : contexte = export de HEAD, `JETONS_DE_SERVICE`
+  avec `sinistres-service`, `NODE_ENV=staging` pour l'horloge de recette) : le service démarre, **`/health` 200**
+  (`CANAUX_DEGRADES` : sms, whatsapp, push non configurés). Destinataires enregistrés par la route de service (200,
+  sans écho) ; un autre appelant : 403. Quatre faits publiés sur `sinistres.dossier.changed` par
+  `kafka-console-producer` (DECLARE v1, PIECES_ATTENDUES v2, le même v2 rejoué, `FRAUDE_SUSPECTEE` d'un autre dossier
+  avec destinataire) : **deux messages exactement** dans MailHog (« Votre déclaration de sinistre DEC-2026-01051 est
+  enregistrée », « Dossier DEC-2026-01051 : des pièces sont attendues »), **aucun interdit** dans l'objet ni le corps
+  décodé (« fraud », « indemni », montant, lexique de santé) ; rien pour la fraude, rien pour le rejeu. **Relance 1** :
+  une tâche `relance-pieces|…|dossier-1051|2|1`, `echeanceLe` = J+5 de la demande, délai 5 j. Promue à l'horloge du
+  jour : **trop tôt**, aucun message, replacée à J+5 exactement (score Redis). Service recréé avec
+  `RECETTE_HORLOGE_AVANCE_JOURS=5` : replanification au démarrage (1 cycle, **toujours une seule tâche**), puis promue :
+  **relance envoyée** (« Rappel : dossier DEC-2026-01051, des pièces sont toujours attendues », sans interdit) et la
+  **relance 2 planifiée à J+10** de la demande (`echeanceLe` 2026-11-27, délai 5 j).
+- **Rejeu depuis `origin/dev`** (b3d4388, image reconstruite depuis `git archive origin/dev`, volumes neufs) :
+  `/health` 200, mêmes deux messages sans interdit pour les mêmes faits, relance 1 planifiée à J+5. Pile descendue
+  (`down -v`), aucun conteneur ni volume `grp-d`, verrou rendu.
+- Verrou Docker attendu ~1 min (B, STORY-961), pris à 07:29, rendu à 07:58.

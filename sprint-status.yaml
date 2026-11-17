@@ -325,7 +325,16 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1051.md"
     reserved_on: "2026-11-17"
     note: >
-      EN COURS le 2026-11-17 — annonce « ⚠ Contrats » avant le code. Lot D, n° 7 du lot 3 (EPIC-220). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-notification-service#90 (dev 7d4b24d, cdbcd8a, b3d4388). Neuf modèles système
+      de l'assurance (SMS, e-mail, fr/en ; variables reference et numeroOfficiel seules) ; le test des interdits parcourt
+      les 36 textes (santé du registre classification-sante copié à l'octet, montant d'indemnité, « fraude », casse et
+      accents) ; surcharge fautive refusée CONTENU_INTERDIT_A_L_ASSURE. Déclenchés par sinistres.dossier.changed@1
+      (matrice fermée côté assuré, jamais la fraude) vers le destinataire enregistré par sinistres-service (route de
+      service ; sinon CANAL_ABSENT). Relances de pièces : file BullMQ, J+5 de la demande puis J+5 de la relance envoyée,
+      trois au plus, horloge de référence, sans doublon au rejeu ni au redémarrage. Node 24 : 281/281 suites unitaires,
+      intégration Mongo+Redis 9/9, 15/15 mutations. Pile grp-d (rejouée depuis dev) : /health 200, deux messages sans
+      interdit, relance à J+5 puis J+10. Annoncée avant le code (docs #620). Lot D, n° 7 du lot 3 (EPIC-220). NON
+      SLOTTÉE.
 
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
