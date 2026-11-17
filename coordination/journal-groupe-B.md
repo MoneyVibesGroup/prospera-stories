@@ -70,7 +70,9 @@
      - La source des droits lit `droits ∪ droitsHorsJeton` (D-961-7).
      Node 24 : 289/0/3 ; `test:socle` 50/50 (50 actes concurrents, dont 10 abandonnés ⇒ 1 → 40) ; 23 mutations ;
      pile `grp-b` : `/health` 200. Avant la story : demande de A servie (plateforme #26, `jeu-cabinet-v1`).
-  - **Story suivante : STORY-962** (l'écriture en brouillard, `prospera-comptabilite-service`, EPIC-113 ; dépend de
+  7. **STORY-962 en cours** (17/11) : l'écriture en brouillard. Fiche écrite, contrat annoncé avant le code
+     (« ⚠ Contrats »).
+  - **Story en cours : STORY-962** (l'écriture en brouillard, `prospera-comptabilite-service`, EPIC-113 ; dépend de
     961). « Fini quand » (plan §3) : équilibre **par pièce** ; contrôle d'exercice et de date ; pièce justificative
     rattachée (`pieceId`). À lire avant : fiches 959 et 961 (« Pour la suite »).
     - La pièce prend son numéro par `NumerotationDesJournaux.numeroter(portee, journal, session)`, **dans la
@@ -221,6 +223,14 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   membre qui reçoit le rôle par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif).
 
 ## Demandes aux autres groupes
+
+- **→ C (2026-11-17) : la comptabilité lit `GET /api/v1/dossiers/{dossierId}/pieces?pieceId=` de `document-service`**
+  — **information**, rien n'est demandé (STORY-962, D-962-4). À la saisie d'une écriture, la comptabilité vérifie la
+  pièce justificative citée : elle appelle cette route avec le jeton du membre (borne 3 s) et cherche, dans la liste,
+  la pièce qui porte exactement ce `pieceId`. Elle garde `id` (comme `documentId`) et `type`. Liste vide ou 404 : la
+  saisie est refusée (`PIECE_JUSTIFICATIVE_INCONNUE`) ; autre statut ou réponse hors contrat : 503. Si cette route, le
+  filtre `pieceId` ou les champs `id`, `type`, `pieceId` devaient changer, le dire ici avant la fusion. Le jeton
+  présenté doit porter l'audience `document-service` (c'est déjà le cas du compose racine).
 
 - **→ D (2026-11-17) : les 15 rôles du distributeur sont servis, D-1053 est débloquée** — **information** (STORY-960,
   auth #42, `dev` `8d48710` ; fiche `stories/STORY-960.md`, § « Ce que D lit pour D-1053 »).
@@ -469,6 +479,29 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-17, STORY-962 — l'écriture en brouillard, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
+  EPIC-113 ; fiche `stories/STORY-962.md`, D-962-1 → 10). Tout est AJOUT : rien d'existant ne change de forme.
+  - **Route neuve** `POST /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ecritures`, droit
+    `comptabilite:ecriture:saisir` (lu par `/moi/droits`). Corps : `{ journal, dateEcriture: AAAA-MM-JJ, libelle,
+    pieceId, devise: XOF|XAF, lignes: [{ compte, libelle?, debit, credit }] (2 à 500), proposition? }`. **Montants :
+    entiers en unité mineure** (comme `balance.submitted` v1 et paiement), jamais un flottant.
+    201 → `{ id, dossierId, exerciceId, journal, statut: BROUILLARD, numeroProvisoire: VE-BR-000001, dateEcriture,
+    libelle, devise, lignes, totalDebit, totalCredit, pieceJustificative: { pieceId, documentId, type, verifieeLe },
+    saisiePar, saisieLe, provenance }`.
+  - **Routes neuves de lecture** : `GET …/ecritures?journal=` et `GET …/ecritures/{ecritureId}`, ouvertes à tout
+    membre dont la portée couvre le dossier ; au manifeste en `routesLectureSeule`.
+  - **Refus nommés neufs** : 422 `PIECE_DESEQUILIBREE` (`details.totalDebit`, `totalCredit`, `ecart`),
+    `LIGNE_SANS_MONTANT`, `LIGNE_DEBIT_ET_CREDIT` (`details.ligne`, `compte`), `PIECE_HORS_BORNE`,
+    `DATE_HORS_EXERCICE` (`details.date`, `debut`, `fin`), `PIECE_JUSTIFICATIVE_INCONNUE` (`details.pieceId`) ;
+    404 `ECRITURE_INTROUVABLE` ; 503 `DOCUMENTS_INDISPONIBLES`. Un `details` peut porter des nombres.
+  - **Numérotation** : un brouillard prend un numéro PROVISOIRE (`<code>-BR-000001`, série à part par journal et par
+    exercice, dans la transaction de la saisie) ; le numéro définitif viendra à la validation (STORY-964, D-962-1).
+  - **Piste** : acte neuf `ECRITURE_SAISIE`, avec sa provenance (Q3).
+  - **Lu chez C** (`document-service`, **sans rien lui demander de changer**) : `GET /api/v1/dossiers/{dossierId}/pieces?pieceId=`,
+    avec le jeton du membre, borné à 3 s (D-962-4).
+  - **Lu chez B (auth)** : le claim `dv` du jeton, qui clé le cache des droits `(membre, organisation, dv)` (D-962-5).
+  - Variable neuve, requise : `DOCUMENT_SERVICE_URL`. Aucun topic, aucun schéma au registre.
 
 - **2026-11-17, STORY-961 — le plan de journaux, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
   EPIC-112 ; fiche `stories/STORY-961.md`, D-961-1 → 7). **Fusionné le 17/11** : comptabilite #3, `acafd6f` sur

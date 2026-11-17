@@ -22,8 +22,11 @@
 // - Droits (C7) : DÉCLARÉS, pas encore attribuables. La borne du jeton bloque tout droit de tenant neuf jusqu'au
 //   retrait de `perms[]` (ADR « droits hors du jeton », étape 4). Le service les lit par `/moi/droits`, jamais dans le
 //   jeton : depuis STORY-959, toute route qui écrit déclare le sien (`comptabilite:exercice:ouvrir` pour ouvrir un
-//   exercice), sinon elle est fermée. Tant qu'auth-service ne les attribue à aucun rôle, aucun geste d'écriture ne
-//   passe (403 `DROIT_INSUFFISANT`).
+//   exercice, `comptabilite:ecriture:saisir` pour saisir un brouillard depuis STORY-962), sinon elle est fermée. Tant
+//   qu'auth-service ne les attribue à aucun rôle, aucun geste d'écriture ne passe (403 `DROIT_INSUFFISANT`).
+// - Pièce justificative (STORY-962) : chaque écriture cite un `pieceId` de `document-service`, vérifié dans le dossier
+//   à la saisie (`GET /api/v1/dossiers/{dossierId}/pieces?pieceId=`, jeton du membre). document-service est du
+//   socle, pas un module : il n'entre pas dans `depends`.
 
 export const MANIFESTE_COMPTABILITE = {
   code: 'comptabilite',
@@ -98,6 +101,8 @@ export const MANIFESTE_COMPTABILITE = {
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/tenue', // STORY-959
     'GET /api/v1/dossiers/{dossierId}/tenues', // STORY-959 : l'historique des tenues et des bascules
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/journaux', // STORY-961 : le plan de journaux
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ecritures', // STORY-962 : les écritures de l'exercice
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ecritures/{ecritureId}', // STORY-962 : une écriture
   ],
 
   // C13, point 7 (chemins vus par le service). À créer.
