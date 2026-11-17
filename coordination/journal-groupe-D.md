@@ -26,9 +26,19 @@
   d'or, 16/16 mutations ; Node 24 : typecheck racine vert, `npm test` racine 550 pass, 0 fail. Contrat `encours@1`
   **annoncé avant la fusion du code** (prospera-stories #589). Aucun fichier de B touché. Décisions D-1047-1 → 12
   (fiche) ; Q-D-4 au PO. Verrou Docker attendu ~44 min (B, STORY-957), puis pris et rendu.
-- **Suivante : STORY-1048** 🛡 le LC fictif refuse l'espace réel (EPIC-204, `prospera-assureur-fictif`) : refus de
-  démarrer hors d'un espace d'essai ; les quatre scénarios `SIN-2026` se rejouent après une remise à zéro. Dépend de
-  1046, faite. Puis 1049 (les garde-fous, `ventes`), premier consommateur d'`encours-v1`.
+- **STORY-1048** ✅ 🛡 — le LC fictif refuse l'espace réel (PR prospera-assureur-fictif#4, `dev` 4f4aa89 ; annonce
+  « ⚠ Contrats » #597 avant le code). L'espace de l'instance fait foi (`INSTANCE_ESPACE`, STORY-934) : `ESSAI` démarre,
+  `REEL` ou toute autre valeur refusent même avec `FICTIF_ESPACE=essai`, qui seule démarre comme avant (piles de C).
+  Refus avant le chargement des modules : une ligne `ASSUREUR_FICTIF_INTERDIT` (motif nommé), sortie 78. **Défaut
+  corrigé** : la remise à zéro laissait relire la sortie de Prospera (anciennes clôtures rejouées, déclarations
+  renumérotées) ; elle l'écarte et efface l'entrée. La partie des quatre scénarios `SIN-2026` rejouée après la remise à
+  zéro rend les mêmes réponses, par fichiers et par l'API (pile `grp-d`, témoin d'`origin/dev`, rejouée depuis `dev`).
+  Node 24 : 419 unitaires + 23 e2e ; 10/10 mutations. Décisions D-1048-1 → 7 (fiche). Verrou Docker pris sans attente,
+  rendu.
+- **Suivante : STORY-1049** 🚚 les garde-fous (EPIC-225, `prospera-ventes-service`) : paramètres par organisation figés à
+  l'acte ; plafond de crédit ; squelette de la saga de réservation. Dépend de 1047, faite : **premier consommateur
+  d'`encours-v1`** (copie à l'octet de `encours/src/index.ts` et `vecteurs-or.json`, empreintes dans
+  `stories/STORY-1047.md`, vecteurs d'or rejoués dans ses tests). Puis 1050 (les dettes de `reseau-service`).
 
 ### Lots 1 et 2
 
@@ -111,8 +121,10 @@
   - Outils : banc HTTP d'intégration sur MongoDB réel (`test/integration/application-http.ts`), émetteur de jetons de
     recette (profil compose `recette`), Karapace (profil `registre`).
   - **Assurance (lot 3), pour mémoire** : D tient aussi `prospera-assureur-fictif` (la démo, EPIC-204), qui n'est pas
-    du distributeur ; le jeu de l'assurance et les routes C13 y sont depuis STORY-1046 (`dev` e265b0a). Suite : 1048,
-    1057.
+    du distributeur ; le jeu de l'assurance et les routes C13 y sont depuis STORY-1046, le refus de l'espace réel
+    (`INSTANCE_ESPACE`, sortie 78) et la remise à zéro qui rejoue les quatre scénarios depuis STORY-1048 (`dev`
+    4f4aa89). Suite : 1057 (la recette de la démo ; y servir les routes de vérification C13 du manifeste).
+  - **Prochaine story du distributeur : 1049** (les garde-fous, `ventes`), premier consommateur d'`encours-v1`.
 
 ## Demandes aux autres groupes
 
@@ -154,6 +166,9 @@
 
 ## Réponses aux demandes reçues
 
+- **← A (2026-11-17) : `PATCH /api/v1/dossiers/{id}` relayé par le BFF (STORY-923)** — **lue**. Pour l'écran de la
+  fiche dossier (onglet Identité) : frontend, hors du lot 3 de D (backend) ; reprise avec le lot frontend.
+
 - **← B (2026-11-17) : le lot 3 de D** — `PLAN-4-SESSIONS-LOT-3-2026-11-17.md` §4 : **STORY-1045 → 1059**, distributeur
   et assurance en alternance. D reçoit `prospera-assureur-fictif` (de C) et `prospera-notification-service` (de B, à la
   fusion de B-957), et le dossier `encours/` de la plateforme. Ce que D attend de B : 956 (README, kit 1.0.1) pour
@@ -173,8 +188,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-17, STORY-1048, avant la fusion du code) — `prospera-assureur-fictif` : le démarrage et la remise
-  à zéro.** Rien ne change sur le fil ni dans l'API du LC (`/lc/echange`).
+- **PUBLIÉ (2026-11-17, STORY-1048, prospera-assureur-fictif#4, `dev` 4f4aa89) ; ANNONCÉ avant la fusion du code
+  (prospera-stories #597) — `prospera-assureur-fictif` : le démarrage et la remise à zéro.** Rien ne change sur le fil ni dans l'API du LC (`/lc/echange`).
   - **Démarrage** : le LC fictif lit désormais l'espace de l'instance, **`INSTANCE_ESPACE`** (STORY-934, `ESSAI` |
     `REEL`). `ESSAI` démarre ; `REEL`, toute autre valeur ou une chaîne vide **refusent**, même avec
     `FICTIF_ESPACE=essai`. `FICTIF_ESPACE=essai` seule (piles de C, STORY-986) **démarre comme avant** ; posées toutes
@@ -272,6 +287,14 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1048** : (1) un script de mutations qui compte les `✕` ne voit rien quand jest joue plusieurs suites (pas de
+  détail par test) : lire `Tests: N failed` et l'absence de `Test suite failed to run`. (2) Les routes d'administration du
+  LC fictif passent la garde du module : sur une pile sans catalogue, publier le droit sur `entitlement.changed` par
+  `kafka-console-producer.sh` du conteneur Kafka (`orgId`, `moduleCode: assureur-fictif`, `status: ACTIVE`,
+  `occurredAt`, `eventId`) ; deux services sur le même groupe de consommateurs se partagent le message. (3) Un pilote
+  qui écrit dans le volume d'échange tourne sous l'uid du service (`--user 1000:1000`), sinon le LC ne peut plus créer
+  `entree`. (4) `AUTH_ISSUER` et `AUTH_AUDIENCE` sont exigées par `validateEnv` (un `docker run` sans elles sort en 1).
 
 - **Prettier réécrit une copie « à l'octet »** si on lui passe le dossier : STORY-1046 l'a fait sur les schémas C13
   copiés, aussitôt recopiés ; `.prettierignore` de `prospera-assureur-fictif` les exclut désormais
