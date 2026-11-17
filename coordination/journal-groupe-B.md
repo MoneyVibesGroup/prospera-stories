@@ -697,6 +697,38 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-17, STORY-972 — les comptes du jeu et la connexion « en tant que » dans auth, la comptabilité au
+  catalogue, annoncé AVANT la fusion du code** (`prospera-auth-service`, `prospera-platform-catalog-service`,
+  `prospera-plateforme` ; fiche `stories/STORY-972.md`, D-972-1 → 10). Tout est AJOUT : aucune route, aucun champ,
+  aucun topic existants ne changent de forme.
+  - **Auth, variable neuve** `INSTANCE_ESPACE` (facultative, la même que chez A et D) : `ESSAI` seulement si dit,
+    sinon `REEL`. En réel, les trois routes ci-dessous rendent **403 `ESPACE_REEL_REFUSE`** avant la lecture du corps.
+  - **Auth, route neuve (moteur)** : `PUT /api/v1/interne/organisations/{organisationId}/comptes-du-jeu`, sous
+    l'identité de service du moteur (`MOTEUR_JETON_SERVICE`, comme la naissance ; 401 `IDENTITE_DU_MOTEUR_REQUISE`).
+    Corps `{ comptes: [{ objet, cle, prenom, nom, roleMetier }] }` (1 à 200). Chaque compte naît sous
+    `identifiantDuJeu(organisationId, objet, cle)` (D-1058-4 ; `commercial`, `COM-nn` pour un agent) : utilisateur
+    `ACTIVE`, sans mot de passe, adresse `<objet>.<cle>.<org>@jeu-demonstration.invalid`, membre `TENANT_USER` avec son
+    rôle métier (du socle, proposé au métier de l'organisation). Réponse `{ organisationId, poses, existants, comptes:
+    [{ userId, objet, cle, prenom, nom, roleMetier }] }` : **201** si un compte naît, **200** au rejeu (rien de
+    réécrit). Refus : 404 `ORGANISATION_INCONNUE` ; 422 `COMPTE_EN_DOUBLE`, `TENANT_ROLE_INCONNU`,
+    `TENANT_ROLE_NON_PROPOSE` ; 409 `COMPTE_DU_JEU_EN_CONFLIT` (un utilisateur qui n'est pas un compte du jeu sous cet
+    identifiant).
+  - **Auth, routes neuves (membre de l'essai)** : `GET /api/v1/essai/comptes-du-jeu` → `{ comptes: [...] }` (même
+    forme) ; `POST /api/v1/essai/connexion-en-tant-que { compteId }` → **200**, la paire de jetons de la connexion
+    (`accessToken`, `refreshToken`, `tokenType`, `expiresIn`), émise pour le compte visé (son `roleMetier`, ses
+    droits, son `dv`). Refus : 403 `APPELANT_HORS_ORGANISATION` (l'appelant n'est pas membre actif de l'organisation
+    de son jeton) ; 404 `COMPTE_DU_JEU_INCONNU` (tout ce qui n'est pas un compte du jeu actif de cette organisation).
+  - **Auth, base** : collection neuve `comptes_du_jeu` (en ajout seul, index unique `(organisationId, objet, cle)`).
+    `identity.user.registered@1`, `identity.membership.changed@1` et `identity.droits.changed@1` partent à la pose,
+    **charges inchangées**, aucun schéma touché.
+  - **Catalogue** : le module `comptabilite` 0.1.0 entre au catalogue (copie de son manifeste, 47 copies) ; les
+    manifestes amendés de C, de D et de `paiement` sont recopiés à leur version. Fichier neuf `.env.essai.example` (la
+    partie A de l'essai : `INSTALLATION_SERVICES` nomme `commande` et `terrain`). Aucune route, aucun schéma, aucun
+    topic du catalogue ne change.
+  - **Plateforme** : une ligne du README, rien d'autre.
+  - **Pour D** : vos services ne changent rien ; le compte de Kodjo a l'identifiant de son `commercial` `COM-01`.
+    **Pour A** (relecture) : rien chez vous. **Pour C** : D-972-3 (vos manifestes recopiés à leur version).
+
 - **2026-11-17, STORY-968 — les comptes de tiers, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
   EPIC-115 ; fiche `stories/STORY-968.md`, D-968-1 → 12). **Fusionné le 17/11** : comptabilite #8, `92a861a` sur
   `dev` (annonce : stories #665), sans écart au contrat annoncé. Des routes et des champs AJOUTÉS, rien de renommé ; **un
