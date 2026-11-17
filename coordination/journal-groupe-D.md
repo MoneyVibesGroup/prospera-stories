@@ -5,6 +5,21 @@
 
 ## État
 
+### Lot 3 (ouvert le 2026-11-17)
+
+- **Plan** : `PLAN-4-SESSIONS-LOT-3-2026-11-17.md` §4 : **STORY-1045 → 1059**, distributeur 🚚 et assurance 🛡 en
+  alternance ; une sous-session neuve par story (`REGLES-DES-GROUPES.md` §1.2). Même poste que B, même verrou Docker.
+- **STORY-1045** ✅ — `vocabulaires/` et `contrats/distributeur/` dans la plateforme (PR prospera-plateforme#21, `dev`
+  baa38dd ; étiquettes `vocabulaires-v1` et `contrats-distributeur-v1`). **Solde D-1042-3.** Aucun fichier de B
+  touché : le `test` et le `typecheck` racines lisaient déjà ces dossiers (STORY-941).
+- **Suivante : STORY-1046** 🛡 la compagnie de démonstration (EPIC-204, `prospera-assureur-fictif` et plateforme). Elle
+  attend la **passation de `prospera-assureur-fictif` par C** : au 2026-11-17, elle **n'est pas écrite** (journal de C,
+  « Passations : aucune » ; la demande de B y est « ouverte »). Le plan (§5) permet à D de la **constater** au rituel de
+  1046 : `dev` d'`assureur-fictif` est alors à `78ad10c` (relevé du 2026-11-17, à relire au rituel). Si C y travaille
+  encore, D prend 1047 (qui attend B-956 pour le README de `encours/`) ou 1050 (sans dépendance), et l'écrit ici.
+
+### Lots 1 et 2
+
 - **2026-11-14** : journal ouvert, lot 1 pas encore commencé.
 - **2026-11-16** : lot 2 lancé par l'utilisateur (« prends le lot 2 du groupe D et tu fais toutes les stories de ce
   lot »). La session tourne sur un poste à part (`C:\Users\USER\…`), pas sur le poste principal de A et C.
@@ -39,6 +54,10 @@
 
 - Distributeur (lot 2) : `prospera-ventes-service` (3412), `prospera-terrain-service` (3413),
   `prospera-recouvrement-service` (3414), `prospera-pilotage-service` (3415), `prospera-croissance-service` (3416).
+- `prospera-plateforme` : `series/` (`series-v1`), `vocabulaires/` (`vocabulaires-v1`), `contrats/distributeur/`
+  (`contrats-distributeur-v1`) ; **lot 3** : `encours/` (inscrit au README par B-956).
+- Lot 3, à recevoir : `prospera-assureur-fictif` (de C, passation à écrire ou à constater au rituel de 1046),
+  `prospera-notification-service` (de B, à la fusion de B-957).
 
 - `reseau-service` (lot 2) : `main` et `dev` posées le 2026-11-16 ; port de développement **3419** ; piles Docker
   `grp-d`.
@@ -55,7 +74,13 @@
   - Les cinq services du distributeur en squelette (garde par module, profil, manifestes, piste d'audit chaînée,
     aucun import croisé) : ventes 3412, terrain 3413, recouvrement 3414, pilotage 3415, croissance 3416.
   - `prospera-plateforme/series/` (étiquette `series-v1`), copiée dans ventes (`src/socle/series/`).
-  - **Reste à faire** : `vocabulaires/` et `contrats/distributeur/` dans la plateforme (D-1042-3) ; le volet Reprise
+  - `prospera-plateforme/vocabulaires/` (`vocabulaires-v1`) et `contrats/distributeur/` (`contrats-distributeur-v1`),
+    STORY-1045, `dev` baa38dd : le vocabulaire par verticale et la garde du catalogue des faits d'AD-20. **Aucun
+    service ne les copie encore** : chacun les copie à l'octet (empreintes dans `stories/STORY-1045.md`) avec sa
+    première story qui affiche un libellé ou publie un fait, et rejoue `verifierFaitsDuModule` sur la clause C5 de
+    chacun de ses manifestes. Les 13 faits « nouveaux » d'AD-20 manquent encore aux manifestes (PR d'AD-27).
+  - ~~`vocabulaires/` et `contrats/distributeur/` dans la plateforme (D-1042-3)~~ : **soldé par STORY-1045**.
+  - **Reste à faire** : le volet Reprise
     de l'import réseau (après B-947, D-1041-3) ; la republication de `reseau.commercial.changed@1` quand seul l'état
     du compte change (D-1034-5) ; les droits hors du jeton (B-949) à la place de la table rôle → droits (D-1032-2) ;
     la bascule de la garde sur l'état publié (D-1030-2).
@@ -91,6 +116,19 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **PUBLIÉ (2026-11-17, STORY-1045, prospera-plateforme#21, `dev` baa38dd) — deux contrats neufs** (rien d'existant ne
+  change ; aucun fichier hors des dossiers de D).
+  - **`catalogue-faits@1`** (`contrats/distributeur/`, étiquette `contrats-distributeur-v1`) : le catalogue des faits
+    d'AD-20 (129 noms) et la garde `verifierFaitsDuModule`. **Pour B** : les 18 faits déjà codés de `paiement` y sont,
+    sans `@1`, avec les trois faits de l'amendement du 2026-11-13 ; un fait **neuf** de `paiement` (Créance, B-963 et
+    B-965 : `paiement.creance.changed@1`, `.credit-tiers.changed@1` y sont déjà) qu'un module du distributeur lit doit
+    y entrer avant d'être consommé : le demander ici. **Pour C et la microfinance** : les faits que vos spines ou PRD
+    ajoutent aux modules du noyau (`recouvrement`, `equipe`, `dashboard`…) y entrent de la même façon, avec leur source.
+  - **`vocabulaire@1`** (`vocabulaires/`, étiquette `vocabulaires-v1`) : un tableau par verticale (`distributeur`,
+    `imf`, `assurance`), clés neutres, `null` = sans objet. Les colonnes IMF et assurance sont celles du PRD
+    distributeur (propositions) : **une correction se demande à D** (écart connu : le PRD microfinance §3 met
+    « client » avant « membre »).
 
 - **PUBLIÉ (2026-11-16, STORY-1036, reseau-service#7, `dev` 17dcf14) — `reseau.portee.changed@1`, contrat neuf** (rien d'existant ne change). Producteur
   unique : `reseau-service`. Consommateurs attendus : **C-1004** (sinistres), puis pdv, stock et le distributeur.
@@ -132,3 +170,9 @@
 
 - Poste de D : Node 25 en local. Le client Kafka de Confluent est natif : les tests se jouent dans le stage
   `verification` du `Dockerfile` (Node 24), `npm ci --ignore-scripts` suffit en local pour `tsc` et le lint.
+- Plateforme sous Node 24 sans toucher au `node_modules` du poste :
+  `git -c core.autocrlf=false archive HEAD | docker run --rm -i node:24-slim sh -c 'mkdir /w && cd /w && tar -x && npm ci && npm run typecheck && npm test'`
+  (sous le verrou ; un test de B y est ignoré : la matrice du catalogue n'est pas dans le conteneur).
+- AD-20 ne nomme que quelques exceptions (« les faits que les spines fixent font foi ») : avant de déclarer un nom
+  « hors catalogue », chercher sa source (spines, PRD des verticales, `git grep` dans `prospera-paiement-service`).
+  STORY-1045 : 25 noms des manifestes en avaient tous une.

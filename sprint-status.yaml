@@ -245,7 +245,12 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1045.md"
     reserved_on: "2026-11-17"
     note: >
-      EN COURS le 2026-11-17 — fiche écrite avant le code. Lot D, n° 1 du lot 3 (EPIC-222). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-plateforme#21 (dev baa38dd ; étiquettes vocabulaires-v1 et
+      contrats-distributeur-v1). vocabulaires/ : noyau de 62 clés (PRD-D §6.1 → §6.8 et refus neutres), distributeur,
+      imf, assurance ; test d'AD-15 (seuls les libellés changent). contrats/distributeur/ : catalogue de 129 faits
+      (AD-20, communs, déjà codés de paiement, exceptions sourcées) et sa garde ; 0 refus sur les 22 manifestes. Node 24
+      : test racine 469 pass, 0 fail ; typecheck racine vert. Solde D-1042-3. Lot D, n° 1 du lot 3 (EPIC-222). NON
+      SLOTTÉE.
 
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
