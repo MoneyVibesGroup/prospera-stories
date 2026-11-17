@@ -99,6 +99,14 @@
 - Le `docker-compose.yml` racine n'est pas versionné : une dépendance de service se pose dans
   `prospera-recette/docker-compose.recette.yml`, par une demande à A.
 - `docker compose down` ne rend pas la mémoire de la VM : `wsl --shutdown` le fait (poste Windows).
+- **MinIO : l'image est `cgr.dev/chainguard/minio:latest`, avec `user: '0'`** (norme du 2026-11-17, décidée par
+  l'utilisateur). `minio/minio` a été retiré de Docker Hub (« pull access denied ») et `quay.io/minio/minio` refuse le
+  pull anonyme (401) : un poste sans l'image en cache ne lève plus de pile. L'image de Chainguard est le même serveur
+  MinIO (même commande `server /data --console-address :9001`, mêmes variables `MINIO_ROOT_USER`/`PASSWORD`, mêmes
+  ports 9000 et 9001) ; elle tourne sans root et refuse sinon d'écrire dans `/data` (« file access denied »). Le client
+  `mc` est `cgr.dev/chainguard/minio-client:latest-dev`. **Partout** : le `docker-compose.yml` racine de chaque poste,
+  `prospera-recette` (par A), tout compose, Dockerfile ou test de conteneur d'un dépôt. Plus aucune référence neuve à
+  `minio/minio`.
 
 ### 1.7 Fichiers et fins de ligne (poste Windows)
 

@@ -223,6 +223,12 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-17) : MinIO passe à `cgr.dev/chainguard/minio:latest`, avec `user: '0'`** — **ouverte, à faire par
+  A**. Norme décidée par l'utilisateur (`REGLES-DES-GROUPES.md` §1.6) : `minio/minio` a été retiré de Docker Hub,
+  `quay.io` refuse le pull anonyme. Trois gestes : (1) le `docker-compose.yml` racine du poste principal ; (2) le
+  service `minio` de `prospera-recette/docker-compose.recette.yml` ; (3) une recette qui écrit dans MinIO, rejouée sur
+  pile neuve. Détail et preuve : journal de B, « Demandes aux autres groupes ».
+
 - **← B (2026-11-15) : relecture du contrat d'état publié avant figeage (STORY-932, plan §7)** — **faite**. Relecture
   indépendante sur les sources (PRD moteur §3.1, FR-34, FR-35, FR-43, addendum §A-2 ; C2, C8, C13 ; spines du moteur et
   de la coque). Verdict : **figeable après 4 corrections bloquantes**, toutes faites avant la fusion (export dans
