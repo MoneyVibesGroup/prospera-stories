@@ -616,6 +616,13 @@ reserved_ranges:
       🏁 DONE le 2026-11-17 — prospera-recette#24 (dev 68ef348) ; docker-compose.yml racine du poste principal modifié en
       place (non versionné). Garde du profil 18/18, mutation rouge sur l'assertion ; pile neuve grp-a : recette zone-franche 5/5
       (artefacts fiscaux écrits dans MinIO), mc ls les voit. Demande de B close ; C prévenu. Lot 3 de A, n° 1. NON SLOTTÉE.
+  - range: "STORY-921"
+    status: "RÉSERVÉ"
+    owner: "Le hub de balance accepte la 5e origine comptabilite — ORIGINES_BALANCE, ingestion directe, contrat balance.submitted (balance-service)"
+    source_doc: "prospera-stories/stories/STORY-921.md"
+    reserved_on: "2026-11-17"
+    note: >
+      EN COURS le 2026-11-17 — lot 3 de A, n° 2 ; B-967 l'attend. Contrat annoncé avant le code. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
