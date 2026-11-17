@@ -1,6 +1,6 @@
 # STORY-962 : l'écriture en brouillard
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (première écriture comptable : équilibre par pièce, montants exacts, contrôle d'exercice et de
 date, pièce justificative vérifiée chez un autre service, numéro et piste dans une transaction, cache des droits)
@@ -133,11 +133,75 @@ publiée (D-L3-4).
 
 ## Ce qui a été livré
 
-À remplir à la fusion.
+Deux PR fusionnées en « Rebase and merge » le 17/11, l'annonce d'abord.
+
+| Dépôt | PR | Sur la branche |
+|---|---|---|
+| `prospera-stories` | #623 (fiche, tracker, manifeste amendé, annonce du contrat, AVANT le code) | `main` `b8ca29b` |
+| `prospera-comptabilite-service` | #4 | `dev` **`ce22d81`** (rejoué de `59455cc` ; arbre identique) |
+
+- `src/ecritures/` :
+  - `piece.ts` : les règles pures (équilibre par pièce en `bigint`, sens des lignes, borne 2^53 − 1, date dans
+    l'exercice, jour civil) ;
+  - `ecriture.schema.ts` : collection `ecritures`, index unique `un_numero_provisoire_par_journal`, montants
+    validés entiers ;
+  - `source-des-pieces.ts` : port `SourceDesPieces` et son adaptateur HTTP de `document-service` (borné, fermé) ;
+  - `brouillard.service.ts` : saisie (numéro provisoire, écriture, piste dans UNE transaction), lecture, liste ;
+  - `ecritures.controller.ts`, `ecritures.dto.ts`, `ecritures.module.ts`.
+- `src/journaux/` : `serieDuBrouillard`, `prefixeDuBrouillard`, `numeroterBrouillard` ; la série des brouillards est
+  amorcée avec la définitive quand le plan est arrêté.
+- `src/droits/cache-des-droits.ts` : le cache `(membre, organisation, dv)`, posé devant `SourceDesDroitsHttp`
+  (`SOURCE_DES_DROITS_HTTP`) ; la garde passe le membre et son `dv` ; `JwtStrategy` projette `dv`.
+- `src/common/refus.ts` : huit refus nommés neufs ; `details` admet des nombres.
+- `DOCUMENT_SERVICE_URL` (requise) et `DOCUMENT_SERVICE_DELAI_MS` : configuration, compose, `.env.example`, README.
+- `src/module.manifest.ts` recopié à l'octet depuis `main` (`git -c core.autocrlf=false show`).
+- `test/socle/ecritures.socle-spec.ts` : suite neuve ; les trois suites existantes posent `DOCUMENT_SERVICE_URL`.
 
 ## Preuves
 
-À remplir à la fusion.
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive` du commit poussé) :
+  **29 suites, 358 passés, 3 sautés** (les comparaisons à `prospera-plateforme` et `prospera-stories`, absents du
+  conteneur) ; `npm run lint`, `tsc --noEmit` et `npm run build` verts.
+- **`npm run test:socle`** (vrai MongoDB 8.0 `rs0`, vrai Kafka, doublures HTTP d'auth, de dossier-service et de
+  document-service) : **69/69**, dont 19 neufs.
+  - Pièce équilibrée : 201, `VE-BR-000001`, pièce justificative (`documentId`, `type`) ; document-service lu une fois,
+    avec le jeton du membre, pour ce dossier et ce `pieceId`. La piste porte `ECRITURE_SAISIE` et sa provenance.
+  - Imputation proposée et acceptée : « proposé par la machine », proposition citée.
+  - Le brouillard ne consomme aucun numéro définitif : VE reste à 0 au plan de journaux, la série des brouillards à 2.
+  - Droit seulement dans `droitsHorsJeton` : 201. Lecture par id et par journal sans droit d'écriture ; une écriture
+    lue sous un autre exercice : 404 `ECRITURE_INTROUVABLE`.
+  - **Refus nommés, et rien d'écrit ni de numéroté** (écritures, piste et tête de la série relues avant et après
+    chaque refus) :
+    - **pièce déséquilibrée : 422 `PIECE_DESEQUILIBREE`** (118 000 / 100 000, écart 18 000) ;
+    - **date hors de l'exercice : 422 `DATE_HORS_EXERCICE`** (31/12/2025 et 01/01/2027, bornes 2026-01-01 →
+      2026-12-31) ;
+    - `LIGNE_SANS_MONTANT`, `LIGNE_DEBIT_ET_CREDIT` ;
+    - montant flottant, négatif ou en texte : 400 ; une seule ligne, `2026-02-30`, `EUR`, `../x`, champ en trop,
+      `pieceId` absent : 400 ;
+    - pièce inconnue (liste vide, ou 404) : 422 `PIECE_JUSTIFICATIVE_INCONNUE` ;
+    - document-service lent : 503 `DOCUMENTS_INDISPONIBLES` en moins de 1,8 s (borne 800 ms) ;
+    - exercice aux CAHIERS : 409 ; non ouvert : 404 ; clos chez dossier-service : 409 `EXERCICE_CLOS` ; journal `PA` :
+      404 `JOURNAL_INCONNU` ;
+    - sans le droit : 403 `DROIT_INSUFFISANT`, document-service n'est pas appelé.
+  - **Cache** : trois saisies du même membre au même `dv` ⇒ une seule lecture de `/moi/droits` ; `dv` + 1 ⇒ relecture.
+  - **20 saisies concurrentes dans AC** : `AC-BR-000001` → `000020`, rangs 1 → 20 en base, tête de série à 20,
+    20 entrées de piste.
+- **Mutations : 31/31 unitaires et 5/5 sur le socle rougissent sur une assertion** (script joué dans l'image de
+  vérification ; « rouge » = `Tests: … failed` et aucun `TS\d{4}`). Elles portent sur :
+  - les règles : équilibre neutralisé, bornes de date (début, fin, début exclusif), ligne sans montant, ligne à deux
+    sens, borne 2^53, signe de l'écart, flottant admis ;
+  - la pièce justificative : pièce approchée, 404 pris pour une panne, pièce absente admise, hors contrat ;
+  - le service : exercice clos admis, date non contrôlée, équilibre non vérifié, numéro définitif au lieu du
+    provisoire, écriture hors transaction, journal hors plan, acte de piste ;
+  - l'index unique ; la série des brouillards (nom, préfixe, amorce) ;
+  - le cache : `dv` hors de la clé, durée, cache sans `dv`, borne ; `dv` passé par la garde, projeté entier ;
+    `DOCUMENT_SERVICE_URL` requise ;
+  - **sur le socle** : équilibre neutralisé, date non contrôlée, numéro définitif, pièce absente admise, débit
+    flottant admis par le DTO.
+- **Pile `grp-b`** (compose du dépôt, image runtime du commit, volumes neufs, verrou Docker pris de façon atomique) :
+  `docker compose up` sain (quatre conteneurs `healthy`), `/api/v1/health` 200 (`rs0`, primaire ; Kafka up),
+  `EcrituresController` mappé, les deux chemins dans l'OpenAPI, `POST …/ecritures` sans jeton : 401. Descendue avec ses
+  volumes, verrou rendu.
 
 ## Pour la suite
 
