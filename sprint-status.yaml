@@ -1382,6 +1382,17 @@ reserved_ranges:
       ACCUSE_DOSSIER_COMPLET arrêtée par l'événement ACCUSE_POSE ; pièce rejetée ou non contrôlée : rien. L'envoi reste
       à EPIC-220 (D). Node 24 : 977 unitaires sur MongoDB réel, 19 e2e ; aucun câblage ne change, pas de pile. Lot 3 de
       C, n° 3. NON SLOTTÉE.
+  - range: "STORY-1008"
+    status: "RÉSERVÉ"
+    owner: "La provision d'ouverture posée à l'ouverture : la transition d'ouverture propose la provision à assurance (sinistres, port vers assurance existant)"
+    source_doc: "prospera-stories/stories/STORY-1008.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-sinistres-service#18 (dev f9fe2f4). Les transitions d'ouverture (1, 2, et 3 en
+      rattrapage) d'un dossier MATERIEL ou RISQUES_DIVERS proposent sinistres.provision.revisee@1 (motif OUVERTURE,
+      estimation du déclarant ou gravité) dans la même transaction ; posée une seule fois (marqueur provisionOuverture) ;
+      corporel et recours saisis par l'humain ; assurance reste le seul écrivain des mouvements. Aucun fait neuf.
+      Node 24 : 997 unitaires sur MongoDB réel, 19 e2e ; pas de pile. Lot 3 de C, n° 4. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
