@@ -75,7 +75,11 @@
   - ~~**STORY-1009**~~ : **sinistres #20** ; la transition 6 ou 12 porte les pièces demandées (motif, date, auteur, numéro
     de demande) : la liste s'allonge, `PIECES_COMPLETES` repasse à faux, courrier de demande, relances de 999 reprises ;
     sans pièce nommée, `PIECES_NON_NOMMEES` ; Node 24 (1080 unitaires, 25 e2e), rejouée depuis `dev`, sans pile.
-  - **STORY-1011** ← **suivante** : un formulaire d'instruction par type de sinistre (`sinistres`, FR-55).
+  - ~~**STORY-1011**~~ : **sinistres #21** (manifeste #635) ; un formulaire d'instruction par type de sinistre, en
+    paramètre versionné `formulaires-2026.1` (6 familles ; accident du travail et décès renvoient au barème corporel),
+    contrôlé par le serveur (`CHAMP_OBLIGATOIRE_ABSENT` nomme tous les champs manquants), version figée à l'entrée en
+    instruction ; Node 24 (1110 unitaires, 25 e2e), rejouée depuis `dev`, sans pile.
+  - **STORY-1010** ← **suivante** : le décompte dans l'ordre fixe, et l'arrondi (`sinistres`, FR-69, FR-73).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -412,6 +416,19 @@ seulement.
   ⚠️ Pour tous : quitter l'attente de pièces lève maintenant aussi le constat `RELANCES_EPUISEES` (jusque-là il restait
   vrai après la reprise).
 
+- **2026-11-17, STORY-1011 — une route de lecture, une écriture, aucun fait neuf.**
+  `GET /api/v1/sinistres/dossiers/{id}/instruction` (lecture seule, au manifeste, `prospera-stories` 36da9fd) rend
+  `{ dossierId, version, type, formulaire: { sorte: 'FORMULAIRE', version, famille, libelle, champs[] } | { sorte: 'RENVOI',
+  renvoi: 'BAREME_CORPOREL', libelle } | null, figee, figeeLe?, valeurs, enregistrements[] }` ; réservée à GEST, GREC, RESP,
+  COMITE, DT, DG, AUD (403 sinon, 404 hors portée). `POST` même chemin : `{ roleExerce, versionLue, cleIdempotence,
+  valeurs }`, rôles GEST, GREC, RESP, dossier `EN_INSTRUCTION` ; rend la même vue. Refus : `CHAMP_OBLIGATOIRE_ABSENT`
+  (`details.champs` = tous les manquants), `CHAMP_INCONNU`, `VALEUR_INVALIDE` (`details.champs[{champ, attendu}]`) en 400 ;
+  `INSTRUCTION_IMPOSSIBLE`, `FORMULAIRE_SANS_CALCUL` (`details.renvoi`), `TYPE_DE_SINISTRE_ABSENT`, `SEPARATION_DES_TACHES`,
+  `ETAT_PERIME`, `CLE_REUTILISEE` en 409. **Pour D (écrans)** : dessiner le formulaire depuis `formulaire.champs` (type,
+  libellé, obligatoire, `obligatoireSi`, valeurs, bornes) ; dates `AAAA-MM-JJ`, montants entiers en FCFA, pourcentages 0-100.
+  **Pour B/A** : `dossier.instruction` est une donnée du dossier, jamais dans `sinistres.dossier.changed@1`.
+  ⚠️ Enregistrer le formulaire rend partie « instruire » : celui qui le remplit ne validera ni ne contrôlera.
+
 ## Questions à l'utilisateur ou au PO
 
 - **❓ 2026-11-17 — STORY-1002, question au PO : qui porte `sinistres.declaration.enregistree@1` ?** La spine (AD-16)
@@ -448,6 +465,11 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   paramètre figé `experts-2026.1.json` ; manifeste amendé pour la fiche en lecture seule. ⚠️ Écart : aucun
   `docker compose up` du service pour cette story (plan : « Docker : non ») ; droits fins `expertises:*` toujours à poser.
 
+- **D-1011-1 → D-1011-9** (`stories/STORY-1011.md`) : six familles de formulaires, AT et décès renvoyés au barème
+  corporel ; champs seulement, ni calcul ni alerte (1010, 1012) ; version figée à l'entrée en instruction (à défaut au
+  premier enregistrement) ; tout ou rien, défauts pour les facultatifs ; écriture en `EN_INSTRUCTION` par GEST, GREC, RESP ;
+  enregistrer = acte `INSTRUIRE` ; aucune valeur dans la piste ni dans un fait ; lecture réservée (liste à confirmer avec
+  l'annexe B) ; aucun champ de santé (le corporel aura son canal, FR-70).
 - **D-1009-1 → D-1009-11** (`stories/STORY-1009.md`) : la demande se joint à la transition (pas de route) ; pièces
   demandées obligatoires ; catalogue de `pieces-2026.1`, pas de pièce libre ; motif de la pièce ou de la transition
   (10 caractères) ; pièce déjà attendue refusée, déjà reçue redemandable ; attente toujours celle de l'assuré ;
@@ -519,6 +541,16 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **Le manifeste copié a une empreinte notée dans le service** (vu en 1011) : amender le manifeste dans
+  `prospera-stories` puis recopier ne suffit pas, `src/socle/manifestes/sources-des-manifestes.ts` porte le commit et le
+  sha256 de la source, et `pile-du-moteur.invariant.spec.ts` rougit (Node 24 seulement dans l'étage de vérification) tant
+  qu'ils ne suivent pas. Les mettre à jour dans le même commit que la copie.
+- **Une suite « sinistres » peut rougir une fois sous charge sans que le code soit en cause** (1011 : la suite du service
+  a échoué sur l'export de `dev` pendant que A chargeait le poste, puis passé 190/190 seule ; la même branche avait passé
+  deux fois). Relancer le dossier, lire le nom du test avec `●.*›`, ne pas conclure sur le décompte.
+- **Les tests qui publient une version de paramètre de plus** modifient l'objet du registre (`FORMULAIRES_D_INSTRUCTION`) :
+  toujours dans un `try … finally { delete … }`, sinon la version reste pour les tests suivants.
 
 - **Un constat dérivé d'une liste doit suivre la liste** (vu en 1009) : 999 levait les relances à la sortie de l'attente
   mais laissait `RELANCES_EPUISEES` à vrai ; invisible tant que rien ne ramenait le dossier en attente, il ouvrait le
