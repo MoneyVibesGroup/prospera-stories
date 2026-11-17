@@ -1,6 +1,6 @@
 # STORY-1056 : la commande (1) — saisie, validation, bon de livraison `EMIS` avec son numéro `BL-` par les séries
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-228 (la commande : saisie, validation, bon de livraison) · **Dépôt :** `prospera-ventes-service`
 (module `commande`, tenu par D) ; `prospera-stories` (manifeste `commande`, C5). **Plage :** groupe D, n° 12 du lot 3
@@ -27,8 +27,8 @@ catalogue `contrats-distributeur-v1` (STORY-1045).
 - [x] Code sur `MNV-1056` (ventes), poussé (6f3db76) : saisie, validation branchée, émission des bons, outbox,
   schémas, copie de `contrats/distributeur/`, tests ; tsc et lint verts en local.
 - [x] Verrou Docker pris à 16:01 (libre au moment de lever, B l'avait rendu).
-- [ ] Preuves Node 24 (sous le verrou Docker), pile `grp-d`, rejeu depuis `origin/dev`.
-- [ ] PR ventes fusionnée en rebase ; PR de docs finale (fiche `done`, tracker, journal).
+- [x] Preuves Node 24 (sous le verrou Docker), pile `grp-d`, rejeu depuis `origin/dev`.
+- [x] PR ventes #6 fusionnée en rebase (`dev` 10b8ba5, bf00355, 7221f4c) ; verrou rendu à 16:36 ; PR de docs finale.
 
 ## Ce qui doit être vrai à la fin
 
@@ -143,4 +143,43 @@ l'API de réservation de `stock` ; la rétention sans expiration du topic `comma
 
 ## Preuves
 
-(à écrire)
+- **Annonce « ⚠ Contrats » avant le code** : prospera-stories **#654** (`main` bb02021), avec le manifeste `commande`
+  amendé (C5 : `+ commande.engagement-tiers.changed@1`, `+ commande.serie.changed@1`), recopié à l'octet dans `ventes`
+  (`sources-des-manifestes.ts` : commit bb02021, sha256 `e22ef41a023c67a0bde5f4fdb62e1a9d8e98e78ac71321d4aac414f89a14731b`).
+- **Copie de `contrats-distributeur-v1`** (baa38dd) dans `src/socle/contrats-distributeur/` : `index.ts`
+  `e353d4a8…4e4228`, `catalogue-faits.json` `5b260df2…ca73` (celles de la fiche 1045), figées par
+  `src/contrats-distributeur.invariant.spec.ts`, qui rejoue aussi `verifierFaitsDuModule` sur les quatre manifestes
+  (aucun refus) et exige que chaque topic de l'outbox soit au manifeste et au catalogue sous `commande`, avec son schéma.
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive HEAD`, `--load`) :
+  `tsc --noEmit` vert ; lint des fichiers touchés (`endOfLine auto`, `--max-warnings 0`) vert ; `npm run build` vert ;
+  unitaires **Test Suites: 44 passed, 44 total ; Tests: 411 passed** ; e2e **1 passed, 16 tests** ; intégration sur
+  **MongoDB 8.0 réel en jeu de répliques** **Test Suites: 8 passed, 8 total ; Tests: 75 passed**, dont
+  `commandes.int-spec.ts` (14) : UJ-1 au prix « ce client » (292 000 HT, 52 560 TVA, 344 560 TTC), grille changée sans
+  effet ; rejeu de la saisie ; neuf refus nommés sans écriture ; validation → `BL-2026-000001`, `VALIDEE`, quatre faits
+  conformes à leurs schémas (Ajv) et piste `SAISIE`, `VALIDATION`, `EMISSION`, `TOUS_LES_BONS_EMIS` ; deux points de
+  stock → deux numéros continus ; stock non branché → aucun numéro, puis reprise → émis ; rejeu ×3 sans numéro ni fait de
+  plus ; **20 validations parallèles → rangs 1 → 20 continus, 20 numéros distincts** ; **trois émissions simultanées du
+  même bon → un seul numéro**, le suivant reprend le 2 sans trou ; plafond → `PLAFOND_CREDIT_DEPASSE`, brouillon sans
+  acte ; `TRANSITION_INTERDITE` sans écriture ; portée (404, `HORS_PORTEE`, liste filtrée) ; numéro en double refusé
+  par la base ; et les bancs de 1049/1053 adaptés (saisie puis `{ commandeId }`, squelette refusé 400).
+- **Mutations : 16/16 rouges sur une assertion** (script hors dépôt, image Node 24 + MongoDB) : bascule sans condition
+  d'état ; bon déjà émis non refusé ; `VALIDEE` dès le premier bon ; numéro sur cinq chiffres ; TVA tronquée ; prix
+  société avant « ce client » ; saisie hors portée admise ; acte sans lien conditionnel à la commande ; engagement
+  publié à l'ancienne révision ; empreinte de la saisie ignorée (tournée pour garder le symbole) ; un prix sur le bon
+  émis ; numéro non unique en base ; copie du catalogue retouchée ; réservation de recette admise en production ; canal
+  terrain servi ; rang de série fixe.
+- **Pile `grp-d`** (`docker compose -p grp-d --profile commande` + surcouche de recette hors dépôt : émetteur de jetons
+  et doublure de `/moi/droits`, Karapace 6.2.0, `NODE_ENV=staging`, `COMMANDE_RESERVATION_STOCK=recette`) : schémas
+  enregistrés (`commande.*-value`, ids 1 → 4, BACKWARD vérifié) ; **16/16 vérifications** : saisie UJ-1 201
+  `BROUILLON` 344 560 ; validation 201, bon `EMIS` `BL-2026-000001`, commande `VALIDEE` ; le commercial et un membre
+  sans rôle reçoivent **403 `DROIT_INSUFFISANT`** ; rejeu même clé 201 `rejeu: true` même numéro, autre clé 409
+  `COMMANDE_DEJA_VALIDEE`, tête de série restée à 1 ; **plafond** 1 000 000 : 409 `PLAFOND_CREDIT_DEPASSE`
+  (dépassement 44 560), la commande reste brouillon ; **12 validations parallèles** : rangs 2 → 13 continus, 12 numéros
+  distincts ; **outbox vidée** (0 en attente, 52 publiés) ; **faits lus sur Kafka** : 13 sur chacun des quatre topics.
+  **Rejoué à l'identique** sur des images reconstruites depuis `origin/dev` (7221f4c, `--no-cache`), volumes neufs :
+  16/16 (Karapace a répondu 500 au premier enregistrement, rejoué ensuite : §1.9). `down -v` après chaque passage :
+  aucun conteneur, volume ni réseau `grp-d`.
+- `git diff --stat` = `--ignore-cr-at-eol` ; aucun `index.ts` non suivi (la copie du catalogue est suivie).
+- PR **prospera-ventes-service#6**, `head.sha` 10b623f vérifié, fusionnée en rebase : **`dev` 10b8ba5, bf00355,
+  7221f4c**.
+- **Verrou Docker** : libre au moment de lever (B l'avait rendu), pris à 16:01 **sans attente**, rendu à 16:36.
