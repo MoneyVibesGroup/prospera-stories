@@ -83,8 +83,12 @@
     plafond, franchise ; table `decompte-2026.1` figée par empreinte, jugée à la date de survenance ; SIN-2026-9002
     445 500 → 395 500 au franc ; décompte au franc, repère arrondi à 5 000 une fois à la fin, montant arrêté au franc ;
     Node 24 (1139 unitaires, 25 e2e), rejouée depuis `dev`, sans pile.
-  - **STORY-1012** ← **suivante** : le matériel automobile : vétusté sur pièces selon l'âge, et épave (`sinistres`, FR-72) ;
-    elle s'insère dans le décompte de 1010 (voir D-1010-9).
+  - ~~**STORY-1012**~~ : **sinistres #23** ; le matériel automobile dans le décompte : grille de vétusté par âge et par
+    catégorie de pièce (`vetuste-automobile-2026.1`, table distincte, figée par empreinte, jugée à la survenance), vétusté
+    sur les pièces seulement, épave (valeur vénale − valeur de l'épave), RC seule avec assuré fautif = zéro et `BLOQUANT` ;
+    395 500 au franc, « 775 000 » non reproduit ; Node 24 (1172 unitaires, 25 e2e), rejouée depuis `dev`, sans pile.
+  - **STORY-1013** ← **suivante** : une évaluation arrêtée n'est jamais recalculée (`sinistres`, FR-75), **la dernière du
+    lot 3 de C** ; elle garde `tableVersion` **et** `tableDeVetusteVersion` du décompte de 1010/1012 (D-1012-1).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -476,6 +480,15 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   adaptateur du formulaire ; franchise après le plafond ; corporel renvoyé au barème ; matériel automobile renvoyé à 1012
   (point d'insertion : variante `PAR_AGE_SUR_PIECES` de `Vetuste`, table `2026.2`) ; alertes du décompte seulement.
   **→ PO** : l'écran affiche-t-il 702 000 ou 700 000 comme repère ? (défaut : 702 000, repère arrondi à côté).
+- **D-1012-1 → D-1012-12** (`stories/STORY-1012.md`) : **table de vétusté distincte** (`vetuste-automobile-2026.1`) et non
+  `decompte-2026.2` comme le pensait D-1010-9 (pas de rétroactivité, `decompte-2026.1` intacte, le décompte rend
+  `tableVersion` et `tableDeVetusteVersion`) ; quatre catégories de pièces portant toutes la grille indicative de la
+  démo (H-059) ; âge = année de survenance − année de mise en circulation, bornes comprises ; vétusté sur pièces seulement ;
+  épave si la remise en état dépasse **strictement** la valeur vénale, sans vétusté, décision validée prioritaire, sans
+  valeur vénale `A_DECIDER` ; RC seule fautif = zéro et `BLOQUANT`, franchise nulle en RC ; **« 775 000 » non reproduit**
+  (entrées absentes de tout extrait) ; contexte en 5e paramètre de l'adaptateur ; alertes d'instruction (H-046) hors
+  story. **→ PO** : la grille de vétusté de la compagnie (A-5, H-059) est à obtenir ; les quatre catégories attendent
+  ses valeurs.
 - **D-1011-1 → D-1011-9** (`stories/STORY-1011.md`) : six familles de formulaires, AT et décès renvoyés au barème
   corporel ; champs seulement, ni calcul ni alerte (1010, 1012) ; version figée à l'entrée en instruction (à défaut au
   premier enregistrement) ; tout ou rien, défauts pour les facultatifs ; écriture en `EN_INSTRUCTION` par GEST, GREC, RESP ;
@@ -557,6 +570,10 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   jamais les mêmes, sur des suites sans rapport avec le code ; les mêmes suites passent seules, 210/210, et la suite
   entière passe en `npx jest -w 2`, 1139/1139). Dans l'étage de vérification, jouer `npx jest -w 2`.
 
+- **Un test d'absence d'argument passe par le défaut du paramètre** (vu en 1012) : `refus(e, undefined)` d'un assistant de test
+  à valeur par défaut rend la grille par défaut ; pour éprouver « sans grille », appeler la fonction sans le troisième argument.
+- **Une mutation qui rend une variable inutile ne compile plus** (vu en 1012, M2) : `Tests: 0 total` ne prouve rien ; écrire la
+  mutation de façon que la variable reste lue (`(c ?? 0) + 3000`).
 - **Le manifeste copié a une empreinte notée dans le service** (vu en 1011) : amender le manifeste dans
   `prospera-stories` puis recopier ne suffit pas, `src/socle/manifestes/sources-des-manifestes.ts` porte le commit et le
   sha256 de la source, et `pile-du-moteur.invariant.spec.ts` rougit (Node 24 seulement dans l'étage de vérification) tant
