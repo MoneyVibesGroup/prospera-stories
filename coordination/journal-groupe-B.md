@@ -57,10 +57,27 @@
      Node 24 : 99 suites, 1 364/1 364 ; 11 mutations rouges ; pile `grp-b` : 26/26, cinq jetons RS256 réels ;
      `test:schemas` 16/16. **D-1053 débloquée.** La même voie (hors du jeton) lève la borne pour `comptabilite:*`
      (D-959-4) : ils restent à attribuer, avant B-967.
-  - **Story suivante : STORY-961** (le plan de journaux, `prospera-comptabilite-service`, EPIC-112 ; dépend de 959).
-    À lire avant : `epics-comptabilite-2026-08-27.md` (EPIC-112), fiches 958 et 959, `series-v1` de la plateforme.
-    Si 961 attribue `comptabilite:*` à des rôles, ils entrent **hors du jeton** (`droits-hors-jeton.ts` d'auth) et
-    la garde de la comptabilité doit lire `droits ∪ droitsHorsJeton` (piège ci-dessous).
+  6. ~~STORY-961~~ : **prospera-comptabilite-service #3** (`acafd6f` sur `dev`), contrat annoncé avant la fusion
+     (stories #621). Le plan de journaux.
+     - Le plan est déclaré par référentiel (`plans-de-journaux@1`, donnée du service : SN, SMT, SFD-BCEAO, CIMA ;
+       six natures, codes `AC VE BQ CA OD AN`).
+     - Il est **arrêté** à l'ouverture au JOURNAL, dans la transaction de la tenue (`plans_de_journaux`,
+       append-only). Les séries sont amorcées à ce moment, et la piste dit `referentiel` et `planDeJournaux`.
+     - `GET …/exercices/{e}/journaux` (lecture seule). Un exercice aux CAHIERS n'a pas de journaux : 409
+       `EXERCICE_TENU_AUX_CAHIERS` (D-961-3).
+     - Numérotation : `series-v1` copiée à l'octet, une série par journal et par exercice. Le numéro est émis
+       **dans la transaction de l'acte** : ni trou ni doublon (D-961-5).
+     - La source des droits lit `droits ∪ droitsHorsJeton` (D-961-7).
+     Node 24 : 289/0/3 ; `test:socle` 50/50 (50 actes concurrents, dont 10 abandonnés ⇒ 1 → 40) ; 23 mutations ;
+     pile `grp-b` : `/health` 200. Avant la story : demande de A servie (plateforme #26, `jeu-cabinet-v1`).
+  - **Story suivante : STORY-962** (l'écriture en brouillard, `prospera-comptabilite-service`, EPIC-113 ; dépend de
+    961). « Fini quand » (plan §3) : équilibre **par pièce** ; contrôle d'exercice et de date ; pièce justificative
+    rattachée (`pieceId`). À lire avant : fiches 959 et 961 (« Pour la suite »).
+    - La pièce prend son numéro par `NumerotationDesJournaux.numeroter(portee, journal, session)`, **dans la
+      transaction qui l'écrit** (sinon : trou).
+    - Le cache des droits `(membre, organisation, dv)` reste à poser (D-959-4).
+    - `comptabilite:*` n'est toujours attribué à aucun rôle dans auth : en réel, toute écriture rend 403 jusqu'à
+      ce qu'il le soit (hors du jeton, avant B-967).
 
 ### Lot 2 (ouvert le 2026-11-16)
 
@@ -226,6 +243,12 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
     `reprise:lot:valider` et ne s'attribuent que par lui (D-960-9). Paramètres de `commande` (D-1049-4, « DIST_ADMIN
     et le DG ») : l'annexe B ne nomme pas de droit pour eux ; à vous de choisir entre un droit neuf (à demander ici,
     il entrera hors du jeton) et `roleMetier`.
+
+- **→ A (2026-11-17) : le plan de journaux est déclaré dans la comptabilité, pas dans vos paquets** — **information**,
+  aucune action demandée (STORY-961, D-961-1). Vos paquets de référentiel (balance-service) portent le plan de comptes,
+  pas de plan de journaux ; la comptabilité, seule à en lire un, le déclare par référentiel dans
+  `src/journaux/plans-de-journaux.json` (`plans-de-journaux@1` : SN, SMT, SFD-BCEAO, CIMA ; six journaux). Si vous
+  voulez un jour le porter dans les paquets, dites-le ici : seul le chargeur de la comptabilité changera.
 
 - **→ A (2026-11-17) : la tenue d'un exercice est déclarée dans la comptabilité** — **information**, aucune action
   demandée (STORY-959, D-959-5 et D-959-6). Q1 (D-L3-4) est appliquée côté comptabilité : un exercice ouvert aux
@@ -448,7 +471,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-17, STORY-961 — le plan de journaux, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
-  EPIC-112 ; fiche `stories/STORY-961.md`, D-961-1 → 7). Tout est AJOUT : rien d'existant ne change de forme.
+  EPIC-112 ; fiche `stories/STORY-961.md`, D-961-1 → 7). **Fusionné le 17/11** : comptabilite #3, `acafd6f` sur
+  `dev` (annonce : stories #621). Tout est AJOUT : rien d'existant ne change de forme.
   - **Route neuve** : `GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/journaux` → `{ dossierId, exerciceId,
     referentiel, versionDuPlan, arreteLe, journaux: [{ code, libelle, nature, dernierNumero }] }`. Ouverte à tout
     membre dont la portée couvre le dossier ; au manifeste en `routesLectureSeule`.
@@ -933,6 +957,10 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Questions à l'utilisateur ou au PO
 
+- **STORY-961, le plan de journaux du SMT** (D-961-1) : le système minimal de trésorerie tient, selon l'AUDCIF, un
+  journal de trésorerie (recettes et dépenses) plutôt que des journaux d'achats et de ventes. Choix par défaut : le
+  plan SMT déclare les six journaux, comme SN, puisqu'un exercice SMT tenu AU JOURNAL tient une comptabilité en
+  partie double ; un plan SMT propre se déclarerait en version 2, sans code. Contestable.
 - **STORY-960, les droits d'`automatisations`** (D-960-10) : l'annexe B (et l'annexe A, C7) du PRD distributeur
   nomment `automatisations:regle:gerer`, `:regle:activer`, `:cible:valider`, `:journal:consulter` ; le manifeste
   `manifestes/automatisations.manifest.ts` déclare `:regle:ecrire`, `:regle:activer`, `:arbitrage:decider`,
@@ -964,6 +992,17 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **`series-v1` ne garantit pas l'absence de TROU** (STORY-961) : elle rend des numéros consécutifs et jamais
+  réémis, mais un numéro émis par un acte qui échoue ensuite reste consommé. Pour un journal légal, passer la session
+  de l'acte au dépôt (`depotMongo(collection, { session })`) : l'incrément est alors annulé avec l'acte, et
+  `withTransaction` rejoue la transaction perdante d'une course (erreur transitoire). Prouvé à 50 actes concurrents,
+  dont 10 abandonnés : 1 → 40 ; sans la session, la suite rougit.
+- **Amorcer les séries avant la première pièce** (STORY-961) : deux premières émissions concurrentes dans une
+  transaction se disputeraient l'upsert du document de la série. La comptabilité les amorce à 0 quand elle arrête le
+  plan (`Series.amorcer(serie, 0)`).
+- **Mutation qui ôte un garde de type** (`!chaines(x)` → `!chaines([])`) : `x` n'est plus rétréci, et la mutation
+  rougit par compilation. La réécrire en gardant le rétrécissement (`!chaines(x) && !Array.isArray(x)`).
 
 - **Deux familles de droits de tenant depuis STORY-960** : le jeton (`perms[]`) ne porte que les 24 codes de
   `TenantPermission` ; tout droit neuf est hors du jeton, servi par `/moi/droits` dans `droitsHorsJeton`. Une garde
