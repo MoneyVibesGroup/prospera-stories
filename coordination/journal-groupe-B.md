@@ -28,9 +28,16 @@
      Node 24 vert dans les trois services ; 30 mutations rouges. Pile `grp-b` : `/health` 200 21 à 22 s après le retour
      de Kafka, message consommé par les trois services. Témoin `dev` : notification et paiement restent hors de leur
      groupe. **`notification` est passé à D** (voir « Passations »).
-  - **Story suivante : STORY-958** (le socle de `prospera-comptabilite-service`). **Le dépôt est à créer par
-    l'utilisateur** (plan du lot 3, §6), privé, `MoneyVibesGroup`, avec « Rebase and merge » seul. S'il n'existe pas au
-    rituel de 958, B prend STORY-960 (les 15 rôles du distributeur dans auth, sans dépendance) et l'écrit ici.
+  3. ~~STORY-958~~ : **prospera-comptabilite-service #1** (`8f36ef9` sur `dev` ; `main` et `dev` amorcées en
+     `08c6c54`), contrat annoncé avant la fusion (stories #604). Le socle de la comptabilité : garde globale sur l'état
+     publié (`garde-etat-publie-v1`), cloisonnement par dossier ET par exercice (résolus par dossier-service avec le
+     jeton du membre), référentiel du dossier (`GET …/dossiers/{d}/exercices/{e}/referentiel`), piste d'audit
+     append-only avec `provenance` (Q3), manifeste `comptabilite`, **port 3420** (D-958-1). Node 24 180/0/2, socle
+     20/20 sur MongoDB 8.0 rs0 et Kafka, 20 mutations ; pile `grp-b` : `/health` 200.
+  - **Story suivante : STORY-959** (les exercices et la tenue, dans `prospera-comptabilite-service`). À lire avant :
+    `stories/STORY-958.md`, « Pour la suite ». La première écriture : `ResolveurDePortee` pour la portée,
+    `PisteAuditService.consigner(portee, …, session)` dans la transaction de l'acte, droits par `/moi/droits`, premier
+    fait par une outbox, schéma dans `contrat/schemas/` et annonce ici avant la fusion.
 
 ### Lot 2 (ouvert le 2026-11-16)
 
@@ -129,7 +136,9 @@
 `prospera-platform-catalog-service`, `prospera-paiement-service`, `prospera-plateforme` (à créer, STORY-931),
 `prospera-notification-service` et `prospera-auth-service` (reçus de A, voir Passations).
 
-**Lot 3** : **`prospera-notification-service` n'est plus à B** depuis la fusion de STORY-957 (17/11), il est à D
+**Lot 3** : **`prospera-comptabilite-service`** (neuf, créé par l'utilisateur ; `main` et `dev` amorcées par STORY-958,
+checkout du poste en `core.autocrlf=false`, pile propre au dépôt : `docker compose -p grp-b --profile comptabilite`).
+**`prospera-notification-service` n'est plus à B** depuis la fusion de STORY-957 (17/11), il est à D
 (D-L3-3). B n'y écrit plus ; une demande passe par le journal de D. Pendant ce lot, la même
 session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
@@ -172,6 +181,15 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   membre qui reçoit le rôle par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif).
 
 ## Demandes aux autres groupes
+
+- **→ A (2026-11-17) : `prospera-comptabilite-service` existe, port 3420** — **information**, aucune action avant
+  B-967 (STORY-958, D-958-8). Le service n'entre pas encore dans la recette : le catalogue ne connaît pas encore le
+  module et la comptabilité ne publie rien. À la première recette croisée (la balance dérivée, B-967), B demandera ici :
+  le service dans `docker-compose.recette.yml` (port 3420, `DOSSIER_SERVICE_URL`, `AUTH_*`) et `comptabilite-service`
+  dans l'`AUTH_AUDIENCE` de l'IdP. **Ce que la comptabilité lit de dossier-service dès maintenant** (sans rien vous
+  demander) : `GET /dossiers/{id}` (`id`, `orgId`, `referentielComptable`) et `GET /dossiers/{id}/axes?exerciceId=`
+  (`effectifs.decision.systemeComptable`, `effectifs.herite`, `effectifs.exercice`), avec le jeton du membre. Un
+  renommage de ces champs est à annoncer à B.
 
 - **→ D (2026-11-17) : `prospera-notification-service` est à vous, D-1051 est débloquée** — **information**.
   Passation écrite plus haut (« Passations ») : dernier commit de B sur `dev` `5e6c553` (STORY-957, notification #89).
@@ -364,7 +382,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-17, STORY-958 — un module NEUF, `comptabilite`, annoncé AVANT la fusion du code**
-  (`prospera-comptabilite-service`, dépôt neuf). Tout est AJOUT : rien d'existant ne change.
+  (`prospera-comptabilite-service`, dépôt neuf). **Fusionné le 17/11** : comptabilite #1, `8f36ef9` sur `dev`
+  (annonce : stories #604). Tout est AJOUT : rien d'existant ne change.
   - **Manifeste neuf** : `manifestes/comptabilite.manifest.ts` (code `comptabilite`, sans numéro M ; copie à l'octet
     dans le service, `src/module.manifest.ts`). Neuf droits `comptabilite:*` **déclarés, pas encore attribuables**
     (borne du jeton, jusqu'à l'étape 4 de l'ADR « droits hors du jeton »). Le catalogue ne le connaît pas encore : tant
@@ -802,6 +821,20 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **`prettier --write "src/**/*.ts"` reformate aussi `src/vendor/`** (STORY-958) : la copie épinglée de la garde
+  partagée a changé d'empreinte (`01f9e769…` au lieu de `a830c449…`). Seul le test d'empreinte l'a vu, sous Node 24
+  (sur le poste en Node 25, la suite qui le porte ne charge pas, à cause du binding natif). `src/vendor/` va dans
+  `.prettierignore` de tout service qui en a un ; ne jamais formater tout `src/`.
+- **Un `AppModule` avec `ConfigModule.forRoot({ validate })` valide l'environnement dès son IMPORT** : un spec qui
+  l'importe en tête plante le worker jest (« child process exceptions »). Le charger par `require` après avoir posé un
+  environnement complet (STORY-958, `gardes.spec.ts`).
+- **Les ports de développement 3410 → 3419 sont pris** (STORY-958) : 3410 → 3416 et 3419 par les services de C et de D,
+  3417 par `prospera-ia-service`, 3418 par `prospera-ia-centrale` (spine de l'IA commune). Un port proposé par un plan
+  se vérifie aussi dans les spines et les manifestes, pas seulement dans les compose.
+- **Mutations sous ts-jest** : une mutation qui retire le dernier usage d'un import, ou compare deux littéraux sans
+  recouvrement, rougit par compilation (`noUnusedLocals`, TS2367). Muter en gardant l'usage (`&& false`, `as string`,
+  `return` avant le `throw`) pour rougir sur l'assertion (STORY-958).
 
 - **Client de Confluent : fermer un client admin est SYNCHRONE** (destruction librdkafka) : de 0,45 à 3,8 s, Kafka
   arrêté, et la boucle d'événements est bloquée pendant ce temps (STORY-957). Un contrôle de santé qui crée et ferme

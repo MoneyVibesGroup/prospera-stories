@@ -976,6 +976,18 @@ reserved_ranges:
       Pile grp-b : Kafka arrêté, services redémarrés, Kafka relancé ; /health 200 en 21 à 22 s, message consommé par
       les trois (offset 2/2) ; témoin dev : notification et paiement hors de leur groupe 345 s après. Passation de
       notification à D (D-L3-3), D-1051 débloquée. Lot 3 de B, n° 2 (EPIC-155). NON SLOTTÉE.
+  - range: "STORY-958"
+    status: "RÉSERVÉ"
+    owner: "Le socle de prospera-comptabilite-service — Node 24, client de Confluent, MongoDB 8.0 en jeu de répliques, Karapace ; garde sur l'état publié (garde-etat-publie-v1), manifeste comptabilite, cloisonnement par dossier et par exercice, référentiel du dossier, piste d'audit qui distingue la proposition de la machine du choix de l'utilisateur ; port 3420 (prospera-comptabilite-service, neuf)"
+    source_doc: "prospera-stories/stories/STORY-958.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-comptabilite-service #1 (dev 8f36ef9 ; main et dev amorcées en 08c6c54) ;
+      contrat annoncé avant la fusion (stories #604 : manifeste comptabilite, route du référentiel). Node 24 :
+      180 passés / 0 échec / 2 sautés ; suite du socle 20/20 sur MongoDB 8.0 rs0 et Kafka sans création automatique
+      de topics (état publié projeté en 2,7 s, portée par dossier et par exercice, piste en transaction, append-only) ;
+      20 mutations rouges. Pile grp-b : /health 200 ; Kafka arrêté 503 en 3,0 s, relancé 200 en 6 s. Port 3420
+      (3417 et 3418 réservés à l'IA commune, D-958-1). Lot 3 de B, n° 3 (EPIC-111). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
