@@ -20,8 +20,10 @@
 //   (`provenance` de chaque entrée, STORY-958). C11 : les capacités d'IA (EPIC-117, 118) viendront de
 //   `prospera-ia-service` ; aucune n'est déclarée tant qu'elles ne sont pas dans un lot.
 // - Droits (C7) : DÉCLARÉS, pas encore attribuables. La borne du jeton bloque tout droit de tenant neuf jusqu'au
-//   retrait de `perms[]` (ADR « droits hors du jeton », étape 4). Le socle ne les lit pas encore ; la première route
-//   d'écriture (STORY-959) les lira par `/moi/droits`.
+//   retrait de `perms[]` (ADR « droits hors du jeton », étape 4). Le service les lit par `/moi/droits`, jamais dans le
+//   jeton : depuis STORY-959, toute route qui écrit déclare le sien (`comptabilite:exercice:ouvrir` pour ouvrir un
+//   exercice), sinon elle est fermée. Tant qu'auth-service ne les attribue à aucun rôle, aucun geste d'écriture ne
+//   passe (403 `DROIT_INSUFFISANT`).
 
 export const MANIFESTE_COMPTABILITE = {
   code: 'comptabilite',
@@ -92,6 +94,8 @@ export const MANIFESTE_COMPTABILITE = {
   // C2, C13 point 5 : routes autorisées en LECTURE_SEULE (sous /api/v1). Une comptabilité tenue reste lisible.
   routesLectureSeule: [
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/referentiel',
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/tenue', // STORY-959
+    'GET /api/v1/dossiers/{dossierId}/tenues', // STORY-959 : l'historique des tenues et des bascules
   ],
 
   // C13, point 7 (chemins vus par le service). À créer.

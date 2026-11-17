@@ -995,6 +995,14 @@ reserved_ranges:
       de topics (état publié projeté en 2,7 s, portée par dossier et par exercice, piste en transaction, append-only) ;
       20 mutations rouges. Pile grp-b : /health 200 ; Kafka arrêté 503 en 3,0 s, relancé 200 en 6 s. Port 3420
       (3417 et 3418 réservés à l'IA commune, D-958-1). Lot 3 de B, n° 3 (EPIC-111). NON SLOTTÉE.
+  - range: "STORY-959"
+    status: "RÉSERVÉ"
+    owner: "Les exercices et la tenue — ouvrir un exercice à la comptabilité, tenue exclusive aux cahiers OU au journal (TENUE_EXCLUSIVE), bascule d'un exercice au suivant, choix consigné dans la piste avec sa provenance ; droits lus par /moi/droits (prospera-comptabilite-service)"
+    source_doc: "prospera-stories/stories/STORY-959.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🚧 EN COURS le 2026-11-17 — contrat annoncé avant la fusion du code (routes neuves, manifeste amendé). Lot 3 de
+      B, n° 4 (EPIC-111). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
