@@ -1,6 +1,6 @@
 # STORY-960 : les 15 rôles du distributeur dans auth
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (une table de 131 droits, la borne du jeton contournée sans la relever, un champ de contrat et
 un claim ajoutés)
@@ -114,6 +114,12 @@ ne les tient pas.
   `:execution:annuler`. Auth suit l'annexe B (le critère de la story). Le manifeste est à réaligner avec la story du
   module (question dans le journal de B). Les autres manifestes du distributeur déclarent bien tous les droits de
   l'annexe, nouveaux compris (vérifié par script le 17/11).
+- **D-960-12 : le distributeur n'a toujours pas de rôle métier par défaut** (STORY-166 tient). Un `TENANT_ADMIN` ou
+  un `TENANT_USER` sans rôle `DIST_*` attribué n'a **aucun** droit du distributeur, ni par le jeton ni par
+  `/moi/droits` : la table rôle socle → droits que `reseau` avait (D-1032-2 : `TENANT_ADMIN` les cinq `reseau:*`,
+  `TENANT_USER` la consultation) n'est **pas** reprise. FR-4 : « un utilisateur sans rôle ne voit aucun écran
+  métier ». Le dirigeant attribue les rôles (`PUT /organizations/me/members/{userId}/tenant-role`). Contestable : poser
+  `DIST_ADMIN` par défaut au `TENANT_ADMIN` du distributeur est une ligne de `ROLE_METIER_PAR_DEFAUT`.
 - **D-960-11 : un changement du socle à la livraison n'avance pas `dv` (D-949-3 tient).** Le déploiement de 960 change
   les droits de tous les membres du distributeur sans événement : les caches des services se renouvellent à leur
   terme (60 s au plus), les `perms[]` des jetons au renouvellement (15 min au plus).
@@ -131,8 +137,60 @@ ne les tient pas.
 
 ## Livraison
 
-(à compléter)
+- **auth #42**, fusionnée en « Rebase and merge » : `cf8e001` (les rôles) et `8d48710` (e2e) sur `dev` ; tête de la
+  PR `d07a488`, arbre identique à `dev` après rejeu.
+- Contrats annoncés avant la fusion : stories #616.
 
 ## Preuves
 
-(à compléter)
+- **Node 24** (étage `verification`, image construite depuis `git archive` de la tête) : **99 suites, 1 364/1 364**,
+  `tsc` et `nest build` verts. Sur le poste (Node 25), mêmes résultats hors des quatre suites du client de Confluent
+  (binding natif).
+- **e2e** (Node 24) : 16 suites sur 18, 267/269. AC 11 et AC 12 de 166 revus (le jeton ne porte que ses droits du
+  jeton ; `DIST_MARKETING` n'est plus vide). Cinq suites ne compilaient plus depuis STORY-942 (`TenantRolesService`
+  absent du module de test de `UsersController`) : réparées. Restent rouges, **déjà rouges sur `dev`** :
+  `health.e2e` (exige MongoDB, Redis et Kafka réels) et `auth-register.e2e` (500 sur l'inscription simulée, même
+  échec sur `origin/dev`, vérifié dans un worktree).
+- **Lint** des fichiers touchés : vert.
+- **Mutations : 11/11 rougissent sur une assertion** (aucune par compilation) : droits hors jeton portés par le jeton ;
+  `estPorteParLeJeton` ouvert à tout le catalogue ; la résolution ne retire plus les données privées ; la surcharge ne
+  les refuse plus ; claim `roleMetier` absent ; `issueSession` transmet l'origine au lieu du code ; l'événement perd
+  `roleMetierAttribue` ; le superviseur reçoit les rémunérations ; le contrôleur sort des interdits ; `DIST_ADMIN`
+  reçoit le journal des paiements ; `droitsHorsJeton` mal servi.
+- **La table contre le PRD** : `annexe-b2-distributeur.fixture.json` est extrait de l'annexe B.2 par un script
+  indépendant (131 droits, 15 rôles) ; le test compare chaque rôle à cette extraction.
+- **Pile `grp-b`** (MongoDB 8.0 en jeu de répliques, Kafka 3.9, Redis, Karapace 6.2, MinIO Chainguard, Mailhog ;
+  image `runtime` de la branche) : `/health` 200 (MongoDB, Redis, Kafka `up`) ; le semis aligne les 17 rôles au
+  démarrage. **Preuve de bout en bout, 26 vérifications sur 26** (`preuve.mjs`) :
+  - un fondateur s'inscrit, vérifie son e-mail ; l'opérateur reclasse l'organisation au distributeur ;
+  - le dirigeant invite cinq membres et leur attribue `DIST_SUPERVISEUR`, `DIST_GEST_ENTREPOT`, `DIST_ADMIN`,
+    `DIST_DAF`, `DIST_COMMERCIAL` ; chacun accepte son invitation ;
+  - **cinq vrais jetons RS256**, chacun avec son `roleMetier` et `dv = 2`, de 924 à 1 146 octets. Le DAF a 43 droits
+    et son jeton n'en porte que 6 (paiement) ; le superviseur, 23 droits et 1 dans le jeton ; le gestionnaire
+    d'entrepôt, 11 droits et aucun dans le jeton ; le jeton du fondateur sans rôle n'a pas de `roleMetier` ;
+  - `/moi/droits` : `droits` = `perms[]` du jeton ; le superviseur n'a ni rémunérations ni commissions ; le
+    gestionnaire d'entrepôt ni prix d'achat ni marge ; `DIST_ADMIN` aucune donnée métier ; le commercial son
+    portefeuille et ses commandes, pas de pilotage ;
+  - la surcharge `equipe:remuneration:consulter` sur `DIST_SUPERVISEUR` : **422 `DONNEE_PRIVEE_HORS_DU_ROLE`** ;
+  - un droit retiré par surcharge disparaît de `/moi/droits` avec l'ancien jeton, `dv` 2 ⇒ 3.
+- **Sur le fil** (`identity.droits.changed`, organisation de la preuve) : 21 messages, clé `organisationId`.
+  `ROLE_METIER` porte `roleMetierAttribue` = le rôle attribué (`DIST_ADMIN`, `DIST_COMMERCIAL`, `DIST_DAF` ×2,
+  `DIST_GEST_ENTREPOT`, `DIST_SUPERVISEUR`) ; `APPARTENANCE` et `VERTICAL` : `null` ; `SURCHARGE` : le rôle de chacun.
+- **Karapace** : les sept schémas d'`origin/dev` enregistrés d'abord (version 1), puis ceux de la branche :
+  `schemas:compatibilite` tous compatibles BACKWARD, `schemas:enregistrer` pose la **version 2** de
+  `identity.droits.changed-value` (avec `roleMetierAttribue`), les six autres inchangés ; `test:schemas` **16/16**.
+  ⚠ Témoin : Karapace 6.2 juge encore compatible une version où `roleMetierAttribue` deviendrait REQUIS (piège connu,
+  STORY-942) ; c'est le test unitaire « un événement antérieur, sans le champ, reste valide » qui garde ce cas.
+- Pile descendue avec ses volumes (`down -v`), images retirées, **verrou Docker rendu**.
+
+## Pour la suite
+
+- **D-1053** : lire `droits ∪ droitsHorsJeton` par `/moi/droits` (« Ce que D lit pour D-1053 »). Le jeton porte
+  `roleMetier`.
+- **B, paiement (963, 965)** : `paiement:creance:consulter` et `paiement:credit-tiers:imputer` sont **hors du
+  jeton**. Les routes de la Créance qui les exigent devront lire `/moi/droits` (patron de 949, ou garde de 959), pas
+  `perms[]`.
+- **B, comptabilité (961 → 970)** : attribuer `comptabilite:*` ne bute plus sur la borne (D-960-2) ; ils entreront hors
+  du jeton, et la garde de la comptabilité devra lire `droits ∪ droitsHorsJeton`.
+- **Catalogue (B)** : la double lecture de 949 compare `droits ∪ droitsPlateforme` au jeton, inchangé : aucun écart
+  nouveau. Le jour où l'état publié bascule sur la résolution, `droitsEffectifs` devra inclure `droitsHorsJeton`.

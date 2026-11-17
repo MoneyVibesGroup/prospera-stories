@@ -1051,8 +1051,12 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-960.md"
     reserved_on: "2026-11-17"
     note: >
-      EN COURS le 2026-11-17 — contrat annoncé avant la fusion du code (journal de B, « ⚠ Contrats »). Lot 3 de B,
-      n° 5 (EPIC-223). Débloque D-1053. NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — auth #42 (dev cf8e001, 8d48710) ; contrat annoncé avant la fusion (stories #616).
+      Table de l'annexe B (131 droits) appliquée par la résolution du jeton et de /moi/droits ; 118 droits neufs hors
+      du jeton (droitsHorsJeton, borne 41 ≤ 44) ; claim roleMetier ; données privées retirées et refusées
+      (DONNEE_PRIVEE_HORS_DU_ROLE) ; roleMetierAttribue sur identity.droits.changed@1 (version 2, BACKWARD).
+      Node 24 : 99 suites, 1364/1364 ; 11 mutations rouges ; pile grp-b : 26/26, cinq jetons RS256 réels ;
+      Karapace : test:schemas 16/16. Lot 3 de B, n° 5 (EPIC-223). D-1053 débloquée. NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
