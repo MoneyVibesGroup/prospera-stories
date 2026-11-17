@@ -22,8 +22,14 @@
 // - Droits (C7) : DÉCLARÉS, pas encore attribuables. La borne du jeton bloque tout droit de tenant neuf jusqu'au
 //   retrait de `perms[]` (ADR « droits hors du jeton », étape 4). Le service les lit par `/moi/droits`, jamais dans le
 //   jeton : depuis STORY-959, toute route qui écrit déclare le sien (`comptabilite:exercice:ouvrir` pour ouvrir un
-//   exercice, `comptabilite:ecriture:saisir` pour saisir un brouillard depuis STORY-962), sinon elle est fermée. Tant
-//   qu'auth-service ne les attribue à aucun rôle, aucun geste d'écriture ne passe (403 `DROIT_INSUFFISANT`).
+//   exercice, `comptabilite:ecriture:saisir` pour saisir, corriger ou abandonner un brouillard depuis STORY-962 et 964,
+//   `comptabilite:ecriture:valider` pour valider et contre-passer depuis STORY-964), sinon elle est fermée. La
+//   vérification de la piste chaînée exige `comptabilite:piste:consulter` (STORY-964). Pas de séparation des pouvoirs
+//   au niveau de l'acteur (D-964-7) : la piste dit qui a saisi et qui a validé. Tant qu'auth-service ne les attribue à
+//   aucun rôle, aucun geste d'écriture ne passe (403 `DROIT_INSUFFISANT`).
+// - Inaltérabilité (STORY-964) : une écriture validée porte son numéro définitif, continu et sans trou par journal et
+//   par exercice ; elle ne se modifie ni ne se supprime (409 `ECRITURE_VALIDEE_INALTERABLE`), elle se contre-passe. La
+//   piste d'audit est chaînée par empreinte (SHA-256), une chaîne par exercice, et se vérifie par une route.
 // - Pièce justificative (STORY-962) : chaque écriture cite un `pieceId` de `document-service`, vérifié dans le dossier
 //   à la saisie (`GET /api/v1/dossiers/{dossierId}/pieces?pieceId=`, jeton du membre). document-service est du
 //   socle, pas un module : il n'entre pas dans `depends`.
@@ -103,6 +109,7 @@ export const MANIFESTE_COMPTABILITE = {
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/journaux', // STORY-961 : le plan de journaux
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ecritures', // STORY-962 : les écritures de l'exercice
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ecritures/{ecritureId}', // STORY-962 : une écriture
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/piste/verification', // STORY-964 : la piste chaînée
   ],
 
   // C13, point 7 (chemins vus par le service). À créer.
