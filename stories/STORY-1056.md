@@ -23,9 +23,10 @@ catalogue `contrats-distributeur-v1` (STORY-1045).
 
 ## Où en est-on (pour une reprise après interruption)
 
-- [x] Rituel, lecture, fiche, annonce « ⚠ Contrats » (cette PR de docs).
-- [ ] Code sur `MNV-1056` (ventes) : saisie, validation branchée, émission des bons, outbox, schémas, copie de
-  `contrats/distributeur/`, tests.
+- [x] Rituel, lecture, fiche, annonce « ⚠ Contrats » (prospera-stories #654, `main` bb02021).
+- [x] Code sur `MNV-1056` (ventes), poussé (6f3db76) : saisie, validation branchée, émission des bons, outbox,
+  schémas, copie de `contrats/distributeur/`, tests ; tsc et lint verts en local.
+- [x] Verrou Docker pris à 16:01 (libre au moment de lever, B l'avait rendu).
 - [ ] Preuves Node 24 (sous le verrou Docker), pile `grp-d`, rejeu depuis `origin/dev`.
 - [ ] PR ventes fusionnée en rebase ; PR de docs finale (fiche `done`, tracker, journal).
 
