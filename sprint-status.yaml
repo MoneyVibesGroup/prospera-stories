@@ -1067,6 +1067,16 @@ reserved_ranges:
       prospera-sinistres-service#10 (dev 85206fc). Formulaire commun, formulaire de secours unique, doublon par
       empreinte HMAC (Prospera et LC), réserves jamais bloquantes, urgence en tête des files. Pile verte, rejouée
       depuis dev. Lot 2 de C, n° 11. NON SLOTTÉE.
+  - range: "STORY-1001"
+    status: "RÉSERVÉ"
+    owner: "Ouvrir : recevabilité en quatre questions, décision de garantie, pièces attendues et courrier (assurance, sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1001.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-assurance-service#24 (dev 8d0c598), prospera-sinistres-service#12 (dev a873dbc)
+      ; correctif #11 (codes de type). Recevabilité lue chez assurance, décision de garantie motivée, pièces attendues
+      satisfaites par ged.piece.controlee ; constats posés par commande, plus en base. Pile verte, rejouée depuis dev.
+      Lot 2 de C, n° 12. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"

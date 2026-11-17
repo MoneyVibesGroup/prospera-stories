@@ -46,8 +46,9 @@
   20. ~~STORY-999~~ : **sinistres #9** (relances, attente d'un tiers, dossiers muets, agents inactifs ; manifeste #573) ;
   21. ~~STORY-1000~~ : **plateforme #20, liaison #6, sinistres #10** (formulaire commun, secours, doublon Prospera et
      LC par empreinte HMAC, réserves, urgence) ;
-  22. **STORY-1001** ← **suivante** : ouvrir (recevabilité, garantie, pièces attendues et courrier ; provision
-     d'ouverture).
+  22. ~~STORY-1001~~ : **assurance #24, sinistres #12** (+ correctif #11 des codes de type) ; recevabilité,
+     garantie, pièces attendues, courrier ; constats posés par commande ;
+  23. **STORY-1002** ← **suivante** : attribuer (charge pondérée, réaffectation motivée ; la prise en instruction).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -282,6 +283,16 @@ seulement.
     `accuse` ; nouveaux refus `DECLARATION_INCOMPLETE`, `RECEPTION_FUTURE`, `FORMULAIRE_SECOURS_DEJA_SAISI`,
     `DOUBLON_PROBABLE`, `MOTIF_ECRIT`, `DOSSIER_HORS_DOUBLON`.
 
+- **2026-11-17, STORY-1001 — un port HTTP entre deux services, et un fait de `ged` consommé.**
+  - `sinistres` lit `GET /api/v1/assurance/recevabilite` (`ASSURANCE_URL`) en **transmettant le jeton de l'agent** :
+    ⚠️ pour B (installation, IdP) : le jeton doit porter l'audience `assurance-service` ; sinon la recevabilité reste
+    « injoignable » (jamais un refus).
+  - `sinistres` consomme `ged.piece.controlee@1` (groupe `sinistres-service.liaison`, D-1001-7) : les pièces validées
+    au contrôle posent `PIECES_COMPLETES` — les preuves n'ont plus à poser ce constat en base.
+  - Nouvelles routes : `POST /api/v1/sinistres/dossiers/{id}/recevabilite`, `…/garantie` ; manifeste `assurance` amendé
+    (route de lecture `recevabilite`).
+  - ⚠️ STORY-1000 corrigée (#11) : codes de type `MRH`, `ACCIDENT_TRAVAIL` (ceux de la démo et d'`assurance`).
+
 ## Questions à l'utilisateur ou au PO
 
 Retenu par défaut le 2026-11-15, selon la règle de l'utilisateur (« appliquer ce que je recommande, contestable après
@@ -304,6 +315,10 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-1001-1 → D-1001-8** (`stories/STORY-1001.md`) : `assurance` calcule, `sinistres` lit par un port (jeton
+  transmis) ; recevabilité ajoutée et datée ; pièce reçue = validée au contrôle ; délai de la garantie en jours
+  calendaires, jamais sous le plancher ; différés nommés ; pièce de santé = première pièce médicale attendue ; un seul
+  consommateur supervisé ; rôles du circuit du jeton chez `assurance`.
 - **D-1000-1 → D-1000-7** (`stories/STORY-1000.md`) : déclaration rangée au dossier, jamais dans un fait ; doublon
   par empreinte HMAC à clé d'instance partagée ; le choix de l'agent dans la même commande ; délais de déclaration en
   paramètre (planchers légaux), celui de la garantie avec 1001 ; pas d'envoi de l'accusé ici ; formulaire facultatif
