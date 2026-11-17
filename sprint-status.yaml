@@ -1180,6 +1180,15 @@ reserved_ranges:
       ni corrigée ni supprimée, garde de la collection sur le vrai pilote ; piste chaînée intacte puis rompue à la
       main, cinq ruptures détectées) ; 45 + 7 mutations rouges. Pile grp-b : /health 200. Lot 3 de B, n° 9
       (EPIC-113, 120). NON SLOTTÉE.
+  - range: "STORY-965"
+    status: "RÉSERVÉ"
+    owner: "La Créance (2) — paiement.creance.changed@1 (état absolu, révision croissante, publié dans la transaction des sept gestes qui changent une Créance à source ; au registre Karapace en BACKWARD) ; le crédit du tiers et ses compteurs (GET /creances/tiers/{tiersId}/compteurs, règle encours-v1 copiée à l'octet, sans encours) sous paiement:creance:consulter lu hors du jeton (/moi/droits) (prospera-paiement-service)"
+    source_doc: "prospera-stories/stories/STORY-965.md"
+    reserved_on: "2026-11-17"
+    note: >
+      EN COURS le 2026-11-17 — annonce « ⚠ Contrats » avant le code (topic paiement.creance.changed, route des
+      compteurs, collection etats_de_creance, variables facultatives AUTH_SERVICE_URL et AUTH_SERVICE_TIMEOUT_MS ;
+      manifeste amendé). Lot 3 de B, n° 10 (EPIC-231). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
