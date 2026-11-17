@@ -44,9 +44,20 @@
   unitaires, 11 e2e, 32 d'intégration sur MongoDB réel ; 12/12 mutations. Pile `grp-d` (puis rejouée depuis `dev`) :
   `PLAFOND_CREDIT_DEPASSE` sur appel réel, l'acte relu garde sa version 1 après le passage à la version 2. Décisions
   D-1049-1 → 11 (fiche). Verrou Docker pris sans attente (B l'avait rendu), rendu.
-- **Suivante : STORY-1050** 🚚 les dettes de `reseau-service` (EPIC-145, 264 ; sans dépendance) : garde sur l'état
-  publié (D-1030-2) ; `/moi/droits` à la place de la table rôle → droits (D-1032-2) ; `reseau.commercial.changed@1`
-  republié quand seul l'état du compte change (D-1034-5). Puis 1051 (prévenir l'assuré, `notification`, reçu de B).
+- **STORY-1050** ✅ 🚚 — les dettes de `reseau-service` (PR reseau-service#13, `dev` a3d2f59 ; PR #14, `dev` 49c4d01 ;
+  annonce « ⚠ Contrats » #613 avant le code). **Soldées : D-1030-2, D-1032-2, D-1034-5.** La garde lit l'état publié
+  seul (`etat-publie.changed.<espace>@1`, `garde-etat-publie-v1` copiée à l'octet) ; les droits viennent de
+  `GET /moi/droits` (`droits ∪ droitsHorsJeton`, cache 60 s, 503 `DROITS_INDISPONIBLES`) ; la table rôle → droits est
+  retirée ; `reseau.commercial.changed@1` est republié quand seul l'état du compte change, dans la transaction du fait
+  `identity.*`. Node 24 : 463 unitaires, 17 e2e, 118 d'intégration sur MongoDB réel ; 17/17 mutations. Pile `grp-d`
+  (rejouée depuis `dev`, témoin d'`origin/dev`) : refus sur appels réels, droits lus de `/moi/droits`, trois faits du
+  commercial lus sur Kafka. Décisions D-1050-1 → 10 (fiche). Verrou Docker pris sans attente (B l'avait rendu), rendu.
+  ⚠️ En réel, les routes de `reseau` qui exigent un droit répondent 403 jusqu'à B-960 (« → B »).
+- **Suivante : STORY-1051** 🛡 prévenir l'assuré (1), dans `prospera-notification-service` (EPIC-220). **La
+  passation de B est écrite** (journal de B, « Passations », 2026-11-17 : dernier commit de B sur `dev` `5e6c553`,
+  STORY-957, notification #89) : 1051 est débloquée ; la constater au rituel (PR ouvertes, dernier commit), puis
+  ajouter le dépôt aux « Dépôts tenus ». Points d'entrée selon B : `src/modules/declenchement/`, modèles système ; AC-5
+  refuse toute minuterie (relances de 5 jours par une file BullMQ). Puis 1052 (séries hébergées).
 
 ### Lots 1 et 2
 
@@ -123,10 +134,18 @@
     `recouvrement` la copieront de même. Ce qui en est exclu et pourquoi : D-1047-3. Reste à y ajouter, en `1.x`, l'exclusion du
     montant dérogé pour l'évaluation du blocage (avec la story de `recouvrement`), et la correspondance avec les faits
     de B-963 et B-965 quand ils seront fixés.
-  - **Reste à faire** : le volet Reprise
-    de l'import réseau (après B-947, D-1041-3) ; la republication de `reseau.commercial.changed@1` quand seul l'état
-    du compte change (D-1034-5) ; les droits hors du jeton (B-949) à la place de la table rôle → droits (D-1032-2) ;
-    la bascule de la garde sur l'état publié (D-1030-2).
+  - **Reste à faire** : le volet Reprise de l'import réseau (après B-947, D-1041-3 ; STORY-1055).
+    ~~D-1034-5, D-1032-2, D-1030-2~~ : **soldées par STORY-1050** (`dev` a3d2f59, 49c4d01) :
+    - la garde de `reseau` lit l'état publié seul (`src/socle/etat-des-modules/`, projection `socle_etats_publies`,
+      copie `src/vendor/garde-etat-publie/` à `garde-etat-publie-v1`) ; `socle_etat_des_modules` (ancienne projection
+      d'`entitlement.changed`) n'est plus lue : la supprimer d'une base existante est sans risque ;
+    - les droits viennent de `/moi/droits` (`src/socle/droits-du-membre/`, `AUTH_SERVICE_URL` requise) ; aucune table
+      de rôles dans le service ; **1053** n'aura qu'à vérifier que la table d'accès de B-960 rend les cinq `reseau:*`
+      aux bons rôles (rien à coder côté garde) ;
+    - le commercial suit son compte (`personnes/comptes-des-commerciaux.ts`, suites inscrites dans
+      `socle/identite/suites-de-l-identite.ts`) ; `comptePublie` retenu sur la fiche ;
+    - la doublure de recette de `/moi/droits` est dans l'émetteur du profil `recette` (revendications
+      `droitsDeRecette`, `droitsHorsJetonDeRecette`).
   - Outils : banc HTTP d'intégration sur MongoDB réel (`test/integration/application-http.ts`), émetteur de jetons de
     recette (profil compose `recette`), Karapace (profil `registre`).
   - **Assurance (lot 3), pour mémoire** : D tient aussi `prospera-assureur-fictif` (la démo, EPIC-204), qui n'est pas
@@ -146,8 +165,8 @@
       `commande.engagement-tiers.changed@1` par une outbox et la copie de `contrats/distributeur/` ;
     - l'adaptateur de `stock` est `ReservationStockNonBranchee` (motif `RESERVATION_NON_BRANCHEE`) tant que l'API de
       réservation de `stock` n'existe pas ; la projection des droits garde le voisin `stock` (`MODULES_VOISINS`).
-  - **Prochaine story du distributeur : 1050** (les dettes de `reseau-service`), puis 1052 (séries hébergées) et 1056
-    (la commande (1)).
+  - **Prochaine story du distributeur : 1052** (séries hébergées), puis 1053 (les rôles, après B-960) et 1056 (la
+    commande (1)).
 
 ## Demandes aux autres groupes
 
@@ -159,7 +178,10 @@
   `reseau:decoupage:modifier`, `reseau:affectation:modifier`, `reseau:portee:attribuer`. Ce que la table retirée donnait
   (D-1032-2), à reprendre dans la table d'accès de l'annexe B : `TENANT_ADMIN` les cinq, `TENANT_USER`
   `reseau:noeud:consulter`. `reseau` ne lit pas `perms[]` : il lui suffit que `/moi/droits` rende ces codes, que la
-  borne du jeton (44) les laisse entrer dans `perms[]` ou non.
+  borne du jeton (44) les laisse entrer dans `perms[]` ou non. **Mis à jour après l'annonce de B-960** (`/moi/droits`
+  1.1.0, champ `droitsHorsJeton`) : `reseau` lit `droits ∪ droitsHorsJeton` depuis reseau-service#14 ; les `reseau:*`
+  peuvent donc rester hors du jeton. Reste à vérifier, à la fusion de B-960, qu'ils figurent bien dans la table
+  d'accès des 15 rôles.
   **→ C (2026-11-17), information** : `reseau.commercial.changed@1` se republie quand seul l'état du compte change
   (« ⚠ Contrats ») ; `sinistres` n'en dépend pas.
 
@@ -229,7 +251,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-17, STORY-1050) avant la fusion du code — `reseau-service` : la garde lit l'état publié, les
+- **PUBLIÉ (2026-11-17, STORY-1050, reseau-service#13, `dev` a3d2f59, et #14, `dev` 49c4d01) ; ANNONCÉ avant la
+  fusion du code (prospera-stories #613) — `reseau-service` : la garde lit l'état publié, les
   droits viennent de `/moi/droits`, le commercial est republié quand son compte change.** Aucun topic, aucune route,
   aucun champ n'est renommé ni retiré du fil ; ce qui change, ce sont **trois comportements**.
   - **La garde du module** lit `etat-publie.changed.<espace>@1` (contrat figé `contrat-etat-publie-v1`, groupe neuf
@@ -244,7 +267,8 @@
     `reseau:affectation:modifier`, `reseau:portee:attribuer`) sont lus par `GET {AUTH_SERVICE_URL}/api/v1/moi/droits`
     (B-949), avec le jeton de l'appelant ; seuls les `droits` de tenant comptent. La table rôle → droits du service est
     retirée. Cache 60 s au plus, relu sur un `dv` plus récent, invalidé par `identity.droits.changed@1` (groupe
-    `reseau-service.droits-membres`). **Code neuf** : 503 `DROITS_INDISPONIBLES` (auth injoignable, délai de 2 s,
+    `reseau-service.droits-membres`). Depuis #14 : les droits effectifs sont `droits ∪ droitsHorsJeton` (`/moi/droits`
+    1.1.0 de B-960 ; absent = `[]`). **Code neuf** : 503 `DROITS_INDISPONIBLES` (auth injoignable, délai de 2 s,
     réponse illisible). **Variable neuve, requise** : `AUTH_SERVICE_URL`. ⚠️ **En réel, toute route du module qui exige
     un droit répond 403 `DROIT_INSUFFISANT` jusqu'à ce qu'auth-service attribue les droits `reseau:*`** (B-960 ; voir
     « → B » plus haut), comme la comptabilité (D-959-4).
@@ -375,6 +399,16 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1050** : (1) un `docker run … sh -c '… | grep …' | tail` ne montre rien tant que tout n'est pas fini : écrire
+  la sortie dans un fichier et le lire ; une suite d'intégration qui casse au montage du module (dépendance Nest
+  manquante dans le banc HTTP) ressemble alors à un blocage. (2) Le banc HTTP (`application-http.ts`) prend les
+  fournisseurs de `ReseauModule` : tout fournisseur neuf du module dont la dépendance vient d'un module global du socle
+  (ici `SuitesDeLIdentite`) doit y être fourni aussi. (3) Une mutation qui laisse une variable inutilisée échoue à la
+  compilation (ts-jest) : la tourner pour garder le symbole employé. (4) `git checkout -- <fichier>` pour défaire une
+  mutation jouée sur un fichier **non commité** défait aussi le vrai changement : muter seulement après le commit. (5)
+  Deux écritures concurrentes sur une ligne absente : l'upsert conditionnel perd le plus récent sur la clé dupliquée ;
+  rejouer une fois. (6) Dans une transaction MongoDB, pas de `Promise.all` de lectures sur la même session.
 
 - **STORY-1049** : (1) un banc HTTP monté sur `monterSurMongo` se ferme **base d'abord** (`dropDatabase`, puis
   `app.close()`) : fermer l'application ferme la connexion, et un `dropDatabase` posé ensuite reste en attente pour
