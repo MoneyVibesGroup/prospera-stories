@@ -118,10 +118,29 @@
      Node 24 : 130 + 4 662/0/2 ; conformité `rs-paiement` 13/13 (20 déclarations concurrentes ⇒ révisions 1 → 21) ;
      Karapace id 1 BACKWARD, `test:schemas` 7/7 ; 31 faits lus sur le fil ; 32 mutations ; pile `grp-b` :
      `/health` 200. **D-1059 est débloquée** (« → D »).
-  - **Story suivante : STORY-966** (le grand livre, `prospera-comptabilite-service`, EPIC-114 ; dépend de 964).
-    « Fini quand » (plan §3) : consultation par compte et par période, soldes et mouvements. À lire avant : fiche 964
-    (« Pour la suite » : le grand livre ne lit que les écritures `VALIDEE`). Ensuite : 967 (balance dérivée, attend
-    A-921, déjà servie).
+  11. ~~STORY-966~~ : **prospera-comptabilite-service #6** (`7fed6ce` sur `dev`), contrat annoncé avant la fusion
+     (stories #652). Le grand livre.
+     - `GET …/grand-livre/comptes/{compte}` : solde d'ouverture de la période, mouvements (pièce, journal, numéro
+       définitif, libellé, débit, crédit, solde progressif), totaux, clôture ; pages par curseur, `reporte`.
+     - `GET …/grand-livre` : comptes mouvementés (ouverture, à-nouveaux, mouvements, clôture), totaux de tous les
+       comptes, équilibre, brouillards de la période comptés à part. C'est le modèle de la balance de 967.
+     - Calculé à la volée sur les seules écritures `VALIDEE`, toutes les lectures dans une session MongoDB `snapshot`,
+       sans projection (D-966-1). Sommes en `Decimal128` puis `bigint` ; 422 `MONTANT_HORS_BORNE` plutôt qu'un nombre
+       arrondi (D-966-6). Droit `comptabilite:dossier:consulter`, déjà déclaré (D-966-9).
+     Node 24 : 498/0/3 ; `test:socle` 132/132 (dont 20 validations pendant 30 lectures, toutes cohérentes ; 30 000
+     lignes lues en 317 et 567 ms) ; 30 + 9 mutations rouges, dont la lecture sans instantané ; pile `grp-b` :
+     `/health` 200.
+  - **Story suivante : STORY-967** (la balance dérivée du grand livre, `prospera-comptabilite-service`, EPIC-114 ;
+    dépend de 966 et de **A-921, fusionnée** sur `origin/dev` de `balance-service`, `9dfd60e`). « Fini quand »
+    (plan §3) : balance publiée au contrat canonique, origine `comptabilite`, `checksum`, ingérée par
+    `balance-service`. À lire avant : fiche 966 (« Pour la suite » : `GrandLivreService.comptesMouvementes` sans
+    `limite`, refus tant que `brouillardsDansLaPeriode > 0`, mouvements HORS à-nouveaux), `INTEGRATION.md` §1 et
+    §1 ter de `balance-service`, « ← A, l'origine `comptabilite` » ci-dessous. À demander à A avant la première
+    publication : le `sourceSystem` dans `INGESTION_SOURCE_SYSTEMS`. Ensuite : 968 (les tiers).
+  - **À placer (B, auth)** : attribuer les droits `comptabilite:*` aux rôles du cabinet (hors du jeton, D-959-4) et
+    servir `commande:parametres:modifier` à D (D-1053-7, ci-dessous). Sans cela, la comptabilité rend 403 en réel, y
+    compris le grand livre. Choix par défaut : une story d'auth de la plage de B, comme remplaçante, avant que la
+    balance de 967 ne soit publiée en réel. Contestable par la session de groupe.
 
 ### Lot 2 (ouvert le 2026-11-16)
 
@@ -511,6 +530,19 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
+- **← D (2026-11-17, STORY-1053) : un droit neuf, `commande:parametres:modifier`, au catalogue de tenant** — **lue,
+  prise en charge, pas encore servie** (relevée au rituel de 966). Elle passera par la même story d'auth que
+  l'attribution des droits `comptabilite:*` aux rôles du cabinet (« À placer », dans l'état du lot 3 ci-dessus) :
+  hors du jeton, rôles par défaut `DIST_DG` et `DIST_ADMIN`, comme demandé. Annoncée ici avant sa fusion.
+- **← D (2026-11-17, STORY-1055) : `reseau` sur `kit-cible` 1.0.1, D6 et la chaîne** — **lue**. D6 (la version par
+  `lotId`) reste ouvert avec D4 → D8 (fiche 956, D-956-7). L'option de profil `chaine.longueur` est notée pour la
+  prochaine version du kit, sans urgence.
+- **← C (2026-11-16 et 17) : recopier au catalogue les manifestes amendés** (`liaison-assureur`, `assurance`,
+  `expertises`, `sinistres`) — **lue, prise en charge** (relevée au rituel de 966). Le catalogue les recopie par
+  `scripts/manifestes/copier.mjs` et les vérifie par `manifestes:garde`, que joue toute story de B qui touche les
+  manifestes du catalogue. Les manifestes `comptabilite` (958 → 966) et `paiement` (965) y passeront en même temps.
+  Rien ne rougit d'ici là : la garde n'est jouée qu'au gate d'une telle story (pas de CI).
+
 - **← C (2026-11-17, STORY-1006) : les référentiels habilités dans l'état publié ?** — **lue, prise en charge, pas
   encore servie.** Le choix par défaut de C convient : garder `entitlement.changed` pour le seul champ `referentiels`
   (D-1006-5). Le contrat d'état publié est figé (`contrat-etat-publie-v1`, ajouts facultatifs seuls, BACKWARD) : un
@@ -580,7 +612,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-17, STORY-966 — le grand livre, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
-  EPIC-114 ; fiche `stories/STORY-966.md`, D-966-1 → 11). Tout est AJOUT : rien d'existant ne change de forme.
+  EPIC-114 ; fiche `stories/STORY-966.md`, D-966-1 → 11). **Fusionné le 17/11** : comptabilite #6, `7fed6ce` sur
+  `dev` (annonce : stories #652). Tout est AJOUT : rien d'existant ne change de forme.
   - **Routes neuves** (sous `/api/v1/dossiers/{d}/exercices/{e}`), droit **`comptabilite:dossier:consulter`** (déjà
     déclaré au manifeste depuis 958 : aucun droit neuf ; lu par `/moi/droits`, `droits ∪ droitsHorsJeton`), au
     manifeste en `routesLectureSeule` :
@@ -1244,6 +1277,20 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Jest à plusieurs workers ne sait pas sérialiser un `BigInt`** (STORY-966). Un `expect(...).toEqual` qui échoue
+  sur des `bigint` fait tomber TOUTE la suite (« Do not know how to serialize a BigInt », `messageParent`) : la sortie
+  n'a plus de ligne `Tests: … failed`, et un script de mutations compte la mutation comme survivante. Cinq fausses
+  survivantes à 966. Jouer les mutations d'une suite à `bigint` en `--runInBand` (`-i`).
+- **`sed` remplace `\n` par une vraie fin de ligne** dans un script de mutations, et casse la chaîne Python (STORY-966,
+  comme le heredoc de 963). Corriger un script par un autre script écrit avec l'outil d'écriture, avec une constante
+  `NL`.
+- **Un `$sum` MongoDB de doubles perd l'unité au-delà de 2^53** : sommer des montants par `{ $toDecimal: { $toLong:
+  champ } }` (exact), puis lire le `Decimal128` en `bigint` par son écriture décimale (STORY-966). Un `$toDecimal`
+  appliqué directement à un double rend des zéros de fraction (« 1.00000000000000 ») : passer par `$toLong` d'abord.
+- **Lecture cohérente de plusieurs requêtes** : `connexion.startSession({ snapshot: true })` (MongoDB ≥ 5.0, jeu de
+  répliques), puis `.session(s)` sur chaque `find`, `distinct`, `countDocuments` et `aggregate`. Pas de transaction.
+  La course de 966 (20 validations, 30 lectures) rougit sans l'instantané (STORY-966, mutation S9).
 
 - **Un `afterAll` qui lève laisse la connexion MongoDB ouverte, et jest ne rend jamais la main** (STORY-965) : la
   conformité a tourné plus d'une heure, sans sortie (le `grep` de la commande retenait tout). La cause : un

@@ -1,6 +1,6 @@
 # STORY-966 : le grand livre
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne à élevée (soldes exacts par compte et par période, lus d'un seul instantané sous des
 validations concurrentes ; sommes exactes ; pagination ; modèle qui doit servir la balance de STORY-967 sans refonte)
@@ -139,3 +139,82 @@ dans un solde.
 - **Manifeste** : les deux routes en `routesLectureSeule` ; commentaire des droits (le grand livre exige
   `comptabilite:dossier:consulter`).
 - Aucun topic, aucun schéma au registre, aucune variable.
+
+## Ce qui a été livré
+
+Deux PR fusionnées en « Rebase and merge » le 17/11, l'annonce d'abord.
+
+| Dépôt | PR | Sur la branche |
+|---|---|---|
+| `prospera-stories` | #652 (fiche, tracker, manifeste amendé, annonce du contrat, AVANT le code) | `main` `5190872` |
+| `prospera-comptabilite-service` | #6 | `dev` **`7fed6ce`** (rejoué de `5364b06` ; arbre identique) |
+
+- `src/grand-livre/` :
+  - `grand-livre.ts` : les règles pures (période, compte, devise, entiers exacts, soldes en deux colonnes, position
+    et curseur, solde progressif, lignes et totaux, pages de comptes) ;
+  - `grand-livre.service.ts` : la consultation (portée, tenue, période), puis toutes les lectures dans une session
+    `snapshot` ; une agrégation `$facet` par compte (sommes, suite après le curseur, page) ; une agrégation par compte
+    pour la liste ; `comptesMouvementes` exporté en `bigint` pour 967 ;
+  - `vue.ts` : les nombres rendus, `MONTANT_HORS_BORNE` au-delà de 2^53 − 1 ;
+  - `grand-livre.controller.ts`, `grand-livre.dto.ts`, `grand-livre.module.ts`.
+- `src/common/refus.ts` : six refus nommés neufs. `src/ecritures/ecriture.schema.ts` : index `grand_livre_par_compte`.
+  `src/module.manifest.ts` recopié à l'octet depuis `main`. README : section du grand livre.
+- `test/socle/grand-livre.socle-spec.ts` : suite neuve (34 tests).
+
+## Preuves
+
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive` du commit poussé) :
+  **35 suites, 498 passés, 3 sautés** ; `npm run lint`, `tsc --noEmit` et `npm run build` verts dans l'image.
+- **`npm run test:socle`** (vrai MongoDB 8.0 `rs0`, vrai Kafka, doublures HTTP d'auth, de dossier-service et de
+  document-service) : **132/132**, dont 34 neufs.
+  - **Jeu connu** (sept pièces, dont des à-nouveaux, une contre-passation et un brouillard) : 411100 sur l'exercice,
+    six mouvements dans l'ordre date → journal → numéro, solde progressif juste, clôture nulle ; liste des cinq comptes
+    exacte colonne par colonne, totaux 230 000 / 384 000 / 348 000 équilibrés ; mars : ouverture 148 000 D.
+  - **Brouillard exclu** : ni mouvement ni montant ; compté à part (`brouillardsDansLaPeriode` 1 sur l'exercice, 0 en
+    mars).
+  - **Contre-passation** : 701100 et 443100 retombent à ce qu'ils seraient sans la pièce ; le mouvement cite
+    l'originale (`contrePasse`).
+  - **Bornes** : jour seul inclusif (le 20 mars contient P4), creux du 21 au 24, premier et dernier jour de
+    l'exercice ; 422 `PERIODE_HORS_EXERCICE` (avec les bornes) et `PERIODE_INVALIDE` sur les deux routes ; 400 sur
+    `du` mal formé, `limite` 0 ou 1 001, devise inconnue, paramètre inconnu ; `COMPTE_MALFORME` ; `CURSEUR_INVALIDE`.
+  - **Exercice** : aux cahiers 409, non ouvert 404, clos consultable ; sans écriture validée : `devise: null`.
+  - **Droit** : 403 `DROIT_INSUFFISANT` sans `comptabilite:dossier:consulter` ; 200 avec le droit seulement dans
+    `droitsHorsJeton`.
+  - **Devises** : XOF et XAF validées ⇒ 409 `DEVISE_A_PRECISER` ; `devise=XAF` ne rend que ses écritures.
+  - **Sommes** : 2^53 − 2 et 1 rendent 2^53 − 1 exactement ; une unité de plus ⇒ 422 `MONTANT_HORS_BORNE`
+    (`valeur` `"9007199254740992"`) ; débits internes de 2^53 + 1 (non représentable en double) contre-passés ⇒ solde
+    d'ouverture **3** exactement (en double : 2).
+  - **Pages** : 26 mouvements par pages de 7 (quatre pages) mises bout à bout = la lecture d'une traite, chaque
+    `reporte` égal au solde du mouvement précédent ; une pièce qui mouvemente deux fois le compte : lignes 1 et 2.
+  - **Concurrence** : 20 validations en même temps que 30 lectures. Chaque lecture d'un compte est cohérente (nombre,
+    totaux, solde final = clôture, tous numérotés). Chaque liste est équilibrée, et brouillards + lignes validées = 20.
+    15 lectures sur 15 ont vu une validation partielle : la course a bien eu lieu. La dernière lecture voit `VE-000001`
+    → `000020`.
+  - **Volume** (mesure) : 10 000 écritures validées (30 000 lignes) ; 411100 sur juin (833 mouvements, page de 200)
+    en **317 ms** ; liste des 11 comptes en **567 ms**.
+- **Mutations** (« rouge » = `Tests: … failed` et aucun `TS\d{4}`) :
+  - **unitaires : 32**, 30 rouges sur une assertion. #22 est **équivalente** : si l'ouverture, les mouvements et la
+    clôture s'équilibrent, les à-nouveaux s'équilibrent forcément. #28 (le filtre du curseur) n'est éprouvée que sur le
+    socle (S5). Elles portent sur la période, le compte, la devise, les entiers exacts, la borne, l'ordre, le curseur,
+    le solde progressif, les lignes et les totaux, le tri, les pages et la vue ;
+  - **socle : 9/9 rouges** : brouillards admis, ouverture à borne incluse, `reporte` faux, ordre des journaux inversé,
+    curseur qui reprend le même jour, à-nouveaux perdus, sommes en double, brouillards mal comptés, **lecture sans
+    instantané** (vue par la course).
+- **Pile `grp-b`** (compose du dépôt, image du commit, volumes neufs, verrou Docker pris de façon atomique) :
+  `docker compose -p grp-b --profile comptabilite up -d --build` sain (quatre conteneurs `healthy`), `/api/v1/health`
+  200 (`rs0`, primaire ; Kafka up). Les deux routes sont mappées et dans l'OpenAPI ; sans jeton : 401. Descendue avec
+  ses volumes, images de preuve supprimées, verrou rendu.
+
+## Pour la suite
+
+- **STORY-967** (la balance dérivée) appelle `GrandLivreService.comptesMouvementes(portee, exercice, periode,
+  codesDesANouveaux)` sans `limite` : tout, en `bigint`, dans un seul instantané. Elle refusera de publier tant que
+  `brouillardsDansLaPeriode > 0` (Q2). Elle publiera les mouvements HORS à-nouveaux, puisque le hub chaîne lui-même le
+  socle d'à-nouveaux (A-921, `INTEGRATION.md` §1 ter). Le libellé de chaque compte vient du plan du référentiel. Le
+  `sourceSystem` est à faire ajouter par A à `INGESTION_SOURCE_SYSTEMS` avant la première publication.
+- **Une devise par dossier** : 962 laisse chaque pièce choisir XOF ou XAF ; une règle « la devise du dossier » éviterait
+  `DEVISE_A_PRECISER`. À poser avec la tenue (remplaçante, ou 970).
+- **Les lectures ouvertes à la portée** (D-958-9) et le grand livre sous `comptabilite:dossier:consulter` : à aligner
+  quand auth attribuera les droits `comptabilite:*` aux rôles du cabinet (avant B-967 : sinon tout rend 403 en réel).
+- **Projection** : non retenue (D-966-1). Elle viendra si une mesure la réclame, sans changer le contrat de lecture.
+  Mesuré ici : 30 000 lignes lues en moins de 0,6 s.
