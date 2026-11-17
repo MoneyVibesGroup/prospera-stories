@@ -1,6 +1,6 @@
 # STORY-1048 : le LC fictif refuse l'espace réel, et ses quatre scénarios se rejouent après une remise à zéro
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-204 (le logiciel de compagnie fictif, la compagnie de démonstration et la recette de la démo) ·
 **Dépôt :** `prospera-assureur-fictif` (tenu par D depuis STORY-1046) · **Plage :** groupe D, n° 4 du lot 3
@@ -87,3 +87,73 @@ Le LC fictif refuse déjà de démarrer si `FICTIF_ESPACE` ne vaut pas `essai` (
   `SIN-2026-900N` (accusés `ACCEPTE`), puis une seconde évaluation après la clôture (`REFUSE`, `ETAT_INCOMPATIBLE`) ; la
   police de `SIN-2026-9002` suspendue (version 2) ; un réglage de refus posé. Les montants sont les chiffres de référence
   du générateur (`SIN-2026-9002` : évaluation arrêtée 395 500).
+
+## Ce qui a été livré
+
+**2026-11-17** — `prospera-assureur-fictif` **#4**, fusionnée en « Rebase and merge » sur `dev` (**`4f4aa89`** ; branche
+`bf54bc8`). Annonce « ⚠ Contrats » fusionnée **avant** le code (prospera-stories **#597**, `main` 6fb5882).
+
+- `src/config/espace-d-essai.ts` : `jugerLEspace(env)` (la table de D-1048-2, fonction pure), `ligneDuRefus`,
+  `CODE_ESPACE_INTERDIT`, `SORTIE_ESPACE_INTERDIT` (78).
+- `src/main.ts` : l'espace jugé avant le chargement différé d'`AppModule` ; refus = une ligne JSON sur la sortie
+  d'erreur, `process.exitCode = 78`, rien d'autre. `src/config/env.validation.ts` : la même règle en premier ;
+  `INSTANCE_ESPACE` (facultative, `ESSAI`) et `FICTIF_ESPACE` (facultative, `essai`) déclarées.
+- `BoiteAuxLettres.remettreAZero(organisationId, taille)` : vider, effacer l'entrée, écarter la sortie (`IGNORE`,
+  `ANTERIEUR_A_LA_REMISE_A_ZERO`), recharger le jeu ; rend `{ lots, sortieEcartee, entreeEffacee }`. Un cycle et une
+  remise à zéro passent l'un après l'autre (file d'attente interne). La route `POST /assureur-fictif/remise-a-zero`
+  l'appelle ; `Compagnie.remettreAZero` est retirée (un seul chemin).
+- `docker-compose.yml` : `INSTANCE_ESPACE: ${INSTANCE_ESPACE:-ESSAI}`, `FICTIF_ESPACE: ${FICTIF_ESPACE:-essai}`. README :
+  la table du démarrage et la remise à zéro.
+- Tests : `espace-d-essai.spec.ts` (la table, 21 cas), `env.validation.spec.ts` (+5), `main.spec.ts` (le point d'entrée
+  chargé dans un registre isolé : `AppModule` jamais chargé hors essai, sortie 78), `boite-aux-lettres.service.spec.ts`
+  (+4, sur un vrai disque), e2e `compagnie.e2e-spec.ts` (la partie des quatre scénarios, par fichiers, avant et après la
+  remise à zéro ; `test/utils/partie-des-scenarios.ts`).
+
+## Preuves
+
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive HEAD`) : `tsc` vert ;
+  lint du dépôt entier 0 (`--max-warnings 0`) ; build ; **40/40 suites, 419 tests** unitaires (385 avant) ; **e2e 3/3
+  suites, 23 tests** (22 avant).
+- **Mutations, 10 sur 10 rouges sur une assertion** (aucune à la compilation) : un espace réel accepté avec
+  `FICTIF_ESPACE=essai` (8 rouges) ; `REEL` lu comme inconnu (6) ; désaccord accepté (3) ; aucune preuve ⇒ ouvert (4) ;
+  valeur inconnue d'`INSTANCE_ESPACE` acceptée (7) ; `validateEnv` ne juge plus l'espace en premier (6) ; `main.ts` ne
+  refuse plus avant `AppModule` (3) ; la sortie n'est plus écartée (2 unitaires, 1 e2e) ; l'entrée n'est plus effacée (1).
+- **Témoin « avant la correction »** (image `runtime` construite depuis `origin/dev` e265b0a ; vérifié dans l'image :
+  ni `espace-d-essai.js`, ni `INSTANCE_ESPACE` dans `env.validation.js`) : avec `INSTANCE_ESPACE=REEL` et
+  `FICTIF_ESPACE=essai`, le LC fictif **démarre et répond sain** ; la partie jouée, puis la remise à zéro et un cycle :
+  **6 fichiers de l'ancienne sortie relus** (`recus: 6`), les 4 clôtures rejouées d'abord (« decision » se trie avant
+  « declaration »), les anciennes déclarations renumérotées ; la partie rejouée ne rend pas les réponses attendues
+  (`DOUBLON` ×4, puis `REFUSE ETAT_INCOMPATIBLE` sur les évaluations de scénarios remis au statut déclaré).
+- **Pile `grp-d`** (`docker compose -p grp-d --profile assureur-fictif up`, MongoDB 8 en jeu de répliques, Kafka ; un
+  émetteur RS256 de preuve tient le rôle d'auth-service ; le droit `assureur-fictif` publié sur `entitlement.changed`
+  par le producteur de Kafka) :
+  - **refus** : `INSTANCE_ESPACE=REEL` (et `FICTIF_ESPACE=essai`) : conteneur **sorti en 78**, une seule ligne de
+    journal `{"level":"fatal",…,"code":"ASSUREUR_FICTIF_INTERDIT","motif":"ESPACE_REEL",…}` ; sans aucune preuve : 78,
+    `AUCUNE_PREUVE_D_ESSAI` ; `INSTANCE_ESPACE=essai` : 78, `ESPACE_INCONNU` ; `ESSAI` + `FICTIF_ESPACE=reel` : 78,
+    `ESPACES_EN_DESACCORD` ; `FICTIF_ESPACE=production` : 78, `ESPACE_INCONNU` ;
+  - **démarrage** : le compose du dépôt (`ESSAI` + `essai`) : sain ; `FICTIF_ESPACE=essai` seule (piles de C) : sain ;
+  - **les quatre scénarios** (pilote joué par le réseau de la pile, sous l'uid du service sur le volume d'échange, jeu
+    réduit) : la partie par fichiers rend les 21 réponses attendues (`LCF-2026-000001` → `000004`, 13 accusés
+    `ACCEPTE`, 4 `REFUSE ETAT_INCOMPATIBLE`) ; police de 9002 suspendue (version 2) et refus réglé ; sans remise à
+    zéro, la même partie diffère (`REFUSE IDENTIFIANT_INCONNU`, `DOUBLON` ×3…) ; **remise à zéro** : `{ lots: 9,
+    sortieEcartee: 12, entreeEffacee: 22 }`, puis un cycle `recus: 0, deposes: 9` ; aucun accusé ni numéro servi ; les
+    quatre sinistres et leurs polices **identiques au premier chargement** (`SIN-2026-9001` → `9004` au statut
+    `DECLARE`, provisions 1 500 000, 780 000, 45 000 000, 12 000 000) ; journal des reçus : 12 `IGNORE
+    ANTERIEUR_A_LA_REMISE_A_ZERO` ; **rejouée par fichiers : mêmes réponses** ; seconde remise à zéro (`sortieEcartee:
+    18`), **rejouée par l'API du LC : mêmes réponses**.
+  - **Rejouée sur l'image reconstruite depuis `dev` (`4f4aa89`)**, volumes neufs, relève automatique à 5 s : refus
+    `ESPACE_REEL` en 78 ; démarrage sain ; même partie, mêmes résultats.
+  - Pile descendue avec ses volumes (`down -v`) ; aucun conteneur, volume ni réseau `grp-d` restant ; verrou rendu.
+
+## Ce qui reste
+
+- **Le drapeau `assureurFictifAutorise`** de l'état voulu (D-1048-4) : à lire en plus de l'espace quand l'agent le
+  portera (moteur, B).
+- **Les routes de vérification C13** du manifeste (`assureur-fictif-absent-du-reel`, `remise-a-zero`, …) ne sont pas
+  servies (demande de B du 16/11, STORY-944) : avec STORY-1057 (la recette de la démo) ou avant toute installation par
+  le moteur.
+- **L'effacement C13 laisse la sortie** (à `liaison-assureur`, D-1046-8) : un cycle après l'effacement relirait la sortie
+  d'une organisation effacée (même mécanisme que le défaut corrigé ici ; le rejeu de l'effacement le rattrape, D-1046-8).
+  À trancher avec 1057.
+- **La remise à zéro côté Prospera** reste au moteur (D-987-4) : après la seule remise à zéro du LC, `liaison-assureur`
+  garde ses projections (une police en version 2 voit revenir la version 1).

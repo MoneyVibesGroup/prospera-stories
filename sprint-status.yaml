@@ -283,8 +283,13 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1048.md"
     reserved_on: "2026-11-17"
     note: >
-      EN COURS le 2026-11-17 — fiche écrite avant le code ; « ⚠ Contrats » annoncé avant la fusion du code (journal de
-      D). Lot D, n° 4 du lot 3 (EPIC-204). Dépend de 1046 (faite). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-assureur-fictif#4 (dev 4f4aa89). Le LC fictif lit l'espace de l'instance
+      (INSTANCE_ESPACE, STORY-934) : ESSAI démarre ; REEL ou toute autre valeur refusent, même avec FICTIF_ESPACE=essai
+      (qui seule démarre comme avant) ; refus avant le chargement des modules, ligne ASSUREUR_FICTIF_INTERDIT, sortie 78.
+      La remise à zéro efface l'entrée et écarte la sortie déposée avant elle : la partie des quatre scénarios SIN-2026
+      rejouée après elle rend les mêmes réponses (fichiers et API), prouvé sur pile grp-d et rejoué depuis dev. Node 24 :
+      419 unitaires + 23 e2e, 10/10 mutations. Annoncée avant le code (docs #597). Lot D, n° 4 du lot 3 (EPIC-204).
+      NON SLOTTÉE.
 
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
