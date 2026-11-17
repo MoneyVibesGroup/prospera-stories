@@ -72,7 +72,10 @@
   - ~~**STORY-1014**~~ : **prospera-stories #630** (manifeste) et **sinistres #19** ; référentiel des experts et des
     cabinets, agrément daté et son historique, jugement de désignation qui refuse (`AGREMENT_ECHU`…) ; Node 24, sans
     pile ; la désignation d'une mission (FR-61) appellera `ExpertsService.exigerDesignable`.
-  - **STORY-1009** ← **suivante** : demander des pièces complémentaires pendant l'instruction (`sinistres`, FR-57).
+  - ~~**STORY-1009**~~ : **sinistres #20** ; la transition 6 ou 12 porte les pièces demandées (motif, date, auteur, numéro
+    de demande) : la liste s'allonge, `PIECES_COMPLETES` repasse à faux, courrier de demande, relances de 999 reprises ;
+    sans pièce nommée, `PIECES_NON_NOMMEES` ; Node 24 (1080 unitaires, 25 e2e), rejouée depuis `dev`, sans pile.
+  - **STORY-1011** ← **suivante** : un formulaire d'instruction par type de sinistre (`sinistres`, FR-55).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -397,6 +400,18 @@ seulement.
   neuf pour `assurance`, qui l'a déjà consommé. `GET …/dossiers/{id}` porte `provisionOuverture` (facultatif).
   ⚠️ Pour tous : un dossier **corporel** n'a toujours aucune provision tant qu'un agent ne la saisit pas (FR-49).
 
+- **2026-11-17, STORY-1009 — aucune route neuve, aucun fait neuf ; la transition 6 et 12 gagnent un champ.**
+  `POST /api/v1/sinistres/dossiers/{id}/transitions` accepte `piecesDemandees` (`[{ code, demandeA?, motif? }]`),
+  **obligatoire** pour les transitions 6 et 12 (`PIECES_NON_NOMMEES`, 400) et **refusé** pour toute autre
+  (`PIECES_HORS_DEMANDE`, 400) ; autres refus : `PIECE_INCONNUE`, `PIECE_EN_DOUBLE`, `PIECES_TROP_NOMBREUSES`,
+  `DESTINATAIRE_INCONNU`, `MOTIF_ECRIT` (400), `PIECE_DEJA_ATTENDUE` (409). Les pièces attendues du dossier gagnent
+  `motif`, `demandeNumero`, `demandeeLe`, `demandeePar`, `demandeeRole` (facultatifs). **Pour D (écrans du circuit)** :
+  `transitionsPossibles` ne dit pas que 6 et 12 demandent des pièces ; l'écran doit les collecter avant d'envoyer
+  (code du catalogue de `pieces-2026.1`, motif de 10 caractères au moins, destinataire facultatif). **Pour D
+  (EPIC-220)** : le courrier `DEMANDE_PIECES` d'une demande est en `BROUILLON` dans `courriers[]`, un par destinataire.
+  ⚠️ Pour tous : quitter l'attente de pièces lève maintenant aussi le constat `RELANCES_EPUISEES` (jusque-là il restait
+  vrai après la reprise).
+
 ## Questions à l'utilisateur ou au PO
 
 - **❓ 2026-11-17 — STORY-1002, question au PO : qui porte `sinistres.declaration.enregistree@1` ?** La spine (AD-16)
@@ -433,6 +448,12 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   paramètre figé `experts-2026.1.json` ; manifeste amendé pour la fiche en lecture seule. ⚠️ Écart : aucun
   `docker compose up` du service pour cette story (plan : « Docker : non ») ; droits fins `expertises:*` toujours à poser.
 
+- **D-1009-1 → D-1009-11** (`stories/STORY-1009.md`) : la demande se joint à la transition (pas de route) ; pièces
+  demandées obligatoires ; catalogue de `pieces-2026.1`, pas de pièce libre ; motif de la pièce ou de la transition
+  (10 caractères) ; pièce déjà attendue refusée, déjà reçue redemandable ; attente toujours celle de l'assuré ;
+  suspension FR-85 non posée (date conservée) ; la piste nomme les pièces ; paramètre figé `demande-de-pieces-2026.1` ;
+  constat `RELANCES_EPUISEES` levé avec les relances ; pièce rejetée gardant son motif. ⚠️ Écart : aucun
+  `docker compose up` du service pour cette story (plan : « Docker : non »).
 - **D-1008-1 → D-1008-7** (`stories/STORY-1008.md`) : l'ouverture = transitions 1 et 2 (3 en rattrapage), listes en
   paramètre figé ; corporel et recours exclus (FR-49 contre « grille par volet » du plan) ; rôle du fait `RESP` ou
   `GEST` ; estimation avant gravité, jamais d'erreur ; devise `XOF` du paramètre ; identifiant de proposition dérivé du
@@ -499,6 +520,12 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
 
 ## Pièges rencontrés
 
+- **Un constat dérivé d'une liste doit suivre la liste** (vu en 1009) : 999 levait les relances à la sortie de l'attente
+  mais laissait `RELANCES_EPUISEES` à vrai ; invisible tant que rien ne ramenait le dossier en attente, il ouvrait le
+  classement sans suite dès la première demande de pièces suivante. Recalculer le constat là où la liste change.
+- **Un objet reconstruit « champ par champ » perd les champs ajoutés plus tard** : `rejeterLaPiece` ne recopiait que
+  trois champs ; le motif de la demande a failli s'y perdre. Retirer ce qui s'efface (`pieceId`, `recueLe`) plutôt que
+  recopier ce qu'on garde.
 - **Un `e2e` qui charge `gardesGlobalesDeclarees()` lit `AppModule`, donc le client de Confluent : il ne se joue
   qu'en Node 24** (« Could not locate the bindings file » sous Node 25 local). Les unitaires sans Kafka passent en local ;
   le `e2e` se joue dans l'étage `verification`. Une mutation de test se joue en local sur les unitaires.
