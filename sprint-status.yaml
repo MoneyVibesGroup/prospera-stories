@@ -634,6 +634,15 @@ reserved_ranges:
       🏁 DONE le 2026-11-17 — balance-service#152 (dev 9dfd60e). Origine comptabilite dans ORIGINES_BALANCE et publiable par
       ingestion directe (source direct, referentiel facultatif, balance générale) ; inconnue/interne refusée, nommée ; mutations
       rouges sur l'assertion ; e2e OpenAPI 221/221. Contrat annoncé avant le code (stories#588). Lot 3 de A, n° 2. NON SLOTTÉE.
+  - range: "STORY-922"
+    status: "RÉSERVÉ"
+    owner: "Retirer le code mort de la double lecture — decisionAncienne, memeDecision, libelle, DroitLu (balance-service, bilan-service, prospera-fiscal-service)"
+    source_doc: "prospera-stories/stories/STORY-922.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — balance #153 (dev e67034a), bilan #178 (dev 557d402), fiscal #53 (dev 4ee8ed7). Quatre symboles sans
+      appelant retirés de double-lecture.ts, trois copies identiques ; decisionPubliee et EtatPublieLu gardés ; tsc, lint, suites
+      read-models vertes ; deux échecs de bilan (bindings, dossier-scope.invariant) PRÉEXISTANTS sur dev. Pas de Docker. Lot 3 de A, n° 3. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
