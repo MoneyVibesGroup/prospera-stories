@@ -1393,6 +1393,19 @@ reserved_ranges:
       estimation du déclarant ou gravité) dans la même transaction ; posée une seule fois (marqueur provisionOuverture) ;
       corporel et recours saisis par l'humain ; assurance reste le seul écrivain des mouvements. Aucun fait neuf.
       Node 24 : 997 unitaires sur MongoDB réel, 19 e2e ; pas de pile. Lot 3 de C, n° 4. NON SLOTTÉE.
+  - range: "STORY-1014"
+    status: "RÉSERVÉ"
+    owner: "Le référentiel des experts et des cabinets, et l'agrément échu : un expert à agrément échu n'est pas désignable, l'historique des agréments est gardé (sinistres, module expertises)"
+    source_doc: "prospera-stories/stories/STORY-1014.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-stories#630 (manifeste, main 50883fa) et prospera-sinistres-service#19 (dev
+      3a6964e). Fiche d'expert ou de cabinet (nature, domaines, zones, mode d'honoraires, capacité, état avec motif),
+      agrément daté et historique des prolongations (pièce obligatoire) ; jugement de désignation qui REFUSE
+      (AGREMENT_ECHU « Agrément échu le AAAA-MM-JJ », AGREMENT_ABSENT, EXPERT_INACTIF, DOMAINE_NON_COUVERT) exposé par
+      ExpertsService.exigerDesignable et par POST …/controle-de-designation ; GET experts/{expertId} déclaré en lecture
+      seule au manifeste. Node 24 : 1056 unitaires sur MongoDB réel, 24 e2e, build 0 ; pas de pile. Lot 3 de C, n° 5.
+      NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
