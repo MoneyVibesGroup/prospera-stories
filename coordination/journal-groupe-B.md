@@ -130,6 +130,26 @@
      Node 24 : 498/0/3 ; `test:socle` 132/132 (dont 20 validations pendant 30 lectures, toutes cohérentes ; 30 000
      lignes lues en 317 et 567 ms) ; 30 + 9 mutations rouges, dont la lecture sans instantané ; pile `grp-b` :
      `/health` 200.
+  12. ~~STORY-971~~ (story **neuve** de la plage de B, insérée avant 967 par la session de groupe : **décision
+     contestable**, motifs ci-dessous) : **auth #43** (`913bd92` sur `dev`), contrat annoncé avant la fusion
+     (stories #656). Les droits de la comptabilité et des paramètres de `commande`.
+     - **Pourquoi ici** : (1) la demande de D (D-1053-7, Q-D-5) passe avant la story suivante ; (2) les neuf
+       `comptabilite:*` n'étaient attribués à aucun rôle : en réel, toute la comptabilité rendait 403, alors que la
+       balance de 967 doit être publiée en réel.
+     - Dix droits neufs au catalogue de tenant, **hors du jeton** (`droitsHorsJeton` de `/moi/droits`) ; borne
+       inchangée (41 ≤ 44) ; 152 codes (24 + 128).
+     - `CAB_ASSOCIE` : les neuf `comptabilite:*` ; `CAB_COLLABORATEUR` : six (ni ouvrir l'exercice, ni le plan de
+       journaux, ni clore ; il saisit ET valide, sans séparation, D-964-7, D-971-2). Rôles par défaut du cabinet :
+       tout membre les reçoit sans geste.
+     - `commande:parametres:modifier` : `DIST_DG` et `DIST_ADMIN`, par `AJOUTS_A_L_ANNEXE_B`, hors de la recopie de
+       l'annexe B (D-971-3).
+     - `identity.droits.changed@1` et `moi-droits` 1.1.0 inchangés ; pas d'avance de `dv` (D-971-5 → 7).
+     Node 24 : 100 suites, 1 387/1 387 ; 18 mutations rouges (une par droit neuf, plus le
+     mécanisme). Pile `grp-b` : **24/24** ; vrais jetons RS256 de l'associé (`/moi/droits` : les neuf
+     `comptabilite:*`), du collaborateur (six) et d'un `DIST_DG` (`commande:parametres:modifier`, 45 droits) ;
+     **ouverture 201 et grand livre 200** au jeton de l'associé, collaborateur 403 à l'ouverture ; témoin
+     `origin/dev` : 403 `DROIT_INSUFFISANT`. Deux doublures sur le fil : l'état publié `EN_SERVICE` (le catalogue ne
+     connaît pas encore le module) et le KYC approuvé (pour dossier-service). Verrou rendu.
   - **Story suivante : STORY-967** (la balance dérivée du grand livre, `prospera-comptabilite-service`, EPIC-114 ;
     dépend de 966 et de **A-921, fusionnée** sur `origin/dev` de `balance-service`, `9dfd60e`). « Fini quand »
     (plan §3) : balance publiée au contrat canonique, origine `comptabilite`, `checksum`, ingérée par
@@ -137,10 +157,11 @@
     `limite`, refus tant que `brouillardsDansLaPeriode > 0`, mouvements HORS à-nouveaux), `INTEGRATION.md` §1 et
     §1 ter de `balance-service`, « ← A, l'origine `comptabilite` » ci-dessous. À demander à A avant la première
     publication : le `sourceSystem` dans `INGESTION_SOURCE_SYSTEMS`. Ensuite : 968 (les tiers).
-  - **À placer (B, auth)** : attribuer les droits `comptabilite:*` aux rôles du cabinet (hors du jeton, D-959-4) et
-    servir `commande:parametres:modifier` à D (D-1053-7, ci-dessous). Sans cela, la comptabilité rend 403 en réel, y
-    compris le grand livre. Choix par défaut : une story d'auth de la plage de B, comme remplaçante, avant que la
-    balance de 967 ne soit publiée en réel. Contestable par la session de groupe.
+  - **Pour 967** : la comptabilité ne rend plus 403 en réel à un membre du cabinet (STORY-971). Restent à lever pour
+    la première recette croisée : le module `comptabilite` au catalogue (manifestes recopiés, sinon l'état publié
+    dit `NON_INSTALLE`, D-958-3), `comptabilite-service` dans l'`AUTH_AUDIENCE` de l'IdP de la recette (demande à A),
+    et le commentaire « Droits (C7) : DÉCLARÉS, pas encore attribuables » du manifeste `comptabilite`, périmé depuis
+    971 : à corriger par 967, qui amende le manifeste et le recopie à l'octet (D-971-8).
 
 ### Lot 2 (ouvert le 2026-11-16)
 
@@ -530,10 +551,15 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
-- **← D (2026-11-17, STORY-1053) : un droit neuf, `commande:parametres:modifier`, au catalogue de tenant** — **lue,
-  prise en charge, pas encore servie** (relevée au rituel de 966). Elle passera par la même story d'auth que
-  l'attribution des droits `comptabilite:*` aux rôles du cabinet (« À placer », dans l'état du lot 3 ci-dessus) :
-  hors du jeton, rôles par défaut `DIST_DG` et `DIST_ADMIN`, comme demandé. Annoncée ici avant sa fusion.
+- **← D (2026-11-17, STORY-1053) : un droit neuf, `commande:parametres:modifier`, au catalogue de tenant** —
+  **servie par STORY-971** (auth #43, `dev` `913bd92` ; annonce : stories #656). Le code est au catalogue de
+  tenant, **hors du jeton** : servi par `GET /moi/droits` dans `droitsHorsJeton`, jamais dans `perms[]`. Rôles par
+  défaut : **`DIST_DG` et `DIST_ADMIN`**, comme demandé, et eux seuls (`AJOUTS_A_L_ANNEXE_B`, à part de la recopie de
+  l'annexe B : si le PO répond autrement à Q-D-5, la ligne se retire). Aucun `dv` n'avance à la livraison : vos caches
+  `(membre, organisation, dv)` le voient à leur terme (60 s au plus). Preuve sur la pile `grp-b` : un vrai jeton
+  RS256 `DIST_DG` obtient le droit par `/moi/droits` (fiche `stories/STORY-971.md`, § Preuves). Pour votre recette :
+  `PUT /api/v1/commande/parametres` doit passer pour un DG ou un `DIST_ADMIN` sur une image d'auth reconstruite
+  depuis `dev`.
 - **← D (2026-11-17, STORY-1055) : `reseau` sur `kit-cible` 1.0.1, D6 et la chaîne** — **lue**. D6 (la version par
   `lotId`) reste ouvert avec D4 → D8 (fiche 956, D-956-7). L'option de profil `chaine.longueur` est notée pour la
   prochaine version du kit, sans urgence.
@@ -612,8 +638,9 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-17, STORY-971 — dix droits neufs au catalogue de tenant d'auth, hors du jeton, annoncés AVANT la fusion
-  du code** (`prospera-auth-service`, branche `MNV-971` ; fiche `stories/STORY-971.md`, D-971-1 → 8). Tout est AJOUT :
-  aucune route, aucun champ, aucun topic ne change de forme.
+  du code** (`prospera-auth-service`, branche `MNV-971` ; fiche `stories/STORY-971.md`, D-971-1 → 8). **Fusionné le
+  17/11** : auth #43, `913bd92` sur `dev` (annonce : stories #656). Tout est AJOUT : aucune route, aucun champ, aucun
+  topic ne change de forme.
   - **Catalogue** (`DROITS_HORS_JETON`) : `commande:parametres:modifier` (demande de D, D-1053-7) et les neuf droits du
     manifeste `comptabilite` (`comptabilite:dossier:consulter`, `:exercice:ouvrir`, `:journal:administrer`,
     `:ecriture:saisir`, `:ecriture:valider`, `:tiers:administrer`, `:lettrage:realiser`, `:exercice:cloturer`,
@@ -1301,6 +1328,22 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Preuve de la comptabilité en réel, par dossier-service** (STORY-971) : (1) dossier-service exige le KYC approuvé
+  de l'organisation (`KYC_NOT_APPROVED`) : sans kyc-service, poser `kyc.status.changed` (`orgId`, `status:
+  APPROVED`, `occurredAt`, `eventId`, `schemaVersion: 1`) sur le fil ; (2) une SARL exige un dirigeant
+  (`DIRIGEANT_REQUIS`) ; (3) ouvrir l'exercice AVANT de décider les axes (`AUCUN_EXERCICE_OUVERT`), sinon la
+  comptabilité rend 409 `REFERENTIEL_NON_DECIDE` ; (4) le module `comptabilite` n'est pas au catalogue : poser
+  l'état publié `EN_SERVICE` sur `etat-publie.changed.reel` (clé = organisation). Détail :
+  `stories/STORY-971.md`, § Preuves.
+- **Le dirigeant ne s'attribue pas un rôle plus large que le sien** (`TENANT_ROLE_AUTO_ESCALADE`), et l'opérateur
+  n'attribue pas `DIST_DG` (`VALIDATION_DE_REPRISE_RESERVEE_AU_DG`) : pour un jeton `DIST_DG`, le fondateur invite un
+  membre et le lui attribue (STORY-971).
+- **La connexion est limitée en débit** (429 `ThrottlerException`) : un script de preuve qui ouvre plus de cinq ou
+  six sessions par minute doit attendre et rejouer. Une surcharge vide (`ajouts: [], retraits: []`) rend 400 : on ne
+  « remet pas à zéro » une surcharge par un `PUT` vide (STORY-971).
+- **Le heredoc a encore mangé un antislash** (`\n` d'un script Python de preuve, devenu une vraie fin de ligne,
+  STORY-971) : écrire `chr(10)`, ou passer par l'outil d'écriture ou d'édition.
 
 - **Jest à plusieurs workers ne sait pas sérialiser un `BigInt`** (STORY-966). Un `expect(...).toEqual` qui échoue
   sur des `bigint` fait tomber TOUTE la suite (« Do not know how to serialize a BigInt », `messageParent`) : la sortie
