@@ -111,8 +111,16 @@ balance (l'écran dit pourquoi, il ne montre pas un tiroir vide).
 - **D-926-5 — le BFF ne relaie pas la route** (comme la complétude et le référentiel : relais à nommer par A si
   l'écran le demande).
 
-## Preuves attendues
+## Preuves (relevées)
 
-`tsc`, tests unitaires (provenance, rejeu pur, DTO) et e2e (route, cloisonnement) par chemin de fichier, lint des seuls
-fichiers touchés, mutations ×2 rouges sur l'assertion. **Docker non requis** : un champ, une route dans un contrôleur
-et un service existants, aucun module, provider ni dépendance neufs.
+- Code : balance-service #155 (dev `6df0ce6`). `tsc` propre ; lint des seuls fichiers touchés propre.
+- Unitaires : provenance des lignes (dto, 12/12), rejeu pur (10/10) ; `src/modules/cahiers`, `balance` et `referentiel` en bloc : seules échouent les `*.module.spec.ts` (`Cannot find module 'bindings'`, Node v25, **préexistant** : même échec sur `origin/dev` en mettant la story de côté) ; `sage-parser` et `rendu-excel`, lents sous charge, passent seuls.
+- e2e : `agregation-cahiers` 41/41 (13 neufs : marqueur posé à la persistance, 701 avec pièce, 6132 saisie à la main, écart signé, non ventilable, 409 x4 natures, 404 compte absent, cloisonnement x4, id malformé), `openapi-contract` 223/223 (enum nommée, champ facultatif, route publiée), `balance`, `cahiers-recettes`, `pieces-ocr`, `balance-export` verts (434 sur les 6 fichiers).
+- Mutations rouges sur l'assertion (pas à la compilation) : marqueur retiré de la persistance ⇒ 1 rouge ; signe de l'écart inversé ⇒ rouge (unitaire et e2e) ; `NON_ENREGISTREE` rendu `CAHIERS` ⇒ 2 rouges.
+- **Docker non requis** : un champ de schéma, une route dans un contrôleur existant, aucun module ni provider neuf (verrou non pris).
+
+## Reste nommé
+
+- Balances `ocr` d'avant la story : `NON_ENREGISTREE`. Poser `adaptateur: cahiers` sur celles qui viennent des cahiers = migration + supposition : à décider par le PO.
+- Le BFF ne relaie pas la route (relais à nommer par A si l'écran le demande).
+- `FICHIER` : pas de lignes sources d'un import Sage (le fichier n'est pas rejoué) ; `sources` (comptes auxiliaires) reste la seule ouverture.
