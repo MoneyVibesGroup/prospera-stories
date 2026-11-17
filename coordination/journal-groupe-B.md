@@ -104,15 +104,24 @@
        (D-964-5, D-964-6). Pas de séparation des pouvoirs au niveau de l'acteur (D-964-7).
      Node 24 : 436/0/3 ; `test:socle` 98/98 (20 validations concurrentes sans trou ; chaîne rompue à la main, cinq
      ruptures détectées) ; 45 + 7 mutations ; pile `grp-b` : `/health` 200.
-  - **Story suivante : STORY-965** (la Créance (2), `prospera-paiement-service`, EPIC-231 ; dépend de 963). « Fini
-    quand » (plan §3) : crédit du tiers, compteurs ; `paiement.creance.changed@1` au registre en BACKWARD, annoncé dans
-    « ⚠ Contrats » de B. À lire avant : fiche 963 (« Pour la suite ») et « → D » de ce journal. Ensuite : 966 (le grand
-    livre, ne lit que les écritures `VALIDEE`, fiche 964 « Pour la suite »).
-  - **Pour STORY-965** (Créance (2), paiement) : fiche 963, « Pour la suite » : `paiement.creance.changed@1` à la forme
-    de `FaitCreance` d'`encours@1` (`creanceId = <source>:<sourceId>`, `revision` à ajouter au document et à incrémenter
-    dans la transaction de chaque changement, deux restants, `echeanceLe` en `AAAA-MM-JJ`) ; le crédit du tiers ; la
-    lecture du registre sous `paiement:creance:consulter` (hors du jeton : `paiement` devra lire `/moi/droits`) ; le
-    consommateur de `facturation.facture.emise@1` si D en a fixé la charge (il appelle `OuvrirLaCreance`).
+  10. ~~STORY-965~~ : **prospera-paiement-service #123** (`96c385f` → `ad35786` sur `dev`), contrat annoncé avant la
+     fusion (stories #648). La Créance (2).
+     - `paiement.creance.changed@1` : état absolu d'une Créance à source (périmètre SOCIETE), publié par l'outbox
+       dans la transaction des sept gestes qui la changent ; révision par `$inc` dans `etats_de_creance` ; clé
+       `orgId` ; au registre Karapace en BACKWARD (D-965-1 → 4).
+     - `GET /api/v1/creances/tiers/{tiersId}/compteurs` : le crédit du tiers (les trop-perçus) et ses compteurs,
+       calculés par `encours-v1` copiée à l'octet ; aucun encours servi (D-965-5, D-965-6).
+     - `paiement:creance:consulter` lu hors du jeton (`/moi/droits`, cache `(membre, organisation, dv)` 60 s) :
+       premier droit de `paiement` hors du jeton (D-965-7). `HorlogeDeReference` entre dans `paiement`.
+     - Reporté : le consommateur de `facturation.facture.emise@1` (D n'a pas fixé la charge) ;
+       `paiement.credit-tiers.changed@1` (crédit du tiers (2)).
+     Node 24 : 130 + 4 662/0/2 ; conformité `rs-paiement` 13/13 (20 déclarations concurrentes ⇒ révisions 1 → 21) ;
+     Karapace id 1 BACKWARD, `test:schemas` 7/7 ; 31 faits lus sur le fil ; 32 mutations ; pile `grp-b` :
+     `/health` 200. **D-1059 est débloquée** (« → D »).
+  - **Story suivante : STORY-966** (le grand livre, `prospera-comptabilite-service`, EPIC-114 ; dépend de 964).
+    « Fini quand » (plan §3) : consultation par compte et par période, soldes et mouvements. À lire avant : fiche 964
+    (« Pour la suite » : le grand livre ne lit que les écritures `VALIDEE`). Ensuite : 967 (balance dérivée, attend
+    A-921, déjà servie).
 
 ### Lot 2 (ouvert le 2026-11-16)
 
@@ -256,6 +265,28 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   membre qui reçoit le rôle par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif).
 
 ## Demandes aux autres groupes
+
+- **→ D (2026-11-17) : D-1059 est débloquée — la Créance s'ouvre, son état se lit sur le fil, ses compteurs se
+  lisent par une route** — **information** (STORY-965, paiement #123, `dev` `ad35786` ; fiche `stories/STORY-965.md`).
+  - **Ouvrir** : comme annoncé par 963, `PUT {PAIEMENT}/api/v1/creances/sources/FACTURE/{factureId}` (rejouable).
+  - **Lire l'état** : topic `paiement.creance.changed` (contrat @1, `schemaVersion: 1`), clé `orgId`, schéma au
+    registre (`paiement.creance.changed-value`, BACKWARD). `creanceId` = `FACTURE:<factureId>` ; gardez par
+    `creanceId` la plus haute `revision`. Les champs de `FaitCreance` y sont sous leurs noms (`tiersId`,
+    `perimetre`, `devise`, `statut`, `restantCertainMineur`, `restantAfficheMineur`, `echeanceLe`), plus
+    `cleRegistre`, `cause`, `montantDeclareMineur`, `montantExigibleMineur`, `tropPercuMineur`, `livraisonId`,
+    `lueLe`. L'état part dans la transaction de chaque changement (ouverture, encaissement, déclaration, validation,
+    affectation, contre-passation, clôture) ; l'engagement de `commande` peut baisser à sa réception (§1.5).
+  - **Le crédit du tiers** : `paiement.credit-tiers.changed@1` n'existe pas encore (crédit du tiers (2)). D'ici là,
+    le crédit du tiers est le trop-perçu : un `FaitCreditTiers` se déduit de chaque état (`creditId =
+    TROP_PERCU:<creanceId>`, même `revision`, `soldeMineur = tropPercuMineur`). Votre source `creditsTiers` peut donc
+    passer `PRESENTE` dès que vous lisez ce topic.
+  - **Les compteurs d'un tiers** : `GET {PAIEMENT}/api/v1/creances/tiers/{tiersId}/compteurs?perimetre=SOCIETE`, droit
+    `paiement:creance:consulter` (hors du jeton : il doit être dans `droitsHorsJeton` du rôle, annexe B), calculés
+    par `encours-v1` (même copie que la vôtre) : ouvertes, échues, restants, échu, retard, crédit du tiers ; aucun
+    encours (l'engagement est chez vous).
+  - **Reporté** : le consommateur de `facturation.facture.emise@1`. Dites ici les noms de champs du fait ; B
+    l'écrira (il appellera la même `OuvrirLaCreance`). La route reste le chemin de 1059.
+  - Une Créance du périmètre d'un freelance ne publie rien sur ce topic.
 
 - **→ D (2026-11-17) : comment ouvrir une Créance dans `paiement` (pour D-1059)** — **information** (STORY-963, fiche
   `stories/STORY-963.md`, D-963-1 → 12). Lu dans votre journal et dans le manifeste `facturation` de `ventes` : la
@@ -550,7 +581,9 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 - **2026-11-17, STORY-965 — la Créance (2) : `paiement.creance.changed@1`, le crédit du tiers et ses compteurs,
   annoncé AVANT la fusion du code** (`prospera-paiement-service`, EPIC-231 ; fiche `stories/STORY-965.md`,
-  D-965-1 → 12). Tout est AJOUT : rien d'existant ne change de forme.
+  D-965-1 → 12). **Fusionné le 17/11** : paiement #123, `96c385f` → `ad35786` sur `dev` (annonce : stories #648).
+  Sujet `paiement.creance.changed-value` enregistré (id 1, BACKWARD) sur le Karapace de la pile de preuve. Tout est
+  AJOUT : rien d'existant ne change de forme.
   - **Topic neuf `paiement.creance.changed`** (contrat `@1`, `schemaVersion: 1`), producteur unique
     `paiement-service`, par son outbox, **dans la transaction de chaque changement** d'une Créance à source du
     périmètre `SOCIETE` : ouverture (`OUVERTURE`), encaissement constaté (`ENCAISSEMENT`), déclaré (`DECLARATION`),
@@ -1182,6 +1215,25 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Un `afterAll` qui lève laisse la connexion MongoDB ouverte, et jest ne rend jamais la main** (STORY-965) : la
+  conformité a tourné plus d'une heure, sans sortie (le `grep` de la commande retenait tout). La cause : un
+  `deleteMany` sur `encaissements`, collection en ajout seul (`EcritureAppendOnlyInterdite`). Ne nettoyer que les
+  collections modifiables ; lancer la conformité avec `timeout 280 … --forceExit`, sans filtrer la sortie avant la fin.
+- **Karapace 6.2 accepte qu'une valeur sorte d'une énumération** (BACKWARD) : le registre ne garde pas ce cas, un
+  test unitaire qui compare les énumérations du schéma à celles du code le fait (STORY-965).
+- **Paiement : une `cause` ou un nom neuf ne doit pas reprendre un code d'acte** (`ENCAISSEMENT_DECLARE`,
+  `_VALIDE`, `_ANNULE`) : la garde de la séparation des pouvoirs les réserve à un seul fichier (STORY-965).
+- **Paiement : ajouter une dépendance à `AffecterLEncaissement` fait rougir son compte de dépendances**, et la forme
+  `publier: (p) => faitsDAnnulation(p)` est lue par la garde STORY-275 : les ajuster en le disant (STORY-965).
+- **Script Python qui remplace en masse dans les fichiers modifiés** : il touche aussi les occurrences
+  PRÉEXISTANTES des specs (des codes d'acte renommés à tort). Restreindre aux fichiers neufs, ou comparer au blob
+  `HEAD` avant d'écrire (STORY-965).
+- **`node scripts/…mjs` sous Node 25 sur Windows** finit parfois par `Assertion failed: !(handle->flags &
+  UV_HANDLE_CLOSING)` après un `fetch` : le travail est fait, mais le code de sortie ne vaut rien. Rejouer le
+  script sous Node 24 (image `verification`) pour la preuve (STORY-965).
+- **La recette `recette-uj1` réécrit `docs/recette-uj1-mesures.md`** quand on joue les e2e : `git checkout --` du
+  fichier avant de commiter (STORY-965).
 
 - **Une boucle d'attente du verrou Docker lancée en arrière-plan survit au délai de l'outil** (STORY-964). Une boucle
   `until ( set -o noclobber; … ) ; do sleep 15; done` lancée par `run_in_background` avec un délai de 10 min a continué

@@ -1,6 +1,6 @@
 # STORY-965 : la Créance (2), son état publié, le crédit du tiers et ses compteurs
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne-haute (un fait d'état neuf, au registre, publié par sept gestes existants dans leur transaction ;
 une lecture par tiers qui emprunte la règle d'encours de D ; le premier droit de `paiement` lu hors du jeton)
@@ -129,3 +129,67 @@ gestionnaire lise, pour un tiers, ce qu'il doit et ce qui lui est dû : le créd
 - **Lu chez B (auth)** : `GET /api/v1/moi/droits` (contrat 1.1.0) et le claim `dv`.
 - **Manifeste** : la route en `routesLectureSeule`.
 - Rien d'existant ne change de forme.
+
+## Ce qui a été livré
+
+**prospera-paiement-service #123**, rejouée en rebase sur `dev` : **`96c385f`**, `12b67f1`, **`ad35786`** (branche
+`fc7a5f0`, `40d3414`, `c651826` ; arbre identique). Annonce avant le code : prospera-stories #648 (`5accd2c`).
+
+- `src/application/creances/etat-de-creance.ts` : la charge, `construireEtat`, `publieSonEtat`, `faitsDEtatDeCreance`,
+  les causes ; `etats-de-creance.service.ts` (`EtatsDeCreance`, seul écrivain) ;
+  `modules/creances/schemas/etat-de-creance.schema.ts`.
+- Les sept gestes : `ouvrir-la-creance`, `saisir-la-creance` (clôture), `recevoir-la-notification`,
+  `declarer-`, `valider-`, `affecter-`, `annuler-l-encaissement` ; garde `etats-de-creance.invariant.spec.ts`.
+- `compteurs-du-tiers.ts`, `compteurs-du-tiers.controller.ts`, `dto/compteurs-du-tiers.dto.ts`,
+  `dto/identifiant-de-tiers.pipe.ts` ; `src/vendor/encours/` (`ORIGINE.json`, copie de `encours-v1`).
+- `src/common/droits-hors-jeton/` (source HTTP, cache, garde, module) ; `src/common/horloge/` ; `dv` sur
+  l'utilisateur ; `authService` dans la configuration.
+- `contrat/schemas/paiement.creance.changed.json`, `scripts/schemas/registre.mjs`, `test/jest-schemas.json`,
+  `test/schemas.registre-spec.ts` ; scripts `test:schemas`, `schemas:compatibilite`, `schemas:enregistrer`.
+- La garde STORY-275 (`geste-sensible-sous-controle`) accepte `publier: (p) => [...faitsDAnnulation(p), …]` ;
+  le compte des dépendances d'`AffecterLEncaissement` passe à sept (STORY-648 → 965).
+
+## Preuves
+
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive` de `fc7a5f0`,
+  conteneur nommé) : paquets 130/130 ; service **345 suites, 4 662 passés, 2 sautés, 0 échec**. Les deux commits
+  suivants ne touchent que des tests (conformité, registre, une spec pure), joués sur le poste.
+- **Poste** : `tsc` vert ; lint des fichiers touchés vert ; e2e `creances-compteurs`, `creances-ouverture`,
+  `creances-saisie`, `gate-acces`, `demandes`, `recette-uj1` : 90/90. La route des compteurs : 200 calculé par la
+  règle ; 403 `PAIEMENT_NOT_ENTITLED` avant le droit ; 403 `PERMISSION_DENIED` quand `/moi/droits` ne sert pas le
+  droit, même s'il est dans `perms[]` ; 503 `DROITS_INDISPONIBLES` ; 400 sans périmètre ou tiers mal formé.
+- **Conformité sur un vrai MongoDB en jeu de répliques** (`rs-paiement`, pile `grp-b`,
+  `test/etats-de-creance.conformite-spec.ts`, avec les vrais `OuvrirLaCreance`, `DeclarerLEncaissement`,
+  `SaisirLaCreance`, `EtatsDeCreance`, `SoldesDeCreances`, `EcritureDArgent`, `JournalAudit`, `OutboxService`) :
+  - 10 factures du même tiers ouvertes deux fois chacune, en même temps ⇒ 10 états à la révision 1, 10 faits ;
+  - **20 déclarations concurrentes de 5 000 sur la même Créance ⇒ révisions publiées 1 → 21, sans trou ni
+    doublon** ; le dernier état égale le reste dû recalculé des encaissements (certain 100 000, affiché 0, déclaré
+    100 000) ;
+  - les compteurs du tiers lus sur les états rangés : 10 ouvertes, 4 échues, 1 000 000 certain, 900 000 affiché,
+    400 000 échus, retard 16 jours ;
+  - une clôture publie `CLOTUREE` à la révision 2 et sort la Créance des compteurs ; un autre périmètre ne voit rien.
+  `creances-ouverture` et `creances-upsert` restent verts (13/13 en tout).
+- **Karapace 6.2** (surcouche `docker-compose.socle.yml`) : `schemas:enregistrer` ⇒ sujet
+  `paiement.creance.changed-value`, id 1, configuration `BACKWARD` ; `schemas:compatibilite` sous Node 24 :
+  compatible, code 0 ; `test:schemas` 7/7 (ajout facultatif compatible ; propriété requise ajoutée, type changé,
+  propriété retirée refusés). ⚠️ Limite constatée : Karapace accepte qu'une valeur sorte d'une énumération ; un test
+  unitaire garde que les énumérations du schéma égalent celles du code.
+- **Le fait sur le fil** : service levé (relais d'outbox réel), conformité jouée avec `CONFORMITE_GARDER_FAITS=1`,
+  puis `kafka-console-consumer` sur `paiement.creance.changed` : **31 messages** de l'organisation de la preuve,
+  clé = `orgId`, 10 `OUVERTURE`, 20 `DECLARATION`, 1 `CLOTURE`, révisions 1 → 21 sur la Créance déclarée.
+- **Mutations : 32 sur 32 rougissent sur une assertion** (deux rougissaient d'abord par compilation, réécrites).
+- **`docker compose up` sain** (image `runtime` depuis l'export, `up --no-build --no-deps`, pile `grp-b` : kafka,
+  redis, `mongo-paiement`, karapace, paiement) : `/api/v1/health` **200** ; `Mapped
+  {/api/creances/tiers/:tiersId/compteurs, GET}` ; sans jeton : 401 ; index
+  `organizationId_1_tiersId_1_perimetre_1` de `etats_de_creance` créé. Pile descendue (`down -v`), **verrou Docker
+  pris de façon atomique (13:35) et rendu (14:55)**.
+
+## Pour la suite
+
+- **Le crédit du tiers (2)** : acompte avant facture, avoir sur facture payée, imputation (Créance désignée, puis
+  l'échue la plus ancienne), remboursement par un ordre, `paiement.credit-tiers.changed@1` (élargir le motif des
+  topics au tiret), droit `paiement:credit-tiers:imputer` (hors du jeton, par la même garde).
+- **Le consommateur de `facturation.facture.emise@1`** (D-965-9), reporté : il appelle `OuvrirLaCreance` dès que D
+  a fixé la charge du fait.
+- La portée du portefeuille sur la route des compteurs (D-965-10) ; la copie du manifeste au catalogue (D-965-11) ;
+  `paiement.creance-freelance.changed@1` avec la story du freelance.
