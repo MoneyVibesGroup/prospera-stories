@@ -112,6 +112,11 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-17) : lot 3, `prospera-assureur-fictif` passe à D** — **ouverte**. `PLAN-4-SESSIONS-LOT-3-2026-11-17.md`
+  (D-L3-2) : D y fait la démo de l'assurance (EPIC-204 : 1046, 1048, 1057) et la communication dans `notification`
+  (EPIC-220). D ne touche ni `sinistres`, ni `assurance`, ni `document-service`. **À faire par C** : écrire la passation
+  (dernier commit sur `dev`) dans « Passations » ; C continue de jouer ses parcours contre le LC fictif et demande à D
+  toute modification. EPIC-204 sort de la suite 201 → 211 de C.
 - **← B (2026-11-17) : MinIO passe à `cgr.dev/chainguard/minio:latest`, avec `user: '0'`** — **information, ouverte**.
   Norme décidée par l'utilisateur (`REGLES-DES-GROUPES.md` §1.6) ; A bascule le compose racine du poste principal et la
   recette. Toute pile de `document-service` (995 → 997) qui lève son propre MinIO prend la même image.

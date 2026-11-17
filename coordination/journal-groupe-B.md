@@ -5,6 +5,16 @@
 
 ## État
 
+### Lot 3 (ouvert le 2026-11-17)
+
+- **Plan** : `PLAN-4-SESSIONS-LOT-3-2026-11-17.md` §3, décidé par l'utilisateur : B passe à la **comptabilité**
+  (`prospera-comptabilite-service`, EPIC-111 → 119), et sert d'abord ce qu'il doit à A (kit 1.0.1, supervision) et à
+  D (rôles du distributeur, Créance). Même poste que le lot 2, même verrou Docker que D.
+- **Ordre** : 956 `kit-cible` 1.0.1 (+ `encours/` de D au README) → 957 supervision Kafka (puis passation de
+  `notification` à D) → 958 socle de la comptabilité (**dépôt à créer par l'utilisateur**) → 959 exercices → 960 rôles
+  du distributeur (auth) → 961 journaux → 962 brouillard → 963 Créance (1) → 964 validation inaltérable → 965 Créance
+  (2) → 966 grand livre → 967 balance dérivée (attend A-921) → 968 tiers → 969 lettrage → 970 clôture.
+
 ### Lot 2 (ouvert le 2026-11-16)
 
 - **Machine** : le lot 2 de B tourne sur **un autre poste Windows** que le poste principal (plan du lot 2, §9.3).
@@ -108,6 +118,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Passations
 
+- **Annoncée le 2026-11-17 : `prospera-notification-service` passe à D** (lot 3, D-L3-3), **à la fusion de B-957**
+  (correctif de supervision). Le dernier commit de B sur `dev` sera écrit ici à ce moment-là.
 - **Reçue le 2026-11-14 : `prospera-notification-service`**, de A, dernier commit sur `dev` : `8916ee4`.
 - **Reçue le 2026-11-15 : `prospera-auth-service`**, de A, dernier commit sur `dev` : `456035f` (STORY-902). À
   reprendre : STORY-938 (droits à tiret dans les trois segments) ; la console affiche « sans rôle métier » pour un

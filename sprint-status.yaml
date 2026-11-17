@@ -62,6 +62,7 @@ reserved_ranges:
       Sous-plage de STORY-900 → STORY-1199 (Dev B), découpée le 2026-11-14 pour quatre sessions
       parallèles sur deux machines : aucune ne voit les branches locales des autres, donc chacune puise
       dans sa seule plage. Les fiches sont écrites juste avant de coder.
+      Lot 3 (2026-11-17, PLAN-4-SESSIONS-LOT-3-2026-11-17.md §2) : STORY-920 → 929, dix stories légères (dettes du cabinet, 5e origine du hub, démo du cabinet).
 
   - range: "STORY-930 → STORY-979"
     status: "RÉSERVÉ"
@@ -72,6 +73,7 @@ reserved_ranges:
       Sous-plage de STORY-900 → STORY-1199 (Dev B), découpée le 2026-11-14 pour quatre sessions
       parallèles sur deux machines : aucune ne voit les branches locales des autres, donc chacune puise
       dans sa seule plage. Les fiches sont écrites juste avant de coder.
+      Lot 3 (2026-11-17, PLAN-4-SESSIONS-LOT-3-2026-11-17.md §3) : STORY-956 → 970 (kit-cible 1.0.1, supervision, comptabilité EPIC-111 → 119, rôles du distributeur, Créance).
 
   - range: "STORY-980 → STORY-1029"
     status: "RÉSERVÉ"
@@ -92,6 +94,7 @@ reserved_ranges:
       Sous-plage de STORY-900 → STORY-1199 (Dev B), ouverte le 2026-11-16 quand l'utilisateur a fait passer D au
       backend (lot 2 : 15 stories backend par groupe). La plage de Dev A (STORY-730 → 899) n'est pas touchée. Les
       fiches sont écrites juste avant de coder.
+      Lot 3 (2026-11-17, PLAN-4-SESSIONS-LOT-3-2026-11-17.md §4) : STORY-1045 → 1059 (distributeur et assurance en alternance).
   - range: "STORY-1030"
     status: "RÉSERVÉ"
     owner: "Le squelette de reseau-service sur la pile du moteur — module reseau, gate RESEAU_NOT_ENTITLED, profil, manifeste copié à l'octet, démarrage dégradé sans Kafka, port 3419 (reseau-service)"
