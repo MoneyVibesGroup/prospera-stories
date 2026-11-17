@@ -1,6 +1,6 @@
 # STORY-972 : les demandes de D et de C — le jeu « Grossiste du Golfe » chez B, la comptabilité au catalogue
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (trois dépôts ; deux routes et une collection neuves dans auth ; une copie de manifestes et un
 fichier de configuration dans le catalogue ; une ligne de README)
@@ -131,11 +131,73 @@ Les points 2 et 3 sont la même PR du catalogue (une seule recopie). Une seule s
 
 ## Ce qui a été livré
 
-*(à remplir à la fusion)*
+**2026-11-17** — trois PR fusionnées en « Rebase and merge », après l'annonce « ⚠ Contrats » (prospera-stories #668,
+`main` `9fad661`) :
+
+- `prospera-plateforme` **#31** (`dev` `a06d8c9`) : la ligne du README pour les trois dossiers du jeu « Grossiste du
+  Golfe » → groupe D, étiquette `jeu-grossiste-golfe-v1` (déjà posée par D sur `d36623b`).
+- `prospera-platform-catalog-service` **#60** (`dev` `6e5f052`, `2c3a933`) : `copies.json` regénéré depuis
+  `prospera-stories@51f4803` (47 copies, `comptabilite` 0.1.0 neuve ; `assurance`, `liaison-assureur`, `expertises`,
+  `sinistres`, `commande`, `facturation`, `paiement` recopiés) ; `.env.essai.example` et
+  `src/config/espace-essai.spec.ts` ; `.gitignore`, `.dockerignore` et l'étage `verification` le laissent passer ;
+  spec du semis à 47 copies, avec la comptabilité.
+- `prospera-auth-service` **#44** (`dev` `8661bbf`) : `src/modules/comptes-du-jeu/` (service, deux contrôleurs, garde
+  d'espace, collection `comptes_du_jeu`, `identifiant-du-jeu.ts` copié à l'octet de ventes), `INSTANCE_ESPACE`
+  (configuration et validation), `AuthService` exporté, `.env.example`.
 
 ## Preuves
 
-*(à remplir)*
+- **Node 24** (étages `verification` construits depuis `git archive` de la branche, conteneurs nommés) : auth `tsc`
+  vert, **101 suites, 1 415/1 415** (1 387 à 971 ; +28 de `comptes-du-jeu.spec.ts`) ; catalogue `tsc` vert, **101
+  suites, 1 536/1 536**, dont `espace-essai.spec.ts`. Sur le poste (Node 25), seules les suites du client de Confluent
+  ne chargent pas (binding natif, connu).
+- **Lint** des fichiers touchés (`endOfLine auto`) : vert dans les deux services. `manifestes:garde` : **verte, 47
+  manifestes, source = copie** (rouge sur l'ancienne copie : `facturation` divergeait). `git diff --stat` =
+  `--ignore-cr-at-eol` dans les trois dépôts ; aucun `index.ts` non suivi.
+- **Mutations, auth : 14/15 rouges sur une assertion**, aucune par compilation (espace réel admis, `essai` en
+  minuscules admis, doublon admis, rôle d'un autre métier admis, rejeu réécrit, utilisateur existant pris, mot de
+  passe posé, rôle métier non attribué, appelant hors organisation admis, utilisateur suspendu admis, appartenance
+  suspendue admise, session ouverte pour l'appelant, garde sans effet, identifiant décalé). **Une équivalente** : lire
+  le compte sans filtre d'organisation ; l'appartenance du compte à l'organisation du jeton, vérifiée ensuite, refuse
+  le même cas (deux gardes pour la même propriété). M1 survivait d'abord pour une mauvaise raison : trois promesses
+  créées d'un coup, dont une rejetée avant d'être attendue, faisaient tomber jest (voir les pièges) ; le test a été
+  réécrit, M1 rougit.
+- **Mutations, catalogue (données gardées) : 5/5 rouges** : `commande` retiré, port de `terrain` changé,
+  `facturation` ajouté, espace `REEL`, adresse finie par `/`.
+- **Pile `grp-b`** (compose racine et une surcouche locale non versionnée : auth et catalogue de la branche, puis
+  **reconstruits depuis `origin/dev` après la fusion, volumes neufs**, dossier-service et comptabilité d'`origin/dev`,
+  MongoDB 8.0 en jeu de répliques, Kafka, Redis, MinIO Chainguard) : `/health` 200 pour les quatre services ; semis du
+  catalogue « créés 28, rattachés 19, refusés 0 » (47).
+  - **Le réel, 13/13** (deux fois : branche, puis `origin/dev`) : un associé s'inscrit, vrai jeton RS256 ; dossier,
+    exercice 2026 et axes chez le vrai dossier-service. **Avant** : la comptabilité rend 403
+    `COMPTABILITE_NOT_ENTITLED`, et le vrai catalogue publie déjà `comptabilite` **`NON_INSTALLE`** (il connaît le
+    module). L'opérateur enregistre le référentiel `syscohada-revise@2.3` au registre du catalogue (base neuve) puis
+    `PUT /catalog/entitlements/{org}/comptabilite` (`0.1.0`) : **201**, droit `source: moteur:<plan>` ; l'état publié
+    lu au catalogue passe **`EN_SERVICE`**, et `etat-publie.changed.reel` porte `EN_INSTALLATION` (numéro 1) puis
+    `EN_SERVICE` (numéro 2), `instanceId: plateforme` — émis par le catalogue. **Puis, au vrai jeton de l'associé :
+    ouverture au JOURNAL 201, `GET …/grand-livre` 200, `GET …/tenue` 200.** La seule doublure de la preuve est
+    `kyc.status.changed` APPROVED (kyc-service hors de la pile, dossier-service l'exige) : **aucune doublure de l'état
+    publié**. Dans ce même espace réel, auth rend 403 `ESPACE_REEL_REFUSE` à la pose des comptes (même avec un corps
+    faux : avant la lecture du corps), à la liste et à la connexion « en tant que ».
+  - **L'essai, 19/19** (branche, puis `origin/dev`) : auth et catalogue relancés avec `INSTANCE_ESPACE=ESSAI`, le
+    catalogue avec l'`INSTALLATION_SERVICES` de `.env.essai.example`. Un prospect distributeur ; la pose sans le jeton
+    du moteur ou au jeton du prospect : 401 ; par le moteur : **201, quatre comptes** (Kodjo `COM-01`
+    `DIST_COMMERCIAL`, Folly `COM-04` `DIST_FREELANCE`, Akossiwa `DIST_COMPTABLE`, Ayité `DIST_DG`), Kodjo sous
+    `identifiantDuJeu(org, commercial, COM-01)` ; rejouée : 200, quatre existants. En base, Kodjo n'a **aucun
+    `passwordHash`**, et sa connexion par mot de passe rend 401. Un rôle du cabinet : 422 `TENANT_ROLE_NON_PROPOSE`.
+    Le prospect lit ses quatre comptes, **se connecte en tant que Kodjo : 200**, vrai jeton RS256 (`sub` = Kodjo,
+    `org`, `roleMetier: DIST_COMMERCIAL`, `dv` 2) ; `/moi/droits` au jeton de Kodjo : 15 droits hors du jeton (le
+    prospect sans rôle : 0) ; **de Kodjo à Ayité en un geste : 200, `DIST_DG`** ; la session de Kodjo se rafraîchit.
+    Refus : le prospect lui-même comme cible, et le prospect d'un autre essai vers Kodjo : 404
+    `COMPTE_DU_JEU_INCONNU` ; l'autre essai a une liste vide. **Le catalogue de l'essai** lit `espace: ESSAI` et
+    `services.commande = http://ventes-service:3412`, `services.terrain = http://terrain-service:3413` ; `/health` 200.
+    En plus, par le PUT de la console dans l'essai : `reseau` (non nommé) s'installe, sa vérification différée ;
+    `terrain` (nommé) **appelle son adresse** —
+    `http://terrain-service:3413/api/v1/instance/terrain/{org}/verifications/zones-lues`, injoignable sur cette pile —
+    et le plan s'arrête (409 `INSTALLATION_INACHEVEE`, `SERVICE_INJOIGNABLE`) : l'adresse est lue et jamais différée.
+- **Verrou Docker** : D le tenait (STORY-1059, 22:37) ; code et mutations faits pendant l'attente (boucles bornées) ;
+  pris à 23:29, pile descendue avec ses volumes, images de la preuve retirées, **rendu à 23:45**. Aucune boucle
+  d'attente ne tourne après la remise.
 
 ## Ce qui reste
 

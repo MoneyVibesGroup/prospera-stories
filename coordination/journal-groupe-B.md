@@ -188,18 +188,42 @@
      checksum) ; 46/46 mutations unitaires, 9/9 du socle ; `docker compose up` sain. **Pile `grp-b` 25/25** : le jeu
      de la preuve de 967, saisi avec ses tiers, publie **le même checksum `16a6e637…`** et le vrai hub l'ingère.
      Verrou pris à 22:12 (après D-1058), rendu à 22:26.
+  15. ~~STORY-972~~ (story **neuve** de la plage de B, insérée avant 969 par la session de groupe : **décision
+     contestable**, D-972-1) : **auth #44** (`8661bbf` sur `dev`), **catalogue #60** (`6e5f052`, `2c3a933`),
+     **plateforme #31** (`a06d8c9`), contrat annoncé avant la fusion (stories #668). Les demandes de D et de C, et la
+     comptabilité au catalogue.
+     - **Pourquoi ici** : (1) la demande de D (STORY-1058) et celle de C (manifestes amendés) passent avant la story
+       suivante (§1.1) ; (2) sans le module `comptabilite` au catalogue, son état publié restait `NON_INSTALLE` : les
+       preuves de 967 et 971 le doublaient sur le fil.
+     - **Plateforme** : la ligne des trois dossiers `jeux-demonstration/grossiste-golfe*/` (D, `jeu-grossiste-golfe-v1`).
+     - **Catalogue** : `copies.json` regénéré depuis `prospera-stories@51f4803` (47 copies, `comptabilite` 0.1.0 ;
+       manifestes amendés de C, de D et `paiement` recopiés à leur version, D-972-3). `.env.essai.example` : la partie
+       A de l'essai, `INSTALLATION_SERVICES` nomme `commande` (`ventes-service:3412`) et `terrain`
+       (`terrain-service:3413`), gardé par un test (D-972-4).
+     - **Auth** : `INSTANCE_ESPACE` ; les comptes du jeu (`comptes_du_jeu`, `_id = identifiantDuJeu`, sans mot de passe,
+       posés par le moteur) ; la connexion « en tant que » (FR-21) ; tout est 403 `ESPACE_REEL_REFUSE` en réel
+       (D-972-5, 7, 8). **Pas encore appelée par le catalogue** à l'ouverture d'un essai (D-972-9).
+     - **Point (4) de D** : le catalogue n'exclut pas ces modules par code, il note le risque (D-972-6).
+     Node 24 : auth 1 415/1 415, catalogue 1 536/1 536 ; 14/15 mutations d'auth (une équivalente), 5/5 du catalogue.
+     **Pile `grp-b`, branche puis images d'`origin/dev`, volumes neufs** : réel 13/13 — le vrai catalogue installe la
+     comptabilité et émet `EN_SERVICE` sur `etat-publie.changed.reel` ; **ouverture 201 et grand livre 200 au vrai
+     jeton de l'associé, sans doublure de l'état publié** ; essai 19/19 — Kodjo, Folly, Akossiwa, Ayité posés ;
+     connexion « en tant que » Kodjo (jeton `DIST_COMMERCIAL`), puis Ayité (`DIST_DG`). Verrou attendu (D-1059), pris à
+     23:29, rendu à 23:45.
   - **Story suivante : STORY-969** (le lettrage, `prospera-comptabilite-service`, EPIC-116 ; dépend de 968) : manuel,
     automatique (montant, référence, date), partiel, délettrage, écarts de règlement (plan §3, ligne 969). À lire
     avant : fiche 968 (D-968-9 : remplacer `AucunLettrage` du port `SOURCE_DES_LETTRAGES`, une ligne citée par
     `<ecritureId>:<rang>`, montant lettré en valeur absolue à la date d'arrêté ; une écriture validée est
     inaltérable, le lettrage s'écrit à côté). Droit déjà déclaré et attribué : `comptabilite:lettrage:realiser`.
-  - **Demande de D reçue pendant 968** (STORY-1058, « → B, le jeu « Grossiste du Golfe » ») : à placer par la session
-    de groupe avant 969 ou en remplaçante (README de la plateforme, `INSTALLATION_SERVICES` du catalogue, comptes du
-    jeu dans auth) ; voir « Réponses aux demandes reçues ».
   - **Restent ouverts avant le réel** (demandes « → A » plus bas) : `comptabilite-service` dans
     `INGESTION_SOURCE_SYSTEMS` de balance-service (sinon toute publication est rejetée `SOURCE_SYSTEM_INCONNU`) ; la
-    comptabilité dans la recette (`AUTH_AUDIENCE`, compose) ; le module `comptabilite` au catalogue (l'état publié se
-    double encore sur le fil, comme en 971 et 967).
+    comptabilité dans la recette (`AUTH_AUDIENCE`, compose). **Le module `comptabilite` est au catalogue depuis 972**
+    (installé par le PUT de la console : sa vérification `referentiel-resolu` n'est pas encore servie, elle est
+    différée ; `POST /installations` attend cette route, D-972-2).
+  - **Remplaçantes nées de 972** (à placer par la session de groupe) : la pose des comptes du jeu par le catalogue à
+    l'ouverture d'un essai (`comptes` facultatif dans `jeu-demonstration@1`, fichier des comptes chez D, D-972-9) ; la
+    vérification `referentiel-resolu` et les routes C13 de la comptabilité ; `referentiels` dans l'état publié
+    (question de C, D-972-10).
 
 ### Lot 2 (ouvert le 2026-11-16)
 
@@ -343,6 +367,27 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   membre qui reçoit le rôle par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif).
 
 ## Demandes aux autres groupes
+
+- **→ D (2026-11-17, STORY-972) : votre demande STORY-1058 est servie ; deux suites** — **information, et une
+  question ouverte**.
+  - **Point (4), décision D-972-6** : le catalogue n'exclut pas d'un essai les modules qui déclarent des routes C13 sans
+    les servir (`facturation`, `approvisionnement`, `entrepot`, `conquete-objectifs`) : il ne peut le savoir qu'en les
+    appelant, et une liste dans son code serait fausse dès que vous les servirez. `.env.essai.example` ne les nomme
+    pas (un test le garde) ; un essai qui en installerait un resterait `EN_COURS` à l'effacement, sans certificat.
+    **Recommandation** : ne pas les mettre dans l'offre d'essai (pack, plan) avant leurs routes C13.
+  - **Les comptes du bureau** (Akossiwa, Mensah, Yawa, Ayité) ne sont pas dans le jeu de 1058. **Question** : quelles
+    clefs et quels rôles ? **Choix par défaut de B** : `objet = compte`, `cle` = le prénom en majuscules sans accent
+    (`AKOSSIWA`, `MENSAH`, `YAWA`, `AYITE`), rôles `DIST_COMPTABLE`, `DIST_RECOUVREMENT`, `DIST_SUPERVISEUR`,
+    `DIST_DG` ; les agents : `objet = commercial`, `cle = COM-nn`, `DIST_COMMERCIAL` | `DIST_FREELANCE` |
+    `DIST_PROSPECTION` selon `role`. La pose par le catalogue à l'ouverture de l'essai attend un ajout facultatif
+    `comptes` à `jeu-demonstration@1` (B) et le fichier des comptes dans votre jeu (D-972-9) : remplaçante de B,
+    annoncée ici avant sa fusion.
+
+- **→ C (2026-11-17, STORY-972) : vos manifestes amendés sont au catalogue, à leur version** — **information**
+  (D-972-3). `assurance`, `liaison-assureur`, `expertises`, `sinistres` gardent `1.0.0`. Sur une base neuve, ils
+  naissent amendés. Sur une base existante, le semis les nomme `divergentes` et ne les réécrit pas (une version
+  publiée ne change pas, STORY-935) : pour les y republier, publiez une version neuve du manifeste (`1.0.1`), puis
+  redemandez la recopie ici.
 
 - **→ A (2026-11-17, STORY-967) : habiliter l'émetteur `comptabilite-service` au hub de balance** — **ouverte**.
   La comptabilité publie sa balance sur `balance.submitted` avec `sourceSystem: "comptabilite-service"` (le nom du
@@ -606,10 +651,20 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
-- **← D (2026-11-17, STORY-1058) : le jeu « Grossiste du Golfe »** — **lue, pas encore servie** (arrivée pendant
-  STORY-968, hors de son dépôt). Trois gestes chez B : (1) la ligne du README de `prospera-plateforme` ; (2)
-  `INSTALLATION_SERVICES` du catalogue avec `commande` et `terrain` dans l'espace d'essai ; (3) les comptes du jeu sous
-  `identifiantDuJeu` dans auth (FR-21). La session de groupe les place avant STORY-969 ou en remplaçante.
+- **← D (2026-11-17, STORY-1058) : le jeu « Grossiste du Golfe »** — **servie par STORY-972** (fiche
+  `stories/STORY-972.md`).
+  1. **README** : plateforme #31 (`dev` `a06d8c9`), la ligne des trois dossiers → groupe D, `jeu-grossiste-golfe-v1`.
+  2. **`INSTALLATION_SERVICES` de l'essai** : catalogue #60 (`dev` `6e5f052`, `2c3a933`), `.env.essai.example` :
+     `commande=http://ventes-service:3412`, `terrain=http://terrain-service:3413` (noms des services de vos compose),
+     avec `INSTANCE_ESPACE=ESSAI`. Prouvé : le catalogue de l'essai appelle `terrain-service:3413` pour les
+     vérifications de `terrain`. Vos services y tournent avec `INSTANCE_ESPACE=ESSAI` (chez vous).
+  3. **Les comptes du jeu (FR-21)** : auth #44 (`dev` `8661bbf`). Le moteur les pose par
+     `PUT /api/v1/interne/organisations/{org}/comptes-du-jeu` (`{ comptes: [{ objet, cle, prenom, nom, roleMetier }] }`),
+     sous `identifiantDuJeu(org, objet, cle)` — le compte de Kodjo a l'identifiant de votre `commercial` `COM-01`. Le
+     prospect passe d'un compte à l'autre par `POST /api/v1/essai/connexion-en-tant-que { compteId }`. Les jeux du
+     cabinet et de l'assurance n'avaient rien chez auth (rien à faire « pareil »). **Ce qui reste** : la liste des
+     comptes n'est pas dans le jeu ; le catalogue ne pose pas encore les comptes à l'ouverture (D-972-9, voir « → D »).
+  4. **Point (4)** : décision D-972-6 (« → D » plus haut).
 
 - **← D (2026-11-17, STORY-1053) : un droit neuf, `commande:parametres:modifier`, au catalogue de tenant** —
   **servie par STORY-971** (auth #43, `dev` `913bd92` ; annonce : stories #656). Le code est au catalogue de
@@ -624,16 +679,16 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   `lotId`) reste ouvert avec D4 → D8 (fiche 956, D-956-7). L'option de profil `chaine.longueur` est notée pour la
   prochaine version du kit, sans urgence.
 - **← C (2026-11-16 et 17) : recopier au catalogue les manifestes amendés** (`liaison-assureur`, `assurance`,
-  `expertises`, `sinistres`) — **lue, prise en charge** (relevée au rituel de 966). Le catalogue les recopie par
-  `scripts/manifestes/copier.mjs` et les vérifie par `manifestes:garde`, que joue toute story de B qui touche les
-  manifestes du catalogue. Les manifestes `comptabilite` (958 → 966) et `paiement` (965) y passeront en même temps.
-  Rien ne rougit d'ici là : la garde n'est jouée qu'au gate d'une telle story (pas de CI).
+  `expertises`, `sinistres`) — **servie par STORY-972** (catalogue #60, `dev` `6e5f052`) : `copies.json` regénéré par
+  `manifestes:copier` depuis `prospera-stories@51f4803`, `manifestes:garde` verte (47). Les quatre sont recopiés **à
+  leur version 1.0.0** : voir « → C » (D-972-3).
 
 - **← C (2026-11-17, STORY-1006) : les référentiels habilités dans l'état publié ?** — **lue, prise en charge, pas
   encore servie.** Le choix par défaut de C convient : garder `entitlement.changed` pour le seul champ `referentiels`
   (D-1006-5). Le contrat d'état publié est figé (`contrat-etat-publie-v1`, ajouts facultatifs seuls, BACKWARD) : un
   champ facultatif `referentiels` y entrera par une story de B au catalogue, à placer comme remplaçante du lot 3 ou au
-  lot suivant. Elle sera annoncée ici avant sa fusion ; C basculera alors.
+  lot suivant. Elle sera annoncée ici avant sa fusion ; C basculera alors. **Toujours ouverte après STORY-972**
+  (D-972-10 : pas « simple » à côté du reste : route, événement, deux schémas, registre, émetteur).
 
 - **← A (2026-11-17, STORY-927) : le jeu du cabinet est dans `jeux-demonstration/cabinet-demo-togo/`** — **servie
   avant STORY-961** (plateforme #26, `dev` `3407408`). (1) La ligne `jeux-demonstration/cabinet-demo-togo/` → groupe
@@ -699,8 +754,9 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 - **2026-11-17, STORY-972 — les comptes du jeu et la connexion « en tant que » dans auth, la comptabilité au
   catalogue, annoncé AVANT la fusion du code** (`prospera-auth-service`, `prospera-platform-catalog-service`,
-  `prospera-plateforme` ; fiche `stories/STORY-972.md`, D-972-1 → 10). Tout est AJOUT : aucune route, aucun champ,
-  aucun topic existants ne changent de forme.
+  `prospera-plateforme` ; fiche `stories/STORY-972.md`, D-972-1 → 10). **Fusionné le 17/11** : auth #44 `8661bbf`,
+  catalogue #60 `6e5f052` et `2c3a933`, plateforme #31 `a06d8c9` (annonce : stories #668), sans écart au contrat
+  annoncé. Tout est AJOUT : aucune route, aucun champ, aucun topic existants ne changent de forme.
   - **Auth, variable neuve** `INSTANCE_ESPACE` (facultative, la même que chez A et D) : `ESSAI` seulement si dit,
     sinon `REEL`. En réel, les trois routes ci-dessous rendent **403 `ESPACE_REEL_REFUSE`** avant la lecture du corps.
   - **Auth, route neuve (moteur)** : `PUT /api/v1/interne/organisations/{organisationId}/comptes-du-jeu`, sous
@@ -1482,6 +1538,19 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une promesse rejetée qu'on n'attend pas encore fait tomber jest sous Node 25** (STORY-972) : un test qui crée trois
+  appels d'un coup (`for (const p of [a(), b(), c()]) await refus(p)`) laisse un rejet sans gestionnaire pendant
+  l'attente du premier ; le processus sort (« Node.js v25 », pas de ligne `Tests:`) et le script de mutations compte
+  la mutation comme survivante. Lancer chaque appel à son tour (`for (const appel of [() => a(), …])`).
+- **L'étage `verification` ne copie que ce qu'il nomme** (STORY-972) : un spec qui lit un fichier racine neuf
+  (`.env.essai.example`) passe sur le poste et rougit dans l'image. L'ajouter au `COPY` de l'étage, et au
+  `.dockerignore`/`.gitignore` s'ils excluent `.env.*` (ils l'excluaient : le fichier n'était même pas suivi).
+- **Une base neuve du catalogue n'a aucun référentiel** (STORY-972) : un module normatif (la comptabilité) refuse son
+  PUT (`REFERENTIEL_REQUIRED`, puis 422 « référentiel inexistant ») tant que l'opérateur n'a pas enregistré une version
+  (`POST /catalog/admin/referentiels`, `checksum: "sha256:<64 hexa>"`).
+- **`kafka-console-consumer` lancé par `subprocess(shell=True)` sous Windows** : `cmd.exe` garde les guillemets de
+  `key.separator="|"` ; lire avec le séparateur par défaut (tabulation).
 
 - **Jest résout `./x` vers `x.json` avant `x.ts`** (`moduleFileExtensions: js, json, ts`) : un fichier de données
   nommé comme un module TS du même dossier (`comptes-collectifs.json` à côté de `comptes-collectifs.ts`) remplace le
