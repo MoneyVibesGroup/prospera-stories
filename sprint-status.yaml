@@ -1270,6 +1270,16 @@ reserved_ranges:
       jetons RS256 (associé : 9 comptabilite:* ; collaborateur : 6 ; DIST_DG : commande:parametres:modifier, 45
       droits) ; ouverture 201 et grand livre 200 au jeton de l'associé ; témoin origin/dev : 403 DROIT_INSUFFISANT.
       Lot 3 de B, n° 12 (EPIC-111, EPIC-223). NON SLOTTÉE.
+  - range: "STORY-967"
+    status: "RÉSERVÉ"
+    owner: "La balance dérivée du grand livre, publiée au hub — mouvements hors à-nouveaux et soldes de clôture des seules écritures validées (instantané, bigint), équilibrée, refusée tant qu'un brouillard reste dans la période (Q2) ; balance.submitted v1 (origine comptabilite, source direct, checksum v2 du hub) par une outbox écrite avec la publication et son entrée de piste chaînée ; idempotente (même contenu, même version) ; verdict du hub lu (balance.created, balance.rejected) ; droit comptabilite:ecriture:valider (prospera-comptabilite-service)"
+    source_doc: "prospera-stories/stories/STORY-967.md"
+    reserved_on: "2026-11-17"
+    note: >
+      EN COURS le 2026-11-17 — fiche écrite et contrat annoncé avant le code (fait balance.submitted produit,
+      balance.created et balance.rejected consommés ; POST et GET …/balance/publications ; refus
+      BROUILLARDS_A_VALIDER, BALANCE_VIDE, BALANCE_DESEQUILIBREE, PUBLICATION_INTROUVABLE ; collections
+      balances_publiees et outbox_events ; manifeste amendé). Lot 3 de B, n° 13 (EPIC-114). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
