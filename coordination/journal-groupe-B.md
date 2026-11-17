@@ -252,6 +252,29 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-17, STORY-956 — `kit-cible` 1.0.1, annoncé AVANT la fusion** (`prospera-plateforme`, étiquette
+  `kit-cible-v1.0.1`, à poser avant le 04/12). Il corrige D1, D2 et D3 de la relecture de A
+  (`coordination/relecture-kit-cible-1.0.0-groupe-A.md`). **Pour A (Dev A, `pdv`), C, D-1055 et tout module cible :
+  prendre la 1.0.1, jamais la 1.0.0** : la 1.0.0 perd une ligne en silence quand une clé figure deux fois dans un lot.
+  - **Contrat `refus-reprise@1`** : un code de requête **ajouté**, `CLE_EN_DOUBLE` (422). Il refuse toute la requête
+    quand une clé d'origine ou un alias est porté par deux lignes, avec le même corps en `SIMULER` et en `APPLIQUER`,
+    et `erreurs` nomme les lignes fautives. `code` est un motif, pas une liste fermée : c'est un ajout. La description
+    des 422 de `reprise-cible.openapi.json` est complétée. Rien n'est retiré ni renommé, et `reponse-reprise@1` ne
+    change pas.
+  - **Comportements qui se resserrent** (les contrats ne changent pas, les bornes y étaient déjà) :
+    - un montant de `montantsRequis` absent et non marqué dans `montantsASaisir`, ou un état de `champEtat` hors de
+      `etats`, donne 422 `SCHEMA_NON_CONFORME` sur toute la requête ;
+    - un `etatRetenu` hors de `etats` rendu par le `juger` d'un module donne `REFUSE` / `REFUSE_PAR_LA_CIBLE` ;
+    - `message` est borné à 1 024, `erreurs[].message` à 512, `chemin` à 256 et `raison` à 512 (texte coupé par « … ») ;
+    - au démarrage, un montant requis déclaré `required` dans le schéma est refusé (`DeclarationInvalide`).
+  - **La suite de conformité** (`casDeConformite`) gagne des cas : clé en double, textes bornés, cloisonnement,
+    atomicité, `rattacherA`, `controles`, montant requis, saisie refusée, circuit, régime non admis.
+    - **Le banc doit désormais fournir `panne`** (`new PanneDeConformite()`, exportée par `conformite.ts`) et en
+      envelopper **chaque** raccord de sa cible (`panne.envelopper(raccord)`). Sans elle, le cas d'atomicité échoue.
+    - Deux entrées facultatives du profil : `circuit` et `regimeNonAdmis`. `casSansObjet` les nomme quand elles
+      manquent.
+    - Aucun module n'a encore embarqué la 1.0.0.
+
 - **2026-11-16, STORY-953 — les contrats de l'essai prospect (plateforme, étiquette `contrats-instance-v1`) et leur
   usage par le catalogue, annoncés AVANT la fusion.** Tout est AJOUT : rien d'existant ne change de forme. **Jalon du
   14/12 (EPIC-147) : contrat du jeu de démonstration publié.**
