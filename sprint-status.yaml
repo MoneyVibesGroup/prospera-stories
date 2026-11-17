@@ -1243,6 +1243,15 @@ reserved_ranges:
       validations pendant 30 lectures, chaque lecture cohérente ; 30 000 lignes lues en 317 et 567 ms) ; 30 + 9
       mutations rouges (1 équivalente). Pile grp-b : /health 200. Calcul à la volée dans une session snapshot, pas de
       projection (D-966-1). Lot 3 de B, n° 11 (EPIC-114). NON SLOTTÉE.
+  - range: "STORY-971"
+    status: "RÉSERVÉ"
+    owner: "Les droits de la comptabilité et des paramètres de commande dans auth — les neuf comptabilite:* du manifeste et commande:parametres:modifier (demande de D, D-1053-7) au catalogue de tenant, hors du jeton (droitsHorsJeton de /moi/droits, borne inchangée) ; comptabilité attribuée aux deux rôles du cabinet (CAB_ASSOCIE les neuf, CAB_COLLABORATEUR six), commande:parametres:modifier à DIST_DG et DIST_ADMIN (prospera-auth-service)"
+    source_doc: "prospera-stories/stories/STORY-971.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🚧 EN COURS le 2026-11-17 — story neuve de la plage de B (930 → 979), insérée avant STORY-967 par la session
+      du groupe B (demande de D au journal de D, D-1053-7 ; comptabilite:* attribués à aucun rôle, D-959-4).
+      Contestable. NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

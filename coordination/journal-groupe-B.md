@@ -611,6 +611,30 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-17, STORY-971 — dix droits neufs au catalogue de tenant d'auth, hors du jeton, annoncés AVANT la fusion
+  du code** (`prospera-auth-service`, branche `MNV-971` ; fiche `stories/STORY-971.md`, D-971-1 → 8). Tout est AJOUT :
+  aucune route, aucun champ, aucun topic ne change de forme.
+  - **Catalogue** (`DROITS_HORS_JETON`) : `commande:parametres:modifier` (demande de D, D-1053-7) et les neuf droits du
+    manifeste `comptabilite` (`comptabilite:dossier:consulter`, `:exercice:ouvrir`, `:journal:administrer`,
+    `:ecriture:saisir`, `:ecriture:valider`, `:tiers:administrer`, `:lettrage:realiser`, `:exercice:cloturer`,
+    `:piste:consulter`). 152 codes en tout (24 du jeton, 128 hors du jeton). **Jamais dans `perms[]`** : la borne du
+    jeton ne bouge pas (17 + 24 = 41 ≤ 44).
+  - **Servis par** `GET /api/v1/moi/droits`, dans `droitsHorsJeton` (contrat `moi-droits` 1.1.0, inchangé). Les droits
+    de tenant effectifs restent `droits ∪ droitsHorsJeton`.
+  - **Attributions par défaut** :
+    - `CAB_ASSOCIE` (rôle par défaut du `TENANT_ADMIN` d'un cabinet) : les neuf `comptabilite:*` ;
+    - `CAB_COLLABORATEUR` (rôle par défaut du `TENANT_USER`) : `dossier:consulter`, `ecriture:saisir`,
+      `ecriture:valider`, `tiers:administrer`, `lettrage:realiser`, `piste:consulter` (ni ouvrir, ni arrêter le plan
+      de journaux, ni clore : D-971-2) ;
+    - `DIST_DG` et `DIST_ADMIN` : `commande:parametres:modifier` (D-971-3). Aucun autre rôle.
+  - **Pas d'avance de `dv`** à la livraison (D-949-3) : les caches `(membre, organisation, dv)` des services voient les
+    droits neufs à leur terme (60 s au plus). Le jeton ne change pas.
+  - **`identity.droits.changed@1` ne change pas** : il ne porte aucun droit (D-949-4) ; schéma non touché, rien à
+    enregistrer au registre.
+  - **Pour D** : `PUT /api/v1/commande/parametres` passe pour un DG ou un `DIST_ADMIN` dès le déploiement d'auth (cache
+    compris). **Pour la comptabilité (B)** : sa garde lit déjà `droits ∪ droitsHorsJeton` (D-961-7) ; rien n'y change.
+    Un rôle personnalisé ou une surcharge peuvent désormais composer ces dix droits (module souscrit exigé, STORY-167).
+
 - **2026-11-17, STORY-966 — le grand livre, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
   EPIC-114 ; fiche `stories/STORY-966.md`, D-966-1 → 11). **Fusionné le 17/11** : comptabilite #6, `7fed6ce` sur
   `dev` (annonce : stories #652). Tout est AJOUT : rien d'existant ne change de forme.
