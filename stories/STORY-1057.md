@@ -1,6 +1,6 @@
 # STORY-1057 : la recette de la démo assurance, jouable contre la compagnie fictive
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-204 (le logiciel de compagnie fictif, la compagnie de démonstration et la recette de la démo) ·
 **Dépôt :** `prospera-assureur-fictif` (tenu par D depuis STORY-1046) · **Plage :** groupe D, n° 13 du lot 3
@@ -19,6 +19,8 @@ fiches STORY-986, 987, 1046 (D-1046-8), 1048 (« Ce qui reste »).
 - 17:10 — verrou Docker libre (B l'avait rendu avant 17:00) : pris sans attente (`D STORY-1057 17:10`).
 - 17:30 — code poussé sur `MNV-1057` (72b481d, puis le rejeu renforcé) ; Node 24 : tsc, lint, build verts, 44/44
   suites et 451 unitaires, 4/4 suites et 30 e2e ; mutations en cours ; puis la pile `grp-d`.
+- 17:45 — fusionnée (#5, `dev` f9bbea5), recette verte sur l'image de `origin/dev` avec des volumes neufs, rejouée ;
+  pile descendue, verrou rendu. Story finie.
 
 ## Pourquoi
 
@@ -109,12 +111,86 @@ le moteur ne peut pas installer le LC fictif (`NON_EXECUTEE`).
 
 ## Ce qui a été livré
 
-*(à la fin)*
+**2026-11-17** — `prospera-assureur-fictif` **#5**, fusionnée en « Rebase and merge » sur `dev` : **`51f2639`**,
+**`9e98f70`**, **`f9bbea5`** (branche `72b481d`, `78564a1`, `001002a` ; `head.sha` vérifié avant la fusion). Annonce
+« ⚠ Contrats » fusionnée **avant** le code (prospera-stories **#658**, `main` 3768852).
+
+- `src/modules/assureur-fictif/recette/` :
+  - `table-annexe-e.json` : l'annexe E extraite du PRD par script (`prospera-stories@e631c2a`, sha256 du PRD
+    `263a6f3f…`), empreinte de la table figée par un test (`164e1acf…`) ;
+  - `annexe-e.ts` : le classement (D-1057-2), les 14 contrôles du LC et leurs valeurs attendues écrites ;
+  - `recette.ts` (`jouerLaRecette`, `rapportEnTexte`), `client-du-lc.ts`, `recette-demo.ts` (`npm run recette:demo`,
+    sortie 0/1/2), `emetteur-de-recette.ts` (JWKS et jetons d'essai), `partie-des-scenarios.ts` (déplacée de
+    `test/utils`, garantie du décompte, D-1057-6).
+- `src/modules/assureur-fictif/instance/verification/` : `VerificationsC13` et sa route (cinq codes du manifeste,
+  `MOTEUR` seul, 404 `VERIFICATION_INCONNUE`), `verification-installation.schema.json` copié à l'octet
+  (`platform-catalog-service@c3c63c8`, sha256 `8e7d29a2…`, invariant de copie).
+- `demo/referentiel-fictif.ts` : le référentiel du générateur, prouvé exact sur le jeu de la démo entier.
+- D-1057-5 : `RegistreC13.rouvrir`, `estFermee`, `EffacementFait.rouverteLe` ; `BoiteAuxLettres` : cycle fermé,
+  `rouvrirApresEffacement` (`ANTERIEUR_A_L_EFFACEMENT`), `exclusif` (l'effacement dans la file), remise à zéro qui rouvre ;
+  `DepotCompagnie.numerosAttribues`, `parcourirObjets` (mémoire et MongoDB, curseur).
+- `docker-compose.yml` : profil `recette` (`emetteur-de-recette`, `droit-de-recette`, `recette-demo`) ; README.
+
+### La table de l'annexe E : où chaque vérification se joue
+
+| Lignes de l'annexe E | Où | Comment elle se joue | Résultat attendu (pile) |
+|---|---|---|---|
+| n° 3 (dossier DÉCLARÉ) | LC + C | le LC sert `SIN-2026-9002` au statut `DECLARE` (lot C-9 lu par son API) | `DECLARE` — vert |
+| n° 11 (devis 1 273 000) | LC + C | chiffre de référence servi par le LC (`GET /assureur-fictif/jeu`) ; l'OCR est à C | 1 273 000 — vert |
+| n° 25, 49 (445 500) | LC + C | chiffrage de l'expert servi | 445 500 — vert |
+| n° 64, 70, 71, 86 (70 % au tiers) | LC + C | part du tiers servie | 70 — vert |
+| n° 74, 78 (décompte) | LC + C | recalcul : 445 500 − max(10 % × 445 500, 50 000) avec la garantie acquise de la police servie (C-3) = évaluation arrêtée du jeu | 395 500 — vert |
+| n° 79, 80 (ÉVALUÉ, provision 395 500) | LC + C | décompte + évaluation C-14 envoyée par l'API du LC | 395 500 ; `ACCEPTE` — vert |
+| n° 90, 94 (quittance, RÉGLÉ) | LC + C | règlement par chèque C-15 | `ACCEPTE` — vert |
+| n° 95 (créance de recours 276 850) | LC + C | 70 % × 395 500 = montant réclamé du jeu ; encaissement C-16 | 276 850 ; `ACCEPTE` — vert |
+| n° 97 (CLÔTURÉ) | LC + C | décision de clôture C-17, puis une évaluation refusée (clos au LC) | `ACCEPTE` puis `REFUSE ETAT_INCOMPATIBLE` — vert |
+| n° 104 (remise à zéro : DÉCLARÉ, démo vierge) | LC + C | remise à zéro ; les quatre scénarios et leurs polices servis comme au premier chargement ; aucun envoi ni numéro ; la même partie rejouée rend les mêmes réponses, celles de la démo | 0 écart — vert |
+| 65 autres vérifications de E.1 (n° 5–8, 10, 12–18, 20–24, 32–33, 35–37, 39, 41–42, 44–48, 50–59, 61–63, 65, 67–69, 72–73, 76, 81–85, 88–89, 91–93, 98–102) | **C** | non jouables par le LC seul : le dossier, le circuit, les experts, la GED et l'OCR sont dans `sinistres` et `document-service` | `NON_JOUABLE_PAR_LE_LC` → C |
+| 22 vérifications d'écran de E.1 (n° 1, 2, 4, 9, 19, 26–31, 34, 38, 40, 43, 60, 66, 75, 77, 87, 96, 103) | **C + écran** | bouton, grisé, « sans rechargement » (FR-28) : le fait à C, l'écran à `prospera-app` (pas de coque) | `NON_JOUABLE_PAR_LE_LC` → C, écran |
+| Les 21 refus de E.2 | **C** (n° 2, 3, 5, 9, 12, 14, 19, 21 : + écran) | refus du circuit de Prospera (séparation des tâches, droits, champs) : aucun n'est un refus du LC | `NON_JOUABLE_PAR_LE_LC` → C |
+| Les cinq vérifications C13 | LC | `POST …/verifications/<code>` sous `MOTEUR`, au contrat | 5/5 `VERT`, mesure 0 |
+
+La recette rend les 125 lignes (104 + 21) ; la part du LC est **17/17 verte** ; 108 lignes sont nommées non jouables par
+le LC seul, avec leur destination.
 
 ## Preuves
 
-*(à la fin)*
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive HEAD`) : `tsc` vert ;
+  lint du dépôt entier 0 (`--max-warnings 0`) ; build ; **44/44 suites, 451 tests** unitaires (419 avant) ; **e2e 4/4
+  suites, 30 tests** (23 avant ; la suite neuve `recette-demo.e2e-spec.ts` joue `jouerLaRecette` par HTTP contre
+  l'application montée avec la vraie chaîne de gardes et les jetons de l'émetteur de recette).
+- **Mutations, 12 sur 12 rouges sur une assertion** (aucune à la compilation ; M9 et M10 rejouées après avoir rendu
+  leur mutation compilable et leur message court) : franchise au minimum (2 rouges) ; **décompte attendu saboté à
+  445 500** (2) ; évaluation acceptée après clôture (3) ; remise à zéro qui ne vide plus (3) ; cycle qui relève une
+  organisation effacée (2) ; réouverture qui n'écarte plus la sortie (1) ; trous non comptés (1) ; personne hors
+  référentiel non comptée (1) ; `absent-du-reel` toujours vert (1) ; un prénom de trop au référentiel (1) ; route de
+  vérification sans le moteur (1) ; rejeu sans les réponses de la démo (1). Une première version de n° 104 survivait à
+  une remise à zéro qui gardait un sinistre clos (deux parties identiques, mais fausses) : le contrôle exige désormais les
+  réponses de la démo au rejeu.
+- **Pile `grp-d`** (`AUTH_JWKS_URI=http://emetteur-de-recette:3499/.well-known/jwks.json docker compose -p grp-d
+  --profile assureur-fictif --profile recette run --rm recette-demo` ; MongoDB 8 en jeu de répliques, Kafka, le droit
+  du module publié sur `entitlement.changed`, l'émetteur de recette) :
+  - branche : **recette verte de bout en bout** (17/17, C13 5/5, 12 s), **rejouée** (elle commence par une remise à
+    zéro) : verte, table identique ; **jeu de la démo** (`RECETTE_TAILLE=DEMO`, 205 915 enregistrements) : verte, 244 s ;
+  - les cinq vérifications sur l'organisation chargée au jeu de la démo : 27, 234, 123, **2 370** (46 540 objets
+    relus) et 509 ms, sous le délai de 10 s du moteur ;
+  - D-1057-5 sur la pile : effacement C13 (`EFFACE`, 206 049 enregistrements), cycle `fermee: true`, effacement rejoué
+    `DEJA_EFFACE` au même décompte, remise à zéro, cycle rouvert ;
+  - **image reconstruite depuis `origin/dev` (`f9bbea5`)**, `build --no-cache`, volumes neufs (code neuf vérifié dans
+    l'image) : recette **verte**, rejouée **verte**, tables identiques entre elles et à celle de la branche ; refus de
+    l'espace réel intact (`INSTANCE_ESPACE=REEL` ⇒ sortie 78, `ESPACE_REEL`) ;
+  - `down -v` : aucun conteneur, volume ni réseau `grp-d` restant.
+- **Verrou Docker** : libre à 17:00 (B l'avait rendu), pris à 17:10 sans attente, rendu à 17:45.
 
 ## Ce qui reste
 
-*(à la fin)*
+- **La part Prospera des 104 + 21** (→ C) : jouer le parcours de `SIN-2026-9002` dans `sinistres` contre le LC
+  fictif ; la table classée et la recette du LC sont réutilisables (`table-annexe-e.json`, `CONTROLES_DU_LC`).
+- **L'assemblage de la recette complète sur vrai backend** (→ A, `prospera-recette`) quand C aura le parcours : la
+  suite peut appeler `recette-demo.js` (image du LC fictif) pour la part du LC.
+- **C-10 (documents)** n'est pas dans le jeu : le générateur (dossier de C) ne les produit pas (Q-D-8, → C). Les
+  « 7 documents » et le bordereau de 11 pièces (n° 12, 101) en dépendent.
+- **Les noms de l'annexe E** ne sont pas ceux du jeu (Q-D-7, → C).
+- **La garantie du sinistre existant `SIN-2026-9002`** (`RC_CIRCULATION`, franchise 0) contredit le décompte de
+  l'annexe E (D-1057-6, → C).
+- Le drapeau `assureurFictifAutorise` de l'état voulu (D-1048-4) : toujours au moteur.

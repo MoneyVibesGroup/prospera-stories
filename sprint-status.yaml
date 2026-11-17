@@ -425,7 +425,15 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1057.md"
     reserved_on: "2026-11-17"
     note: >
-      🚧 EN COURS (2026-11-17) — groupe D, n° 13 du lot 3 (EPIC-204). Annonce « ⚠ Contrats » avant le code. NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-assureur-fictif#5 (dev 51f2639, 9e98f70, f9bbea5) ; annonce « ⚠ Contrats » avant le
+      code (docs #658). npm run recette:demo : la table de l'annexe E extraite du PRD (104 vérifications, 21 refus) et
+      classée — 17 parts jouées par le LC (chiffres de référence de SIN-2026-9002 recalculés au franc près : 395 500,
+      276 850 ; réponses du LC à la partie de la démo ; remise à zéro ; partie rejouée), 108 lignes non jouables par le LC
+      seul, nommées avec leur destination (→ C, écran). Cinq routes de vérification C13 (verification-installation@1, MOTEUR
+      seul, banc en mémoire). Boîte aux lettres fermée après un effacement C13 (reste de 1048). Node 24 : 451 unitaires, 30
+      e2e, 12/12 mutations. Pile grp-d : recette verte (17/17, C13 5/5), rejouée, jeu de la démo vert (244 s), puis image
+      reconstruite depuis origin/dev, volumes neufs : verte, rejouée, tables identiques. Lot D, n° 13 du lot 3 (EPIC-204).
+      NON SLOTTÉE.
 
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"

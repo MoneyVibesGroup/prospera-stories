@@ -142,11 +142,26 @@
   - Pile `grp-d`, rejouée depuis `dev` : 16/16 (saisie, validation, `BL-2026-000001`, 403, rejeu sans numéro, plafond,
     12 validations parallèles continues, outbox vidée, faits lus sur Kafka).
   - Décisions D-1056-1 → 13 (fiche). **Verrou Docker pris à 16:01 sans attente** (B l'avait rendu), rendu à 16:36.
-- **STORY-1057** 🚧 🛡 — la recette de la démo assurance : **en cours** (annonce « ⚠ Contrats » avant le code ; fiche
-  `stories/STORY-1057.md`, section « Où j'en suis »).
-- **Suivante : STORY-1057** 🛡 la recette de la démo assurance, dans `prospera-assureur-fictif` (EPIC-204) : les
-  vérifications de l'annexe E rendues jouables contre la compagnie fictive ; dépend de 1046 et 1048, faites ; la fiche
-  1048 note que les routes de vérification C13 du manifeste sont à faire avec 1057.
+- **STORY-1057** ✅ 🛡 — la recette de la démo assurance (PR prospera-assureur-fictif#5, `dev` 51f2639, 9e98f70,
+  f9bbea5 ; annonce « ⚠ Contrats » #658 avant le code).
+  - **`npm run recette:demo`** joue, par HTTP, contre un LC fictif vivant : la table de l'annexe E extraite du PRD
+    (`recette/table-annexe-e.json`, 104 vérifications et 21 refus) et **classée** : **17 lignes dont le LC joue la
+    part** (n° 3, 11, 25, 49, 64, 70, 71, 74, 78, 79, 80, 86, 90, 94, 95, 97, 104 : chiffres de référence de
+    `SIN-2026-9002` recalculés au franc près — décompte 395 500, recours 276 850 —, réponses du LC à la partie de la
+    démo, remise à zéro, partie rejouée), **108 lignes non jouables par le LC seul**, nommées avec leur destination
+    (65 → C ; 22 → C et l'écran ; les 21 refus → C). Sortie 0 si la part du LC est verte. Profil compose `recette`.
+  - **Les cinq routes de vérification C13** servies (`verification-installation@1`, `MOTEUR` seul, banc en mémoire,
+    aucune ne modifie l'organisation) : **reste 1 de 1048 soldé**. **Après un effacement C13, l'organisation est fermée
+    à la boîte aux lettres** jusqu'au premier import ou à une remise à zéro : **reste 2 de 1048 soldé** (D-1057-5).
+  - Node 24 : 451 unitaires, 30 e2e ; 12/12 mutations (dont une vérification de l'annexe E sabotée). Pile `grp-d` :
+    recette verte (17/17, C13 5/5), rejouée, jeu de la démo vert (244 s) ; puis image reconstruite depuis `origin/dev`,
+    volumes neufs : verte, rejouée, tables identiques.
+  - Décisions D-1057-1 → 9 (fiche) ; Q-D-7 et Q-D-8 au PO ; → C, → A, → B. **Verrou Docker pris à 17:10 sans attente**
+    (B l'avait rendu avant 17:00), rendu à 17:45.
+- **Suivante : STORY-1058** 🚚 le jeu « Grossiste du Golfe » (EPIC-226), dans `ventes`, `terrain` et la plateforme : un
+  jeu au format `jeu-demonstration@1` (vérifié par `jeu:verifier`), avec les routes C13 d'import et d'effacement ;
+  dépend de 1056, faite. Patron : STORY-1046 (le jeu de l'assurance, `jeux-demonstration/` de la plateforme, routes
+  C13 sous `MOTEUR`) et STORY-1057 (les routes de vérification C13, contrat `verification-installation@1`).
 
 ### Lots 1 et 2
 
@@ -278,7 +293,10 @@
   - **Assurance (lot 3), pour mémoire** : D tient aussi `prospera-assureur-fictif` (la démo, EPIC-204), qui n'est pas
     du distributeur ; le jeu de l'assurance et les routes C13 y sont depuis STORY-1046, le refus de l'espace réel
     (`INSTANCE_ESPACE`, sortie 78) et la remise à zéro qui rejoue les quatre scénarios depuis STORY-1048 (`dev`
-    4f4aa89). Suite : 1057 (la recette de la démo ; y servir les routes de vérification C13 du manifeste).
+    4f4aa89) ; la recette de la démo (`npm run recette:demo`, table de l'annexe E classée), les cinq routes de
+    vérification C13 et la boîte aux lettres fermée après un effacement depuis STORY-1057 (`dev` f9bbea5). Ce qui
+    reste à l'assurance de D : rien d'ouvert dans le dépôt ; les demandes à C (documents C-10, noms, garantie de 9002)
+    changent le générateur de C, que D recopie alors à l'octet (empreinte du jeu à refiger).
   - **Les garde-fous de `commande`** (STORY-1049, `ventes` `dev` c8f5fd2), `src/modules/commande/garde-fous/` :
     - paramètres versionnés (`commande_parametres`, une version immuable par changement, la première écrite à la
       première lecture) ; changés par `TENANT_ADMIN` jusqu'à 1053 ; un acte garde sa `parametresVersion` ;
@@ -351,6 +369,31 @@
     dépend de 1056, faite).
 
 ## Demandes aux autres groupes
+
+- **→ C (2026-11-17) : la part Prospera de l'annexe E (STORY-1057)** — **information, et trois demandes ouvertes**.
+  La recette du LC fictif (`npm run recette:demo`, `prospera-assureur-fictif` `dev` f9bbea5) joue ce que le LC tient de
+  l'annexe E ; **les 108 autres lignes sont à vous** (dossier, circuit, experts, GED, OCR ; 22 d'entre elles se voient
+  aussi à l'écran) : la table classée est réutilisable telle quelle (`src/modules/assureur-fictif/recette/
+  table-annexe-e.json` et `annexe-e.ts`, colonne `ou`). Trois écarts du **générateur** (votre dossier
+  `contrats/assurance/demo/`), à trancher chez vous puis à me demander de recopier :
+  (1) **C-10** : le jeu ne produit aucun document ; les « 7 documents » (n° 12) et le bordereau de 11 pièces (n° 101)
+  en dépendent (Q-D-8) ; (2) **les noms** de l'annexe E (« Estelle Lawson », « Komlan », « SAREX ») ne sont pas ceux
+  du jeu (Estelle Kpodar, Koffi Mensah, trois cabinets fictifs) : la part Prospera lira la personne par son rôle
+  (Q-D-7) ; (3) **la garantie du sinistre existant `SIN-2026-9002`** est `RC_CIRCULATION` (franchise 0), qui donne
+  445 500 et non le décompte de 395 500 ; la police porte la garantie `DOMMAGES_TOUS_ACCIDENTS` (10 %, 50 000), que la
+  partie retient (D-1057-6). **Pour vos piles** : après un effacement C13 du LC, rejouer un parcours demande des lots
+  neufs (comme après une remise à zéro) — **ouverte** pour (1) à (3).
+- **→ A (2026-11-17) : assembler la recette de la démo sur vrai backend (`prospera-recette`)** — **information,
+  ouverte** pour quand C aura le parcours de `SIN-2026-9002`. La part du LC se joue par l'image du LC fictif
+  (`node dist/modules/assureur-fictif/recette/recette-demo.js`, variables `RECETTE_*`, sortie 0/1, rapport JSON par
+  `RECETTE_RAPPORT`) ; la table des 104 + 21 et leur classement sont dans `table-annexe-e.json` et `annexe-e.ts`.
+  Règle de recette (FR-15, FR-264) : 104 sur 104 de la table réécrite.
+- **→ B (2026-11-17) : le LC fictif sert ses cinq vérifications C13 (STORY-1057)** — **information**. Votre demande
+  du 16/11 (STORY-944, « servir les routes de vérification ») est **servie** pour `assureur-fictif` :
+  `INSTALLATION_SERVICES=assureur-fictif=<url>` suffit ; chaque route répond `verification-installation@1` en moins de
+  3 s sur le jeu de la démo (délai du moteur : 10 s). Dans un espace réel, le service ne démarre pas : le moteur verra
+  `assureur-fictif-absent-du-reel` `NON_EXECUTEE`, jamais `VERT` ; c'est au bilan d'un espace réel de le lire comme
+  un échec (FR-205). Le drapeau `assureurFictifAutorise` de l'état voulu reste à porter par l'agent (D-1048-4).
 
 - **→ B (2026-11-17), information : `reseau` est le premier module cible sur `kit-cible` 1.0.1 (STORY-1055)** — aucune
   action exigée.
@@ -477,6 +520,11 @@
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-16) : servir les routes de vérification de vos modules (STORY-944)** — **servie pour
+  `assureur-fictif`** par prospera-assureur-fictif#5 (STORY-1057, `dev` f9bbea5) : les cinq codes du manifeste, au contrat
+  `verification-installation@1`. Les modules du distributeur (`reseau`, `ventes`…) n'en servent pas encore : à leur
+  installation par le moteur.
+
 - **← B (2026-11-17) : `commande:parametres:modifier` au catalogue de tenant (STORY-971, annoncée)** — **lue** au
   rituel de 1056. Hors du jeton, `DIST_DG` et `DIST_ADMIN` seulement, servi par `/moi/droits` (`droitsHorsJeton`) :
   rien à changer dans `ventes` (la route lit déjà ce droit depuis 1053). La demande D-1053-7 reste **ouverte** jusqu'à
@@ -511,8 +559,10 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-17, STORY-1057), AVANT la fusion du code — `prospera-assureur-fictif` : les cinq routes de
-  vérification C13, la recette de la démo, la boîte aux lettres fermée après un effacement.** Fiche :
+- **PUBLIÉ (2026-11-17, STORY-1057, prospera-assureur-fictif#5, `dev` 51f2639 → f9bbea5) ; ANNONCÉ avant la fusion
+  du code (prospera-stories #658). Aucun écart avec l'annonce. — `prospera-assureur-fictif` : les cinq routes de
+  vérification C13, la recette de la démo, la boîte aux lettres fermée après un effacement.** Ajouts au cycle
+  d'administration (`POST /assureur-fictif/cycle`) : `fermee: true` quand l'organisation est effacée. Fiche :
   `stories/STORY-1057.md` (D-1057-1 → 9). Rien d'existant ne change de forme : ni l'API du LC (`/lc/echange`), ni le fil
   (lots, accusés, numéros), ni l'import et l'effacement C13, ni l'administration.
   - **Routes neuves** (déjà déclarées au manifeste, C13 points 2 et 8), sous le seul jeton de service du **moteur**
@@ -871,6 +921,15 @@
 
 ## Questions à l'utilisateur ou au PO
 
+- **Q-D-8 (2026-11-17, STORY-1057) — La vérification C13 `objets-de-l-annexe-c` est-elle verte sans documents
+  (C-10) ?** Le générateur du jeu n'en produit pas. **Choix par défaut : `VERT`**, C-10 nommé `SANS_OBJET` dans le
+  détail (avec C-18 et C-19, exports tirés de Prospera, jamais déposés au LC) ; demande à C pour les documents.
+  Alternative : `ORANGE` (le moteur n'installerait plus le LC fictif) tant que le jeu n'a pas de documents.
+- **Q-D-7 (2026-11-17, STORY-1057) — Les noms de l'annexe E (« Estelle Lawson », « Komlan », « SAREX ») sont-ils à
+  garder ?** Ce sont ceux de la démo d'origine ; le jeu fictif en a d'autres (Estelle Kpodar, Koffi Mensah, cabinets
+  fictifs). **Choix par défaut : la recette lit la personne par son rôle dans le jeu**, la part du LC ne juge aucun nom
+  (D-1057-8). Alternative : le générateur de C reprend les noms de l'annexe (s'ils sont fictifs, FR-202).
+
 - **Q-D-6 (2026-11-17, STORY-1054) — Quels messages à l'assuré demandent son consentement ?** FR-19 veut un
   consentement par finalité ; FR-36, FR-48 et FR-18 font des étapes du dossier des messages dus. **Choix par défaut :
   seul le numéro officiel (« assuré (information) », FR-146) est facultatif** (`INFORMATION_DU_DOSSIER`, échec
@@ -897,6 +956,25 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1057** :
+  - (1) **Un `foo.ts` et un `foo.json` dans le même dossier** (`annexe-e.ts`, `annexe-e.json`) : `import … from
+    './annexe-e'` charge le JSON sous `ts-node` et jest (« not iterable ») ; le `dist` compilé, lui, marche. Nommer le
+    JSON autrement (`table-annexe-e.json`). Déjà vu en 1051 : à éviter d'emblée.
+  - (2) **`cat > fichier` sans entrée en tête d'une commande** attend la console : la commande ne finit jamais (tâche
+    d'arrière-plan à arrêter). Et un heredoc mange encore l'antislash d'un `'\n'` dans un script Python : écrire au
+    fichier, ou par l'outil d'édition.
+  - (3) **Les e2e chargent `AppModule`** (la chaîne de gardes) : elles tirent le client Kafka natif et ne tournent que
+    sous Node 24, dans l'image `verification` ; les unitaires purs tournent sous Node 25 en local.
+  - (4) Un `tsc --noEmit` local écrit `dist/tsconfig.tsbuildinfo` (incrémental) : supprimer `dist/` avant de rendre
+    le checkout.
+  - (5) Sous Git Bash, `docker compose run -e RECETTE_RAPPORT=/tmp/r.json` réécrit le chemin en chemin Windows :
+    `MSYS_NO_PATHCONV=1`.
+  - (6) Un message d'échec énorme (une expression régulière sur 46 000 lignes) dépasse le tampon de `spawnSync` : la
+    mutation paraît survivre (« Tests: ? »). Écrire l'assertion sur une liste courte (`filter` puis `toEqual([])`).
+  - (7) **Un contrôle de rejeu « mêmes réponses » survit à un état gardé** (deux parties identiques, mais fausses) :
+    exiger aussi les réponses attendues au rejeu.
+  - (8) `rm -rf "$S/…"` est refusé par la garde de l'outil : écrire `"${S:?}"/…`.
 
 - **STORY-1056** :
   - (1) **`docker build` sur ce poste passe par le constructeur `desktop-linux` (pilote `docker-container`)** : sans
