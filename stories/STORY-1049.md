@@ -1,6 +1,6 @@
 # STORY-1049 : les garde-fous de la commande — paramètres figés à l'acte, plafond de crédit, squelette de la saga
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-225 (les garde-fous, l'encours, le plafond de crédit et la saga de réservation) · **Dépôt :**
 `prospera-ventes-service` (module `commande`, tenu par D) · **Plage :** groupe D, n° 5 du lot 3
@@ -117,4 +117,39 @@ de `stock` ; les rôles du distributeur (1053).
 
 ## Preuves
 
-À remplir.
+- **Copie à l'octet** d'`encours-v1` (`git -c core.autocrlf=false show encours-v1:…`, commit b061cec) dans
+  `src/socle/encours/` : `index.ts` `4b5c9bff01f1fa1e49c80517c676bd7f42367440a95fe89ba1d8c3d96d8c1fbc`,
+  `vecteurs-or.json` `23e3c260c2a9cf26e582eecd3bbb7b8368c2011633060d15edbeca683a57eabd`, celles de la fiche 1047,
+  figées par `src/encours.invariant.spec.ts` (valeurs écrites dans le test) ; ni lint ni formatage sur la copie
+  (`.prettierignore`, `eslint.config.mjs`) ; les **dix vecteurs d'or** (dont cinq refus) rejoués par
+  `src/socle/encours/vecteurs-or.spec.ts`.
+- **Node 24** (étage `verification` du Dockerfile, image construite depuis `git -c core.autocrlf=false archive HEAD`) :
+  `tsc --noEmit` vert ; lint des fichiers touchés (`endOfLine auto`) vert ; `npm run build` vert ; unitaires **Test
+  Suites: 37 passed, 37 total ; Tests: 339 passed** ; e2e **1 suite, 11 passed** ; intégration sur **MongoDB 8.0 réel
+  en jeu de répliques** **Test Suites: 4 passed, 4 total ; Tests: 32 passed** (dont 20 pour les garde-fous :
+  paramètres v1 écrite une fois sous dix lectures simultanées, changement tracé, version périmée et changements
+  concurrents, acte relu avec sa version ; 600 000 puis 600 000 sous 1 000 000 refusé `PLAFOND_CREDIT_DEPASSE`, **deux
+  validations simultanées : une seule passe**, FR-187 retrouvé (encours 1 500 000, disponible 500 000) ; refus fermés
+  qui n'écrivent rien ; rejeu ; saga : `STOCK_INSUFFISANT` puis reprise, crash après la réservation rattrapé sans double
+  réservation ; et 4 par le banc HTTP : garde du module, rôle du `PUT`, corps du 409, clé d'idempotence).
+- **Mutations : 12/12 rouges sur une assertion** (script hors dépôt, joué dans l'image Node 24 avec MongoDB) : crédit
+  bloqué ignoré ; source `ABSENTE` rendue muette ; crédit bloqué contrôlé après le stock ; incrément de l'engagement
+  hors de la transaction ; acte relu avec les paramètres courants ; empreinte de la charge ignorée ; version attendue
+  non contrôlée ; borne du seuil élargie ; réservation non notée ; supplément non jugé ; voisin `stock` non projeté ;
+  copie d'`encours` retouchée.
+- **Pile `grp-d`** (`docker compose -p grp-d --profile commande up --build`, émetteur RS256 de recette sur le réseau de
+  la pile ; droits `commande` et `stock` publiés sur `entitlement.changed`, projetés tous deux) : service `healthy`,
+  `/health` 200. Appels réels : paramètres v1 (valeurs de la démo) ; sans plafond `409 PLAFOND_INCONNU` ; plafond
+  1 000 000 posé dans le read-model (faute de `pdv`) et Créance non branchée `409 ENCOURS_NON_INSTALLE`
+  (`absentes: [creances, creditsTiers]`, disponible `NON_INSTALLE`) ; sources posées (faute de B-963, B-965) : 600 000
+  `201` (bon `EN_ATTENTE_RESERVATION`, ligne `RESERVATION_NON_BRANCHEE`), la seconde de 600 000 **`409
+  PLAFOND_CREDIT_DEPASSE`** (dépassement 200 000, moyen `commande:plafond:deroger`) ; rejeu `rejeu: true` ; `PUT` refusé
+  403 au `TENANT_USER`, version 2 au `TENANT_ADMIN` ; **l'acte relu garde sa version 1 et ses valeurs** ; piste
+  d'audit intègre (2 lignes). Aucune erreur au journal du service. **Rejoué à l'identique** sur des images reconstruites
+  depuis `origin/dev` (c8f5fd2), volumes neufs. `down -v` après chaque passage : aucun conteneur, volume ni réseau
+  `grp-d` restant.
+- `git diff --stat` = `--ignore-cr-at-eol` (31 fichiers) ; aucun `index.ts` non suivi (la copie d'`encours` est suivie).
+- Annonce « ⚠ Contrats » fusionnée **avant** le code : prospera-stories **#605** (`main` be7b77e).
+- PR **prospera-ventes-service#3**, `head.sha` fa47fa2 vérifié, fusionnée en rebase : **`dev` c8f5fd2**.
+- Verrou Docker du poste : libre au moment de lever Docker (B l'avait rendu), pris à 04:21, rendu à 04:34, repris et
+  rendu pour le rejeu depuis `dev`.

@@ -35,10 +35,18 @@
   zéro rend les mêmes réponses, par fichiers et par l'API (pile `grp-d`, témoin d'`origin/dev`, rejouée depuis `dev`).
   Node 24 : 419 unitaires + 23 e2e ; 10/10 mutations. Décisions D-1048-1 → 7 (fiche). Verrou Docker pris sans attente,
   rendu.
-- **Suivante : STORY-1049** 🚚 les garde-fous (EPIC-225, `prospera-ventes-service`) : paramètres par organisation figés à
-  l'acte ; plafond de crédit ; squelette de la saga de réservation. Dépend de 1047, faite : **premier consommateur
-  d'`encours-v1`** (copie à l'octet de `encours/src/index.ts` et `vecteurs-or.json`, empreintes dans
-  `stories/STORY-1047.md`, vecteurs d'or rejoués dans ses tests). Puis 1050 (les dettes de `reseau-service`).
+- **STORY-1049** ✅ 🚚 — les garde-fous de la commande (PR prospera-ventes-service#3, `dev` c8f5fd2 ; annonce
+  « ⚠ Contrats » #605 avant le code). **Premier consommateur d'`encours-v1`** : `src/socle/encours/` copié à l'octet
+  (empreintes figées par un test, dix vecteurs d'or rejoués). Paramètres de `commande` versionnés par organisation
+  (`commande_parametres`, AD-12), l'acte garde sa `parametresVersion` ; plafond jugé sur l'encours certain sous verrou
+  par tiers (AD-9) ; échec fermé tant que la Créance n'est pas branchée (`ENCOURS_NON_INSTALLE`) ; squelette de la saga
+  (AD-34 : transaction locale, puis `stock` par ligne de bon, reprise sans double réservation). Node 24 : 339
+  unitaires, 11 e2e, 32 d'intégration sur MongoDB réel ; 12/12 mutations. Pile `grp-d` (puis rejouée depuis `dev`) :
+  `PLAFOND_CREDIT_DEPASSE` sur appel réel, l'acte relu garde sa version 1 après le passage à la version 2. Décisions
+  D-1049-1 → 11 (fiche). Verrou Docker pris sans attente (B l'avait rendu), rendu.
+- **Suivante : STORY-1050** 🚚 les dettes de `reseau-service` (EPIC-145, 264 ; sans dépendance) : garde sur l'état
+  publié (D-1030-2) ; `/moi/droits` à la place de la table rôle → droits (D-1032-2) ; `reseau.commercial.changed@1`
+  republié quand seul l'état du compte change (D-1034-5). Puis 1051 (prévenir l'assuré, `notification`, reçu de B).
 
 ### Lots 1 et 2
 
@@ -82,7 +90,8 @@
   profil `assureur-fictif`, « Rebase and merge » seul ; dans `prospera-plateforme`, le jeu
   `jeux-demonstration/assurance-compagnie-demo-reduite/` (étiquette `jeu-assurance-v1`). Le générateur reste dans le
   dossier de C (`contrats/assurance/demo/generateur.ts`), copié à l'octet.
-- Lot 3, à recevoir : `prospera-notification-service` (de B, à la fusion de B-957).
+- Lot 3 : `prospera-notification-service`, passé par B à la fusion de B-957 (passation écrite dans le journal de B,
+  dernier commit de B sur `dev` 5e6c553) ; à constater au rituel de 1051.
 
 - `reseau-service` (lot 2) : `main` et `dev` posées le 2026-11-16 ; port de développement **3419** ; piles Docker
   `grp-d`.
@@ -109,9 +118,9 @@
     chacun de ses manifestes. Les 13 faits « nouveaux » d'AD-20 manquent encore aux manifestes (PR d'AD-27).
   - ~~`vocabulaires/` et `contrats/distributeur/` dans la plateforme (D-1042-3)~~ : **soldé par STORY-1045**.
   - `prospera-plateforme/encours/` (`encours-v1`, STORY-1047, `dev` b061cec) : **la seule règle de calcul de
-    l'encours** (AD-9), pour `commande`, `pdv` et `recouvrement`. **Aucun service ne la copie encore** : `ventes` la
-    copie avec 1049 (à l'octet : `src/index.ts` et `vecteurs-or.json`, empreintes dans `stories/STORY-1047.md`) et
-    rejoue les vecteurs d'or. Ce qui en est exclu et pourquoi : D-1047-3. Reste à y ajouter, en `1.x`, l'exclusion du
+    l'encours** (AD-9), pour `commande`, `pdv` et `recouvrement`. **`ventes` la copie depuis STORY-1049**
+    (`src/socle/encours/`, empreintes figées par `src/encours.invariant.spec.ts`, vecteurs d'or rejoués) ; `pdv` et
+    `recouvrement` la copieront de même. Ce qui en est exclu et pourquoi : D-1047-3. Reste à y ajouter, en `1.x`, l'exclusion du
     montant dérogé pour l'évaluation du blocage (avec la story de `recouvrement`), et la correspondance avec les faits
     de B-963 et B-965 quand ils seront fixés.
   - **Reste à faire** : le volet Reprise
@@ -124,9 +133,29 @@
     du distributeur ; le jeu de l'assurance et les routes C13 y sont depuis STORY-1046, le refus de l'espace réel
     (`INSTANCE_ESPACE`, sortie 78) et la remise à zéro qui rejoue les quatre scénarios depuis STORY-1048 (`dev`
     4f4aa89). Suite : 1057 (la recette de la démo ; y servir les routes de vérification C13 du manifeste).
-  - **Prochaine story du distributeur : 1049** (les garde-fous, `ventes`), premier consommateur d'`encours-v1`.
+  - **Les garde-fous de `commande`** (STORY-1049, `ventes` `dev` c8f5fd2), `src/modules/commande/garde-fous/` :
+    - paramètres versionnés (`commande_parametres`, une version immuable par changement, la première écrite à la
+      première lecture) ; changés par `TENANT_ADMIN` jusqu'à 1053 ; un acte garde sa `parametresVersion` ;
+    - le crédit se lit par le port `SourcesDuCredit` dans des read-models **remplis par personne aujourd'hui** :
+      `commande_plafonds` (projection future de `pdv.plafond.changed@1`, avec `suspendu` = crédit bloqué),
+      `commande_creances`, `commande_credits_tiers` (à brancher par 1059 sur les faits de B-963, B-965) et
+      `commande_sources_encours` : **sans document, la source est `ABSENTE` et toute commande à crédit est refusée**
+      (`ENCOURS_NON_INSTALLE`) ; le consommateur de 1059 pose ce document quand `paiement` est en service ;
+    - l'acte `POST /api/v1/commande/validations` reçoit la commande dans son corps (squelette, D-1049-9) : **1056** y
+      branche la saisie, la bascule `EMIS` et le numéro `BL-` (série `bons-livraison`), la publication de
+      `commande.engagement-tiers.changed@1` par une outbox et la copie de `contrats/distributeur/` ;
+    - l'adaptateur de `stock` est `ReservationStockNonBranchee` (motif `RESERVATION_NON_BRANCHEE`) tant que l'API de
+      réservation de `stock` n'existe pas ; la projection des droits garde le voisin `stock` (`MODULES_VOISINS`).
+  - **Prochaine story du distributeur : 1050** (les dettes de `reseau-service`), puis 1052 (séries hébergées) et 1056
+    (la commande (1)).
 
 ## Demandes aux autres groupes
+
+- **→ B (2026-11-17) : `commande` refuse toute commande à crédit tant que la Créance n'y est pas projetée
+  (STORY-1049)** — **information**, aucune action avant 965. Les sources `creances` et `creditsTiers` de l'encours
+  sont `ABSENTE` dans `ventes` (refus `ENCOURS_NON_INSTALLE`) jusqu'au consommateur de D-1059, qui lira
+  `paiement.creance.changed@1` et `paiement.credit-tiers.changed@1` tels que B-963 et B-965 les fixeront (forme
+  attendue : « → B, ce que la bibliothèque d'encours lit », plus bas). Rien de neuf n'est demandé.
 
 - **→ C (2026-11-17) : le LC fictif lit l'espace de l'instance (STORY-1048)** — **information**, aucune action exigée.
   Vos piles qui ne posent que `FICTIF_ESPACE=essai` démarrent comme avant. Si une pile pose `INSTANCE_ESPACE` pour un
@@ -188,8 +217,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-17, STORY-1049, avant la fusion du code) — `prospera-ventes-service`, module `commande` : les
-  garde-fous.** Aucun fait publié, aucun topic, aucun contrat existant ne change. Ajouts seulement, **sans consommateur
+- **PUBLIÉ (2026-11-17, STORY-1049, prospera-ventes-service#3, `dev` c8f5fd2) ; ANNONCÉ avant la fusion du code
+  (prospera-stories #605) — `prospera-ventes-service`, module `commande` : les garde-fous.** Aucun fait publié, aucun topic, aucun contrat existant ne change. Ajouts seulement, **sans consommateur
   aujourd'hui** (ni écran, ni service).
   - **Routes** (garde `COMMANDE_NOT_ENTITLED`) : `GET /api/v1/commande/parametres` (version courante),
     `GET /api/v1/commande/parametres/versions/{version}`, `PUT /api/v1/commande/parametres` (`TENANT_ADMIN` jusqu'à
@@ -308,6 +337,13 @@
 
 ## Pièges rencontrés
 
+- **STORY-1049** : (1) un banc HTTP monté sur `monterSurMongo` se ferme **base d'abord** (`dropDatabase`, puis
+  `app.close()`) : fermer l'application ferme la connexion, et un `dropDatabase` posé ensuite reste en attente pour
+  toujours (la suite ne finit pas, `Test suite failed to run` au `afterAll`). (2) Sous MongoDB, deux transactions qui
+  écrivent le même document se gênent d'elles-mêmes (conflit d'écriture, la seconde est rejouée par
+  `withTransaction`) : une mutation qui retire seulement la condition de révision **survit** ; le verrou se prouve en
+  sortant l'incrément de la transaction. (3) `MSYS_NO_PATHCONV=1` aussi devant `docker run -v …:/mutations`, sinon
+  Git Bash réécrit le chemin du conteneur.
 - **STORY-1048** : (1) un script de mutations qui compte les `✕` ne voit rien quand jest joue plusieurs suites (pas de
   détail par test) : lire `Tests: N failed` et l'absence de `Test suite failed to run`. (2) Les routes d'administration du
   LC fictif passent la garde du module : sur une pile sans catalogue, publier le droit sur `entitlement.changed` par
