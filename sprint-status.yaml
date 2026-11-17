@@ -1358,6 +1358,17 @@ reserved_ranges:
       (garde de B copiée à l'octet) ; l'interrupteur ne se lit plus dans la configuration du droit ; absent ou mal
       formé = éteint (COMPTA_CIMA_ETEINTE) ; référentiels habilités encore lus dans entitlement.changed (D-1006-5,
       question à B). Node 24 : 2389 unitaires, 367 e2e ; pile verte, rejouée depuis dev. Lot 3 de C, n° 2. NON SLOTTÉE.
+  - range: "STORY-1007"
+    status: "RÉSERVÉ"
+    owner: "L'accusé de réception du dossier complet : la dernière pièce obligatoire validée au contrôle pose l'accusé et lève l'échéance ACCUSE_DOSSIER_COMPLET (sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1007.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-sinistres-service#17 (dev d9444e5). Dernière pièce validée dans ged
+      (ged.piece.controlee@1) : courrier ACCUSE_RECEPTION au dossier (brouillon, une seule fois) et échéance
+      ACCUSE_DOSSIER_COMPLET arrêtée par l'événement ACCUSE_POSE ; pièce rejetée ou non contrôlée : rien. L'envoi reste
+      à EPIC-220 (D). Node 24 : 977 unitaires sur MongoDB réel, 19 e2e ; aucun câblage ne change, pas de pile. Lot 3 de
+      C, n° 3. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
