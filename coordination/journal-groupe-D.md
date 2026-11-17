@@ -125,9 +125,9 @@
     lus sur Kafka.
   - Décisions D-1055-1 → 13 (fiche) ; → B pour information (D6, la chaîne).
   - **Verrou Docker attendu 69 min** (B, STORY-965, de 13:47 à 14:56), puis pris et rendu à 15:21.
-- **Suivante : STORY-1056** 🚚 la commande (1), dans `prospera-ventes-service` (EPIC-228) : saisie, validation,
-  numéro de bon de livraison par les séries (série `bons-livraison`, `NumerotationDesSeries`) ; dépend de 1049 et 1052,
-  faites.
+- **STORY-1056** 🚧 🚚 — la commande (1), dans `prospera-ventes-service` (EPIC-228) : saisie, validation, numéro de
+  bon de livraison par les séries (série `bons-livraison`, `NumerotationDesSeries`). **En cours** : fiche et annonce
+  « ⚠ Contrats » avant le code (manifeste `commande` amendé, C5).
 
 ### Lots 1 et 2
 
@@ -463,6 +463,53 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-17, STORY-1056, avant le code) — `prospera-ventes-service`, module `commande` : la saisie, la
+  validation branchée sur elle, le bon `EMIS` et son numéro `BL-`, quatre faits publiés.** Fiche :
+  `stories/STORY-1056.md` (D-1056-1 → 13). Aucun topic, aucune route existants ne sont renommés.
+  - **Routes neuves** (garde `COMMANDE_NOT_ENTITLED`, droits de la table d'accès) :
+    - `POST /api/v1/commande/commandes` (`commande:commande:saisir` ; `Idempotency-Key` exigée) : corps
+      `{ commandeId (UUID né chez l'appelant), pointDeVenteId, canal: BUREAU|TELEPHONE|WHATSAPP|COMPTOIR,
+      devise? (XOF), pointDeStockId?, dateLivraisonSouhaitee? (AAAA-MM-JJ), messageClient?, lignes: [{ articleId,
+      quantite: { valeur, unite }, pointDeStockId? }] }` ; 201 la commande `BROUILLON` (lignes au prix figé, origine
+      et version de grille, totaux HT, TVA par taux, TTC) ; rejeu : la même commande.
+    - `GET /api/v1/commande/commandes?limite=` et `GET /api/v1/commande/commandes/{commandeId}`
+      (`commande:reseau:consulter` ou `commande:portefeuille:consulter`) : la commande avec son acte et ses bons
+      (numéros), dans la portée de lecture ; hors portée, 404 `COMMANDE_INCONNUE`. La marge reste une donnée privée
+      (`catalogue:marge:consulter`), `null` tant que le coût de `stock` n'est pas branché.
+  - **Route qui prend sa forme définitive** (annoncée « squelette » par 1049, D-1049-9 ; aucun consommateur) :
+    `POST /api/v1/commande/validations` reçoit **`{ commandeId }`**, la commande saisie ; les champs du squelette
+    (`tiersId`, `perimetre`, `devise`, `montantTtcMineur`, `noeudId`, `margeMineur`, `bons`) sont **refusés** (400).
+    L'acte rendu gagne, par bon, `etat: EMIS`, `numero` (`BL-AAAA-NNNNNN`), `rangDansLaSerie`, `epoque`, `emisLe` ; et
+    `commande: { statut }`. `POST …/validations/{commandeId}/reservations` (reprise) émet en plus les bons devenus
+    complets.
+  - **Codes neufs** : `COMMANDE_INCONNUE` (404), `COMMANDE_DEJA_SAISIE`, `POINT_DE_VENTE_INCONNU`,
+    `ARTICLE_SANS_PRIX`, `UNITE_NON_VENDUE`, `TRANSITION_INTERDITE` (409), `PDV_HORS_PERIMETRE` (403),
+    `COMMANDE_SANS_LIGNE`, `CANAL_NON_SERVI` (400).
+  - **Faits publiés** (outbox transactionnelle `socle_outbox`, un seul relais ; topic sans `@1`, `schemaVersion: 1`,
+    en-têtes `eventId` et `schemaVersion` ; enveloppe `eventId`, `schemaVersion`, `occurredAt`, `organisationId` ; un
+    `rang` par objet ; schémas dans `contrat/schemas/` de `ventes`, au registre sur `<topic>-value` en **BACKWARD**) :
+    - `commande.engagement-tiers.changed` (clé `<organisationId>:<tiersId>:<perimetre>`) : `revision`, `tiersId`,
+      `perimetre`, `devise`, `restantAFacturerMineur`, `versionEncours` — la forme de l'entrée `engagement`
+      d'`encours@1` ; écrit dans la transaction de l'acte ; pour `pdv` et `recouvrement` ;
+    - `commande.bon-livraison.emis` (clé `<organisationId>:<commandeId>`) : `bonId`, `commandeId`, `numero`,
+      `rangDansLaSerie`, `epoque`, `pointDeStockId`, `pointDeVenteId`, `lignes[{ ligne, articleId, quantite }]`,
+      `emisLe` — **sans prix** ;
+    - `commande.serie.changed` (clé `<organisationId>:bons-livraison`) : `serie`, `prefixe`, `dernier`, `epoque` ;
+    - `commande.commande.validee` (clé `<organisationId>:<commandeId>`) : `commandeId`, `pointDeVenteId`, `noeudId`,
+      `canal`, `bons[{ bonId, numero, pointDeStockId, lignes }]`, `valideeLe` — **sans prix ni identité de
+      freelance**.
+  - **Manifeste `commande`** (prospera-stories, C5) : `publie` gagne `commande.engagement-tiers.changed@1` et
+    `commande.serie.changed@1` (faits « nouveaux » d'AD-20) ; recopié à l'octet dans `ventes`.
+  - **Collections neuves** : `commande_commandes`, `commande_points_de_vente` et `commande_prix` (read-models,
+    projections futures de `pdv.point-de-vente.changed@1` et `catalogue.grille.publiee@1`, **remplis par personne
+    aujourd'hui** : sans document, `POINT_DE_VENTE_INCONNU` ou `ARTICLE_SANS_PRIX`), `commande_reservations_de_recette`,
+    `socle_outbox`, `socle_verrous`. `commande_bons` gagne `numero`, `rangDansLaSerie`, `epoque`, `emisLe` ; l'état
+    `EMIS`.
+  - **Variables** (facultatives) : `COMMANDE_RESERVATION_STOCK` (`non-branchee` par défaut ; `recette` **refusée en
+    production**), `OUTBOX_RELAIS_INTERVALLE_MS`, `OUTBOX_TAILLE_PAQUET`, `OUTBOX_VERROU_TTL_MS`.
+  - **Copie neuve** : `contrats/distributeur/src/index.ts` et `catalogue-faits.json` à `contrats-distributeur-v1`, dans
+    `src/socle/contrats-distributeur/` (la copie d'`acces.ts` ne change pas).
 
 - **PUBLIÉ (2026-11-17, STORY-1055, reseau-service#15, `dev` c62f586 → d31f744 ; prospera-plateforme#29, `dev`
   a458b26, étiquette `objets-reseau-v1`) ; ANNONCÉ avant la fusion du code (prospera-stories #650). Aucun écart avec
