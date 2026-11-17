@@ -1132,10 +1132,13 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-963.md"
     reserved_on: "2026-11-17"
     note: >
-      EN COURS le 2026-11-17 — fiche écrite et contrat annoncé avant le code (PUT /creances/sources/{source}/{sourceId},
-      refus SOURCE_DE_CREANCE_NON_SERVIE et CREANCE_SOURCE_EN_CONFLIT, filtres de GET /creances, champs de source sur
-      la vue et sur paiement.creance.materialisee) ; → D : comment ouvrir une Créance (D-1059). Lot 3 de B, n° 8
-      (EPIC-231). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-paiement-service #122 (dev 716059c) ; contrat annoncé avant la fusion
+      (stories #633 : PUT /creances/sources/{source}/{sourceId}, refus SOURCE_DE_CREANCE_NON_SERVIE et
+      CREANCE_SOURCE_EN_CONFLIT, filtres de GET /creances, champs de source sur la vue et sur
+      paiement.creance.materialisee). Node 24 : paquets 130/130, service 4578 passés / 0 échec / 2 sautés ;
+      conformité sur MongoDB rs-paiement : 20 ouvertures concurrentes ⇒ 1 Créance, 1 trace, 1 fait, rejeu sans
+      écriture ; 21 mutations rouges. Pile grp-b : /health 200. Droit : paiement:demande:emettre (D-963-7). → D :
+      comment ouvrir une Créance (D-1059). Lot 3 de B, n° 8 (EPIC-231). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

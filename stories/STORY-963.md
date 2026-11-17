@@ -1,6 +1,6 @@
 # STORY-963 : la Créance (1), un registre ouvert par sa source
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (le registre existe depuis STORY-251 ; il reçoit la clé `(source, sourceId)`, un tiers et un
 périmètre, sans seconde collection ni migration ; l'idempotence se prouve sous concurrence sur la vraie base)
@@ -132,11 +132,54 @@ Tout est AJOUT : rien d'existant ne change de forme.
 
 ## Ce qui a été livré
 
-À compléter à la fusion.
+**prospera-paiement-service #122**, rejouée en rebase sur `dev` : **`716059c`** (branche `74a979f`, arbre identique).
+Annonce avant le code : prospera-stories #633 (`d127a32`).
+
+- `src/domain/creance/source-de-creance.ts` : les quatre sources, `SOURCES_SERVIES`, `MODULE_DE_LA_SOURCE`,
+  `preparerRattachement`, `echeanceDeLaSource`, `verifierConcordanceDeSource`, les motifs d'identifiant et de périmètre.
+- `src/domain/creance/creance.ts` : `DescriptionDeCreance.rattachement` (facultatif) ; `preparerDescription` refuse
+  une source portée sous un autre module ou une autre référence.
+- `src/modules/creances/schemas/creance.schema.ts` : `source`, `sourceId`, `tiersId`, `perimetre`, `livraisonId`
+  (facultatifs, `type: String` + `enum`/`match`) ; index `{ organizationId, tiersId, perimetre }`.
+- `src/application/creances/creances-projetees.service.ts` : le rattachement au `$setOnInsert`, la concordance vérifiée
+  après l'upsert (dans la transaction de l'appelant), `lireParSource` (clef calculée), les filtres de recherche,
+  la relecture du rattachement. Il reste le seul écrivain du modèle (`creance-materialisation.invariant.spec.ts`).
+- `src/application/creances/ouvrir-la-creance.usecase.ts` : `OuvrirLaCreance` (lecture par clef, transaction
+  abandonnée au rejeu, reprise bornée à 3), inscrit à l'inventaire fermé des écritures d'argent
+  (`piste-opposable.invariant.spec.ts`).
+- `src/modules/creances/ouvertures-de-creance.controller.ts` et `dto/ouvrir-creance.dto.ts` : la route `PUT`.
+- `traces-de-creance.ts` (`champsDeSource`), `dto/creance.vue.ts`, `dto/rechercher-creances.dto.ts`, `creances.module.ts`
+  (`OuvrirLaCreance` fourni et exporté).
 
 ## Preuves
 
-À compléter à la fusion.
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive` de `74a979f`,
+  conteneur nommé) : paquets 130/130 ; service **339 suites, 4 578 passés, 2 sautés, 0 échec**.
+- **Poste (Node 25)** : `tsc` vert ; lint des fichiers touchés vert ; e2e `creances-ouverture`, `creances-saisie`,
+  `gate-acces`, `demandes` : 76/76. La suite e2e neuve éprouve les **deux gardes sur la route neuve, qui n'est pas une
+  surface plateforme** : 403 `PAIEMENT_NOT_ENTITLED` sans le module (avant le droit), 403 `PERMISSION_DENIED` avec
+  `paiement:creance:consulter` mais sans `paiement:demande:emettre` ; 201 puis 200 au rejeu (une Créance, une
+  transaction) ; 409, 422, 400 nommés ; corps refusé s'il porte `moduleAppelant`, `referenceExterne` ou `sourceId`.
+- **Conformité sur un vrai MongoDB en jeu de répliques** (`mongo-paiement`, `rs-paiement`, pile `grp-b`,
+  `test/creances-ouverture.conformite-spec.ts`, avec les vrais `OuvrirLaCreance`, `CreancesProjetees`,
+  `EcritureDArgent`, `JournalAudit`, `OutboxService`) : **20 ouvertures concurrentes de la même facture ⇒ 1 naissance,
+  1 document, 1 trace `CREANCE_MATERIALISEE`, 1 fait `paiement.creance.materialisee`**, aucun 409 rendu au client
+  (les conflits sont absorbés par la reprise bornée) ; rejoué 4 fois, même résultat. Rejeu tardif : aucune trace,
+  aucun fait. Autre tiers : 409, rien d'écrit. Autre montant : montant d'origine conservé, anomalie tracée. Deux
+  factures : deux Créances ; la même facture dans une autre organisation : une autre Créance. La conformité de
+  STORY-251 (`creances-upsert`) reste verte.
+- **Mutations : 21 sur 21 rougissent sur une assertion** (aucune par compilation) : source réservée servie, module de
+  `FACTURE` changé, concordance sans tiers, sans `sourceId`, date impossible acceptée, périmètre libre, source non
+  servie laissée passer, identifiant libre, module non vérifié dans la description, rejeu rendu malgré un montant
+  divergent, rejeu qui écrit, un seul essai, tout refus rejoué, pas de concordance avant la transaction, service qui
+  compare la source à elle-même, `$setOnInsert` sans tiers, relecture sans tiers, filtre de recherche ignoré, fait
+  sans tiers, toujours 201, vue sans tiers. Six mutations rougissaient d'abord par compilation (rétrécissement de type
+  perdu) : réécrites pour garder le type.
+- **`docker compose up` sain** (module Nest touché ; image `runtime` construite depuis l'export, `up --no-build`,
+  pile `grp-b` : `mongo-paiement`, `kafka`, `redis`) : `/api/v1/health` **200** (MongoDB `rs-paiement` primaire,
+  audit, Kafka, Redis, fournisseurs, référentiel) ; `Mapped {/api/creances/sources/:source/:sourceId, PUT}` ;
+  `PUT` sans jeton : 401 ; l'index `organizationId_1_tiersId_1_perimetre_1` créé au démarrage. Pile descendue
+  (`down -v`), images retirées, **verrou Docker pris de façon atomique et rendu**.
 
 ## Pour la suite
 

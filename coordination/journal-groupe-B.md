@@ -80,17 +80,28 @@
        définitif s'émet à la validation (D-962-1). Piste `ECRITURE_SAISIE` avec provenance.
      - Cache des droits `(membre, organisation, dv)`, 60 s, borné ; `dv` projeté du jeton (D-962-5).
      Node 24 : 358/0/3 ; `test:socle` 69/69 ; 31 + 5 mutations ; pile `grp-b` : `/health` 200.
-  8. **STORY-963 en cours** (17/11) : la Créance (1). Fiche écrite, contrat annoncé avant le code (« ⚠ Contrats ») ;
-     « → D » : comment ouvrir une Créance (pour D-1059).
-  - **Story en cours : STORY-963** (la Créance (1), `prospera-paiement-service`, EPIC-231 ; ne dépend de rien).
-    « Fini quand » (plan §3) : registre unique, clé `(source, sourceId)`, source `FACTURE` ; un tiers, un périmètre ;
-    idempotent. À lire avant : « ← D, ce que la bibliothèque d'encours lit de la Créance » (état absolu par clé,
-    révision croissante, `statut`, deux restants, `echeanceLe`, `perimetre`, `devise`, montants entiers en unité
-    mineure) et le piège « Deux familles de droits de tenant » (`paiement:creance:consulter` hors du jeton). D-1059
-    attend 963 et 965.
-  - **Pour STORY-964** (validation, comptabilité) : valider = `numeroter(portee, code, session)` dans la transaction de
-    la validation ; fiche 962, « Pour la suite ». `comptabilite:*` n'est toujours attribué à aucun rôle dans auth (en
-    réel, la saisie rend 403 jusque-là ; hors du jeton, avant B-967).
+  8. ~~STORY-963~~ : **prospera-paiement-service #122** (`716059c` sur `dev`), contrat annoncé avant la fusion
+     (stories #633). La Créance (1) : un registre unique ouvert par sa source.
+     - Même collection `creances` et même upsert que STORY-251 ; la clé `(source, sourceId)` est portée par l'`_id`
+       (`<org>|FACTURATION|FACTURE:<SOURCEID>`), module et référence **déduits** de la source (D-963-2).
+     - `FACTURE` seule servie ; les trois autres sources rendent 422 `SOURCE_DE_CREANCE_NON_SERVIE` (D-963-3).
+     - `tiersId` et `perimetre` (`SOCIETE` | `FREELANCE:<id>`) figés ; autre valeur : 409
+       `CREANCE_SOURCE_EN_CONFLIT` ; autre montant : anomalie tracée (D-963-5).
+     - `PUT /api/v1/creances/sources/{source}/{sourceId}` sous `paiement:demande:emettre` (dans le jeton, D-963-7) :
+       201 née, 200 rejeu, rien d'écrit au rejeu ; reprise bornée à 3 sur `ECRITURE_CONCURRENTE` (D-963-6).
+     Node 24 : 130 + 4 578/0/2 ; conformité `rs-paiement` : 20 ouvertures concurrentes ⇒ 1 Créance, 1 trace, 1 fait ;
+     21 mutations ; pile `grp-b` : `/health` 200. « → D » : comment ouvrir une Créance (pour D-1059).
+  - **Story suivante : STORY-964** (la validation inaltérable, `prospera-comptabilite-service`, EPIC-113 et 120 ; dépend
+    de 962). « Fini quand » (plan §3) : brouillard → définitif ; une écriture validée ne se modifie pas, elle se
+    **contre-passe** ; séquence prouvée par une piste chaînée ; mutation. À lire avant : fiche 962 (« Pour la suite » :
+    valider = `numeroter(portee, code, session)` dans la transaction de la validation, D-961-5 ; le numéro provisoire
+    reste sur l'écriture) et fiche 961. `comptabilite:*` n'est toujours attribué à aucun rôle dans auth (en réel, la
+    saisie rend 403 jusque-là ; hors du jeton, avant B-967).
+  - **Pour STORY-965** (Créance (2), paiement) : fiche 963, « Pour la suite » : `paiement.creance.changed@1` à la forme
+    de `FaitCreance` d'`encours@1` (`creanceId = <source>:<sourceId>`, `revision` à ajouter au document et à incrémenter
+    dans la transaction de chaque changement, deux restants, `echeanceLe` en `AAAA-MM-JJ`) ; le crédit du tiers ; la
+    lecture du registre sous `paiement:creance:consulter` (hors du jeton : `paiement` devra lire `/moi/droits`) ; le
+    consommateur de `facturation.facture.emise@1` si D en a fixé la charge (il appelle `OuvrirLaCreance`).
 
 ### Lot 2 (ouvert le 2026-11-16)
 
@@ -527,7 +538,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-17, STORY-963 — la Créance (1), annoncé AVANT la fusion du code** (`prospera-paiement-service`, EPIC-231 ;
-  fiche `stories/STORY-963.md`, D-963-1 → 12). Tout est AJOUT : rien d'existant ne change de forme.
+  fiche `stories/STORY-963.md`, D-963-1 → 12). **Fusionné le 17/11** : paiement #122, `716059c` sur `dev` (annonce :
+  stories #633). Tout est AJOUT : rien d'existant ne change de forme.
   - **Route neuve** `PUT /api/v1/creances/sources/{source}/{sourceId}`, droit `paiement:demande:emettre` (dans le
     jeton), garde du module (pas une surface plateforme). Corps : `{ tiersId, perimetre: SOCIETE | FREELANCE:<id>,
     montantOrigineMineur (entier > 0, unité mineure), devise, echeanceLe: AAAA-MM-JJ, libelle, livraisonId?, payeur? }`.
@@ -1091,6 +1103,21 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Paiement : une écriture d'argent neuve doit entrer dans l'inventaire FERMÉ** de `piste-opposable.invariant.spec.ts`
+  (`ECRITURES_DARGENT`) : tout fichier qui appelle `this.ecriture.executer` y est listé par son nom (STORY-963).
+- **Paiement : `EcritureDArgent` ne reprend rien, et c'est voulu** ; un cas d'usage idempotent par sa clef peut
+  reprendre `ECRITURE_CONCURRENTE` lui-même, aussitôt et en nombre borné (AD-12 interdit la minuterie). Mesuré sur
+  `rs-paiement` : 20 ouvertures concurrentes de la même clef, trois essais suffisent, aucun 409 ne sort (STORY-963).
+- **Paiement : un rejeu qui passe par `EcritureDArgent` consigne une trace même quand rien ne naît** (la trace est
+  obligatoire). Pour qu'un rejeu n'écrive rien, lever une erreur sentinelle dans `ecrire` quand l'upsert n'a rien
+  inséré : la transaction est abandonnée, on rend la Créance existante (`RejeuSansEffet`, STORY-963).
+- **La clef primaire d'une créance est insensible à la casse** (`normaliserReferenceExterne` met en majuscules) :
+  deux identifiants qui ne diffèrent que par la casse visent la même clef. Comparer l'identifiant relu à la lettre
+  (STORY-963, `CREANCE_SOURCE_EN_CONFLIT`).
+- **Script de mutations : ne jamais écrire `\n` dans une chaîne Python par un heredoc qui l'injecte dans un autre
+  script** ; la chaîne se casse en vraie fin de ligne. Écrire le script avec l'outil d'écriture et bâtir les motifs
+  multilignes avec une constante `NL` (STORY-963).
 
 - **Une variable d'environnement requise de plus fait tomber TOUTE la suite `test:socle`** (STORY-962). `AppModule`
   valide l'environnement à son import ; les suites jouent `--runInBand` et chacune pose son environnement dans son
