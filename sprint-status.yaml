@@ -341,10 +341,18 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1052.md"
     reserved_on: "2026-11-17"
     note: >
-      🔄 EN COURS le 2026-11-17 — series-v1.1 (écriture majoritaire, lecture linéarisable, ancre en écriture
-      anticipée hors de la base restaurable, restauration détectée au démarrage et à l'émission, trou déclaré et
-      tracé) ; ventes : socle des séries, jeu de répliques exigé, profil hébergé. Contrats annoncés avant le code.
-      Lot D, n° 8 du lot 3 (EPIC-224, EPIC-263). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-plateforme#27 (dev bb6d96c → 1fe8c5e, étiquette series-v1.1 ; series-v1
+      inchangée) et prospera-ventes-service#4 (dev 32d8b5f, 4782467, dbe3fa6, e4a27c7). series-v1.1, compatible :
+      écriture majoritaire, lecture linéarisable, ancre en écriture anticipée hors de la base restaurable (réservé
+      avant d'être rendu, confirmé après l'acquittement), restauration détectée au démarrage et à l'émission, trou
+      déclaré dans la série, tracé dans la piste d'audit, SERIE_DERIVE au journal ; série créée hors de la transaction
+      (course mesurée sur MongoDB réel, D-1052-13). ventes : socle des séries, jeu de répliques exigé
+      (JEU_DE_REPLIQUES_INSUFFISANT), GET /commande/series, profil hébergé (trois membres, ancre à part). Node 24 :
+      plateforme 574 pass / 0 fail, 12/12 mutations ; ventes 348 unitaires, 11 e2e, 44 d'intégration sur MongoDB réel,
+      11/11 mutations. Pile grp-d (rejouée depuis dev) : mongodump, émissions, mongorestore --drop service en marche
+      puis arrêté : 56 numéros rendus, 56 distincts, trous 21→35 et 41→45 déclarés ; un membre sur trois arrêté :
+      émissions continues ; sans majorité : aucun numéro rendu. Annoncée avant le code (docs #632). Lot D, n° 8 du lot
+      3 (EPIC-224, EPIC-263). NON SLOTTÉE.
 
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
