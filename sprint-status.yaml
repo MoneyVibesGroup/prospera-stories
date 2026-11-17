@@ -1153,6 +1153,16 @@ reserved_ranges:
       l'affectation ; réaffectation motivée ; parcours déclarer → ouvrir → attribuer → instruire joué contre le LC
       fictif (envoi de la déclaration à la main : sinistres.declaration.enregistree@1 n'existe pas, D-1002-8). Pile
       verte, rejouée depuis dev. Lot 2 de C, n° 13. NON SLOTTÉE.
+  - range: "STORY-1003"
+    status: "RÉSERVÉ"
+    owner: "Les actes qui font une partie au dossier ; cumuls interdits ; matrice de délégation datée (sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1003.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-sinistres-service#14 (dev 4473e07). Partie au dossier (FR-29) lue dans
+      l'historique ; cumuls de FR-7 en paramètre figé (separation-2026.1), refusés par SEPARATION_DES_TACHES ; matrice
+      de délégation datée (delegation-2026.1) qui résout COMITE ; contrôle du niveau 1. Pile verte, rejouée depuis dev.
+      Lot 2 de C, n° 14. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
