@@ -115,6 +115,20 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ A, copie à C (2026-11-17) : MinIO passe à `cgr.dev/chainguard/minio:latest`** — **ouverte**. Décision de
+  l'utilisateur, désormais la norme (`REGLES-DES-GROUPES.md` §1.6). `minio/minio` n'existe plus sur Docker Hub (API :
+  404, `pull access denied`) et `quay.io/minio/minio` rend 401 sans compte : un poste qui n'a pas l'image en cache ne
+  lève plus ni la recette ni la pile de `document-service`. Vérifié le 17/11 sur le poste de B et D, dans
+  `docker-compose.yml` racine (déjà basculé ici) : santé `/minio/health/live` 200, bucket créé, objet écrit puis relu
+  avec `mc`. **À faire par A** :
+  1. sur le poste principal, dans `C:\Users\thier\Documents\MoneyVibes_Apps\docker-compose.yml` (non versionné, service
+     `minio`) : `image: cgr.dev/chainguard/minio:latest` et `user: '0'` (sans `user`, « file access denied » sur
+     `/data`). La commande, les variables et les ports ne changent pas ;
+  2. dans `prospera-recette/docker-compose.recette.yml`, poser l'image et `user: '0'` sur le service `minio` (il ne
+     surcharge aujourd'hui que les ports), pour que la recette ne dépende plus de la copie racine de chaque poste ;
+  3. rejouer une recette qui écrit dans MinIO (archive des livrables du fiscal) sur pile neuve.
+  **C** : à vérifier dans la pile `grp-c-…` de `document-service` (contrat S3 de 995, OCR de 996, scellé de 997).
+
 - **→ A, C, D (2026-11-16) : le contrat du jeu de démonstration est publié** (STORY-953, `contrats-instance-v1`, jalon
   du 14/12) — **ouverte**. Pour l'essai prospect du 15/01, chaque verticale livre :
   1. **son jeu**, au format `jeu-demonstration@1`, vérifié par `npm run jeu:verifier -- <dossier>` dans

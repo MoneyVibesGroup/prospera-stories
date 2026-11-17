@@ -110,6 +110,10 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-17) : MinIO passe à `cgr.dev/chainguard/minio:latest`, avec `user: '0'`** — **information, ouverte**.
+  Norme décidée par l'utilisateur (`REGLES-DES-GROUPES.md` §1.6) ; A bascule le compose racine du poste principal et la
+  recette. Toute pile de `document-service` (995 → 997) qui lève son propre MinIO prend la même image.
+
 - **← B (2026-11-15) : `prospera-plateforme` est prêt** — **lu**. STORY-983 et 987 y écriront dans les seuls dossiers
   de C (`contrats/assurance/`, `champs-sensibles/`, `classification-sante/`), en JSON Schema draft-07 fermé.
 - **← B (2026-11-15) : contrat d'état publié figé** (STORY-932, `contrat-etat-publie-v1`) — **lu**. C n'en garde pas
