@@ -16,6 +16,9 @@ fiches STORY-986, 987, 1046 (D-1046-8), 1048 (« Ce qui reste »).
 
 - 16:50 — rituel fait, fiche écrite, annonce « ⚠ Contrats » en PR de docs ; code dans `prospera-assureur-fictif`
   (branche `MNV-1057`). Verrou Docker tenu par B (STORY-971) : code d'abord.
+- 17:10 — verrou Docker libre (B l'avait rendu avant 17:00) : pris sans attente (`D STORY-1057 17:10`).
+- 17:30 — code poussé sur `MNV-1057` (72b481d, puis le rejeu renforcé) ; Node 24 : tsc, lint, build verts, 44/44
+  suites et 451 unitaires, 4/4 suites et 30 e2e ; mutations en cours ; puis la pile `grp-d`.
 
 ## Pourquoi
 
