@@ -1,6 +1,6 @@
 # STORY-921 : le hub de balance accepte la 5e origine `comptabilite`
 
-Status: in-progress
+Status: done
 
 **Complexité :** faible (un symbole d'enum, trois gardes, une publication de contrat)
 
@@ -61,7 +61,16 @@ origine est rejetée (`PAYLOAD_INVALIDE`). Sans cette story, B-967 n'a aucun end
 
 ## Definition of Done
 
-- [ ] Suites unitaires et e2e concernées vertes (lecture de `Test Suites: … failed`) ; lint des fichiers touchés ; `tsc`/build.
-- [ ] Mutation rouge sur l'assertion, puis remise.
-- [ ] PR code fusionnée sur dev ; PR de docs de clôture fusionnée ; B prévenu (B-967) avec le SHA sur dev et la forme attendue.
-- [ ] Pas de module Nest ni de dépendance changés : Docker non requis.
+- [x] Suites unitaires et e2e concernées vertes (lecture de `Test Suites: … failed`) ; lint des fichiers touchés ; `tsc`/build.
+- [x] Mutation rouge sur l'assertion, puis remise.
+- [x] PR code fusionnée sur dev ; PR de docs de clôture fusionnée ; B prévenu (B-967) avec le SHA sur dev et la forme attendue.
+- [x] Pas de module Nest ni de dépendance changés : Docker non requis.
+
+## Livraison (2026-11-17)
+
+🏁 **DONE** — balance-service **#152** (dev `9dfd60e`) ; contrat annoncé avant le code (stories #588).
+
+- Code : `ORIGINES_BALANCE` + `ORIGINE_COMPTABILITE` + `ORIGINES_PUBLIABLES_PAR_INGESTION` (`balance-canonique.ts`), lecture de l'ingestion directe (`ingestion.regles.ts`), schéma `balance.submitted.v1`, `INTEGRATION.md` §1 ter, OpenAPI `OrigineBalance`.
+- Preuves : suites touchées vertes (ingestion, validateur, verrou d'inventaire, créances/dettes : 11 suites, 337 tests ; balance/contrôles : 410 tests, `Test Suites: 1 failed` = module.spec, écart d'environnement ci-dessous), e2e OpenAPI 221/221, `tsc` propre, lint des 8 fichiers TS propre. Mutation 1 (retrait de `comptabilite` des origines publiables) : 8 tests rouges sur l'assertion (`ok` attendu `true`, motif sans « comptabilite »). Mutation 2 (retrait de `ORIGINES_BALANCE`) : le verrou d'inventaire rougit sur l'assertion ; le type `OrigineBalance` rougit en plus à la compilation (garde de type).
+- Docker : non requis (ni module Nest ni dépendance changés).
+- Écart d'environnement (hors story) : sur ce poste (Node 25), les suites `*.module.spec.ts` qui chargent le client Kafka natif échouent (« Cannot find module 'bindings' ») ; identique avant la story, elles se jouent sous Node 24 dans l'image.
