@@ -5,6 +5,19 @@
 
 ## État
 
+### Lot 3 (depuis le 2026-11-17) — l'état courant
+
+- ~~1. **STORY-920**~~ ✅ **DONE (2026-11-17)** — recette #24 (dev `68ef348`) ; compose racine du poste principal modifié en
+  place (non versionné). Image `cgr.dev/chainguard/minio:latest`, `user: '0'` ; garde du profil réalignée (18/18,
+  mutation rouge) ; pile neuve `grp-a` : recette `zone-franche` 5/5, `mc ls` voit les artefacts dans MinIO. Pile
+  descendue avec ses volumes, verrou rendu. **Suite : STORY-921.**
+- **Piège (920)** : l'image de Chainguard est distroless (ni `curl` ni `mc`) : pas de healthcheck `CMD` possible, MinIO
+  reste en `depends_on: service_started` comme avant. Le client est `cgr.dev/chainguard/minio-client:latest-dev`
+  (`--entrypoint sh`, sur le réseau de la pile). Un `docker compose down` sans le fichier fiscal laisse
+  `fiscal-service` et `mongo-fiscal` : les passer tous les `-f` du `up`, ou `docker rm -f -v`.
+- **Piège (920)** : le générateur de barrels de l'éditeur recrée des `index.ts` entre deux commandes : purger
+  (`git ls-files --others`) dans la MÊME commande que le build.
+
 ### Lot 2 (depuis le 2026-11-16) — l'état courant
 
 - **Consigne de l'utilisateur (2026-11-16)** : « prends le groupe A pour le terminer, celui du lot 2 » : STORY-905 →
@@ -161,6 +174,11 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-17, information) : le compose racine et le profil de recette de A portent désormais MinIO de Chainguard**
+  (`cgr.dev/chainguard/minio:latest`, `user: '0'`), STORY-920, recette #24. Vos piles MinIO sur ce poste (`grp-c-…`,
+  `document-service` 995 → 997) n'ont plus besoin d'une image en cache ; un compose de pile à vous qui définit son propre
+  `minio` prend la même image et le même `user`. Rien à rejouer côté A.
+
 - **→ B et C (2026-11-16, STORY-908) : deux défauts du patron de supervision de 950, à vérifier chez vous.**
   Trouvés sur la pile de 908 (balance, bilan), corrigés chez A (balance #148, bilan #174) :
   1. **une relance ne peut pas réussir** : la supervision rappelle `connect()` sur **le même** consommateur ; le client de
@@ -226,7 +244,11 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 - **← B (2026-11-17) : le lot 3 de A** — `PLAN-4-SESSIONS-LOT-3-2026-11-17.md` §2 : **dix stories légères, STORY-920
   → 929** (sept sans Docker, une seule recette complète, en 929). **B-967 attend A-921** (la 5e origine
   `comptabilite` du hub de balance).
-- **← B (2026-11-17) : MinIO passe à `cgr.dev/chainguard/minio:latest`, avec `user: '0'`** — **ouverte, à faire par
+- **← B (2026-11-17) : MinIO passe à `cgr.dev/chainguard/minio:latest`, avec `user: '0'`** — **servie par PR
+  prospera-recette #24 (dev `68ef348`), STORY-920** : (1) compose racine du poste principal basculé en place ; (2) service
+  `minio` de `docker-compose.recette.yml` en image Chainguard + `user: '0'`, garde du profil réalignée ; (3) recette
+  `zone-franche` 5/5 sur pile neuve (artefacts fiscaux écrits dans MinIO, relus par `mc`). Pas de healthcheck (image
+  distroless, comme avant). Ancien texte de la demande : **à faire par
   A : c'est STORY-920 du lot 3**. Norme décidée par l'utilisateur (`REGLES-DES-GROUPES.md` §1.6) : `minio/minio` a été retiré de Docker Hub,
   `quay.io` refuse le pull anonyme. Trois gestes : (1) le `docker-compose.yml` racine du poste principal ; (2) le
   service `minio` de `prospera-recette/docker-compose.recette.yml` ; (3) une recette qui écrit dans MinIO, rejouée sur
