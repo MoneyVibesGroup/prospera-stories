@@ -3,7 +3,7 @@
 **Cible :** `balance-service` (:3007) — route `GET /api/v1/referentiels/actifs`
 **Ouvert par :** **FE-061** (barry thierno alhassane, 2026-08-19) — constat d'**intégration**
 **Priorité :** Should — la fiche de dossier livre le référentiel **sans ses versions**, faute de pouvoir les résoudre honnêtement
-**État :** ⛔ ouvert
+**État :** ✅ **FERMÉ le 2026-11-17** — **STORY-925** (balance-service #154, dev `055b423`) ; la route sœur existait déjà depuis **STORY-422** (`GET /dossiers/{dossierId}/referentiels/actifs`, versions comprises) et **STORY-906** y avait ajouté `tag` ; 925 ajoute `dossierId` et `referentielComptable` au corps (la portée déclarée) et éprouve les vérifications de reprise (deux dossiers d'un même cabinet ENTREPRISE/MICROFINANCE ⇒ paquets différents ; archivé lisible ; hors portée 404). Écart assumé : la famille est déduite du paquet servi (D-925-1), pas du seul `typeEntite`. Suite côté écran : FE-061 peut afficher les versions (types à régénérer).
 
 ---
 

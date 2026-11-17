@@ -682,7 +682,7 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-925.md"
     reserved_on: "2026-11-17"
     note: >
-      Lot 3 de A, n° 6. La route était déjà par dossier depuis STORY-422 et servait les versions ; 906 avait ajouté le tag. Reste : la portée déclarée
+      🏁 DONE le 2026-11-17 — balance#154 (dev 055b423). Lot 3 de A, n° 6. La route était déjà par dossier depuis STORY-422 et servait les versions ; 906 avait ajouté le tag. Reste : la portée déclarée
       (dossierId, referentielComptable), éprouvée sur deux dossiers d'un même cabinet. Ajout seul ; pas de Docker. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
