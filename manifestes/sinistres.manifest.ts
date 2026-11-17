@@ -299,6 +299,7 @@ export const MANIFESTE_SINISTRES = {
     'GET /api/v1/sinistres/gestionnaires', // STORY-1002 : le registre des gestionnaires et leur charge pondérée (FR-51), figée
     'GET /api/v1/sinistres/dossiers/{id}/affectation/candidats', // STORY-1002 : la liste de choix d'un dossier (FR-50, FR-51), figée
     'GET /api/v1/sinistres/dossiers/{id}/instruction', // STORY-1011 : le formulaire d'instruction du dossier, sa version figée et ses valeurs (FR-55), figée
+    'GET /api/v1/sinistres/dossiers/{id}/evaluations', // STORY-1013 : les évaluations arrêtées du dossier, versions et décompte figés, et les cinq montants (FR-75), figée
     'GET /api/v1/instance/sinistres/{organisationId}/export',
   ],
 
