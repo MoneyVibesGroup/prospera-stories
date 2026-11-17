@@ -109,9 +109,25 @@
   18/18 mutations. Pile `grp-d` (rejouée depuis `dev`) : `/health` 200, accusé `TRANSMIS`, numéro officiel en cloche
   sans accord et après retrait, SMS en échec déposé `ECHEC_DU_CANAL`, rejeu sans envoi ni dépôt de plus. Décisions
   D-1054-1 → 12 (fiche) ; Q-D-6 au PO ; → C. Verrou Docker pris à 12:38 sans attente, rendu à 13:35.
-- **STORY-1055** 🚧 🚚 — l'import réseau par la Reprise (`reseau-service`, EPIC-165), **en cours** : fiche
-  `stories/STORY-1055.md` (son « Avancement » dit où en est la story) ; annonce « ⚠ Contrats » avant le code. Puis 1056
-  (la commande (1)).
+- **STORY-1055** ✅ 🚚 — l'import réseau par la Reprise (reseau-service#15, `dev` c62f586, 25d236c, 2d3db2a,
+  d31f744 ; prospera-plateforme#29, `dev` a458b26, étiquette **`objets-reseau-v1`** ; annonce « ⚠ Contrats » #650 avant
+  le code). **Solde D-1041-3.**
+  - `reseau` reçoit `reseau.zone@1.0` (zones et hiérarchie par `parent`) et `reseau.commercial@1.0` (la personne à
+    inviter, sa zone courante datée), par `kit-cible` 1.0.1 copié à l'octet. Ni agence, ni portée, ni responsable.
+  - Routes `reprise/reseau/{org}/objets|controles/{objet}`. Jetons de service `REPRISE`, `CONNECTEURS` et `MOTEUR`,
+    admis là seulement ; la garde est celle du kit (état publié, matrice).
+  - **Un seul moteur des zones** pour l'import par fichier de 1041 et la Reprise : mêmes règles, mêmes codes, même
+    écriture ; portées republiées une fois par transaction ; zone `HISTORIQUE` fermée en fin de transaction.
+  - Node 24 : 502 unitaires, 17 e2e, 155 d'intégration sur MongoDB réel ; plateforme 615 pass, 0 fail.
+  - **La suite de conformité du kit, telle que publiée : 16/16** (6 cas sans objet, nommés) ; 15/15 mutations.
+  - Pile `grp-d`, rejouée depuis `dev` : `SIMULER` n'écrit rien ; un lot fautif est refusé nommé (422) sans trace ;
+    `APPLIQUER` importe tout ; un second `APPLIQUER` est identique à l'octet ; le témoin reste intact ; les faits sont
+    lus sur Kafka.
+  - Décisions D-1055-1 → 13 (fiche) ; → B pour information (D6, la chaîne).
+  - **Verrou Docker attendu 69 min** (B, STORY-965, de 13:47 à 14:56), puis pris et rendu à 15:21.
+- **Suivante : STORY-1056** 🚚 la commande (1), dans `prospera-ventes-service` (EPIC-228) : saisie, validation,
+  numéro de bon de livraison par les séries (série `bons-livraison`, `NumerotationDesSeries`) ; dépend de 1049 et 1052,
+  faites.
 
 ### Lots 1 et 2
 
@@ -150,7 +166,8 @@
 - Distributeur (lot 2) : `prospera-ventes-service` (3412), `prospera-terrain-service` (3413),
   `prospera-recouvrement-service` (3414), `prospera-pilotage-service` (3415), `prospera-croissance-service` (3416).
 - `prospera-plateforme` : `series/` (`series-v1`, **`series-v1.1`** depuis STORY-1052), `vocabulaires/` (`vocabulaires-v1`), `contrats/distributeur/`
-  (`contrats-distributeur-v1` ; **`acces-distributeur-v1`** depuis STORY-1053, `src/acces.ts`) ; **lot 3** : `encours/` (inscrit au README par B-956).
+  (`contrats-distributeur-v1` ; **`acces-distributeur-v1`** depuis STORY-1053, `src/acces.ts`) ; **lot 3** : `encours/` (inscrit au README par B-956) ;
+  `contrats/objets/reseau/` (module `reseau`, README ; **`objets-reseau-v1`** depuis STORY-1055).
 - **`prospera-assureur-fictif`** (lot 3, reçu de C, passation constatée le 2026-11-17 au rituel de 1046) : port 3411,
   profil `assureur-fictif`, « Rebase and merge » seul ; dans `prospera-plateforme`, le jeu
   `jeux-demonstration/assurance-compagnie-demo-reduite/` (étiquette `jeu-assurance-v1`). Le générateur reste dans le
@@ -213,7 +230,19 @@
     `recouvrement` la copieront de même. Ce qui en est exclu et pourquoi : D-1047-3. Reste à y ajouter, en `1.x`, l'exclusion du
     montant dérogé pour l'évaluation du blocage (avec la story de `recouvrement`), et la correspondance avec les faits
     de B-963 et B-965 quand ils seront fixés.
-  - **Reste à faire** : le volet Reprise de l'import réseau (après B-947, D-1041-3 ; STORY-1055).
+  - ~~Le volet Reprise de l'import réseau (D-1041-3)~~ : **soldé par STORY-1055** (`dev` c62f586 → d31f744) :
+    - **la cible** : `src/modules/reseau/reprise/`, sur `src/vendor/kit-cible/` (`kit-cible-v1.0.1`, empreintes dans
+      `src/reprise.invariant.spec.ts`). Pour passer à une version suivante du kit, recopier toute la distribution à la
+      nouvelle étiquette (`git -c core.autocrlf=false show`), refiger les empreintes, puis rejouer
+      `test/integration/reprise-conformite.int-spec.ts` sans y toucher ;
+    - **les schémas** : écrits dans `prospera-plateforme/contrats/objets/reseau/` (`objets-reseau-v1`, `a458b26`).
+      Une mineure (`zone@1.1`) se publie là, s'étiquette, puis se recopie dans `reprise/objets/` avec `ORIGINE.json` ;
+    - **le moteur des zones** (`import/moteur-des-zones.ts`, `regles-des-zones.ts`) est le seul chemin d'une zone en
+      nombre. Un redécoupage ou un import futur passe par lui ;
+    - restent hors de la reprise : agences (avec la microfinance), portées (AD-8), responsable, affectations antérieures
+      (une mineure `commercial@1.1`), déplacement ou fermeture d'une zone existante (actes de Prospera) ;
+    - pour la Reprise (`reprise-service`) : un lot par sorte d'objet, car la version vaut par `lotId` (D6 du kit). Les
+      zones partent avant les commerciaux, le parent avant l'enfant.
     ~~D-1034-5, D-1032-2, D-1030-2~~ : **soldées par STORY-1050** (`dev` a3d2f59, 49c4d01) :
     - la garde de `reseau` lit l'état publié seul (`src/socle/etat-des-modules/`, projection `socle_etats_publies`,
       copie `src/vendor/garde-etat-publie/` à `garde-etat-publie-v1`) ; `socle_etat_des_modules` (ancienne projection
@@ -276,10 +305,25 @@
     - **recette** : l'émetteur de jetons de 1053 dérive les droits de chaque rôle de
       `auth-service/src/modules/rbac/table-d-acces-distributeur.ts` (scripts décrits dans la fiche) ; un vrai
       auth-service se branche par `AUTH_SERVICE_URL` et `AUTH_JWKS_URI`.
-  - **Prochaine story du distributeur : 1055** (l'import réseau par la Reprise), puis 1056 (la commande (1), premier
-    vrai numéro `BL-` par les séries hébergées ; y lire le nœud du point de vente au lieu du corps).
+  - **Prochaine story du distributeur : 1056** (la commande (1), premier vrai numéro `BL-` par les séries hébergées ;
+    y lire le nœud du point de vente au lieu du corps).
 
 ## Demandes aux autres groupes
+
+- **→ B (2026-11-17), information : `reseau` est le premier module cible sur `kit-cible` 1.0.1 (STORY-1055)** — aucune
+  action exigée.
+  - La suite publiée passe telle quelle sur MongoDB réel : 16 cas joués, 6 sans objet nommés.
+  - **D6 compte** : la version d'un lot vaut par `lotId`, pas par objet. Un lot qui porte des zones puis des
+    commerciaux sous le même `lotId` voit les commerciaux refusés `VERSION_ANTERIEURE`, dès qu'une version 2 des zones
+    est passée. Si la Reprise ne tient pas un lot par sorte d'objet, D6 doit passer avant `reprise-service`.
+  - La chaîne de 600 objets suppose une auto-référence sans borne de profondeur. `reseau` borne la sienne : son banc
+    pose `profondeurMax` à 1 000 pour ses organisations de conformité. Une option du profil (`chaine.longueur`)
+    éviterait ce réglage aux modules à hiérarchie bornée ; à vous de voir, sans urgence.
+  - Les organisations de la suite (`org-conformite-a`, `org-conformite-b`) ne sont pas des `ObjectId`. Le banc de
+    `reseau` les traduit par une bijection devant la cible ; un module dont l'organisation est un `ObjectId` fera de
+    même.
+  - `contrats/objets/reseau/` est écrit par D (README : « le module `<code>` ») ; si vous tenez le tableau « Qui écrit
+    dans quel dossier », la ligne générique suffit.
 
 - **→ C (2026-11-17) : consentements de l'assuré et accusé des messages (STORY-1054)** — **ouverte**, sans urgence
   (rien ne casse chez vous). (1) À la déclaration, quand l'assuré accepte d'être informé du numéro de sinistre
@@ -420,7 +464,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-17, STORY-1055) avant le code — `reseau-service` reçoit la Reprise : `reseau.zone@1.0` et
+- **PUBLIÉ (2026-11-17, STORY-1055, reseau-service#15, `dev` c62f586 → d31f744 ; prospera-plateforme#29, `dev`
+  a458b26, étiquette `objets-reseau-v1`) ; ANNONCÉ avant la fusion du code (prospera-stories #650). Aucun écart avec
+  l'annonce.** `reseau-service` reçoit la Reprise : `reseau.zone@1.0` et
   `reseau.commercial@1.0`, par `kit-cible` 1.0.1.** Rien d'existant ne change de forme. Ce sont des **ajouts** :
   - **Deux routes neuves** (contrat `reprise-cible.openapi.json` de la plateforme, servi par `traiterRequete` du kit) :
     `POST /api/v1/reprise/reseau/{organisationId}/objets/{zone|commercial}` (`SIMULER`, `APPLIQUER`) et
@@ -727,6 +773,21 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1055** :
+  - (1) **La version d'un lot du kit vaut par `lotId`** : un banc qui livre des zones puis des commerciaux sous le même
+    lot voit `INCHANGE/VERSION_ANTERIEURE`. Il faut un lot par sorte d'objet.
+  - (2) **Le verrou Docker a été tenu 80 min par B.** Coder et pousser d'abord tout ce qui ne demande pas Docker :
+    tsc, lint, unitaires locaux. Ceux du client de Confluent échouent sous Node 25 (« Could not locate the bindings
+    file »), c'est attendu. Puis tout jouer d'affilée sous le verrou.
+  - (3) **La suite de conformité doit passer sans retouche** : le banc s'adapte au module (organisations traduites,
+    profondeur posée), jamais la suite.
+  - (4) **Un manifeste recopié change son empreinte** : mettre à jour `socle/manifestes/sources-des-manifestes.ts`
+    (commit et sha256) dans le même commit, sinon `pile-du-moteur.invariant` rougit.
+  - (5) **Un script Python passé par heredoc** qui écrit une séquence d'échappement de fin de ligne écrit de vrais
+    retours chariot dans son propre source. Un heredoc d'une centaine de lignes avec des apostrophes échoue aussi.
+    Écrire le script avec l'outil d'écriture (`chr(13)`).
+  - (6) `python -I` ignore `PYTHONIOENCODING` : employer `python -X utf8 -I` pour afficher les émojis du tracker.
 
 - **STORY-1054** : (1) **deux suites e2e de `notification` lancées en parallèle dans deux conteneurs ont fait tomber
   Docker Desktop** (API en 500, conteneurs orphelins) ; une à la fois, `--runInBand --forceExit`, sortie écrite dans
