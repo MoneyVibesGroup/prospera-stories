@@ -65,11 +65,26 @@
   15/15 mutations ; e2e : 4 suites rouges **héritées** (identiques sur `dev` avant 1051, voir « Pièges »). Pile `grp-d`
   (rejouée depuis `dev`) : `/health` 200, deux messages sans interdit, relance trop tôt replacée, puis envoyée à J+5
   avec la suivante à J+10. Décisions D-1051-1 → 11 (fiche). Verrou Docker attendu ~1 min (B, STORY-961), rendu.
-- **STORY-1052** 🔄 🚚 — les séries hébergées : en cours (fiche, contrats annoncés avant le code ; plateforme
-  `MNV-1052`, ventes `MNV-1052`).
-- **Suivante : STORY-1052** 🚚 les séries hébergées (`ventes` et la plateforme, EPIC-224, EPIC-263), sans dépendance :
-  aucun numéro perdu ni réémis après une restauration ; jeu de répliques. Puis 1053 (les rôles, B-960 fusionnée) et
-  1054 (prévenir l'assuré (2) : accusé, repli dans la cloche, consentements par finalité).
+- **STORY-1052** ✅ 🚚 — les séries hébergées (PR prospera-plateforme#27, `dev` bb6d96c → 1fe8c5e, étiquette
+  **`series-v1.1`** ; PR prospera-ventes-service#4, `dev` 32d8b5f, 4782467, dbe3fa6, e4a27c7 ; annonce « ⚠ Contrats »
+  #632 avant le code). `series-v1.1` (compatible ; `series-v1` ne bouge pas) : écriture `majority` + `j`, lecture
+  `linearizable` ; **ancre en écriture anticipée** hors de la base qu'on restaure (chaque numéro réservé avant d'être
+  rendu, confirmé après l'acquittement) ; une base derrière l'ancre a été restaurée : relève au maximum connu, nouvelle
+  époque, **trou déclaré** (série, piste d'audit, `SERIE_DERIVE` au journal), jamais comblé ni réémis — à l'émission
+  et au démarrage. `ventes` : `NumerotationDesSeries` (émission dans une transaction `majority` avec sa pièce), jeu de
+  répliques exigé au démarrage, `GET /api/v1/commande/series`, `docker-compose.heberge.yml` (trois membres porteurs,
+  ancre à part). Node 24 : plateforme 574 pass / 0 fail, 12/12 mutations ; ventes 348 unitaires, 11 e2e, 44
+  d'intégration sur MongoDB réel, 11/11 mutations. **Pile `grp-d` réelle** (rejouée depuis `dev`) : `mongodump`,
+  émissions, `mongorestore --drop` service en marche puis service arrêté : **56 numéros rendus, 56 distincts, aucun
+  réémis**, trous 21 → 35 et 41 → 45 déclarés et tracés ; un membre sur trois arrêté : émissions continues ; sans
+  majorité : aucun numéro rendu. Décisions D-1052-1 → 14 (fiche). Verrou Docker pris sans attente (B l'avait rendu),
+  rendu.
+- **Suivante : STORY-1053** 🚚 les 15 rôles appliqués par le serveur, dans les cinq services (EPIC-223) : table
+  d'accès lue du jeton et de `/moi/droits`, périmètre lu sur `reseau.portee.changed@1`. **B-960 est fusionnée**
+  (auth #42, `dev` cf8e001 et 8d48710 ; « → D » du journal de B, fiche `STORY-960.md` § « Ce que D lit pour
+  D-1053 ») : 1053 est **débloquée**. À savoir : un membre sans rôle `DIST_*` n'a **aucun** droit (D-960-12),
+  `TENANT_ADMIN` n'ouvre plus rien des modules ; les droits des modules sont tous dans `droitsHorsJeton`. Puis 1054
+  (prévenir l'assuré (2)) et 1055 (l'import réseau par la Reprise).
 
 ### Lots 1 et 2
 
@@ -107,7 +122,7 @@
 
 - Distributeur (lot 2) : `prospera-ventes-service` (3412), `prospera-terrain-service` (3413),
   `prospera-recouvrement-service` (3414), `prospera-pilotage-service` (3415), `prospera-croissance-service` (3416).
-- `prospera-plateforme` : `series/` (`series-v1`), `vocabulaires/` (`vocabulaires-v1`), `contrats/distributeur/`
+- `prospera-plateforme` : `series/` (`series-v1`, **`series-v1.1`** depuis STORY-1052), `vocabulaires/` (`vocabulaires-v1`), `contrats/distributeur/`
   (`contrats-distributeur-v1`) ; **lot 3** : `encours/` (inscrit au README par B-956).
 - **`prospera-assureur-fictif`** (lot 3, reçu de C, passation constatée le 2026-11-17 au rituel de 1046) : port 3411,
   profil `assureur-fictif`, « Rebase and merge » seul ; dans `prospera-plateforme`, le jeu
@@ -140,7 +155,25 @@
     et au registre ; suite de conformité `conformite-portee-reseau-v1` ; C-1004 est le premier consommateur attendu.
   - Les cinq services du distributeur en squelette (garde par module, profil, manifestes, piste d'audit chaînée,
     aucun import croisé) : ventes 3412, terrain 3413, recouvrement 3414, pilotage 3415, croissance 3416.
-  - `prospera-plateforme/series/` (étiquette `series-v1`), copiée dans ventes (`src/socle/series/`).
+  - `prospera-plateforme/series/` : `series-v1` (STORY-1044) et **`series-v1.1`** (STORY-1052, `dev` 1fe8c5e),
+    copiée dans ventes (`src/socle/series/series.ts`, empreinte `68833b1a…` figée par `src/series.invariant.spec.ts`).
+    **Les séries hébergées** (STORY-1052) :
+    - **Émettre un numéro** = `NumerotationDesSeries.emettreDansUneTransaction(module, organisationId, serie,
+      travail)` : la transaction (`majority`) porte le numéro ET la pièce que `travail` écrit avec la session ; le
+      numéro est confirmé dans l'ancre après l'acquittement ; une transaction périmée (`SERIE_INSTABLE`) est rejouée.
+      **1056** l'emploie pour `BL-` (série `bons-livraison`, déclarée par `SeriesDeCommande`) ; `facturation`
+      déclarera ses séries de même (`declarer('facturation', { … })`). Ne jamais tirer un numéro hors d'elle.
+    - **L'hébergé est une configuration** (AD-26) : `SERIES_ANCRE_URI` (l'ancre, une base **hors** de celle du
+      service ; en production, celle de la plateforme Money Vibes), `MONGODB_MEMBRES_PORTEURS_MIN=3` ; sans elles, le
+      service se comporte comme `series-v1` et le dit (`SERIES_SANS_ANCRE`). Profil de pile :
+      `docker-compose.heberge.yml`.
+    - **Une restauration se voit seule** : au démarrage (avant d'écouter) ou à l'émission, la série est relevée au
+      maximum de l'ancre, le trou est déclaré (`GET /api/v1/commande/series`), tracé dans `commande_audit` et signalé
+      `SERIE_DERIVE` au journal (l'alerte d'AD-32, à brancher sur la supervision). Le résidu (une panne entre
+      l'acquittement et la confirmation, puis une restauration) est écrit dans la fiche (D-1052-6).
+    - Reste : publier `commande.serie.changed@1` (1056, avec le manifeste), remettre chaque jour la tête à l'agent
+      (EPIC-148, B), brancher l'alerte `SERIE_DERIVE` sur la supervision du moteur (AD-40) ; la route de recette
+      (`SERIES_EMISSIONS_DE_RECETTE`, jamais en production) sert les recettes de restauration.
   - `prospera-plateforme/vocabulaires/` (`vocabulaires-v1`) et `contrats/distributeur/` (`contrats-distributeur-v1`),
     STORY-1045, `dev` baa38dd : le vocabulaire par verticale et la garde du catalogue des faits d'AD-20. **Aucun
     service ne les copie encore** : chacun les copie à l'octet (empreintes dans `stories/STORY-1045.md`) avec sa
@@ -193,8 +226,8 @@
     repli cloche, consentements, WhatsApp approuvé, effacement des destinataires par les droits des personnes).
     Dettes héritées : 4 suites e2e rouges (voir « Pièges ») ; ouvert de la passation de B (vérification des sorties
     d'essai, bascule de la garde sur l'état publié seul).
-  - **Prochaine story du distributeur : 1052** (séries hébergées), puis 1053 (les rôles, après B-960) et 1056 (la
-    commande (1)).
+  - **Prochaine story du distributeur : 1053** (les rôles, B-960 fusionnée), puis 1055 (l'import réseau par la
+    Reprise) et 1056 (la commande (1), premier vrai numéro `BL-` par les séries hébergées).
 
 ## Demandes aux autres groupes
 
@@ -222,7 +255,9 @@
   Les relances de `notification` sont automatiques (FR-47, H-040 : à confirmer en immersion) et ne remplacent pas les
   vôtres (STORY-999) ; l'arbitrage après trois relances reste chez vous.
 
-- **→ B (2026-11-17) : attribuer les droits `reseau:*` par auth-service (STORY-1050, pour B-960)** — **ouverte**.
+- **→ B (2026-11-17) : attribuer les droits `reseau:*` par auth-service (STORY-1050, pour B-960)** — **servie par
+  B-960** (auth #42, `dev` 8d48710 ; les cinq `reseau:*` sont dans la table des 15 rôles) ; reste à le vérifier en
+  1053 (un membre sans rôle `DIST_*` n'a plus aucun droit, D-960-12).
   Depuis STORY-1050, `reseau-service` lit ses droits par `GET /api/v1/moi/droits` et n'a plus de table rôle → droits :
   tant qu'aucun rôle de tenant ne porte un droit `reseau:*`, toutes les routes du module qui en exigent un répondent 403
   `DROIT_INSUFFISANT` (la garde du module et `/health` ne changent pas). Les cinq codes, tous vérifiés par une garde
@@ -281,6 +316,13 @@
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-17) : les 15 rôles du distributeur sont servis, D-1053 est débloquée (STORY-960)** — **lue** au
+  rituel de 1052 ; appliquée par **1053** (droits `droits ∪ droitsHorsJeton` de `/moi/droits`, `roleMetier` jamais
+  pour décider d'un droit, aucun droit sans rôle `DIST_*`). Les paramètres de `commande` (D-1049-4) et la lecture des
+  séries (D-1052-12) restent au `TENANT_ADMIN` jusqu'à 1053, qui choisira entre un droit neuf et `roleMetier`.
+- **← B (2026-11-17) : comment ouvrir une Créance dans `paiement` (STORY-963, pour D-1059)** — **lue** ; servira
+  **1059** (`PUT {PAIEMENT}/api/v1/creances/sources/FACTURE/{factureId}`, rejouable).
+
 - **← A (2026-11-17) : `PATCH /api/v1/dossiers/{id}` relayé par le BFF (STORY-923)** — **lue**. Pour l'écran de la
   fiche dossier (onglet Identité) : frontend, hors du lot 3 de D (backend) ; reprise avec le lot frontend.
 
@@ -303,8 +345,12 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-17, STORY-1052), avant la fusion du code — `series-v1.1` (plateforme) et les séries hébergées
-  de `prospera-ventes-service`.** Rien d'existant ne change de forme ; `series-v1` ne bouge pas.
+- **PUBLIÉ (2026-11-17, STORY-1052, prospera-plateforme#27, `dev` 1fe8c5e, étiquette `series-v1.1` ;
+  prospera-ventes-service#4, `dev` 32d8b5f → e4a27c7) ; ANNONCÉ avant la fusion du code (prospera-stories #632) —
+  `series-v1.1` (plateforme) et les séries hébergées de `prospera-ventes-service`.** Rien d'existant ne change de
+  forme ; `series-v1` ne bouge pas. Écart avec l'annonce : une variable de plus, `LOG_PRETTY` (facultative ; par
+  défaut rien ne change), pour qu'une pile de recette démarre sur l'image runtime. sha256 de `series/src/index.ts` à
+  `series-v1.1` : `68833b1af555ab70f50054f11f9bfddf37316d692082d11bd62b8a42f37a13a4`.
   - **`series-v1.1`** (`prospera-plateforme/series/src/index.ts`, version `1.1.0`, majeur 1, compatible avec
     `series-v1`) : ajouts seulement — `new Series(depot, prefixes, { ancre, horloge })` (sans ancre : comme v1),
     `confirmer`, `reconcilier`, `reconcilierTout`, `etat`, `lister`, `ancreMongo`, `ancreEnMemoire`, types
@@ -500,6 +546,19 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1052** : (1) **deux transactions MongoDB qui créent le même document (upsert) ne se heurtent qu'à
+  l'acquittement** : chacune voit son propre document neuf et tire le même numéro ; sur un document qui existe, le
+  second incrément est refusé tout de suite (`WriteConflict`, rejoué par `withTransaction`). Une logique qui lit un
+  état extérieur pendant la transaction (ici l'ancre) voit alors ce qu'a écrit la gagnante : créer le document hors
+  de la transaction avant d'y entrer. Mesuré : rouge une fois sur trois, vert seul ; un diagnostic instrumenté (une
+  ligne par appel) l'a montré, pas la relecture du code. (2) `NODE_ENV=staging` sur l'image runtime de `ventes` : pas
+  de `pino-pretty`, le service ne démarre pas ; poser `LOG_PRETTY=false`. (3) `docker compose … down -v` lit les
+  variables d'interpolation de la surcouche : sans elles, la descente échoue en silence (sortie redirigée) ;
+  vérifier `docker ps -a` et `docker volume ls` après. (4) Un heredoc de plus de cent lignes avec des apostrophes et
+  des antiquotes échoue au découpage (« unexpected EOF ») : script Python écrit par l'outil d'écriture. (5) Un mutant
+  peut être équivalent sur le chemin employé (ancre « état d'après » au lieu d'« état d'avant » avec `$max`) : le
+  dire, le remplacer par une mutation qui compte.
 
 - **STORY-1051** : (1) **quatre suites e2e de `notification` sont rouges sur `dev` avant 1051** (témoin rejoué :
   `appel-de-service`, `envois`, `rail-notification` — le banc n'a pas `UtilisateurModel`, ajouté à `EnvoisService` par

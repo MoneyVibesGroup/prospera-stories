@@ -1,11 +1,6 @@
 # STORY-1052 : les séries hébergées — aucun numéro perdu ni réémis après une restauration
 
-Status: in-progress
-
-> **Où en est la story (note de reprise, tenue à jour sur la branche `docs-1052`)** : code écrit et poussé
-> (plateforme `MNV-1052` 67b7863, ventes `MNV-1052`) ; Node 24 vert (plateforme ; ventes : tsc, lint, unitaires, e2e,
-> build, intégration sur MongoDB réel) ; restent les mutations, la pile `grp-d` (sauvegarde et restauration réelles),
-> les PR et l'étiquette `series-v1.1`. Annonce « ⚠ Contrats » dans la PR de cette branche.
+Status: done
 
 **Épics :** EPIC-224 (les séries sans perte, le jeu de répliques et l'exploitation hébergée), EPIC-263 (profil
 d'instance hébergée) · **Dépôts :** `prospera-plateforme` (`series/`, tenu par D), `prospera-ventes-service` (socle
@@ -123,6 +118,9 @@ seule**, relève le compteur au maximum connu, et **déclare** ce qu'elle ne peu
   deux incréments concurrents se heurtent tout de suite) ; avant tout saut en transaction, `lireEngage` relit l'état
   engagé : s'il tient déjà le numéro tiré, la transaction est périmée, **rien n'est sauté ni réservé**, refus
   `SERIE_INSTABLE`, et `ventes` rejoue l'émission (cinq fois au plus).
+- **D-1052-14 — `LOG_PRETTY`** (facultatif, `true` | `false`) : par défaut rien ne change (lisible hors production).
+  Une pile de recette pose `NODE_ENV=staging` pour ouvrir la route de recette ; l'image runtime n'a pas `pino-pretty`
+  et le service ne démarrait pas (« unable to determine transport target ») : la pile pose `LOG_PRETTY=false`.
 
 ## Ce qui n'est pas fait ici
 
@@ -132,4 +130,63 @@ l'agent (EPIC-148, B) ; le rapprochement des encaissements avec le relevé du fo
 
 ## Preuves
 
-À écrire.
+- **Bibliothèque** (`prospera-plateforme`, Node 24, `node:24-slim`, archive de la branche) : `npm run typecheck` vert ;
+  `npm test` racine **575 tests, 574 pass, 0 fail** (1 sauté, hérité) ; `series/` **32/32** (8 de v1 inchangés,
+  24 neufs : ancre, sauvegarde et restauration, démarrage, émission abandonnée, dernier numéro perdu, transaction
+  périmée, amorçage ancré, ancre en panne, 50 émissions simultanées sur ancre lente, niveaux MongoDB des deux
+  adaptateurs). **Mutations : 12/12 rouges sur une assertion** (la confirmation ou la réservation ne disent plus le
+  recul ; numéro rendu sans réservation ; série non créée hors transaction ; transaction périmée qui saute ; démarrage
+  qui ne confirme plus ; émission qui ne confirme plus la précédente ; écriture `w: 1` ; lecture `majority` ; amorçage
+  d'une série entamée d'après l'ancre ; saut sans époque ; émissions hors transaction sans file).
+- **Copie à l'octet** dans `ventes` (`git -c core.autocrlf=false show series-v1.1:series/src/index.ts`, `cmp`
+  identique) : `src/socle/series/series.ts` sha256
+  **`68833b1af555ab70f50054f11f9bfddf37316d692082d11bd62b8a42f37a13a4`**, figée par `src/series.invariant.spec.ts`
+  (valeur écrite dans le test) ; ni lint ni formatage sur la copie.
+- **`ventes`, Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive HEAD`) :
+  `tsc --noEmit` vert ; `npm run lint` (tout le dépôt) vert, et lint des fichiers touchés avec `endOfLine auto` ;
+  `npm run build` vert ; unitaires **Test Suites: 38 passed, 38 total ; Tests: 348 passed** ; e2e **1 suite, 11
+  passed** ; intégration sur **MongoDB 8.0 réel en jeu de répliques** **Test Suites: 6 passed, 6 total ; Tests: 44
+  passed** (dont 12 neufs : 50 émissions transactionnelles simultanées consécutives, l'ancre à 50/50 ; sauvegarde
+  par copie, émissions, restauration : 16 rendu, trou 11 → 15 déclaré et tracé dans la piste, piste intègre ; relève au
+  démarrage ; dernier numéro rendu puis perdu : trou d'un numéro ; émission abandonnée reprise sans trou ; lecture
+  linéarisable ; jeu de répliques à trois exigé : refus ; et par le banc HTTP : garde du module, rôle, route de recette
+  fermée, 30 émissions parallèles, série inconnue, bornes). Les deux suites de séries rejouées 8 fois : vertes.
+  **Mutations : 11/11 rouges sur une assertion** (confirmation après l'acquittement retirée ; trou non tracé ;
+  démarrage sans réconciliation ; jeu de répliques non jugé ; un membre de moins accepté ; route de recette permise en
+  production ; route ouverte sans configuration ; copie retouchée ; saut MongoDB sans époque ; saut MongoDB sans
+  trou ; ancre sans espace du service). **Mutant équivalent écarté** : l'ancre MongoDB qui rend l'état d'après au lieu
+  de l'état d'avant ne change rien en transaction (`$max` garde la plus haute réservation, l'état d'après contient le
+  recul) ; il ne diffère que hors transaction, chemin que `ventes` n'emploie pas.
+- **La course mesurée** (D-1052-13) : le premier passage de l'intégration a rougi une fois sur trois (« trou 2 → 5 »
+  sans restauration) ; un diagnostic instrumenté a montré des transactions condamnées qui tiraient toutes le n° 1 sur
+  une série à créer. Corrigé dans la bibliothèque avant toute PR ; rejoué vert depuis.
+- **Pile `grp-d` réelle, profil hébergé** (`docker compose -p grp-d -f docker-compose.yml -f
+  docker-compose.heberge.yml --profile commande up --build`, plus une surcouche de preuve hors dépôt : émetteur RS256
+  de recette, `NODE_ENV=staging`, `SERIES_EMISSIONS_DE_RECETTE=actif`, `LOG_PRETTY=false` ; droit `commande` publié
+  sur `entitlement.changed`). MongoDB du service en **jeu de répliques à trois membres porteurs** (`rs0` : un
+  primaire, deux secondaires), ancre dans un **autre jeu** (`mongo-ancre`, `rsa`). Au démarrage : « Jeu de répliques
+  rs0 : 3 membre(s) porteur(s) (3 exigé(s)) ».
+  - `GET /api/v1/commande/series` : 200 au `TENANT_ADMIN` (`ancree: true`, série vierge), 403 au `TENANT_USER`.
+  - **20 émissions parallèles** (chacune sa transaction et son témoin) : 1 → 20, époque 1.
+  - **`mongodump`** de `ventes_service` ; **15 émissions** : 21 → 35.
+  - **`mongorestore --drop`, service en marche** : la base revient à `dernier 20`, 20 témoins ; l'ancre, hors de la
+    base, garde `reserve 35, confirme 35`. **5 émissions** : **36 → 40, époque 2**, l'émission déclare le trou
+    **21 → 35** (tous émis et confirmés) ; journal `SERIE_DERIVE … (EMISSION)`, niveau erreur.
+  - **`mongodump` (2)**, 5 émissions : 41 → 45 ; **service arrêté, `mongorestore --drop`, service redémarré** : avant
+    d'écouter, `SERIE_DERIVE … (DEMARRAGE) ; trou déclaré 41 → 45 … époque 3` ; `GET` : `dernier 45, époque 3, trous
+    [21 → 35 (époque 2), 41 → 45 (époque 3)]` ; **3 émissions : 46 → 48**.
+  - Piste d'audit de `commande` : deux lignes `SYSTEME` (20 → 36, époque 2 ; 40 → 45, époque 3) ; témoins en base :
+    28, tous distincts (1 → 20, 36 → 40, 46 → 48).
+  - **Un membre sur trois arrêté** : 5 émissions, 49 → 53. **Deux membres arrêtés** (plus de majorité) : la demande
+    échoue (500 au bout de 35 à 40 s), **aucun numéro rendu**, l'ancre reste à 53. **Membres relancés** : 54 → 56.
+  - **Bilan : 56 numéros rendus, 56 distincts, aucun réémis** ; les 20 numéros que les restaurations ont fait
+    disparaître de la base (21 → 35, 41 → 45) sont déclarés, jamais comblés.
+  - **Rejoué à l'identique** sur des images reconstruites depuis `origin/dev` (e4a27c7, `build --no-cache`, code neuf
+    vérifié dans `dist`), volumes neufs. `down -v` après chaque passage : aucun conteneur, volume ni réseau `grp-d`.
+- `git diff --stat` = `--ignore-cr-at-eol` (plateforme 4 fichiers ; ventes 22) ; aucun `index.ts` non suivi.
+- Annonce « ⚠ Contrats » fusionnée **avant** le code : prospera-stories **#632** (`main` 62a9adb).
+- PR **prospera-plateforme#27**, `head.sha` f704f12 vérifié, fusionnée en rebase : **`dev` bb6d96c, c0021e1, 867d4c1,
+  1fe8c5e** ; étiquette annotée **`series-v1.1`** sur 1fe8c5e (`series-v1` inchangée, e0cb763).
+- PR **prospera-ventes-service#4**, `head.sha` 39587a6 vérifié, fusionnée en rebase : **`dev` 32d8b5f, 4782467,
+  dbe3fa6, e4a27c7**.
+- Verrou Docker du poste : libre (B l'avait rendu), pris à 09:40, rendu à 10:27.
