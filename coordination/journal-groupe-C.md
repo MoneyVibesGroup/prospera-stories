@@ -52,8 +52,13 @@
      affectation et réaffectation motivée ; parcours joué contre le LC fictif ;
   24. ~~STORY-1003~~ : **sinistres #14** ; parties au dossier, cumuls interdits (paramètre figé), matrice de
      délégation datée (résout `COMITE`), contrôle du niveau 1 ;
-  25. **STORY-1004** ← **suivante** : les portées par volet et l'accès par dossier (D-1036 et la suite de
-     conformité de D sont livrés ; ticket `TICKET-BACKEND-conformite-portee-reseau-sinistres.md`).
+  25. ~~STORY-1004~~ : **sinistres #15** ; périmètre par rôle, portée réseau consommée, suite de conformité de D
+     verte, inscrit au registre de `reseau-service`.
+- **🏁 2026-11-17 — LOT 2 DE C TERMINÉ** (989, 991 → 1004). **Lot 3** (`PLAN-4-SESSIONS-LOT-3-2026-11-17.md` §5) :
+  **STORY-1005 → 1014**, dans l'ordre du tableau : 1005, 1006, 1007, 1008, 1014, 1009, 1011, 1010, 1012, 1013.
+  ⚠️ Règle du lot 3 (`REGLES-DES-GROUPES.md` §1.2) : **une sous-session neuve par story**, lancée par la session du
+  groupe ; tout ce que la story suivante doit savoir est écrit ici ou dans la fiche.
+  - **STORY-1005** ← **suivante** : la garde lit l'état publié (`garde-etat-publie-v1` de B-937).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -76,7 +81,9 @@ seulement.
 
 ## Passations
 
-- *(aucune)*
+- **→ D (2026-11-17) : `prospera-assureur-fictif`** — dernier commit de C sur `dev` : `78ad10c` (STORY-987) ; D l'a
+  constatée au rituel de 1046 et tient le dépôt depuis. C continue de jouer ses parcours contre le LC fictif (STORY-1002
+  l'a fait) et demande à D toute modification, ici.
 
 ## Demandes aux autres groupes
 
@@ -121,7 +128,17 @@ seulement.
 
 ## Réponses aux demandes reçues
 
-- **← B (2026-11-17) : lot 3, `prospera-assureur-fictif` passe à D** — **ouverte**. `PLAN-4-SESSIONS-LOT-3-2026-11-17.md`
+- **← D (2026-11-16) : consommer `reseau.portee.changed@1` et passer la suite de conformité (STORY-1004)** — **servie**
+  par `prospera-sinistres-service#15` (`dev` `29069cc`) : consommateur `sinistres-service.portee-reseau`, read-model
+  par `(organisation, utilisateur)`, suite `conformite-portee-reseau-v1` copiée à l'octet (`f2779975…`) et jouée sur
+  le vrai read-model et le vrai filtre (six cas verts, MongoDB) ; **inscrit au registre** (`PUT
+  …/conformite/consommateurs/sinistres`, référence `prospera-sinistres-service@29069cc`) ; la vérification
+  `consommateurs-conformes` est VERT. ⚠️ Le registre de `reseau-service` vit dans SA base : l'inscription faite sur la
+  pile de preuve ne vaut que pour elle ; à refaire à l'installation réelle (ou par la CI, quand elle existera).
+- **← D (2026-11-17) : passation de `prospera-assureur-fictif` constatée** — **lu**.
+
+- **← B (2026-11-17) : lot 3, `prospera-assureur-fictif` passe à D** — **servie** (passation écrite ci-dessus,
+  2026-11-17). `PLAN-4-SESSIONS-LOT-3-2026-11-17.md`
   (D-L3-2) : D y fait la démo de l'assurance (EPIC-204 : 1046, 1048, 1057) et la communication dans `notification`
   (EPIC-220). D ne touche ni `sinistres`, ni `assurance`, ni `document-service`. **À faire par C** : écrire la passation
   (dernier commit sur `dev`) dans « Passations » ; C continue de jouer ses parcours contre le LC fictif et demande à D
@@ -315,6 +332,12 @@ seulement.
   `delegation-2026.1` (matrice datée) ; `POST /api/v1/sinistres/dossiers/{id}/controle`. La validation (10a) d'un
   montant au-delà du niveau 1 est refusée à tout signataire seul (403, niveau `COMITE`) jusqu'à la séance du comité.
 
+- **2026-11-17, STORY-1004 — la portée s'applique désormais à `sinistres`.** Un agent ne voit que les dossiers de
+  son périmètre de rôle (FR-6) et, quand `reseau` est installé, de sa portée réseau. ⚠️ Pour les autres groupes : un
+  `GEST` doit être au **registre des gestionnaires** (STORY-1002) pour voir un dossier ; une organisation qui installe
+  `reseau` sans publier de portées ne voit **plus rien** dans `sinistres` (échec fermé voulu). Nouveau champ facultatif
+  `noeudId` à la déclaration (`POST /api/v1/sinistres/dossiers`). Contrat consommé : `reseau.portee.changed@1`.
+
 ## Questions à l'utilisateur ou au PO
 
 - **❓ 2026-11-17 — STORY-1002, question au PO : qui porte `sinistres.declaration.enregistree@1` ?** La spine (AD-16)
@@ -343,6 +366,9 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-1004-1 → D-1004-7** (`stories/STORY-1004.md`) : deux couches fail-closed ; `reseau` installé lu dans l'état
+  des modules (voisin suivi) ; volet du GEST lu au registre ; périmètres de MED et CPT ; `noeudId` au dossier ; jamais
+  la portée dans le jeton ; commandes du système hors portée.
 - **D-1003-1 → D-1003-8** (`stories/STORY-1003.md`) : actes lus dans l'historique ; évaluer compte comme instruire ;
   affecter puis valider permis ; émettre n'est plus interdit à l'instructeur (FR-7) ; niveau 1 signé par RESP, DT ou
   DG ; cumul = montant évalué ; au-delà du niveau 1, aucun signataire seul ; le contrôle pose `CONTROLE_ABSENT`.

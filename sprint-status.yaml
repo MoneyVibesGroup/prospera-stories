@@ -1193,6 +1193,16 @@ reserved_ranges:
       l'historique ; cumuls de FR-7 en paramètre figé (separation-2026.1), refusés par SEPARATION_DES_TACHES ; matrice
       de délégation datée (delegation-2026.1) qui résout COMITE ; contrôle du niveau 1. Pile verte, rejouée depuis dev.
       Lot 2 de C, n° 14. NON SLOTTÉE.
+  - range: "STORY-1004"
+    status: "RÉSERVÉ"
+    owner: "Les portées par volet et l'accès par dossier ; reseau.portee.changed@1 ; suite de conformité de D (sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1004.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-sinistres-service#15 (dev 29069cc). Périmètre par rôle (FR-6) en paramètre figé ;
+      portée réseau consommée (read-model, plus haute révision), appliquée quand reseau est installé ; hors portée =
+      404 ; suite de conformité de D verte (6 cas, MongoDB) ; inscrit au registre de reseau-service,
+      consommateurs-conformes VERT. Pile verte, rejouée depuis dev. Lot 2 de C, n° 15 : LOT 2 TERMINÉ. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
