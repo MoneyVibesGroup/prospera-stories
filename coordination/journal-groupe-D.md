@@ -176,15 +176,40 @@
   - Node 24 : plateforme 616 tests (615 pass, 1 sauté), générateur 25/25 ; ventes 444 unitaires, 24 e2e, 82
     d'intégration ; terrain 341, 24, 15 ; mutations 11/11, 16/16, 10/10.
   - Pile `grp-d` (branches) : ventes 25/25 (une vente du jeu saisie et validée `BL-2026-000001`), terrain 22/22 (Kodjo :
-    14 visites au jour 0) ; espace réel 403. Rejeu sur images reconstruites depuis origin/dev (--no-cache, volumes neufs) : ventes 25/25 et espace réel 403 ; terrain NON rejoué depuis origin/dev (session bloquée pendant ce rejeu, verrou rendu à B pour 968 ; à rejouer à la prochaine prise du verrou).
+    14 visites au jour 0) ; espace réel 403. Rejeu sur images reconstruites depuis origin/dev (--no-cache, volumes neufs) : ventes 25/25 et espace réel 403 ; terrain
+    rejoué depuis origin/dev (`068e1c0`, `--no-cache`, volumes neufs) par la session de 1059 : **22/22**, Kodjo 14 visites
+    au jour 0, témoin intact, espace réel 403.
   - Décisions D-1058-1 → 14 (fiche) ; Q-D-9 au PO ; → B. Verrou Docker attendu ~30 min (B, 967), pris à 18:32 ; rendu à B par la session de groupe après le blocage du rejeu de terrain ; aucun conteneur, volume ni réseau grp-d ne reste.
-- **STORY-1059** 🔄 🚚 — la facture juste (1) : en cours (fiche, annonce « ⚠ Contrats » ci-dessous).
-- **Suivante : STORY-1059** 🚚 la facture juste (1) (EPIC-230), dans `ventes` : une facture ouvre sa Créance dans
-  `paiement` (`PUT /api/v1/creances/sources/FACTURE/{sourceId}`), de façon idempotente. **Ses dépendances sont
-  fusionnées** (vérifié le 2026-11-17 sur `origin/dev` de `prospera-paiement-service`) : **B-963** (`716059c`, la Créance
-  (1), source `FACTURE`, droit `paiement:demande:emettre`) et **B-965** (`96c385f` → `ad35786`,
-  `paiement.creance.changed@1` au registre en BACKWARD, crédit du tiers). 1059 pose aussi le consommateur qui remplit
-  `commande_creances`, `commande_credits_tiers` et `commande_sources_encours` (fin de `ENCOURS_NON_INSTALLE`).
+- **STORY-1059** ✅ 🚚 — la facture juste (1) (PR prospera-ventes-service#8, `dev` 1c1e944, 101fbe8, bd8d211 ; annonce
+  « ⚠ Contrats » #666 avant le code, avec les manifestes `commande` et `facturation` amendés, C5). **Dernière story du
+  lot.**
+  - **La facture** (module `facturation`) : `POST /facturation/factures { commandeId }` facture une commande `VALIDEE`
+    (option « dès la validation », AD-29 ; la livraison n'existe pas encore) ; la commande est lue sur
+    `commande.commande.chiffree@1` (publié par `commande` à la validation), jamais dans son code ; échéance figée par la
+    condition de règlement du point de vente (`CONDITIONS_REGLEMENT_MANQUANTES` sinon) ; **`FAC-AAAA-NNNNNN` tiré dans
+    la transaction de la facture** ; une facture par commande (clé d'origine `<commandeId>:facture`, index unique) ;
+    faits `facturation.facture.emise` et `facturation.serie.changed` par l'outbox (BACKWARD au registre).
+  - **La Créance** : `PUT /api/v1/creances/sources/FACTURE/{factureId}` chez `paiement` (B-963), jeton du membre, après
+    la transaction ; `paiement` indisponible : la facture existe (`A_OUVRIR`), relance en mémoire tant que le jeton vit,
+    rejeu, `POST …/factures/{id}/creance` — même clé, **jamais deux Créances**. La charge de `facturation.facture.emise@1`
+    est celle que B attend pour son consommateur (« → B »).
+  - **La Créance projetée dans `commande`** : `paiement.creance.changed@1` (plus haute révision, trop-perçu = crédit du
+    tiers) ; **les sources de l'encours sont branchées au premier fait de l'organisation : fin d'`ENCOURS_NON_INSTALLE`**,
+    la commande à crédit est jugée sur l'encours ; l'engagement baisse à la Créance de sa facture, une fois, dans les deux
+    ordres (AD-9).
+  - Node 24 : 506 unitaires (52/52 suites), 24 e2e, 98 d'intégration sur MongoDB réel (10 émissions concurrentes : une
+    facture, un numéro) ; 16/16 mutations ; Karapace : 7 sujets BACKWARD.
+  - **Pile `grp-d` avec le vrai `paiement` construit depuis `origin/dev` (`ad35786`)** : 30/30 (Créance relue par l'API de
+    paiement, rejeu, 8 émissions concurrentes, paiement arrêté puis relancé : Créance ouverte 2 s après son retour, sans
+    doublon ; projection, jugement sur l'encours, `PLAFOND_CREDIT_DEPASSE`) ; rejoué sur les images reconstruites depuis `origin/dev` (`--no-cache`, volumes neufs) : 30/30, deux fois ; 16/16 mutations rejouées.
+  - **Reste de 1058 joué** : `terrain` sur l'image d'`origin/dev` (`068e1c0`, `--no-cache`, volumes neufs) : 22/22, espace
+    réel 403.
+  - Décisions D-1059-1 → 12 (fiche) ; Q-D-10 au PO ; → B (consommateur de `facturation.facture.emise@1`). **Verrou Docker
+    pris à 22:37 sans attente (B l'avait rendu), une seule prise, rendu à 23:29** ; aucun conteneur, volume ni réseau
+    `grp-d` ne reste.
+- **Le lot 3 de D est fini : 15 stories sur 15 (1045 → 1059)**, le 2026-11-17. Passation à Dev A mise à jour en entier
+  (« Passations »), avant le 04/12 (D-L3-6). Suivantes du distributeur, hors lot : la facture juste (2), la commande (2),
+  les remplaçantes d'EPIC-227.
 
 ### Lots 1 et 2
 
@@ -253,7 +278,48 @@
 - **← C, `prospera-assureur-fictif`, constatée par D au rituel de 1046, `dev` 78ad10c** (2026-11-17, plan du lot 3
   §5). C n'avait pas écrit sa passation (« Passations : aucune ») ; au rituel : aucune PR ouverte, dernier commit sur
   `dev` du 2026-11-16 (MNV-987). C est actif ailleurs (sinistres, 1001 → 1002), pas sur ce dépôt.
-- **→ Dev A (2026-11-16, D-L2-5, avant le 04/12) : le distributeur.** Ce que D laisse :
+- **→ Dev A (mise à jour complète le 2026-11-17, à la fin du lot 3 ; D-L2-5, D-L3-6 : avant le 04/12) : le distributeur,
+  et ce que D tient d'autre.** La synthèse d'abord, puis le détail par sujet (les sous-points qui suivent).
+  - **Dépôts tenus par D** : `reseau-service` (3419), `prospera-ventes-service` (3412 : `commande`, `facturation`,
+    `approvisionnement`, `entrepot`), `prospera-terrain-service` (3413 : `terrain`, `conquete-objectifs`),
+    `prospera-recouvrement-service` (3414), `prospera-pilotage-service` (3415), `prospera-croissance-service` (3416),
+    `prospera-assureur-fictif` (3411, reçu de C), `prospera-notification-service` (3008, reçu de B) ; dans
+    `prospera-plateforme` : `series/`, `vocabulaires/`, `contrats/distributeur/`, `encours/`, `contrats/objets/reseau/`,
+    `jeux-demonstration/grossiste-golfe*/` et `assurance-compagnie-demo-reduite/`. Étiquettes : `series-v1`,
+    `series-v1.1`, `vocabulaires-v1`, `contrats-distributeur-v1`, `acces-distributeur-v1`, `encours-v1`,
+    `objets-reseau-v1`, `jeu-grossiste-golfe-v1`, `jeu-assurance-v1`, `conformite-portee-reseau-v1`. Fusion en « Rebase
+    and merge » seulement ; branches `MNV-<n>` depuis `origin/dev` ; Node 24 pour les tests du client Kafka de Confluent
+    (étage `verification` des Dockerfile).
+  - **Livré** : lot 2 (1030 → 1044 : `reseau-service` complet, les cinq squelettes, `series-v1`) ; lot 3 (1045 → 1059) :
+    vocabulaires et catalogue des faits, encours, garde-fous et plafond, séries hébergées sans perte, les 15 rôles dans
+    les cinq services, la Reprise réseau, la commande (1), le jeu « Grossiste du Golfe » et ses routes C13, **la facture
+    juste (1)** ; côté assurance : compagnie de démonstration, LC fictif refusé en réel, sa recette, prévenir l'assuré (1)
+    et (2). Détail et SHA : « État », plus haut.
+  - **Ce qui reste, dans l'ordre conseillé** : (1) **la facture juste (2)** (facture par livraison, `SANS_BON`, mentions
+    légales A-1, PDF, envoi, avoir, `PARTIELLE`/`PAYEE` lus de `paiement.creance.changed@1`, balances ; fiche 1059
+    « Ce qui reste ») ; (2) **la commande (2)** (`TRANSMISE`, modifier, annuler, remise, dérogation, `CMD-`, livraison
+    et reliquat, allocation du matin ; détail plus bas, « La commande (1) ») ; (3) **les remplaçantes d'EPIC-227** (les
+    référentiels du distributeur côté réseau : zones à plat, points de vente rattachés) ; (4) les consommateurs qui
+    rempliront les read-models aujourd'hui remplis par personne (`pdv`, `catalogue`, `stock`) ; (5) les routes C13 de
+    `facturation`, `approvisionnement`, `entrepot`, `conquete-objectifs` ; (6) les dettes héritées de `notification`
+    (4 suites e2e rouges).
+  - **Demandes ouvertes chez les autres groupes** (détail dans « Demandes aux autres groupes ») : **chez B** — le jeu
+    « Grossiste du Golfe » (README, `INSTALLATION_SERVICES` avec `commande` et `terrain`, comptes du jeu : STORY-972
+    annoncée), **le consommateur de `facturation.facture.emise@1`** (charge fixée par 1059), le crédit du tiers (2)
+    (`paiement.credit-tiers.changed@1`) ; **chez C** — la part Prospera de l'annexe E et trois écarts du générateur
+    (documents C-10, noms, garantie de 9002), l'enregistrement du destinataire de l'assuré (1051), les consentements et
+    l'accusé (1054), la suite de conformité de la portée pour `sinistres` (C-1004) ; **chez A** — assembler la recette de
+    la démo assurance (information).
+  - **Questions au PO, avec le choix retenu par défaut** (détail dans « Questions à l'utilisateur ou au PO ») : Q-D-4
+    (encours certain pour le plafond), Q-D-5 (`commande:parametres:modifier`, DG et `DIST_ADMIN`), Q-D-6 (seul le numéro
+    officiel est facultatif à l'assuré), Q-D-7 (la recette lit la personne par son rôle), Q-D-8 (`objets-de-l-annexe-c`
+    vert sans documents), Q-D-9 (dimanche chômé, samedi travaillé), **Q-D-10** (la série `FAC-` démarre à 0 sans reprise
+    de Sage).
+  - **Pièges** : la section « Pièges rencontrés » (par story, la plus récente d'abord). À lire avant tout : le verrou
+    Docker du poste et les commandes courtes (1058-5, 1055-2), les fins de ligne et `git archive` (§1.7), les mutations
+    qui rougissent sur une compilation (1053-2, 1058-2, 1059-1), `--load` au `docker build` (1056-1), Karapace qui
+    répond 500 juste après `healthy`, `pino-pretty` absent de l'image `runtime` (1052-2, 1058-1).
+  - Le détail, sujet par sujet :
   - `reseau-service` complet pour le lot (EPIC-044 → 053) : `dev` 5922180 ; contrat `reseau.portee.changed@1` publié
     et au registre ; suite de conformité `conformite-portee-reseau-v1` ; C-1004 est le premier consommateur attendu.
   - Les cinq services du distributeur en squelette (garde par module, profil, manifestes, piste d'audit chaînée,
@@ -287,8 +353,8 @@
     l'encours** (AD-9), pour `commande`, `pdv` et `recouvrement`. **`ventes` la copie depuis STORY-1049**
     (`src/socle/encours/`, empreintes figées par `src/encours.invariant.spec.ts`, vecteurs d'or rejoués) ; `pdv` et
     `recouvrement` la copieront de même. Ce qui en est exclu et pourquoi : D-1047-3. Reste à y ajouter, en `1.x`, l'exclusion du
-    montant dérogé pour l'évaluation du blocage (avec la story de `recouvrement`), et la correspondance avec les faits
-    de B-963 et B-965 quand ils seront fixés.
+    montant dérogé pour l'évaluation du blocage (avec la story de `recouvrement`). La correspondance avec les faits de
+    B-963 et B-965 est **faite par 1059**, chez le consommateur (`src/modules/commande/credit/faits-lus.ts`).
   - ~~Le volet Reprise de l'import réseau (D-1041-3)~~ : **soldé par STORY-1055** (`dev` c62f586 → d31f744) :
     - **la cible** : `src/modules/reseau/reprise/`, sur `src/vendor/kit-cible/` (`kit-cible-v1.0.1`, empreintes dans
       `src/reprise.invariant.spec.ts`). Pour passer à une version suivante du kit, recopier toute la distribution à la
@@ -326,10 +392,11 @@
     - paramètres versionnés (`commande_parametres`, une version immuable par changement, la première écrite à la
       première lecture) ; changés par `TENANT_ADMIN` jusqu'à 1053 ; un acte garde sa `parametresVersion` ;
     - le crédit se lit par le port `SourcesDuCredit` dans des read-models **remplis par personne aujourd'hui** :
-      `commande_plafonds` (projection future de `pdv.plafond.changed@1`, avec `suspendu` = crédit bloqué),
-      `commande_creances`, `commande_credits_tiers` (à brancher par 1059 sur les faits de B-963, B-965) et
-      `commande_sources_encours` : **sans document, la source est `ABSENTE` et toute commande à crédit est refusée**
-      (`ENCOURS_NON_INSTALLE`) ; le consommateur de 1059 pose ce document quand `paiement` est en service ;
+      `commande_plafonds` (projection future de `pdv.plafond.changed@1`, avec `suspendu` = crédit bloqué, **toujours
+      remplie par personne** hors du jeu C13), `commande_creances`, `commande_credits_tiers` et
+      `commande_sources_encours` : **remplis depuis 1059** par le consommateur de `paiement.creance.changed@1` (sans
+      Créance projetée pour l'organisation, la source reste `ABSENTE` et la commande à crédit est refusée
+      `ENCOURS_NON_INSTALLE`) ;
     - ~~l'acte reçoit la commande dans son corps (squelette, D-1049-9)~~ : **soldé par 1056** (voir « La commande (1) »
       plus bas) ;
     - l'adaptateur de `stock` est `ReservationStockNonBranchee` (motif `RESERVATION_NON_BRANCHEE`) tant que l'API de
@@ -406,9 +473,46 @@
     - **la recette** : pilote de la partie A et surcouche (émetteur RS256, `INSTANCE_ESPACE=ESSAI`) décrits dans la fiche ;
     - **reste** : les routes C13 de `facturation`, `approvisionnement`, `entrepot`, `conquete-objectifs` ; la part
       `reseau` (nœuds sous les identifiants du jeu) ; les routes de lecture des tournées (EPIC-233).
-  - **Prochaine story du distributeur : 1059** (la facture juste (1) ; B-963 et B-965 fusionnées).
+  - **La facture juste (1)** (STORY-1059, `ventes` `dev` 1c1e944 → bd8d211), `src/modules/facturation/` et
+    `src/modules/commande/credit/` :
+    - **l'émission** (`factures/factures.service.ts`) : `POST /facturation/factures { commandeId }` facture une commande
+      `VALIDEE` (option « dès la validation », AD-29 : quantités commandées, prix figés) ; la commande est lue dans
+      `facturation_commandes_chiffrees` (projection de `commande.commande.chiffree@1`, jamais le code de `commande`) ;
+      l'échéance vient de `facturation_conditions_reglement` (**remplie par personne** : projection future de
+      `pdv.point-de-vente.changed@1` ; sans elle, `CONDITIONS_REGLEMENT_MANQUANTES`) ; le numéro `FAC-` est tiré dans
+      la transaction de la facture (série `factures`, `SERIES_DE_FACTURATION`) ; clé d'origine `<commandeId>:facture`
+      (index unique) ;
+    - **la Créance** (`creances/`) : port `OuvertureDeCreance` (adaptateur HTTP vers `PUT
+      {PAIEMENT_SERVICE_URL}/api/v1/creances/sources/FACTURE/{factureId}`, jeton du membre) ; `OuverturesDesCreances`
+      note l'issue (`A_OUVRIR`, `OUVERTE`, `REFUSEE`) et relance en mémoire tant que le jeton vit ; après un
+      redémarrage, une facture `A_OUVRIR` se reprend par le rejeu ou `POST …/factures/{id}/creance` — **jusqu'au
+      consommateur de `facturation.facture.emise@1` chez B**, qui la rendra durable (même clé) ;
+    - **la projection du crédit** (`commande/credit/`) : groupe `ventes-service.creances` sur `paiement.creance.changed`
+      et `facturation.facture.emise` ; plus haute révision par Créance ; crédit du tiers = trop-perçu (B-965) ; sources
+      de l'encours posées au premier fait de l'organisation ; l'engagement baisse du TTC à la Créance de la facture,
+      une fois (`commande_factures.engagementSolde`) ;
+    - **pour la facture par livraison (2)** : une seconde clé d'origine (`<livraisonId>:facture`), la quantité facturée
+      par ligne de bon, la lecture de `commande.bon-livraison.livre@1` ; le mode se fige par commande (AD-29) ;
+    - **recette** : pile `grp-d` avec le vrai `paiement` d'`origin/dev` (Mongo `rs-paiement` provisionné par ses
+      scripts, Redis, `NODE_ENV=production`, `/health/live` : il est `unhealthy` par construction), KYC et droit
+      `paiement` publiés sur Kafka, jetons à double audience (`ventes-service`, `paiement-service`) avec
+      `perms: ['paiement:demande:emettre']` ; pilote et surcouche décrits dans la fiche 1059.
+  - **Le lot 3 de D est fini.** Prochaines stories du distributeur : la facture juste (2), la commande (2), puis les
+    remplaçantes d'EPIC-227.
 
 ## Demandes aux autres groupes
+
+- **→ B (2026-11-17) : consommer `facturation.facture.emise@1` dans `paiement` (STORY-1059 ; votre D-965-9)** —
+  **ouverte**, sans urgence (la route reste le chemin de 1059). La charge est fixée et **publiée** (`ventes` `dev`
+  1c1e944, schéma `facturation.facture.emise-value` en BACKWARD, topic `facturation.facture.emise`, clé
+  `<organisationId>:<factureId>`, enveloppe `eventId`, `schemaVersion: 1`, `occurredAt`, `organisationId`) :
+  `factureId` (votre `sourceId`), `numero` (le `libelle`), `commandeId`, `livraisonId` (`null` dans ce mode),
+  `tiersId`, `perimetre`, `devise`, `montantHtMineur`, `montantTvaMineur`, **`montantTtcMineur`** (votre
+  `montantOrigineMineur` ; graphie de `ventes`, pas `montantTTCMineur`), `echeanceLe`, `emiseLe`, `rang` (1). Une facture
+  dont la Créance n'a pas pu s'ouvrir (paiement arrêté, puis `ventes` redémarré) reste `A_OUVRIR` jusqu'à un membre :
+  votre consommateur la fermera sans membre, sur la même clé `(FACTURE, factureId)`. **Information** : `ventes` lit
+  `paiement.creance.changed` (groupe `ventes-service.creances`, depuis le début) et garde la plus haute `revision` par
+  `creanceId` ; si la charge change, le dire ici.
 
 - **→ B (2026-11-17) : le jeu « Grossiste du Golfe » (STORY-1058)** — **ouverte**. (1) **README de la plateforme** :
   une ligne du tableau pour `jeux-demonstration/grossiste-golfe-petit/`, `grossiste-golfe/`, `grossiste-golfe-grand/`
@@ -470,7 +574,7 @@
   Le courrier `ACCUSE_RECEPTION` papier (votre STORY-1007) n'est pas un canal de `notification` : il reste hors
   de 1054.
 - **→ B (2026-11-17) : un droit neuf, `commande:parametres:modifier`, au catalogue de tenant (STORY-1053, D-1053-7)** —
-  **ouverte**. Changer les paramètres de `commande` (seuil de remise, score de priorité, alertes, heure de l'allocation
+  **servie par B-971** (auth #43, `dev` `913bd92`, constaté au rituel de 1059). Changer les paramètres de `commande` (seuil de remise, score de priorité, alertes, heure de l'allocation
   du matin ; versionnés et figés à l'acte, STORY-1049) : AD-12 réserve ce geste au DG et à `DIST_ADMIN`, l'annexe B ne
   nomme aucun droit pour lui. Demandé : le code `commande:parametres:modifier` au catalogue, **hors du jeton**
   (`droitsHorsJeton`), rôles par défaut **`DIST_DG` et `DIST_ADMIN`** ; il est déclaré au manifeste `commande`
@@ -569,6 +673,14 @@
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-17) : D-1059 débloquée (STORY-963, 965)** — **appliquée par 1059** : la route `PUT
+  …/creances/sources/FACTURE/{factureId}` est appelée avec le jeton du membre ; `paiement.creance.changed@1` est lu tel
+  que publié (plus haute `revision` par `creanceId`, trop-perçu = crédit du tiers) ; prouvé sur une pile avec le vrai
+  `paiement` d'`origin/dev` (`ad35786`). Rien n'a manqué chez vous ; aucun ticket.
+- **← B (2026-11-17) : le jeu « Grossiste du Golfe » (votre réponse à D-1058)** — **lue** : les trois gestes sont placés
+  avant STORY-969 ou en remplaçante ; les comptes du jeu viennent avec STORY-972 (annoncée, `main`
+  9fad661). La demande reste **ouverte** jusqu'à leur fusion.
+
 - **← B (2026-11-16) : servir les routes de vérification de vos modules (STORY-944)** — **servie pour
   `assureur-fictif`** par prospera-assureur-fictif#5 (STORY-1057, `dev` f9bbea5) : les cinq codes du manifeste, au contrat
   `verification-installation@1`. Les modules du distributeur (`reseau`, `ventes`…) n'en servent pas encore : à leur
@@ -608,8 +720,12 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-17, STORY-1059), avant la fusion du code — `prospera-ventes-service`, modules `facturation` et
-  `commande` : la facture émise, sa Créance ouverte dans `paiement`, trois faits neufs publiés, la Créance projetée.**
+- **PUBLIÉ (2026-11-17, STORY-1059, prospera-ventes-service#8, `dev` 1c1e944 → bd8d211) ; ANNONCÉ avant la fusion du
+  code (prospera-stories #666). Un écart : `COMMANDE_INCONNUE` n'est pas émis (un `commandeId` mal formé rend la 400 de
+  validation, une commande inconnue de `facturation` 409 `COMMANDE_NON_FACTURABLE`). Schémas enregistrés en BACKWARD
+  (`commande.commande.chiffree-value`, `facturation.facture.emise-value`, `facturation.serie.changed-value`). —
+  `prospera-ventes-service`, modules `facturation` et `commande` : la facture émise, sa Créance ouverte dans
+  `paiement`, trois faits neufs publiés, la Créance projetée.**
   Fiche : `stories/STORY-1059.md` (D-1059-1 → 12). Tout est AJOUT : aucune route, aucun topic, aucun champ existants ne
   changent. Manifestes amendés dans cette PR (C5) : `commande` publie `commande.commande.chiffree@1` et consomme
   `facturation.facture.emise@1` ; `facturation` publie `facturation.serie.changed@1` et consomme
@@ -1042,6 +1158,14 @@
 
 ## Questions à l'utilisateur ou au PO
 
+- **Q-D-10 (2026-11-17, STORY-1059) — Une organisation qui n'a rien à reprendre de Sage émet-elle ses factures dès
+  `FAC-AAAA-000001` ?** AD-5 veut que la série des factures reprenne le dernier numéro de Sage, posé une fois par la
+  Reprise (`facturation.suite-numerotation@1`), et refuse l'émission tant qu'elle ne l'est pas
+  (`NUMEROTATION_NON_INITIALISEE`). La Reprise de la facturation (EPIC-244) n'existe pas encore. **Choix par défaut : la
+  série démarre à 0** (essai, démonstration, client sans Sage) ; la reprise devra se poser avant la première facture
+  d'un client qui migre (EPIC-244 refusera une initialisation après elle). Alternative : refuser toute facture tant que
+  la suite n'est pas posée, au prix de bloquer l'essai.
+
 - **Q-D-9 (2026-11-17, STORY-1058) — Les jours d'un plan de journée du jeu sautent-ils le seul dimanche ?** Le jeu dit
   « aujourd'hui et les dix jours ouvrés suivants » (FR-9). **Choix par défaut : le dimanche est chômé, le samedi
   travaillé** (commerce de gros au Togo) ; les jours fériés ne sont pas sautés. Alternative : un calendrier en
@@ -1082,6 +1206,25 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1059** :
+  - (1) **`eslint --fix` retire un `as string` devenu inutile après une garde** (`if (c.creanceId !== \`…\`)` rétrécit
+    le type) : une mutation qui affaiblit la garde (`&& …`) casse alors la compilation (TS2322). Muter vers une garde
+    qui garde le rétrécissement (`typeof c.creanceId !== 'string'`).
+  - (2) **Une vérification redondante rend une mutation équivalente** : `FacturesDuModule` et `OuverturesDesCreances`
+    vérifient tous deux « déjà `OUVERTE` » ; muter l'un survit. Éprouver le chemin intérieur directement (`tenter`), et
+    la condition d'écriture (`$ne: 'OUVERTE'`) par une tentative qui finit **après** une ouverture concurrente.
+  - (3) **Un état absolu rejoué à l'identique ne prouve pas « la plus haute révision »** : `updateOne` sur `$lte` rend
+    `modifiedCount: 0` si le contenu ne change pas. Rejouer la même révision **avec un autre contenu**.
+  - (4) **`paiement` met le `sourceId` en majuscules dans l'identifiant du registre** (`…|FACTURE:D079FA5B-…`), pas dans
+    `creanceId` (`FACTURE:d079fa5b-…`) ni dans `referenceExterne` : ne jamais rapprocher par `cleRegistre`.
+  - (5) **La pile avec le vrai `paiement`** : il est `unhealthy` par construction (fournisseurs déclarés sans
+    raccordement) : `depends_on` en `service_started`, vivacité sur `/api/v1/health/live` ; son MongoDB exige les
+    scripts de `mongo/` du dépôt en LF (`git -c core.autocrlf=false archive`), montés en lecture ; il lit le KYC
+    (`kyc.status.changed`, `APPROVED`) et son droit (`entitlement.changed`, `moduleCode: paiement`) sur Kafka ; le jeton
+    porte les deux audiences et `perms: ['paiement:demande:emettre']` (lu dans le jeton, pas dans `/moi/droits`).
+  - (6) **Le rejeu de `terrain` laissé par 1058 a pris dix minutes** sous le verrou (image `--no-cache` en arrière-plan,
+    pilote en commande courte) : le jouer dès la prise du verrou, avant les preuves de la story.
 
 - **STORY-1058** :
   - (1) **`terrain-service` hors `NODE_ENV=production` ne démarre pas** dans l'image `runtime` : `pino-pretty` (dépendance

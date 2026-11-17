@@ -1,6 +1,6 @@
 # STORY-1059 : la facture juste (1) — une facture émise ouvre sa Créance dans `paiement`, de façon idempotente
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-230 (la facturation : la facture juste) · **Dépôt :** `prospera-ventes-service` (modules `facturation`
 et `commande`) ; `prospera-paiement-service` (groupe B) **lu seulement** · **Plage :** groupe D, n° 15 du lot 3
@@ -17,11 +17,13 @@ absolu `paiement.creance.changed@1`, crédit du tiers = trop-perçu) ; journal d
 ## Où en est-on (pour une reprise après interruption)
 
 - [x] Rituel, lecture (plan, règles, journaux de B et D, épic, spine, fiches 963, 965, 1047, 1049, 1056, 1058), fiche.
-- [ ] Annonce « ⚠ Contrats » fusionnée avant le code (manifestes `commande` et `facturation` amendés, C5).
-- [ ] `ventes` : branche `MNV-1059`, code, preuves Node 24, PR fusionnée en rebase.
-- [ ] Verrou Docker (tenu par B, STORY-968, à 22:12 au rituel) : rejeu de `terrain` (reste de 1058) puis pile de 1059 avec
-  le vrai `paiement` d'`origin/dev`, puis rejeu sur l'image de `ventes` reconstruite depuis `origin/dev`.
-- [ ] PR de docs finale (fiche, tracker, fiche 1058 complétée, journal, passation à Dev A).
+- [x] Annonce « ⚠ Contrats » fusionnée avant le code : prospera-stories **#666** (`main` `4fab607`), manifestes
+  `commande` et `facturation` amendés (C5).
+- [x] `ventes` : PR **#8** fusionnée en rebase (`dev` **1c1e944**, 101fbe8, **bd8d211**).
+- [x] Verrou Docker : tenu par B (STORY-968) à 22:12 au rituel, libre à 22:37 ; **pris à 22:37**, une seule prise :
+  rejeu de `terrain` (reste de 1058), preuves Node 24, mutations, pile avec le vrai `paiement` d'`origin/dev`, rejeu sur
+  les images reconstruites depuis `origin/dev` ; **rendu à 23:29** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+- [x] PR de docs finale (fiche, tracker, fiche 1058 complétée, journal, passation à Dev A).
 
 ## Ce qui doit être vrai à la fin
 
@@ -105,11 +107,101 @@ absolu `paiement.creance.changed@1`, crédit du tiers = trop-perçu) ; journal d
 
 ## Ce qui a été livré
 
-*(à compléter)*
+**2026-11-17** — après l'annonce « ⚠ Contrats » (prospera-stories **#666**, `main` `4fab607`, avec les manifestes
+`commande` et `facturation` amendés), une PR fusionnée en « Rebase and merge » :
+
+- `prospera-ventes-service` **#8** (`dev` **`1c1e944`**, `101fbe8`, **`bd8d211`** ; branche `61f07d1`, `c611d6c`,
+  `cee704a`, tête vérifiée `open` et égale au SHA poussé avant la fusion) :
+  - `src/modules/facturation/factures/` : `Facture` (`facturation_factures`, index uniques clé, clé d'origine `<commandeId>:facture`,
+    numéro), `CommandeChiffreeLue`, `ConditionDeReglementLue` ; `FacturesDuModule` (émission dans la transaction du
+    numéro, rejeu, relance, lecture sous portée) ; `FacturesController` (trois routes, droits de la table d'accès) ;
+    `faits.ts` (`FAC-AAAA-NNNNNN`, `facturation.facture.emise`, `facturation.serie.changed`) ;
+  - `src/modules/facturation/creances/` : le port `OuvertureDeCreance` et son adaptateur HTTP (B-963) ;
+    `OuverturesDesCreances` (issue notée sous condition, relance en mémoire bornée par l'expiration du jeton) ;
+  - `src/modules/facturation/commandes-chiffrees/` : lecture et projection de `commande.commande.chiffree@1`, son
+    consommateur (`ventes-service.commandes-chiffrees`) ;
+  - `src/modules/commande/` : `faitCommandeChiffree` publié à la validation (`emission-des-bons.service.ts`) ;
+    `credit/` (lecture de `paiement.creance.changed@1` et de `facturation.facture.emise@1`, `ProjectionDuCredit`,
+    `ConsommateurDuCredit` sur `ventes-service.creances`, `commande_factures`) ; `commande_factures` au plan
+    d'effacement C13 ;
+  - `contrat/schemas/` : `commande.commande.chiffree.json`, `facturation.facture.emise.json`,
+    `facturation.serie.changed.json` (modèles fermés) ; `topics.ts` (`FacturationTopic`) ; manifestes recopiés à
+    l'octet (sources `4fab607`, empreintes dans `sources-des-manifestes.ts`) ; configuration (`PAIEMENT_SERVICE_URL`,
+    `PAIEMENT_DELAI_MS`, `FACTURATION_RELANCE_CREANCE_MS`, deux groupes Kafka).
+- **Écart à l'annonce** : `COMMANDE_INCONNUE` n'est pas émis par `facturation` : un `commandeId` mal formé rend la 400 de
+  validation, une commande inconnue de `facturation` (ou pas encore validée) rend 409 `COMMANDE_NON_FACTURABLE`.
 
 ## Preuves
 
-*(à compléter)*
+- **Node 24** (étage `verification`, export `git archive`) : `tsc` ; lint des fichiers touchés (`endOfLine auto`) ;
+  build ; **unitaires : Test Suites: 52 passed, 52 total ; Tests: 506 passed** (444 avant) ; **e2e : 2/2 suites, 24
+  tests** ; **intégration sur MongoDB 8 en jeu de répliques : 10/10 suites, 98 tests** (82 avant), dont
+  `facturation.int-spec.ts` (16) : UJ-1 `FAC-2026-000001` (292 000 HT, 52 560 TVA, 344 560 TTC, échéance J+30), deux
+  faits conformes au schéma, piste ; rejeu par la clé et par la commande sans numéro ni fait ni Créance de plus ;
+  **dix émissions simultanées de la même commande : une facture, un numéro, une Créance** ; huit commandes en parallèle :
+  huit numéros continus ; refus nommés sans écriture ; portée ; paiement en panne puis de retour (relance en mémoire,
+  recul 1 s → 2 s) ; jeton expiré non gardé ; refus définitif `REFUSEE` ; une ouverture acquise jamais défaite (même par
+  une tentative concurrente) ; **avant toute Créance `ENCOURS_NON_INSTALLE`, puis jugement sur l'encours et
+  `PLAFOND_CREDIT_DEPASSE`** ; l'engagement baissé une fois dans les deux ordres et sous concurrence (5 + 5) ; trop-perçu
+  à sa plus haute révision.
+- **Mutations : 16/16 rouges sur une assertion** (clé d'origine par facture, numéro sur cinq chiffres, échéance sans
+  délai, `tenter` qui rappelle paiement sur une facture ouverte, ouverture défaite par une tentative en panne, jeton
+  expiré gardé, écriture concurrente prise pour un refus, révision égale qui réécrit, sources jamais branchées,
+  engagement qui ne baisse pas, trop-perçu perdu, émission hors portée, `creanceId` incohérent lu, commande chiffrée
+  incohérente lue, commande chiffrée non publiée, marge publiée). Quatre mutants d'abord équivalents ou qui ne
+  compilaient pas ont été remplacés, avec des tests renforcés (voir « Pièges » du journal).
+- **Karapace 6.2** sur la pile : `schemas:enregistrer` ⇒ 7 sujets (dont `commande.commande.chiffree-value`,
+  `facturation.facture.emise-value`, `facturation.serie.changed-value`), `schemas:compatibilite` : compatibles BACKWARD.
+- **Pile `grp-d`, image de la branche** (`runtime`), avec **le vrai `paiement` construit depuis `origin/dev` (`ad35786`)**,
+  lancé, jamais modifié (MongoDB `rs-paiement` provisionné par ses scripts, Redis, `NODE_ENV=production`), Kafka,
+  Karapace, émetteur de jetons RS256 (JWKS et doublure de `/moi/droits`), `INSTANCE_ESPACE=ESSAI`,
+  `COMMANDE_RESERVATION_STOCK=recette` ; KYC et droits des modules publiés sur Kafka ; read-models posés à la main
+  (points de vente, prix, plafonds, conditions de règlement), **aucune source d'encours** : **30/30**
+  - commande à crédit avant toute Créance : 409 `ENCOURS_NON_INSTALLE` ;
+  - vente au comptoir validée (`BL-2026-000001`, TTC 9 912), **facture `FAC-2026-000001`, Créance `OUVERTE` en 1,2 s**,
+    relue **par l'API de `paiement`** (`GET /creances?source=FACTURE&sourceId=`) : une Créance de 9 912 XOF, tiers
+    `PDV-COMPTOIR`, libellé `FAC-2026-000001` ;
+  - rejeu (même clé, autre membre et autre clé) : la même facture ; la route de paiement rejouée à la main : 200 ;
+    **toujours une Créance** ;
+  - **huit émissions concurrentes** de la même commande : 8 × 201, une facture `FAC-2026-000002`, un seul non-rejeu, **une
+    Créance** ;
+  - **`paiement` arrêté** : facture `FAC-2026-000003` 201 `A_OUVRIR` (`PAIEMENT_INDISPONIBLE`), relue, deux tentatives ;
+    `paiement` relancé : **la Créance s'ouvre seule 2 s après son retour** ; relance à la main ensuite : rien de plus ;
+    **une Créance** ;
+  - **`paiement.creance.changed` projeté** : 3 Créances dans `commande`, les deux sources branchées, l'engagement du
+    comptoir revenu à 0 (trois factures soldées) ; **UJ-1 à crédit (344 560) jugé sur l'encours : `ACCEPTEE`, disponible
+    après 655 440** ; sa facture `FAC-2026-000004` (échéance J+30) ; sa Créance projetée (344 560), l'engagement à 0 ;
+    **700 000 de plus : 409 `PLAFOND_CREDIT_DEPASSE`** (encours certain 344 560, dépassement 44 560) ; 600 000 : 201 ;
+  - outbox de `ventes` vidée (37 publiés) ; sur Kafka : 4 `facturation.facture.emise`, 4 `facturation.serie.changed`,
+    5 `commande.commande.chiffree`, 4 `paiement.creance.changed` de l'organisation.
+- **Rejeu sur les images reconstruites depuis `origin/dev`** (`bd8d211` : `runtime` `--no-cache` et `verification`), volumes neufs, même `paiement` d'`origin/dev` : **30/30**, puis **30/30** dans une seconde organisation ; sous Node 24 sur l'image d'`origin/dev` : unitaires **52/52 suites, 506**, e2e **2/2, 24**, intégration **10/10 suites, 98** ; **mutations 16/16** rejouées d'une traite ; Karapace : 7 sujets compatibles BACKWARD.
+- `git diff --stat` = `--ignore-cr-at-eol` (34 fichiers) ; aucun `index.ts` non suivi ; `dist/` supprimé du checkout.
+- **Reste de 1058 joué au passage** : `prospera-terrain-service` sur l'image d'`origin/dev` (`068e1c0`, `--no-cache`,
+  volumes neufs) : **22/22**, Kodjo 14 visites au jour 0, espace réel 403 (fiche 1058).
+- **Verrou Docker** : libre au rituel de la pile (B l'avait rendu après STORY-968) ; **pris à 22:37** (`D STORY-1059`),
+  une seule prise pour le rejeu de `terrain`, les preuves Node 24, les mutations, la pile et son rejeu ; **rendu à
+  23:29** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+
+## La recette, pour la rejouer
+
+Hors dépôt (aucun fichier de pile n'est versionné : le `docker-compose.yml` de `ventes` ne lève pas `paiement`) :
+
+- **La pile** (`pile-1059.yml`, `docker compose -p grp-d`) : `ventes-service` (image de la branche ou d'`origin/dev`,
+  `NODE_ENV=staging`, `LOG_PRETTY=false`, `INSTANCE_ESPACE=ESSAI`, `COMMANDE_RESERVATION_STOCK=recette`,
+  `PAIEMENT_SERVICE_URL=http://paiement-service:3005`, `FACTURATION_RELANCE_CREANCE_MS=2000`), `mongo-ventes`
+  (`rs0`) ; `paiement-service` (image `runtime` construite depuis `git -c core.autocrlf=false archive origin/dev` de
+  `prospera-paiement-service`, `NODE_ENV=production`, `AUTH_SERVICE_URL=http://emetteur-de-test:8080/api/v1`, les
+  variables de développement du compose racine), `mongo-paiement` (`mongo:8.0`, entrée
+  `/provisionnement/demarrer-mongo-paiement.sh`, le dossier `mongo/` de l'export monté en lecture), `redis` ; `kafka`,
+  `karapace` (6.2.0) ; `emetteur-de-test` (l'émetteur RS256 de 1053 : JWKS et doublure de `/moi/droits`).
+- **Le pilote** (`recette-1059.py <organisation>`) : publie sur Kafka `entitlement.changed` (`commande`, `facturation`,
+  `stock`, `paiement`), `kyc.status.changed` (`APPROVED`, pour `paiement`) et `reseau.portee.changed` (portées totales) ;
+  pose dans `mongo-ventes` les points de vente, prix, plafonds et conditions de règlement, **sans source d'encours** ;
+  signe des jetons à double audience (`ventes-service`, `paiement-service`) avec `perms: ['paiement:demande:emettre']`
+  et les droits de tenant en `droitsHorsJetonDeRecette` ; joue les sept étapes et relit chaque Créance par
+  `GET {paiement}/api/v1/creances?source=FACTURE&sourceId=` ; arrête et relance `paiement` par `docker stop/start`.
+- Avant le pilote : `npm run schemas:enregistrer` depuis l'image `verification` sur le réseau de la pile
+  (`SCHEMA_REGISTRY_URL=http://karapace:8081`), rejoué si Karapace répond 500 juste après `healthy`.
 
 ## Ce qui reste (la facture juste (2))
 

@@ -456,8 +456,15 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1059.md"
     reserved_on: "2026-11-17"
     note: >
-      🔄 EN COURS le 2026-11-17 — fiche écrite, annonce « ⚠ Contrats » avant le code (manifestes commande et facturation
-      amendés, C5). Lot D, n° 15 du lot 3 (EPIC-230). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-ventes-service#8 (dev 1c1e944, 101fbe8, bd8d211) ; annonce « ⚠ Contrats » avant le
+      code (docs #666, manifestes commande et facturation amendés, C5). La facture d'une commande validée (option « dès la
+      validation », AD-29), FAC-AAAA-NNNNNN tiré dans sa transaction, une facture par commande ; sa Créance ouverte dans
+      paiement (PUT /creances/sources/FACTURE/{factureId}, idempotent ; paiement indisponible : A_OUVRIR puis relance, sans
+      doublon) ; faits commande.commande.chiffree, facturation.facture.emise, facturation.serie.changed (BACKWARD) ;
+      paiement.creance.changed projeté dans commande (fin d'ENCOURS_NON_INSTALLE, engagement baissé à la Créance de la
+      facture). Node 24 : 506 unitaires, 24 e2e, 98 d'intégration ; 16/16 mutations. Pile grp-d avec le vrai paiement
+      d'origin/dev : 30/30, rejouée sur les images reconstruites depuis origin/dev (30/30, deux organisations). Reste de 1058 (terrain sur origin/dev) joué : 22/22. Lot D, n° 15 du lot 3
+      (EPIC-230) : lot 3 de D fini (15/15). NON SLOTTÉE.
 
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
