@@ -744,6 +744,15 @@ reserved_ranges:
       Routes C13 import et effacement aux corps de contrats/instance/ ; identité de service MOTEUR seule, espace d'essai seulement (INSTANCE_ESPACE=ESSAI), effacement
       complet par plan (40 collections balance, 22 bilan) et idempotent ; bilan : aucun objet à importer (D-927-1). Dossier de démonstration matérialisé dans balance seul
       (D-928-3, ticket). Dépendance ajv ^8.20.0. Preuve Docker grp-a de bout en bout verte. NON SLOTTÉE.
+  - range: "STORY-929"
+    status: "RÉSERVÉ"
+    owner: "Clôture du lot 3 de A : la recette croisée complète sur pile neuve (espace de la pile RECETTE_ESPACE, POST /installations éprouvé, complétude et relais BFF contre le vrai dossier-service, démonstration C13 de balance et de bilan) ; le cabinet reste installé par le PUT faute de routes de vérification (prospera-recette)"
+    source_doc: "prospera-stories/stories/STORY-929.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-recette#25 (dev f7944dc). Lot 3 de A, n° 10 et dernière (dette 3 de STORY-918). D-929-1 (b) : le moteur ne peut pas ouvrir balance ni bilan par POST /installations
+      tant que 6 routes de vérification ne répondent pas ; le PUT reste, écrit et éprouvé (ticket verifications-de-balance-et-de-bilan-non-servies, story nommée STORY-1080, id proposé). Espace de la pile
+      en un réglage (RECETTE_ESPACE, REEL par défaut). Recette croisée complète 10/10 suites, 134/134 tests, 1 044 s, pile neuve grp-a, images construites depuis origin/dev ; 3 essais avant. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
