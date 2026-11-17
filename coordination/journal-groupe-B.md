@@ -150,18 +150,33 @@
      **ouverture 201 et grand livre 200** au jeton de l'associé, collaborateur 403 à l'ouverture ; témoin
      `origin/dev` : 403 `DROIT_INSUFFISANT`. Deux doublures sur le fil : l'état publié `EN_SERVICE` (le catalogue ne
      connaît pas encore le module) et le KYC approuvé (pour dossier-service). Verrou rendu.
-  - **Story suivante : STORY-967** (la balance dérivée du grand livre, `prospera-comptabilite-service`, EPIC-114 ;
-    dépend de 966 et de **A-921, fusionnée** sur `origin/dev` de `balance-service`, `9dfd60e`). « Fini quand »
-    (plan §3) : balance publiée au contrat canonique, origine `comptabilite`, `checksum`, ingérée par
-    `balance-service`. À lire avant : fiche 966 (« Pour la suite » : `GrandLivreService.comptesMouvementes` sans
-    `limite`, refus tant que `brouillardsDansLaPeriode > 0`, mouvements HORS à-nouveaux), `INTEGRATION.md` §1 et
-    §1 ter de `balance-service`, « ← A, l'origine `comptabilite` » ci-dessous. À demander à A avant la première
-    publication : le `sourceSystem` dans `INGESTION_SOURCE_SYSTEMS`. Ensuite : 968 (les tiers).
-  - **Pour 967** : la comptabilité ne rend plus 403 en réel à un membre du cabinet (STORY-971). Restent à lever pour
-    la première recette croisée : le module `comptabilite` au catalogue (manifestes recopiés, sinon l'état publié
-    dit `NON_INSTALLE`, D-958-3), `comptabilite-service` dans l'`AUTH_AUDIENCE` de l'IdP de la recette (demande à A),
-    et le commentaire « Droits (C7) : DÉCLARÉS, pas encore attribuables » du manifeste `comptabilite`, périmé depuis
-    971 : à corriger par 967, qui amende le manifeste et le recopie à l'octet (D-971-8).
+  13. ~~STORY-967~~ : **prospera-comptabilite-service #7** (`328e727` sur `dev`), contrat annoncé avant la fusion
+     (stories #660). La balance dérivée du grand livre, publiée au hub de balance.
+     - `POST …/balance/publications { au? }` (`comptabilite:ecriture:valider`, aucun droit neuf) : balance de
+       l'exercice jusqu'à la date d'arrêté, dérivée de `comptesMouvementes` (966) — mouvements HORS à-nouveaux,
+       soldes de clôture, `niveauPreuve: fichier`, libellé « Compte <numéro> » ; équilibre exact (422
+       `BALANCE_DESEQUILIBREE`) ; Q2 : 409 `BROUILLARDS_A_VALIDER` (refus, pas avertissement, D-967-4) ; 409
+       `BALANCE_VIDE`, `EXERCICE_CLOS`.
+     - Une transaction : la publication (`balances_publiees`), le fait `balance.submitted` (outbox `outbox_events`,
+       relais au moins une fois) et l'entrée de piste `BALANCE_PUBLIEE`. Origine `comptabilite`, source `direct`,
+       émetteur `comptabilite-service`, `checksum` v2 du hub (ses deux vecteurs publiés), payload validé contre le
+       JSON Schema du hub copié à l'octet.
+     - Idempotente : même contenu que la dernière publication non rejetée ⇒ 200, même version, même `checksum`,
+       rien d'envoyé ; sinon version N+1 (D-967-6). Retours `balance.created` / `balance.rejected` lus : `PUBLIEE →
+       INGEREE | REJETEE` (D-967-10). Manifeste : commentaire des droits corrigé (D-971-8).
+     Node 24 : 564/0/3 ; `test:socle` 150/150 ; 44/44 mutations unitaires, 10/11 du socle (une survivante nommée) ;
+     `docker compose up` sain. **Pile `grp-b` 27/27** : balance-service reconstruit depuis `origin/dev` de A
+     (`98078b0`) **ingère** la balance (origine `comptabilite`, même `checksum`, `statutPreuve: justifiée`, verdict
+     `INGEREE` en 2 à 3 s), refuse une balance déséquilibrée (`ECART_EQUILIBRE`) et un `checksum` faux
+     (`CONTENU_INVALIDE`). Verrou rendu.
+  - **Story suivante : STORY-968** (les comptes de tiers, `prospera-comptabilite-service`, EPIC-115 ; dépend de 964) :
+    clients, fournisseurs, salariés ; compte collectif ; balance âgée (plan §3, ligne 968). À lire avant : fiche 967
+    (« Pour la suite » : la balance publiée doit porter le **compte collectif**, le hub refuse un compte auxiliaire
+    au-delà du niveau de détail du plan). Droit déjà déclaré et attribué : `comptabilite:tiers:administrer`.
+  - **Restent ouverts avant le réel** (demandes « → A » plus bas) : `comptabilite-service` dans
+    `INGESTION_SOURCE_SYSTEMS` de balance-service (sinon toute publication est rejetée `SOURCE_SYSTEM_INCONNU`) ; la
+    comptabilité dans la recette (`AUTH_AUDIENCE`, compose) ; le module `comptabilite` au catalogue (l'état publié se
+    double encore sur le fil, comme en 971 et 967).
 
 ### Lot 2 (ouvert le 2026-11-16)
 
@@ -655,7 +670,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-17, STORY-967 — la balance dérivée du grand livre, publiée au hub, annoncé AVANT la fusion du code**
-  (`prospera-comptabilite-service`, EPIC-114 ; fiche `stories/STORY-967.md`, D-967-1 → 12). Le PREMIER fait produit
+  (`prospera-comptabilite-service`, EPIC-114 ; fiche `stories/STORY-967.md`, D-967-1 → 12). **Fusionné le 17/11** :
+  comptabilite #7, `328e727` sur `dev` (annonce : stories #660), sans écart au contrat annoncé. Le PREMIER fait produit
   par le service. Tout est AJOUT : rien d'existant ne change de forme.
   - **Fait produit** : `balance.submitted` v1, le contrat d'ENTRÉE de `balance-service` (A), **inchangé** (JSON
     Schema `docs/schemas/balance.submitted.v1.schema.json`, pas de registre). Clé `orgId`, en-têtes `eventId` et
@@ -1376,6 +1392,22 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Le hub de balance juge le dossier sur son read-model** (STORY-967) : une balance publiée deux secondes après la
+  création du dossier a été rejetée `DOSSIER_INCONNU` par le vrai balance-service (fait `dossier.*` pas encore
+  projeté). La comptabilité l'a dit (`REJETEE`) et la republication a pris la version suivante. Une preuve sur pile
+  attend que `balance_service.dossiers_dossier` connaisse le dossier avant de publier.
+- **`mongosh` lu par l'entrée standard préfixe sa sortie de l'invite** (`rs0 [direct: primary] base> […]`) : un
+  script de preuve qui ne garde que les lignes commençant par `[` ou `{` ne lit rien. Couper avant `> `.
+- **La porte HTTP de balance-service** (`GET …/balances`) rend 403 `BALANCE_NOT_ENTITLED` même quand le droit
+  `balance` ACTIVE est posé sur `entitlement.changed` : elle lit son droit ailleurs que le read-model de l'ingestion.
+  Pour prouver une ingestion, lire `balance_service.balances` et `balance_ingestions` (STORY-967).
+- **Une mutation qui retire une condition de filtre peut retomber dans la branche suivante** (STORY-967 : un topic
+  non filtré retombait dans la lecture de `balance.created`, et un rejet sur un autre topic restait ignoré). Le test
+  qui la tue envoie un message bien formé pour la branche où l'on retombe.
+- **Une transaction perdante échoue à l'index unique AVANT l'écriture de l'outbox** (STORY-967) : « aucun fait laissé
+  par une perdante » ne prouve pas que l'outbox est dans la transaction. Seule une panne injectée après elle le
+  prouverait (mutation survivante nommée dans la fiche).
 
 - **Preuve de la comptabilité en réel, par dossier-service** (STORY-971) : (1) dossier-service exige le KYC approuvé
   de l'organisation (`KYC_NOT_APPROVED`) : sans kyc-service, poser `kyc.status.changed` (`orgId`, `status:

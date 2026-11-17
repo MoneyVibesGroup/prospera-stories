@@ -1,6 +1,6 @@
 # STORY-967 : la balance dérivée du grand livre, publiée au hub de balance
 
-Status: in-progress
+Status: done
 
 **Complexité :** élevée (un premier fait produit par le service, par une outbox ; un sceau qui doit être identique à
 l'octet à celui du hub ; l'idempotence d'une publication ; les retours du hub consommés ; une preuve de bout en bout
@@ -175,12 +175,123 @@ l'origine `comptabilite`, et lit la réponse du hub.
 - **Pour A** : rien ne change dans `balance-service` ; il faut seulement que `comptabilite-service` entre dans
   `INGESTION_SOURCE_SYSTEMS` (demande « → A »).
 
+## Ce qui a été livré
+
+Deux PR fusionnées en « Rebase and merge » le 17/11, l'annonce d'abord.
+
+| Dépôt | PR | Sur la branche |
+|---|---|---|
+| `prospera-stories` | #660 (fiche, tracker, manifeste amendé, annonce du contrat, demandes à A, AVANT le code) | `main` `fb70c71` |
+| `prospera-comptabilite-service` | #7 | `dev` **`328e727`** (rejoué de `4855276` ; arbre identique) |
+
+- `src/balance/` :
+  - `balance.ts` : les règles pures (lignes, libellé, équilibre exact, brouillards, balance vide, montants rendus, bornes
+    ISO) ;
+  - `sceau.ts` : le checksum v2 du hub et l'empreinte du contenu (le sceau sans la version) ;
+  - `evenement.ts` : le fait `balance.submitted` v1 ;
+  - `publication.service.ts` : la publication (portée, tenue, période, grand livre en instantané, refus, puis une
+    transaction : publication, outbox, piste), la liste et la lecture d'une version ;
+  - `retours-du-hub.ts` et `retours-du-hub.service.ts` : la lecture des retours et le consommateur (`VerdictsDuHub`,
+    `RetoursDuHubConsumer`) ;
+  - `balance-publiee.schema.ts` (`balances_publiees`), `balance.controller.ts`, `balance.dto.ts`, `vue.ts`,
+    `balance.module.ts`.
+- `src/kafka/outbox/` : `evenement-sortant.schema.ts` (`outbox_events`), `producteur-kafka.service.ts`,
+  `relais-outbox.service.ts`, `outbox.module.ts`.
+- `src/common/refus.ts` (quatre refus neufs), `src/config/` (deux variables facultatives), `src/module.manifest.ts`
+  recopié à l'octet depuis `main`, README (section de la balance).
+- `test/fixtures/balance-service/` : le JSON Schema `balance.submitted.v1` du hub, copié à l'octet, et son origine
+  (`9dfd60e`, sha256 `b98b82ac…`).
+- `test/socle/balance.socle-spec.ts` : suite neuve (18 tests).
+
+## Preuves
+
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive` du commit poussé) :
+  **40 suites, 564 passés, 3 sautés** ; `npm run lint`, `tsc --noEmit` et `npm run build` verts dans l'image.
+- **`npm run test:socle`** (vrai MongoDB 8.0 `rs0`, vrai Kafka, doublures HTTP d'auth, de dossier-service et de
+  document-service), lancé sous `timeout 1500` et `--forceExit` : **150/150**, dont 18 neufs. La suite LIT le fait
+  sur le vrai Kafka et y POSE les retours du hub :
+  - balance de l'exercice : mouvements hors à-nouveaux, soldes de clôture, cinq comptes, totaux 148 000 / 318 000
+    équilibrés, version 1 ; le fait part sur `balance.submitted`, clé = organisation, en-têtes `eventId` et
+    `schemaVersion: "1"`, conforme au JSON Schema du hub ; outbox marquée `ENVOYE` ;
+  - piste : entrée `BALANCE_PUBLIEE` (provenance `CHOISI_PAR_L_UTILISATEUR`), chaîne intacte ;
+  - rejeu : 200, même version, même `checksum`, rien dans l'outbox, rien dans la piste, aucun second fait ;
+  - une écriture de plus : version 2 ; date d'arrêté au 28/02 : version 3, rejouée en 200 ; retour à la fin de
+    l'exercice : version 4 (on compare à la DERNIÈRE publication) ;
+  - refus : brouillard dans la période 409 `BROUILLARDS_A_VALIDER` (et la balance arrêtée avant lui passe), 409
+    `BALANCE_VIDE`, `EXERCICE_CLOS`, `EXERCICE_TENU_AUX_CAHIERS`, `DEVISE_A_PRECISER`, 422 `PERIODE_HORS_EXERCICE`,
+    400 sur un corps inconnu, 403 `DROIT_INSUFFISANT` sans `comptabilite:ecriture:valider`, 404
+    `PUBLICATION_INTROUVABLE` ;
+  - concurrence : dix publications simultanées du même contenu ⇒ un 201 et neuf 200, une version, un fait, une
+    entrée de piste, aucun fait laissé par une transaction perdante ;
+  - retours : `balance.rejected` ⇒ `REJETEE` (code, motif) ; même contenu republié ⇒ version neuve ;
+    `balance.created` ⇒ `INGEREE` (`balanceId`) ; un retour rejoué ou un rejet tardif ne change rien.
+- **Mutations** (« rouge » = `Tests: … failed` et aucun `TS\d{4}`) :
+  - **unitaires : 44/44 rouges** (lignes, équilibre, Q2, vide, niveau de preuve, bornes, montants ; sceau : tri,
+    ordre des clés, bornes, version, référentiel, empreinte ; fait : source, origine, `orgId`, période, émetteur, champ
+    hors contrat ; retours : source, `submittedEventId`, `orgId`, version, motif, checksum, topic ; relais : blocage
+    par organisation, échec rejouable, seuil d'échec, `ENVOYE`, en-tête, clé, lot ; configuration). Quatre premières
+    écritures rougissaient par compilation ou survivaient (le filtre de topic) : réécrites, et un test ajouté (une
+    création bien formée sur un autre topic est ignorée) ;
+  - **socle : 10/11 rouges** (republication après rejet, idempotence, version, acte de piste, brouillards,
+    à-nouveaux, date d'arrêté, exercice clos, rejet tardif sur une publication ingérée ; et la création appariée
+    sans la version, **équivalente** : le `checksum` scelle déjà la version). **Survivante** : l'outbox écrite hors
+    de la session de la transaction. Le test « aucun fait laissé par une transaction perdante » ne la voit pas : les
+    perdantes échouent à l'index unique, AVANT l'écriture de l'outbox. Seule une panne injectée après l'outbox la
+    verrait ; l'écriture prend la session (lecture du code).
+- **`docker compose -p grp-b --profile comptabilite up -d --build`** (image du commit, volumes neufs) : quatre
+  conteneurs `healthy`, `/api/v1/health` 200 (Kafka up : les consommateurs de l'état publié et des retours du hub
+  ont rejoint leur groupe), les trois routes mappées.
+- **Preuve de bout en bout, pile `grp-b`** (compose racine du poste et une surcouche locale non versionnée ; auth
+  `913bd92`, dossier-service `768a4aa` et **balance-service `98078b0`** reconstruits depuis `origin/dev` par `git
+  archive`, comptabilité de la branche ; MongoDB 8.0 et Kafka 3.9) : **27/27**.
+  - **Trois doublures sur le fil, et elles seules** : le KYC approuvé, l'état publié `EN_SERVICE` de la comptabilité
+    (le catalogue ne connaît pas le module) et le droit `balance` ACTIVE (`syscohada-revise@2.3`), plus une doublure
+    HTTP de document-service (toute pièce citée existe). `INGESTION_SOURCE_SYSTEMS` du hub posé par la surcouche
+    avec `comptabilite-service` (demande « → A »).
+  - Un associé s'inscrit (vrai jeton RS256, `/moi/droits` : `comptabilite:ecriture:valider`). Dossier SARL, exercice
+    2026, axes SN chez le vrai dossier-service ; ouverture au JOURNAL ; **quatre pièces saisies et validées**
+    (`AN-000001`, `VE-000001`, `BQ-000001`, `AC-000001`).
+  - **Publication : 201**, version 1, `checksum` `16a6e637…` identique au sceau recalculé une troisième fois par le
+    script (Python, indépendamment) ; mouvements 295 000 = 295 000, soldes 677 000 = 677 000 ; 521100 : mouvement D
+    118 000 (à-nouveaux exclus), solde D 618 000.
+  - **Ingérée par balance-service** : la publication passe `INGEREE` en 2 à 3 s, avec le `balanceId` du hub. Au hub :
+    une balance `origine: comptabilite`, `source: direct`, version 1, **même `checksum`**, bon dossier, bonne
+    organisation, `SN`, XOF, mêmes lignes, `statutPreuve: justifiée` ; trace d'ingestion `sourceSystem:
+    comptabilite-service`, sans rejet. Rejeu : 200, aucun doublon au hub.
+  - Q2 : un brouillard saisi ⇒ 409 `BROUILLARDS_A_VALIDER` ; validé ⇒ version 2, ingérée au même `checksum`.
+  - **Refus du hub** (faits posés directement sur `balance.submitted`, émetteur habilité) : balance déséquilibrée
+    (écart 10 000) ⇒ `REJETÉE`, **`ECART_EQUILIBRE`** ; `checksum` faux ⇒ **`CONTENU_INVALIDE`** ; les deux publiés
+    sur `balance.rejected` avec leur code ; aucune n'est une balance ; nos publications n'en sont pas touchées.
+  - Piste chaînée intacte (13 entrées).
+  - **Une course vue sur la pile** (`preuve967-course-dossier.log`, gardée) : un dossier créé deux secondes plus tôt
+    n'était pas encore dans le read-model du hub ; la première publication a été rejetée **`DOSSIER_INCONNU`** par le
+    vrai hub, la publication est passée `REJETEE`, la republication a pris la version 2 et a été ingérée. C'est le
+    chemin de D-967-6 et D-967-10, joué par le vrai hub. La preuve propre attend que le hub connaisse le dossier.
+  - `GET {balance-service}/dossiers/{d}/balances?origine=comptabilite` rend 403 `BALANCE_NOT_ENTITLED` : la porte HTTP
+    du hub lit son droit ailleurs que le read-model alimenté par la doublure. La lecture s'est faite dans sa base.
+  - Pile descendue avec ses volumes, images de la preuve supprimées, **verrou Docker rendu** (pris à 17:45 après
+    D-1057, rendu à 18:14).
+
+## Pour la suite
+
+- **A** : `comptabilite-service` dans le défaut de `INGESTION_SOURCE_SYSTEMS` (sans lui, toute publication est
+  rejetée `SOURCE_SYSTEM_INCONNU`) ; la comptabilité dans la recette (audience de l'IdP, compose). Demandes ouvertes
+  au journal de B.
+- **Le libellé du plan** : « Compte <numéro> » tant que la comptabilité ne lit pas le paquet du référentiel ;
+  changer le libellé change le sceau (version N+1).
+- **Comptes de tiers (968)** : le hub refuse un compte au-delà du niveau de détail du plan (« compte auxiliaire
+  à ramener à son compte de plan »). La balance publiée devra porter le **compte collectif**, pas l'auxiliaire.
+- **Clôture (970)** : la balance définitive se publie avant la clôture (un exercice clos refuse la publication) ;
+  les à-nouveaux de N+1 dériveront du grand livre, le hub chaînant son propre socle.
+- **Plusieurs instances** : le relais de l'outbox n'a pas de bail (une instance aujourd'hui) ; à poser comme au
+  catalogue (STORY-933) avant d'en lever deux.
+
 ## Definition of Done
 
-- [ ] Tests unitaires (Node 24, étage `verification`), lint des fichiers touchés, `tsc`, build.
-- [ ] `test:socle` sur un vrai MongoDB 8.0 en jeu de répliques et un vrai Kafka, sous `timeout`.
-- [ ] Mutations rouges sur l'assertion (logique neuve).
-- [ ] `docker compose up` sain (module Nest neuf).
-- [ ] Preuve de bout en bout sur la pile `grp-b` : ingestion au hub, `checksum` identique, refus du hub sur une
+- [x] Tests unitaires (Node 24, étage `verification`), lint des fichiers touchés, `tsc`, build.
+- [x] `test:socle` sur un vrai MongoDB 8.0 en jeu de répliques et un vrai Kafka, sous `timeout`.
+- [x] Mutations rouges sur l'assertion (logique neuve) ; une survivante nommée.
+- [x] `docker compose up` sain (module Nest neuf).
+- [x] Preuve de bout en bout sur la pile `grp-b` : ingestion au hub, `checksum` identique, refus du hub sur une
   balance déséquilibrée et un `checksum` faux.
-- [ ] PR de code fusionnée en rebase ; PR de docs (fiche, tracker, journal).
+- [x] PR de code fusionnée en rebase ; PR de docs (fiche, tracker, journal).
