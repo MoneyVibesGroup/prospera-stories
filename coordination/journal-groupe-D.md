@@ -19,9 +19,10 @@
   `jeu:verifier` conforme pour les deux (Node 24). Routes C13 d'import et d'effacement du LC fictif, sous l'identité
   `MOTEUR` seule ; effacement idempotent. Pile `grp-d` : jeu complet importé en 136 s, puis effacé.
   **Passation de `prospera-assureur-fictif` constatée** (voir « Passations »).
-- **Suivante : STORY-1047** 🚚 la bibliothèque d'encours (EPIC-225, `prospera-plateforme/encours/`). **Débloquée** :
-  B-956 est fusionnée (plateforme #22, `dev` 189183f, relevé le 2026-11-17) ; le README porte la ligne `encours/` et
-  le `test` et le `typecheck` racines lisent `encours/` (voir la note de B, « → D (2026-11-17) »).
+- **STORY-1047** 🔨 🚚 — la bibliothèque d'encours (EPIC-225, `prospera-plateforme/encours/`), **en cours** : fiche
+  écrite (`stories/STORY-1047.md`, D-1047-1 → 12), contrat `encours@1` **annoncé avant la fusion du code** (voir
+  « ⚠ Contrats »). B-956 est fusionnée (plateforme #22, `dev` 189183f) : le `test` et le `typecheck` racines lisent
+  `encours/`, aucun fichier de B n'est touché.
 
 ### Lots 1 et 2
 
@@ -103,6 +104,14 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-17) : ce que la bibliothèque d'encours lit de la Créance (B-963, B-965)** — **information**, aucune
+  action exigée avant 1059. `encours@1` (STORY-1047) prend en entrée l'**état absolu** de chaque Créance et de chaque
+  crédit du tiers, par clé, avec une **révision croissante** (la plus haute l'emporte) : pour la Créance, `statut`
+  (`OUVERTE` | `CLOTUREE`), les **deux restants** de STORY-259 (`restantCertain`, `restantAffiche` ; ou le montant
+  déclaré à part, comme le dit l'amendement du 2026-11-13), `echeanceLe`, `perimetre`, `devise`, montants entiers en
+  unité mineure ; pour le crédit du tiers, son `solde`. Si `paiement.creance.changed@1` ou
+  `paiement.credit-tiers.changed@1` s'en écarte (pas de révision, un seul restant), le dire ici : D adapte la
+  correspondance chez le consommateur, la règle ne change pas. Une Créance `CLOTUREE` sort de l'encours (D-1047-3).
 - **→ C (2026-11-17) : passation de `prospera-assureur-fictif` constatée** — **pour information**. D tient le dépôt
   depuis STORY-1046 (`dev` 78ad10c au rituel, e265b0a après). C continue de jouer ses parcours contre le LC fictif et
   demande à D toute modification (ici). Ce qui change pour vous : deux routes neuves (C13, identité `MOTEUR` seule) ; un
@@ -144,6 +153,31 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-17, STORY-1047, avant la fusion du code) — `encours@1`, bibliothèque neuve** (`prospera-plateforme/
+  encours/`, étiquette `encours-v1` posée à la fusion ; rien d'existant ne change). Consommateurs : `commande`
+  (STORY-1049, qui juge), `pdv` (le disponible à crédit), `recouvrement` (l'évaluation du blocage), chacun par **copie à
+  l'octet** de `encours/src/index.ts` et de `encours/vecteurs-or.json`, vecteurs d'or rejoués dans ses tests (AD-2).
+  - **La règle** (AD-9, FR-52), par `(tiers, périmètre)` : `encoursCertain = Σ restantCertain des Créances OUVERTE +
+    restantAFacturer de l'engagement − Σ solde des crédits du tiers` ; `encoursAffiche`, la même avec `restantAffiche`
+    (encaissements déclarés en moins). L'encours **certain** juge, dit « dépassé » et sert au blocage ; l'affiché se
+    montre (D-1047-2, Q-D-4). Pas de champ `encours` nu (comme `restant` chez `paiement`).
+  - **API** : `calculerEncours(entree, le)` (date `AAAA-MM-JJ` en paramètre, aucune horloge) ;
+    `disponibleACredit(plafond, resultat)` (`CALCULE` | `NON_INSTALLE` | `SANS_OBJET`) ;
+    `jugerPlafond(plafond, resultat, supplementMineur)` (`ACCEPTEE` | `REFUSEE` `PLAFOND_CREDIT_DEPASSE`, strict |
+    `NON_INSTALLE` | `SANS_OBJET`) ; `VERSION_ENCOURS = '1.0.0'`, `MAJEUR_ENCOURS = 1`.
+  - **Entrée** : trois sources `{ statut: 'ABSENTE' }` ou `{ statut: 'PRESENTE', faits }` — `creances` (états absolus de
+    `paiement.creance.changed@1` : `creanceId` = `<source>:<sourceId>`, `revision`, `tiersId`, `perimetre`, `devise`,
+    `statut` `OUVERTE`|`CLOTUREE`, `restantCertainMineur`, `restantAfficheMineur`, `echeanceLe`), `creditsTiers`
+    (`paiement.credit-tiers.changed@1` : `creditId`, `revision`, …, `soldeMineur`), `engagement`
+    (`commande.engagement-tiers.changed@1` : `revision`, …, `restantAFacturerMineur`, `versionEncours`). Par clé, la plus
+    haute `revision` l'emporte, quel que soit l'ordre d'arrivée.
+  - **Refus nommés** (`RefusEncours.code`) : `ENTREE_INVALIDE`, `DATE_INVALIDE`, `HORS_TIERS`, `HORS_PERIMETRE` (AD-31 :
+    jamais filtré en silence), `DEVISE_DIFFERENTE`, `REVISION_INCOHERENTE`, `VERSION_ENCOURS_DIFFERENTE` (l'engagement
+    porte la version de la fonction ; un autre majeur est refusé), `MONTANT_HORS_BORNES`.
+  - **Hors de l'encours** (D-1047-3) : Créance `CLOTUREE` ; autre tiers, périmètre ou devise (refusés) ; commandes non
+    validées ; le montant d'une dérogation **reste** dans l'encours (c'est `recouvrement` qui l'exclut de son évaluation,
+    en `1.x` avec sa story).
 
 - **PUBLIÉ (2026-11-17, STORY-1046, prospera-assureur-fictif#3, `dev` 626b93e ; plateforme #23, `jeu-assurance-v1`) —
   ajouts seulement** (annoncés ici avec la PR de docs, juste après la fusion du code : rien d'existant ne change de
@@ -188,6 +222,10 @@
 
 ## Questions à l'utilisateur ou au PO
 
+- **Q-D-4 (2026-11-17, STORY-1047) — La commande se juge-t-elle sur l'encours certain ou sur l'encours affiché ?** Le
+  PRD dit qu'un encaissement déclaré (espèces, virement) « diminue l'encours affiché » et que le blocage « lit le reste
+  dû confirmé », sans trancher pour le plafond. **Choix par défaut : l'encours certain** (D-1047-2) : un encaissement
+  déclaré mais non confirmé ne libère pas de crédit ; celui qui déclare ne confirme pas (FR-P60).
 - **Q-D-1 (2026-11-16, STORY-1031) — Le KYC dans la garde de `reseau` en mode « sur site ».** La spine (AD-10)
   exige le KYC Money Vibes de l'organisation ; une instance installée chez le client (EPIC-148) n'aura pas forcément
   de `kyc-service`. **Choix par défaut : KYC exigé partout** (D-1031-2), à revoir avec l'agent d'instance.
