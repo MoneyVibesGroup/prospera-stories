@@ -381,6 +381,32 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-17, STORY-959 — les exercices et la tenue, annoncé AVANT la fusion du code**
+  (`prospera-comptabilite-service`). Tout est AJOUT : rien d'existant ne change de forme.
+  - **Trois routes neuves** :
+    - `POST /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ouverture`, corps `{ tenue: CAHIERS|JOURNAL,
+      proposition? }`. 201 à l'ouverture ; 200 si la même tenue est déjà choisie (rien n'est écrit). Droit exigé :
+      `comptabilite:exercice:ouvrir`, lu par `GET /moi/droits` d'auth-service avec le jeton du membre.
+    - `GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/tenue` : la tenue de l'exercice.
+    - `GET /api/v1/dossiers/{dossierId}/tenues` : les tenues du dossier, du plus récent au plus ancien.
+    - Réponse : `{ dossierId, exerciceId, tenue, debutExercice, precedente?: { exerciceId, tenue }, bascule,
+      ouvertPar, ouvertLe }`.
+  - **Refus nommés neufs** :
+    - 409 `TENUE_EXCLUSIVE` (`details.tenueExistante`, `details.tenueDemandee`) ;
+    - 409 `EXERCICE_CLOS` (`details.statut`) ;
+    - 404 `EXERCICE_NON_OUVERT` ;
+    - 403 `DROIT_INSUFFISANT` (`details.droit`) ;
+    - 503 `DROITS_INDISPONIBLES`.
+    Les refus portent désormais un `details` facultatif (ajout).
+  - **Manifeste amendé** (`manifestes/comptabilite.manifest.ts`, copie à l'octet dans le service) :
+    - les deux lectures entrent dans `routesLectureSeule` ;
+    - le commentaire des droits dit qu'ils se lisent par `/moi/droits`.
+  - **Ce que le service lit chez B (auth)** : `GET /api/v1/moi/droits?organisationId=` → `droits` (tableau de
+    chaînes), avec le jeton du membre. Variable neuve, requise : `AUTH_SERVICE_URL`.
+  - **Pas encore** : aucun topic produit, aucun schéma au registre (D-959-5). `comptabilite:*` n'est attribué à aucun
+    rôle dans auth-service. En réel, l'ouverture répond donc 403 `DROIT_INSUFFISANT` jusqu'à ce qu'il le soit
+    (D-959-4).
+
 - **2026-11-17, STORY-958 — un module NEUF, `comptabilite`, annoncé AVANT la fusion du code**
   (`prospera-comptabilite-service`, dépôt neuf). **Fusionné le 17/11** : comptabilite #1, `8f36ef9` sur `dev`
   (annonce : stories #604). Tout est AJOUT : rien d'existant ne change.
