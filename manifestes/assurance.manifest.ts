@@ -238,6 +238,7 @@ export const MANIFESTE_ASSURANCE = {
     'GET /api/v1/assurance/polices', // [proposition]
     'GET /api/v1/assurance/polices/{id}', // [proposition]
     'GET /api/v1/assurance/provisions', // [proposition]
+    'GET /api/v1/assurance/recevabilite', // STORY-1001 : la recevabilité en quatre questions, lue par sinistres (FR-41), figée
     'GET /api/v1/assurance/etats/psap', // [proposition]
     'GET /api/v1/assurance/etats/crca', // [proposition]
     'GET /api/v1/instance/assurance/{organisationId}/export',
