@@ -12,6 +12,7 @@
 > cabinet en premier inclut sa comptabilité, EPIC-111 → 120).
 > **Rédigé par** la session du groupe B, sur consigne de l'utilisateur, à partir des journaux, du tracker et des épics
 > (relevés le 17/11).
+> **Amendé le 2026-11-17** (§5, §8) : dix petites stories pour C (STORY-1005 → 1014), sur consigne de l'utilisateur.
 
 ---
 
@@ -133,11 +134,46 @@ Plage : **STORY-1045 → 1059**. 🚚 distributeur, 🛡 assurance.
 **Remplaçantes** : les référentiels du distributeur côté réseau (EPIC-227 : zones à plat, points de vente
 rattachés) ; la commande (2).
 
-## 5. Groupe C : il finit son lot 2
+## 5. Groupe C : il finit son lot 2, puis dix petites stories
 
-Au 17/11, C a livré 989, 991 → 999 ; restent **1000 → 1004** (§4 du lot 2). Ensuite, la consigne du 15/11 : EPIC-201
-→ 211, hors EPIC-204 (D-L3-2). C ne cède que `prospera-assureur-fictif` : il écrit la passation (dernier commit sur
-`dev`) dans son journal, ou D la constate au rituel de 1046.
+Au 17/11, C a livré 989, 991 → 1001 ; restent **1002 → 1004** (§4 du lot 2). **1004 n'attend plus rien de D** :
+D-1036 (`reseau.portee.changed@1`, reseau-service#7) et D-1037 (suite `conformite-portee-reseau-v1`, #8) sont sur le
+`dev` de `reseau-service` depuis le 16/11 ; mode d'emploi : `tickets/TICKET-BACKEND-conformite-portee-reseau-sinistres.md`.
+C ne cède que `prospera-assureur-fictif` : il écrit la passation (dernier commit sur `dev`) dans son journal, ou D la
+constate au rituel de 1046.
+
+**Ajout du 2026-11-17 (consigne de l'utilisateur : « petites stories » pour C, dix en tout)** — plage
+**STORY-1005 → 1014**, dans l'ordre ci-dessous, après 1004. Elles prennent la suite de la consigne du 15/11 (EPIC-201
+→ 211, hors EPIC-204, D-L3-2) et soldent d'abord les écarts nommés dans les fiches de C.
+
+**Règle de légèreté** (C partage le poste principal avec A, comme au §2) : un service par story, ou la même petite
+modification dans plusieurs ; neuf stories sur dix se prouvent **sans Docker** (tests unitaires et e2e du service) ;
+ni dépôt neuf, ni contrat neuf sur le fil.
+
+| # | Story | Épic | Dépôts | Docker | Dépend de | Fini quand | Origine |
+|:--:|---|:--:|---|:--:|---|---|---|
+| 1 | **1005** la garde lit l'état publié | 201 | sinistres, liaison-assureur, document-service | 1 pile | `garde-etat-publie-v1` (publiée par B-937) | l'adaptateur du port `EtatDesModules` lit `etat-publie.changed.<espace>@1` au lieu d'`entitlement.changed` ; la garde et les routes ne changent pas ; un module éteint est refusé, un module inconnu aussi (échec fermé) | annoncée à B le 15/11 (D-980-2) |
+| 2 | **1006** `compta-cima` lu sur l'état publié | 201 | assurance | non | 1005 (même adaptateur) | l'interrupteur se lit dans l'état publié, plus dans la configuration du droit `assurance` ; absent, il est éteint (`COMPTA_CIMA_ETEINTE`) | D-981-1, D-981-2 |
+| 3 | **1007** l'accusé de réception du dossier complet | 206 | sinistres | non | 1001 | quand la dernière pièce attendue est validée au contrôle, l'accusé est posé et l'échéance `ACCUSE_DOSSIER_COMPLET` (10 jours) levée ; une pièce rejetée ou non contrôlée ne compte pas ; l'envoi reste à EPIC-220 (D) | D-1001-5 |
+| 4 | **1008** la provision d'ouverture posée à l'ouverture | 206 | sinistres (port vers assurance existant) | non | 1001, 994 | l'ouverture pose la provision proposée par 994, arrondie à 5 000 ; rejouer l'ouverture ne pose rien deux fois ; `assurance` reste le seul écrivain des mouvements | FR-49, D-1001-5 |
+| 5 | **1014** le référentiel des experts, et l'agrément échu | 208 | sinistres (module `expertises`) | non | — | experts et cabinets avec un agrément daté ; un expert à agrément échu n'est pas désignable (refus nommé) ; l'historique des agréments est gardé | FR-177, FR-178 |
+| 6 | **1009** demander des pièces complémentaires pendant l'instruction | 207 | sinistres | non | 1002 | la liste des pièces attendues de 1001 s'allonge avec un motif ; les relances de 999 la reprennent | FR-57 |
+| 7 | **1011** un formulaire d'instruction par type de sinistre | 207 | sinistres | non | 1002 | formulaires en paramètre versionné par type (`MRH`, `ACCIDENT_TRAVAIL`…), contrôlés par le serveur ; un champ obligatoire absent donne un refus nommé ; la version du formulaire est figée sur le dossier | FR-55 |
+| 8 | **1010** le décompte dans l'ordre fixe, et l'arrondi | 207 | sinistres | non | 1002 | une fonction pure applique dommage → vétusté → règle proportionnelle → plafond → franchise, tables en paramètre ; montants matériels de référence retrouvés au franc près | FR-69, FR-73 |
+| 9 | **1012** le matériel automobile : vétusté sur pièces selon l'âge, et épave | 207 | sinistres | non | 1010 | table de vétusté par âge et par catégorie de pièce, paramètre daté ; épave déduite ; s'insère dans le décompte de 1010 ; montants de référence au franc près | FR-72 |
+| 10 | **1013** une évaluation arrêtée n'est jamais recalculée | 207 | sinistres | non | 1010 | une évaluation arrêtée garde sa table, jugée à la date de survenance ; un changement de table ne la modifie pas (test) ; l'évaluation, la provision, l'offre, le règlement et le recours sont cinq montants distincts | FR-75 |
+
+Les numéros suivent l'ordre où les stories ont été trouvées ; **l'ordre de travail est celui du tableau** (1014
+passe en 5e : il ne dépend pas de l'instruction).
+
+**Écartés de ces dix (trop lourds, ou chez un autre groupe)** : le courrier de demande de pièces archivé et envoyé
+(deux services ; l'envoi est à D, EPIC-220) ; le fait `sinistres.garantie.decidee@1` (contrat neuf) ; la fusion de
+deux dossiers par le RESP (D-1000-3) ; le corporel selon le Code CIMA (barème non saisi, action A-12) ; les sinistres
+majeurs (FR-57a) ; le registre des décès et des ayants droit (FR-70a) ; l'alignement de `@napi-rs/canvas` (dette de
+996, attend le registre npm).
+
+**Remplaçantes** : la mission d'expertise et sa machine d'états (FR-61) ; la qualification de la responsabilité à
+l'instruction (FR-54).
 
 ## 6. Ce que l'utilisateur doit faire (gestes réservés)
 
@@ -168,6 +204,7 @@ Au 17/11, C a livré 989, 991 → 999 ; restent **1000 → 1004** (§4 du lot 2)
 |---|---|---|
 | A | STORY-920 → 929 | 902 → 929 |
 | B | STORY-956 → 970 | 930 → 979 |
+| C | STORY-1005 → 1014 (après 1002 → 1004 du lot 2) | 980 → 1029 |
 | D | STORY-1045 → 1059 | 1030 → 1079 |
 
 Les plages sont déjà au tracker (`reserved_ranges`) ; le lot 3 y est noté. Chaque groupe insère ses entrées juste
