@@ -1,6 +1,6 @@
 # STORY-1055 : l'import réseau par la Reprise — les zones et les commerciaux reçus par `kit-cible` 1.0.1, un seul moteur des zones avec l'import par fichier
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-165 (les modules cibles reçoivent la reprise : un point d'import dans le « fini » de chacun) · **Dépôts :**
 `reseau-service` (tenu par D, port 3419) ; `prospera-plateforme`, dossier `contrats/objets/reseau/` seulement (écrit par
@@ -133,13 +133,71 @@ d'une zone que l'import par fichier applique déjà.
   l'état du commercial (`EN_POSTE`, `PARTI`). Ce ne sont pas les champs livrés : c'est ce que la Reprise doit
   comparer à la source (AD-13).
 
-## Avancement (pour reprendre après une coupure)
+## Ce qui a été livré
 
-- 13:47 — rituel fait (plan, règles, journaux A, B, C, D ; fiches 1041, 947, 956 ; EPIC-165 ; kit 1.0.1 lu) ; branches
-  `docs-1055` (prospera-stories) et `MNV-1055` (reseau-service) posées depuis `origin/main` et `origin/dev`.
-  Verrou Docker tenu par B (« B STORY-965 13:35 ») : code d'abord.
-- 14:45 — annonce « ⚠ Contrats » fusionnée (prospera-stories #650, `main` 6c77cc2). Plateforme : branche `MNV-1055`
-  poussée (`2e59857`, schémas `zone@1.0` et `commercial@1.0`, test de compilation par le kit ; PR à ouvrir après la
-  preuve Node 24). `reseau-service` : branche `MNV-1055` poussée (`c4f643c`) : kit copié, moteur des zones, routes,
-  raccords, bancs ; tsc et lint verts, unitaires touchés verts sous Node 25 ; intégration et Node 24 à jouer sous le
-  verrou (toujours tenu par B).
+- **`prospera-plateforme` #29** (`dev` `a458b26`, étiquette **`objets-reseau-v1`**) : `contrats/objets/reseau/zone@1.0.json`,
+  `commercial@1.0.json` et `test/objets-reseau.test.ts`. Le test compile chaque schéma par le kit, déclare le module au
+  kit avec ses deux objets et garde les champs fermés. Aucun fichier de B touché.
+- **`reseau-service` #15** (`dev` `c62f586`, `25d236c`, `2d3db2a`, `d31f744`) :
+  - `src/vendor/kit-cible/` : la distribution de `kit-cible-v1.0.1`, copiée à l'octet, empreintes figées par
+    `src/reprise.invariant.spec.ts` ; `ajv` en dépendance d'exécution ; analyseur JSON à 2 Mio
+    (`common/utils/analyseur-de-corps.ts`).
+  - `modules/reseau/import/regles-des-zones.ts` et `moteur-des-zones.ts` : le moteur des zones (D-1055-2). L'import par
+    fichier de 1041 l'emploie désormais : `ImportService.appliquer` crée par `MoteurDesZones.creer` et termine par
+    `MoteurDesZones.terminer`. `NoeudsService` gagne `modifierZoneDansLaSession` et l'option `parentFermeAdmis`.
+  - `modules/reseau/reprise/` : la cible (`CibleDuReseau`, construite au démarrage), les deux objets (`ZonesReprises`,
+    `CommerciauxRepris`), les chantiers par transaction, les fiches (`reprise_fiches`), les routes
+    (`RepriseController`), les schémas copiés (`objets/`, `ORIGINE.json`).
+  - Jetons de service : `common/decorators/identites-de-service.decorator.ts`, `JwtStrategy`, `EmailVerifiedGuard`
+    (patron de STORY-948 et de STORY-1046) ; l'invariant des routes en tient compte (seules les deux routes de la
+    Reprise admettent un jeton de service).
+  - Manifeste recopié de prospera-stories `6c77cc2` (empreinte refigée dans `socle/manifestes/sources-des-manifestes.ts`).
+
+## Preuves
+
+- **Node 24** (étage `verification`, export LF du commit) :
+  - tsc ✔, lint des fichiers touchés (`endOfLine auto`) ✔, build ✔ ;
+  - unitaires : **47/47 suites, 502 tests** ; e2e : **17/17** ;
+  - intégration sur MongoDB réel (jeu de répliques) : **15/15 suites, 155 tests**, dont `conformite.int-spec`
+    (`conformite-portee-reseau-v1` toujours verte) et `administration.int-spec` (l'import de 1041, inchangé et vert).
+- **La suite de conformité du kit, telle que publiée** (`test/integration/reprise-conformite.int-spec.ts`), sur MongoDB
+  réel, avec la panne de l'atomicité :
+  - **16/16 cas** joués ;
+  - les 6 autres sont sans objet et nommés par `casSansObjet` : montant ×3, ouverture, circuit, régime non admis ;
+  - `SIMULER` de 500 objets : 8 s ; chaîne de 600 objets : 38 s.
+- **Mutations : 15/15 rouges sur une assertion** (aucune « failed to run »). Elles portent sur :
+  - la copie du kit, la profondeur, la fermeture différée, la fin des chantiers ;
+  - `SIMULER` qui écrit, le code pris (moteur partagé), le cloisonnement de la zone vivante ;
+  - un jeton de service ouvert partout, le déplacement par la reprise, le doublon de commercial ;
+  - la valeur de contrôle figée, le chantier de l'import par fichier, l'analyseur à 100 Kio ;
+  - le parent déjà fermé, la panne avalée.
+  - Plateforme : 2/2 mutations des schémas rouges.
+- **Plateforme sous Node 24** (`node:24-slim`, export LF) : typecheck ✔ ; `npm test` 615 pass, 0 fail, 1 sauté (la
+  matrice du catalogue, absente du conteneur).
+- **Pile `grp-d`** (reseau, MongoDB, Kafka, émetteur de recette), appels réels, d'abord sur la branche puis **rejouée sur
+  l'image reconstruite depuis `origin/dev`** (`d31f744`), volumes neufs : **8/8**.
+  - Témoin posé dans une seconde organisation.
+  - `SIMULER` : 4 verdicts `CREE`, rien d'écrit (ni nœud, ni fiche, ni clé, ni fait).
+  - Lot fautif : 422 `SCHEMA_NON_CONFORME` (`/objets/1/champs/code`), le même en `APPLIQUER`, puis 422 `CLE_EN_DOUBLE` ;
+    rien d'écrit.
+  - `APPLIQUER` : 4 zones (dont `ANCIENNE` fermée) et 2 commerciaux `CREE`, une affectation.
+  - Un second `APPLIQUER` : réponse identique à l'octet ; une version 2 du même contenu donne `INCHANGE` ; base et
+    outbox inchangées.
+  - Le témoin est intact.
+  - Lu sur Kafka pour l'organisation de recette : `reseau.noeud.created` ×4, `reseau.noeud.closed` ×1,
+    `reseau.commercial.changed` ×2 ; outbox vide.
+  - Toujours `-p grp-d` ; `down -v` à la fin ; aucun conteneur, volume ni réseau `grp-d` restant.
+- Fins de ligne : `git diff --stat` et `--ignore-cr-at-eol` identiques avant chaque commit.
+- **Verrou Docker** : attendu de 13:47 à 14:56, soit **69 min** (B, « STORY-965 13:35 »). Pris à 14:56, rendu à 15:21.
+
+## Ce qui a été appris (pour la suite)
+
+- **La version d'un lot vaut par `lotId`, pas par objet** (kit 1.0.1 ; D6 de la relecture de A, encore ouvert). Un lot
+  qui porte des zones puis des commerciaux sous le même `lotId` voit les commerciaux refusés `VERSION_ANTERIEURE`, dès
+  qu'une version 2 des zones est passée. La Reprise doit donc tenir un lot par sorte d'objet, ou monter la version à
+  chaque envoi (→ B, pour information).
+- **La chaîne de 600 objets de la suite suppose une auto-référence sans borne.** `reseau` borne la profondeur (10 au
+  plus par l'API) : le banc pose 1 000 dans la configuration de ses organisations (D-1055-10). Un module à hiérarchie
+  bornée (`pdv` ?) fera de même, ou B ajoutera une option au profil.
+- Le raccord du kit ne reçoit ni la clé d'origine ni l'acteur du lot. L'auteur des écritures est l'identité du jeton
+  (`service:REPRISE`), et la clé d'origine vit dans `reprise_cles`.
