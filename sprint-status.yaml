@@ -676,6 +676,14 @@ reserved_ranges:
     note: >
       🏁 DONE le 2026-11-17 — dossier-service#55 (dev 768a4aa). Lot 3 de A, n° 5. Ticket « trois surfaces » : surface 2 (ticket fermé). Liste de STORY-079 (bloquants / optionnels), dirigeants bloquant
       seulement si la forme l'exige. Ajout seul ; pas de Docker. NON SLOTTÉE.
+  - range: "STORY-925"
+    status: "RÉSERVÉ"
+    owner: "Le référentiel effectif d'un dossier déclare son dossier et sa famille : GET /dossiers/{id}/referentiels/actifs rend dossierId et referentielComptable (balance-service)"
+    source_doc: "prospera-stories/stories/STORY-925.md"
+    reserved_on: "2026-11-17"
+    note: >
+      Lot 3 de A, n° 6. La route était déjà par dossier depuis STORY-422 et servait les versions ; 906 avait ajouté le tag. Reste : la portée déclarée
+      (dossierId, referentielComptable), éprouvée sur deux dossiers d'un même cabinet. Ajout seul ; pas de Docker. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
