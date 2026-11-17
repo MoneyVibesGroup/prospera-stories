@@ -669,7 +669,7 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-924.md"
     reserved_on: "2026-11-17"
     note: >
-      En cours le 2026-11-17 (lot 3 de A, n° 5). Ticket « trois surfaces » : surface 2. Liste de STORY-079 (bloquants / optionnels), dirigeants bloquant
+      🏁 DONE le 2026-11-17 — dossier-service#55 (dev 768a4aa). Lot 3 de A, n° 5. Ticket « trois surfaces » : surface 2 (ticket fermé). Liste de STORY-079 (bloquants / optionnels), dirigeants bloquant
       seulement si la forme l'exige. Ajout seul ; pas de Docker. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
