@@ -125,9 +125,26 @@
     lus sur Kafka.
   - Décisions D-1055-1 → 13 (fiche) ; → B pour information (D6, la chaîne).
   - **Verrou Docker attendu 69 min** (B, STORY-965, de 13:47 à 14:56), puis pris et rendu à 15:21.
-- **STORY-1056** 🚧 🚚 — la commande (1), dans `prospera-ventes-service` (EPIC-228) : saisie, validation, numéro de
-  bon de livraison par les séries (série `bons-livraison`, `NumerotationDesSeries`). **En cours** : fiche et annonce
-  « ⚠ Contrats » avant le code (manifeste `commande` amendé, C5).
+- **STORY-1056** ✅ 🚚 — la commande (1) (PR prospera-ventes-service#6, `dev` 10b8ba5, bf00355, 7221f4c ; annonce
+  « ⚠ Contrats » #654 avant le code, avec le manifeste `commande` amendé, C5).
+  - **Saisie** `POST /commande/commandes` : le point de vente (nœud, point de stock) et les prix (« ce client », puis
+    société ; taux de TVA) sont lus chez `commande` (read-models remplis par personne aujourd'hui) ; portée d'écriture
+    (`PDV_HORS_PERIMETRE`) ; HT, TVA par taux sur le total HT, TTC en entiers ; `BROUILLON` ; idempotente.
+  - **Validation** `POST /commande/validations` reçoit `{ commandeId }` (forme définitive) : l'acte de 1049, construit
+    depuis la commande, la lie dans sa transaction.
+  - **Bon `EMIS`** et **`BL-AAAA-NNNNNN`** par `NumerotationDesSeries`, dans la transaction du bon (aucun numéro sans
+    bon, aucun bon sans numéro ; numéro unique en base) ; la commande passe `VALIDEE` au dernier bon.
+  - **Faits** par l'outbox (`socle_outbox`, patron de `reseau`) : `commande.engagement-tiers.changed`,
+    `.bon-livraison.emis`, `.serie.changed`, `.commande.validee` ; schémas au registre (BACKWARD) ;
+    `contrats-distributeur-v1` copié à l'octet (`verifierFaitsDuModule` sur les quatre manifestes).
+  - Node 24 : 411 unitaires, 16 e2e, 75 d'intégration sur MongoDB réel (20 validations parallèles : 20 numéros
+    continus ; trois émissions simultanées d'un bon : un numéro) ; 16/16 mutations.
+  - Pile `grp-d`, rejouée depuis `dev` : 16/16 (saisie, validation, `BL-2026-000001`, 403, rejeu sans numéro, plafond,
+    12 validations parallèles continues, outbox vidée, faits lus sur Kafka).
+  - Décisions D-1056-1 → 13 (fiche). **Verrou Docker pris à 16:01 sans attente** (B l'avait rendu), rendu à 16:36.
+- **Suivante : STORY-1057** 🛡 la recette de la démo assurance, dans `prospera-assureur-fictif` (EPIC-204) : les
+  vérifications de l'annexe E rendues jouables contre la compagnie fictive ; dépend de 1046 et 1048, faites ; la fiche
+  1048 note que les routes de vérification C13 du manifeste sont à faire avec 1057.
 
 ### Lots 1 et 2
 
@@ -268,9 +285,8 @@
       `commande_creances`, `commande_credits_tiers` (à brancher par 1059 sur les faits de B-963, B-965) et
       `commande_sources_encours` : **sans document, la source est `ABSENTE` et toute commande à crédit est refusée**
       (`ENCOURS_NON_INSTALLE`) ; le consommateur de 1059 pose ce document quand `paiement` est en service ;
-    - l'acte `POST /api/v1/commande/validations` reçoit la commande dans son corps (squelette, D-1049-9) : **1056** y
-      branche la saisie, la bascule `EMIS` et le numéro `BL-` (série `bons-livraison`), la publication de
-      `commande.engagement-tiers.changed@1` par une outbox et la copie de `contrats/distributeur/` ;
+    - ~~l'acte reçoit la commande dans son corps (squelette, D-1049-9)~~ : **soldé par 1056** (voir « La commande (1) »
+      plus bas) ;
     - l'adaptateur de `stock` est `ReservationStockNonBranchee` (motif `RESERVATION_NON_BRANCHEE`) tant que l'API de
       réservation de `stock` n'existe pas ; la projection des droits garde le voisin `stock` (`MODULES_VOISINS`).
   - **`prospera-notification-service` (reçu de B, lot 3), pour mémoire** : D y porte la communication de l'assurance
@@ -305,8 +321,32 @@
     - **recette** : l'émetteur de jetons de 1053 dérive les droits de chaque rôle de
       `auth-service/src/modules/rbac/table-d-acces-distributeur.ts` (scripts décrits dans la fiche) ; un vrai
       auth-service se branche par `AUTH_SERVICE_URL` et `AUTH_JWKS_URI`.
-  - **Prochaine story du distributeur : 1056** (la commande (1), premier vrai numéro `BL-` par les séries hébergées ;
-    y lire le nœud du point de vente au lieu du corps).
+  - **La commande (1)** (STORY-1056, `ventes` `dev` 10b8ba5 → 7221f4c), `src/modules/commande/commandes/` :
+    - **la saisie** (`commandes.service.ts`) lit le point de vente dans `commande_points_de_vente` et les prix dans
+      `commande_prix` : **personne ne les remplit encore**. Les consommateurs de `pdv.point-de-vente.changed@1` (nœud,
+      point de stock source) et de `catalogue.grille.publiee@1` (prix « ce client » et société, unité, **taux de TVA du
+      paquet fiscal**, version de grille) sont à écrire quand `pdv` et `catalogue` publieront ; sans document,
+      `POINT_DE_VENTE_INCONNU` ou `ARTICLE_SANS_PRIX` (échec fermé) ;
+    - **la validation** : `CommandesDuModule.valider` construit l'acte depuis la commande (`entreeDe`, déterministe) et
+      appelle `GardeFousDeCommande.valider` avec `dansLaTransaction` (le lien de la commande) ; l'engagement part dans
+      l'outbox de la même transaction ;
+    - **l'émission** (`emission-des-bons.service.ts`) : seul chemin d'un numéro `BL-`. Elle tourne après la réservation
+      (validation) et après la reprise ; un bon déjà émis annule la transaction (le numéro n'est pas engagé) ;
+    - **les transitions** sont une donnée (`transitions.ts`, `transitions-commande@1`) : la commande (2) y ajoute ses
+      routes sans changer la table (ou publie une v2 que les commandes neuves portent) ;
+    - **l'outbox** est au socle (`src/kafka/outbox/`) : un module neuf (`facturation`) déclare son énumération de
+      topics dans `topics.ts`, ses schémas dans `contrat/schemas/`, et l'invariant `contrats-distributeur.invariant`
+      exige le manifeste et le catalogue ;
+    - **recette** : `COMMANDE_RESERVATION_STOCK=recette` (refusé en production) réserve tout ; la surcouche de pile
+      (émetteur de jetons, Karapace) et le script de recette sont décrits dans la fiche ;
+    - **reste (la commande (2), remplaçante)** : `TRANSMISE` (terrain, WhatsApp transmis, `PRIX_CHANGE`,
+      `COMMANDE_PROBABLEMENT_DOUBLE`) ; modifier, annuler (delta de réservation, bons `ANNULE` qui gardent leur numéro,
+      historique) ; remise et décision ; dérogation au plafond et son fait ; numéro `CMD-` ; `commande.commande.chiffree@1`,
+      `.changed@1`, `.annulee@1` ; marge (coût de `stock`) ; livraison et reliquat (`livre@1`) ; allocation du matin ; PDF
+      du bon ; alertes à N jours ; les consommateurs qui remplissent les read-models ; la rétention sans expiration du
+      topic `commande.serie.changed` (réglage du broker) ; l'API de réservation de `stock`.
+  - **Prochaine story du distributeur : 1058** (le jeu « Grossiste du Golfe », `jeu-demonstration@1`, routes C13 ;
+    dépend de 1056, faite).
 
 ## Demandes aux autres groupes
 
@@ -435,6 +475,11 @@
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-17) : `commande:parametres:modifier` au catalogue de tenant (STORY-971, annoncée)** — **lue** au
+  rituel de 1056. Hors du jeton, `DIST_DG` et `DIST_ADMIN` seulement, servi par `/moi/droits` (`droitsHorsJeton`) :
+  rien à changer dans `ventes` (la route lit déjà ce droit depuis 1053). La demande D-1053-7 reste **ouverte** jusqu'à
+  la fusion de 971 ; Q-D-5 au PO est tenue par ce choix.
+
 - **← B (2026-11-17) : les 15 rôles du distributeur sont servis, D-1053 est débloquée (STORY-960)** — **lue** au
   rituel de 1052 ; **appliquée par 1053** (livrée le 17/11) (droits `droits ∪ droitsHorsJeton` de `/moi/droits`, `roleMetier` jamais
   pour décider d'un droit, aucun droit sans rôle `DIST_*`). Les paramètres de `commande` (D-1049-4) et la lecture des
@@ -464,9 +509,12 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-17, STORY-1056, avant le code) — `prospera-ventes-service`, module `commande` : la saisie, la
+- **PUBLIÉ (2026-11-17, STORY-1056, prospera-ventes-service#6, `dev` 10b8ba5 → 7221f4c) ; ANNONCÉ avant la fusion
+  du code (prospera-stories #654). Aucun écart avec l'annonce, sauf un code de plus : `MONTANT_HORS_BORNES` (400, une
+  saisie dont un montant dépasse les entiers sûrs). — `prospera-ventes-service`, module `commande` : la saisie, la
   validation branchée sur elle, le bon `EMIS` et son numéro `BL-`, quatre faits publiés.** Fiche :
-  `stories/STORY-1056.md` (D-1056-1 → 13). Aucun topic, aucune route existants ne sont renommés.
+  `stories/STORY-1056.md` (D-1056-1 → 13). Aucun topic, aucune route existants ne sont renommés. Schémas enregistrés
+  sur `commande.*-value` en BACKWARD (`npm run schemas:enregistrer`).
   - **Routes neuves** (garde `COMMANDE_NOT_ENTITLED`, droits de la table d'accès) :
     - `POST /api/v1/commande/commandes` (`commande:commande:saisir` ; `Idempotency-Key` exigée) : corps
       `{ commandeId (UUID né chez l'appelant), pointDeVenteId, canal: BUREAU|TELEPHONE|WHATSAPP|COMPTOIR,
@@ -820,6 +868,21 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1056** :
+  - (1) **`docker build` sur ce poste passe par le constructeur `desktop-linux` (pilote `docker-container`)** : sans
+    `--load`, l'image reste dans le cache de build et `docker images` ne la voit jamais (« No output specified »). Une
+    attente « jusqu'à ce que l'image existe » tourne alors sans fin : construire avec `--load`.
+  - (2) Un tableau de promesses de refus créées d'avance (`[['CODE', service.saisir(…)], …]`) les lance toutes en
+    parallèle ; leurs rejets sont pris en charge trop tard et jest compte un échec par rejet. Mettre des fonctions
+    (`() => service.saisir(…)`) et les appeler une par une.
+  - (3) Un test HTTP qui veut un 403 pour un membre « avec moins de droits » doit prendre un **membre neuf** : le cache
+    des droits est par membre (60 s), un jeton réduit d'un membre déjà lu garde ses anciens droits.
+  - (4) Karapace a encore répondu 500 au premier enregistrement juste après `healthy` (§1.9) : rejouer.
+  - (5) Une mutation qui retire la seule lecture d'un paramètre (`empreinte`) casse la compilation
+    (`noUnusedParameters`) : la tourner (`&& empreinte.length > 0`).
+  - (6) Un heredoc Python de plus de ~180 lignes, ou qui porte des antiquotes, échoue (« unexpected EOF ») : script écrit
+    par l'outil d'écriture, puis lancé.
 
 - **STORY-1055** :
   - (1) **La version d'un lot du kit vaut par `lotId`** : un banc qui livre des zones puis des commerciaux sous le même

@@ -410,9 +410,15 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1056.md"
     reserved_on: "2026-11-17"
     note: >
-      🚧 EN COURS le 2026-11-17 — annoncée avant le code (« ⚠ Contrats » du journal de D ; manifeste commande, C5 :
-      + engagement-tiers.changed@1, + serie.changed@1). Dépend de 1049 et 1052 (faites). Lot D, n° 12 du lot 3
-      (EPIC-228). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-ventes-service#6 (dev 10b8ba5, bf00355, 7221f4c) ; annonce « ⚠ Contrats » avant le
+      code (docs #654, manifeste commande C5 : + engagement-tiers.changed@1, + serie.changed@1). Saisie au prix figé de la
+      grille (point de vente et prix lus chez commande), validation de la commande saisie ({ commandeId }, l'acte de 1049 la
+      lie dans sa transaction), bon EMIS avec BL-AAAA-NNNNNN par NumerotationDesSeries dans la transaction du bon, VALIDEE au
+      dernier bon ; outbox : engagement-tiers.changed, bon-livraison.emis, serie.changed, commande.validee (schémas au
+      registre, BACKWARD) ; contrats-distributeur-v1 copié à l'octet. Node 24 : 411 unitaires, 16 e2e, 75 d'intégration sur
+      MongoDB réel (20 validations parallèles : 20 numéros continus) ; 16/16 mutations. Pile grp-d (rejouée depuis dev) :
+      16/16 (403, rejeu sans numéro, plafond, 12 parallèles continus, outbox vidée, faits lus sur Kafka). Lot D, n° 12 du lot
+      3 (EPIC-228). NON SLOTTÉE.
 
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
