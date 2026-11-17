@@ -14,6 +14,14 @@
   `notification` à D) → 958 socle de la comptabilité (**dépôt à créer par l'utilisateur**) → 959 exercices → 960 rôles
   du distributeur (auth) → 961 journaux → 962 brouillard → 963 Créance (1) → 964 validation inaltérable → 965 Créance
   (2) → 966 grand livre → 967 balance dérivée (attend A-921) → 968 tiers → 969 lettrage → 970 clôture.
+- **Avancement** :
+  1. ~~STORY-956~~ : **plateforme #22** (`189183f`, étiquette **`kit-cible-v1.0.1`** : jalon du 04/12 tenu),
+     contrat annoncé avant la fusion (stories #580). D1 `CLE_EN_DOUBLE`, D2 textes bornés, D3 montants requis et
+     états appliqués par le kit ; suite publiée élargie à 22 cas (cloisonnement, atomicité avec `PanneDeConformite`,
+     cas du témoin, `controles`) ; `encours/` au README et dans les scripts racines. Node 24 : 490/0/1 sauté, MongoDB
+     8.0 23/23 ; 25 + 29 mutations. D4 → D8 restent ouverts (fiche, D-956-7).
+  - **Story suivante : STORY-957** (supervision Kafka corrigée dans notification, paiement, catalogue : consommateur
+    neuf à chaque relance, `/health` borné à 5 s ; puis passation de `notification` à D).
 
 ### Lot 2 (ouvert le 2026-11-16)
 
@@ -127,6 +135,27 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-17) : relire `kit-cible` 1.0.1** (suite de ta relecture de la 1.0.0) — **ouverte**. Étiquette
+  `kit-cible-v1.0.1` de `prospera-plateforme` (`189183f`, STORY-956). Les décisions sont dans
+  `stories/STORY-956.md` (D-956-1 → 7), et l'annonce est plus bas, dans « ⚠ Contrats ».
+  - **D1** : 422 `CLE_EN_DOUBLE` sur la requête. Le kit n'applique pas « la dernière l'emporte ».
+  - **D2** : bornes dans `RefusRequete` et sur toute `raison`.
+  - **D3** : `SCHEMA_NON_CONFORME` pour un montant requis absent non marqué ou un état hors circuit, et
+    `REFUSE_PAR_LA_CIBLE` pour un état retenu hors circuit.
+  - **La suite publiée** : 22 cas, et un banc qui doit fournir `panne`.
+  - **Encore ouverts**, de ta liste : D4 (concurrence, E11000) et D5 à D8. Dis si l'un d'eux doit passer avant `pdv`.
+    Verdict à écrire dans ton journal.
+
+- **→ D (2026-11-17) : `encours/` est au README de `prospera-plateforme`, et `kit-cible` 1.0.1 est étiqueté** —
+  **information** (D-L3-5, STORY-956, plateforme #22, `189183f`). **D-1047 et D-1055 sont débloquées.**
+  - **`encours/`** : `npm test` joue déjà `encours/test/**/*.test.ts` et le typecheck lit `encours/**/*.ts`, avant
+    même votre premier fichier, sans PR de B. La garde `test/scripts-racines.test.ts` le vérifie. Forme attendue :
+    `src/`, `test/`, `scripts/` ; pas de dépendance propre (à demander ici).
+  - **D-1055** : copier `bibliotheques/kit-cible/distribution/` à `kit-cible-v1.0.1`, et jamais la 1.0.0, avec
+    `git -c core.autocrlf=false show`. Le banc de conformité de `reseau` fournit `panne`
+    (`new PanneDeConformite()`) et enveloppe chaque raccord par `panne.envelopper(raccord)`. Une clé en double dans un
+    lot est désormais refusée (422 `CLE_EN_DOUBLE`) : la Reprise doit dédoublonner.
+
 - **→ A, copie à C (2026-11-17) : MinIO passe à `cgr.dev/chainguard/minio:latest`** — **ouverte**. Décision de
   l'utilisateur, désormais la norme (`REGLES-DES-GROUPES.md` §1.6). `minio/minio` n'existe plus sur Docker Hub (API :
   404, `pull access denied`) et `quay.io/minio/minio` rend 401 sans compte : un poste qui n'a pas l'image en cache ne
@@ -199,7 +228,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   `verification-installation@1` (voir « ⚠ Contrats »). À faire à la gate de chaque module, avant son installation
   par le moteur : pour le cabinet, avant A-918.
 
-- **→ A (2026-11-16) : relire `kit-cible` 1.0.0 avant le 04/12** (EPIC-161 : « relu par Dev A ») — **ouverte**.
+- **→ A (2026-11-16) : relire `kit-cible` 1.0.0 avant le 04/12** (EPIC-161 : « relu par Dev A ») — **servie** par
+  A le 16/11 (verdict : 1.0.1 nécessaire), corrigée par STORY-956 ; relecture de la 1.0.1 demandée plus haut.
   Étiquette `kit-cible-v1.0.0` sur `prospera-plateforme` (`789a11a`, STORY-947). À lire : `bibliotheques/kit-cible/src/`
   (`cible.ts`, `conformite.ts`, `mongodb.ts`), la fiche `stories/STORY-947.md` (D-947-1 → 10) et le README de la
   plateforme (section du kit). Ce qu'on attend de la relecture : la suite de conformité couvre-t-elle ce qu'un point
@@ -225,6 +255,13 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   démarrer.
 
 ## Réponses aux demandes reçues
+
+- **← A (2026-11-16) : relecture de `kit-cible` 1.0.0, « 1.0.1 nécessaire »**
+  (`coordination/relecture-kit-cible-1.0.0-groupe-A.md`) — **servie par STORY-956** (plateforme #22, `189183f`,
+  étiquette `kit-cible-v1.0.1`).
+  - Servis : D1, D2, D3 et les trous de la suite (cloisonnement, atomicité, `rattacherA`, `REFUSE_PAR_LA_CIBLE`,
+    `REQUALIFIE`, régime non admis, majeure, `OBJET_INCONNU`, 1 Mio, `controles`, `saisirMontant`).
+  - Ouverts : D4 à D8 (fiche 956, D-956-7) ; relecture de la 1.0.1 demandée ci-dessus.
 
 - **← C (2026-11-15) : la recette d'`origin/dev` ne démarre pas sur une pile NEUVE** — **servie par STORY-940**
   (catalogue et paiement créent leurs topics abonnés absents avant `subscribe`, le correctif de C). Plus besoin de
@@ -253,7 +290,7 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-17, STORY-956 — `kit-cible` 1.0.1, annoncé AVANT la fusion** (`prospera-plateforme`, étiquette
-  `kit-cible-v1.0.1`, à poser avant le 04/12). Il corrige D1, D2 et D3 de la relecture de A
+  `kit-cible-v1.0.1`). **Fusionné le 17/11** : plateforme #22, `189183f` sur `dev`, étiquette posée et poussée. Il corrige D1, D2 et D3 de la relecture de A
   (`coordination/relecture-kit-cible-1.0.0-groupe-A.md`). **Pour A (Dev A, `pdv`), C, D-1055 et tout module cible :
   prendre la 1.0.1, jamais la 1.0.0** : la 1.0.0 perd une ligne en silence quand une clé figure deux fois dans un lot.
   - **Contrat `refus-reprise@1`** : un code de requête **ajouté**, `CLE_EN_DOUBLE` (422). Il refuse toute la requête
@@ -664,6 +701,22 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Verrou Docker : une prise en deux temps est une course** (STORY-956, 17/11).
+  - Ce qui s'est passé : B a lu « pas de verrou », puis a lancé dans le même message la prise du verrou et le `up` de
+    sa pile. D avait pris le verrou entre-temps : `grp-b` a tourné environ une minute à côté de `grp-d-1045-verif`,
+    puis B l'a descendue avec ses volumes.
+  - La règle : prendre le verrou **atomiquement**, avec `( set -o noclobber; echo "B STORY-<n> <heure>" >
+    .verrou-docker )`, qui échoue si le fichier existe. N'enchaîner le `up` qu'après le succès de cette commande,
+    jamais dans un appel parallèle.
+  - Pour attendre le verrou :
+    `until ( set -o noclobber; echo … > .verrou-docker ) 2>/dev/null; do sleep 10; done`.
+- **Un script Python nommé comme un module standard** (`types.py` dans le dossier de travail) est importé à sa place
+  par `yaml`, `re`, `enum`… et s'exécute. Nommer les scripts sans risque de collision, et lancer `python -I`.
+- **`kit-cible`, preuve sous Node 24 sans Dockerfile** : export
+  `git -c core.autocrlf=false archive --format=tar HEAD`, puis un conteneur `node:24-slim` nommé dans le réseau de la
+  pile (`docker create`, `docker cp`, `docker start`, `docker wait`, `docker logs`). `docker cp` vers un dossier absent
+  échoue : copier le dossier entier.
 
 - **`structuredClone` sous jest rend un `Date` d'un autre royaume** : `instanceof Date` le refuse. Un faux modèle
   Mongoose qui compare des dates doit tester `Object.prototype.toString.call(v) === '[object Date]'`, sinon un test de
