@@ -1,3 +1,4 @@
+// Amendé le 2026-11-17 (STORY-1014) : `routesLectureSeule` nomme la fiche d'un expert (`GET /api/v1/expertises/experts/{expertId}`, avec l'historique de ses agréments) ; `GET /api/v1/expertises/experts` est figée, avec ses filtres (`designablePour`, `actif`).
 // Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M29 — Expertises et intervenants (format du contrat de module, clause C1, amendée le 2026-11-10,
 // le 2026-11-11 et le 2026-11-12).
@@ -229,7 +230,8 @@ export const MANIFESTE_EXPERTISES = {
   routesLectureSeule: [
     'GET /api/v1/expertises/missions', // [proposition]
     'GET /api/v1/expertises/missions/{id}', // [proposition]
-    'GET /api/v1/expertises/experts', // [proposition]
+    'GET /api/v1/expertises/experts', // liste, filtres `designablePour`, `actif` (STORY-1014)
+    'GET /api/v1/expertises/experts/{expertId}', // fiche et historique des agréments (STORY-1014)
     'GET /api/v1/instance/expertises/{organisationId}/export',
   ],
 
