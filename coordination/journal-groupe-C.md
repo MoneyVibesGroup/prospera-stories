@@ -58,7 +58,10 @@
   **STORY-1005 → 1014**, dans l'ordre du tableau : 1005, 1006, 1007, 1008, 1014, 1009, 1011, 1010, 1012, 1013.
   ⚠️ Règle du lot 3 (`REGLES-DES-GROUPES.md` §1.2) : **une sous-session neuve par story**, lancée par la session du
   groupe ; tout ce que la story suivante doit savoir est écrit ici ou dans la fiche.
-  - **STORY-1005** ← **suivante** : la garde lit l'état publié (`garde-etat-publie-v1` de B-937).
+  - ~~**STORY-1005**~~ : **sinistres #16, liaison-assureur #7, document-service (GitHub `prospera-ocr-service`) #29** ;
+    la garde lit l'état publié (`garde-etat-publie-v1` de B-937), `entitlement.changed` n'ouvre plus rien ; pile verte,
+    rejouée depuis `dev` ; écart nommé : recette de l'Atelier (STORY-100) non rejouée.
+  - **STORY-1006** ← **suivante** : `compta-cima` lu sur l'état publié (`assurance`).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -338,6 +341,14 @@ seulement.
   `reseau` sans publier de portées ne voit **plus rien** dans `sinistres` (échec fermé voulu). Nouveau champ facultatif
   `noeudId` à la déclaration (`POST /api/v1/sinistres/dossiers`). Contrat consommé : `reseau.portee.changed@1`.
 
+- **2026-11-17, STORY-1005 — le fil ne change pas, la source de la garde change.** Les trois services (`sinistres`,
+  `liaison-assureur`, `document-service`) consomment désormais `etat-publie.changed.<espace>@1` (groupe
+  `KAFKA_ETAT_PUBLIE_GROUP_ID`, espace `INSTANCE_ESPACE`, défaut `REEL`) et **plus** `entitlement.changed`. Les routes,
+  les codes de refus et l'audience ne changent pas ; un module en `LECTURE_SEULE` refuse l'écriture par
+  `ABONNEMENT_EXPIRE`. ⚠️ Pour les autres groupes et l'exploitation : le service ne s'ouvre plus tant que le moteur
+  n'a pas publié l'état du module ; la collection `socle_etat_des_modules` est orpheline (à nettoyer à la main) ;
+  l'état vit dans `socle_etat_publie`. `assurance-service` reste sur l'ancien fil jusqu'à STORY-1006.
+
 ## Questions à l'utilisateur ou au PO
 
 - **❓ 2026-11-17 — STORY-1002, question au PO : qui porte `sinistres.declaration.enregistree@1` ?** La spine (AD-16)
@@ -366,6 +377,10 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-1005-1 → D-1005-7** (`stories/STORY-1005.md`) : l'état publié décide seul, sans double lecture ; `LECTURE_SEULE`
+  traduit en `ACTIVE` à échéance d'époque 0 ; espace = `INSTANCE_ESPACE`, l'autre est ignoré ; idempotence par
+  `(epoque, numero)`, plus de registre d'`eventId` ; `reseau` reste un voisin suivi dans `sinistres` ; collection
+  orpheline laissée ; erreur de lint de `document-service` corrigée ici.
 - **D-1004-1 → D-1004-7** (`stories/STORY-1004.md`) : deux couches fail-closed ; `reseau` installé lu dans l'état
   des modules (voisin suivi) ; volet du GEST lu au registre ; périmètres de MED et CPT ; `noeudId` au dossier ; jamais
   la portée dans le jeton ; commandes du système hors portée.
@@ -413,6 +428,16 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **Un e2e peut rougir une fois sous charge et se montrer vert ensuite** (`liaison-assureur`, `echange.e2e-spec.ts`,
+  12 échecs dans l'étage de vérification, jamais reproduits ni en isolé ni en suite). Avant de chercher une
+  régression, rejouer le fichier seul, puis la suite, puis la séquence complète de la preuve.
+- **`fetch` réutilise une connexion que le serveur a fermée** (`SocketError: other side closed`) après une pause de
+  12 s entre deux appels de la preuve : demander `connection: close` et réessayer ; ce n'est pas un défaut du service.
+- **Le lint d'un dépôt peut être rouge sur `dev` depuis avant ta story** (`document-service`) : l'exporter et le
+  vérifier avant de croire à une régression.
+- **L'étiquette d'image Docker doit être en minuscules** (`grp-c-…-doc-MNV` refusée) ; un shell qui dépasse 180 s
+  passe en arrière-plan, la sortie se lit alors dans son fichier.
 
 - **`git archive` applique `core.autocrlf`** : l'export d'un dépôt Windows sort en CRLF (65 354 erreurs de lint, et
   les empreintes des référentiels embarqués fausses). Toujours `git -c core.autocrlf=false archive`.
