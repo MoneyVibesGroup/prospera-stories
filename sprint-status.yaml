@@ -258,8 +258,13 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1046.md"
     reserved_on: "2026-11-17"
     note: >
-      🚧 EN COURS le 2026-11-17 — passation de prospera-assureur-fictif constatée par D (dev 78ad10c). Lot D, n° 2
-      du lot 3 (EPIC-204). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-assureur-fictif#3 (dev 626b93e, e265b0a) et prospera-plateforme#23 (dev a938c38,
+      étiquette jeu-assurance-v1). Le jeu de l'assurance au format jeu-demonstration@1 (générateur de STORY-987, graine
+      20260115, une part : module assureur-fictif) : assurance-compagnie-demo (205 915, produit par npm run jeu:ecrire) et
+      assurance-compagnie-demo-reduite (5 180, versionné dans la plateforme) ; jeu:verifier conforme pour les deux. Routes
+      C13 d'import et d'effacement du LC fictif, identité MOTEUR seule ; effacement idempotent (DEJA_EFFACE). Node 24 : 385
+      unitaires + 22 e2e ; pile grp-d : jeu complet importé en 136 s puis effacé. Passation d'assureur-fictif constatée
+      (dev 78ad10c). Lot D, n° 2 du lot 3 (EPIC-204). NON SLOTTÉE.
 
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"

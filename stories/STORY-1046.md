@@ -1,6 +1,6 @@
 # STORY-1046 : la compagnie de démonstration — le jeu de l'assurance et les routes C13 du LC fictif
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-204 (le logiciel de compagnie fictif, la compagnie de démonstration et la recette de la démo) ·
 **Dépôts :** `prospera-assureur-fictif` (reçu de C au rituel de cette story), `prospera-plateforme` (dossier
@@ -72,4 +72,62 @@ LC fictif. Il manque le **jeu de l'assurance au format du contrat** et les **deu
 
 ## Ce qui a été livré
 
-*(à la fin de la story)*
+**2026-11-17** — deux PR fusionnées en « Rebase and merge » :
+
+- `prospera-assureur-fictif` **#3** (`dev` `626b93e` puis `e265b0a`, README) :
+  - `src/modules/assureur-fictif/demo/jeu-demonstration.ts` : le jeu au format du contrat, deux tailles, l'empreinte du
+    `jeu.json` de chacune figée (`jeu-demonstration.spec.ts`) ; `npm run jeu:ecrire -- <dossier> [DEMO|REDUITE]` (dans
+    l'image : `node dist/modules/assureur-fictif/demo/ecrire-le-jeu.js`) ;
+  - `src/modules/assureur-fictif/instance/` : les deux routes C13, le registre des imports et des effacements
+    (collections `assureur-fictif_imports-c13`, `assureur-fictif_effacements-c13`), les contrats de
+    `contrats-instance-v1` copiés à l'octet (`ORIGINE.json`, garde `copie.invariant.spec.ts`) ;
+  - l'identité de service (patron du catalogue, STORY-948) : la stratégie JWT lit `identite` et `organisationId`,
+    `EmailVerifiedGuard` n'admet un jeton de service que sur une route `@AdmetIdentitesDeService(...)` ;
+  - `DepotCompagnie.vider` rend son décompte ; `BoiteAuxLettres.effacerLEntree`.
+- `prospera-plateforme` **#23** (`dev` `a938c38`, étiquette **`jeu-assurance-v1`**) :
+  `jeux-demonstration/assurance-compagnie-demo-reduite/` (données seules, 10 fichiers).
+
+| Jeu | Enregistrements | `jeu.json` (sha256) | Où |
+|---|---:|---|---|
+| `assurance-compagnie-demo@1.0.0` | 205 915 | `f58ddf1a…c80ed` | produit par `npm run jeu:ecrire -- <dossier> DEMO` (~80 Mo) |
+| `assurance-compagnie-demo-reduite@1.0.0` | 5 180 | `23602877…c7e93` | `prospera-plateforme/jeux-demonstration/`, et `jeu:ecrire … REDUITE` |
+
+Décompte par objet (démo / réduite) : produit 7 / 7, assure 18 000 / 400, police 25 000 / 600, garantie 133 512 /
+3 206, prime 25 000 / 600, intermediaire 40 / 40, coassurance 853 / 24, traite 3 / 3, sinistre-existant 3 500 / 300.
+
+## Preuves
+
+- **`prospera-assureur-fictif`, Node 24** (étage `verification`, image construite depuis `git archive`) : `tsc` ;
+  lint du dépôt 0 ; **38/38 suites, 385 tests** (351 avant) ; **e2e 3/3 suites, 22 tests** (14 avant) ; build.
+- **Mutations**, toutes rouges sur l'assertion : le registre des imports non effacé (3 rouges), l'empreinte ignorée
+  (1), `DEJA_EFFACE` malgré des données revenues (1), une ligne non validée (3), une identité de service admise sur
+  toute route (2, e2e). Une première version de la mutation « ligne non validée » rougissait à la compilation : réécrite.
+- **`prospera-plateforme`, Node 24** (`node:24-slim`, export `git archive`) : `typecheck` vert ; `npm test` **512 pass,
+  0 fail, 1 skipped** (la matrice du catalogue) ; `npm run jeu:verifier` : `assurance-compagnie-demo-reduite`
+  conforme (5 180), `assurance-compagnie-demo` écrit par `jeu:ecrire` conforme (205 915), témoin conforme.
+- **Pile `grp-d`** (`docker compose -p grp-d --profile assureur-fictif up --build` depuis un export : image runtime,
+  MongoDB 8 en jeu de répliques, Kafka ; un émetteur RS256 de preuve tient le rôle d'auth-service) : service sain.
+  Un pilote joue la partie A (lecture du `jeu.json`, lots de 500 comme `JEUX_DEMONSTRATION_LOT`, clef
+  `jeu|<org>|<code>@<version>|<module>|<objet>|<n>`, chaque réponse validée contre le contrat) :
+  - **jeu réduit** : 17 appels C13, 5 180 enregistrements `IMPORTE` en 3,2 s ; 17 lots du contrat publiés (servis par
+    l'API du LC et déposés dans `entree`) ; `SIN-2026-9002` au statut `DECLARE`, provision 780 000 ; les 9 premiers lots
+    rejoués : `DEJA_IMPORTE` ; même clef, autre lot : 409 `IDEMPOTENCE_REUTILISEE` ;
+  - refus : utilisateur 403 `IDENTITE_DE_SERVICE_REQUISE` ; moteur d'une autre organisation 403
+    `ORGANISATION_HORS_JETON` ; Reprise 403 `IDENTITE_DE_SERVICE_REFUSEE` ; jeton du moteur sur l'administration du LC
+    403 `IDENTITE_DE_SERVICE_REFUSEE` ;
+  - **effacement** : `EFFACE`, 5 231 enregistrements (5 180 objets, 17 lots, 17 imports notés, 17 fichiers) ; rejoué :
+    `DEJA_EFFACE`, même `effaceLe` ; MongoDB : 0 document de l'organisation hors du registre des effacements ; une
+    organisation témoin chargée du même jeu : intacte (5 180 objets, 17 fichiers) ;
+  - **jeu complet** : 416 appels C13, **205 915 enregistrements en 136 s**, rejeux et refus identiques ; effacé
+    (207 156), rejoué `DEJA_EFFACE` ; l'organisation témoin toujours intacte.
+  - Pile descendue avec ses volumes (`down -v`), verrou Docker rendu.
+
+## Ce qui reste
+
+- **Le personnel et les quatre scénarios** (D-1046-5) entrent avec les modules qui les portent (rôles, circuit : C).
+- **Le jeu complet n'est pas dans une image** : l'exploitation le produit par `jeu:ecrire` et le dépose dans
+  `JEUX_DEMONSTRATION_DIR` du catalogue de l'essai ; à automatiser avec le déploiement de l'espace d'essai (B, EPIC-147).
+- La remise à zéro de l'administration (`POST /assureur-fictif/remise-a-zero`) recharge encore le jeu par le générateur,
+  sans passer par la route C13 : les deux donnent les mêmes lignes ; la recette de l'annexe E (STORY-1057) dira s'il faut
+  les unifier.
+- STORY-1048 : le refus de démarrer hors d'un espace d'essai et les quatre scénarios rejoués après une remise à zéro.
