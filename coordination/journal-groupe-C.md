@@ -61,7 +61,10 @@
   - ~~**STORY-1005**~~ : **sinistres #16, liaison-assureur #7, document-service (GitHub `prospera-ocr-service`) #29** ;
     la garde lit l'état publié (`garde-etat-publie-v1` de B-937), `entitlement.changed` n'ouvre plus rien ; pile verte,
     rejouée depuis `dev` ; écart nommé : recette de l'Atelier (STORY-100) non rejouée.
-  - **STORY-1006** ← **suivante** : `compta-cima` lu sur l'état publié (`assurance`).
+  - ~~**STORY-1006**~~ : **assurance #25** ; la garde d'`assurance` lit l'état publié (droit, lecture seule,
+    interrupteur `compta-cima` dans `module.interrupteurs[]`) ; pile verte, rejouée depuis `dev` ; reste : les
+    référentiels habilités se lisent encore dans `entitlement.changed` (D-1006-5, demande à B).
+  - **STORY-1007** ← **suivante** : l'accusé de réception du dossier complet (`sinistres`).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -347,7 +350,19 @@ seulement.
   les codes de refus et l'audience ne changent pas ; un module en `LECTURE_SEULE` refuse l'écriture par
   `ABONNEMENT_EXPIRE`. ⚠️ Pour les autres groupes et l'exploitation : le service ne s'ouvre plus tant que le moteur
   n'a pas publié l'état du module ; la collection `socle_etat_des_modules` est orpheline (à nettoyer à la main) ;
-  l'état vit dans `socle_etat_publie`. `assurance-service` reste sur l'ancien fil jusqu'à STORY-1006.
+  l'état vit dans `socle_etat_publie`. `assurance-service` est passé à son tour avec STORY-1006 (voir plus bas).
+
+- **2026-11-17, STORY-1006 — `assurance` lit l'état publié ; `assurance` ne quitte pas tout à fait `entitlement.changed`.**
+  `prospera-assurance-service` consomme `etat-publie.changed.<espace>@1` (groupe `KAFKA_ETAT_PUBLIE_GROUP_ID`, espace
+  `INSTANCE_ESPACE`, défaut `REEL`) pour le droit, la lecture seule et l'interrupteur `compta-cima`
+  (`module.interrupteurs[]`, absent = éteint). Routes et codes inchangés. ⚠️ Pour l'exploitation : le service ne sert
+  plus rien tant que le moteur n'a pas publié l'état du module `assurance` ; et `compta-cima` reste éteint tant que
+  le moteur ne l'allume pas (la route de B publiait `interrupteurs` vide à STORY-936). Le fil `entitlement.changed`
+  reste lu **pour les référentiels habilités seulement**.
+- **→ B (2026-11-17) : les référentiels habilités dans l'état publié ?** — **question, ouverte.** Le palier ④ du gate
+  d'`assurance` (`cima-assurances@7.0`) lit `referentiels` dans `entitlement.changed` ; l'état publié ne les porte pas.
+  Choix par défaut de C : garder ce fil pour ce seul champ (D-1006-5). Si B ajoute un champ facultatif (compatibilité
+  BACKWARD) ou publie un autre contrat, C bascule et retire le consommateur.
 
 ## Questions à l'utilisateur ou au PO
 
@@ -377,6 +392,10 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-1006-1 → D-1006-8** (`stories/STORY-1006.md`) : l'interrupteur est `module.interrupteurs[]` du module
+  `assurance` ; mêmes règles de droit que 1005 ; entrée illisible = éteinte ; un module fermé n'allume rien ;
+  référentiels toujours lus dans `entitlement.changed` ; ordre de la garde inchangé ; collection
+  `org_assurance_etat_publie` ; `src/vendor` hors lint.
 - **D-1005-1 → D-1005-7** (`stories/STORY-1005.md`) : l'état publié décide seul, sans double lecture ; `LECTURE_SEULE`
   traduit en `ACTIVE` à échéance d'époque 0 ; espace = `INSTANCE_ESPACE`, l'autre est ignoré ; idempotence par
   `(epoque, numero)`, plus de registre d'`eventId` ; `reseau` reste un voisin suivi dans `sinistres` ; collection
@@ -428,6 +447,13 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **La garde de portée du dossier précède la garde d'accès d'`assurance`** : sur pile, une route `dossiers/:id/…` d'un
+  dossier inconnu rend 404 `DOSSIER_INTROUVABLE`, jamais le refus du gate. Publier un `dossier.created` avant de
+  prouver un refus de gate. Et le graphe d'injection (`app.module.injection.spec.ts`) sert une config doublée : tout
+  nouveau consommateur qui lit `kafka.*` à la construction doit y être servi.
+- **Un fichier copié à l'octet (`src/vendor`) échoue au lint de prettier** : l'ignorer dans eslint, jamais le reformater.
+- **Un script de preuve interrompu ne doit pas rendre le verrou d'un autre** : le `trap` ne s'arme qu'après la prise.
 
 - **Un e2e peut rougir une fois sous charge et se montrer vert ensuite** (`liaison-assureur`, `echange.e2e-spec.ts`,
   12 échecs dans l'étage de vérification, jamais reproduits ni en isolé ni en suite). Avant de chercher une
