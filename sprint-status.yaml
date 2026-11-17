@@ -1516,6 +1516,20 @@ reserved_ranges:
       l'adaptateur du formulaire de 1011. 395 500 et 702 000 retrouvés au franc ; « 775 000 » non reproduit (entrées
       absentes des extraits). Aucune route, aucun fait. Node 24 : 1172 unitaires sur MongoDB réel, 25 e2e, build 0 ; pas
       de pile. Lot 3 de C, n° 9. NON SLOTTÉE.
+  - range: "STORY-1013"
+    status: "RÉSERVÉ"
+    owner: "Une évaluation arrêtée n'est jamais recalculée : commande « arrêter l'évaluation », décompte copié avec ses deux versions de table, cinq montants distincts (sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1013.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-stories#643 (manifeste, main 7bba9ca) et prospera-sinistres-service#24 (dev
+      a12c5c6). POST et GET …/dossiers/{id}/evaluations : montant du gestionnaire au franc (jamais le repère d'office,
+      motif s'il diffère du décompte et dès la version 2), décompte calculé UNE fois et copié avec tableVersion ET
+      tableDeVetusteVersion jugées à la date de survenance ; un changement de table ou de formulaire ne la modifie pas
+      (tests) ; ajout seul, l'ancienne version reste lisible ; cinq montants à leur source (évaluation, provision,
+      offre, règlement, recours). Provision NON réalignée (D-1013-8, motif absent du contrat) ; aucun fait neuf. Node 24 :
+      1212 unitaires sur MongoDB réel, 26 e2e, build 0 ; pas de pile. Lot 3 de C, n° 10 et dernier : LOT 3 DE C TERMINÉ.
+      NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"

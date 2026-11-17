@@ -87,8 +87,14 @@
     catégorie de pièce (`vetuste-automobile-2026.1`, table distincte, figée par empreinte, jugée à la survenance), vétusté
     sur les pièces seulement, épave (valeur vénale − valeur de l'épave), RC seule avec assuré fautif = zéro et `BLOQUANT` ;
     395 500 au franc, « 775 000 » non reproduit ; Node 24 (1172 unitaires, 25 e2e), rejouée depuis `dev`, sans pile.
-  - **STORY-1013** ← **suivante** : une évaluation arrêtée n'est jamais recalculée (`sinistres`, FR-75), **la dernière du
-    lot 3 de C** ; elle garde `tableVersion` **et** `tableDeVetusteVersion` du décompte de 1010/1012 (D-1012-1).
+  - ~~**STORY-1013**~~ : **sinistres #24** (manifeste #643) ; une évaluation arrêtée n'est jamais recalculée (FR-75) :
+    `POST` et `GET …/dossiers/{id}/evaluations`, montant du gestionnaire au franc, décompte copié avec `tableVersion` **et**
+    `tableDeVetusteVersion` (jugées à la survenance), une version de plus par correction avec motif, cinq montants à leur
+    source ; provision non réalignée (D-1013-8) ; Node 24 (1212 unitaires, 26 e2e), rejouée depuis `dev`, sans pile.
+- **🏁 2026-11-17 — LOT 3 DE C TERMINÉ** (STORY-1005 → 1014, dix stories). **Aucune story suivante n'est assignée** : la
+  suite attend une consigne de l'utilisateur. Restes nommés dans les fiches : réalignement de la provision à l'évaluation
+  (D-1013-8), fait `sinistres.evaluation.arretee@1` (D-1013-9), lever une alerte bloquante (D-1013-10), commande de
+  décision de véhicule et cession de l'épave (1012), alertes d'instruction (H-046), questions au PO ci-dessous.
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -159,6 +165,10 @@ seulement.
 - **→ B (2026-11-17) : recopier le manifeste `expertises` amendé au catalogue** — `manifestes/expertises.manifest.ts`
   a changé sur `main` (`50883fa`, PR #630, STORY-1014 : une route de lecture seule de plus,
   `GET /api/v1/expertises/experts/{expertId}`). Même remarque que ci-dessus. — ouverte
+
+- **→ B (2026-11-17) : recopier le manifeste `sinistres` amendé au catalogue** — `manifestes/sinistres.manifest.ts` a
+  changé sur `main` (`7bba9ca`, PR #643, STORY-1013 : une route de lecture seule de plus,
+  `GET /api/v1/sinistres/dossiers/{id}/evaluations`). Même remarque que ci-dessus. — ouverte
 
 ## Réponses aux demandes reçues
 
@@ -438,6 +448,23 @@ seulement.
   **Pour B/A** : `dossier.instruction` est une donnée du dossier, jamais dans `sinistres.dossier.changed@1`.
   ⚠️ Enregistrer le formulaire rend partie « instruire » : celui qui le remplit ne validera ni ne contrôlera.
 
+- **2026-11-17, STORY-1013 — une route de lecture, une écriture, aucun fait neuf.**
+  `POST /api/v1/sinistres/dossiers/{id}/evaluations` : `{ roleExerce, versionLue, cleIdempotence, montant, motif? }`
+  (GEST, GREC, RESP ; dossier `EN_INSTRUCTION` ou `EVALUE`). Le montant est un entier de francs, obligatoire, jamais
+  arrondi ni écrit d'office ; `motif` (10 caractères) obligatoire quand il diffère du décompte et dès la version 2.
+  Refus : `MONTANT_EVALUE`, `MONTANT_INVALIDE`, `MOTIF_ECRIT` (400) ; `EVALUATION_IMPOSSIBLE`, `TYPE_DE_SINISTRE_ABSENT`,
+  `INSTRUCTION_NON_ENREGISTREE`, `DECOMPTE_IMPOSSIBLE`, `DECOMPTE_INVALIDE`, `ALERTE_BLOQUANTE_NON_LEVEE`,
+  `SEPARATION_DES_TACHES`, `ETAT_PERIME`, `CLE_REUTILISEE` (409). `GET …/evaluations` (lecture seule, au manifeste,
+  `prospera-stories` 7bba9ca ; mêmes rôles de lecture que le formulaire) rend `{ dossierId, version, statut, montants:
+  { evaluation: { montant, rang }, provision: { montant: null, tenueParAssurance: true }, offre, reglement, recours :
+  { montant: null } }, courante, evaluations[] }` ; chaque évaluation porte `rang`, `montant`, `motif?`, `arreteePar`,
+  `arreteeLe`, `survenuLe`, `tableVersion?`, `tableDeVetusteVersion?`, `decompte?` (lignes, repère, alertes) ou
+  `renvoi: 'BAREME_CORPOREL'`. **Pour D (écrans, « Pourquoi ce montant ? »)** : afficher `decompte.lignes` tel quel, ne
+  rien recalculer côté écran ; les cinq montants s'affichent côte à côte, jamais fondus. `vue.montantEvalue` est celui de
+  la dernière version. **Pour B/A** : l'évaluation est une donnée du dossier, jamais dans `sinistres.dossier.changed@1` ;
+  aucun fait `sinistres.evaluation.arretee@1` (D-1013-9) et aucune proposition de provision à l'arrêt (D-1013-8).
+  ⚠️ Arrêter l'évaluation rend partie « évaluer » (FR-29).
+
 ## Questions à l'utilisateur ou au PO
 
 - **❓ 2026-11-17 — STORY-1002, question au PO : qui porte `sinistres.declaration.enregistree@1` ?** La spine (AD-16)
@@ -489,6 +516,14 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   (entrées absentes de tout extrait) ; contexte en 5e paramètre de l'adaptateur ; alertes d'instruction (H-046) hors
   story. **→ PO** : la grille de vétusté de la compagnie (A-5, H-059) est à obtenir ; les quatre catégories attendent
   ses valeurs.
+- **D-1013-1 → D-1013-12** (`stories/STORY-1013.md`) : commande à part avant la transition 7 ; montant obligatoire, au
+  franc, jamais écrit d'office ; décompte calculé une fois et copié ; les DEUX tables jugées à la survenance ; ajout seul,
+  motif dès la version 2, permis en instruction et en évalué ; rôles de la transition 7 et partie « évaluer » ; motif
+  comparé au décompte (le chiffrage de l'expertise viendra avec FR-61) ; **la provision n'est pas réalignée** (motif
+  absent de la liste fermée et du schéma : contrat) ; pas de fait `evaluation.arretee@1` ; alerte bloquante = refus
+  (lever : à écrire) ; sans formulaire, pas d'évaluation ; corporel sans décompte. **→ PO** : veut-il que l'arrêt de
+  l'évaluation propose la provision à `assurance` (motif `EVALUATION`, FR-76) dans une story de plus ? (défaut : oui,
+  plus tard, avec l'ajout facultatif du motif au fait.)
 - **D-1011-1 → D-1011-9** (`stories/STORY-1011.md`) : six familles de formulaires, AT et décès renvoyés au barème
   corporel ; champs seulement, ni calcul ni alerte (1010, 1012) ; version figée à l'entrée en instruction (à défaut au
   premier enregistrement) ; tout ou rien, défauts pour les facultatifs ; écriture en `EN_INSTRUCTION` par GEST, GREC, RESP ;
@@ -686,3 +721,5 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   `MSYS_NO_PATHCONV=1`.
 - **Le client de Confluent ne crashe pas sur un `eachMessage` qui lève** : il journalise et relit le même message
   (`lib/kafkajs/_consumer.js`). La santé d'un consommateur bloqué se mesure donc aux échecs consécutifs par partition.
+- **Un e2e qui pose un dossier directement dans le dépôt doit lui donner une déclaration COMPLÈTE** (STORY-1013) : `vueDeLaDeclaration` fait `new Date(recueLe).toISOString()`, qui lève sur une date absente ; la route rend 500 alors que le service a écrit. Poser `canal`, `typeSinistre`, `recueLe` et `saisieLe`, pas seulement le type.
+- **Un motif de test de « 10 caractères au moins » : compter** (STORY-1013) : `trop court` en fait dix et passe ; écrire `trop bref` pour un refus.
