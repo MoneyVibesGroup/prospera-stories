@@ -1,6 +1,6 @@
 # STORY-923 : le BFF relaie `PATCH /dossiers/{id}`
 
-Status: in-progress
+Status: done
 
 **Complexité :** faible (un client, un proxy, une route)
 
@@ -62,6 +62,13 @@ Status: in-progress
 
 ## Definition of Done
 
-- [ ] `tsc`/build, unitaires et e2e concernés (par chemin), lint des fichiers touchés.
-- [ ] `docker compose up` du BFF (un provider et un contrôleur de plus) : le service démarre ; pile `grp-a` descendue, verrou rendu.
-- [ ] PR code et docs fusionnées ; tracker, journal, dette 4 barrée, ligne pour D.
+- [x] `tsc`/build, unitaires et e2e concernés (par chemin), lint des fichiers touchés.
+- [x] `docker compose up` du BFF (un provider et un contrôleur de plus) : le service démarre ; pile `grp-a` descendue, verrou rendu.
+- [x] PR code et docs fusionnées ; tracker, journal, dette 4 barrée, ligne pour D.
+
+## Livraison (2026-11-17)
+
+DONE : admin-panel #36 (dev `18a9893`). `tsc` et `nest build` verts ; unitaires 43/43 suites (533 tests), e2e 13/13 (232) ; lint des fichiers touchés propre.
+Deux mutations rouges sur l'assertion : (1) le BFF qui rend 500 au lieu du 409 (3 tests e2e rouges) ; (2) la `version` non propagée (1 e2e et 1 unitaire rouges).
+Pile : `docker compose up --no-deps admin-panel` (projet `grp-a`) : healthy, `Mapped {/api/dossiers/:id, PATCH}`, 401 sans jeton, route dans `/api/docs-json` ; pile retirée, verrou rendu.
+Limite : le round-trip réel contre `dossier-service` (409 de version) n'a pas été joué (client mocké en e2e) : à couvrir par la recette croisée (929) ou le gate de l'écran.
