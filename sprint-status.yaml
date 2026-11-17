@@ -359,12 +359,18 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1053.md"
     reserved_on: "2026-11-17"
     note: >
-      🚧 EN COURS le 2026-11-17 — les 15 rôles appliqués par le serveur dans les cinq services du distributeur
-      (ventes, terrain, recouvrement, pilotage, croissance). Bibliothèque acces-distributeur dans
-      prospera-plateforme/contrats/distributeur (étiquette acces-distributeur-v1), copiée à l'octet ; droits lus de
-      GET /moi/droits (droits ∪ droitsHorsJeton, cache 60 s, dv, identity.droits.changed@1) ; portée lue sur
-      reseau.portee.changed@1 (fail-closed, plus haute révision, suite conformite-portee-reseau-v1). Annoncée avant
-      le code (journal de D, « ⚠ Contrats »). Lot D, n° 9 du lot 3 (EPIC-223). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-plateforme#28 (dev e3727f8, étiquette acces-distributeur-v1 :
+      contrats/distributeur/src/acces.ts, aucun fichier de B) ; prospera-ventes-service#5 (dev f3f4774, 1233037,
+      9e626fa) ; prospera-terrain-service#2 (dev 5b701a8) ; prospera-recouvrement-service#2 (dev 2879924) ;
+      prospera-pilotage-service#2 (dev faa553a) ; prospera-croissance-service#2 (dev a035e61). Chaque route des treize
+      modules exige un droit de la table d'accès lu de GET /moi/droits (droits ∪ droitsHorsJeton, cache 60 s, dv,
+      identity.droits.changed@1) : DROIT_INSUFFISANT, DROITS_INDISPONIBLES ; AUTH_SERVICE_URL requise. Portée projetée
+      de reseau.portee.changed@1 dans les cinq services (échec fermé, plus haute révision), conformite-portee-reseau-v1
+      verte sur MongoDB réel, 13 modules inscrits au registre de reseau. commande : actes lus et écrits dans la portée
+      (GET /commande/validations, HORS_PORTEE), marge absente sans catalogue:marge:consulter ; paramètres :
+      commande:parametres:modifier (demandé à B, Q-D-5). Node 24 : tout vert ; mutations 16/16 et 14/14. Pile grp-d
+      (rejouée depuis dev) : 34/34 appels conformes. Annoncée avant le code (docs #638). Lot D, n° 9 du lot 3
+      (EPIC-223). NON SLOTTÉE.
 
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"

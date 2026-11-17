@@ -79,14 +79,25 @@
   réémis**, trous 21 → 35 et 41 → 45 déclarés et tracés ; un membre sur trois arrêté : émissions continues ; sans
   majorité : aucun numéro rendu. Décisions D-1052-1 → 14 (fiche). Verrou Docker pris sans attente (B l'avait rendu),
   rendu.
-- **STORY-1053** 🚧 en cours (2026-11-17) — fiche `stories/STORY-1053.md`, annonce « ⚠ Contrats » ci-dessous ;
-  branches `MNV-1053` dans les cinq services, `docs-1053` ici.
-- **Suivante : STORY-1053** 🚚 les 15 rôles appliqués par le serveur, dans les cinq services (EPIC-223) : table
-  d'accès lue du jeton et de `/moi/droits`, périmètre lu sur `reseau.portee.changed@1`. **B-960 est fusionnée**
-  (auth #42, `dev` cf8e001 et 8d48710 ; « → D » du journal de B, fiche `STORY-960.md` § « Ce que D lit pour
-  D-1053 ») : 1053 est **débloquée**. À savoir : un membre sans rôle `DIST_*` n'a **aucun** droit (D-960-12),
-  `TENANT_ADMIN` n'ouvre plus rien des modules ; les droits des modules sont tous dans `droitsHorsJeton`. Puis 1054
-  (prévenir l'assuré (2)) et 1055 (l'import réseau par la Reprise).
+- **STORY-1053** ✅ 🚚 — les 15 rôles appliqués par le serveur, dans les cinq services (PR prospera-plateforme#28,
+  `dev` e3727f8, étiquette **`acces-distributeur-v1`** ; ventes #5, `dev` 9e626fa ; terrain #2, `dev` 5b701a8 ;
+  recouvrement #2, `dev` 2879924 ; pilotage #2, `dev` faa553a ; croissance #2, `dev` a035e61 ; annonce « ⚠ Contrats »
+  #638 avant le code). La règle est une bibliothèque de D dans `contrats/distributeur/src/acces.ts` (dossier déjà lu
+  par les scripts racines : **aucun fichier de B touché**), copiée à l'octet dans `src/socle/acces/`, dossier
+  identique dans les cinq services. Chaque route d'un module exige un droit de la table d'accès, lu de
+  `GET /moi/droits` (`droits ∪ droitsHorsJeton`, cache 60 s, `dv`, `identity.droits.changed@1`) : 403
+  `DROIT_INSUFFISANT`, 503 `DROITS_INDISPONIBLES` ; `AUTH_SERVICE_URL` requise. Les cinq services projettent
+  `reseau.portee.changed@1` (`socle_portees_reseau`, plus haute révision, échec fermé) et passent
+  `conformite-portee-reseau-v1` sur MongoDB réel ; **inscrits au registre de `reseau`** pour leurs treize modules (sur
+  la pile). `commande` lit et écrit ses actes dans la portée (`GET /commande/validations`, 404 hors lecture,
+  `HORS_PORTEE`), et la marge est **absente** sans `catalogue:marge:consulter`. Paramètres : droit neuf
+  `commande:parametres:modifier` (D-1053-7, **→ B**, Q-D-5). Node 24 : tout vert dans les cinq ; mutations 16/16
+  (bibliothèque) et 14/14 (`ventes`). Pile `grp-d` (rejouée depuis `dev`, droits dérivés de la table d'auth) : 34/34
+  appels conformes ; témoin d'`origin/dev` : `TENANT_ADMIN` sans rôle ouvrait tout. Décisions D-1053-1 → 12 (fiche).
+  Verrou Docker pris à 11:05 sans attente (B l'avait rendu), rendu.
+- **Suivante : STORY-1054** 🛡 prévenir l'assuré (2), dans `prospera-notification-service` (EPIC-220) : accusé de
+  réception, repli dans la cloche, consentements par finalité (dépend de 1051, faite). Puis 1055 (l'import réseau par
+  la Reprise) et 1056 (la commande (1)).
 
 ### Lots 1 et 2
 
@@ -125,7 +136,7 @@
 - Distributeur (lot 2) : `prospera-ventes-service` (3412), `prospera-terrain-service` (3413),
   `prospera-recouvrement-service` (3414), `prospera-pilotage-service` (3415), `prospera-croissance-service` (3416).
 - `prospera-plateforme` : `series/` (`series-v1`, **`series-v1.1`** depuis STORY-1052), `vocabulaires/` (`vocabulaires-v1`), `contrats/distributeur/`
-  (`contrats-distributeur-v1`) ; **lot 3** : `encours/` (inscrit au README par B-956).
+  (`contrats-distributeur-v1` ; **`acces-distributeur-v1`** depuis STORY-1053, `src/acces.ts`) ; **lot 3** : `encours/` (inscrit au README par B-956).
 - **`prospera-assureur-fictif`** (lot 3, reçu de C, passation constatée le 2026-11-17 au rituel de 1046) : port 3411,
   profil `assureur-fictif`, « Rebase and merge » seul ; dans `prospera-plateforme`, le jeu
   `jeux-demonstration/assurance-compagnie-demo-reduite/` (étiquette `jeu-assurance-v1`). Le générateur reste dans le
@@ -228,8 +239,26 @@
     repli cloche, consentements, WhatsApp approuvé, effacement des destinataires par les droits des personnes).
     Dettes héritées : 4 suites e2e rouges (voir « Pièges ») ; ouvert de la passation de B (vérification des sorties
     d'essai, bascule de la garde sur l'état publié seul).
-  - **Prochaine story du distributeur : 1053** (les rôles, B-960 fusionnée), puis 1055 (l'import réseau par la
-    Reprise) et 1056 (la commande (1), premier vrai numéro `BL-` par les séries hébergées).
+  - **L'accès des cinq services** (STORY-1053, EPIC-223) :
+    - **la règle** : `prospera-plateforme/contrats/distributeur/src/acces.ts` (`acces-distributeur-v1`, e3727f8),
+      copiée à l'octet dans `src/socle/acces/acces-distributeur.ts` de chaque service (empreinte dans
+      `src/acces.invariant.spec.ts`) ; le dossier `src/socle/acces/` est **le même dans les cinq** : une évolution se
+      fait dans `ventes`, puis se recopie dans les quatre autres (vérifier avec `diff -r`) ;
+    - **une route neuve** déclare `@ExigeDroit('<droit du manifeste>', …)` (l'un suffit) ou `@ExigeUnDroitDuModule()` ;
+      sinon `src/acces.invariant.spec.ts` rougit. Les droits viennent de `/moi/droits` ; jamais de `roles`,
+      `perms[]` ou `roleMetier` ;
+    - **la portée** : `PorteesDesMembres.portee(org, userId, 'LECTURE'|'ECRITURE')` (échec fermé), ou
+      `.condition(org, userId, sorte, '<champ du nœud>')` à **ajouter** à la condition d'organisation ; lecture hors
+      portée ⇒ 404, écriture ⇒ 403 `HORS_PORTEE` (patron : `commande`, `garde-fous.service.ts`) ; les douze autres
+      modules l'appliqueront avec leur première route de données ;
+    - **une donnée privée** : la déclarer dans les champs privés du module (`ChampsPrives`, patron
+      `commande/garde-fous/donnees-privees.ts`) : elle est retirée de la réponse (clé absente) et sa consultation
+      journalisée (`DONNEE_PRIVEE_SERVIE`) ;
+    - **recette** : l'émetteur de jetons de 1053 dérive les droits de chaque rôle de
+      `auth-service/src/modules/rbac/table-d-acces-distributeur.ts` (scripts décrits dans la fiche) ; un vrai
+      auth-service se branche par `AUTH_SERVICE_URL` et `AUTH_JWKS_URI`.
+  - **Prochaine story du distributeur : 1055** (l'import réseau par la Reprise), puis 1056 (la commande (1), premier
+    vrai numéro `BL-` par les séries hébergées ; y lire le nœud du point de vente au lieu du corps).
 
 ## Demandes aux autres groupes
 
@@ -241,8 +270,10 @@
   (prospera-stories, PR de l'annonce de 1053). Jusque-là, `PUT /api/v1/commande/parametres` répond 403
   `DROIT_INSUFFISANT` à tous (échec fermé, sans urgence : aucun écran ne l'appelle). Q-D-5 au PO dans ce journal ; si
   le PO préfère un droit existant, D change une ligne de `ventes`.
-- **→ B (2026-11-17), information : les cinq services du distributeur lisent `/moi/droits` (STORY-1053)** — aucune
-  action. Comme `reseau` : `droits ∪ droitsHorsJeton`, cache 60 s, `dv`, `identity.droits.changed@1` (cinq groupes de
+- **→ B (2026-11-17), information : les cinq services du distributeur lisent `/moi/droits` (STORY-1053, livrée)** —
+  aucune action. Aucun fichier de B touché dans la plateforme : la bibliothèque est dans `contrats/distributeur/`
+  (`src/acces.ts`, étiquette `acces-distributeur-v1`), déjà jouée par les scripts racines ; si vous tenez le README,
+  la ligne `contrats/distributeur/` peut dire « et la règle d'accès des cinq services (STORY-1053) ». Comme `reseau` : `droits ∪ droitsHorsJeton`, cache 60 s, `dv`, `identity.droits.changed@1` (cinq groupes de
   consommateurs neufs, `<service>.droits-membres`). Si le contrat `moi-droits` 1.x changeait de forme, le dire ici.
 
 - **→ B (2026-11-17) : `series-v1.1` est publiée ; la comptabilité peut rester sur `series-v1` (STORY-1052)** —
@@ -270,8 +301,9 @@
   vôtres (STORY-999) ; l'arbitrage après trois relances reste chez vous.
 
 - **→ B (2026-11-17) : attribuer les droits `reseau:*` par auth-service (STORY-1050, pour B-960)** — **servie par
-  B-960** (auth #42, `dev` 8d48710 ; les cinq `reseau:*` sont dans la table des 15 rôles) ; reste à le vérifier en
-  1053 (un membre sans rôle `DIST_*` n'a plus aucun droit, D-960-12).
+  B-960** (auth #42, `dev` 8d48710 ; les cinq `reseau:*` sont dans la table des 15 rôles) ; **vérifié en 1053** (la table
+  d'auth, lue ligne à ligne par l'émetteur de recette : les cinq `reseau:*` aux rôles de l'annexe ; un membre sans rôle
+  `DIST_*` n'a aucun droit, D-960-12).
   Depuis STORY-1050, `reseau-service` lit ses droits par `GET /api/v1/moi/droits` et n'a plus de table rôle → droits :
   tant qu'aucun rôle de tenant ne porte un droit `reseau:*`, toutes les routes du module qui en exigent un répondent 403
   `DROIT_INSUFFISANT` (la garde du module et `/health` ne changent pas). Les cinq codes, tous vérifiés par une garde
@@ -331,7 +363,7 @@
 ## Réponses aux demandes reçues
 
 - **← B (2026-11-17) : les 15 rôles du distributeur sont servis, D-1053 est débloquée (STORY-960)** — **lue** au
-  rituel de 1052 ; appliquée par **1053** (droits `droits ∪ droitsHorsJeton` de `/moi/droits`, `roleMetier` jamais
+  rituel de 1052 ; **appliquée par 1053** (livrée le 17/11) (droits `droits ∪ droitsHorsJeton` de `/moi/droits`, `roleMetier` jamais
   pour décider d'un droit, aucun droit sans rôle `DIST_*`). Les paramètres de `commande` (D-1049-4) et la lecture des
   séries (D-1052-12) restent au `TENANT_ADMIN` jusqu'à 1053, qui choisira entre un droit neuf et `roleMetier`.
 - **← B (2026-11-17) : comment ouvrir une Créance dans `paiement` (STORY-963, pour D-1059)** — **lue** ; servira
@@ -359,13 +391,17 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-17, STORY-1053, avant la fusion du code) — les 15 rôles appliqués par les cinq services du
+- **PUBLIÉ (2026-11-17, STORY-1053 : prospera-plateforme#28, `dev` e3727f8, étiquette `acces-distributeur-v1` ;
+  ventes #5 `dev` 9e626fa ; terrain #2 5b701a8 ; recouvrement #2 2879924 ; pilotage #2 faa553a ; croissance #2
+  a035e61) ; ANNONCÉ avant la fusion du code (prospera-stories #638) — les 15 rôles appliqués par les cinq services du
   distributeur** (`prospera-ventes-service`, `-terrain-`, `-recouvrement-`, `-pilotage-`, `-croissance-service`) et
   la bibliothèque `acces-distributeur` (`prospera-plateforme/contrats/distributeur/src/acces.ts`, étiquette
   `acces-distributeur-v1`, rien d'existant n'y change). Aucun topic, aucun champ n'est renommé ni retiré ; **ce qui
   change, ce sont des refus et une variable requise.** Fiche : `stories/STORY-1053.md` (D-1053-1 → 9).
+  - **Écart avec l'annonce** : les deux réglages facultatifs s'appellent `DROITS_DELAI_MS` et `DROITS_CACHE_TTL_MS`,
+    comme dans `reseau` (D-1053-10), au lieu des `AUTH_DROITS_*` annoncés. Rien d'autre.
   - **Variable neuve, REQUISE dans les cinq services** : `AUTH_SERVICE_URL` (auth-service, pour
-    `GET /api/v1/moi/droits`) ; facultatives : `AUTH_DROITS_DELAI_MS` (2 000), `AUTH_DROITS_CACHE_TTL_MS` (60 000, 60 s
+    `GET /api/v1/moi/droits`) ; facultatives : `DROITS_DELAI_MS` (2 000), `DROITS_CACHE_TTL_MS` (60 000, 60 s
     au plus), `KAFKA_DROITS_MEMBRES_GROUP_ID`, `KAFKA_PORTEES_GROUP_ID`. Une pile sans `AUTH_SERVICE_URL` ne démarre
     plus.
   - **Refus neufs sur toute route d'un module** (après la garde du module) : **403 `DROIT_INSUFFISANT`** (le membre n'a
@@ -597,6 +633,17 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1053** : (1) un émetteur de jetons de recette qui **régénère sa clé** à chaque démarrage, arrêté puis relancé
+  (recette « auth arrêté »), fait répondre **401** à tous les services (même `kid`, clé changée, JWKS en cache) : garder
+  la clé dans un fichier du conteneur. (2) Une mutation qui retire un appel laisse un import ou un paramètre inutilisé :
+  ts-jest refuse de charger la suite (« Test suite failed to run ») ; tourner la mutation pour garder le symbole
+  (`… && unParmi.length < 0`, `delaiMs * 1000`). (3) Sous Git Bash, `python` (Windows) ne lit pas `/tmp/…` : écrire
+  les réponses de `curl` dans un chemin `cygpath -m`. (4) Le cache des droits compte son âge depuis l'**écriture** :
+  une recette longue qui suppose qu'un membre lu au début est encore en cache après `stop` d'auth se trompe (60 s) ;
+  prendre un membre jamais lu pour prouver le 503. (5) Un dossier racine neuf dans la plateforme fait rougir
+  `test/scripts-racines.test.ts` tant que B ne l'a pas inscrit : mettre le code de D dans un dossier déjà lu
+  (`contrats/distributeur/`).
 
 - **STORY-1052** : (1) **deux transactions MongoDB qui créent le même document (upsert) ne se heurtent qu'à
   l'acquittement** : chacune voit son propre document neuf et tire le même numéro ; sur un document qui existe, le
