@@ -116,6 +116,13 @@
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-17) : le LC fictif lit l'espace de l'instance (STORY-1048)** — **information**, aucune action exigée.
+  Vos piles qui ne posent que `FICTIF_ESPACE=essai` démarrent comme avant. Si une pile pose `INSTANCE_ESPACE` pour un
+  autre service et la passe aussi au LC fictif, elle doit valoir `ESSAI` (sinon refus, sortie 78,
+  `ASSUREUR_FICTIF_INTERDIT`). Conseillé : poser `INSTANCE_ESPACE=ESSAI` au LC fictif. La remise à zéro du LC n'est plus
+  suivie d'une relecture de votre `sortie` : rejouer un parcours après elle demande des lots neufs (ce que
+  `liaison-assureur` fait de lui-même).
+
 - **→ B (2026-11-17) : ce que la bibliothèque d'encours lit de la Créance (B-963, B-965)** — **information**, aucune
   action exigée avant 1059. `encours@1` (STORY-1047) prend en entrée l'**état absolu** de chaque Créance et de chaque
   crédit du tiers, par clé, avec une **révision croissante** (la plus haute l'emporte) : pour la Créance, `statut`
@@ -165,6 +172,21 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-17, STORY-1048, avant la fusion du code) — `prospera-assureur-fictif` : le démarrage et la remise
+  à zéro.** Rien ne change sur le fil ni dans l'API du LC (`/lc/echange`).
+  - **Démarrage** : le LC fictif lit désormais l'espace de l'instance, **`INSTANCE_ESPACE`** (STORY-934, `ESSAI` |
+    `REEL`). `ESSAI` démarre ; `REEL`, toute autre valeur ou une chaîne vide **refusent**, même avec
+    `FICTIF_ESPACE=essai`. `FICTIF_ESPACE=essai` seule (piles de C, STORY-986) **démarre comme avant** ; posées toutes
+    deux, elles doivent s'accorder. Le refus arrête le processus avant tout chargement (aucune connexion, aucun port) :
+    une ligne JSON sur la sortie d'erreur (`"code":"ASSUREUR_FICTIF_INTERDIT"`, `motif` parmi `ESPACE_REEL`,
+    `ESPACE_INCONNU`, `ESPACES_EN_DESACCORD`, `AUCUNE_PREUVE_D_ESSAI`), puis le **code de sortie 78**. Le compose du
+    dépôt pose `INSTANCE_ESPACE=ESSAI` et `FICTIF_ESPACE=essai`.
+  - **Remise à zéro** (`POST /api/v1/assureur-fictif/remise-a-zero`) : elle efface aussi l'**entrée** que le LC a écrite
+    et **écarte** ce que Prospera avait déposé dans `sortie` avant elle (inscrit au journal des reçus, `IGNORE`, code
+    `ANTERIEUR_A_LA_REMISE_A_ZERO`, jamais relu ; rien n'est supprimé de `sortie`). Réponse : `{ lots }` devient
+    `{ lots, sortieEcartee, entreeEffacee }` (ajouts). Ce que Prospera dépose après la remise à zéro est reçu
+    normalement.
 
 - **PUBLIÉ (2026-11-17, STORY-1047, prospera-plateforme#24, `dev` b061cec, étiquette `encours-v1`) ; ANNONCÉ avant la
   fusion du code (prospera-stories #589) — `encours@1`, bibliothèque neuve** (`prospera-plateforme/encours/` ; rien
