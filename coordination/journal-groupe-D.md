@@ -188,6 +188,26 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-17, STORY-1049, avant la fusion du code) — `prospera-ventes-service`, module `commande` : les
+  garde-fous.** Aucun fait publié, aucun topic, aucun contrat existant ne change. Ajouts seulement, **sans consommateur
+  aujourd'hui** (ni écran, ni service).
+  - **Routes** (garde `COMMANDE_NOT_ENTITLED`) : `GET /api/v1/commande/parametres` (version courante),
+    `GET /api/v1/commande/parametres/versions/{version}`, `PUT /api/v1/commande/parametres` (`TENANT_ADMIN` jusqu'à
+    D-1053 ; corps `{ versionAttendue, valeurs, motif }`), `GET /api/v1/commande/tiers/{tiersId}/credit` (le
+    disponible à crédit, FR-187), `POST /api/v1/commande/validations` (l'acte, `Idempotency-Key` exigée ; **squelette** :
+    sa forme définitive vient avec la saisie, STORY-1056), `GET /api/v1/commande/validations/{commandeId}`,
+    `POST /api/v1/commande/validations/{commandeId}/reservations` (reprise de la saga).
+  - **Codes de refus neufs** : `PARAMETRES_INVALIDES`, `PARAMETRES_VERSION_PERIMEE`, `PARAMETRES_VERSION_INCONNUE`,
+    `CLE_D_IDEMPOTENCE_MANQUANTE`, `CLE_REUTILISEE_AVEC_AUTRE_CHARGE`, `COMMANDE_DEJA_VALIDEE`, `VALIDATION_INCONNUE`,
+    `PLAFOND_INCONNU`, `CREDIT_BLOQUE`, `STOCK_NON_INSTALLE`, `ENCOURS_NON_INSTALLE`, `ENCOURS_INCALCULABLE`,
+    `PLAFOND_CREDIT_DEPASSE` (ceux de la spine gardent son sens).
+  - **Échec fermé, pour information de B et de qui construira `pdv`** : tant que la Créance (B-963, B-965) n'est pas
+    projetée dans `commande`, ses sources sont `ABSENTE` et **toute commande à crédit est refusée**
+    `ENCOURS_NON_INSTALLE` ; sans plafond connu du tiers, `PLAFOND_INCONNU`. Ce que `commande` attend de
+    `pdv.plafond.changed@1` (fait du catalogue, schéma non fixé) : par `(tiersId, perimetre)`, un état absolu avec une
+    `revision` croissante, `devise`, `statut` `FIXE` (avec le montant en unité mineure) ou `SANS_OBJET`, et `suspendu`
+    (le crédit bloqué, FR-189). De la Créance : rien de neuf (voir « → B, ce que la bibliothèque d'encours lit »).
+
 - **PUBLIÉ (2026-11-17, STORY-1048, prospera-assureur-fictif#4, `dev` 4f4aa89) ; ANNONCÉ avant la fusion du code
   (prospera-stories #597) — `prospera-assureur-fictif` : le démarrage et la remise à zéro.** Rien ne change sur le fil ni dans l'API du LC (`/lc/echange`).
   - **Démarrage** : le LC fictif lit désormais l'espace de l'instance, **`INSTANCE_ESPACE`** (STORY-934, `ESSAI` |
