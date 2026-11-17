@@ -84,6 +84,7 @@ reserved_ranges:
       Sous-plage de STORY-900 → STORY-1199 (Dev B), découpée le 2026-11-14 pour quatre sessions
       parallèles sur deux machines : aucune ne voit les branches locales des autres, donc chacune puise
       dans sa seule plage. Les fiches sont écrites juste avant de coder.
+      Lot 3 (2026-11-17, PLAN-4-SESSIONS-LOT-3-2026-11-17.md §5) : après 1002 → 1004 du lot 2, STORY-1005 → 1014, dix petites stories (garde sur l'état publié, écarts de 1001, instruction et chiffrage EPIC-207, référentiel des experts) ; ordre de travail 1005, 1006, 1007, 1008, 1014, 1009, 1011, 1010, 1012, 1013.
 
   - range: "STORY-1030 → STORY-1079"
     status: "RÉSERVÉ"
