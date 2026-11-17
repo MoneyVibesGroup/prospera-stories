@@ -1034,6 +1034,16 @@ reserved_ranges:
       🏁 DONE le 2026-11-17 — prospera-sinistres-service#9 (dev a358048) ; manifeste prospera-stories#573. Relances (5
       jours, 3 sans effet, arbitrage, constat posé par commande), attente posée et levée par les transitions, files du
       silence et agents inactifs. Pile verte, rejouée depuis dev. Lot 2 de C, n° 10. NON SLOTTÉE.
+  - range: "STORY-1000"
+    status: "RÉSERVÉ"
+    owner: "Déclarer : canaux, saisie commune, doublon (Prospera et LC), réserves, urgence corporelle (plateforme, liaison-assureur, sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1000.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-plateforme#20 (dev dba6ce0), prospera-liaison-assureur-service#6 (dev 30c6364),
+      prospera-sinistres-service#10 (dev 85206fc). Formulaire commun, formulaire de secours unique, doublon par
+      empreinte HMAC (Prospera et LC), réserves jamais bloquantes, urgence en tête des files. Pile verte, rejouée
+      depuis dev. Lot 2 de C, n° 11. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
