@@ -548,6 +548,40 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-17, STORY-965 — la Créance (2) : `paiement.creance.changed@1`, le crédit du tiers et ses compteurs,
+  annoncé AVANT la fusion du code** (`prospera-paiement-service`, EPIC-231 ; fiche `stories/STORY-965.md`,
+  D-965-1 → 12). Tout est AJOUT : rien d'existant ne change de forme.
+  - **Topic neuf `paiement.creance.changed`** (contrat `@1`, `schemaVersion: 1`), producteur unique
+    `paiement-service`, par son outbox, **dans la transaction de chaque changement** d'une Créance à source du
+    périmètre `SOCIETE` : ouverture (`OUVERTURE`), encaissement constaté (`ENCAISSEMENT`), déclaré (`DECLARATION`),
+    validé (`VALIDATION`), affecté (`AFFECTATION`), contre-passé (`CONTRE_PASSATION`), clôture (`CLOTURE`).
+    **Clé de partition : `orgId`.** Schéma au registre Karapace, sujet `paiement.creance.changed-value`,
+    compatibilité **BACKWARD**, modèle fermé (`contrat/schemas/paiement.creance.changed.json`).
+  - **Charge (état absolu, tout requis)** : enveloppe `schemaVersion`, `eventId`, `orgId`, `occurredAt` ; puis
+    `organisationId`, `creanceId` (= `<source>:<sourceId>`, K-7), `cleRegistre` (l'`id` de `GET /creances/{id}`),
+    `revision` (entier ≥ 1, strictement croissant par Créance, donné par la base), `cause`, `source`, `sourceId`,
+    `tiersId`, `perimetre` (`SOCIETE`), `livraisonId` (ou `null`), `devise`, `statut` (`OUVERTE` | `CLOTUREE`),
+    `montantOrigineMineur`, `confirmeMineur`, `montantDeclareMineur`, `annuleMineur`, `restantCertainMineur`,
+    `restantAfficheMineur`, `montantExigibleMineur` (= le certain), `tropPercuMineur`, `echeanceLe` (`AAAA-MM-JJ`),
+    `lueLe` (ISO). Montants entiers en unité mineure.
+  - **Écarts à ce que D attendait** (« → B, ce que la bibliothèque d'encours lit ») : aucun pour `FaitCreance`
+    (mêmes noms, révision, deux restants). **`paiement.credit-tiers.changed@1` n'est PAS publié par 965** : le crédit
+    du tiers de cette version, ce sont les trop-perçus, portés par `tropPercuMineur` (D-965-6). Une Créance du
+    périmètre d'un freelance ne publie rien sur ce topic (amendement §1.2).
+  - **Route neuve** `GET /api/v1/creances/tiers/{tiersId}/compteurs?perimetre=SOCIETE|FREELANCE:<id>`, droit
+    **`paiement:creance:consulter`, lu hors du jeton** (`GET /moi/droits`, `droits ∪ droitsHorsJeton`, cache
+    `(membre, organisation, dv)` 60 s), garde du module → `{ tiersId, perimetre, le, parDevise: [{ devise,
+    nombreDeCreancesOuvertes, nombreDeCreancesEchues, restantCertainMineur, restantAfficheMineur, echuCertainMineur,
+    plusAncienneEcheance, retardMaxJours, creditDuTiersMineur, versionEncours }] }`, calculé par `encours@1` (copie à
+    l'octet de `encours-v1`), sans encours (l'engagement est à `commande`). Refus : 400 `CREANCE_INVALIDE`
+    (`tiersId`), 400 de validation (`perimetre`), 403 `PAIEMENT_NOT_ENTITLED`, 403 `PERMISSION_DENIED`
+    (`details.droit`), 503 `DROITS_INDISPONIBLES`.
+  - **Collection neuve** `etats_de_creance` (le dernier état publié, la révision). **Variables neuves, facultatives** :
+    `AUTH_SERVICE_URL` (forme `http://auth-service:3001/api/v1` ; absente, la route ferme en 503),
+    `AUTH_SERVICE_TIMEOUT_MS` (3 000). **Manifeste** (`manifestes/paiement.manifest.ts`, amendé dans cette PR) : la
+    route en `routesLectureSeule`.
+  - **Pour `catalogue-faits@1` (D)** : `paiement.creance.changed@1` y est déjà ; rien à demander.
+
 - **2026-11-17, STORY-964 — la validation inaltérable, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
   EPIC-113 et 120 ; fiche `stories/STORY-964.md`, D-964-1 → 9). **Fusionné le 17/11** : comptabilite #5, `92f8c53` sur
   `dev` (annonce : stories #640). Tout est AJOUT, sauf un champ de la vue d'une écriture

@@ -219,6 +219,7 @@ export const MANIFESTE_PAIEMENT = {
     'GET /api/v1/creances',
     'GET /api/v1/creances/{id}',
     'GET /api/v1/creances/{id}/encaissements',
+    'GET /api/v1/creances/tiers/{tiersId}/compteurs', // crédit du tiers et compteurs (STORY-965), droit hors du jeton
     'GET /api/v1/encaissements',
     'GET /api/v1/encaissements/export',
     'GET /api/v1/encaissements/ecarts',
