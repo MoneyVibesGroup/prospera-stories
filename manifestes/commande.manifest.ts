@@ -1,4 +1,5 @@
 // Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
+// Amendé le 2026-11-17 (STORY-1056) : C5, + `commande.engagement-tiers.changed@1` et `commande.serie.changed@1` (faits « nouveaux » d'AD-20, publiés par l'outbox de `prospera-ventes-service`).
 // Manifeste M08 — Commande (format du contrat de module, clause C1, amendée le 2026-11-10, le 2026-11-11 et
 // le 2026-11-12).
 // Source : PRD distributeur (prds/prd-distributeur-2026-11-12), annexe A.1, treize clauses C1 → C13 tranchées.
@@ -108,6 +109,8 @@ export const MANIFESTE_COMMANDE = {
     'commande.remise.decidee@1',
     'commande.bon-livraison.emis@1',
     'commande.bon-livraison.livre@1', // quantités livrées confirmées, d'où naît la facture (FR-36, FR-42)
+    'commande.engagement-tiers.changed@1', // [AD-9, AD-20 « nouveau » ; STORY-1056] état absolu de l'engagement par (tiers, perimetre) : TTC restant à facturer, version d'encours ; pdv, recouvrement
+    'commande.serie.changed@1', // [AD-5, AD-20 « nouveau » ; STORY-1056] tête de la suite des bons BL- (dernier, époque)
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] dérogations, annulations, export, effacement
     'commande.realite.constatee@1', // [AD-14, spine IA] panier proposé accepté ou non, erreur de commande confirmée ou écartée à la livraison (issue : ACCEPTE, MODIFIE, REJETE, ERREUR_CONFIRMEE, ERREUR_ECARTEE) ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
