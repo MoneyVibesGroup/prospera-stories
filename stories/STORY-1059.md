@@ -184,7 +184,10 @@ absolu `paiement.creance.changed@1`, crédit du tiers = trop-perçu) ; journal d
 
 ## La recette, pour la rejouer
 
-Hors dépôt (aucun fichier de pile n'est versionné : le `docker-compose.yml` de `ventes` ne lève pas `paiement`) :
+**Versionnée** depuis le 2026-11-17, à la demande de l'utilisateur : `prospera-ventes-service/scripts/recette/1059/`
+(PR ventes #9, `dev` 2453485). Ce dossier contient `pile-1059.yml`, `emetteur-de-test.mjs`, `recette-1059.py` et un
+`README.md` qui explique comment la rejouer. Ces fichiers sont hors de l'image et du lint. Le `docker-compose.yml` de
+`ventes` ne lève pas `paiement` : c'est pourquoi la pile est à part. Elle comprend :
 
 - **La pile** (`pile-1059.yml`, `docker compose -p grp-d`) : `ventes-service` (image de la branche ou d'`origin/dev`,
   `NODE_ENV=staging`, `LOG_PRETTY=false`, `INSTANCE_ESPACE=ESSAI`, `COMMANDE_RESERVATION_STOCK=recette`,

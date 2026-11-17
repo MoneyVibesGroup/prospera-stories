@@ -207,6 +207,9 @@
   - Décisions D-1059-1 → 12 (fiche) ; Q-D-10 au PO ; → B (consommateur de `facturation.facture.emise@1`). **Verrou Docker
     pris à 22:37 sans attente (B l'avait rendu), une seule prise, rendu à 23:29** ; aucun conteneur, volume ni réseau
     `grp-d` ne reste.
+  - **Recette versionnée** (à la demande de l'utilisateur, le 2026-11-17) : `prospera-ventes-service/scripts/recette/1059/`
+    (PR ventes#9, `dev` 2453485), avec la pile, l'émetteur de jetons, le pilote et le `README.md` qui explique comment la
+    rejouer. Avant, ces scripts n'existaient que dans un dossier temporaire du poste.
 - **Le lot 3 de D est fini : 15 stories sur 15 (1045 → 1059)**, le 2026-11-17. Passation à Dev A mise à jour en entier
   (« Passations »), avant le 04/12 (D-L3-6). Suivantes du distributeur, hors lot : la facture juste (2), la commande (2),
   les remplaçantes d'EPIC-227.
