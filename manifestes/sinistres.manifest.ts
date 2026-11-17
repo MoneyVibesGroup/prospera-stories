@@ -296,6 +296,8 @@ export const MANIFESTE_SINISTRES = {
     'GET /api/v1/sinistres/journal', // [proposition, `sinistres:journal:consulter`]
     'GET /api/v1/sinistres/files/{file}', // STORY-998 : les files de travail par rôle (FR-147, FR-148), figée
     'GET /api/v1/sinistres/activite/agents-inactifs', // STORY-999 : les agents sans écriture depuis 10 jours ouvrés (FR-144), figée
+    'GET /api/v1/sinistres/gestionnaires', // STORY-1002 : le registre des gestionnaires et leur charge pondérée (FR-51), figée
+    'GET /api/v1/sinistres/dossiers/{id}/affectation/candidats', // STORY-1002 : la liste de choix d'un dossier (FR-50, FR-51), figée
     'GET /api/v1/instance/sinistres/{organisationId}/export',
   ],
 
