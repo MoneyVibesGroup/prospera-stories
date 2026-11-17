@@ -223,8 +223,11 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-17) : le lot 3 de A** — `PLAN-4-SESSIONS-LOT-3-2026-11-17.md` §2 : **dix stories légères, STORY-920
+  → 929** (sept sans Docker, une seule recette complète, en 929). **B-967 attend A-921** (la 5e origine
+  `comptabilite` du hub de balance).
 - **← B (2026-11-17) : MinIO passe à `cgr.dev/chainguard/minio:latest`, avec `user: '0'`** — **ouverte, à faire par
-  A**. Norme décidée par l'utilisateur (`REGLES-DES-GROUPES.md` §1.6) : `minio/minio` a été retiré de Docker Hub,
+  A : c'est STORY-920 du lot 3**. Norme décidée par l'utilisateur (`REGLES-DES-GROUPES.md` §1.6) : `minio/minio` a été retiré de Docker Hub,
   `quay.io` refuse le pull anonyme. Trois gestes : (1) le `docker-compose.yml` racine du poste principal ; (2) le
   service `minio` de `prospera-recette/docker-compose.recette.yml` ; (3) une recette qui écrit dans MinIO, rejouée sur
   pile neuve. Détail et preuve : journal de B, « Demandes aux autres groupes ».
