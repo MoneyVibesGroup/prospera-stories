@@ -669,6 +669,35 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-17, STORY-968 — les comptes de tiers, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
+  EPIC-115 ; fiche `stories/STORY-968.md`, D-968-1 → 12). Des routes et des champs AJOUTÉS, rien de renommé ; **un
+  comportement change** : une ligne sur un compte collectif sans tiers est refusée.
+  - **Routes neuves** (droit de lecture `comptabilite:dossier:consulter`, au manifeste en `routesLectureSeule`) :
+    - `POST /api/v1/dossiers/{d}/tiers` (**`comptabilite:tiers:administrer`**, déjà déclaré et attribué en 971 : aucun
+      droit neuf) : `{ code, nom, categorie: CLIENT | FOURNISSEUR | SALARIE, delaiDePaiementJours?, referenceExterne?:
+      { systeme, id } }` → 201, 200 au rejeu, 409 `TIERS_EN_DOUBLE` ; `GET /api/v1/dossiers/{d}/tiers` (pages par
+      code) et `GET /api/v1/dossiers/{d}/tiers/{tiersId}` ;
+    - sous `/api/v1/dossiers/{d}/exercices/{e}` : `GET …/comptes-collectifs` (`comptes-collectifs@1`), `GET
+      …/comptes-collectifs/{racine}/auxiliaires` (par tiers, `sansTiers`, `collectifAuGrandLivre`, `concorde`), `GET
+      …/tiers/balance-agee?au=&categorie=&tranches=&devise=` (tranches `NON_ECHU`, `0-30`, `31-60`, `61-90`, `91+` par
+      défaut ; montants signés débit − crédit ; `au` absente = horloge du service), `GET …/tiers/{tiersId}/grand-livre`
+      (la forme du grand livre d'un compte, avec `tiers` et le `compte` de chaque mouvement).
+  - **Champs AJOUTÉS, facultatifs** : `tiersId` et `echeance` sur les lignes de `POST …/ecritures` et `PUT
+    …/ecritures/{id}`, sur les lignes de toute écriture lue, et sur les mouvements de `GET …/grand-livre/comptes/{c}`.
+  - **Comportement** : une ligne sur un collectif (SN, SMT : 401, 409, 411, 416, 419, 421, 422 ; CIMA : 411, 414, 420,
+    425 ; SFD-BCEAO : aucun) sans tiers ⇒ 422 **`TIERS_REQUIS`**, à la saisie, à la correction ET à la validation (un
+    brouillard d'avant 968 se corrige avant d'être validé). Un tiers ou une échéance hors collectif ⇒ 422
+    `TIERS_HORS_COLLECTIF`. Les écritures déjà validées ne changent pas.
+  - **Refus nommés neufs** : 422 `TIERS_REQUIS`, `TIERS_INCONNU`, `TIERS_HORS_COLLECTIF`, `ECHEANCE_INVALIDE`,
+    `TRANCHES_INVALIDES` ; 409 `TIERS_EN_DOUBLE` ; 404 `TIERS_INTROUVABLE`, `COLLECTIF_INCONNU`.
+  - **Base** : collection neuve `tiers` (en ajout seul), index neuf `grand_livre_par_tiers` sur `ecritures`.
+  - **Inchangé** : `balance.submitted` (la balance publiée porte toujours le compte du plan, le collectif, jamais un
+    compte auxiliaire : le hub n'a rien à changer). Aucun topic, aucun schéma, aucune variable.
+  - **Manifeste** (`manifestes/comptabilite.manifest.ts`, amendé dans cette PR) : six routes de lecture, commentaire
+    des tiers et des droits, « tiers » dans l'avertissement de désinstallation.
+  - **Pour A** (relecture) : rien à changer chez vous. **Pour D** : un tiers de la comptabilité peut citer un point de
+    vente (`referenceExterne: { systeme: 'paiement', id: 'pdv-0042' }`) ; il n'est jamais lu chez vous.
+
 - **2026-11-17, STORY-967 — la balance dérivée du grand livre, publiée au hub, annoncé AVANT la fusion du code**
   (`prospera-comptabilite-service`, EPIC-114 ; fiche `stories/STORY-967.md`, D-967-1 → 12). **Fusionné le 17/11** :
   comptabilite #7, `328e727` sur `dev` (annonce : stories #660), sans écart au contrat annoncé. Le PREMIER fait produit

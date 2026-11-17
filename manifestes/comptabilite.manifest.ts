@@ -28,6 +28,8 @@
 //   STORY-967), sinon elle est fermée. La vérification de la piste chaînée exige `comptabilite:piste:consulter`
 //   (STORY-964), le grand livre et les balances publiées `comptabilite:dossier:consulter` (STORY-966, 967). Pas de
 //   séparation des pouvoirs au niveau de l'acteur (D-964-7) : la piste dit qui a saisi, qui a validé, qui a publié.
+//   Créer un tiers exige `comptabilite:tiers:administrer` ; les lectures des tiers, des collectifs, des auxiliaires et
+//   de la balance âgée exigent `comptabilite:dossier:consulter` (STORY-968, aucun droit neuf).
 // - Grand livre (STORY-966) : calculé à la volée sur les seules écritures VALIDÉES (contre-passations comprises, jamais
 //   un brouillard), lu dans un instantané MongoDB ; par compte et par période (bornes inclusives, dans l'exercice).
 // - Balance (STORY-967) : dérivée du grand livre (mouvements hors à-nouveaux, soldes de clôture), équilibrée, refusée
@@ -35,6 +37,16 @@
 //   `comptabilite`, `source: direct`, émetteur `comptabilite-service`, `checksum` du hub) par une outbox écrite dans
 //   la transaction de la publication, avec son entrée de piste ; idempotente (même contenu : même version, même
 //   `checksum`) ; le verdict du hub (`balance.created`, `balance.rejected`) est lu et porté par la publication.
+// - Comptes de tiers (STORY-968) : la comptabilité POSSÈDE ses tiers (clients, fournisseurs, salariés), un registre par
+//   DOSSIER (`tiers`, en ajout seul : un tiers cité par des lignes validées ne se modifie pas) ; une référence externe
+//   facultative cite le même tiers dans un autre système (paiement, réseau), sans jamais l'appeler. Les comptes
+//   COLLECTIFS sont déclarés par référentiel (`comptes-collectifs@1`, donnée du service : SN et SMT 401, 409, 411, 416,
+//   419, 421, 422 ; CIMA 411, 414, 420, 425 ; SFD-BCEAO aucun) ; toute ligne d'écriture sur un collectif porte un tiers
+//   de sa catégorie (champ facultatif `tiersId` de la ligne, refus 422 `TIERS_REQUIS` sinon) et une échéance figée.
+//   L'auxiliaire et le collectif concordent par construction (ce sont les mêmes lignes) ; la balance publiée garde le
+//   compte du plan (le collectif), jamais un compte auxiliaire. Balance âgée par tiers et par tranche d'ancienneté
+//   (0-30, 31-60, 61-90, 91+ par défaut, paramétrables), à une date d'arrêté (l'horloge du service par défaut), sur
+//   les lignes non lettrées (le lettrage vient en STORY-969).
 // - Inaltérabilité (STORY-964) : une écriture validée porte son numéro définitif, continu et sans trou par journal et
 //   par exercice ; elle ne se modifie ni ne se supprime (409 `ECRITURE_VALIDEE_INALTERABLE`), elle se contre-passe. La
 //   piste d'audit est chaînée par empreinte (SHA-256), une chaîne par exercice, et se vérifie par une route.
@@ -104,7 +116,7 @@ export const MANIFESTE_COMPTABILITE = {
 
   // C9 : texte rendu par la partie A avant la désinstallation.
   avertissementDesinstallation:
-    "Journaux, écritures validées, grand livre et piste d'audit restent enregistrés et lisibles ; aucune nouvelle écriture ne pourra être saisie et aucune balance ne sera plus dérivée du grand livre.",
+    "Journaux, écritures validées, tiers, grand livre et piste d'audit restent enregistrés et lisibles ; aucune nouvelle écriture ne pourra être saisie et aucune balance ne sera plus dérivée du grand livre.",
 
   // C12 : format lisible par la version précédente pendant 7 jours.
   retourArriere: 'SANS_PERTE',
@@ -124,6 +136,12 @@ export const MANIFESTE_COMPTABILITE = {
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/grand-livre/comptes/{compte}', // STORY-966 : un compte
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/balance/publications', // STORY-967 : les balances publiées
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/balance/publications/{version}', // STORY-967 : une balance
+    'GET /api/v1/dossiers/{dossierId}/tiers', // STORY-968 : le registre des tiers du dossier
+    'GET /api/v1/dossiers/{dossierId}/tiers/{tiersId}', // STORY-968 : un tiers
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/comptes-collectifs', // STORY-968 : les collectifs
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/comptes-collectifs/{racine}/auxiliaires', // STORY-968
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/tiers/balance-agee', // STORY-968 : la balance âgée
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/tiers/{tiersId}/grand-livre', // STORY-968 : un auxiliaire
   ],
 
   // C13, point 7 (chemins vus par le service). À créer.
