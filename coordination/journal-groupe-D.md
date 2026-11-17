@@ -53,9 +53,21 @@
   (rejouée depuis `dev`, témoin d'`origin/dev`) : refus sur appels réels, droits lus de `/moi/droits`, trois faits du
   commercial lus sur Kafka. Décisions D-1050-1 → 10 (fiche). Verrou Docker pris sans attente (B l'avait rendu), rendu.
   ⚠️ En réel, les routes de `reseau` qui exigent un droit répondent 403 jusqu'à B-960 (« → B »).
-- **STORY-1051** 🔧 **en cours** — prévenir l'assuré (1), dans `prospera-notification-service` (EPIC-220). Passation
-  de B constatée (« Passations ») ; fiche et annonce « ⚠ Contrats » avant le code ; branche `MNV-1051` partie de `dev`
-  `5e6c553`. Puis 1052 (séries hébergées).
+- **STORY-1051** ✅ 🛡 — prévenir l'assuré (1) (PR prospera-notification-service#90, `dev` 7d4b24d, cdbcd8a, b3d4388 ;
+  annonce « ⚠ Contrats » #620 avant le code). **Premier travail de D dans `notification`** (passation de B constatée).
+  Neuf modèles système de l'assurance (`assurance-*`, SMS et e-mail, `fr`/`en`, variables `reference` et
+  `numeroOfficiel` seules). Le test des interdits parcourt les 36 textes et rougit sur une variable de santé (registre
+  `classification-sante` copié à l'octet), un montant d'indemnité ou « fraude », casse et accents comprises ; une
+  surcharge fautive est refusée `CONTENU_INTERDIT_A_L_ASSURE`. Déclenchement par `sinistres.dossier.changed@1` (matrice
+  fermée, jamais la fraude), destinataire enregistré par `sinistres-service` (route de service ; sans lui
+  `CANAL_ABSENT`). Relances de pièces : file BullMQ, J+5 de la demande puis J+5 de la relance envoyée, trois au plus,
+  horloge de référence, identifiants déterministes. Node 24 : 281/281 suites unitaires, intégration Mongo+Redis 9/9,
+  15/15 mutations ; e2e : 4 suites rouges **héritées** (identiques sur `dev` avant 1051, voir « Pièges »). Pile `grp-d`
+  (rejouée depuis `dev`) : `/health` 200, deux messages sans interdit, relance trop tôt replacée, puis envoyée à J+5
+  avec la suivante à J+10. Décisions D-1051-1 → 11 (fiche). Verrou Docker attendu ~1 min (B, STORY-961), rendu.
+- **Suivante : STORY-1052** 🚚 les séries hébergées (`ventes` et la plateforme, EPIC-224, EPIC-263), sans dépendance :
+  aucun numéro perdu ni réémis après une restauration ; jeu de répliques. Puis 1053 (les rôles, B-960 fusionnée) et
+  1054 (prévenir l'assuré (2) : accusé, repli dans la cloche, consentements par finalité).
 
 ### Lots 1 et 2
 
@@ -170,6 +182,15 @@
       `commande.engagement-tiers.changed@1` par une outbox et la copie de `contrats/distributeur/` ;
     - l'adaptateur de `stock` est `ReservationStockNonBranchee` (motif `RESERVATION_NON_BRANCHEE`) tant que l'API de
       réservation de `stock` n'existe pas ; la projection des droits garde le voisin `stock` (`MODULES_VOISINS`).
+  - **`prospera-notification-service` (reçu de B, lot 3), pour mémoire** : D y porte la communication de l'assurance
+    (EPIC-220), pas du distributeur. Depuis STORY-1051 (`dev` b3d4388) : `src/domain/assurance/` (matrice statut →
+    message, interdits, relances), `src/modules/assurance/` (consommateur de `sinistres.dossier.changed@1`, groupe
+    `notification-assurance` ; route de service du destinataire, `sinistres-service` seul), file
+    `notification:relances-pieces` (`adapters/bullmq/relances-pieces-*.ts`), neuf modèles `assurance-*` au socle,
+    copie `src/vendor/classification-sante/` (à recopier et refiger si C change son registre). Suite : 1054 (accusé,
+    repli cloche, consentements, WhatsApp approuvé, effacement des destinataires par les droits des personnes).
+    Dettes héritées : 4 suites e2e rouges (voir « Pièges ») ; ouvert de la passation de B (vérification des sorties
+    d'essai, bascule de la garde sur l'état publié seul).
   - **Prochaine story du distributeur : 1052** (séries hébergées), puis 1053 (les rôles, après B-960) et 1056 (la
     commande (1)).
 
@@ -269,8 +290,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-17, STORY-1051, avant la fusion du code) — `prospera-notification-service` : prévenir l'assuré
-  (1).** Rien d'existant ne change de forme ; ajouts seulement.
+- **PUBLIÉ (2026-11-17, STORY-1051, prospera-notification-service#90, `dev` 7d4b24d → b3d4388) ; ANNONCÉ avant la
+  fusion du code (prospera-stories #620) — `prospera-notification-service` : prévenir l'assuré (1).** Rien d'existant
+  ne change de forme ; ajouts seulement. Écart avec l'annonce : aucun.
   - **Fait consommé** : `sinistres.dossier.changed@1` (contrat de C, inchangé), groupe neuf `notification-assurance`
     (`KAFKA_ASSURANCE_GROUP_ID`). Un message part au **changement** d'état du dossier, côté assuré seulement
     (D-1051-3) ; `FRAUDE_SUSPECTEE`, `LITIGE`, `REJETE`, `SANS_SUITE` et les états internes ne produisent rien.
@@ -440,6 +462,20 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1051** : (1) **quatre suites e2e de `notification` sont rouges sur `dev` avant 1051** (témoin rejoué :
+  `appel-de-service`, `envois`, `rail-notification` — le banc n'a pas `UtilisateurModel`, ajouté à `EnvoisService` par
+  STORY-651 — et `health` — le faux client Kafka n'a pas `admin.listTopics`, depuis STORY-957) : 68 tests rouges des
+  deux côtés ; à réparer dans une story de D (dette héritée), pas à confondre avec une régression. (2) Sous jest, un
+  `foo.ts` et un `foo.json` dans le même dossier : `import … from './foo'` résout le JSON (ordre `js, json, ts`) ; d'où
+  `garde.ts` pour la copie de C. (3) La garde « une seule porte de service » (`appel-de-service.invariant.spec.ts`), la
+  garde de suppression complète (toute collection à `organizationId` dans `COLLECTIONS_A_SUPPRIMER`) et le relevé des
+  consommateurs supervisés rougissent sur un ajout légitime : les inventorier, avec le motif. (4) L'image `runtime` pose
+  `NODE_ENV=production`, qui refuse `RECETTE_HORLOGE_AVANCE_JOURS` : une pile de recette pose `NODE_ENV=staging`. (5)
+  `docker run node … /chemin` sous Git Bash : `MSYS_NO_PATHCONV=1` aussi devant `docker create`. (6) `npm run
+  test:conformite` complet sur la pile reste bloqué (les autres suites visent des hôtes par défaut `127.0.0.1`) :
+  jouer la suite visée par chemin. (7) Un BullMQ `promote()` d'une relance trop tôt la replace à son échéance
+  (`moveToDelayed`) : c'est la preuve que rien ne part avant l'intervalle.
 
 - **STORY-1050** : (1) un `docker run … sh -c '… | grep …' | tail` ne montre rien tant que tout n'est pas fini : écrire
   la sortie dans un fichier et le lire ; une suite d'intégration qui casse au montage du module (dépendance Nest
