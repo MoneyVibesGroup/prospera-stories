@@ -1,6 +1,6 @@
 # STORY-1054 : prévenir l'assuré (2) — l'accusé de transmission rendu au dossier, le repli dans la cloche de l'assuré, les consentements par finalité
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-220 (prévenir : notification, relais Money Vibes et portail des cabinets) · **Dépôt :**
 `prospera-notification-service` (tenu par D, port 3008) · **Plage :** groupe D, n° 10 du lot 3
@@ -113,9 +113,66 @@ d'accusé propre à l'assurance sur le bus ; l'état « lu » d'un dépôt de cl
 les messages au courtier, aux coassureurs et au personnel ; les réponses entrantes ; l'appel des routes par `sinistres`
 (C).
 
-## Avancement
+## Livré
 
-- 2026-11-17 : rituel fait (plan, règles, journaux A, B, C, D, EPIC-220, PRD, fiche 1051, code de `notification` sur
-  `origin/dev` b3d4388) ; fiche écrite ; annonce « ⚠ Contrats » avant le code.
-- 2026-11-17 : annonce fusionnée (prospera-stories #647, `main` 296699e). Code poussé sur `MNV-1054` (967f412) ; Node 24 :
-  tsc, build, lint verts, unitaires 287/287 suites. Verrou Docker pris à 12:38 (libre). En cours : e2e, mutations, pile.
+- **PR prospera-notification-service#91**, fusionnée en rebase (`merged = true`) : `dev` **d9de737** (branche 967f412,
+  le corps de la story) et **e0a50c0** (ccd69f9 : la cloche ne garde qu'un code nommé, relevé sur la pile). Tête de
+  la PR vérifiée avant la fusion (`ccd69f9`) ; arbre de `dev` identique à celui éprouvé.
+- Annonce « ⚠ Contrats » fusionnée **avant** le code : prospera-stories **#647** (`main` 296699e).
+- Code : `src/domain/assurance/finalites.ts` (deux finalités, échec fermé, dernière décision),
+  `src/domain/assurance/distribution.ts` (état de distribution) ; `src/modules/assurance/messages-assure.service.ts`
+  (journal, voie externe ou cloche, contrôle des interdits sur le texte déposé, fin de chaîne, lecture),
+  `consentements-finalites.service.ts`, deux schémas (`assurance_messages`, `assurance_consentements`), trois routes
+  dans le contrôleur de la porte de l'assurance ; `src/modules/envois/fins-de-chaine.ts` (observateurs), signal dans
+  `EnvoisService.poursuivre` et à l'accusé « échoué » (`AccusesService`), `tentativesParCle` ; deux collections au
+  `COLLECTIONS_A_SUPPRIMER`.
+- **Écarts avec l'annonce** : `DOSSIER_INVALIDE` répond **400** (comme la route du destinataire de 1051), pas 422 ;
+  le dépôt dans la cloche ne garde le `code` que s'il est un code nommé (un adaptateur rend parfois un texte, par
+  exemple « Le canal SMS n'est pas configuré… ») ; `voie` est absente tant qu'un message est en cours de remise.
+
+## Preuves
+
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive HEAD`, tête ccd69f9) :
+  `tsc --noEmit` vert ; `npm run lint` (tout le dépôt) vert ; `npm run build` vert ; unitaires **Test Suites: 287
+  passed, 287 total ; Tests: 4211 passed, 1 skipped** (six suites neuves ; 281 avant). Lint des fichiers touchés avec
+  `endOfLine auto` vert ; `git diff --stat` = `--ignore-cr-at-eol`.
+- **Le test des textes de la cloche** (`src/modules/assurance/textes-de-la-cloche.spec.ts`) rend les **18 textes**
+  déposables (neuf clés × `fr`, `en`, canal SMS) avec des valeurs réalistes et passe chaque texte rendu au contrôle de
+  1051 : aucun interdit ; chacun rougit quand on lui ajoute « FRAUDE », « 150 000 FCFA » ou « taux d'incapacité ».
+- **e2e** : `assurance-destinataire.e2e-spec.ts` vert (12 : les cinq de 1051 et sept neufs — 200 accord tracé, 422
+  `FINALITE_OBLIGATOIRE`, 400 décision hors liste, 401, 403 `APPELANT_HORS_PERIMETRE`, lecture des finalités, lecture des
+  messages pour l'appelant du jeton, 400 sans organisation). **Les quatre suites rouges héritées le restent à
+  l'identique** : témoin `origin/dev` b3d4388 et branche, `--runInBand` : `rail-notification`, `envois`,
+  `appel-de-service`, `health` ; **Test Suites: 4 failed, 16 passed, 20 total** des deux côtés ; Tests : 68 failed /
+  222 passed (témoin), 68 failed / 229 passed (branche, +7 neufs).
+- **Intégration sur MongoDB et Redis réels** (`test/assurance-relances.conformite-spec.ts`, pile `grp-d`) : **15/15**
+  — les neuf de 1051 (dont « sans destinataire » : désormais dans la cloche, `CANAL_ABSENT`), l'accusé `TRANSMIS` lu
+  par le dossier sans l'adresse, le numéro officiel sans accord dans la cloche, le rejeu sans dépôt ni envoi de plus,
+  l'accord puis le retrait (opposable au message suivant), la fin de chaîne déposée une seule fois, la relance sans
+  destinataire déposée et comptée (la suivante due 5 jours après).
+- **Mutations : 18/18 rouges sur une assertion** (script hors dépôt, image Node 24 ; trois réécrites au second tour
+  parce qu'elles cassaient la compilation, puis rouges sur l'assertion) : voie ouverte sur `INCONNU` ; numéro officiel
+  classé obligatoire ; la décision la plus ancienne ferait l'état ; consentement non lu ; texte de cloche non
+  contrôlé ; valeur interdite non contrôlée ; fin de chaîne d'un autre module ; fin signalée deux fois redéposée ;
+  cloche rendue par l'e-mail ; message retraité au rejeu ; mauvais motif de refus de canal ; décision acceptée sur le
+  suivi ; date de décision future ; accord sans version du texte ; signal sur un envoi non échoué ; signal sur un
+  « délivré » ; distribution qui garde la tentative la moins avancée ; texte SMS de relance portant « certificat
+  médical ».
+- **Pile `grp-d`** (compose racine + surcouche locale non versionnée : contexte = export de HEAD, `JETONS_DE_SERVICE`
+  avec `sinistres-service`, `NODE_ENV=staging`) : **`/health` 200**. Destinataires par la route de service (A, C, D en
+  e-mail ; B en SMS, aucune passerelle SMS sur la pile) ; consentements : C accorde l'information, D accorde puis
+  retire, une décision sur le suivi refusée **422 `FINALITE_OBLIGATOIRE`** ; l'historique de D garde les deux actes
+  (qui, quand, version du texte, appelant, écrit le). Cinq faits publiés sur `sinistres.dossier.changed` par
+  `kafka-console-producer` : **cinq courriels exactement** dans MailHog (A : déclaration, ouverture ; C : ouverture,
+  numéro officiel ; D : ouverture). Lus par le dossier : les messages partis **`TRANSMIS`** avec leur date (l'accusé) ;
+  A : numéro officiel **dans la cloche, `CONSENTEMENT_ABSENT`** ; D : numéro officiel **dans la cloche,
+  `CONSENTEMENT_RETIRE`** (le retrait bloque l'envoi externe) ; B : la déclaration en SMS **`NON_REMIS`** (envoi
+  `echoue` à la remise), **déposée dans la cloche `ECHEC_DU_CANAL`** par la fin de chaîne ; aucune adresse dans les
+  réponses. **Rejeu des cinq faits** : toujours cinq courriels, mêmes messages, mêmes dépôts (8 messages, 3 en cloche,
+  6 envois). La première pile a montré que le `code` de B était le texte de l'adaptateur : corrigé (ccd69f9).
+- **Rejeu depuis `origin/dev`** (e0a50c0, image reconstruite depuis `git archive origin/dev`, volumes neufs) : mêmes
+  résultats (voir le journal de D) ; le dépôt de B n'a plus de `code` textuel. Pile descendue (`down -v`), aucun
+  conteneur ni volume `grp-d`, verrou rendu.
+- Verrou Docker pris à 12:38 sans attente (fichier absent, B l'avait rendu), rendu à 13:35. Docker Desktop a
+  cessé de répondre (500) deux fois quand deux suites e2e tournaient en parallèle : relancées l'une après l'autre,
+  `--runInBand`.
