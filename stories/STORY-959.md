@@ -1,6 +1,6 @@
 # STORY-959 : les exercices et la tenue
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (première route d'écriture du service : droits, transaction tenue + piste, course tranchée par
 l'index)
@@ -92,12 +92,83 @@ chaque exercice, s'il est tenu ici.
 
 ## Ce qui a été livré
 
-*(à compléter à la fusion)*
+Deux PR fusionnées en « Rebase and merge » le 17/11, le contrat d'abord.
+
+| Dépôt | PR | Sur la branche |
+|---|---|---|
+| `prospera-stories` | #609 (fiche, tracker, manifeste amendé, annonce du contrat, AVANT le code) | `main` `4410d8a` |
+| `prospera-comptabilite-service` | #2 | `dev` **`a8784cb`** (rejoué de `65af177` ; arbre identique) |
+
+- `src/exercices/` :
+  - `tenue.ts` : les règles pures (exclusivité, idempotence, bascule) ;
+  - `tenue-exercice.schema.ts` : collection `tenues_exercice`, index unique, append-only ;
+  - `tenue.service.ts` : la transaction tenue + piste, la course tranchée par l'index ;
+  - `exercices.controller.ts` : les trois routes ;
+  - `tenue.dto.ts`.
+- `src/droits/` : port `SourceDesDroits` (`GET /moi/droits`, borné, fermé), `GardeDesDroits` (4e garde globale) et
+  `@DroitRequis` (borné aux droits du manifeste).
+- `src/piste/` : champ `donnees` (chaînes, 16 clés au plus), `choixDuGeste` (la provenance déduite de la proposition) ;
+  `HORLOGE` exportée.
+- `src/portee/` : `PorteeDuDossier`, `filtreDuDossier` ; `src/referentiel/` : `ResolveurDePortee.resoudreDossier`.
+- `src/common/refus.ts` : cinq refus nommés neufs et un `details` facultatif.
+- `AUTH_SERVICE_URL` (requise) et `AUTH_SERVICE_DELAI_MS` ; compose, `.env.example`, README.
+- `src/module.manifest.ts` : recopié à l'octet depuis `main` (`git -c core.autocrlf=false show`).
+- `test/socle/tenue.socle-spec.ts` (suite neuve) ; `test/socle/outils.ts` gagne une doublure d'auth (`AuthDeTest`).
 
 ## Preuves
 
-*(à compléter à la fusion)*
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive` du commit poussé) :
+  **21 suites, 248 passés, 2 sautés** (les deux comparaisons aux sources de `prospera-plateforme` et
+  `prospera-stories`, absentes du conteneur) ; `npm run lint`, `tsc --noEmit` et `npm run build` verts.
+- **`npm run test:socle`** sur la pile `grp-b` (vrai MongoDB 8.0 `rs0`, vrai Kafka sans création automatique de topics,
+  doublures HTTP d'auth et de dossier-service) : **36/36**, dont les 20 du socle et 16 tenues neuves.
+  - Sans `comptabilite:exercice:ouvrir` : 403 `DROIT_INSUFFISANT` (`details.droit`). Dossier-service n'est pas
+    appelé, rien n'est écrit, et `/moi/droits?organisationId=` reçoit le jeton du membre tel quel.
+  - Auth lente : 503 `DROITS_INDISPONIBLES`, borné à 800 ms.
+  - Tenue inconnue ou champ en trop : 400.
+  - 2025 ouvert aux CAHIERS : 201, une entrée `EXERCICE_OUVERT` « choisi par l'utilisateur ».
+  - 2025 au JOURNAL : 409 `TENUE_EXCLUSIVE`, rien d'écrit. CAHIERS rejoué : 200, toujours une seule entrée.
+  - Lecture de la tenue (même sans droit d'écriture) ; exercice non ouvert : 404 `EXERCICE_NON_OUVERT`.
+  - Exercice clos sans tenue : 409 `EXERCICE_CLOS`. Dossier hors portée : 404. Autre organisation sans le module :
+    403.
+  - **Bascule** : 2025 clos, 2026 ouvert au JOURNAL sur une proposition acceptée. La réponse donne `bascule: true` et
+    `precedente` (2025, CAHIERS). La piste écrit « proposé par la machine », avec la proposition citée et
+    `donnees.tenuePrecedente`. 2025 ne passe pas au journal après coup (409).
+  - **Course** : quatre ouvertures concurrentes de 2027, deux par tenue, rendent `201, 409, 200, 409` : une tenue et
+    une seule entrée de piste.
+  - L'historique `GET …/tenues` liste 2027, 2026, 2025.
+  - `updateOne` et `deleteMany` sur les tenues lèvent sur le vrai pilote.
+  - `LECTURE_SEULE` : l'ouverture rend 403 `ABONNEMENT_EXPIRE`, la lecture reste ouverte.
+- **Mutations : 25/25 rougissent sur une assertion** (script joué dans l'image de vérification). Elles portent sur :
+  - les règles (exclusivité, bascule) ;
+  - le service : idempotence, exercice clos, borne `$lt` de l'exercice précédent, relecture après doublon, provenance,
+    `bascule` dans la piste, borne de la liste, refus exclusif ;
+  - l'index unique ;
+  - Q3 (`choixDuGeste`) ; `donnees` (borne, recopie) ;
+  - `filtreDuDossier` ; le résolveur (organisation) ;
+  - la garde (lecture sans droit, droit requis, droit hors manifeste) ;
+  - la source des droits (403, chaînes, droits de plateforme exclus) ;
+  - le `details` des refus ; le câblage du 4e maillon ; `AUTH_SERVICE_URL` requise.
+  Trois mutations rougissaient d'abord par compilation (rétrécissement de type, import inutilisé) : elles ont été
+  réécrites pour rougir sur l'assertion.
+- **Pile `grp-b`** (compose du dépôt, image runtime du commit poussé, volumes neufs, verrou Docker pris de façon
+  atomique après celui de D) :
+  - `docker compose up` sain, les quatre conteneurs `healthy` ;
+  - `/api/v1/health` 200 (`mongodb` : `rs0`, primaire ; `kafka` : up) ;
+  - `ExercicesController` et ses trois routes mappés, présents dans l'OpenAPI ;
+  - `POST …/ouverture` sans jeton : 401.
+  Pile descendue avec ses volumes (`down -v`), verrou rendu.
 
 ## Pour la suite
 
-*(à compléter à la fusion)*
+- **STORY-961** (le plan de journaux) : n'ouvrir des journaux que sur un exercice tenu au JOURNAL. Lire la tenue
+  par `filtreCloisonne(portee)` sur `tenues_exercice`. Un exercice aux CAHIERS, ou pas ouvert, refuse nommément.
+- **STORY-962** (le brouillard) : le cache des droits `(membre, organisation, dv)` derrière `SOURCE_DES_DROITS` (la
+  saisie est fréquente) ; décider s'il faut un acte tracé pour annuler une tenue choisie par erreur avant toute
+  écriture (D-959-2).
+- **Avant la première recette croisée (B-967)**, trois verrous à lever, chacun dans une story de B :
+  - `comptabilite:*` attribués aux rôles du cabinet dans auth-service (D-959-4, borne du jeton) ;
+  - le module au catalogue (D-958-3) ;
+  - les routes d'instance (C13).
+- **Le fait `comptabilite.tenue.changed@1`** (D-959-5), par une outbox, quand un consommateur l'attend. Le premier
+  probable : balance-service, pour refuser un cahier sur un exercice tenu au journal (D-959-6, A).
