@@ -310,8 +310,15 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1050.md"
     reserved_on: "2026-11-17"
     note: >
-      🚧 EN COURS le 2026-11-17 — les dettes de reseau-service (D-1030-2, D-1032-2, D-1034-5). Annoncée dans
-      « ⚠ Contrats » avant le code. Lot D, n° 6 du lot 3 (EPIC-145, EPIC-264). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — reseau-service#13 (dev a3d2f59) et #14 (dev 49c4d01). Solde D-1030-2 : la garde lit
+      l'état publié seul (etat-publie.changed.<espace>@1, (epoque, numero) décide), décidée par garde-etat-publie-v1
+      copiée à l'octet ; entitlement.changed n'est plus lu ; échec fermé RESEAU_NOT_ENTITLED. Solde D-1032-2 : les
+      droits viennent de GET /moi/droits (droits ∪ droitsHorsJeton), cache 60 s invalidé par identity.droits.changed@1,
+      503 DROITS_INDISPONIBLES ; table rôle → droits retirée (403 en réel jusqu'à B-960). Solde D-1034-5 :
+      reseau.commercial.changed@1 republié quand seul l'état du compte change, dans la transaction du fait identity.*.
+      Node 24 : 463 unitaires, 17 e2e, 118 d'intégration sur MongoDB réel ; 17/17 mutations. Pile grp-d (rejouée depuis
+      dev, témoin d'origin/dev) : refus sur appel réel, droits lus de /moi/droits, trois faits du commercial lus sur
+      Kafka. Annoncée avant le code (docs #613). Lot D, n° 6 du lot 3 (EPIC-145, EPIC-264). NON SLOTTÉE.
 
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"

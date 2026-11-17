@@ -1,6 +1,6 @@
 # STORY-1050 : les dettes de `reseau-service` — la garde sur l'état publié, les droits lus de `/moi/droits`, le commercial republié quand son compte change
 
-Status: in-progress
+Status: done
 
 **Épics :** EPIC-145 (la garde de l'état publié dans chaque service) et EPIC-264 (chantiers de plateforme) · **Dépôt :**
 `reseau-service` (tenu par D, port 3419) · **Plage :** groupe D, n° 6 du lot 3 (`PLAN-4-SESSIONS-LOT-3-2026-11-17.md`
@@ -86,6 +86,10 @@ reprenne le distributeur.
   ne republie pas). Un commercial publié avant cette story (sans `comptePublie`) est republié au premier fait qui le
   touche. **La charge ne change pas** (aucun champ ajouté, rien renommé) et le `rang` non plus : comme la
   republication par une affectation, il suit les écritures du commercial, pas les publications.
+- **D-1050-10 — Les droits hors du jeton comptent aussi** (ajoutée en cours de story, PR reseau-service#14). L'annonce
+  de B-960 (journal de B, « ⚠ Contrats ») ajoute à `/moi/droits` 1.1.0 le champ `droitsHorsJeton` : les droits de tenant
+  effectifs sont `droits ∪ droitsHorsJeton`, et les codes au-delà de la borne du jeton (dont `reseau:*`) n'y seront
+  que là. `reseau` lit les deux ; absent = `[]` (auth d'avant B-960) ; illisible = 503 `DROITS_INDISPONIBLES`.
 - **D-1050-9 — Le socle ne dépend pas du module.** La projection `identity.*` appelle des « suites » qu'un module
   inscrit au démarrage (`SuitesDeLIdentite`), avec la session de sa transaction ; l'annuaire accepte la session pour lire
   ce que la transaction vient d'écrire.
@@ -97,6 +101,45 @@ pour un `INDEPENDANT` (D-1034-6) ; le volet Reprise de l'import réseau (1055) ;
 `reseau.commercial.changed@1` (il n'en a pas, comme les faits de la hiérarchie : à poser avec son premier
 consommateur).
 
+## Livré
+
+- **PR reseau-service#13**, fusionnée en rebase : `dev` **a3d2f59** (branche 6017d43) — les trois dettes.
+- **PR reseau-service#14**, fusionnée en rebase : `dev` **49c4d01** (branche cc220c9) — D-1050-10 (`droitsHorsJeton`).
+- Annonce « ⚠ Contrats » fusionnée **avant** le code : prospera-stories **#613** (`main` 27d13e8).
+
 ## Preuves
 
-À écrire à la fin.
+- **Copie à l'octet** de la garde partagée : `git -c core.autocrlf=false show garde-etat-publie-v1:paquets/garde-etat-publie/src/index.ts`
+  (commit 058257f) dans `src/vendor/garde-etat-publie/garde-etat-publie.ts`, sha256
+  `a830c4491491e9505a9a761ecc549b11e10779bd13577bdd59bcffff17f892f7` (celle de la comptabilité, B-958), figée par
+  `src/socle/etat-des-modules/etat-publie.spec.ts` (valeur écrite dans le test) ; hors lint et formatage.
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive HEAD`) : `tsc --noEmit`
+  vert ; `npm run lint` (tout le dépôt) vert ; `npm run build` vert ; unitaires **Test Suites: 45 passed, 45 total ;
+  Tests: 461 passed** (463 avec #14) ; e2e **1 suite, 17 passed** ; intégration sur **MongoDB 8.0 réel en jeu de
+  répliques** **Test Suites: 13 passed, 13 total ; Tests: 118 passed** (dont `read-models` : `(epoque, numero)` décide,
+  rejeu sans réouverture, époque neuve, quatre livraisons simultanées ; et `comptes-des-commerciaux`, neuf cas : rien
+  sans appartenance, INVITE puis ACTIF puis SUSPENDU republiés une fois chacun, rejeu sans effet, prénom sans
+  republication, e-mail changé qui délie, autre organisation intouchée, commercial d'avant 1050 republié, suite en échec
+  qui annule annuaire, marqueur et fait). La suite `conformite-portee-reseau-v1` passe (unitaires et intégration).
+- **Mutations : 17/17 rouges sur une assertion** (script hors dépôt, joué dans l'image Node 24 avec MongoDB) : sorte de
+  la route non lue ; aucun état reçu qui ouvre ; lecture seule jamais dite ; « installé » jugé sur `export` ; ordre
+  `(epoque, numero)` non jugé ; message d'un autre espace projeté ; copie de la garde retouchée ; auth indisponible
+  rendue en ensemble vide ; `dv` du jeton ignoré par le cache ; droits plateforme qui ouvrent ; droit exigé non vérifié ;
+  invalidation ignorée ; commercial republié sans changement ; suites d'identité non jouées ; annuaire lu hors de la
+  transaction ; compte publié non retenu ; `droitsHorsJeton` ignoré (#14).
+- **Pile `grp-d`** (`docker compose -p grp-d --profile reseau --profile recette up --build`, émetteur RS256 de recette
+  qui sert aussi la doublure de `/moi/droits` ; pas de profil `registre` : aucun schéma ne change) : service `healthy`.
+  Appels réels : KYC approuvé, **aucun état publié reçu ⇒ 403 `RESEAU_NOT_ENTITLED`** ; `EN_SERVICE` ⇒ 200 avec les
+  droits lus de `/moi/droits` ; même état, jeton `TENANT_ADMIN` sans droit dans `/moi/droits` ⇒ **403
+  `DROIT_INSUFFISANT`** ; `SUSPENDU` ⇒ 403 ; `EN_SERVICE` rejoué plus ancien ⇒ **reste 403** ; `LECTURE_SEULE` ⇒ lecture
+  200 (`lectureSeule: true`), écriture **403 `ABONNEMENT_EXPIRE`** ; commercial créé, puis `identity.user.registered`
+  (INVITED), `identity.membership.changed`, `identity.user.updated` (ACTIVE) publiés sur Kafka : **trois messages lus
+  sur `reseau.commercial.changed`** — `A_INVITER`/`null`, `INVITE`/`userId`, `ACTIF`/`userId` ; émetteur arrêté, membre
+  hors cache ⇒ **503 `DROITS_INDISPONIBLES`**. **Rejoué à l'identique** sur des images reconstruites depuis
+  `origin/dev` (a3d2f59), volumes neufs ; puis (#14) un droit présent seulement dans `droitsHorsJeton` ⇒ 200.
+- **Témoin avant la correction** (image d'`origin/dev` 5922180, code neuf absent de `dist/`, même pile) : la garde
+  ignore l'état publié (403 sans `entitlement.changed` alors qu'`EN_SERVICE` est sur le topic ; **200 avec
+  `entitlement.changed` ACTIVE alors que l'état publié est `SUSPENDU`**) ; `TENANT_ADMIN` ouvert par la table de rôles ;
+  l'API rend le commercial `ACTIF` mais **un seul fait publié, `A_INVITER`**.
+- Verrou Docker pris à 05:05 (B l'avait rendu), rendu à 06:30 ; `down -v` : aucun conteneur, volume ni réseau `grp-d`.
+- Fins de ligne : `git diff --stat` et `--ignore-cr-at-eol` identiques avant chaque commit ; aucun `index.ts` non suivi.
