@@ -1262,9 +1262,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-971.md"
     reserved_on: "2026-11-17"
     note: >
-      🚧 EN COURS le 2026-11-17 — story neuve de la plage de B (930 → 979), insérée avant STORY-967 par la session
-      du groupe B (demande de D au journal de D, D-1053-7 ; comptabilite:* attribués à aucun rôle, D-959-4).
-      Contestable. NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — auth #43 (dev 913bd92) ; contrat annoncé avant la fusion (stories #656 : dix droits
+      neufs hors du jeton). Story neuve de la plage de B (930 → 979), insérée avant STORY-967 par la session du
+      groupe B (demande de D, D-1053-7 ; comptabilite:* attribués à aucun rôle, D-959-4) : contestable. Catalogue
+      152 codes (24 + 128), borne inchangée ; identity.droits.changed@1 et moi-droits 1.1.0 inchangés. Node 24 :
+      100 suites, 1387/1387 ; 18 mutations rouges (une par droit neuf, plus le mécanisme). Pile grp-b : 24/24, vrais
+      jetons RS256 (associé : 9 comptabilite:* ; collaborateur : 6 ; DIST_DG : commande:parametres:modifier, 45
+      droits) ; ouverture 201 et grand livre 200 au jeton de l'associé ; témoin origin/dev : 403 DROIT_INSUFFISANT.
+      Lot 3 de B, n° 12 (EPIC-111, EPIC-223). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

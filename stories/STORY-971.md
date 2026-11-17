@@ -1,6 +1,6 @@
 # STORY-971 : les droits de la comptabilité et des paramètres de `commande` dans auth
 
-Status: in-progress
+Status: done
 
 **Complexité :** faible à moyenne (dix droits neufs au catalogue de tenant, hors du jeton ; deux tables d'attribution ;
 aucun champ ni route neufs)
@@ -102,12 +102,69 @@ Les deux passent par le même mécanisme (STORY-960, D-960-2) et le même dépô
 
 ## Livraison
 
-(à compléter)
+- **auth #43**, fusionnée en « Rebase and merge » : `913bd92` sur `dev` (tête de la PR `e6720b7`, arbre identique
+  après rejeu).
+- Contrat annoncé avant la fusion : stories #656 (« ⚠ Contrats » du journal de B).
+- Fichiers : `src/common/rbac/droits-hors-jeton.ts` (dix codes), `src/modules/rbac/table-d-acces-cabinet.ts` (neuf),
+  `src/modules/rbac/table-d-acces-distributeur.ts` (`AJOUTS_A_L_ANNEXE_B`), `src/modules/rbac/tenant-system-roles.ts`
+  (les deux rôles du cabinet dérivés de la table) ; tests de table d'accès, du catalogue, de la résolution et du
+  catalogue de composition.
 
 ## Preuves
 
-(à compléter)
+- **Node 24** (étage `verification`, image construite depuis `git archive` de la tête) : `tsc` vert, **100 suites,
+  1 387/1 387** (1 364 à 960). Sur le poste (Node 25) : 96 suites vertes, les quatre du client de Confluent ne
+  chargent pas (binding natif, connu).
+- **Lint** des fichiers touchés : vert.
+- **Mutations : 18/18 rougissent sur une assertion**, aucune par compilation (une première écriture de M6 rougissait
+  par `TS6133` : réécrite en gardant l'usage du paramètre) :
+  - une par droit neuf, sur sa ligne d'attribution : les neuf `comptabilite:*` (un droit « à tous » réservé à
+    l'associé, ou un droit de l'associé donné au collaborateur), `commande:parametres:modifier` sans `DIST_ADMIN`, puis
+    sans le DG ;
+  - le mécanisme : les ajouts à l'annexe ignorés ; la comptabilité portée par le jeton ;
+    `commande:parametres:modifier` porté par le jeton ; la résolution qui perd la comptabilité ; le collaborateur qui
+    reçoit les droits de l'associé ; la dérivation du cabinet qui ignore le rôle ; un rôle du distributeur qui reçoit
+    `comptabilite:dossier:consulter`.
+- **Pile `grp-b`** (racine du poste et une surcouche locale non versionnée : auth de la branche, dossier-service et
+  comptabilité reconstruits depuis `origin/dev`, MongoDB 7 et 8.0 en jeu de répliques, Kafka 3.9, Redis, MinIO
+  Chainguard, Mailhog ; `comptabilite-service` dans l'`AUTH_AUDIENCE` de l'IdP) : `/health` 200 pour les trois
+  services. **Preuve de bout en bout, 24 vérifications sur 24** :
+  - **cabinet** : un associé s'inscrit (rôle par défaut `CAB_ASSOCIE`). Son **vrai jeton RS256** (1 188 octets) ne
+    porte que ses trois droits fiscaux ; `/moi/droits` rend les **neuf `comptabilite:*`** dans `droitsHorsJeton`, et
+    `droits` = `perms[]`. Il invite un collaborateur (`CAB_COLLABORATEUR`) : jeton à un droit
+    (`fiscalite:declaration:preparer`), `/moi/droits` à **six** `comptabilite:*` ;
+  - **distributeur** : le fondateur sans rôle n'a pas le droit (D-960-12) ; il invite un membre et lui attribue
+    `DIST_DG`. **Vrai jeton RS256** du DG (`roleMetier` `DIST_DG`, trois droits dans le jeton) ; `/moi/droits` :
+    **`commande:parametres:modifier`** dans `droitsHorsJeton`, 45 droits de tenant, aucune comptabilité. Passé
+    `DIST_ADMIN` par l'opérateur : le droit est là (ancien jeton, `dv` 3) ; passé `DIST_DC` : il n'y est plus (`dv` 4) ;
+  - **la comptabilité en réel** : dossier, exercice 2026 et axes (SN, réel) créés chez dossier-service avec le jeton
+    de l'associé. Le grand livre rend d'abord 403 `COMPTABILITE_NOT_ENTITLED` (module absent de l'état publié). Puis :
+    collaborateur 403 `DROIT_INSUFFISANT` à l'ouverture (`comptabilite:exercice:ouvrir`) ; associé **201** à
+    l'ouverture au JOURNAL ; **`GET …/grand-livre` 200** au jeton de l'associé (aucun compte, équilibré) ;
+    `GET …/piste/verification` 200 (une entrée, chaîne intacte). Témoin : `comptabilite:dossier:consulter` retiré à
+    `CAB_ASSOCIE` par surcharge, le grand livre rend 403 `DROIT_INSUFFISANT` ;
+  - **deux doublures, et elles seules** : l'état publié `EN_SERVICE` du module (le catalogue ne connaît pas encore
+    `comptabilite`, D-958-3) et `kyc.status.changed` `APPROVED` (dossier-service exige le KYC approuvé ; kyc-service
+    n'est pas dans la pile), posés sur le fil avec `kafka-console-producer`. Les droits, eux, viennent de l'auth réel.
+- **Témoin `origin/dev`** : la même preuve, auth reconstruit depuis `origin/dev` (sans 971), dans la même pile : 15/23.
+  Les huit écarts sont ceux attendus : `/moi/droits` sans `comptabilite:*` ni `commande:parametres:modifier`, le DG à 44
+  droits, et l'associé refusé en **403 `DROIT_INSUFFISANT`** au grand livre (`comptabilite:dossier:consulter`) et à
+  l'ouverture.
+- **`identity.droits.changed@1`** : aucun fichier de `contrat/schemas/` touché, aucune charge changée (D-971-6). Le
+  registre n'avait rien à juger ; Karapace n'a pas été levé.
+- Pile descendue avec ses volumes (`down -v`), images de la preuve retirées, **verrou Docker rendu** (pris à 16:37
+  après l'attente de D-1056, rendu à 16:57).
 
 ## Pour la suite
 
-(à compléter)
+- **STORY-967 (B)** : la comptabilité ne rend plus 403 à un membre du cabinet. Restent pour la première recette
+  croisée : le module `comptabilite` au catalogue (sinon l'état publié dit `NON_INSTALLE`), `comptabilite-service`
+  dans l'`AUTH_AUDIENCE` de l'IdP de la recette (demande à A), et le commentaire « Droits (C7) : DÉCLARÉS, pas encore
+  attribuables » du manifeste, à corriger et recopier à l'octet (D-971-8).
+- **D** : `PUT /api/v1/commande/parametres` passe pour un DG ou un `DIST_ADMIN` sur une image d'auth reconstruite
+  depuis `dev` (cache de 60 s compris). Si le PO tranche Q-D-5 autrement, la ligne d'`AJOUTS_A_L_ANNEXE_B` se retire.
+- **Cabinet** : un cabinet qui veut séparer saisie et validation retire `comptabilite:ecriture:valider` au
+  collaborateur par surcharge ; un « quatre yeux » imposé par le service viendrait d'une demande (D-964-7).
+- **Preuves sur pile qui passent par dossier-service** : ouvrir l'exercice AVANT de décider les axes
+  (`AUCUN_EXERCICE_OUVERT`), déclarer un dirigeant pour une SARL (`DIRIGEANT_REQUIS`), poser le KYC approuvé ; le
+  dirigeant ne s'attribue pas `DIST_DG` lui-même (`TENANT_ROLE_AUTO_ESCALADE`) : il l'attribue à un membre invité.
