@@ -1484,6 +1484,18 @@ reserved_ranges:
       VALEUR_INVALIDE ; version figée à l'entrée en instruction ; POST et GET …/dossiers/{id}/instruction (lecture au
       manifeste) ; enregistrer rend partie « instruire » ; aucune valeur dans un fait, aucun champ de santé. Node 24 :
       1110 unitaires sur MongoDB réel, 25 e2e, build 0 ; pas de pile. Lot 3 de C, n° 7. NON SLOTTÉE.
+  - range: "STORY-1010"
+    status: "RÉSERVÉ"
+    owner: "Le décompte dans l'ordre fixe (dommage, vétusté, règle proportionnelle, plafond, franchise) et l'arrondi : fonction pure, table en paramètre figée par empreinte (sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1010.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-sinistres-service#22 (dev 49d5eb3). calculerLeDecompte (pure, entiers exacts) :
+      cinq lignes dans l'ordre fixe, table decompte-2026.1 figée (sha256) et jugée à la date de survenance ; 780 000 →
+      702 000, SIN-2026-9002 445 500 → 395 500, vol 400 000 → 295 000 ; décompte au franc, repère arrondi à 5 000 une fois
+      à la fin, montant arrêté au franc, corporel renvoyé au barème ; adaptateur du formulaire de 1011 (le matériel
+      automobile attend 1012). Aucune route, aucun fait, pas de commande « arrêter l'évaluation » (1013). Node 24 : 1139
+      unitaires sur MongoDB réel, 25 e2e, build 0 ; pas de pile. Lot 3 de C, n° 8. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"

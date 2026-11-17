@@ -79,7 +79,12 @@
     paramètre versionné `formulaires-2026.1` (6 familles ; accident du travail et décès renvoient au barème corporel),
     contrôlé par le serveur (`CHAMP_OBLIGATOIRE_ABSENT` nomme tous les champs manquants), version figée à l'entrée en
     instruction ; Node 24 (1110 unitaires, 25 e2e), rejouée depuis `dev`, sans pile.
-  - **STORY-1010** ← **suivante** : le décompte dans l'ordre fixe, et l'arrondi (`sinistres`, FR-69, FR-73).
+  - ~~**STORY-1010**~~ : **sinistres #22** ; `calculerLeDecompte` (fonction pure) : dommage, vétusté, règle proportionnelle,
+    plafond, franchise ; table `decompte-2026.1` figée par empreinte, jugée à la date de survenance ; SIN-2026-9002
+    445 500 → 395 500 au franc ; décompte au franc, repère arrondi à 5 000 une fois à la fin, montant arrêté au franc ;
+    Node 24 (1139 unitaires, 25 e2e), rejouée depuis `dev`, sans pile.
+  - **STORY-1012** ← **suivante** : le matériel automobile : vétusté sur pièces selon l'âge, et épave (`sinistres`, FR-72) ;
+    elle s'insère dans le décompte de 1010 (voir D-1010-9).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -465,6 +470,12 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   paramètre figé `experts-2026.1.json` ; manifeste amendé pour la fiche en lecture seule. ⚠️ Écart : aucun
   `docker compose up` du service pour cette story (plan : « Docker : non ») ; droits fins `expertises:*` toujours à poser.
 
+- **D-1010-1 → D-1010-10** (`stories/STORY-1010.md`) : pas de commande « arrêter l'évaluation » (c'est 1013) ; table
+  `decompte-2026.1` datée, jugée à la survenance ; lignes entières de francs, demi vers le haut, arithmétique entière ;
+  **le PRD se contredit sur 702 000** : indemnité calculée au franc (702 000) et repère arrondi (700 000), question au PO ;
+  adaptateur du formulaire ; franchise après le plafond ; corporel renvoyé au barème ; matériel automobile renvoyé à 1012
+  (point d'insertion : variante `PAR_AGE_SUR_PIECES` de `Vetuste`, table `2026.2`) ; alertes du décompte seulement.
+  **→ PO** : l'écran affiche-t-il 702 000 ou 700 000 comme repère ? (défaut : 702 000, repère arrondi à côté).
 - **D-1011-1 → D-1011-9** (`stories/STORY-1011.md`) : six familles de formulaires, AT et décès renvoyés au barème
   corporel ; champs seulement, ni calcul ni alerte (1010, 1012) ; version figée à l'entrée en instruction (à défaut au
   premier enregistrement) ; tout ou rien, défauts pour les facultatifs ; écriture en `EN_INSTRUCTION` par GEST, GREC, RESP ;
@@ -541,6 +552,10 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **La suite complète de `sinistres` en parallèle rougit sur MongoDB quand le poste est chargé** (1010 : 8 puis 29 échecs,
+  jamais les mêmes, sur des suites sans rapport avec le code ; les mêmes suites passent seules, 210/210, et la suite
+  entière passe en `npx jest -w 2`, 1139/1139). Dans l'étage de vérification, jouer `npx jest -w 2`.
 
 - **Le manifeste copié a une empreinte notée dans le service** (vu en 1011) : amender le manifeste dans
   `prospera-stories` puis recopier ne suffit pas, `src/socle/manifestes/sources-des-manifestes.ts` porte le commit et le
