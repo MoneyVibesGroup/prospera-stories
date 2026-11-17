@@ -116,4 +116,6 @@ les messages au courtier, aux coassureurs et au personnel ; les réponses entran
 ## Avancement
 
 - 2026-11-17 : rituel fait (plan, règles, journaux A, B, C, D, EPIC-220, PRD, fiche 1051, code de `notification` sur
-  `origin/dev` b3d4388) ; fiche écrite ; annonce « ⚠ Contrats » avant le code. Branche de code `MNV-1054`.
+  `origin/dev` b3d4388) ; fiche écrite ; annonce « ⚠ Contrats » avant le code.
+- 2026-11-17 : annonce fusionnée (prospera-stories #647, `main` 296699e). Code poussé sur `MNV-1054` (967f412) ; Node 24 :
+  tsc, build, lint verts, unitaires 287/287 suites. Verrou Docker pris à 12:38 (libre). En cours : e2e, mutations, pile.
