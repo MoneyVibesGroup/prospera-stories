@@ -19,10 +19,16 @@
   `jeu:verifier` conforme pour les deux (Node 24). Routes C13 d'import et d'effacement du LC fictif, sous l'identité
   `MOTEUR` seule ; effacement idempotent. Pile `grp-d` : jeu complet importé en 136 s, puis effacé.
   **Passation de `prospera-assureur-fictif` constatée** (voir « Passations »).
-- **STORY-1047** 🔨 🚚 — la bibliothèque d'encours (EPIC-225, `prospera-plateforme/encours/`), **en cours** : fiche
-  écrite (`stories/STORY-1047.md`, D-1047-1 → 12), contrat `encours@1` **annoncé avant la fusion du code** (voir
-  « ⚠ Contrats »). B-956 est fusionnée (plateforme #22, `dev` 189183f) : le `test` et le `typecheck` racines lisent
-  `encours/`, aucun fichier de B n'est touché.
+- **STORY-1047** ✅ 🚚 — la bibliothèque d'encours (PR prospera-plateforme#24, `dev` b061cec, étiquette
+  `encours-v1`). Une seule règle (AD-9, FR-52) : `encours = créances ouvertes + engagement non facturé − crédit du
+  tiers`, par `(tiers, périmètre)`, en deux lectures (certain, qui juge ; affiché, déclarés en moins) ; même résultat
+  pour la même entrée (720 ordres d'arrivée prouvés) ; `ABSENTE` dite ; plafond jugé strictement. 38 tests, 10 vecteurs
+  d'or, 16/16 mutations ; Node 24 : typecheck racine vert, `npm test` racine 550 pass, 0 fail. Contrat `encours@1`
+  **annoncé avant la fusion du code** (prospera-stories #589). Aucun fichier de B touché. Décisions D-1047-1 → 12
+  (fiche) ; Q-D-4 au PO. Verrou Docker attendu ~44 min (B, STORY-957), puis pris et rendu.
+- **Suivante : STORY-1048** 🛡 le LC fictif refuse l'espace réel (EPIC-204, `prospera-assureur-fictif`) : refus de
+  démarrer hors d'un espace d'essai ; les quatre scénarios `SIN-2026` se rejouent après une remise à zéro. Dépend de
+  1046, faite. Puis 1049 (les garde-fous, `ventes`), premier consommateur d'`encours-v1`.
 
 ### Lots 1 et 2
 
@@ -92,6 +98,12 @@
     première story qui affiche un libellé ou publie un fait, et rejoue `verifierFaitsDuModule` sur la clause C5 de
     chacun de ses manifestes. Les 13 faits « nouveaux » d'AD-20 manquent encore aux manifestes (PR d'AD-27).
   - ~~`vocabulaires/` et `contrats/distributeur/` dans la plateforme (D-1042-3)~~ : **soldé par STORY-1045**.
+  - `prospera-plateforme/encours/` (`encours-v1`, STORY-1047, `dev` b061cec) : **la seule règle de calcul de
+    l'encours** (AD-9), pour `commande`, `pdv` et `recouvrement`. **Aucun service ne la copie encore** : `ventes` la
+    copie avec 1049 (à l'octet : `src/index.ts` et `vecteurs-or.json`, empreintes dans `stories/STORY-1047.md`) et
+    rejoue les vecteurs d'or. Ce qui en est exclu et pourquoi : D-1047-3. Reste à y ajouter, en `1.x`, l'exclusion du
+    montant dérogé pour l'évaluation du blocage (avec la story de `recouvrement`), et la correspondance avec les faits
+    de B-963 et B-965 quand ils seront fixés.
   - **Reste à faire** : le volet Reprise
     de l'import réseau (après B-947, D-1041-3) ; la republication de `reseau.commercial.changed@1` quand seul l'état
     du compte change (D-1034-5) ; les droits hors du jeton (B-949) à la place de la table rôle → droits (D-1032-2) ;
@@ -154,8 +166,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-17, STORY-1047, avant la fusion du code) — `encours@1`, bibliothèque neuve** (`prospera-plateforme/
-  encours/`, étiquette `encours-v1` posée à la fusion ; rien d'existant ne change). Consommateurs : `commande`
+- **PUBLIÉ (2026-11-17, STORY-1047, prospera-plateforme#24, `dev` b061cec, étiquette `encours-v1`) ; ANNONCÉ avant la
+  fusion du code (prospera-stories #589) — `encours@1`, bibliothèque neuve** (`prospera-plateforme/encours/` ; rien
+  d'existant ne change). sha256 : `src/index.ts` `4b5c9bff…`, `vecteurs-or.json` `23e3c260…` (complets dans la fiche). Consommateurs : `commande`
   (STORY-1049, qui juge), `pdv` (le disponible à crédit), `recouvrement` (l'évaluation du blocage), chacun par **copie à
   l'octet** de `encours/src/index.ts` et de `encours/vecteurs-or.json`, vecteurs d'or rejoués dans ses tests (AD-2).
   - **La règle** (AD-9, FR-52), par `(tiers, périmètre)` : `encoursCertain = Σ restantCertain des Créances OUVERTE +
