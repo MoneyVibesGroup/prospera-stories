@@ -1004,6 +1004,33 @@ reserved_ranges:
       🏁 DONE le 2026-11-16 — prospera-sinistres-service#8 (dev 6ef224b) ; manifeste amendé prospera-stories#570. Files
       servies, triées (échéance puis ancienneté) et comptées au serveur, gestes ouverts ou fermés avec leur code ;
       prochainTermeLe dérivé et indexé. Pile verte, rejouée depuis dev. Lot 2 de C, n° 9. NON SLOTTÉE.
+  - range: "STORY-996"
+    status: "RÉSERVÉ"
+    owner: "L'OCR réel, le contrôle humain avant archivage, les lots de numérisation ; module ged (plateforme, document-service)"
+    source_doc: "prospera-stories/stories/STORY-996.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-plateforme#18 (dev 6b57633), prospera-ocr-service#27 (dev 03e5d99). Lecture
+      réelle page par page (lot de 50 pages scannées en 48 s), contrôle humain, lots ; moteur OCR corrigé (pages JPEG).
+      Pile verte, rejouée depuis dev. Lot 2 de C, n° 7. NON SLOTTÉE.
+  - range: "STORY-997"
+    status: "RÉSERVÉ"
+    owner: "Le versement au fonds, le scellé par empreinte, le bordereau complémentaire ; module ged (plateforme, document-service)"
+    source_doc: "prospera-stories/stories/STORY-997.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-plateforme#19 (dev 94a8058), prospera-ocr-service#28 (dev a504061). Numéro
+      ARC- attribué, bordereau, scellé sur les fichiers, vérification (un octet modifié la fait échouer), /C1 sans
+      invalider l'origine. Pile verte, rejouée depuis dev. Lot 2 de C, n° 8. NON SLOTTÉE.
+  - range: "STORY-999"
+    status: "RÉSERVÉ"
+    owner: "Les relances et les dossiers muets à 8, 15 et 30 jours (sinistres)"
+    source_doc: "prospera-stories/stories/STORY-999.md"
+    reserved_on: "2026-11-16"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-sinistres-service#9 (dev a358048) ; manifeste prospera-stories#573. Relances (5
+      jours, 3 sans effet, arbitrage, constat posé par commande), attente posée et levée par les transitions, files du
+      silence et agents inactifs. Pile verte, rejouée depuis dev. Lot 2 de C, n° 10. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"

@@ -39,10 +39,12 @@
      ajout seul chez `assurance`, seuil glissant, décision du `RESP`) ;
   16. ~~STORY-995~~ : **plateforme #16, document-service #26** (module `ged` : versions immuables, « à rattacher »,
      port S3 et contrat sur MinIO, santé chiffrée, gate `GED_NOT_ENTITLED`) ;
-  17. **STORY-996** ← **en cours** : l'OCR réel, le contrôle humain avant archivage, les lots de numérisation
-     (plateforme #18 fusionnée : `ged.piece.controlee`, `ged.lot.changed`) ;
-  18. ~~STORY-998~~ (faite en avance) : **sinistres #8** (files de travail par rôle, triées et comptées au serveur ;
-     route au manifeste, #570) ; ensuite 997, 999, 1000 → 1004.
+  17. ~~STORY-996~~ : **plateforme #18, document-service #27** (lecture OCR réelle, contrôle humain, lots ; lot de 50
+     pages scannées en 48 s ; moteur OCR corrigé pour les pages JPEG) ;
+  18. ~~STORY-998~~ : **sinistres #8** (files de travail par rôle ; route au manifeste, #570) ;
+  19. ~~STORY-997~~ : **plateforme #19, document-service #28** (versement, numéro `ARC-`, scellé, vérification, `/C1`) ;
+  20. ~~STORY-999~~ : **sinistres #9** (relances, attente d'un tiers, dossiers muets, agents inactifs ; manifeste #573) ;
+  21. **STORY-1000** ← **suivante** : déclarer (canaux, saisie commune, doublon, réserves, urgence corporelle).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -247,6 +249,21 @@ seulement.
   - ⚠️ Pour tous : sur les piles de preuve, `GET /api/v1/health` de `sinistres` rend 503 au démarrage (lignes
     d'erreur aux journaux, conteneur « unhealthy » quelques secondes) ; à ne pas confondre avec une erreur du scénario.
 
+- **2026-11-17, STORY-996/997 — `document-service` : contrats NOUVEAUX, et deux changements qui touchent tout le
+  service.**
+  - Faits `ged.piece.controlee`, `ged.lot.changed`, `ged.dossier.verse`, `ged.dossier.scelle`, `ged.empreinte.echec`
+    (prêts à consommer : `sinistres` lira `ged.piece.controlee` pour la pièce « reçue »).
+  - ⚠️ **Le moteur OCR du service** (`src/ocr/pdf-page-renderer.ts`, partagé par le KYC, le profil et les pièces
+    comptables) : un PDF dont les pages sont des images JPEG (tout vrai scan) faisait tomber le processus (Windows) ou
+    bloquait le rendu (Linux) — pdf.js mêlait sa copie de `@napi-rs/canvas` (0.1.x) à celle du service (1.x). Corrigé
+    par une `CanvasFactory` ; test de régression au smoke OCR.
+  - ⚠️ **Le filtre d'exceptions global** transmet désormais `details` d'un refus nommé (additif).
+- **2026-11-17, STORY-999 — `sinistres`** : routes `POST …/relances`, `POST …/relances/{n}/effet`, files
+  `a-surveiller`, `a-relancer`, `muets`, `GET …/activite/agents-inactifs` ; constat `RELANCES_EPUISEES` posé par la
+  commande ; champs `derniereActionLe`, `relances`, `attente` ; le fait `sinistres.dossier.changed` ne change pas.
+  - ⚠️ Pour tous les dépôts Mongo : `$set` IGNORE un champ devenu `undefined` (il reste en base) ; un champ qui
+    disparaît se retire par `$unset` — le banc mémoire ne le voit pas.
+
 ## Questions à l'utilisateur ou au PO
 
 Retenu par défaut le 2026-11-15, selon la règle de l'utilisateur (« appliquer ce que je recommande, contestable après
@@ -269,6 +286,11 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-996-1 → D-996-10**, **D-997-1 → D-997-7**, **D-999-1 → D-999-6** (fiches) : lecture par version et file
+  BullMQ ; moteur du service hors des modules (`ocr` admis par l'invariant) ; seuils de lecture en paramètre `2026.2` ;
+  contrôle par NUM, l'agent récepteur, GEST/GREC/RESP ; lots par NUM/RESP ; numéro `ARC-` par compteur, jamais rendu ;
+  valeur des pièces en paramètre `2026.3` ; scellé sur les fichiers ; `/Cn` lié au précédent ; relances « à confirmer »
+  (pas d'envoi) ; l'attente d'un tiers comme état du dossier, pas une échéance ; seuils du silence en paramètre.
 - **D-998-1 → D-998-4** (`stories/STORY-998.md`) : volet en paramètre jusqu'à la portée (1004) ; files des autres
   modules lues par statut ; `prochainTermeLe` dérivé stocké ; dossiers muets et « à surveiller » en STORY-999.
 - **D-995-1 → D-995-7** (`stories/STORY-995.md`) : dossier connu par `sinistres.dossier.changed` ; noms de routes et
