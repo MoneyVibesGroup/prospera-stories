@@ -1,4 +1,5 @@
 // Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
+// Amendé le 2026-11-17 (STORY-1059) : C5, + `commande.commande.chiffree@1` publié (montants de la commande validée, pour `facturation`) et + `facturation.facture.emise@1` consommé (l'engagement baisse à la Créance de la facture, AD-9).
 // Amendé le 2026-11-17 (STORY-1056) : C5, + `commande.engagement-tiers.changed@1` et `commande.serie.changed@1` (faits « nouveaux » d'AD-20, publiés par l'outbox de `prospera-ventes-service`).
 // Manifeste M08 — Commande (format du contrat de module, clause C1, amendée le 2026-11-10, le 2026-11-11 et
 // le 2026-11-12).
@@ -104,6 +105,7 @@ export const MANIFESTE_COMMANDE = {
   // `{ valeur, unite }`, en unité de base.
   publie: [
     'commande.commande.validee@1', // commande validée, stock réservé : entrepot la lit
+    'commande.commande.chiffree@1', // [AD-3, AD-20 « nouveau » ; STORY-1059] la commande validée avec ses montants (prix figés, HT, TVA par taux, TTC) ; facturation (option « facturer dès la validation », AD-29) ; jamais la marge
     'commande.commande.annulee@1',
     'commande.commande.changed@1', // état absolu de la commande
     'commande.remise.decidee@1',
@@ -128,6 +130,7 @@ export const MANIFESTE_COMMANDE = {
     'entrepot.expedition.livree@1', // livraison confirmée
     'paiement.creance.changed@1', // encours (FR-187, FR-247)
     'paiement.credit-tiers.changed@1', // crédit du tiers (FR-248)
+    'facturation.facture.emise@1', // [STORY-1059, AD-9] la facture d'une commande : l'engagement baisse à la réception de sa Créance, jamais avant
     // Le blocage du crédit (`recouvrement`, FR-119) et la portée (`reseau.portee.changed@1`, C2) ne figurent pas
     // dans la ligne C5 de l'annexe A.1. Propositions à figer par la story de consommation, sans quoi les refus
     // `CREDIT_BLOQUE` et le cloisonnement par zone n'ont pas de source :
