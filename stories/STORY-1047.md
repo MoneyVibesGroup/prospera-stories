@@ -1,6 +1,6 @@
 # STORY-1047 : la bibliothèque d'encours
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-225 · **Dépôt :** `prospera-plateforme` (dossier `encours/`, tenu par D, D-L3-5) · **Plage :** groupe
 D, n° 3 du lot 3 (`PLAN-4-SESSIONS-LOT-3-2026-11-17.md` §4). **Dépend de :** B-956 (README et scripts racines),
@@ -105,3 +105,28 @@ encoursAffiche = la même règle, avec restantAffiche (les encaissements déclar
 
 - **Q-D-4 — La commande se juge-t-elle sur l'encours certain ou sur l'encours affiché ?** Choix par défaut :
   **certain** (D-1047-2) : un encaissement déclaré mais non confirmé ne libère pas de crédit.
+
+## Preuves
+
+- **Node 24** (`node:24-slim`, `git -c core.autocrlf=false archive HEAD`, `npm ci`, sous le verrou du poste, conteneur
+  `grp-d-1047-preuves` supprimé à la fin) : `npm run typecheck` racine **vert** ; `npm test` racine **551 tests, 40
+  suites, 550 pass, 0 fail**, 1 ignoré (préexistant : la matrice du catalogue est absente du conteneur) ;
+  `test/scripts-racines.test.ts` vert.
+- `encours/` : **38 tests** — exemples FR-52 (1 400 000, disponible 600 000) et FR-187 (1 500 000, disponible
+  500 000) écrits en dur ; **720 ordres d'arrivée** des six faits du scénario d'AD-9 rendent le même résultat, écrit en
+  dur (1 100 000) ; la fenêtre compte deux fois (1 200 000), jamais zéro ; la seconde commande de 600 000 est refusée
+  (dépassement 200 000) ; même refus dans tout ordre ; `ABSENTE` dite ; exclusions ; plafond strict ; échu ; fichier
+  sans import ni horloge ; **10 vecteurs d'or** (dont 5 refus) rejoués.
+- **Mutations : 16/16 rouges sur une assertion** (script hors dépôt, rejoué sous Node 24) : crédit ajouté, plus basse
+  révision, `CLOTUREE` comptée, `ABSENTE` muette, jugement et « dépassé » non stricts, échéance du jour échue, autre
+  périmètre compté, affiché = certain, jugement sur l'affiché, contrôles dans l'ordre d'arrivée, conflit de révision
+  ignoré, majeur non contrôlé, disponible malgré une absence, flottant accepté, entiers sûrs non contrôlés.
+- Formatage : `prettier@3.3.3 --print-width 120 --single-quote` sur `src/` et `test/` (la plateforme n'a pas de
+  linter) ; `git diff --stat` = `--ignore-cr-at-eol` (fins de ligne LF).
+- Annonce « ⚠ Contrats » fusionnée **avant** le code : prospera-stories **#589** (`main` 4e1164a).
+- PR **prospera-plateforme#24**, fusionnée en rebase : **`dev` b061cec**. Étiquette annotée **`encours-v1`** sur
+  b061cec. sha256 des fichiers à copier (blobs, LF) : `encours/src/index.ts`
+  `4b5c9bff01f1fa1e49c80517c676bd7f42367440a95fe89ba1d8c3d96d8c1fbc`, `encours/vecteurs-or.json`
+  `23e3c260c2a9cf26e582eecd3bbb7b8368c2011633060d15edbeca683a57eabd`. Copie :
+  `git -c core.autocrlf=false show encours-v1:encours/src/index.ts > <service>/src/socle/encours/index.ts`.
+- Aucun service Nest, aucune dépendance ni Dockerfile ne change : pas de `docker compose up` à faire (§1.5).
