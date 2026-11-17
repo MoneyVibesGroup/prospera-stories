@@ -1070,9 +1070,13 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-961.md"
     reserved_on: "2026-11-17"
     note: >
-      EN COURS le 2026-11-17 — fiche écrite et contrat annoncé avant le code (route GET …/journaux, refus
-      EXERCICE_TENU_AUX_CAHIERS, PLAN_DE_JOURNAUX_ABSENT, JOURNAL_INCONNU ; manifeste amendé). Lot 3 de B, n° 6
-      (EPIC-112). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-comptabilite-service #3 (dev acafd6f) ; contrat annoncé avant la fusion
+      (stories #621 : route GET …/journaux, refus EXERCICE_TENU_AUX_CAHIERS, PLAN_DE_JOURNAUX_ABSENT,
+      JOURNAL_INCONNU ; manifeste amendé). Node 24 : 289 passés / 0 échec / 3 sautés ; test:socle 50/50 sur
+      MongoDB 8.0 rs0 et Kafka (50 actes concurrents, 10 abandonnés après leur numéro ⇒ 1 → 40 sans trou ni
+      doublon ; une série par journal et par exercice ; plan arrêté malgré un changement de référentiel ; CAHIERS
+      ⇒ 409) ; 23 mutations rouges. Pile grp-b : /health 200. series-v1 copiée à l'octet ; droits ∪ droitsHorsJeton.
+      Demande de A servie avant (plateforme #26, étiquette jeu-cabinet-v1). Lot 3 de B, n° 6 (EPIC-112). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
