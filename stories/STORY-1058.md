@@ -25,6 +25,8 @@ personne) ; STORY-1053 (invariant : chaque route déclare son droit).
 - [x] `terrain` : PR #3 fusionnée en rebase (`dev` **cefe9b9, 068e1c0**).
 - [x] Verrou Docker : tenu par B (STORY-967) de 17:45 ; libre à 18:28 ; pris par D à 18:32 (attente ~30 min, passée à coder) ;
   Verrou Docker attendu ~30 min (B, 967), pris à 18:32 ; rendu à B par la session de groupe après le blocage du rejeu de terrain ; aucun conteneur, volume ni réseau grp-d ne reste.
+- [x] **Rejeu de `terrain` sur l'image d'`origin/dev`** (`068e1c0`, `--no-cache`, volumes neufs) : joué par la session de
+  STORY-1059 le 2026-11-17, sous son verrou (pris à 22:37) : **22/22, espace réel 403** (voir « Preuves »).
 - [x] Pile `grp-d` (branches), puis rejouée sur les images reconstruites depuis `origin/dev`.
 - [x] PR de docs finale.
 
@@ -203,7 +205,14 @@ en 5 familles. Kodjo (COM-01, commercial à Bè) a 14 visites au jour 0. Mme Adj
   - **`terrain`, 22/22** : jeu réduit 168 enregistrements, complet 744 en 1,6 s, grand 2 480 en 3,2 s ; mêmes rejeux et
     refus ; **Kodjo (Bè) a 14 visites au jour 0 (2026-11-17), toutes vers des points de vente importés** ;
     effacements (171, 748, 2 486), `DEJA_EFFACE`, témoin intact ; espace réel 403.
-- **Rejeu sur images reconstruites depuis origin/dev (--no-cache, volumes neufs) : ventes 25/25 et espace réel 403 ; terrain NON rejoué depuis origin/dev (session bloquée pendant ce rejeu, verrou rendu à B pour 968 ; à rejouer à la prochaine prise du verrou).**
+- **Rejeu sur images reconstruites depuis origin/dev (--no-cache, volumes neufs) : ventes 25/25 et espace réel 403.**
+  `terrain` n'avait pas été rejoué (session bloquée, verrou rendu à B pour 968) ; **rejoué le 2026-11-17 à 22:47 par
+  la session de STORY-1059** : export `git archive 068e1c0`, image `runtime` construite `--no-cache`, volumes neufs,
+  même pilote et même surcouche (émetteur RS256, `INSTANCE_ESPACE=ESSAI`, `NODE_ENV=production`) : **22/22** — jeu
+  réduit 168 enregistrements (3 appels), rejoué `DEJA_IMPORTE`, 409 `IDEMPOTENCE_REUTILISEE`, les six refus,
+  jeu complet 744 et grande taille 2 480, **Kodjo (Bè) : 14 visites au jour 0 (2026-11-17)**, effacements 171, 748,
+  2 486 puis `DEJA_EFFACE` au même `effaceLe`, **organisation témoin intacte**, registre sans donnée personnelle ;
+  service relancé avec `INSTANCE_ESPACE=REEL` : **403 `ESPACE_REEL_REFUSE`**, rien d'écrit. Pile descendue (`down -v`).
 - `git diff --stat` = `--ignore-cr-at-eol` dans les trois dépôts ; aucun `index.ts` non suivi.
 - **Piège payé** : la surcouche de recette de `terrain` en `NODE_ENV=staging` fait tomber le service (`pino-pretty`
   absent de l'image `runtime`) ; `ventes` lit `LOG_PRETTY`, `terrain` non. Sans rapport avec 1058 : la recette de
