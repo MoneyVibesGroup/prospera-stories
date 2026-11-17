@@ -67,7 +67,9 @@
   - ~~**STORY-1007**~~ : **sinistres #17** ; la dernière pièce validée au contrôle pose l'accusé de réception du
     dossier complet (courrier `ACCUSE_RECEPTION`, une fois) et arrête l'échéance `ACCUSE_DOSSIER_COMPLET`
     (événement `ACCUSE_POSE`) ; Node 24, sans pile (aucun câblage ne change) ; l'envoi reste à EPIC-220.
-  - **STORY-1008** ← **suivante** : la provision d'ouverture posée à l'ouverture (`sinistres`, port vers `assurance`).
+  - ~~**STORY-1008**~~ : **sinistres #18** ; l'ouverture propose la provision d'ouverture à `assurance` (estimation du
+    déclarant, sinon gravité ; une seule fois ; corporel et recours exclus) ; Node 24, sans pile, aucun fait neuf.
+  - **STORY-1014** ← **suivante** : le référentiel des experts et l'agrément échu (`sinistres`, module `expertises`).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -372,6 +374,12 @@ seulement.
   référentiel des échéances `2026.1` déclare l'événement `ACCUSE_POSE`. **Pour D (EPIC-220)** : l'accusé du dossier
   complet est prêt à envoyer dans `courriers[]` ; l'envoi, sa preuve et son archivage restent à vous.
 
+- **2026-11-17, STORY-1008 — aucun contrat sur le fil, un champ de plus au dossier.** Les transitions d'ouverture de
+  `sinistres` publient maintenant `sinistres.provision.revisee@1` (motif `OUVERTURE`, devise `XOF`, volet et gravité ou
+  estimation du déclarant, `propositionId` = `ouverture-<dossierId>`) ; même sujet et même schéma que STORY-994, rien de
+  neuf pour `assurance`, qui l'a déjà consommé. `GET …/dossiers/{id}` porte `provisionOuverture` (facultatif).
+  ⚠️ Pour tous : un dossier **corporel** n'a toujours aucune provision tant qu'un agent ne la saisit pas (FR-49).
+
 ## Questions à l'utilisateur ou au PO
 
 - **❓ 2026-11-17 — STORY-1002, question au PO : qui porte `sinistres.declaration.enregistree@1` ?** La spine (AD-16)
@@ -400,6 +408,11 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-1008-1 → D-1008-7** (`stories/STORY-1008.md`) : l'ouverture = transitions 1 et 2 (3 en rattrapage), listes en
+  paramètre figé ; corporel et recours exclus (FR-49 contre « grille par volet » du plan) ; rôle du fait `RESP` ou
+  `GEST` ; estimation avant gravité, jamais d'erreur ; devise `XOF` du paramètre ; identifiant de proposition dérivé du
+  dossier ; pas de ligne d'audit propre. ⚠️ Écart à connaître : le plan dit « grille par volet et gravité » alors que
+  FR-49 réserve le corporel à la saisie humaine — C a suivi le PRD.
 - **D-1007-1 → D-1007-5** (`stories/STORY-1007.md`) : dossier complet = passage de « il manque » à « aucune pièce
   obligatoire ne manque » sur un contrôle validé ; date du contrôle ; événement `ACCUSE_POSE` ajouté à l'arrêt (sans
   émettre `DOSSIER_COMPLET`, qui ouvre l'offre) et `DOSSIER_OUVERT` conservé ; l'accusé est un courrier du dossier ;
@@ -461,6 +474,12 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
 
 ## Pièges rencontrés
 
+- **Un fait relu sur le banc MongoDB porte son enveloppe d'outbox** (`eventId`, `schemaVersion`…) que le banc mémoire
+  n'a pas : comparer un fait publié par `toMatchObject`, jamais par `toEqual` (vu en 1008).
+- **Deux passages de la vérification sur `origin/dev` ont rougi sur des tests MongoDB sans rapport** (portée,
+  idempotence de 1002, création de 988 : un test différent à chaque fois) pendant que le groupe A chargeait le poste
+  (suites à 120–136 s au lieu de 87 s) ; le troisième passage, identique, était vert. Relancer avant de chercher une
+  régression, et lire le nom des tests tombés : s'ils changent d'un passage à l'autre, c'est la charge.
 - **La garde de portée du dossier précède la garde d'accès d'`assurance`** : sur pile, une route `dossiers/:id/…` d'un
   dossier inconnu rend 404 `DOSSIER_INTROUVABLE`, jamais le refus du gate. Publier un `dossier.created` avant de
   prouver un refus de gate. Et le graphe d'injection (`app.module.injection.spec.ts`) sert une config doublée : tout
