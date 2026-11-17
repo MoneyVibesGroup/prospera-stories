@@ -1163,11 +1163,15 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-964.md"
     reserved_on: "2026-11-17"
     note: >
-      EN COURS le 2026-11-17 — fiche écrite et contrat annoncé avant le code (POST …/validation, POST
-      …/contre-passation, PUT et DELETE …/ecritures/{id}, GET …/piste/verification ; refus
-      ECRITURE_VALIDEE_INALTERABLE, ECRITURE_NON_VALIDEE, ECRITURE_DEJA_CONTREPASSEE,
-      CONTREPASSATION_NON_CONTREPASSABLE, DATE_ANTERIEURE_A_L_ORIGINALE ; champs de chaînage sur la piste ;
-      manifeste amendé). Lot 3 de B, n° 9 (EPIC-113, 120). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-comptabilite-service #5 (dev 92f8c53) ; contrat annoncé avant la fusion
+      (stories #640 : POST …/validation et …/contre-passation, PUT et DELETE …/ecritures/{id}, GET
+      …/piste/verification ; refus ECRITURE_VALIDEE_INALTERABLE, ECRITURE_NON_VALIDEE, ECRITURE_DEJA_CONTREPASSEE,
+      CONTREPASSATION_NON_CONTREPASSABLE, DATE_ANTERIEURE_A_L_ORIGINALE ; manifeste amendé). Node 24 : 436 passés /
+      0 échec / 3 sautés ; test:socle 98/98 sur MongoDB 8.0 rs0 et Kafka (20 validations concurrentes ⇒ AC-000001 →
+      000020 ; même écriture validée 6 fois ⇒ un numéro ; 5 contre-passations concurrentes ⇒ une ; écriture validée
+      ni corrigée ni supprimée, garde de la collection sur le vrai pilote ; piste chaînée intacte puis rompue à la
+      main, cinq ruptures détectées) ; 45 + 7 mutations rouges. Pile grp-b : /health 200. Lot 3 de B, n° 9
+      (EPIC-113, 120). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

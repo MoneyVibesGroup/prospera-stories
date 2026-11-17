@@ -91,12 +91,23 @@
        201 née, 200 rejeu, rien d'écrit au rejeu ; reprise bornée à 3 sur `ECRITURE_CONCURRENTE` (D-963-6).
      Node 24 : 130 + 4 578/0/2 ; conformité `rs-paiement` : 20 ouvertures concurrentes ⇒ 1 Créance, 1 trace, 1 fait ;
      21 mutations ; pile `grp-b` : `/health` 200. « → D » : comment ouvrir une Créance (pour D-1059).
-  - **Story suivante : STORY-964** (la validation inaltérable, `prospera-comptabilite-service`, EPIC-113 et 120 ; dépend
-    de 962). « Fini quand » (plan §3) : brouillard → définitif ; une écriture validée ne se modifie pas, elle se
-    **contre-passe** ; séquence prouvée par une piste chaînée ; mutation. À lire avant : fiche 962 (« Pour la suite » :
-    valider = `numeroter(portee, code, session)` dans la transaction de la validation, D-961-5 ; le numéro provisoire
-    reste sur l'écriture) et fiche 961. `comptabilite:*` n'est toujours attribué à aucun rôle dans auth (en réel, la
-    saisie rend 403 jusque-là ; hors du jeton, avant B-967).
+  9. ~~STORY-964~~ : **prospera-comptabilite-service #5** (`92f8c53` sur `dev`), contrat annoncé avant la fusion
+     (stories #640). La validation inaltérable.
+     - `POST …/ecritures/{id}/validation` (`comptabilite:ecriture:valider`) : numéro définitif `VE-000001` émis par
+       `numeroter` dans la transaction de la validation ; 201, puis 200 au rejeu (D-964-1).
+     - `POST …/ecritures/{id}/contre-passation` : l'inverse, née validée et numérotée, liée (`contrePasse`) ; une
+       seule par écriture (index unique) ; une contre-passation ne se contre-passe pas (D-964-4).
+     - `PUT` et `DELETE …/ecritures/{id}` corrigent et abandonnent le brouillard ; sur une écriture validée, 409
+       `ECRITURE_VALIDEE_INALTERABLE` ; garde du programme sur la collection (D-964-2, D-964-3).
+     - Piste chaînée PAR EXERCICE (`rang`, empreinte SHA-256 de la précédente et la sienne, tête dans
+       `chaines_de_piste`) ; `GET …/piste/verification` (`comptabilite:piste:consulter`) dit la première rupture
+       (D-964-5, D-964-6). Pas de séparation des pouvoirs au niveau de l'acteur (D-964-7).
+     Node 24 : 436/0/3 ; `test:socle` 98/98 (20 validations concurrentes sans trou ; chaîne rompue à la main, cinq
+     ruptures détectées) ; 45 + 7 mutations ; pile `grp-b` : `/health` 200.
+  - **Story suivante : STORY-965** (la Créance (2), `prospera-paiement-service`, EPIC-231 ; dépend de 963). « Fini
+    quand » (plan §3) : crédit du tiers, compteurs ; `paiement.creance.changed@1` au registre en BACKWARD, annoncé dans
+    « ⚠ Contrats » de B. À lire avant : fiche 963 (« Pour la suite ») et « → D » de ce journal. Ensuite : 966 (le grand
+    livre, ne lit que les écritures `VALIDEE`, fiche 964 « Pour la suite »).
   - **Pour STORY-965** (Créance (2), paiement) : fiche 963, « Pour la suite » : `paiement.creance.changed@1` à la forme
     de `FaitCreance` d'`encours@1` (`creanceId = <source>:<sourceId>`, `revision` à ajouter au document et à incrémenter
     dans la transaction de chaque changement, deux restants, `echeanceLe` en `AAAA-MM-JJ`) ; le crédit du tiers ; la
@@ -538,7 +549,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-17, STORY-964 — la validation inaltérable, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
-  EPIC-113 et 120 ; fiche `stories/STORY-964.md`, D-964-1 → 9). Tout est AJOUT, sauf un champ de la vue d'une écriture
+  EPIC-113 et 120 ; fiche `stories/STORY-964.md`, D-964-1 → 9). **Fusionné le 17/11** : comptabilite #5, `92f8c53` sur
+  `dev` (annonce : stories #640). Tout est AJOUT, sauf un champ de la vue d'une écriture
   qui devient facultatif (`numeroProvisoire`, absent d'une contre-passation) ; aucun client ne lit encore ces routes.
   - **Routes neuves** (sous `/api/v1/dossiers/{d}/exercices/{e}`) :
     - `POST …/ecritures/{id}/validation`, droit `comptabilite:ecriture:valider`, corps vide : brouillard → définitif,
@@ -1136,6 +1148,21 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une boucle d'attente du verrou Docker lancée en arrière-plan survit au délai de l'outil** (STORY-964). Une boucle
+  `until ( set -o noclobber; … ) ; do sleep 15; done` lancée par `run_in_background` avec un délai de 10 min a continué
+  après ce délai et a pris le verrou une heure plus tard, alors qu'une seconde boucle (un moniteur) tournait aussi.
+  Ne lancer qu'UNE boucle d'attente, de préférence comme moniteur (tué à son expiration), et **arrêter toute boucle
+  avant de rendre le verrou** : sinon elle le reprend dès que le fichier disparaît.
+- **Une mutation `cond && false` rougit par compilation quand `cond` rétrécit un type utilisé dans le bloc**
+  (`if (e.contrePasse && false)` puis `e.contrePasse.numero` : TS2339 sur `never`) ou laisse une variable sans usage
+  (`noUnusedLocals`). Muter avec une condition fausse qui garde le type et l'usage (`&& e.dateEcriture === '§'`,
+  `|| (x !== y && rang < 0)`), ou annuler l'effet (`lignesInverses(l).map(inverser)`) (STORY-964, quatre mutations).
+- **Un index unique non partiel sur un champ devenu facultatif** fait collisionner les documents qui ne l'ont pas
+  (`null` en double). Le rendre partiel (`partialFilterExpression: { champ: { $exists: true } }`) impose un nom neuf :
+  Mongoose ne remplace pas un index de même nom aux options différentes (STORY-964, `_v2`).
+- **`consigner` exige désormais une transaction** (STORY-964) : une suite ou un code qui consigne sans session lève
+  `PisteHorsTransaction`.
 
 - **Paiement : une écriture d'argent neuve doit entrer dans l'inventaire FERMÉ** de `piste-opposable.invariant.spec.ts`
   (`ECRITURES_DARGENT`) : tout fichier qui appelle `this.ecriture.executer` y est listé par son nom (STORY-963).
