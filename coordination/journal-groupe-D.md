@@ -109,9 +109,9 @@
   18/18 mutations. Pile `grp-d` (rejouée depuis `dev`) : `/health` 200, accusé `TRANSMIS`, numéro officiel en cloche
   sans accord et après retrait, SMS en échec déposé `ECHEC_DU_CANAL`, rejeu sans envoi ni dépôt de plus. Décisions
   D-1054-1 → 12 (fiche) ; Q-D-6 au PO ; → C. Verrou Docker pris à 12:38 sans attente, rendu à 13:35.
-- **Suivante : STORY-1055** 🚚 l'import réseau par la Reprise, dans `reseau-service` (EPIC-165) : le volet Reprise de
-  1041 (D-1041-3) sur `kit-cible` 1.0.1, la suite de conformité du kit passe (dépend de B-956, faite). Puis 1056 (la
-  commande (1)).
+- **STORY-1055** 🚧 🚚 — l'import réseau par la Reprise (`reseau-service`, EPIC-165), **en cours** : fiche
+  `stories/STORY-1055.md` (son « Avancement » dit où en est la story) ; annonce « ⚠ Contrats » avant le code. Puis 1056
+  (la commande (1)).
 
 ### Lots 1 et 2
 
@@ -419,6 +419,39 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-17, STORY-1055) avant le code — `reseau-service` reçoit la Reprise : `reseau.zone@1.0` et
+  `reseau.commercial@1.0`, par `kit-cible` 1.0.1.** Rien d'existant ne change de forme. Ce sont des **ajouts** :
+  - **Deux routes neuves** (contrat `reprise-cible.openapi.json` de la plateforme, servi par `traiterRequete` du kit) :
+    `POST /api/v1/reprise/reseau/{organisationId}/objets/{zone|commercial}` (`SIMULER`, `APPLIQUER`) et
+    `POST /api/v1/reprise/reseau/{organisationId}/controles/{zone|commercial}`. Corps et refus : `enveloppe-reprise@1`,
+    `reponse-reprise@1`, `refus-reprise@1`, `controles-*@1`.
+    - L'organisation du chemin est celle du jeton (403 `ORGANISATION_HORS_JETON`).
+    - L'état publié du module et la matrice décident seuls : 403 `RESEAU_NOT_ENTITLED` ou `ABONNEMENT_EXPIRE`.
+    - Ni KYC ni droit de tenant sur ces routes.
+  - **Jetons de service** (patron de STORY-948 et de STORY-1046) : `identite` `REPRISE`, `CONNECTEURS` ou `MOTEUR`,
+    avec `organisationId`. Ils sont admis sur ces deux routes seulement ; ailleurs, 403
+    `IDENTITE_DE_SERVICE_REFUSEE`. Un jeton d'utilisateur n'est jamais ouvert par la matrice sur ces routes.
+  - **Deux schémas d'objets** écrits par D dans `prospera-plateforme/contrats/objets/reseau/` (`zone@1.0.json`,
+    `commercial@1.0.json`, étiquette `objets-reseau-v1`) :
+    - **zone** : `code`, `nom`, `type`, `parent` (référence vers une zone), `localites`, `statut` (`OUVERT`, `FERME`) ;
+    - **commercial** : `prenom`, `nom`, `email`, `telephone`, `statutEmploi`, `etat` (`EN_POSTE`, `PARTI`), `zone`
+      (référence vers une zone), `affecteDepuis`, `partiLe`.
+    - Les deux admettent `VIVANT` et `HISTORIQUE`. Valeurs de contrôle : `statut` et `etat`, lues sur l'objet vivant.
+  - **Manifeste `reseau`** : `objetsDeReprise` ne change pas (`reseau.zone@1`, `reseau.commercial@1`). Son
+    commentaire dit ce qui est servi (prospera-stories `manifestes/reseau.manifest.ts`, recopié à l'octet dans le
+    service).
+  - **Faits** : aucun topic neuf, aucun champ neuf. Une reprise appliquée publie les faits existants, par l'outbox,
+    dans sa transaction : `reseau.noeud.created@1`, `reseau.noeud.closed@1` (zone `HISTORIQUE`),
+    `reseau.commercial.changed@1` et `reseau.portee.changed@1` quand la hiérarchie change une portée résolue. `SIMULER`
+    ne publie rien.
+  - **Collections neuves** : `reprise_fiches`, `reprise_cles`, `reprise_resultats`, `reprise_lots`, `reprise_traces`.
+    Les collections métier ne gagnent aucun champ.
+  - **Exploitation** : l'analyseur JSON du service passe de 100 Kio à 2 Mio (le kit répond 413 au-delà de 1 Mio) ;
+    `ajv` passe en dépendance d'exécution.
+  - **L'import par fichier de 1041** (`POST /api/v1/import/compte-rendu`, `POST /api/v1/import`) ne change pas de forme.
+    Il juge et écrit par le même moteur des zones (D-1055-2).
+  - Fiche : `stories/STORY-1055.md` (D-1055-1 → 13).
 
 - **PUBLIÉ (2026-11-17, STORY-1054, prospera-notification-service#91, `dev` d9de737 → e0a50c0) ; ANNONCÉ avant la
   fusion du code (prospera-stories #647) — `prospera-notification-service` : prévenir l'assuré (2).** Écarts avec

@@ -209,6 +209,13 @@ export const MANIFESTE_RESEAU = {
   // - Les portées ne sont pas reprises : elles s'attribuent dans Prospera, par quelqu'un qui détient
   //   `reseau:portee:attribuer` (AD-8). Une portée importée d'un autre logiciel serait une portée que personne
   //   n'a attribuée.
+  // ⚡ Servis depuis STORY-1055 par `kit-cible` 1.0.1 (copie à l'octet) : `zone@1.0` et `commercial@1.0`
+  //   (prospera-plateforme/contrats/objets/reseau/, étiquette `objets-reseau-v1`), routes
+  //   `POST /api/v1/reprise/reseau/{organisationId}/objets/{zone|commercial}` (SIMULER, APPLIQUER) et
+  //   `POST /api/v1/reprise/reseau/{organisationId}/controles/{zone|commercial}`, ouvertes par l'état publié et la
+  //   matrice seuls (identité REPRISE ; CONNECTEURS pour les contrôles). Le commercial porte au v1 sa zone
+  //   d'affectation courante, datée (`zone`, `affecteDepuis`, `partiLe`) ; aucun responsable, aucune affectation
+  //   antérieure (D-1055-1). Un même moteur des zones juge et écrit l'import par fichier et la reprise (D-1055-2).
   objetsDeReprise: ['reseau.zone@1', 'reseau.commercial@1'],
 
   // C1, amendement du 2026-11-12 (spine de Connecteurs, AD-2) : « Commerciaux : Prospera propriétaire, ce sont
