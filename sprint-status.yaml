@@ -854,6 +854,17 @@ reserved_ranges:
       catalogue 1457/1457 ; 8 mutations rouges. Pile : 5 essais simultanés avec le jeu témoin en 433 ms sans mélange ;
       effacement automatique à effacementLe, certificat vérifié par @prospera/signature et le schéma ; 4 autres
       intacts. Lot 2 de B, n° 13 (EPIC-147). NON SLOTTÉE.
+  - range: "STORY-956"
+    status: "RÉSERVÉ"
+    owner: "kit-cible 1.0.1 — D1 (CLE_EN_DOUBLE), D2 (textes bornés), D3 (montants requis et états appliqués) ; suite de conformité élargie (cloisonnement, atomicité, cas du témoin, controles) ; encours/ au README et dans les scripts racines (prospera-plateforme)"
+    source_doc: "prospera-stories/stories/STORY-956.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — plateforme #22 (189183f sur dev), étiquette kit-cible-v1.0.1 (jalon du 04/12 tenu) ;
+      contrat annoncé avant la fusion (stories #580 : CLE_EN_DOUBLE ajouté à refus-reprise@1). Node 24 : 490 passés /
+      0 échec / 1 sauté ; conformité du témoin 23/23 sur MongoDB 8.0 en jeu de répliques (grp-b) ; 513/513 après
+      rebase sur dev. 25 + 29 mutations rouges. encours/ lu avant son premier fichier (D-1047 débloquée ; D-1055 sur
+      la 1.0.1). Lot 3 de B, n° 1 (EPIC-161). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

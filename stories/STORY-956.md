@@ -1,6 +1,6 @@
 # STORY-956 : `kit-cible` 1.0.1 ; le README et les scripts racines de la plateforme avec `encours/`
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (trois défauts du kit, une suite publiée élargie, une entrée de dossier dans les fichiers racines)
 
@@ -34,14 +34,14 @@ racines, comme pour les dossiers de C et de D au lot 2 (STORY-941).
 
 | Exigence | Fait |
 |---|---|
-| D1 : clé en double = refus nommé, le même en SIMULER et APPLIQUER | à faire |
-| D2 : messages plafonnés à 1 024 (`message`) et 512 (`raison`, `erreurs[].message`) | à faire |
-| D3 : `montantsRequis` et `etats` appliqués par le kit | à faire |
-| La suite publiée couvre le cloisonnement, l'atomicité, les cas du témoin et `controles` | à faire |
-| `kit-cible` 1.0.1, étiquette `kit-cible-v1.0.1` poussée avant le 04/12 | à faire |
-| `encours/` dans le README et dans les scripts `test` et `typecheck` | à faire |
-| Preuves : tests (Node 24), lint des fichiers touchés, typecheck, build de la distribution, mutations des corrections | à faire |
-| « ⚠ Contrats » du journal B avant la fusion ; A prévenu (relecture de la 1.0.1) ; D prévenu (README) | à faire |
+| D1 : clé en double = refus nommé, le même en SIMULER et APPLIQUER | oui : 422 `CLE_EN_DOUBLE` sur la requête, corps identique dans les deux modes, rien d'écrit (reproduction de A comprise) |
+| D2 : messages plafonnés à 1 024 (`message`) et 512 (`raison`, `erreurs[].message`) | oui : dans `RefusRequete` (tout refus) et pour toute `raison` ; 500 objets de régime inconnu → message de 1 024 |
+| D3 : `montantsRequis` et `etats` appliqués par le kit | oui : 422 `SCHEMA_NON_CONFORME` ; état retenu hors circuit → `REFUSE_PAR_LA_CIBLE` ; le témoin n'écrit plus la règle |
+| La suite publiée couvre le cloisonnement, l'atomicité, les cas du témoin et `controles` | oui : 22 cas (13 à la 1.0.0) |
+| `kit-cible` 1.0.1, étiquette `kit-cible-v1.0.1` poussée avant le 04/12 | oui : plateforme #22, `189183f` sur `dev`, étiquette posée et poussée le 17/11 |
+| `encours/` dans le README et dans les scripts `test` et `typecheck` | oui : motifs posés d'avance (D-956-6), garde des scripts racines |
+| Preuves : tests (Node 24), lint des fichiers touchés, typecheck, build de la distribution, mutations des corrections | oui (ci-dessous) |
+| « ⚠ Contrats » du journal B avant la fusion ; A prévenu (relecture de la 1.0.1) ; D prévenu (README) | oui : annonce fusionnée avant le code (stories #580) ; « → A » et « → D » au journal de B |
 
 ## Décisions (prises par défaut, contestables)
 
@@ -88,3 +88,52 @@ racines, comme pour les dossiers de C et de D au lot 2 (STORY-941).
 - **D-956-7 : D4 à D8 de la relecture restent ouverts** (hors de la ligne 956 du plan).
   - D4 (deux `APPLIQUER` concurrents, E11000) se traitera avant que `pdv` s'appuie sur la concurrence.
   - D5 à D8 sont notés au journal de B.
+
+## Ce qui a été livré (plateforme #22, `189183f` sur `dev`, étiquette `kit-cible-v1.0.1`)
+
+1. **Le kit** (`bibliotheques/kit-cible/src/`) :
+   - `cible.ts` : refus `CLE_EN_DOUBLE` avant le schéma d'objet ; montants requis et état du circuit dans la
+     vérification du schéma ; état retenu hors circuit refusé ; `raison` bornée ;
+   - `types.ts` : `BORNES`, `borner` ; `RefusRequete` borne tout corps de refus ;
+   - `schema-objet.ts` : montant requis `required` refusé au démarrage.
+2. **Le contrat** : `CLE_EN_DOUBLE` dans `refus-reprise@1` et dans les deux OpenAPI (générés par
+   `npm run contrats:reprise`).
+3. **La suite publiée** (`conformite.ts`) : 22 cas, et `PanneDeConformite` / `ErreurDePanne`. Le profil gagne
+   `circuit` et `regimeNonAdmis`. La cible témoin les déclare tous les deux ; sa `commande` n'applique plus le montant
+   requis, son état n'est plus fermé par un `enum`, et sa surcharge `valeursDeControle` écrit exprès.
+4. **La distribution** régénérée (`npm run kit:distribuer`, version 1.0.1 dans `EMPREINTES.json`).
+5. **Les fichiers racines** : `encours/` au README, dans `npm test`, dans le typecheck et dans la garde
+   `test/scripts-racines.test.ts`.
+
+## Preuves
+
+- **Node 24** (`node:24-slim`, export LF du commit, sous le verrou, projet `grp-b`) :
+  - `npm ci` ✔, `npm run typecheck` ✔ (ESM et CommonJS) ;
+  - `npm test` : **490 passés, 0 échec, 1 sauté** (la matrice du catalogue, absente du conteneur, comme à 947) ;
+  - la suite sur **MongoDB 8.0 en jeu de répliques** : **23/23** (les 22 cas, plus l'index unique sous deux
+    transactions concurrentes). `SIMULER` de 500 objets : 5,2 s ; chaîne de 600 objets : 19 s ; cloisonnement et
+    atomicité verts sur un vrai MongoDB.
+- **Après le rebase sur `dev`** (D-1045 fusionnée entre-temps, dossiers disjoints) : typecheck ✔, `npm test`
+  **513/513** (Node 25).
+- **Mutations**, chacune rouge sur une assertion :
+  - `test/mutation.test.ts` : **25** (15 de la 1.0.0 + 10 de la 1.0.1). Ces 10 couvrent D1 (clé, alias), D2
+    (message, erreurs, raison, raison de requalification) et D3 (montant requis, état, état retenu, montant
+    `required`) ;
+  - `test/mutation-conformite.test.ts` : **29** jouées par la suite publiée (15 + 14). Les 14 couvrent D1, D2, D3
+    (montant, état), `rattacherA`, `controles` qui écrit, 1 Mio, régime non admis, saisie sur un historique, valeur
+    saisie hors schéma, l'atomicité perdue (le magasin garde ce qu'une transaction en échec a écrit) et trois fuites
+    de cloisonnement (version du lot, résultat d'idempotence, fiche lue dans toutes les organisations).
+- **Lint** : le dépôt n'a ni ESLint ni Prettier ; le contrôle statique est le typecheck strict, comme à 947.
+- **Fins de ligne** : `git diff --stat` et `--ignore-cr-at-eol` identiques avant le commit.
+
+## Pour la suite
+
+- **D-1055** (import réseau par la Reprise) et tout module cible copient la distribution à `kit-cible-v1.0.1`.
+  Leur banc fournit `panne` et enveloppe chaque raccord.
+- **A** relit la 1.0.1 (journal de B, « → A »).
+- **D-1047** peut créer `encours/` sans PR de B.
+- **Restent ouverts** (D-956-7) : D4 (deux `APPLIQUER` concurrents du même lot, E11000 rendu en 500 au lieu d'un
+  rejeu ; à traiter avant que `pdv` s'appuie sur la concurrence), D5 (`saisirMontant` ne type pas sa demande), D6
+  (version de lot par `lotId`), D7 (même `(lotId, versionLot)` rejoué avec un autre contenu), D8 (`provenance.lotId`
+  non confronté, clé non NFC). Et la copie de la garde dans la distribution (`239ebe7c…`) diffère de celle de
+  paiement (`a830c449…`).
