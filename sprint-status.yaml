@@ -1108,6 +1108,16 @@ reserved_ranges:
       pièce inconnue 422, rien d'écrit ni de numéroté ; 20 saisies concurrentes ⇒ AC-BR-000001 → 000020 ; aucun
       numéro définitif consommé ; cache des droits : 3 saisies ⇒ 1 lecture) ; 31 + 5 mutations rouges. Pile grp-b :
       /health 200. Numéro provisoire, définitif à la validation (D-962-1). Lot 3 de B, n° 7 (EPIC-113). NON SLOTTÉE.
+  - range: "STORY-963"
+    status: "RÉSERVÉ"
+    owner: "La Créance (1) — un registre unique ouvert par sa source : clé (source, sourceId), source FACTURE (les trois autres déclarées, refusées SOURCE_DE_CREANCE_NON_SERVIE), un tiers et un périmètre figés (CREANCE_SOURCE_EN_CONFLIT), ouverture idempotente PUT /creances/sources/{source}/{sourceId} sous paiement:demande:emettre ; montants entiers en unité mineure (prospera-paiement-service)"
+    source_doc: "prospera-stories/stories/STORY-963.md"
+    reserved_on: "2026-11-17"
+    note: >
+      EN COURS le 2026-11-17 — fiche écrite et contrat annoncé avant le code (PUT /creances/sources/{source}/{sourceId},
+      refus SOURCE_DE_CREANCE_NON_SERVIE et CREANCE_SOURCE_EN_CONFLIT, filtres de GET /creances, champs de source sur
+      la vue et sur paiement.creance.materialisee) ; → D : comment ouvrir une Créance (D-1059). Lot 3 de B, n° 8
+      (EPIC-231). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
