@@ -1496,6 +1496,20 @@ reserved_ranges:
       à la fin, montant arrêté au franc, corporel renvoyé au barème ; adaptateur du formulaire de 1011 (le matériel
       automobile attend 1012). Aucune route, aucun fait, pas de commande « arrêter l'évaluation » (1013). Node 24 : 1139
       unitaires sur MongoDB réel, 25 e2e, build 0 ; pas de pile. Lot 3 de C, n° 8. NON SLOTTÉE.
+  - range: "STORY-1012"
+    status: "RÉSERVÉ"
+    owner: "Le matériel automobile : vétusté sur pièces selon l'âge du véhicule et épave, dans le décompte de 1010 (sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1012.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-sinistres-service#23 (dev 1bb2268). Grille de vétusté automobile
+      vetuste-automobile-2026.1 (par âge et par catégorie de pièce, datée, figée par sha256, jugée à la date de
+      survenance ; table DISTINCTE, decompte-2026.1 et son empreinte intacts) ; vétusté sur les pièces seulement (4 ans :
+      30 % pièces, 0 % main-d'œuvre) ; épave quand la remise en état dépasse la valeur vénale (valeur vénale − valeur de
+      l'épave) ; RC seule avec assuré fautif = zéro et BLOQUANT, franchise nulle en RC ; branche VEHICULE de
+      l'adaptateur du formulaire de 1011. 395 500 et 702 000 retrouvés au franc ; « 775 000 » non reproduit (entrées
+      absentes des extraits). Aucune route, aucun fait. Node 24 : 1172 unitaires sur MongoDB réel, 25 e2e, build 0 ; pas
+      de pile. Lot 3 de C, n° 9. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
