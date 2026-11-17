@@ -1309,6 +1309,15 @@ reserved_ranges:
       grp-b 27/27 : balance-service d'origin/dev (98078b0) ingère la balance, origine comptabilite, même checksum ;
       refuse ECART_EQUILIBRE et CONTENU_INVALIDE. → A : comptabilite-service dans INGESTION_SOURCE_SYSTEMS ; la
       comptabilité dans la recette. Lot 3 de B, n° 13 (EPIC-114). NON SLOTTÉE.
+  - range: "STORY-968"
+    status: "RÉSERVÉ"
+    owner: "Les comptes de tiers — registre des tiers du dossier (clients, fournisseurs, salariés ; la comptabilité les possède, référence externe facultative) ; comptes collectifs déclarés par référentiel (comptes-collectifs@1) ; toute ligne sur un collectif porte son tiers et son échéance figée (TIERS_REQUIS sinon, à la saisie, à la correction et à la validation) ; grand livre auxiliaire d'un tiers, auxiliaires d'un collectif et leur concordance ; balance âgée par tiers et par tranche (0-30, 31-60, 61-90, 91+, paramétrables) à une date d'arrêté (horloge de référence), sur les lignes non lettrées (port du lettrage préparé pour 969) ; balance publiée inchangée (prospera-comptabilite-service)"
+    source_doc: "prospera-stories/stories/STORY-968.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🚧 EN COURS le 2026-11-17 — fiche, manifeste amendé (six routes de lecture) et annonce du contrat (« ⚠ Contrats »
+      du journal de B) AVANT la fusion du code. Aucun droit neuf (comptabilite:tiers:administrer et
+      comptabilite:dossier:consulter, déjà attribués en 971). Lot 3 de B, n° 14 (EPIC-115). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
