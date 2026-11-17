@@ -1234,10 +1234,15 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-966.md"
     reserved_on: "2026-11-17"
     note: >
-      EN COURS le 2026-11-17 — fiche écrite et contrat annoncé avant le code (GET …/grand-livre et GET
-      …/grand-livre/comptes/{compte} ; refus PERIODE_HORS_EXERCICE, PERIODE_INVALIDE, MONTANT_HORS_BORNE,
-      DEVISE_A_PRECISER, COMPTE_MALFORME, CURSEUR_INVALIDE ; index grand_livre_par_compte ; manifeste amendé).
-      Lot 3 de B, n° 11 (EPIC-114). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-comptabilite-service #6 (dev 7fed6ce) ; contrat annoncé avant la fusion
+      (stories #652 : GET …/grand-livre et GET …/grand-livre/comptes/{compte} ; refus PERIODE_HORS_EXERCICE,
+      PERIODE_INVALIDE, MONTANT_HORS_BORNE, DEVISE_A_PRECISER, COMPTE_MALFORME, CURSEUR_INVALIDE ; index
+      grand_livre_par_compte ; manifeste amendé). Node 24 : 498 passés / 0 échec / 3 sautés ; test:socle 132/132 sur
+      MongoDB 8.0 rs0 et Kafka (brouillard exclu, contre-passation qui annule, jeu connu juste, bornes inclusives,
+      2^53 − 1 exact et MONTANT_HORS_BORNE au-delà, débits internes de 2^53 + 1 retombés exactement à 3 ; 20
+      validations pendant 30 lectures, chaque lecture cohérente ; 30 000 lignes lues en 317 et 567 ms) ; 30 + 9
+      mutations rouges (1 équivalente). Pile grp-b : /health 200. Calcul à la volée dans une session snapshot, pas de
+      projection (D-966-1). Lot 3 de B, n° 11 (EPIC-114). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
