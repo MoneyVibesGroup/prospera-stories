@@ -91,6 +91,11 @@ export const MANIFESTE_COMMANDE = {
     // la conversion d'une proforma au-delà du plafond (FR-54, §5.2). Ne lève JAMAIS un crédit bloqué (déblocage
     // = procédure de `recouvrement`). Distinct de `pdv:plafond:modifier`, qui change le plafond du client.
     'commande:plafond:deroger',
+    // Droit propre, STORY-1053 (D-1053-7, Q-D-5 au PO ; absent de l'annexe B.2) : changer les paramètres de commande
+    // (seuil de remise, score de priorité, alertes, heure de l'allocation du matin), versionnés et figés à l'acte.
+    // AD-12 réserve ce geste au DG et à DIST_ADMIN : ce sont ses rôles par défaut, demandés à auth-service (hors du
+    // jeton). Lire les paramètres ne demande que l'un des droits du module.
+    'commande:parametres:modifier',
   ],
 
   // C5 : faits publiés et consommés. Noms de l'annexe A.1, à figer par la story de publication. Chaque fait

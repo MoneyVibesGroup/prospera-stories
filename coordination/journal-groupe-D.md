@@ -79,6 +79,8 @@
   réémis**, trous 21 → 35 et 41 → 45 déclarés et tracés ; un membre sur trois arrêté : émissions continues ; sans
   majorité : aucun numéro rendu. Décisions D-1052-1 → 14 (fiche). Verrou Docker pris sans attente (B l'avait rendu),
   rendu.
+- **STORY-1053** 🚧 en cours (2026-11-17) — fiche `stories/STORY-1053.md`, annonce « ⚠ Contrats » ci-dessous ;
+  branches `MNV-1053` dans les cinq services, `docs-1053` ici.
 - **Suivante : STORY-1053** 🚚 les 15 rôles appliqués par le serveur, dans les cinq services (EPIC-223) : table
   d'accès lue du jeton et de `/moi/droits`, périmètre lu sur `reseau.portee.changed@1`. **B-960 est fusionnée**
   (auth #42, `dev` cf8e001 et 8d48710 ; « → D » du journal de B, fiche `STORY-960.md` § « Ce que D lit pour
@@ -231,6 +233,18 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-17) : un droit neuf, `commande:parametres:modifier`, au catalogue de tenant (STORY-1053, D-1053-7)** —
+  **ouverte**. Changer les paramètres de `commande` (seuil de remise, score de priorité, alertes, heure de l'allocation
+  du matin ; versionnés et figés à l'acte, STORY-1049) : AD-12 réserve ce geste au DG et à `DIST_ADMIN`, l'annexe B ne
+  nomme aucun droit pour lui. Demandé : le code `commande:parametres:modifier` au catalogue, **hors du jeton**
+  (`droitsHorsJeton`), rôles par défaut **`DIST_DG` et `DIST_ADMIN`** ; il est déclaré au manifeste `commande`
+  (prospera-stories, PR de l'annonce de 1053). Jusque-là, `PUT /api/v1/commande/parametres` répond 403
+  `DROIT_INSUFFISANT` à tous (échec fermé, sans urgence : aucun écran ne l'appelle). Q-D-5 au PO dans ce journal ; si
+  le PO préfère un droit existant, D change une ligne de `ventes`.
+- **→ B (2026-11-17), information : les cinq services du distributeur lisent `/moi/droits` (STORY-1053)** — aucune
+  action. Comme `reseau` : `droits ∪ droitsHorsJeton`, cache 60 s, `dv`, `identity.droits.changed@1` (cinq groupes de
+  consommateurs neufs, `<service>.droits-membres`). Si le contrat `moi-droits` 1.x changeait de forme, le dire ici.
+
 - **→ B (2026-11-17) : `series-v1.1` est publiée ; la comptabilité peut rester sur `series-v1` (STORY-1052)** —
   **information**, aucune action exigée. Votre copie (`src/vendor/series/`, `series-v1`, e0cb763) reste valide :
   `series-v1` ne bouge pas, et garder le majeur 1 évite qu'une organisation qui installe la comptabilité et `commande`
@@ -344,6 +358,37 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-17, STORY-1053, avant la fusion du code) — les 15 rôles appliqués par les cinq services du
+  distributeur** (`prospera-ventes-service`, `-terrain-`, `-recouvrement-`, `-pilotage-`, `-croissance-service`) et
+  la bibliothèque `acces-distributeur` (`prospera-plateforme/contrats/distributeur/src/acces.ts`, étiquette
+  `acces-distributeur-v1`, rien d'existant n'y change). Aucun topic, aucun champ n'est renommé ni retiré ; **ce qui
+  change, ce sont des refus et une variable requise.** Fiche : `stories/STORY-1053.md` (D-1053-1 → 9).
+  - **Variable neuve, REQUISE dans les cinq services** : `AUTH_SERVICE_URL` (auth-service, pour
+    `GET /api/v1/moi/droits`) ; facultatives : `AUTH_DROITS_DELAI_MS` (2 000), `AUTH_DROITS_CACHE_TTL_MS` (60 000, 60 s
+    au plus), `KAFKA_DROITS_MEMBRES_GROUP_ID`, `KAFKA_PORTEES_GROUP_ID`. Une pile sans `AUTH_SERVICE_URL` ne démarre
+    plus.
+  - **Refus neufs sur toute route d'un module** (après la garde du module) : **403 `DROIT_INSUFFISANT`** (le membre n'a
+    pas le droit que la route déclare) et **503 `DROITS_INDISPONIBLES`** (auth injoignable, plus de 2 s, réponse
+    illisible). ⚠ **Un membre sans rôle `DIST_*` n'a plus accès à aucun module des cinq services** (D-960-12), y compris
+    `TENANT_ADMIN` : `GET /<module>/module` et `GET /<module>/piste` exigent l'un des droits du module (manifeste, C7).
+    Le module `support-client` est fermé à tous tant que ses droits ne sont pas au catalogue.
+  - **Faits consommés en plus par les cinq services** : `reseau.portee.changed@1` (groupe `<service>.portee-reseau`,
+    projection `socle_portees_reseau`) et `identity.droits.changed@1` (groupe `<service>.droits-membres`, invalidation
+    du cache). Chaque service passe `conformite-portee-reseau-v1` et s'inscrit au registre de `reseau` pour ses
+    modules.
+  - **`commande` (`ventes`)** : `PUT /api/v1/commande/parametres` exige le droit **neuf**
+    `commande:parametres:modifier` (au lieu de `TENANT_ADMIN`) — **403 pour tous jusqu'à ce qu'auth l'attribue** (→ B
+    plus bas) ; `GET /api/v1/commande/series` et les émissions de recette exigent `commande:bon-livraison:emettre` ;
+    valider et reprendre la saga exigent `commande:commande:valider` ; lire un acte, `commande:reseau:consulter` ou
+    `commande:portefeuille:consulter`. **Route neuve** : `GET /api/v1/commande/validations?limite=` (les actes du
+    périmètre). **Corps de `POST /commande/validations`** : deux champs AJOUTÉS, facultatifs, `noeudId` (ObjectId hex)
+    et `margeMineur` (entier). **Lecture filtrée par la portée** : un acte hors du périmètre rend 404
+    `VALIDATION_INCONNUE` ; un acte sans nœud n'est visible que d'une portée totale. **Code neuf** : 403 `HORS_PORTEE`
+    (créer ou reprendre hors de l'écriture). **Donnée privée** : `margeMineur` est **absent** de l'acte rendu à qui n'a
+    pas `catalogue:marge:consulter`.
+  - **Manifeste `commande`** (prospera-stories) : droit AJOUTÉ `commande:parametres:modifier` (D-1053-7, Q-D-5) ; copié
+    à l'octet dans `ventes`.
 
 - **PUBLIÉ (2026-11-17, STORY-1052, prospera-plateforme#27, `dev` 1fe8c5e, étiquette `series-v1.1` ;
   prospera-ventes-service#4, `dev` 32d8b5f → e4a27c7) ; ANNONCÉ avant la fusion du code (prospera-stories #632) —
@@ -530,6 +575,12 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-5 (2026-11-17, STORY-1053) — Quel droit change les paramètres de `commande` ?** AD-12 nomme le DG et
+  `DIST_ADMIN` ; l'annexe B n'a pas de droit pour ce geste. **Choix par défaut : un droit propre,
+  `commande:parametres:modifier`, donné au DG et à `DIST_ADMIN`** (D-1053-7), comme `commande:plafond:deroger` l'a été le
+  13/11. Alternative : se contenter d'un droit existant (`dashboard:alerte:configurer`, qui va déjà au DG et à
+  `DIST_ADMIN`), au prix d'un sens détourné.
 
 - **Q-D-4 (2026-11-17, STORY-1047) — La commande se juge-t-elle sur l'encours certain ou sur l'encours affiché ?** Le
   PRD dit qu'un encaissement déclaré (espèces, virement) « diminue l'encours affiché » et que le blocage « lit le reste
