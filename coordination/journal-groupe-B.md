@@ -45,9 +45,22 @@
      - Un 4e maillon global, `GardeDesDroits`, lit `@DroitRequis` par `GET /moi/droits`.
      Node 24 : 248/0/2 ; `test:socle` 36/36 (MongoDB 8.0 rs0, Kafka) ; 25 mutations ; pile `grp-b` : `/health` 200.
      **Aucun rôle n'a encore `comptabilite:*`** : en réel, l'ouverture rend 403 (D-959-4, à lever avant B-967).
-  - **Story suivante : STORY-960** (les 15 rôles du distributeur dans auth, `prospera-auth-service`, EPIC-223). D-1053
-    l'attend. À lire avant : le PRD distributeur, annexe B (table d'accès), et la passation d'auth (« Passations »).
-    Le checkout local d'auth-service est sur `MNV-942` : repartir d'`origin/dev`.
+  5. ~~STORY-960~~ : **auth #42** (`cf8e001`, `8d48710` sur `dev`), contrat annoncé avant la fusion (stories #616).
+     Les 15 rôles du distributeur reçoivent la table de l'annexe B.2 (131 droits), appliquée par la résolution unique
+     du jeton et de `/moi/droits`.
+     - Le jeton est gelé à ses 24 droits ; les 118 droits neufs sont **hors du jeton** (`droitsHorsJeton`, contrat
+       1.1.0). La borne tient (17 + 24 = 41 ≤ 44) sans être relevée.
+     - Claim `roleMetier` dans le jeton ; `roleMetierAttribue` sur `identity.droits.changed@1` (version 2 au registre,
+       BACKWARD).
+     - Données privées (rémunérations, commissions, prix d'achat, marge) : retirées à la résolution, refusées à la
+       surcharge (422 `DONNEE_PRIVEE_HORS_DU_ROLE`).
+     Node 24 : 99 suites, 1 364/1 364 ; 11 mutations rouges ; pile `grp-b` : 26/26, cinq jetons RS256 réels ;
+     `test:schemas` 16/16. **D-1053 débloquée.** La même voie (hors du jeton) lève la borne pour `comptabilite:*`
+     (D-959-4) : ils restent à attribuer, avant B-967.
+  - **Story suivante : STORY-961** (le plan de journaux, `prospera-comptabilite-service`, EPIC-112 ; dépend de 959).
+    À lire avant : `epics-comptabilite-2026-08-27.md` (EPIC-112), fiches 958 et 959, `series-v1` de la plateforme.
+    Si 961 attribue `comptabilite:*` à des rôles, ils entrent **hors du jeton** (`droits-hors-jeton.ts` d'auth) et
+    la garde de la comptabilité doit lire `droits ∪ droitsHorsJeton` (piège ci-dessous).
 
 ### Lot 2 (ouvert le 2026-11-16)
 
@@ -191,6 +204,28 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   membre qui reçoit le rôle par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif).
 
 ## Demandes aux autres groupes
+
+- **→ D (2026-11-17) : les 15 rôles du distributeur sont servis, D-1053 est débloquée** — **information** (STORY-960,
+  auth #42, `dev` `8d48710` ; fiche `stories/STORY-960.md`, § « Ce que D lit pour D-1053 »).
+  - **Le jeton** : `org`, `dv` et le claim neuf `roleMetier` (`DIST_DG`, `DIST_SUPERVISEUR`…), absent pour un membre
+    sans rôle. Il dit QUI, pas ce qu'il peut : ne décidez pas d'un droit sur `roleMetier` (une surcharge retire un
+    droit sans changer le nom du rôle). `perms[]` ne porte que les 24 droits du jeton : aucun droit de vos modules.
+  - **Les droits** : `GET {AUTH}/api/v1/moi/droits?organisationId=<org du jeton>` avec le jeton du membre. Les droits
+    de tenant effectifs sont **`droits ∪ droitsHorsJeton`** (vos modules sont tous dans `droitsHorsJeton`). Cache
+    `(membre, organisation, dv)`, 60 s au plus ; un jeton au `dv` plus grand force la relecture ; auth injoignable ⇒
+    on ferme. Invalidation : `identity.droits.changed@1`, sur `dv` ; `roleMetierAttribue` y dit le rôle attribué
+    après le changement (`null` : aucun).
+  - **La table** : annexe B.2, recopiée ligne à ligne dans `auth-service/src/modules/rbac/table-d-acces-distributeur.ts`
+    (vérifiée contre le PRD par un test). Les cinq `reseau:*` y sont : `noeud:consulter` (DG, DC, RESP_VENTES,
+    SUPERVISEUR, RESP_STOCK, CONTROLE_GESTION, DIST_ADMIN), `noeud:modifier` (DC, DIST_ADMIN), `decoupage:modifier`
+    (DC), `affectation:modifier` (DC, RESP_VENTES, DIST_ADMIN), `portee:attribuer` (DIST_ADMIN, DG).
+  - **Le périmètre** reste dans `reseau.portee.changed@1` (le vôtre) : auth ne publie aucune portée.
+  - ⚠ **Un membre sans rôle `DIST_*` n'a aucun droit** (D-960-12) : `TENANT_ADMIN` n'est plus « les cinq `reseau:*` ».
+    Pour vos recettes : le dirigeant (le fondateur) attribue un rôle par
+    `PUT /api/v1/organizations/me/members/{userId}/tenant-role { role }` ; `DIST_DG` et `DIST_DAF` portent
+    `reprise:lot:valider` et ne s'attribuent que par lui (D-960-9). Paramètres de `commande` (D-1049-4, « DIST_ADMIN
+    et le DG ») : l'annexe B ne nomme pas de droit pour eux ; à vous de choisir entre un droit neuf (à demander ici,
+    il entrera hors du jeton) et `roleMetier`.
 
 - **→ A (2026-11-17) : la tenue d'un exercice est déclarée dans la comptabilité** — **information**, aucune action
   demandée (STORY-959, D-959-5 et D-959-6). Q1 (D-L3-4) est appliquée côté comptabilité : un exercice ouvert aux
@@ -350,6 +385,11 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
+- **← D (2026-11-17, STORY-1050) : attribuer les droits `reseau:*` par auth-service** — **servie par STORY-960**
+  (auth #42, `dev` `8d48710`). Les cinq `reseau:*` sont dans la table des 15 rôles (détail dans « → D » plus haut),
+  servis par `/moi/droits` dans `droitsHorsJeton`. **Écart à la demande** : la table rôle socle (`TENANT_ADMIN` les
+  cinq, `TENANT_USER` la consultation) n'est pas reprise ; il faut un rôle `DIST_*` (D-960-12, contestable).
+
 - **← A (2026-11-16, STORY-908) : deux défauts du patron de supervision de 950** — **servie par STORY-957**
   (notification #89 `5e6c553`, paiement #121 `1e90517`, catalogue #59 `5004cc5`). Les deux défauts étaient présents
   à l'octet dans notification et paiement. Le catalogue avait déjà un consommateur neuf par relance, mais il attendait
@@ -400,8 +440,9 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-17, STORY-960 — les 15 rôles du distributeur dans auth, annoncé AVANT la fusion du code**
-  (`prospera-auth-service`, EPIC-223 ; fiche `stories/STORY-960.md`, D-960-1 → 11). Tout est AJOUT ; deux rôles du
-  socle perdent ou gagnent des droits (ci-dessous).
+  (`prospera-auth-service`, EPIC-223 ; fiche `stories/STORY-960.md`, D-960-1 → 12). **Fusionné le 17/11** : auth #42,
+  `cf8e001` et `8d48710` sur `dev` (annonce : stories #616) ; `identity.droits.changed-value` version 2 au registre.
+  Tout est AJOUT ; deux rôles du socle perdent ou gagnent des droits (ci-dessous).
   - **Rôles** : les 15 rôles `DIST_*` reçoivent la table de l'annexe B.2 du PRD distributeur (131 droits). Aucun rôle
     n'est plus « en attente de module » (ils passent `partiel`). **Changements de droits existants** : `DIST_ADMIN`
     perd `paiement:journal:consulter` et `notification:modele:rediger` ; `DIST_COMPTABLE` déclare, valide et annule
@@ -866,6 +907,14 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Questions à l'utilisateur ou au PO
 
+- **STORY-960, les droits d'`automatisations`** (D-960-10) : l'annexe B (et l'annexe A, C7) du PRD distributeur
+  nomment `automatisations:regle:gerer`, `:regle:activer`, `:cible:valider`, `:journal:consulter` ; le manifeste
+  `manifestes/automatisations.manifest.ts` déclare `:regle:ecrire`, `:regle:activer`, `:arbitrage:decider`,
+  `:execution:annuler`. Auth suit l'annexe B. Choix par défaut : le manifeste se réaligne sur l'annexe avec la story
+  du module. Contestable.
+- **STORY-960, rôle par défaut du distributeur** (D-960-12) : aucun ; un membre sans rôle `DIST_*` n'a aucun droit.
+  Choix par défaut : on garde (FR-4). Alternative : `DIST_ADMIN` par défaut au `TENANT_ADMIN`.
+
 - **STORY-951, l'invitation au réel** (AD-15 : « l'invitation au réel part à la mise en service ») : **pas faite**
   dans 951 (D-951-8). Il manque une route d'invitation pour l'identité de service du moteur dans auth. Choix retenu
   par défaut : elle viendra avec la console de mise en service, dans une story de B. Contestable.
@@ -889,6 +938,18 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Deux familles de droits de tenant depuis STORY-960** : le jeton (`perms[]`) ne porte que les 24 codes de
+  `TenantPermission` ; tout droit neuf est hors du jeton, servi par `/moi/droits` dans `droitsHorsJeton`. Une garde
+  qui ne lit que `droits` (comptabilité, D-959-4) ne verra jamais un droit neuf : lire `droits ∪ droitsHorsJeton`.
+  Même chose pour les droits neufs de `paiement` (`paiement:creance:consulter`, `:credit-tiers:imputer`, B-963/965).
+- **L'inscription publique exige `vertical` et refuse `distributeur`** (`VERTICAL_FERME_A_L_INSCRIPTION`) : pour une
+  preuve, s'inscrire `cabinet`, puis `PATCH /api/v1/admin/organizations/{id}/vertical` par l'opérateur. Les jetons de
+  vérification et d'invitation se lisent dans les tâches BullMQ (`bull:auth-notification:*`, champ `data`) de Redis.
+- **Cinq suites e2e d'auth ne compilaient plus depuis STORY-942** (`TenantRolesService` absent du module de test) :
+  réparées par 960. `health.e2e` exige une vraie pile ; `auth-register.e2e` rend 500 sur `dev` aussi (à reprendre).
+- **Un heredoc de plus de 90 lignes avec des apostrophes typographiques a échoué** (« unexpected EOF ») : écrire les
+  scripts avec l'outil d'écriture, toujours.
 
 - **Une mutation qui casse un rétrécissement de type rougit par compilation** (STORY-959). Exemples :
   `if (deja && false) return f(deja)` (`deja` redevient `T | null`) ; un garde de type qui n'est plus appelé
