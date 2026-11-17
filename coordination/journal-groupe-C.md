@@ -64,7 +64,10 @@
   - ~~**STORY-1006**~~ : **assurance #25** ; la garde d'`assurance` lit l'état publié (droit, lecture seule,
     interrupteur `compta-cima` dans `module.interrupteurs[]`) ; pile verte, rejouée depuis `dev` ; reste : les
     référentiels habilités se lisent encore dans `entitlement.changed` (D-1006-5, demande à B).
-  - **STORY-1007** ← **suivante** : l'accusé de réception du dossier complet (`sinistres`).
+  - ~~**STORY-1007**~~ : **sinistres #17** ; la dernière pièce validée au contrôle pose l'accusé de réception du
+    dossier complet (courrier `ACCUSE_RECEPTION`, une fois) et arrête l'échéance `ACCUSE_DOSSIER_COMPLET`
+    (événement `ACCUSE_POSE`) ; Node 24, sans pile (aucun câblage ne change) ; l'envoi reste à EPIC-220.
+  - **STORY-1008** ← **suivante** : la provision d'ouverture posée à l'ouverture (`sinistres`, port vers `assurance`).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -364,6 +367,11 @@ seulement.
   Choix par défaut de C : garder ce fil pour ce seul champ (D-1006-5). Si B ajoute un champ facultatif (compatibilité
   BACKWARD) ou publie un autre contrat, C bascule et retire le consommateur.
 
+- **2026-11-17, STORY-1007 — aucun contrat sur le fil, un champ de plus au dossier.** `courriers[]` du dossier peut
+  porter un courrier `ACCUSE_RECEPTION` (destinataire `ASSURE`, `BROUILLON`) en plus de `DEMANDE_PIECES` ; le
+  référentiel des échéances `2026.1` déclare l'événement `ACCUSE_POSE`. **Pour D (EPIC-220)** : l'accusé du dossier
+  complet est prêt à envoyer dans `courriers[]` ; l'envoi, sa preuve et son archivage restent à vous.
+
 ## Questions à l'utilisateur ou au PO
 
 - **❓ 2026-11-17 — STORY-1002, question au PO : qui porte `sinistres.declaration.enregistree@1` ?** La spine (AD-16)
@@ -392,6 +400,11 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-1007-1 → D-1007-5** (`stories/STORY-1007.md`) : dossier complet = passage de « il manque » à « aucune pièce
+  obligatoire ne manque » sur un contrôle validé ; date du contrôle ; événement `ACCUSE_POSE` ajouté à l'arrêt (sans
+  émettre `DOSSIER_COMPLET`, qui ouvre l'offre) et `DOSSIER_OUVERT` conservé ; l'accusé est un courrier du dossier ;
+  posé une seule fois. ⚠️ Écart de lecture avec FR-48 (« s'arrête à l'envoi ») jusqu'à EPIC-220.
+
 - **D-1006-1 → D-1006-8** (`stories/STORY-1006.md`) : l'interrupteur est `module.interrupteurs[]` du module
   `assurance` ; mêmes règles de droit que 1005 ; entrée illisible = éteinte ; un module fermé n'allume rien ;
   référentiels toujours lus dans `entitlement.changed` ; ordre de la garde inchangé ; collection
