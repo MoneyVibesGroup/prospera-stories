@@ -7,7 +7,9 @@
 
 ### Lot 3 (depuis le 2026-11-17) — l'état courant
 
-- **2. STORY-921 (en cours, 2026-11-17)** — hub de balance : 5e origine `comptabilite` (fiche `stories/STORY-921.md`). Contrat annoncé ci-dessous AVANT la fusion du code (PR de docs d'annonce séparée, fusionnée d'abord).
+- ~~2. **STORY-921**~~ ✅ **DONE (2026-11-17)** — balance #152 (dev `9dfd60e`). Origine `comptabilite` dans `ORIGINES_BALANCE`, publiable par ingestion directe ; mutations rouges sur l'assertion ; e2e OpenAPI 221/221 ; Docker non requis. **Suite : STORY-922.**
+- **→ B (2026-11-17) : l'origine `comptabilite` est disponible pour B-967** (dev `9dfd60e`, balance-service). Forme attendue de la balance sur `balance.submitted` v1 : `balance.source = "direct"`, `balance.origine = "comptabilite"`, `dossierId` requis, `exercice`, `version` ≥ 1 (lignée propre à l'origine), `lignes` aux QUATRE colonnes de montant en unités mineures entières (SANS `aNouveau*`), `checksum` = SHA-256 de `{ exercice, source, referentiel, version, lignes triées par compte }` (voir `INTEGRATION.md` §1 ter), `referentiel` facultatif : omis, le hub le résout depuis le dossier, mais le sceau porte quand même ce tag. `sourceSystem` à faire ajouter à l'allowlist `INGESTION_SOURCE_SYSTEMS`. Balance GÉNÉRALE (pas une contribution partielle) : le hub chaîne le socle d'à-nouveaux de l'exercice, donc n'envoyer que les mouvements de l'exercice. Retours : `balance.created` ou `balance.rejected` (codes stables). — ouverte jusqu'à B-967.
+- **Piège (921)** : le plan parlait de « 4 origines, la 5e `comptabilite` » ; le code a 3 sources (`sage`, `direct`, `ocr`) et 5 origines (`A_NOUVEAUX`…`INVENTAIRE`). Lecture retenue : `comptabilite` est une ORIGINE (6e symbole de `ORIGINES_BALANCE`, la 2e publiable), sur `source: direct` (D-921-1) ; contestable par B si elle attendait une source.
 - ~~1. **STORY-920**~~ ✅ **DONE (2026-11-17)** — recette #24 (dev `68ef348`) ; compose racine du poste principal modifié en
   place (non versionné). Image `cgr.dev/chainguard/minio:latest`, `user: '0'` ; garde du profil réalignée (18/18,
   mutation rouge) ; pile neuve `grp-a` : recette `zone-franche` 5/5, `mc ls` voit les artefacts dans MinIO. Pile
@@ -275,7 +277,7 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## ⚠ Contrats
 
-- **2026-11-17 (STORY-921), AVANT la fusion du code** : `balance.submitted` v1, champ `origine` : l'énumération reçoit `comptabilite` (**ajout seul**, facultatif, aucun renommage). Publiée par `balance-service` (`docs/schemas/balance.submitted.v1.schema.json`, `INTEGRATION.md`, OpenAPI `OrigineBalance`). Pas de registre Avro/Karapace dans ce service : aucune compatibilité de registre à vérifier ; un émetteur existant ne change rien. `source` reste `direct`. La balance `comptabilite` est une balance GÉNÉRALE (complète, base fiscale, gel de la saisie), référentiel facultatif (résolu depuis le dossier), `origine` hors sceau. **→ B** : lisible pour B-967 dès la fusion de STORY-921 (SHA noté à la clôture).
+- **2026-11-17 (STORY-921), AVANT la fusion du code** : `balance.submitted` v1, champ `origine` : l'énumération reçoit `comptabilite` (**ajout seul**, facultatif, aucun renommage). Publiée par `balance-service` (`docs/schemas/balance.submitted.v1.schema.json`, `INTEGRATION.md`, OpenAPI `OrigineBalance`). Pas de registre Avro/Karapace dans ce service : aucune compatibilité de registre à vérifier ; un émetteur existant ne change rien. `source` reste `direct`. La balance `comptabilite` est une balance GÉNÉRALE (complète, base fiscale, gel de la saisie), référentiel facultatif (résolu depuis le dossier), `origine` hors sceau. **→ B** : fusionné, dev `9dfd60e` (balance-service#152).
 
 ## Front cabinet : revérification et tri du 2026-11-15
 

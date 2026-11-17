@@ -631,7 +631,9 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-921.md"
     reserved_on: "2026-11-17"
     note: >
-      EN COURS le 2026-11-17 — lot 3 de A, n° 2 ; B-967 l'attend. Contrat annoncé avant le code. NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — balance-service#152 (dev 9dfd60e). Origine comptabilite dans ORIGINES_BALANCE et publiable par
+      ingestion directe (source direct, referentiel facultatif, balance générale) ; inconnue/interne refusée, nommée ; mutations
+      rouges sur l'assertion ; e2e OpenAPI 221/221. Contrat annoncé avant le code (stories#588). Lot 3 de A, n° 2. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
