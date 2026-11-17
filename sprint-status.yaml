@@ -1406,6 +1406,18 @@ reserved_ranges:
       ExpertsService.exigerDesignable et par POST …/controle-de-designation ; GET experts/{expertId} déclaré en lecture
       seule au manifeste. Node 24 : 1056 unitaires sur MongoDB réel, 24 e2e, build 0 ; pas de pile. Lot 3 de C, n° 5.
       NON SLOTTÉE.
+  - range: "STORY-1009"
+    status: "RÉSERVÉ"
+    owner: "Demander des pièces complémentaires pendant l'instruction : la liste des pièces attendues s'allonge avec un motif, les relances de 999 la reprennent (sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1009.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-sinistres-service#20 (dev 12ef41d). La transition 6 (en instruction) ou 12 (avant
+      validation) porte piecesDemandees : chaque pièce s'ajoute obligatoire, avec motif, date de présentation, auteur et
+      numéro de demande ; PIECES_COMPLETES repasse à faux ; courrier DEMANDE_PIECES par destinataire ; sans pièce nommée
+      PIECES_NON_NOMMEES (+ 6 autres refus nommés). Relances de 999 reprises ; correctif du constat RELANCES_EPUISEES levé
+      avec les relances. Aucune route neuve, aucun fait neuf. Node 24 : 1080 unitaires sur MongoDB réel, 25 e2e, build 0 ;
+      pas de pile. Lot 3 de C, n° 6. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
