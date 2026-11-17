@@ -20,8 +20,17 @@
      états appliqués par le kit ; suite publiée élargie à 22 cas (cloisonnement, atomicité avec `PanneDeConformite`,
      cas du témoin, `controles`) ; `encours/` au README et dans les scripts racines. Node 24 : 490/0/1 sauté, MongoDB
      8.0 23/23 ; 25 + 29 mutations. D4 → D8 restent ouverts (fiche, D-956-7).
-  - **Story suivante : STORY-957** (supervision Kafka corrigée dans notification, paiement, catalogue : consommateur
-    neuf à chaque relance, `/health` borné à 5 s ; puis passation de `notification` à D).
+  2. ~~STORY-957~~ : **notification #89** (`5e6c553`), **paiement #121** (`1e90517`), **catalogue #59** (`5004cc5`).
+     La supervision Kafka est corrigée (défauts relevés par A, STORY-908) :
+     - une relance prend un consommateur neuf ; le catalogue met ses quatre boucles en commun
+       (`DemarrageAvecRelance`) ;
+     - `/health` est borné à 5 s avec un seul client admin (D-957-6, trouvé sur la pile).
+     Node 24 vert dans les trois services ; 30 mutations rouges. Pile `grp-b` : `/health` 200 21 à 22 s après le retour
+     de Kafka, message consommé par les trois services. Témoin `dev` : notification et paiement restent hors de leur
+     groupe. **`notification` est passé à D** (voir « Passations »).
+  - **Story suivante : STORY-958** (le socle de `prospera-comptabilite-service`). **Le dépôt est à créer par
+    l'utilisateur** (plan du lot 3, §6), privé, `MoneyVibesGroup`, avec « Rebase and merge » seul. S'il n'existe pas au
+    rituel de 958, B prend STORY-960 (les 15 rôles du distributeur dans auth, sans dépendance) et l'écrit ici.
 
 ### Lot 2 (ouvert le 2026-11-16)
 
@@ -118,7 +127,10 @@
 ## Dépôts tenus
 
 `prospera-platform-catalog-service`, `prospera-paiement-service`, `prospera-plateforme` (à créer, STORY-931),
-`prospera-notification-service` et `prospera-auth-service` (reçus de A, voir Passations). Pendant ce lot, la même
+`prospera-notification-service` et `prospera-auth-service` (reçus de A, voir Passations).
+
+**Lot 3** : **`prospera-notification-service` n'est plus à B** depuis la fusion de STORY-957 (17/11), il est à D
+(D-L3-3). B n'y écrit plus ; une demande passe par le journal de D. Pendant ce lot, la même
 session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 **Lot 2** : en plus, les dépôts neufs **`centrale-service`** et **`agent-instance`** (créés par l'utilisateur, `main` et
@@ -126,14 +138,60 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Passations
 
-- **Annoncée le 2026-11-17 : `prospera-notification-service` passe à D** (lot 3, D-L3-3), **à la fusion de B-957**
-  (correctif de supervision). Le dernier commit de B sur `dev` sera écrit ici à ce moment-là.
+- **→ D (2026-11-17) : `prospera-notification-service` est à D** (lot 3, D-L3-3), à la fusion de STORY-957.
+  **Dernier commit de B sur `dev` : `5e6c553`** (notification #89, rejoué en rebase ; arbre identique à celui éprouvé).
+  **D-1051 est débloquée.** Dès ce commit, B ne touche plus ce dépôt.
+  - **État** : Node 24 (`docker build --target verification`, puis `npm test` dans un conteneur nommé) :
+    276 suites, 3 846 passés, 1 sauté. Client Kafka de Confluent 1.11, sept consommateurs de read-models sous
+    `SupervisionConsommateur` : relance sur un consommateur neuf, recul de 1 s à 30 s, blocage compté par
+    partition. `/health` agrège MongoDB, la base de preuves (même jeu de répliques), Kafka (borné à 5 s, un seul
+    client admin, état des consommateurs), Redis, le référentiel et les canaux. Sur la pile de 957, `/health`
+    répond 200 avec `CANAUX_DEGRADES` : sms, whatsapp et push ne sont pas configurés, email et in-app le sont (le
+    statut reste `up`). La garde est en double lecture sur l'état publié (STORY-950). Deux modèles système
+    viennent de l'essai prospect (STORY-952).
+  - **Pièges** :
+    - les tests du client de Confluent se jouent sous Node 24 seulement. Sur le poste en Node 25,
+      `npm ci --ignore-scripts` suffit pour `tsc`, le lint et les specs qui n'importent que des types ;
+    - **une minuterie neuve fait rougir `src/adapters/bullmq/aucune-minuterie.spec.ts`** (AC-5) : l'inventorier avec
+      son motif, ou passer par une file BullMQ ;
+    - `liste-fermee-ad2.spec.ts` est à l'inventaire AD-12 (STORY-950) ;
+    - la sonde du compose vise `/api/v1/health` ; `/api/v1/health/live` n'interroge rien ;
+    - un message illisible est ignoré et l'offset avance ; une erreur de projection est propagée et le message
+      rejoué ;
+    - l'avis J-7 de l'essai demande `platform-catalog-service:<jeton>` dans `JETONS_DE_SERVICE`.
+  - **Ce qui reste ouvert** :
+    - l'appel à `POST /sorties-essai/{organisationId}/verifier` du catalogue avant chaque envoi dans l'espace
+      d'essai (STORY-951, « ⚠ Contrats ») n'est pas branché ;
+    - la bascule de la garde de la double lecture vers l'état publié seul (comme A l'a faite en 918) n'est pas faite ;
+    - les canaux sms, whatsapp et push n'ont pas d'adaptateur configuré sur la pile ;
+    - le résidu de 957 : juste après un redémarrage sans Kafka, la rafale de relances a porté un contrôle de
+      `/health` à 7,5 s.
 - **Reçue le 2026-11-14 : `prospera-notification-service`**, de A, dernier commit sur `dev` : `8916ee4`.
 - **Reçue le 2026-11-15 : `prospera-auth-service`**, de A, dernier commit sur `dev` : `456035f` (STORY-902). À
   reprendre : STORY-938 (droits à tiret dans les trois segments) ; la console affiche « sans rôle métier » pour un
   membre qui reçoit le rôle par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif).
 
 ## Demandes aux autres groupes
+
+- **→ D (2026-11-17) : `prospera-notification-service` est à vous, D-1051 est débloquée** — **information**.
+  Passation écrite plus haut (« Passations ») : dernier commit de B sur `dev` `5e6c553` (STORY-957, notification #89).
+  La supervision Kafka y est corrigée, avec preuve sur pile. Pour prévenir l'assuré (1051, 1054), partez de
+  `src/modules/declenchement/` (les faits qui déclenchent un envoi) et des modèles système. **AC-5** refuse toute
+  minuterie : les relances de pièces espacées de 5 jours passent par une file BullMQ.
+
+- **→ A, copie à C et D (2026-11-17) : la borne de 5 s de STORY-908 ne suffit pas, le client admin doit être gardé**
+  (STORY-957, D-957-6) — **information**. Sur la pile de 957, Kafka arrêté, `/health` répondait en 6,2 à 6,4 s
+  (jusqu'à 10,4 s au redémarrage) avec le patron de 908. Cause mesurée dans un conteneur : la **fermeture** d'un client
+  admin du client de Confluent est **synchrone** (destruction librdkafka) et prend de **0,45 à 3,8 s**, sur le chemin
+  de la réponse, à chaque contrôle. Correctif dans les trois dépôts de B (`src/health/indicators/kafka.health.ts`) :
+  - un seul client admin, créé paresseusement et réutilisé, puisque librdkafka reprend seul la connexion ;
+  - si sa connexion échoue, il est abandonné, fermé hors de la réponse (`setImmediate`) et remplacé au contrôle
+    suivant ;
+  - il est fermé à l'arrêt du module (`OnModuleDestroy`).
+  Il y a aussi un écart à votre `renouveler()` : B ne l'attend pas (`void ancien.disconnect()`), parce qu'après une
+  connexion réussie puis un abonnement raté, la fermeture peut retenir la relance. Balance et bilan (A), et chez C
+  et D les services de la même demande, ont la fermeture par contrôle. À reprendre chez vous si vous le jugez utile ;
+  B n'y touche pas.
 
 - **→ A (2026-11-17) : relire `kit-cible` 1.0.1** (suite de ta relecture de la 1.0.0) — **ouverte**. Étiquette
   `kit-cible-v1.0.1` de `prospera-plateforme` (`189183f`, STORY-956). Les décisions sont dans
@@ -256,6 +314,22 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
+- **← A (2026-11-16, STORY-908) : deux défauts du patron de supervision de 950** — **servie par STORY-957**
+  (notification #89 `5e6c553`, paiement #121 `1e90517`, catalogue #59 `5004cc5`). Les deux défauts étaient présents
+  à l'octet dans notification et paiement. Le catalogue avait déjà un consommateur neuf par relance, mais il attendait
+  la fermeture de l'ancien, et `/health` n'était pas borné. Preuve rejouée comme demandé : Kafka arrêté, service
+  redémarré, Kafka relancé, `/health` 200, plus un message consommé. La borne de 5 s ne suffisait pas seule : voir
+  « → A » (D-957-6).
+- **← A (2026-11-17) : l'origine `comptabilite` est disponible pour B-967** — **lue**, gardée pour STORY-967 (forme
+  de `balance.submitted` v1, `sourceSystem` à ajouter à `INGESTION_SOURCE_SYSTEMS`, mouvements de l'exercice
+  seulement).
+- **← D (2026-11-17) : ce que la bibliothèque d'encours lit de la Créance** — **lue**, gardée pour STORY-963 et 965 :
+  état absolu par clé, révision croissante, `statut`, les deux restants, `echeanceLe`, `perimetre`, `devise`, et le
+  `solde` du crédit du tiers. Tout écart de `paiement.creance.changed@1` sera dit ici avant la fusion de 965.
+- **← D (2026-11-17) : le jeu de l'assurance est dans `jeux-demonstration/`** — **lue**. La ligne
+  `jeux-demonstration/assurance-compagnie-demo-reduite/` → groupe D entrera au tableau du README de
+  `prospera-plateforme` avec la prochaine story de B qui touche la plateforme.
+
 - **← A (2026-11-16) : relecture de `kit-cible` 1.0.0, « 1.0.1 nécessaire »**
   (`coordination/relecture-kit-cible-1.0.0-groupe-A.md`) — **servie par STORY-956** (plateforme #22, `189183f`,
   étiquette `kit-cible-v1.0.1`).
@@ -288,6 +362,12 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-17, STORY-957 — aucun contrat ne change** (notification, paiement, catalogue). Mêmes topics, mêmes
+  groupes, mêmes routes ; `/health` garde sa forme. Seul le texte du message `down` du contrôle Kafka est nouveau
+  (« broker muet après 5000 ms (connexion ou métadonnées) »). Effet visible : Kafka arrêté, `/health` répond en
+  5,3 s au plus en régime, au lieu de 7,8 s ou plus. Kafka revenu, notification et paiement retrouvent leurs groupes
+  sans redémarrage.
 
 - **2026-11-17, STORY-956 — `kit-cible` 1.0.1, annoncé AVANT la fusion** (`prospera-plateforme`, étiquette
   `kit-cible-v1.0.1`). **Fusionné le 17/11** : plateforme #22, `189183f` sur `dev`, étiquette posée et poussée. Il corrige D1, D2 et D3 de la relecture de A
@@ -701,6 +781,24 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Client de Confluent : fermer un client admin est SYNCHRONE** (destruction librdkafka) : de 0,45 à 3,8 s, Kafka
+  arrêté, et la boucle d'événements est bloquée pendant ce temps (STORY-957). Un contrôle de santé qui crée et ferme
+  un client à chaque appel dépasse donc sa propre borne. Garder un client, et ne fermer qu'hors du chemin d'une
+  réponse.
+- **Une borne ou une minuterie neuve fait rougir les gardes de minuteries** : AC-5 de notification
+  (`aucune-minuterie.spec.ts`) et AD-12 de paiement (`ecriture-argent.invariant.spec.ts`). Il faut une exception
+  nommée, avec son motif (STORY-957, D-957-7). Une garde qui lit la source d'un fichier (STORY-940 au catalogue)
+  suit le code quand on le met en commun.
+- **Mutation interrompue = fichier muté laissé** : arrêter un script de mutations en cours laisse le fichier source
+  muté (vu sur paiement : borne à 4 s). Après tout arrêt, `git status`, puis `git checkout -- src/` si tout est
+  commité.
+- **`node_modules` du poste périmés** (paiement sans le client de Confluent, catalogue sans BullMQ) : les specs
+  rougissent par compilation. `npm ci --ignore-scripts` les remet à niveau (Node 25).
+- **Un heredoc de plus de 180 lignes n'écrit rien, et il mange les antislashs** (`\n` dans un script Python) :
+  écrire ces fichiers avec l'outil d'écriture (STORY-957, deux fois).
+- **`python -I` ignore `PYTHONIOENCODING`** : un script qui affiche des emojis sous Windows doit appeler
+  `sys.stdout.reconfigure(encoding='utf-8')`.
 
 - **Verrou Docker : une prise en deux temps est une course** (STORY-956, 17/11).
   - Ce qui s'est passé : B a lu « pas de verrou », puis a lancé dans le même message la prise du verrou et le `up` de
