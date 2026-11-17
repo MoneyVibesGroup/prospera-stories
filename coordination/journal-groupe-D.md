@@ -95,11 +95,23 @@
   (bibliothèque) et 14/14 (`ventes`). Pile `grp-d` (rejouée depuis `dev`, droits dérivés de la table d'auth) : 34/34
   appels conformes ; témoin d'`origin/dev` : `TENANT_ADMIN` sans rôle ouvrait tout. Décisions D-1053-1 → 12 (fiche).
   Verrou Docker pris à 11:05 sans attente (B l'avait rendu), rendu.
-- **STORY-1054** 🛡 — **en cours** (2026-11-17) : fiche écrite, annonce « ⚠ Contrats » ci-dessous avant le code ;
-  branche `MNV-1054` de `prospera-notification-service`.
-- (Rappel du plan) **STORY-1054** 🛡 prévenir l'assuré (2), dans `prospera-notification-service` (EPIC-220) : accusé de
-  réception, repli dans la cloche, consentements par finalité (dépend de 1051, faite). Puis 1055 (l'import réseau par
-  la Reprise) et 1056 (la commande (1)).
+- **STORY-1054** ✅ 🛡 — prévenir l'assuré (2) (PR prospera-notification-service#91, `dev` d9de737, e0a50c0 ; annonce
+  « ⚠ Contrats » #647 avant le code). **L'accusé de réception est l'accusé de transmission rendu au dossier**
+  (D-1054-1 : les accusés que l'assuré reçoit, FR-36 et FR-48, partent depuis 1051) : `GET
+  …/service/assurance/dossiers/{id}/messages` rend, par message, la voie, l'état (`EN_COURS`, `TRANSMIS`, `REMIS`, `LU`,
+  `NON_REMIS`, `EN_CLOCHE`) et ses dates, jamais l'adresse. **Repli dans la cloche de l'assuré** (boîte du dossier
+  tenue par `notification`) : consentement absent ou retiré, pas de destinataire, canal refusé, envoi en échec sans
+  maillon restant (signalé par l'`Envoi` via `FinsDeChaine`, à la remise et à l'accusé « échoué ») ; texte SMS passé
+  au contrôle des interdits de 1051 ; un dépôt par message. **Consentements par finalité** : `SUIVI_DU_SINISTRE`
+  (obligatoire, sans décision possible) et `INFORMATION_DU_DOSSIER` (facultative, le numéro officiel, échec fermé),
+  en ajout seul, tracés (qui, quand, version du texte, appelant). Une relance déposée compte comme donnée. Node 24 :
+  287/287 suites unitaires ; e2e : les 4 suites rouges héritées identiques au témoin ; intégration Mongo+Redis 15/15 ;
+  18/18 mutations. Pile `grp-d` (rejouée depuis `dev`) : `/health` 200, accusé `TRANSMIS`, numéro officiel en cloche
+  sans accord et après retrait, SMS en échec déposé `ECHEC_DU_CANAL`, rejeu sans envoi ni dépôt de plus. Décisions
+  D-1054-1 → 12 (fiche) ; Q-D-6 au PO ; → C. Verrou Docker pris à 12:38 sans attente, rendu à 13:35.
+- **Suivante : STORY-1055** 🚚 l'import réseau par la Reprise, dans `reseau-service` (EPIC-165) : le volet Reprise de
+  1041 (D-1041-3) sur `kit-cible` 1.0.1, la suite de conformité du kit passe (dépend de B-956, faite). Puis 1056 (la
+  commande (1)).
 
 ### Lots 1 et 2
 
@@ -237,8 +249,13 @@
     message, interdits, relances), `src/modules/assurance/` (consommateur de `sinistres.dossier.changed@1`, groupe
     `notification-assurance` ; route de service du destinataire, `sinistres-service` seul), file
     `notification:relances-pieces` (`adapters/bullmq/relances-pieces-*.ts`), neuf modèles `assurance-*` au socle,
-    copie `src/vendor/classification-sante/` (à recopier et refiger si C change son registre). Suite : 1054 (accusé,
-    repli cloche, consentements, WhatsApp approuvé, effacement des destinataires par les droits des personnes).
+    copie `src/vendor/classification-sante/` (à recopier et refiger si C change son registre). Depuis STORY-1054 (`dev`
+    e0a50c0) : `assurance_messages` (journal des messages de l'assuré : voie, accusé calculé des `Envoi`, cloche),
+    `assurance_consentements` (actes en ajout seul, deux finalités), `MessagesAssureService` (tout message de
+    l'assurance y passe : relances comprises), `FinsDeChaine` dans `envois` (l'assurance s'y inscrit ; un autre module
+    peut le faire), trois routes de la même porte de service (`sinistres-service` seul). Reste : WhatsApp et ses
+    modèles approuvés (D-1054-12), le courrier avec preuve, un fait d'accusé poussé si C le demande, l'effacement des
+    destinataires de l'assuré par les droits des personnes (dette de 1051, toujours ouverte).
     Dettes héritées : 4 suites e2e rouges (voir « Pièges ») ; ouvert de la passation de B (vérification des sorties
     d'essai, bascule de la garde sur l'état publié seul).
   - **L'accès des cinq services** (STORY-1053, EPIC-223) :
@@ -403,8 +420,10 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-17, STORY-1054), avant la fusion du code — `prospera-notification-service` : prévenir l'assuré
-  (2).** Rien d'existant ne change de forme ; **ajouts** et **deux comportements** qui changent. Fiche :
+- **PUBLIÉ (2026-11-17, STORY-1054, prospera-notification-service#91, `dev` d9de737 → e0a50c0) ; ANNONCÉ avant la
+  fusion du code (prospera-stories #647) — `prospera-notification-service` : prévenir l'assuré (2).** Écarts avec
+  l'annonce : `DOSSIER_INVALIDE` répond 400 (comme 1051) ; le dépôt ne garde `code` que s'il est un code nommé ;
+  `voie` est absente tant qu'un message est en cours de remise. Rien d'existant ne change de forme ; **ajouts** et **deux comportements** qui changent. Fiche :
   `stories/STORY-1054.md` (D-1054-1 → 12).
   - **Routes neuves, appel de service** (même porte que le destinataire, `sinistres-service` seul ; 401
     `JETON_DE_SERVICE_INVALIDE`, 403 `APPELANT_HORS_PERIMETRE`) :
@@ -675,6 +694,15 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1054** : (1) **deux suites e2e de `notification` lancées en parallèle dans deux conteneurs ont fait tomber
+  Docker Desktop** (API en 500, conteneurs orphelins) ; une à la fois, `--runInBand --forceExit`, sortie écrite dans
+  un fichier du conteneur. Un `--memory 4g` sur la suite unitaire complète fait tomber six suites « failed to run »
+  (aucun test rouge) : sans plafond, 287/287. (2) Une mutation `if (false && …)` ou une comparaison sans recouvrement
+  casse la compilation (ts-jest) : écrire `… && x.length < 0`. (3) Le motif d'un `Envoi` échoué est le **texte** de
+  l'adaptateur (« Le canal SMS n'est pas configuré… »), pas un code : ne le recopier que s'il a la forme d'un code
+  nommé. (4) Un heredoc de plus de ~180 lignes échoue (« unexpected EOF ») : bloc écrit par l'outil d'écriture puis
+  ajouté par un petit script.
 
 - **STORY-1053** : (1) un émetteur de jetons de recette qui **régénère sa clé** à chaque démarrage, arrêté puis relancé
   (recette « auth arrêté »), fait répondre **401** à tous les services (même `kid`, clé changée, JWKS en cache) : garder

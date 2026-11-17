@@ -377,8 +377,16 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1054.md"
     reserved_on: "2026-11-17"
     note: >
-      EN COURS le 2026-11-17 — annoncée avant le code (⚠ Contrats, journal de D). Lot D, n° 10 du lot 3
-      (EPIC-220). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-notification-service#91 (dev d9de737, e0a50c0). Accusé de transmission
+      lisible par le dossier (GET …/service/assurance/dossiers/{id}/messages : EN_COURS, TRANSMIS, REMIS, LU,
+      NON_REMIS, EN_CLOCHE ; jamais l'adresse) ; repli dans la cloche de l'assuré (CONSENTEMENT_ABSENT/RETIRE,
+      CANAL_ABSENT, CANAL_REFUSE, ECHEC_DU_CANAL par la fin de chaîne de l'Envoi), texte SMS passé au contrôle des
+      interdits de 1051, un dépôt par message ; consentements par finalité (SUIVI_DU_SINISTRE obligatoire,
+      INFORMATION_DU_DOSSIER facultative en échec fermé), en ajout seul, tracés (qui, quand, version du texte,
+      appelant). Node 24 : 287/287 suites unitaires, e2e 4 suites rouges héritées identiques au témoin, intégration
+      Mongo+Redis 15/15, 18/18 mutations. Pile grp-d (rejouée depuis dev) : /health 200, accusé TRANSMIS, numéro
+      officiel en cloche sans accord et après retrait, SMS en échec déposé, rejeu sans envoi ni dépôt de plus.
+      Annoncée avant le code (docs #647). Lot D, n° 10 du lot 3 (EPIC-220). NON SLOTTÉE.
 
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
