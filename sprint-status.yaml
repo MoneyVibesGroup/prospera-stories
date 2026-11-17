@@ -705,6 +705,13 @@ reserved_ranges:
     reserved_on: "2026-11-17"
     note: >
       🏁 DONE le 2026-11-17 — balance#155 (dev 6df0ce6). Lot 3 de A, n° 7. Le code relu d'abord : STORY-391/392 livrées, rien n'était rangé sur la nature de la provenance (le chemin cahiers écrit source `ocr`, indiscernable d'une soumission `ocr`). Livré : champ `provenance` sur chaque ligne (dérivé, hors sceau), marqueur `adaptateur`, route `…/balance/{id}/lignes/{compte}/provenance` (écart signé). Ajouts seuls ; pas de migration ; pas de Docker. Ticket « ligne de balance sans provenance » fermé ; FE-075 débloquée. NON SLOTTÉE.
+  - range: "STORY-927"
+    status: "RÉSERVÉ"
+    owner: "Le jeu de démonstration du cabinet au format jeu-demonstration@1 : cabinet-demo-togo (module balance : profil société et deux balances SYSCOHADA équilibrées 2024/2025, graine fixe ; données seules dans prospera-plateforme)"
+    source_doc: "prospera-stories/stories/STORY-927.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — plateforme#25 (dev e958bd6). Lot 3 de A, n° 8. Dossier jeux-demonstration/cabinet-demo-togo/ (jeu.json, balance/profil-societe.json 1 enregistrement, balance/balance.json 2 enregistrements de 36 lignes, generateur/generer.mjs, graine 20270115) ; npm run jeu:verifier conforme, rejeu du générateur identique à l'octet ; le jeu ne porte que le module balance (bilan : rien de stocké à importer, D-927-1). Format = celui des services (profil société, balance.submitted v1 avec dossierRef). Étiquette jeu-cabinet-v1 à poser par B. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
