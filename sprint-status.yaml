@@ -1348,10 +1348,20 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-972.md"
     reserved_on: "2026-11-17"
     note: >
-      🔄 EN COURS le 2026-11-17 — story neuve de la plage de B (930 → 979), insérée avant STORY-969 par la session du
-      groupe B (demandes de D, STORY-1058, et de C, relevée par 966 ; module comptabilite au catalogue) : contestable.
-      Contrat annoncé avant la fusion du code (routes neuves d'auth, INSTANCE_ESPACE). Lot 3 de B (EPIC-226, EPIC-111).
-      NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — auth #44 (dev 8661bbf), catalogue #60 (dev 6e5f052, 2c3a933), plateforme #31 (dev
+      a06d8c9) ; contrat annoncé avant la fusion (stories #668 : INSTANCE_ESPACE ; PUT /interne/organisations/{id}/
+      comptes-du-jeu sous l'identité du moteur ; GET /essai/comptes-du-jeu et POST /essai/connexion-en-tant-que ;
+      collection comptes_du_jeu ; refus ESPACE_REEL_REFUSE, COMPTE_DU_JEU_INCONNU, APPELANT_HORS_ORGANISATION,
+      COMPTE_EN_DOUBLE, COMPTE_DU_JEU_EN_CONFLIT, TENANT_ROLE_INCONNU, TENANT_ROLE_NON_PROPOSE ; comptabilite au
+      catalogue, .env.essai.example). Story neuve de la plage de B (930 → 979), insérée avant STORY-969 par la session
+      du groupe B (demandes de D, STORY-1058, et de C ; module comptabilite au catalogue) : contestable. Node 24 :
+      auth 101 suites 1415/1415, catalogue 101 suites 1536/1536 ; manifestes:garde verte (47) ; 14/15 mutations
+      d'auth rouges (une équivalente) et 5/5 du catalogue. Pile grp-b, branche puis origin/dev (volumes neufs) : réel
+      13/13 — le vrai catalogue installe la comptabilité (PUT de la console) et émet EN_SERVICE sur
+      etat-publie.changed.reel, ouverture 201 et grand livre 200 au vrai jeton de l'associé, AUCUNE doublure de
+      l'état publié ; essai 19/19 — quatre comptes du jeu posés par le moteur, connexion « en tant que » Kodjo puis
+      Ayité, réel 403 ; le catalogue de l'essai appelle terrain à http://terrain-service:3413. Lot 3 de B (EPIC-226,
+      EPIC-111). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
