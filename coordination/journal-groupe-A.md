@@ -7,6 +7,7 @@
 
 ### Lot 3 (depuis le 2026-11-17) — l'état courant
 
+- **2. STORY-921 (en cours, 2026-11-17)** — hub de balance : 5e origine `comptabilite` (fiche `stories/STORY-921.md`). Contrat annoncé ci-dessous AVANT la fusion du code (PR de docs d'annonce séparée, fusionnée d'abord).
 - ~~1. **STORY-920**~~ ✅ **DONE (2026-11-17)** — recette #24 (dev `68ef348`) ; compose racine du poste principal modifié en
   place (non versionné). Image `cgr.dev/chainguard/minio:latest`, `user: '0'` ; garde du profil réalignée (18/18,
   mutation rouge) ; pile neuve `grp-a` : recette `zone-franche` 5/5, `mc ls` voit les artefacts dans MinIO. Pile
@@ -274,7 +275,7 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## ⚠ Contrats
 
-- *(aucun changement annoncé)*
+- **2026-11-17 (STORY-921), AVANT la fusion du code** : `balance.submitted` v1, champ `origine` : l'énumération reçoit `comptabilite` (**ajout seul**, facultatif, aucun renommage). Publiée par `balance-service` (`docs/schemas/balance.submitted.v1.schema.json`, `INTEGRATION.md`, OpenAPI `OrigineBalance`). Pas de registre Avro/Karapace dans ce service : aucune compatibilité de registre à vérifier ; un émetteur existant ne change rien. `source` reste `direct`. La balance `comptabilite` est une balance GÉNÉRALE (complète, base fiscale, gel de la saisie), référentiel facultatif (résolu depuis le dossier), `origine` hors sceau. **→ B** : lisible pour B-967 dès la fusion de STORY-921 (SHA noté à la clôture).
 
 ## Front cabinet : revérification et tri du 2026-11-15
 
