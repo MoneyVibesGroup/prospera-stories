@@ -2,9 +2,10 @@
 
 Status: in-progress
 
-> **Où en est la story (note de reprise, tenue à jour sur la branche `docs-1052`)** : fiche écrite ; code de
-> `series-v1.1` (plateforme, branche `MNV-1052`) puis de `ventes` (branche `MNV-1052`) en cours ; preuves Docker à
-> jouer sous le verrou du poste.
+> **Où en est la story (note de reprise, tenue à jour sur la branche `docs-1052`)** : code écrit et poussé
+> (plateforme `MNV-1052` 67b7863, ventes `MNV-1052`) ; Node 24 vert (plateforme ; ventes : tsc, lint, unitaires, e2e,
+> build, intégration sur MongoDB réel) ; restent les mutations, la pile `grp-d` (sauvegarde et restauration réelles),
+> les PR et l'étiquette `series-v1.1`. Annonce « ⚠ Contrats » dans la PR de cette branche.
 
 **Épics :** EPIC-224 (les séries sans perte, le jeu de répliques et l'exploitation hébergée), EPIC-263 (profil
 d'instance hébergée) · **Dépôts :** `prospera-plateforme` (`series/`, tenu par D), `prospera-ventes-service` (socle
@@ -94,8 +95,9 @@ seule**, relève le compteur au maximum connu, et **déclare** ce qu'elle ne peu
   des Créances restent des sources du maximum connu : elles entrent par `reprendreApresRestauration` (inchangée,
   déclare désormais son trou) quand elles existeront.
 - **D-1052-9 — `series-v1.1`, pas `v2`** : tout est ajouté (options du constructeur, `confirmer`, `reconcilier`,
-  `reconcilierTout`, `etat`, `lister`, `ancreMongo`, `ancreEnMemoire`, `TrouDeclare`, codes `ANCRE_INDISPONIBLE`) ;
-  les méthodes neuves du dépôt sont facultatives dans l'interface ; ce que rendent `emettre`, `tete` et
+  `reconcilierTout`, `etat`, `lister`, `ancreMongo`, `ancreEnMemoire`, `TrouDeclare`, codes `ANCRE_INDISPONIBLE`,
+  `DEPOT_INCOMPLET`, `SERIE_INSTABLE`) ; les méthodes neuves du dépôt (`sauter`, `lister`, `enTransaction`,
+  `assurer`, `lireEngage`) sont facultatives dans l'interface ; ce que rendent `emettre`, `tete` et
   `reprendreApresRestauration` garde sa forme (un champ `trou` ne s'ajoute à `NumeroEmis` que lors d'un saut). Les
   changements de comportement de `depotMongo` sont plus stricts, jamais plus lâches : `majority` et `linearizable`
   hors transaction ; `lire` passe la session dans une transaction (en `v1`, il lisait hors de la transaction). Garder
@@ -111,6 +113,16 @@ seule**, relève le compteur au maximum connu, et **déclare** ce qu'elle ne peu
   N numéros en parallèle, chacun avec un document témoin (`commande_numeros_de_recette`) : elle n'existe que si
   `SERIES_EMISSIONS_DE_RECETTE=actif`, refusé au démarrage en `NODE_ENV=production` (un numéro ne se tire pas sans
   pièce, AD-5 ; elle sert la preuve de restauration sur la pile).
+
+- **D-1052-13 — En transaction, la série se crée hors de la transaction, et une transaction périmée ne saute pas.**
+  Mesuré sur MongoDB réel (premier passage de l'intégration, rouge une fois sur trois) : 50 transactions concurrentes
+  sur une série **à créer** tirent toutes le n° 1 (deux créations du même document ne se heurtent qu'à
+  l'acquittement) ; les condamnées voyaient l'ancre déjà confirmée par la gagnante, croyaient la base restaurée et
+  réservaient plus haut — l'ancre était polluée et la suite sautait 2 → 5 sans restauration. Correctif dans la
+  bibliothèque : `assurer` crée le document hors de la transaction avant l'incrément (sur un document qui existe,
+  deux incréments concurrents se heurtent tout de suite) ; avant tout saut en transaction, `lireEngage` relit l'état
+  engagé : s'il tient déjà le numéro tiré, la transaction est périmée, **rien n'est sauté ni réservé**, refus
+  `SERIE_INSTABLE`, et `ventes` rejoue l'émission (cinq fois au plus).
 
 ## Ce qui n'est pas fait ici
 
