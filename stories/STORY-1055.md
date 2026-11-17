@@ -115,7 +115,8 @@ d'une zone que l'import par fichier applique déjà.
     - l'affectation `MEMBRE` court depuis `affecteDepuis`, jusqu'à `partiLe` pour un commercial parti.
   - **Modification** : l'identité seule (prénom, nom, e-mail, téléphone, statut d'emploi). Une autre zone, une autre
     date ou un départ est refusé : ce sont des actes de Prospera.
-  - **Aucune invitation** ne part de la reprise (manifeste). `cleOrigine` garde l'identifiant de la source.
+  - **Aucune invitation** ne part de la reprise (manifeste). La clé d'origine vit dans l'index du kit (`reprise_cles`),
+    pas sur le commercial : le raccord du kit ne la reçoit pas.
   - Chaque écriture publie `reseau.commercial.changed@1`, par la méthode existante.
 - **D-1055-10 — La chaîne de 600 de la suite** se joue sur des zones liées par `parent`. Le banc pose
   `profondeurMax` à 1 000 pour ses deux organisations, directement dans la configuration. La règle de profondeur ne
@@ -137,3 +138,8 @@ d'une zone que l'import par fichier applique déjà.
 - 13:47 — rituel fait (plan, règles, journaux A, B, C, D ; fiches 1041, 947, 956 ; EPIC-165 ; kit 1.0.1 lu) ; branches
   `docs-1055` (prospera-stories) et `MNV-1055` (reseau-service) posées depuis `origin/main` et `origin/dev`.
   Verrou Docker tenu par B (« B STORY-965 13:35 ») : code d'abord.
+- 14:45 — annonce « ⚠ Contrats » fusionnée (prospera-stories #650, `main` 6c77cc2). Plateforme : branche `MNV-1055`
+  poussée (`2e59857`, schémas `zone@1.0` et `commercial@1.0`, test de compilation par le kit ; PR à ouvrir après la
+  preuve Node 24). `reseau-service` : branche `MNV-1055` poussée (`c4f643c`) : kit copié, moteur des zones, routes,
+  raccords, bancs ; tsc et lint verts, unitaires touchés verts sous Node 25 ; intégration et Node 24 à jouer sous le
+  verrou (toujours tenu par B).
