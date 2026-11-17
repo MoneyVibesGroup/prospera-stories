@@ -53,11 +53,9 @@
   (rejouée depuis `dev`, témoin d'`origin/dev`) : refus sur appels réels, droits lus de `/moi/droits`, trois faits du
   commercial lus sur Kafka. Décisions D-1050-1 → 10 (fiche). Verrou Docker pris sans attente (B l'avait rendu), rendu.
   ⚠️ En réel, les routes de `reseau` qui exigent un droit répondent 403 jusqu'à B-960 (« → B »).
-- **Suivante : STORY-1051** 🛡 prévenir l'assuré (1), dans `prospera-notification-service` (EPIC-220). **La
-  passation de B est écrite** (journal de B, « Passations », 2026-11-17 : dernier commit de B sur `dev` `5e6c553`,
-  STORY-957, notification #89) : 1051 est débloquée ; la constater au rituel (PR ouvertes, dernier commit), puis
-  ajouter le dépôt aux « Dépôts tenus ». Points d'entrée selon B : `src/modules/declenchement/`, modèles système ; AC-5
-  refuse toute minuterie (relances de 5 jours par une file BullMQ). Puis 1052 (séries hébergées).
+- **STORY-1051** 🔧 **en cours** — prévenir l'assuré (1), dans `prospera-notification-service` (EPIC-220). Passation
+  de B constatée (« Passations ») ; fiche et annonce « ⚠ Contrats » avant le code ; branche `MNV-1051` partie de `dev`
+  `5e6c553`. Puis 1052 (séries hébergées).
 
 ### Lots 1 et 2
 
@@ -101,8 +99,9 @@
   profil `assureur-fictif`, « Rebase and merge » seul ; dans `prospera-plateforme`, le jeu
   `jeux-demonstration/assurance-compagnie-demo-reduite/` (étiquette `jeu-assurance-v1`). Le générateur reste dans le
   dossier de C (`contrats/assurance/demo/generateur.ts`), copié à l'octet.
-- Lot 3 : `prospera-notification-service`, passé par B à la fusion de B-957 (passation écrite dans le journal de B,
-  dernier commit de B sur `dev` 5e6c553) ; à constater au rituel de 1051.
+- **`prospera-notification-service`** (lot 3, reçu de B à la fusion de B-957, passation constatée le 2026-11-17 au
+  rituel de 1051) : port 3008, compose racine du poste (`notification-service`, `mongo-notification`, `kafka`, `redis`,
+  `mailhog`).
 
 - `reseau-service` (lot 2) : `main` et `dev` posées le 2026-11-16 ; port de développement **3419** ; piles Docker
   `grp-d`.
@@ -113,6 +112,12 @@
 
 ## Passations
 
+- **← B, `prospera-notification-service`, constatée par D au rituel de 1051, `dev` 5e6c553** (2026-11-17, D-L3-3). Au
+  rituel : aucune PR ouverte, dernier commit sur `dev` = celui de la passation (MNV-957), checkout propre. Repris de la
+  passation : Node 24 (`verification`) seulement pour les tests du client de Confluent ; AC-5 refuse toute minuterie ;
+  sonde `/api/v1/health` ; ouvert : la vérification des sorties d'essai avant envoi (STORY-951), la bascule de la garde
+  sur l'état publié seul, les canaux sms, whatsapp et push sans adaptateur configuré sur la pile, le résidu de 957
+  (7,5 s au redémarrage sans Kafka).
 - **← C, `prospera-assureur-fictif`, constatée par D au rituel de 1046, `dev` 78ad10c** (2026-11-17, plan du lot 3
   §5). C n'avait pas écrit sa passation (« Passations : aucune ») ; au rituel : aucune PR ouverte, dernier commit sur
   `dev` du 2026-11-16 (MNV-987). C est actif ailleurs (sinistres, 1001 → 1002), pas sur ce dépôt.
@@ -169,6 +174,19 @@
     commande (1)).
 
 ## Demandes aux autres groupes
+
+- **→ C (2026-11-17) : enregistrer le destinataire de l'assuré dans `notification` (STORY-1051)** — **ouverte**, sans
+  urgence (rien ne casse chez vous). `notification` prévient l'assuré à chaque étape tirée de
+  `sinistres.dossier.changed@1` (déclaration, pièces attendues et trois relances espacées de 5 jours, ouverture, numéro
+  officiel, offre, chèque, règlement, clôture ; jamais la fraude), mais **aucun fait ne porte d'adresse** (AD-16) : sans
+  destinataire enregistré, rien ne part (`CANAL_ABSENT`). Demandé : à la déclaration (canal choisi par l'assuré, SMS à
+  défaut, FR-146), `sinistres` appelle `PUT {NOTIFICATION_URL}/api/v1/service/assurance/dossiers/{dossierId}/destinataire`
+  avec `Authorization: Bearer <jeton de service de sinistres-service>` et `{ organisationId, canal, destinataire,
+  langue? }` (idempotent ; un nouvel appel remplace). Le jeton se pose des deux côtés (`JETONS_DE_SERVICE` de
+  notification : `sinistres-service:<jeton>`). Facultatif ensuite : la route synchrone d'AD-27
+  (`POST /api/v1/service/envois`, clé `(dossierId, événement)`) vous est ouverte pour les neuf modèles `assurance-*`.
+  Les relances de `notification` sont automatiques (FR-47, H-040 : à confirmer en immersion) et ne remplacent pas les
+  vôtres (STORY-999) ; l'arbitrage après trois relances reste chez vous.
 
 - **→ B (2026-11-17) : attribuer les droits `reseau:*` par auth-service (STORY-1050, pour B-960)** — **ouverte**.
   Depuis STORY-1050, `reseau-service` lit ses droits par `GET /api/v1/moi/droits` et n'a plus de table rôle → droits :
@@ -250,6 +268,29 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-17, STORY-1051, avant la fusion du code) — `prospera-notification-service` : prévenir l'assuré
+  (1).** Rien d'existant ne change de forme ; ajouts seulement.
+  - **Fait consommé** : `sinistres.dossier.changed@1` (contrat de C, inchangé), groupe neuf `notification-assurance`
+    (`KAFKA_ASSURANCE_GROUP_ID`). Un message part au **changement** d'état du dossier, côté assuré seulement
+    (D-1051-3) ; `FRAUDE_SUSPECTEE`, `LITIGE`, `REJETE`, `SANS_SUITE` et les états internes ne produisent rien.
+  - **Route neuve, appel de service** : `PUT /api/v1/service/assurance/dossiers/{dossierId}/destinataire` (jeton de
+    service, appelant **`sinistres-service`** seul ; corps `{ organisationId, canal: "sms"|"email", destinataire,
+    langue? }` ; 200 `{ dossierId, canal, langue, enregistreLe }`, l'adresse n'est jamais rendue ; 403
+    `APPELANT_HORS_PERIMETRE`, 422 `IDENTIFIANT_NON_NORMALISABLE`, `CANAL_NON_SERVI_A_L_ASSURE`). Sans destinataire
+    enregistré, aucun message ne part (`CANAL_ABSENT`, journalisé).
+  - **Appelant de service neuf** : `sinistres-service` entre à `JETONS_DE_SERVICE` ; son périmètre sur
+    `POST /api/v1/service/envois` (AD-27) est limité aux neuf modèles `assurance-*`.
+  - **Neuf modèles système** (SMS et e-mail, `fr`/`en`) : `assurance-declaration-enregistree`,
+    `assurance-pieces-attendues`, `assurance-relance-pieces`, `assurance-dossier-ouvert`, `assurance-numero-officiel`,
+    `assurance-offre-envoyee`, `assurance-cheque-a-retirer`, `assurance-reglement-effectue`, `assurance-dossier-clos`.
+    Variables : `reference` (et `numeroOfficiel` pour le numéro officiel), rien d'autre.
+  - **Refus neuf** : `CONTENU_INTERDIT_A_L_ASSURE` (422) à la création ou à la nouvelle version d'une surcharge d'un
+    modèle `assurance-*` qui porte une donnée de santé, un montant d'indemnité, le mot « fraude » ou une variable hors
+    liste.
+  - **Relances de pièces** : file BullMQ `notification:relances-pieces` (Redis déjà requis), trois au plus, espacées de
+    5 jours sur l'horloge de référence (`RECETTE_HORLOGE_AVANCE_JOURS` en recette).
+  - **→ C** : voir « Demandes aux autres groupes ».
 
 - **PUBLIÉ (2026-11-17, STORY-1050, reseau-service#13, `dev` a3d2f59, et #14, `dev` 49c4d01) ; ANNONCÉ avant la
   fusion du code (prospera-stories #613) — `reseau-service` : la garde lit l'état publié, les
