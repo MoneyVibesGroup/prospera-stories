@@ -712,6 +712,14 @@ reserved_ranges:
     reserved_on: "2026-11-17"
     note: >
       🏁 DONE le 2026-11-17 — plateforme#25 (dev e958bd6). Lot 3 de A, n° 8. Dossier jeux-demonstration/cabinet-demo-togo/ (jeu.json, balance/profil-societe.json 1 enregistrement, balance/balance.json 2 enregistrements de 36 lignes, generateur/generer.mjs, graine 20270115) ; npm run jeu:verifier conforme, rejeu du générateur identique à l'octet ; le jeu ne porte que le module balance (bilan : rien de stocké à importer, D-927-1). Format = celui des services (profil société, balance.submitted v1 avec dossierRef). Étiquette jeu-cabinet-v1 à poser par B. NON SLOTTÉE.
+  - range: "STORY-928"
+    status: "RÉSERVÉ"
+    owner: "Les routes C13 d'import et d'effacement de la démonstration dans balance-service (profil-societe puis balance) et bilan-service (effacement seul) : corps de contrats/instance/, identité de service MOTEUR, espace d'essai seulement, effacement complet et idempotent (balance-service, bilan-service)"
+    source_doc: "prospera-stories/stories/STORY-928.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🟡 EN COURS le 2026-11-17. Lot 3 de A, n° 9 (source STORY-953, STORY-927, dette D-918-4). Dossier de démonstration matérialisé dans balance seul faute de création appelable
+      dans dossier-service (D-928-3). Preuve Docker : 1 pile grp-a. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
