@@ -12,11 +12,16 @@
 - **STORY-1045** ✅ — `vocabulaires/` et `contrats/distributeur/` dans la plateforme (PR prospera-plateforme#21, `dev`
   baa38dd ; étiquettes `vocabulaires-v1` et `contrats-distributeur-v1`). **Solde D-1042-3.** Aucun fichier de B
   touché : le `test` et le `typecheck` racines lisaient déjà ces dossiers (STORY-941).
-- **Suivante : STORY-1046** 🛡 la compagnie de démonstration (EPIC-204, `prospera-assureur-fictif` et plateforme). Elle
-  attend la **passation de `prospera-assureur-fictif` par C** : au 2026-11-17, elle **n'est pas écrite** (journal de C,
-  « Passations : aucune » ; la demande de B y est « ouverte »). Le plan (§5) permet à D de la **constater** au rituel de
-  1046 : `dev` d'`assureur-fictif` est alors à `78ad10c` (relevé du 2026-11-17, à relire au rituel). Si C y travaille
-  encore, D prend 1047 (qui attend B-956 pour le README de `encours/`) ou 1050 (sans dépendance), et l'écrit ici.
+- **STORY-1046** ✅ 🛡 — la compagnie de démonstration (PR prospera-assureur-fictif#3, `dev` 626b93e et e265b0a ;
+  PR prospera-plateforme#23, `dev` a938c38, étiquette `jeu-assurance-v1`). Le jeu de l'assurance au format
+  `jeu-demonstration@1` : `assurance-compagnie-demo` (205 915 enregistrements, produit par `npm run jeu:ecrire`, non
+  versionné) et `assurance-compagnie-demo-reduite` (5 180, dans `prospera-plateforme/jeux-demonstration/`) ;
+  `jeu:verifier` conforme pour les deux (Node 24). Routes C13 d'import et d'effacement du LC fictif, sous l'identité
+  `MOTEUR` seule ; effacement idempotent. Pile `grp-d` : jeu complet importé en 136 s, puis effacé.
+  **Passation de `prospera-assureur-fictif` constatée** (voir « Passations »).
+- **Suivante : STORY-1047** 🚚 la bibliothèque d'encours (EPIC-225, `prospera-plateforme/encours/`). **Débloquée** :
+  B-956 est fusionnée (plateforme #22, `dev` 189183f, relevé le 2026-11-17) ; le README porte la ligne `encours/` et
+  le `test` et le `typecheck` racines lisent `encours/` (voir la note de B, « → D (2026-11-17) »).
 
 ### Lots 1 et 2
 
@@ -56,8 +61,11 @@
   `prospera-recouvrement-service` (3414), `prospera-pilotage-service` (3415), `prospera-croissance-service` (3416).
 - `prospera-plateforme` : `series/` (`series-v1`), `vocabulaires/` (`vocabulaires-v1`), `contrats/distributeur/`
   (`contrats-distributeur-v1`) ; **lot 3** : `encours/` (inscrit au README par B-956).
-- Lot 3, à recevoir : `prospera-assureur-fictif` (de C, passation à écrire ou à constater au rituel de 1046),
-  `prospera-notification-service` (de B, à la fusion de B-957).
+- **`prospera-assureur-fictif`** (lot 3, reçu de C, passation constatée le 2026-11-17 au rituel de 1046) : port 3411,
+  profil `assureur-fictif`, « Rebase and merge » seul ; dans `prospera-plateforme`, le jeu
+  `jeux-demonstration/assurance-compagnie-demo-reduite/` (étiquette `jeu-assurance-v1`). Le générateur reste dans le
+  dossier de C (`contrats/assurance/demo/generateur.ts`), copié à l'octet.
+- Lot 3, à recevoir : `prospera-notification-service` (de B, à la fusion de B-957).
 
 - `reseau-service` (lot 2) : `main` et `dev` posées le 2026-11-16 ; port de développement **3419** ; piles Docker
   `grp-d`.
@@ -68,6 +76,9 @@
 
 ## Passations
 
+- **← C, `prospera-assureur-fictif`, constatée par D au rituel de 1046, `dev` 78ad10c** (2026-11-17, plan du lot 3
+  §5). C n'avait pas écrit sa passation (« Passations : aucune ») ; au rituel : aucune PR ouverte, dernier commit sur
+  `dev` du 2026-11-16 (MNV-987). C est actif ailleurs (sinistres, 1001 → 1002), pas sur ce dépôt.
 - **→ Dev A (2026-11-16, D-L2-5, avant le 04/12) : le distributeur.** Ce que D laisse :
   - `reseau-service` complet pour le lot (EPIC-044 → 053) : `dev` 5922180 ; contrat `reseau.portee.changed@1` publié
     et au registre ; suite de conformité `conformite-portee-reseau-v1` ; C-1004 est le premier consommateur attendu.
@@ -86,9 +97,26 @@
     la bascule de la garde sur l'état publié (D-1030-2).
   - Outils : banc HTTP d'intégration sur MongoDB réel (`test/integration/application-http.ts`), émetteur de jetons de
     recette (profil compose `recette`), Karapace (profil `registre`).
+  - **Assurance (lot 3), pour mémoire** : D tient aussi `prospera-assureur-fictif` (la démo, EPIC-204), qui n'est pas
+    du distributeur ; le jeu de l'assurance et les routes C13 y sont depuis STORY-1046 (`dev` e265b0a). Suite : 1048,
+    1057.
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-17) : passation de `prospera-assureur-fictif` constatée** — **pour information**. D tient le dépôt
+  depuis STORY-1046 (`dev` 78ad10c au rituel, e265b0a après). C continue de jouer ses parcours contre le LC fictif et
+  demande à D toute modification (ici). Ce qui change pour vous : deux routes neuves (C13, identité `MOTEUR` seule) ; un
+  jeton de service présenté à toute autre route du LC fictif est refusé 403 `IDENTITE_DE_SERVICE_REFUSEE` ; vos jetons
+  d'utilisateur, l'API du LC (`/lc/echange`) et l'administration ne changent pas. Le générateur reste dans votre dossier
+  `contrats/assurance/demo/` : s'il change, D recopie et refige les empreintes du jeu (à demander ici).
+- **→ B (2026-11-17) : le jeu de l'assurance est dans `jeux-demonstration/`** — **information**. D-1046-4 : D a ajouté
+  `jeux-demonstration/assurance-compagnie-demo-reduite/` (données seules, plateforme #23), sur la phrase du README « les
+  jeux des verticales viennent de leurs propriétaires ». Si vous tenez le tableau « Qui écrit dans quel dossier » à jour,
+  la ligne est : `jeux-demonstration/assurance-compagnie-demo-reduite/` → groupe D. Le jeu à la taille de la démo
+  (`assurance-compagnie-demo`, ~80 Mo) n'est pas versionné : `npm run jeu:ecrire -- <dossier> DEMO` dans
+  `prospera-assureur-fictif` le produit à l'octet, pour `JEUX_DEMONSTRATION_DIR` du catalogue de l'espace d'essai. Le
+  catalogue le joue avec `INSTALLATION_SERVICES` → `assureur-fictif` et un jeton de service `MOTEUR` ; prouvé avec des
+  lots de 500 (416 appels, 136 s), sans limite de débit côté LC.
 - **→ C (2026-11-16) : consommer `reseau.portee.changed@1` et passer la suite de conformité pour STORY-1004** — ouverte.
   Le contrat est publié (reseau-service#7, `dev` 17dcf14) et la suite étiquetée (`conformite-portee-reseau-v1`,
   sha256 `f27799758591688e283c10e7bee04ea8ca7f3edb8c37dcd135f59e2b0851a15c`). Mode d'emploi :
@@ -116,6 +144,18 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **PUBLIÉ (2026-11-17, STORY-1046, prospera-assureur-fictif#3, `dev` 626b93e ; plateforme #23, `jeu-assurance-v1`) —
+  ajouts seulement** (annoncés ici avec la PR de docs, juste après la fusion du code : rien d'existant ne change de
+  forme).
+  - `POST /api/v1/instance/assureur-fictif/{organisationId}/import` et `…/effacement` (déjà déclarées au manifeste),
+    aux corps exacts de `contrats/instance/` (`contrats-instance-v1`) ; refus 400 `IMPORT_HORS_CONTRAT`,
+    `EFFACEMENT_HORS_CONTRAT`, `ORGANISATION_INCOHERENTE` ; 403 `IDENTITE_DE_SERVICE_REQUISE`,
+    `ORGANISATION_HORS_JETON` ; 409 `IDEMPOTENCE_REUTILISEE` ; 422 `OBJET_NON_IMPORTABLE`, `ENREGISTREMENT_INVALIDE`.
+  - Le LC fictif lit les jetons de service (STORY-948) : 403 `IDENTITE_DE_SERVICE_REFUSEE` hors des routes C13 ; 401
+    `JETON_DE_SERVICE_INVALIDE` pour une identité inconnue.
+  - Les jeux `assurance-compagnie-demo@1.0.0` (`jeu.json` sha256 `f58ddf1a…`) et
+    `assurance-compagnie-demo-reduite@1.0.0` (`23602877…`) : une version publiée ne change plus.
 
 - **PUBLIÉ (2026-11-17, STORY-1045, prospera-plateforme#21, `dev` baa38dd) — deux contrats neufs** (rien d'existant ne
   change ; aucun fichier hors des dossiers de D).
@@ -160,6 +200,14 @@
 
 ## Pièges rencontrés
 
+- **Prettier réécrit une copie « à l'octet »** si on lui passe le dossier : STORY-1046 l'a fait sur les schémas C13
+  copiés, aussitôt recopiés ; `.prettierignore` de `prospera-assureur-fictif` les exclut désormais
+  (`src/modules/*/instance/contrat/*.schema.json`). Toujours revérifier les empreintes après un `prettier --write`.
+- `node --test` sous Node 24 (plateforme) résume en `ℹ tests 513 / ℹ pass … / ℹ fail 0`, pas en `# tests` : un `grep`
+  sur l'ancien format ne trouve rien et casse la chaîne de commandes.
+- Une pile du LC fictif sans auth-service : un petit émetteur RS256 (JWKS + `/jeton?identite=MOTEUR&org=…`) sur le
+  réseau `grp-d_default`, et `AUTH_JWKS_URI` pointé dessus ; `publicKey` de `generateKeyPairSync` est déjà un
+  `KeyObject` (pas de `createPublicKey` dessus).
 - **Verrou Docker du poste** (`MoneyVibes_Apps\.verrou-docker`, une ligne : groupe, story, heure) : B l'a adopté sur ce
   poste ; D le prend avant toute pile ou image et le rend après `down -v`. Une attente de B (STORY-942) a duré ~30 min :
   D a avancé 1033 → 1035 sur des branches empilées pendant ce temps, puis a tout prouvé et fusionné d'une traite.
