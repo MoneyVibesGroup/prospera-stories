@@ -1064,6 +1064,15 @@ reserved_ranges:
       (DONNEE_PRIVEE_HORS_DU_ROLE) ; roleMetierAttribue sur identity.droits.changed@1 (version 2, BACKWARD).
       Node 24 : 99 suites, 1364/1364 ; 11 mutations rouges ; pile grp-b : 26/26, cinq jetons RS256 réels ;
       Karapace : test:schemas 16/16. Lot 3 de B, n° 5 (EPIC-223). D-1053 débloquée. NON SLOTTÉE.
+  - range: "STORY-961"
+    status: "RÉSERVÉ"
+    owner: "Le plan de journaux — journaux déclarés par le référentiel du dossier (achats, ventes, banque, caisse, OD, à-nouveaux ; plans-de-journaux@1), arrêtés à l'ouverture au journal, refusés à un exercice tenu aux cahiers ; numérotation continue par journal et par exercice, par series-v1, dans la transaction de l'acte (prospera-comptabilite-service)"
+    source_doc: "prospera-stories/stories/STORY-961.md"
+    reserved_on: "2026-11-17"
+    note: >
+      EN COURS le 2026-11-17 — fiche écrite et contrat annoncé avant le code (route GET …/journaux, refus
+      EXERCICE_TENU_AUX_CAHIERS, PLAN_DE_JOURNAUX_ABSENT, JOURNAL_INCONNU ; manifeste amendé). Lot 3 de B, n° 6
+      (EPIC-112). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

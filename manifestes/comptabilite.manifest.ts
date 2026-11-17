@@ -35,8 +35,9 @@ export const MANIFESTE_COMPTABILITE = {
 
   enrichiPar: [],
 
-  // Les familles de référentiel que la comptabilité tient : celles de `balance` (le plan de comptes et, dès
-  // STORY-961, le plan de journaux viennent du paquet du référentiel du dossier, jamais du code).
+  // Les familles de référentiel que la comptabilité tient : celles de `balance`. Le plan de comptes vient du paquet du
+  // référentiel ; le plan de journaux est DÉCLARÉ PAR RÉFÉRENTIEL (STORY-961, D-961-1 : une donnée du service,
+  // `plans-de-journaux@1`, tant qu'aucun paquet ne le porte), jamais codé en dur.
   referentielFamilies: [
     'syscohada-revise',
     'smt-togo',
@@ -48,7 +49,7 @@ export const MANIFESTE_COMPTABILITE = {
   droits: [
     'comptabilite:dossier:consulter', // référentiel, journaux, écritures, grand livre, balance, tiers (lecture)
     'comptabilite:exercice:ouvrir', // ouvrir un exercice, choisir sa tenue (STORY-959)
-    'comptabilite:journal:administrer', // plan de journaux du dossier (STORY-961)
+    'comptabilite:journal:administrer', // ajouter un journal au plan déclaré (à venir : STORY-961 déclare le plan sans geste)
     'comptabilite:ecriture:saisir', // brouillard (STORY-962)
     'comptabilite:ecriture:valider', // brouillard → définitif, contre-passation (STORY-964)
     'comptabilite:tiers:administrer', // comptes de tiers auxiliaires (STORY-968)
@@ -96,6 +97,7 @@ export const MANIFESTE_COMPTABILITE = {
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/referentiel',
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/tenue', // STORY-959
     'GET /api/v1/dossiers/{dossierId}/tenues', // STORY-959 : l'historique des tenues et des bascules
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/journaux', // STORY-961 : le plan de journaux
   ],
 
   // C13, point 7 (chemins vus par le service). À créer.
