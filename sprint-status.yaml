@@ -915,6 +915,14 @@ reserved_ranges:
       0 échec / 1 sauté ; conformité du témoin 23/23 sur MongoDB 8.0 en jeu de répliques (grp-b) ; 513/513 après
       rebase sur dev. 25 + 29 mutations rouges. encours/ lu avant son premier fichier (D-1047 débloquée ; D-1055 sur
       la 1.0.1). Lot 3 de B, n° 1 (EPIC-161). NON SLOTTÉE.
+  - range: "STORY-957"
+    status: "RÉSERVÉ"
+    owner: "La supervision Kafka corrigée — un consommateur neuf à chaque relance, /health borné à 5 s ; passation de notification à D (prospera-notification-service, prospera-paiement-service, platform-catalog-service)"
+    source_doc: "prospera-stories/stories/STORY-957.md"
+    reserved_on: "2026-11-17"
+    note: >
+      EN COURS le 2026-11-17 — défauts relevés par A (STORY-908, journal de A). Lot 3 de B, n° 2 (EPIC-155).
+      NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
