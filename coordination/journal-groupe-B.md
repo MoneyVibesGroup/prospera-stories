@@ -70,16 +70,25 @@
      - La source des droits lit `droits ∪ droitsHorsJeton` (D-961-7).
      Node 24 : 289/0/3 ; `test:socle` 50/50 (50 actes concurrents, dont 10 abandonnés ⇒ 1 → 40) ; 23 mutations ;
      pile `grp-b` : `/health` 200. Avant la story : demande de A servie (plateforme #26, `jeu-cabinet-v1`).
-  7. **STORY-962 en cours** (17/11) : l'écriture en brouillard. Fiche écrite, contrat annoncé avant le code
-     (« ⚠ Contrats »).
-  - **Story en cours : STORY-962** (l'écriture en brouillard, `prospera-comptabilite-service`, EPIC-113 ; dépend de
-    961). « Fini quand » (plan §3) : équilibre **par pièce** ; contrôle d'exercice et de date ; pièce justificative
-    rattachée (`pieceId`). À lire avant : fiches 959 et 961 (« Pour la suite »).
-    - La pièce prend son numéro par `NumerotationDesJournaux.numeroter(portee, journal, session)`, **dans la
-      transaction qui l'écrit** (sinon : trou).
-    - Le cache des droits `(membre, organisation, dv)` reste à poser (D-959-4).
-    - `comptabilite:*` n'est toujours attribué à aucun rôle dans auth : en réel, toute écriture rend 403 jusqu'à
-      ce qu'il le soit (hors du jeton, avant B-967).
+  7. ~~STORY-962~~ : **prospera-comptabilite-service #4** (`ce22d81` sur `dev`), contrat annoncé avant la fusion
+     (stories #623). L'écriture en brouillard.
+     - `POST …/exercices/{e}/ecritures` (`comptabilite:ecriture:saisir`) : pièce équilibrée PAR PIÈCE, montants
+       entiers en unité mineure (XOF, XAF), exercice OUVERT et tenu au journal, journal au plan, date dans les bornes.
+     - Le `pieceId` est vérifié chez `document-service` (`GET /dossiers/{d}/pieces?pieceId=`, jeton du membre, 3 s,
+       fermé) (D-962-4).
+     - Le brouillard prend un numéro PROVISOIRE (`VE-BR-000001`, série à part) dans la transaction de la saisie ; le
+       définitif s'émet à la validation (D-962-1). Piste `ECRITURE_SAISIE` avec provenance.
+     - Cache des droits `(membre, organisation, dv)`, 60 s, borné ; `dv` projeté du jeton (D-962-5).
+     Node 24 : 358/0/3 ; `test:socle` 69/69 ; 31 + 5 mutations ; pile `grp-b` : `/health` 200.
+  - **Story suivante : STORY-963** (la Créance (1), `prospera-paiement-service`, EPIC-231 ; ne dépend de rien).
+    « Fini quand » (plan §3) : registre unique, clé `(source, sourceId)`, source `FACTURE` ; un tiers, un périmètre ;
+    idempotent. À lire avant : « ← D, ce que la bibliothèque d'encours lit de la Créance » (état absolu par clé,
+    révision croissante, `statut`, deux restants, `echeanceLe`, `perimetre`, `devise`, montants entiers en unité
+    mineure) et le piège « Deux familles de droits de tenant » (`paiement:creance:consulter` hors du jeton). D-1059
+    attend 963 et 965.
+  - **Pour STORY-964** (validation, comptabilité) : valider = `numeroter(portee, code, session)` dans la transaction de
+    la validation ; fiche 962, « Pour la suite ». `comptabilite:*` n'est toujours attribué à aucun rôle dans auth (en
+    réel, la saisie rend 403 jusque-là ; hors du jeton, avant B-967).
 
 ### Lot 2 (ouvert le 2026-11-16)
 
@@ -418,6 +427,12 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
+- **← C (2026-11-17, STORY-1006) : les référentiels habilités dans l'état publié ?** — **lue, prise en charge, pas
+  encore servie.** Le choix par défaut de C convient : garder `entitlement.changed` pour le seul champ `referentiels`
+  (D-1006-5). Le contrat d'état publié est figé (`contrat-etat-publie-v1`, ajouts facultatifs seuls, BACKWARD) : un
+  champ facultatif `referentiels` y entrera par une story de B au catalogue, à placer comme remplaçante du lot 3 ou au
+  lot suivant. Elle sera annoncée ici avant sa fusion ; C basculera alors.
+
 - **← A (2026-11-17, STORY-927) : le jeu du cabinet est dans `jeux-demonstration/cabinet-demo-togo/`** — **servie
   avant STORY-961** (plateforme #26, `dev` `3407408`). (1) La ligne `jeux-demonstration/cabinet-demo-togo/` → groupe
   A est au tableau « Qui écrit dans quel dossier » du README, avec celle du jeu de l'assurance → groupe D (lue plus
@@ -481,7 +496,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-17, STORY-962 — l'écriture en brouillard, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
-  EPIC-113 ; fiche `stories/STORY-962.md`, D-962-1 → 10). Tout est AJOUT : rien d'existant ne change de forme.
+  EPIC-113 ; fiche `stories/STORY-962.md`, D-962-1 → 10). **Fusionné le 17/11** : comptabilite #4, `ce22d81` sur
+  `dev` (annonce : stories #623). Tout est AJOUT : rien d'existant ne change de forme.
   - **Route neuve** `POST /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ecritures`, droit
     `comptabilite:ecriture:saisir` (lu par `/moi/droits`). Corps : `{ journal, dateEcriture: AAAA-MM-JJ, libelle,
     pieceId, devise: XOF|XAF, lignes: [{ compte, libelle?, debit, credit }] (2 à 500), proposition? }`. **Montants :
@@ -1025,6 +1041,14 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une variable d'environnement requise de plus fait tomber TOUTE la suite `test:socle`** (STORY-962). `AppModule`
+  valide l'environnement à son import ; les suites jouent `--runInBand` et chacune pose son environnement dans son
+  `beforeAll`. Une suite qui ne pose pas la variable neuve fait sortir le processus (`process.exit called with "1"`),
+  et les suites suivantes ne se jouent pas. Quand on ajoute une variable requise, la poser dans **chaque** suite du
+  socle (`test/socle/*.socle-spec.ts`), même avec une adresse factice.
+- **Docker Desktop s'est arrêté pendant la story** (17/11, poste B/D) : la session de groupe l'a relancé. Avant de
+  lever une pile, vérifier que `docker ps` répond.
 
 - **`series-v1` ne garantit pas l'absence de TROU** (STORY-961) : elle rend des numéros consécutifs et jamais
   réémis, mais un numéro émis par un acte qui échoue ensuite reste consommé. Pour un journal légal, passer la session

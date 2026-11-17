@@ -1101,9 +1101,13 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-962.md"
     reserved_on: "2026-11-17"
     note: >
-      EN COURS le 2026-11-17 — fiche écrite et contrat annoncé avant le code (POST et GET …/ecritures, refus
-      PIECE_DESEQUILIBREE, DATE_HORS_EXERCICE, PIECE_JUSTIFICATIVE_INCONNUE, DOCUMENTS_INDISPONIBLES… ; manifeste
-      amendé ; lu chez C : GET /dossiers/{d}/pieces?pieceId=). Lot 3 de B, n° 7 (EPIC-113). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-comptabilite-service #4 (dev ce22d81) ; contrat annoncé avant la fusion
+      (stories #623 : POST et GET …/ecritures, refus PIECE_DESEQUILIBREE, DATE_HORS_EXERCICE,
+      PIECE_JUSTIFICATIVE_INCONNUE, DOCUMENTS_INDISPONIBLES… ; manifeste amendé). Node 24 : 358 passés / 0 échec /
+      3 sautés ; test:socle 69/69 sur MongoDB 8.0 rs0 et Kafka (pièce déséquilibrée 422, date hors exercice 422,
+      pièce inconnue 422, rien d'écrit ni de numéroté ; 20 saisies concurrentes ⇒ AC-BR-000001 → 000020 ; aucun
+      numéro définitif consommé ; cache des droits : 3 saisies ⇒ 1 lecture) ; 31 + 5 mutations rouges. Pile grp-b :
+      /health 200. Numéro provisoire, définitif à la validation (D-962-1). Lot 3 de B, n° 7 (EPIC-113). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
