@@ -142,6 +142,8 @@
   - Pile `grp-d`, rejouée depuis `dev` : 16/16 (saisie, validation, `BL-2026-000001`, 403, rejeu sans numéro, plafond,
     12 validations parallèles continues, outbox vidée, faits lus sur Kafka).
   - Décisions D-1056-1 → 13 (fiche). **Verrou Docker pris à 16:01 sans attente** (B l'avait rendu), rendu à 16:36.
+- **STORY-1057** 🚧 🛡 — la recette de la démo assurance : **en cours** (annonce « ⚠ Contrats » avant le code ; fiche
+  `stories/STORY-1057.md`, section « Où j'en suis »).
 - **Suivante : STORY-1057** 🛡 la recette de la démo assurance, dans `prospera-assureur-fictif` (EPIC-204) : les
   vérifications de l'annexe E rendues jouables contre la compagnie fictive ; dépend de 1046 et 1048, faites ; la fiche
   1048 note que les routes de vérification C13 du manifeste sont à faire avec 1057.
@@ -508,6 +510,33 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-17, STORY-1057), AVANT la fusion du code — `prospera-assureur-fictif` : les cinq routes de
+  vérification C13, la recette de la démo, la boîte aux lettres fermée après un effacement.** Fiche :
+  `stories/STORY-1057.md` (D-1057-1 → 9). Rien d'existant ne change de forme : ni l'API du LC (`/lc/echange`), ni le fil
+  (lots, accusés, numéros), ni l'import et l'effacement C13, ni l'administration.
+  - **Routes neuves** (déjà déclarées au manifeste, C13 points 2 et 8), sous le seul jeton de service du **moteur**
+    (`identite: MOTEUR`, limité à l'organisation du chemin ; sinon 403 `IDENTITE_DE_SERVICE_REQUISE`,
+    `ORGANISATION_HORS_JETON`), hors de la garde du module :
+    `POST /api/v1/instance/assureur-fictif/{organisationId}/verifications/<code>`, corps ignoré, `Idempotency-Key`
+    acceptée (aucune ne modifie l'organisation). Réponse 200 au contrat **`verification-installation@1`**
+    (`{ schemaVersion: 1, code, voyant: VERT|ORANGE|ROUGE, mesure, detail, action? }`, copie à l'octet de
+    `platform-catalog-service/contrat/verification-installation.schema.json`). Codes : `assureur-fictif-absent-du-reel`,
+    `objets-de-l-annexe-c`, `numero-sans-trou`, `jeu-sans-personne-reelle`, `remise-a-zero` ; tout autre : 404
+    `VERIFICATION_INCONNUE`. **Pour B** : `INSTALLATION_SERVICES=assureur-fictif=<url>` suffit ; le LC fictif devient
+    installable par un plan dans un espace d'essai. **Dans un espace réel**, le service ne démarre pas (STORY-1048) : la
+    vérification `assureur-fictif-absent-du-reel` y est `NON_EXECUTEE` chez le moteur, jamais `VERT`.
+  - **Boîte aux lettres** : après un **effacement C13**, le LC ne relève plus la `sortie` de l'organisation ni ne dépose
+    rien dans son `entree`, jusqu'au **premier import C13 suivant** ou à une **remise à zéro**, qui écartent alors ce que
+    Prospera y avait déposé avant (journal des reçus : `IGNORE`, code neuf **`ANTERIEUR_A_L_EFFACEMENT`**, ou
+    `ANTERIEUR_A_LA_REMISE_A_ZERO`). Pour C : rejouer un parcours après un effacement demande des lots neufs, comme
+    après une remise à zéro.
+  - **La recette** : `npm run recette:demo` (dans l'image : `node dist/modules/assureur-fictif/recette/recette-demo.js`),
+    variables `RECETTE_LC_URL`, `RECETTE_ORGANISATION`, `RECETTE_JETON_LC`, `RECETTE_JETON_ADMIN`,
+    `RECETTE_JETON_MOTEUR` (ou `RECETTE_EMETTEUR_URL`, qui les fournit), `RECETTE_TAILLE` (`REDUITE` par défaut,
+    `DEMO`) ; sortie 0 si la part du LC est verte, 1 sinon. Profil compose **`recette`** (neuf) :
+    `emetteur-de-recette` (JWKS et jetons d'essai), `droit-de-recette` (le droit du module sur `entitlement.changed`),
+    `recette-demo`. Aucun port publié de plus.
 
 - **PUBLIÉ (2026-11-17, STORY-1056, prospera-ventes-service#6, `dev` 10b8ba5 → 7221f4c) ; ANNONCÉ avant la fusion
   du code (prospera-stories #654). Aucun écart avec l'annonce, sauf un code de plus : `MONTANT_HORS_BORNES` (400, une
