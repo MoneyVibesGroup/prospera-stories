@@ -1118,6 +1118,16 @@ reserved_ranges:
       ; correctif #11 (codes de type). Recevabilité lue chez assurance, décision de garantie motivée, pièces attendues
       satisfaites par ged.piece.controlee ; constats posés par commande, plus en base. Pile verte, rejouée depuis dev.
       Lot 2 de C, n° 12. NON SLOTTÉE.
+  - range: "STORY-1002"
+    status: "RÉSERVÉ"
+    owner: "Attribuer : registre des gestionnaires, charge pondérée, affectation et réaffectation motivée, prise en instruction (sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1002.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-sinistres-service#13 (dev d337ec7) ; manifeste #584. DOSSIER_AFFECTE posé par
+      l'affectation ; réaffectation motivée ; parcours déclarer → ouvrir → attribuer → instruire joué contre le LC
+      fictif (envoi de la déclaration à la main : sinistres.declaration.enregistree@1 n'existe pas, D-1002-8). Pile
+      verte, rejouée depuis dev. Lot 2 de C, n° 13. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
