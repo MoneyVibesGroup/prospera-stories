@@ -607,6 +607,15 @@ reserved_ranges:
     note: >
       🏁 DONE le 2026-11-16 — prospera-fiscal-service#51 (dev f1e21f8). Node 24 vert ; pile : /moi/droits 200 depuis fiscal,
       un écart provoqué se lit au journal, la décision ne bouge pas. Lot 2 de A, n° 15. NON SLOTTÉE.
+  - range: "STORY-920"
+    status: "RÉSERVÉ"
+    owner: "MinIO à la norme — image de Chainguard et user 0 dans le profil de recette et le compose racine du poste principal (prospera-recette)"
+    source_doc: "prospera-stories/stories/STORY-920.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-recette#24 (dev 68ef348) ; docker-compose.yml racine du poste principal modifié en
+      place (non versionné). Garde du profil 18/18, mutation rouge sur l'assertion ; pile neuve grp-a : recette zone-franche 5/5
+      (artefacts fiscaux écrits dans MinIO), mc ls les voit. Demande de B close ; C prévenu. Lot 3 de A, n° 1. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
