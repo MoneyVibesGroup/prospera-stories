@@ -178,6 +178,7 @@
   - Pile `grp-d` (branches) : ventes 25/25 (une vente du jeu saisie et validée `BL-2026-000001`), terrain 22/22 (Kodjo :
     14 visites au jour 0) ; espace réel 403. Rejeu sur images reconstruites depuis origin/dev (--no-cache, volumes neufs) : ventes 25/25 et espace réel 403 ; terrain NON rejoué depuis origin/dev (session bloquée pendant ce rejeu, verrou rendu à B pour 968 ; à rejouer à la prochaine prise du verrou).
   - Décisions D-1058-1 → 14 (fiche) ; Q-D-9 au PO ; → B. Verrou Docker attendu ~30 min (B, 967), pris à 18:32 ; rendu à B par la session de groupe après le blocage du rejeu de terrain ; aucun conteneur, volume ni réseau grp-d ne reste.
+- **STORY-1059** 🔄 🚚 — la facture juste (1) : en cours (fiche, annonce « ⚠ Contrats » ci-dessous).
 - **Suivante : STORY-1059** 🚚 la facture juste (1) (EPIC-230), dans `ventes` : une facture ouvre sa Créance dans
   `paiement` (`PUT /api/v1/creances/sources/FACTURE/{sourceId}`), de façon idempotente. **Ses dépendances sont
   fusionnées** (vérifié le 2026-11-17 sur `origin/dev` de `prospera-paiement-service`) : **B-963** (`716059c`, la Créance
@@ -606,6 +607,52 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-17, STORY-1059), avant la fusion du code — `prospera-ventes-service`, modules `facturation` et
+  `commande` : la facture émise, sa Créance ouverte dans `paiement`, trois faits neufs publiés, la Créance projetée.**
+  Fiche : `stories/STORY-1059.md` (D-1059-1 → 12). Tout est AJOUT : aucune route, aucun topic, aucun champ existants ne
+  changent. Manifestes amendés dans cette PR (C5) : `commande` publie `commande.commande.chiffree@1` et consomme
+  `facturation.facture.emise@1` ; `facturation` publie `facturation.serie.changed@1` et consomme
+  `commande.commande.chiffree@1` (les trois noms sont au catalogue `contrats-distributeur-v1`).
+  - **Routes neuves** (garde `FACTURATION_NOT_ENTITLED`, droits de la table d'accès, portée du nœud de la commande) :
+    - `POST /api/v1/facturation/factures` (`facturation:facture:emettre` ; `Idempotency-Key` exigée) : corps
+      `{ commandeId }` (une commande `VALIDEE`) ; 201 la facture `{ factureId, numero (FAC-AAAA-NNNNNN), commandeId,
+      mode: DES_LA_VALIDATION, tiersId, perimetre, devise, lignes, montantHtMineur, tva, montantTvaMineur,
+      montantTtcMineur, echeanceLe, emiseLe, bons, ouvertureDeLaCreance: { etat: OUVERTE|A_OUVRIR|REFUSEE, motif?,
+      tentatives, ouverteLe?, cleRegistre? }, rejeu }`. Rejeu (même clé, ou même commande) : la même facture, aucun
+      numéro de plus.
+    - `GET /api/v1/facturation/factures/{factureId}` (`facturation:facture:consulter`) ; hors portée ou inconnue : 404
+      `FACTURE_INCONNUE`.
+    - `POST /api/v1/facturation/factures/{factureId}/creance` (`facturation:facture:emettre`) : relance l'ouverture de
+      la Créance (même clé chez `paiement`) ; rend la facture.
+  - **Codes neufs** : `CLE_D_IDEMPOTENCE_MANQUANTE`, `COMMANDE_INCONNUE` (400/404), `COMMANDE_NON_FACTURABLE`,
+    `CONDITIONS_REGLEMENT_MANQUANTES`, `CLE_REUTILISEE_AVEC_AUTRE_CHARGE` (409), `HORS_PORTEE` (403),
+    `FACTURE_INCONNUE` (404).
+  - **Appel sortant** : `PUT {PAIEMENT_SERVICE_URL}/api/v1/creances/sources/FACTURE/{factureId}` (B-963), jeton du
+    membre qui émet, corps `{ tiersId, perimetre, montantOrigineMineur, devise, echeanceLe, libelle }`. **Pour B** :
+    aucune action ; la route est rejouée sur la même clé (relance, rejeu), comme votre fiche le permet.
+  - **Faits neufs** (outbox `socle_outbox`, topic sans `@1`, `schemaVersion: 1`, enveloppe `eventId`, `schemaVersion`,
+    `occurredAt`, `organisationId` ; schémas dans `contrat/schemas/`, au registre en **BACKWARD**) :
+    - `commande.commande.chiffree` (clé `<organisationId>:<commandeId>`), dans la transaction où la commande passe
+      `VALIDEE` : `commandeId`, `pointDeVenteId`, `noeudId`, `canal`, `perimetre`, `devise`, `lignes[{ ligne,
+      articleId, pointDeStockId, quantite, prixUnitaireHtMineur, tauxTvaPourDixMille, montantHtMineur }]`, `tva[]`,
+      `montantHtMineur`, `montantTvaMineur`, `montantTtcMineur`, `bons[{ bonId, numero, pointDeStockId }]`,
+      `valideeLe`, `rang` — **jamais la marge** (donnée privée) ;
+    - `facturation.facture.emise` (clé `<organisationId>:<factureId>`) : `factureId` (le `sourceId` de la Créance),
+      `numero`, `commandeId`, `livraisonId` (`null`), `tiersId`, `perimetre`, `devise`, `montantHtMineur`,
+      `montantTvaMineur`, `montantTtcMineur`, `echeanceLe`, `emiseLe`, `rang` — **la charge que B attend pour son
+      consommateur** (D-965-9 ; écart à la proposition : `montantTtcMineur`) ;
+    - `facturation.serie.changed` (clé `<organisationId>:factures`) : `serie`, `prefixe`, `dernier`, `epoque`.
+  - **Faits lus** (groupes neufs, depuis le début, §1.9) : `ventes-service.creances` (`paiement.creance.changed`,
+    `facturation.facture.emise`) ; `ventes-service.commandes-chiffrees` (`commande.commande.chiffree`).
+  - **Comportement qui change pour `commande`** : dès que la Créance d'une organisation est projetée, une commande à
+    crédit n'est plus refusée `ENCOURS_NON_INSTALLE` : elle est jugée sur l'encours (`PLAFOND_CREDIT_DEPASSE` au-delà) ;
+    l'engagement baisse du TTC d'une facture à la réception de sa Créance (et publie son état absolu).
+  - **Collections neuves** : `facturation_factures`, `facturation_commandes_chiffrees`,
+    `facturation_conditions_reglement` (projection future de `pdv.point-de-vente.changed@1`, remplie par personne
+    aujourd'hui), `facturation_series`, `commande_factures`. **Variables** (facultatives) : `PAIEMENT_SERVICE_URL`
+    (absente : `A_OUVRIR`, motif `PAIEMENT_NON_CONFIGURE`), `PAIEMENT_DELAI_MS`, `FACTURATION_RELANCE_CREANCE_MS`,
+    `KAFKA_CREANCES_GROUP_ID`, `KAFKA_COMMANDES_CHIFFREES_GROUP_ID`.
 
 - **PUBLIÉ (2026-11-17, STORY-1058 ; prospera-ventes-service#7 `dev` 88ee146 → 7f674ef, prospera-terrain-service#3
   `dev` cefe9b9, 068e1c0, prospera-plateforme#30 `dev` d36623b) ; ANNONCÉ avant la fusion du code (prospera-stories
