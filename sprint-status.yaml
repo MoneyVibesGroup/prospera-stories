@@ -646,6 +646,15 @@ reserved_ranges:
       🏁 DONE le 2026-11-17 — balance #153 (dev e67034a), bilan #178 (dev 557d402), fiscal #53 (dev 4ee8ed7). Quatre symboles sans
       appelant retirés de double-lecture.ts, trois copies identiques ; decisionPubliee et EtatPublieLu gardés ; tsc, lint, suites
       read-models vertes ; deux échecs de bilan (bindings, dossier-scope.invariant) PRÉEXISTANTS sur dev. Pas de Docker. Lot 3 de A, n° 3. NON SLOTTÉE.
+  - range: "STORY-923"
+    status: "RÉSERVÉ"
+    owner: "Le BFF relaie PATCH /dossiers/{id} — le collaborateur modifie l'identité d'un dossier, le 409 de version traverse par son code sans texte (prospera-admin-panel-service)"
+    source_doc: "prospera-stories/stories/STORY-923.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — admin-panel#36 (dev 18a9893). PATCH /api/v1/dossiers/:id (TENANT_ADMIN) vers dossier-service ; refus relayés par code
+      HTTP + code applicatif (liste fermée de 11), aucun texte ajouté ; OpenAPI du BFF à jour ; DOSSIER_SERVICE_URL facultative. Unitaires 533, e2e 232,
+      mutations rouges, admin-panel healthy sous Docker. Lot 3 de A, n° 4. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
