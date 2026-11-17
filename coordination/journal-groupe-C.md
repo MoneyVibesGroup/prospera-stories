@@ -69,7 +69,10 @@
     (événement `ACCUSE_POSE`) ; Node 24, sans pile (aucun câblage ne change) ; l'envoi reste à EPIC-220.
   - ~~**STORY-1008**~~ : **sinistres #18** ; l'ouverture propose la provision d'ouverture à `assurance` (estimation du
     déclarant, sinon gravité ; une seule fois ; corporel et recours exclus) ; Node 24, sans pile, aucun fait neuf.
-  - **STORY-1014** ← **suivante** : le référentiel des experts et l'agrément échu (`sinistres`, module `expertises`).
+  - ~~**STORY-1014**~~ : **prospera-stories #630** (manifeste) et **sinistres #19** ; référentiel des experts et des
+    cabinets, agrément daté et son historique, jugement de désignation qui refuse (`AGREMENT_ECHU`…) ; Node 24, sans
+    pile ; la désignation d'une mission (FR-61) appellera `ExpertsService.exigerDesignable`.
+  - **STORY-1009** ← **suivante** : demander des pièces complémentaires pendant l'instruction (`sinistres`, FR-57).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -136,6 +139,10 @@ seulement.
   `liaison-assureur.fraicheur.changed@1`) ont changé sur `main` (amendement d'AD-16, D-991-2 tranchée par
   l'utilisateur, D-993-2). Si la garde des manifestes du catalogue (`scripts/manifestes/garde.mjs`) compare aux
   sources de `prospera-stories`, elle rougira jusqu'à la recopie. C recopie de son côté ceux de ses services.
+
+- **→ B (2026-11-17) : recopier le manifeste `expertises` amendé au catalogue** — `manifestes/expertises.manifest.ts`
+  a changé sur `main` (`50883fa`, PR #630, STORY-1014 : une route de lecture seule de plus,
+  `GET /api/v1/expertises/experts/{expertId}`). Même remarque que ci-dessus. — ouverte
 
 ## Réponses aux demandes reçues
 
@@ -374,6 +381,16 @@ seulement.
   référentiel des échéances `2026.1` déclare l'événement `ACCUSE_POSE`. **Pour D (EPIC-220)** : l'accusé du dossier
   complet est prêt à envoyer dans `courriers[]` ; l'envoi, sa preuve et son archivage restent à vous.
 
+- **2026-11-17, STORY-1014 — des routes NOUVELLES dans `prospera-sinistres-service` (module `expertises`), un
+  amendement de manifeste, aucun fait sur le fil.** Sous `/api/v1/expertises/` : `POST experts`, `PUT experts/{id}`,
+  `POST experts/{id}/desactivation`, `…/reactivation`, `…/agrement`, `…/controle-de-designation` ; `GET experts`
+  (`actif`, `designablePour`) et `GET experts/{id}`. Le rôle exercé se donne (`roleExerce`) comme dans les registres de
+  1002. Refus de désignation en **409** : `AGREMENT_ECHU` (« Agrément échu le AAAA-MM-JJ », `details.echuLe`),
+  `AGREMENT_ABSENT`, `EXPERT_INACTIF`, `DOMAINE_NON_COUVERT`. **Manifeste `expertises` amendé** (`prospera-stories`
+  50883fa, PR #630) : `GET /api/v1/expertises/experts/{expertId}` en `routesLectureSeule` ; **pour B** : recopier ce
+  manifeste au catalogue (même demande que celle du 16/11). **Pour la story de désignation (FR-61)** : appeler
+  `ExpertsService.exigerDesignable(organisationId, expertId, domaine)` (exporté par `ExpertisesModule`) avant d'écrire.
+
 - **2026-11-17, STORY-1008 — aucun contrat sur le fil, un champ de plus au dossier.** Les transitions d'ouverture de
   `sinistres` publient maintenant `sinistres.provision.revisee@1` (motif `OUVERTURE`, devise `XOF`, volet et gravité ou
   estimation du déclarant, `propositionId` = `ouverture-<dossierId>`) ; même sujet et même schéma que STORY-994, rien de
@@ -408,6 +425,14 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-1014-1 → D-1014-10** (`stories/STORY-1014.md`) : un référentiel, un champ `genre` (garages et assureurs adverses
+  hors story) ; externe sans agrément daté = non désignable (échec fermé) ; la date de fin est le dernier jour valide ;
+  un agrément qui échoit après la désignation ne touche pas la mission ; règles de fiche (interne = `SALARIE`, domaines
+  paramétrés) ; « non désignable » prouvé par `exigerDesignable` + route de contrôle (409) + `designation` de chaque
+  ligne ; le gestionnaire ne voit que les désignables ; prolongation = pièce obligatoire, date qui suit l'actuelle ;
+  paramètre figé `experts-2026.1.json` ; manifeste amendé pour la fiche en lecture seule. ⚠️ Écart : aucun
+  `docker compose up` du service pour cette story (plan : « Docker : non ») ; droits fins `expertises:*` toujours à poser.
+
 - **D-1008-1 → D-1008-7** (`stories/STORY-1008.md`) : l'ouverture = transitions 1 et 2 (3 en rattrapage), listes en
   paramètre figé ; corporel et recours exclus (FR-49 contre « grille par volet » du plan) ; rôle du fait `RESP` ou
   `GEST` ; estimation avant gravité, jamais d'erreur ; devise `XOF` du paramètre ; identifiant de proposition dérivé du
@@ -473,6 +498,12 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **Un `e2e` qui charge `gardesGlobalesDeclarees()` lit `AppModule`, donc le client de Confluent : il ne se joue
+  qu'en Node 24** (« Could not locate the bindings file » sous Node 25 local). Les unitaires sans Kafka passent en local ;
+  le `e2e` se joue dans l'étage `verification`. Une mutation de test se joue en local sur les unitaires.
+- **Une mutation qui compare un littéral hors de l'union (`=== 'JAMAIS'`) ne compile pas** (TS2367) : rougir par une
+  condition toujours fausse (`Date.now() < 0 && …`) pour que la suite échoue sur l'assertion.
 
 - **Un fait relu sur le banc MongoDB porte son enveloppe d'outbox** (`eventId`, `schemaVersion`…) que le banc mémoire
   n'a pas : comparer un fait publié par `toMatchObject`, jamais par `toEqual` (vu en 1008).
