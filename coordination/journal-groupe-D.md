@@ -95,7 +95,9 @@
   (bibliothèque) et 14/14 (`ventes`). Pile `grp-d` (rejouée depuis `dev`, droits dérivés de la table d'auth) : 34/34
   appels conformes ; témoin d'`origin/dev` : `TENANT_ADMIN` sans rôle ouvrait tout. Décisions D-1053-1 → 12 (fiche).
   Verrou Docker pris à 11:05 sans attente (B l'avait rendu), rendu.
-- **Suivante : STORY-1054** 🛡 prévenir l'assuré (2), dans `prospera-notification-service` (EPIC-220) : accusé de
+- **STORY-1054** 🛡 — **en cours** (2026-11-17) : fiche écrite, annonce « ⚠ Contrats » ci-dessous avant le code ;
+  branche `MNV-1054` de `prospera-notification-service`.
+- (Rappel du plan) **STORY-1054** 🛡 prévenir l'assuré (2), dans `prospera-notification-service` (EPIC-220) : accusé de
   réception, repli dans la cloche, consentements par finalité (dépend de 1051, faite). Puis 1055 (l'import réseau par
   la Reprise) et 1056 (la commande (1)).
 
@@ -262,6 +264,16 @@
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-17) : consentements de l'assuré et accusé des messages (STORY-1054)** — **ouverte**, sans urgence
+  (rien ne casse chez vous). (1) À la déclaration, quand l'assuré accepte d'être informé du numéro de sinistre
+  officiel, appeler `POST {NOTIFICATION_URL}/api/v1/service/assurance/dossiers/{dossierId}/consentements` (jeton de
+  service de `sinistres-service`) avec `{ organisationId, finalite: "INFORMATION_DU_DOSSIER", decision: "ACCORDE",
+  versionTexte, recueilliLe, recueilliPar }` ; un retrait se pose de la même façon (`RETIRE`). Sans cela, le numéro
+  officiel reste dans la cloche de l'assuré (échec fermé) ; les autres messages ne demandent rien. (2) Pour inscrire
+  l'accusé de transmission au journal du dossier (FR-146) et la liste « à contacter autrement », lire `GET
+  …/dossiers/{dossierId}/messages?organisationId=` ; si un fait poussé vous convient mieux, dites-le : D l'ajoutera.
+  Le courrier `ACCUSE_RECEPTION` papier (votre STORY-1007) n'est pas un canal de `notification` : il reste hors
+  de 1054.
 - **→ B (2026-11-17) : un droit neuf, `commande:parametres:modifier`, au catalogue de tenant (STORY-1053, D-1053-7)** —
   **ouverte**. Changer les paramètres de `commande` (seuil de remise, score de priorité, alertes, heure de l'allocation
   du matin ; versionnés et figés à l'acte, STORY-1049) : AD-12 réserve ce geste au DG et à `DIST_ADMIN`, l'annexe B ne
@@ -391,6 +403,31 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-17, STORY-1054), avant la fusion du code — `prospera-notification-service` : prévenir l'assuré
+  (2).** Rien d'existant ne change de forme ; **ajouts** et **deux comportements** qui changent. Fiche :
+  `stories/STORY-1054.md` (D-1054-1 → 12).
+  - **Routes neuves, appel de service** (même porte que le destinataire, `sinistres-service` seul ; 401
+    `JETON_DE_SERVICE_INVALIDE`, 403 `APPELANT_HORS_PERIMETRE`) :
+    - `POST /api/v1/service/assurance/dossiers/{dossierId}/consentements`, corps `{ organisationId, finalite,
+      decision: "ACCORDE"|"RETIRE", versionTexte? (exigée pour ACCORDE), recueilliLe (ISO), recueilliPar }` ;
+      200 `{ dossierId, finalite, obligatoire, etat, decision? }` ; 422 `FINALITE_INCONNUE`, `FINALITE_OBLIGATOIRE`,
+      `VERSION_DU_TEXTE_REQUISE`, `DATE_DE_DECISION_FUTURE`, `DOSSIER_INVALIDE`. En ajout seul ; le même acte rejoué
+      n'ajoute rien.
+    - `GET /api/v1/service/assurance/dossiers/{dossierId}/consentements?organisationId=` : par finalité,
+      `{ finalite, obligatoire, etat: ACCORDE|RETIRE|INCONNU, historique[] }`.
+    - `GET /api/v1/service/assurance/dossiers/{dossierId}/messages?organisationId=` : par message, `{ evenement, cle,
+      finalite, demandeLe, voie: EXTERNE|CLOCHE, canal?, etat: EN_COURS|TRANSMIS|REMIS|LU|NON_REMIS|EN_CLOCHE,
+      transmisLe?, remisLe?, luLe?, cloche?: { motif, deposeLe, objet?, corps } }` ; jamais l'adresse.
+  - **Finalités** : `SUIVI_DU_SINISTRE` (obligatoire : huit messages, dont les relances) et `INFORMATION_DU_DOSSIER`
+    (facultative : `assurance-numero-officiel`).
+  - **Comportements qui changent** : (1) le numéro officiel **ne part plus par SMS ou e-mail sans `ACCORDE`** sur
+    `INFORMATION_DU_DOSSIER` (échec fermé) : il tombe dans la cloche de l'assuré ; (2) un message qui ne peut pas
+    partir (pas de destinataire, canal refusé, envoi en échec sans maillon restant) **tombe dans la cloche** au lieu
+    de se perdre au journal, et une relance déposée compte comme donnée (la chaîne ne s'arrête plus faute de
+    destinataire).
+  - **Collections neuves** (effacées avec l'organisation) : `assurance_messages`, `assurance_consentements`.
+  - **Aucun** topic, aucun consommateur, aucune variable d'environnement neufs.
+  - **→ C** : voir « Demandes aux autres groupes » (consentements à la déclaration, lecture de l'accusé).
 - **PUBLIÉ (2026-11-17, STORY-1053 : prospera-plateforme#28, `dev` e3727f8, étiquette `acces-distributeur-v1` ;
   ventes #5 `dev` 9e626fa ; terrain #2 5b701a8 ; recouvrement #2 2879924 ; pilotage #2 faa553a ; croissance #2
   a035e61) ; ANNONCÉ avant la fusion du code (prospera-stories #638) — les 15 rôles appliqués par les cinq services du
@@ -612,6 +649,11 @@
 
 ## Questions à l'utilisateur ou au PO
 
+- **Q-D-6 (2026-11-17, STORY-1054) — Quels messages à l'assuré demandent son consentement ?** FR-19 veut un
+  consentement par finalité ; FR-36, FR-48 et FR-18 font des étapes du dossier des messages dus. **Choix par défaut :
+  seul le numéro officiel (« assuré (information) », FR-146) est facultatif** (`INFORMATION_DU_DOSSIER`, échec
+  fermé) ; les relances de pièces restent du suivi obligatoire (D-1054-6). Alternative : rendre les relances
+  facultatives aussi (une ligne de la table des finalités).
 - **Q-D-5 (2026-11-17, STORY-1053) — Quel droit change les paramètres de `commande` ?** AD-12 nomme le DG et
   `DIST_ADMIN` ; l'annexe B n'a pas de droit pour ce geste. **Choix par défaut : un droit propre,
   `commande:parametres:modifier`, donné au DG et à `DIST_ADMIN`** (D-1053-7), comme `commande:plafond:deroger` l'a été le
