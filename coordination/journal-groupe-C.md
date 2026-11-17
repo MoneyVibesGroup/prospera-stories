@@ -50,8 +50,10 @@
      garantie, pièces attendues, courrier ; constats posés par commande ;
   23. ~~STORY-1002~~ : **sinistres #13** (manifeste #584) ; registre des gestionnaires, charge pondérée,
      affectation et réaffectation motivée ; parcours joué contre le LC fictif ;
-  24. **STORY-1003** ← **suivante** : parties au dossier, cumuls interdits, matrice de délégation datée ; puis
-     **STORY-1004** (portées par volet : D-1036 est livré, plus rien n'attend D).
+  24. ~~STORY-1003~~ : **sinistres #14** ; parties au dossier, cumuls interdits (paramètre figé), matrice de
+     délégation datée (résout `COMITE`), contrôle du niveau 1 ;
+  25. **STORY-1004** ← **suivante** : les portées par volet et l'accès par dossier (D-1036 et la suite de
+     conformité de D sont livrés ; ticket `TICKET-BACKEND-conformite-portee-reseau-sinistres.md`).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -309,6 +311,10 @@ seulement.
     d'`assurance` (`AUTO_MATERIEL`, `ACCIDENT_TRAVAIL`, `RC_GENERALE`…). Une correspondance sera nécessaire quand ces
     sinistres seront repris.
 
+- **2026-11-17, STORY-1003 — deux paramètres figés, une route.** `separation-2026.1` (actes de partie et cumuls) et
+  `delegation-2026.1` (matrice datée) ; `POST /api/v1/sinistres/dossiers/{id}/controle`. La validation (10a) d'un
+  montant au-delà du niveau 1 est refusée à tout signataire seul (403, niveau `COMITE`) jusqu'à la séance du comité.
+
 ## Questions à l'utilisateur ou au PO
 
 - **❓ 2026-11-17 — STORY-1002, question au PO : qui porte `sinistres.declaration.enregistree@1` ?** La spine (AD-16)
@@ -337,6 +343,9 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   amendés (PR « amendement AD-16 ») ; la consommation se code avec la story qui envoie C-17.
 - **D-993-1, D-993-2 — amendements d'AD-16 retenus par défaut, contestables** (même PR) : les faits `.recu` des objets
   du contrat portent leurs champs métier non personnels ; `assurance` consomme `liaison-assureur.fraicheur.changed@1`.
+- **D-1003-1 → D-1003-8** (`stories/STORY-1003.md`) : actes lus dans l'historique ; évaluer compte comme instruire ;
+  affecter puis valider permis ; émettre n'est plus interdit à l'instructeur (FR-7) ; niveau 1 signé par RESP, DT ou
+  DG ; cumul = montant évalué ; au-delà du niveau 1, aucun signataire seul ; le contrôle pose `CONTROLE_ABSENT`.
 - **D-1002-1 → D-1002-8** (`stories/STORY-1002.md`) : registre tenu par `sinistres` ; poids de type à 1, poids de
   dossier non arrondi ; capacité de 20 points ; affecter est une commande hors transition ; cible surchargée ou absente
   = motif ; `RESP` seul ; fait du dossier inchangé ; envoi de la déclaration à la main dans la preuve.
