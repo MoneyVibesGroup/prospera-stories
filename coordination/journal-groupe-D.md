@@ -65,6 +65,8 @@
   15/15 mutations ; e2e : 4 suites rouges **héritées** (identiques sur `dev` avant 1051, voir « Pièges »). Pile `grp-d`
   (rejouée depuis `dev`) : `/health` 200, deux messages sans interdit, relance trop tôt replacée, puis envoyée à J+5
   avec la suivante à J+10. Décisions D-1051-1 → 11 (fiche). Verrou Docker attendu ~1 min (B, STORY-961), rendu.
+- **STORY-1052** 🔄 🚚 — les séries hébergées : en cours (fiche, contrats annoncés avant le code ; plateforme
+  `MNV-1052`, ventes `MNV-1052`).
 - **Suivante : STORY-1052** 🚚 les séries hébergées (`ventes` et la plateforme, EPIC-224, EPIC-263), sans dépendance :
   aucun numéro perdu ni réémis après une restauration ; jeu de répliques. Puis 1053 (les rôles, B-960 fusionnée) et
   1054 (prévenir l'assuré (2) : accusé, repli dans la cloche, consentements par finalité).
@@ -196,6 +198,17 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-17) : `series-v1.1` est publiée ; la comptabilité peut rester sur `series-v1` (STORY-1052)** —
+  **information**, aucune action exigée. Votre copie (`src/vendor/series/`, `series-v1`, e0cb763) reste valide :
+  `series-v1` ne bouge pas, et garder le majeur 1 évite qu'une organisation qui installe la comptabilité et `commande`
+  soit refusée pour « majeurs différents ». Si vous recopiez `series-v1.1` (même appel `depotMongo(collection,
+  { session })`, mêmes résultats) : (1) ouvrez vos transactions de numérotation en `writeConcern: majority` (le niveau
+  ne se pose plus par opération dans une transaction ; hors transaction, l'adaptateur pose `majority` + `j` et lit en
+  `linearizable`) ; (2) `tete()` lit désormais **dans** votre transaction quand une session est passée (en v1, elle
+  lisait hors d'elle) ; (3) sans `ancre` dans les options du constructeur, rien d'autre ne change. Avec une ancre, une
+  restauration de votre base se détecte seule et le trou se déclare au lieu de réémettre un numéro de pièce : à voir
+  avec EPIC-120 (l'export du journal) si vous la voulez pour les journaux légaux.
+
 - **→ C (2026-11-17) : enregistrer le destinataire de l'assuré dans `notification` (STORY-1051)** — **ouverte**, sans
   urgence (rien ne casse chez vous). `notification` prévient l'assuré à chaque étape tirée de
   `sinistres.dossier.changed@1` (déclaration, pièces attendues et trois relances espacées de 5 jours, ouverture, numéro
@@ -289,6 +302,31 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-17, STORY-1052), avant la fusion du code — `series-v1.1` (plateforme) et les séries hébergées
+  de `prospera-ventes-service`.** Rien d'existant ne change de forme ; `series-v1` ne bouge pas.
+  - **`series-v1.1`** (`prospera-plateforme/series/src/index.ts`, version `1.1.0`, majeur 1, compatible avec
+    `series-v1`) : ajouts seulement — `new Series(depot, prefixes, { ancre, horloge })` (sans ancre : comme v1),
+    `confirmer`, `reconcilier`, `reconcilierTout`, `etat`, `lister`, `ancreMongo`, `ancreEnMemoire`, types
+    `TrouDeclare`, `EtatDAncre`, `AncreDesSeries`, `Reconciliation`, `NiveauxMongo` ; méthodes **facultatives** du
+    dépôt (`sauter`, `lister`, `enTransaction`, `assurer`, `lireEngage`) ; refus neufs `ANCRE_INDISPONIBLE`,
+    `DEPOT_INCOMPLET`, `SERIE_INSTABLE` ; `NumeroEmis.trou` n'apparaît que lors d'un saut. `emettre`, `amorcer`,
+    `tete`, `reprendreApresRestauration` gardent leur forme (la reprise déclare désormais son trou dans la série).
+    **Changements de comportement de `depotMongo`** (plus stricts) : hors transaction, `w: majority`, `j: true`,
+    `wtimeoutMS` 10 s et lecture `linearizable` (`maxTimeMS` 10 s) ; `lire` passe la session ; en transaction, la
+    série est créée **hors** de la transaction avant l'incrément (`assurer`). Étiquette `series-v1.1` posée à la
+    fusion ; empreinte dans la fiche.
+  - **`ventes`** : variables neuves, facultatives — `SERIES_ANCRE_URI` (l'ancre, base à part ; absente :
+    `SERIES_SANS_ANCRE` au journal), `MONGODB_MEMBRES_PORTEURS_MIN` (1 par défaut ; 3 en hébergé : sinon le service
+    **ne démarre pas**, `JEU_DE_REPLIQUES_INSUFFISANT`), `SERIES_EMISSIONS_DE_RECETTE` (`actif` refusé en
+    production). Collections neuves : `commande_series` (une série par organisation, `<organisationId>:bons-livraison`),
+    `commande_numeros_de_recette` ; dans la base de l'ancre, `series_ancre`. Routes neuves (garde
+    `COMMANDE_NOT_ENTITLED`, `TENANT_ADMIN` jusqu'à 1053) : `GET /api/v1/commande/series` (têtes, époques, trous
+    déclarés) ; `POST /api/v1/commande/series/{serie}/emissions-de-recette` (fermée sauf recette). Codes neufs de
+    `commande` : `SERIE_INCONNUE`, `ROUTE_DE_RECETTE_FERMEE`. Journal : `SERIE_DERIVE` (erreur, l'alerte d'AD-32) quand
+    une restauration est constatée. Compose neuf : `docker-compose.heberge.yml` (trois membres, ancre). Aucun fait
+    publié, aucun topic.
+  - **→ B** : voir « Demandes aux autres groupes » (information).
 
 - **PUBLIÉ (2026-11-17, STORY-1051, prospera-notification-service#90, `dev` 7d4b24d → b3d4388) ; ANNONCÉ avant la
   fusion du code (prospera-stories #620) — `prospera-notification-service` : prévenir l'assuré (1).** Rien d'existant
