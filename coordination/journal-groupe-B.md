@@ -306,6 +306,23 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-17, STORY-967) : habiliter l'émetteur `comptabilite-service` au hub de balance** — **ouverte**.
+  La comptabilité publie sa balance sur `balance.submitted` avec `sourceSystem: "comptabilite-service"` (le nom du
+  service : audience de son jeton, `clientId` Kafka). Sur `origin/dev` de `balance-service` (`98078b0`), le défaut de
+  `INGESTION_SOURCE_SYSTEMS` (`src/config/configuration.ts`) est `ComptabiliteServiceIMF,ComptabiliteServiceDistributeur,
+  microfinance-service` : la balance y est rejetée `SOURCE_SYSTEM_INCONNU`. Demande : ajouter `comptabilite-service`
+  à ce défaut, et à la valeur de la recette si elle en pose une. **Choix retenu par défaut** en attendant : la pile
+  de preuve de B pose la variable `INGESTION_SOURCE_SYSTEMS` (réglage de pile, aucun code de A touché) ; une
+  publication rejetée le dit (`etat: REJETEE`, `code: SOURCE_SYSTEM_INCONNU`), et se republie en N+1 une fois
+  l'émetteur habilité. Si vous préférez un autre nom, dites-le ici : il est dans une constante du service.
+- **→ A (2026-11-17, STORY-967) : la comptabilité dans la recette** — **ouverte** (annoncée par 958, D-958-8).
+  (1) `comptabilite-service` dans l'`AUTH_AUDIENCE` de l'IdP de la recette : sans elle, tout jeton est refusé (401) ;
+  (2) le service dans `docker-compose.recette.yml` : image du dépôt, port 3420, `MONGODB_URI` en jeu de répliques
+  (base `comptabilite_service`), `KAFKA_BROKERS`, `AUTH_JWKS_URI`, `AUTH_ISSUER`, `AUTH_SERVICE_URL`,
+  `DOSSIER_SERVICE_URL`, `DOCUMENT_SERVICE_URL`. **Choix retenu par défaut** : rien ne presse avant que le module
+  `comptabilite` soit au catalogue (l'état publié dit sinon `NON_INSTALLE`, D-958-3) ; la preuve de 967 se fait sur la
+  pile `grp-b` avec une surcouche locale non versionnée (audience comprise).
+
 - **→ D (2026-11-17) : D-1059 est débloquée — la Créance s'ouvre, son état se lit sur le fil, ses compteurs se
   lisent par une route** — **information** (STORY-965, paiement #123, `dev` `ad35786` ; fiche `stories/STORY-965.md`).
   - **Ouvrir** : comme annoncé par 963, `PUT {PAIEMENT}/api/v1/creances/sources/FACTURE/{factureId}` (rejouable).
@@ -636,6 +653,37 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-17, STORY-967 — la balance dérivée du grand livre, publiée au hub, annoncé AVANT la fusion du code**
+  (`prospera-comptabilite-service`, EPIC-114 ; fiche `stories/STORY-967.md`, D-967-1 → 12). Le PREMIER fait produit
+  par le service. Tout est AJOUT : rien d'existant ne change de forme.
+  - **Fait produit** : `balance.submitted` v1, le contrat d'ENTRÉE de `balance-service` (A), **inchangé** (JSON
+    Schema `docs/schemas/balance.submitted.v1.schema.json`, pas de registre). Clé `orgId`, en-têtes `eventId` et
+    `schemaVersion: "1"`, par une outbox écrite dans la transaction de la publication. `sourceSystem:
+    "comptabilite-service"` ; `balance.source: "direct"`, `balance.origine: "comptabilite"` (A-921) ; `referentiel`
+    (tag du dossier pour l'exercice) et `devise` déclarés ; `exercice` = bornes de dossier-service en ISO ; lignes aux
+    quatre colonnes en unités mineures entières : **mouvements hors à-nouveaux**, **soldes de clôture** à la date
+    d'arrêté, `niveauPreuve: "fichier"`, libellé « Compte <numéro> » ; `checksum` = sceau v2 du hub (prouvé sur ses
+    deux vecteurs) ; `metadata.periode` = date d'arrêté.
+  - **Faits consommés** : `balance.created` et `balance.rejected` (groupe `comptabilite-retours-balance`), pour porter
+    le verdict du hub sur la publication.
+  - **Routes neuves** (sous `/api/v1/dossiers/{d}/exercices/{e}`) :
+    - `POST …/balance/publications`, droit **`comptabilite:ecriture:valider`** (déjà déclaré et attribué : aucun droit
+      neuf, rien à faire dans auth), corps `{ au? }` → 201 (version neuve) ou 200 (même contenu que la dernière
+      publication non rejetée : même version, même `checksum`, rien d'envoyé) ;
+    - `GET …/balance/publications` et `GET …/balance/publications/{version}`, droit `comptabilite:dossier:consulter`,
+      au manifeste en `routesLectureSeule`.
+    - Une publication : `{ publicationId, dossierId, exerciceId, version, origine, source, sourceSystem, periode: {
+      du, au }, exercice: { debut, fin }, referentiel, devise, checksum, eventId, nombreDeComptes, totaux: {
+      mouvementDebit, mouvementCredit, soldeDebiteur, soldeCrediteur }, lignes?, etat: PUBLIEE | INGEREE | REJETEE,
+      hub: null | { balanceId?, code?, motif?, recuLe }, publieePar, publieeLe }`.
+  - **Refus nommés neufs** : 409 `BROUILLARDS_A_VALIDER` (`details.brouillards`, `au` : Q2, refus et non
+    avertissement, D-967-4), 409 `BALANCE_VIDE`, 422 `BALANCE_DESEQUILIBREE` (`details.ecartMouvements`,
+    `ecartSoldes`), 404 `PUBLICATION_INTROUVABLE`.
+  - **Base** : collections neuves `balances_publiees` et `outbox_events`. **Variables facultatives** :
+    `OUTBOX_RELAIS_INTERVALLE_MS`, `KAFKA_RETOURS_BALANCE_GROUP_ID`. **Manifeste** (`manifestes/comptabilite.manifest.ts`,
+    amendé dans cette PR) : commentaire des droits corrigé (D-971-8), `publie`, `consomme`, deux routes de lecture.
+  - **Pour A** (relecture) : `balance-service` n'a rien à changer, sauf l'allowlist (« → A » ci-dessus).
 
 - **2026-11-17, STORY-971 — dix droits neufs au catalogue de tenant d'auth, hors du jeton, annoncés AVANT la fusion
   du code** (`prospera-auth-service`, branche `MNV-971` ; fiche `stories/STORY-971.md`, D-971-1 → 8). **Fusionné le

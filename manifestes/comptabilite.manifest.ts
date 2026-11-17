@@ -19,17 +19,22 @@
 // - Q3 (D-L3-4) : la piste d'audit distingue « proposé par la machine » de « choisi par l'utilisateur » dès le socle
 //   (`provenance` de chaque entrée, STORY-958). C11 : les capacités d'IA (EPIC-117, 118) viendront de
 //   `prospera-ia-service` ; aucune n'est déclarée tant qu'elles ne sont pas dans un lot.
-// - Droits (C7) : DÉCLARÉS, pas encore attribuables. La borne du jeton bloque tout droit de tenant neuf jusqu'au
-//   retrait de `perms[]` (ADR « droits hors du jeton », étape 4). Le service les lit par `/moi/droits`, jamais dans le
-//   jeton : depuis STORY-959, toute route qui écrit déclare le sien (`comptabilite:exercice:ouvrir` pour ouvrir un
-//   exercice, `comptabilite:ecriture:saisir` pour saisir, corriger ou abandonner un brouillard depuis STORY-962 et 964,
-//   `comptabilite:ecriture:valider` pour valider et contre-passer depuis STORY-964), sinon elle est fermée. La
-//   vérification de la piste chaînée exige `comptabilite:piste:consulter` (STORY-964), le grand livre
-//   `comptabilite:dossier:consulter` (STORY-966). Pas de séparation des pouvoirs au niveau de l'acteur (D-964-7) : la
-//   piste dit qui a saisi et qui a validé. Tant qu'auth-service ne les attribue à aucun rôle, aucun geste d'écriture
-//   ne passe, ni la lecture du grand livre (403 `DROIT_INSUFFISANT`).
+// - Droits (C7) : DÉCLARÉS et ATTRIBUÉS depuis STORY-971 (auth-service, catalogue de tenant, hors du jeton) : le
+//   rôle `CAB_ASSOCIE` reçoit les neuf, `CAB_COLLABORATEUR` six (ni `exercice:ouvrir`, ni `journal:administrer`, ni
+//   `exercice:cloturer`). Le service les lit par `GET /moi/droits` (`droits ∪ droitsHorsJeton`), jamais dans le jeton.
+//   Toute route qui écrit déclare le sien (`comptabilite:exercice:ouvrir` pour ouvrir un exercice,
+//   `comptabilite:ecriture:saisir` pour saisir, corriger ou abandonner un brouillard depuis STORY-962 et 964,
+//   `comptabilite:ecriture:valider` pour valider et contre-passer depuis STORY-964, et pour publier la balance depuis
+//   STORY-967), sinon elle est fermée. La vérification de la piste chaînée exige `comptabilite:piste:consulter`
+//   (STORY-964), le grand livre et les balances publiées `comptabilite:dossier:consulter` (STORY-966, 967). Pas de
+//   séparation des pouvoirs au niveau de l'acteur (D-964-7) : la piste dit qui a saisi, qui a validé, qui a publié.
 // - Grand livre (STORY-966) : calculé à la volée sur les seules écritures VALIDÉES (contre-passations comprises, jamais
 //   un brouillard), lu dans un instantané MongoDB ; par compte et par période (bornes inclusives, dans l'exercice).
+// - Balance (STORY-967) : dérivée du grand livre (mouvements hors à-nouveaux, soldes de clôture), équilibrée, refusée
+//   tant qu'un brouillard reste dans la période (Q2) ; publiée au hub de balance sur `balance.submitted` (origine
+//   `comptabilite`, `source: direct`, émetteur `comptabilite-service`, `checksum` du hub) par une outbox écrite dans
+//   la transaction de la publication, avec son entrée de piste ; idempotente (même contenu : même version, même
+//   `checksum`) ; le verdict du hub (`balance.created`, `balance.rejected`) est lu et porté par la publication.
 // - Inaltérabilité (STORY-964) : une écriture validée porte son numéro définitif, continu et sans trou par journal et
 //   par exercice ; elle ne se modifie ni ne se supprime (409 `ECRITURE_VALIDEE_INALTERABLE`), elle se contre-passe. La
 //   piste d'audit est chaînée par empreinte (SHA-256), une chaîne par exercice, et se vérifie par une route.
@@ -42,7 +47,7 @@ export const MANIFESTE_COMPTABILITE = {
   version: '0.1.0',
 
   // La comptabilité est une source : elle n'a besoin d'aucun autre module pour enregistrer. La balance qu'elle
-  // publiera (STORY-967) est ingérée par `balance` si `balance` est installé (5e origine du hub, A-921).
+  // publie (STORY-967) est ingérée par `balance` si `balance` est installé (origine `comptabilite` du hub, A-921).
   depends: [],
 
   enrichiPar: [],
@@ -70,13 +75,15 @@ export const MANIFESTE_COMPTABILITE = {
     'comptabilite:piste:consulter', // piste d'audit et fichier des écritures (EPIC-120)
   ],
 
-  // C5 : faits publiés et consommés. Le socle ne publie encore rien.
+  // C5 : faits publiés et consommés.
   publie: [
-    'balance.submitted', // à créer (STORY-967) : la balance dérivée du grand livre, origine `comptabilite`, `checksum`
+    'balance.submitted', // STORY-967 : la balance dérivée du grand livre, origine `comptabilite`, `checksum` (outbox)
   ],
   consomme: [
     'etat-publie.changed.essai@1', // la garde (AD-24), dans l'espace d'essai
     'etat-publie.changed.reel@1', // la garde (AD-24), dans le réel
+    'balance.created', // STORY-967 : le hub a ingéré une balance publiée (apparié par checksum et version)
+    'balance.rejected', // STORY-967 : le hub a refusé une balance publiée (apparié par submittedEventId)
   ],
 
   profilCompose: 'comptabilite',
@@ -115,6 +122,8 @@ export const MANIFESTE_COMPTABILITE = {
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/piste/verification', // STORY-964 : la piste chaînée
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/grand-livre', // STORY-966 : les comptes mouvementés
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/grand-livre/comptes/{compte}', // STORY-966 : un compte
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/balance/publications', // STORY-967 : les balances publiées
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/balance/publications/{version}', // STORY-967 : une balance
   ],
 
   // C13, point 7 (chemins vus par le service). À créer.
