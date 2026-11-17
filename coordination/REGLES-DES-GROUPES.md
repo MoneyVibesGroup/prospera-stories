@@ -34,6 +34,15 @@
 - **Une série de stories s'enchaîne sans s'arrêter** : story finie ⇒ poussée ⇒ PR fusionnée ⇒ journal à jour ⇒ story
   suivante. S'il manque quelque chose pour pousser (mesure, arbitrage), le dire **tout de suite** au lieu de continuer
   en silence.
+- **Une conversation neuve par story** (décidé par l'utilisateur le 2026-11-17, en vigueur dès le lot 3, sur les
+  deux postes). Une session ne peut pas vider sa propre conversation (`/clear` est réservé à l'utilisateur) : la
+  session de groupe lance donc **chaque story dans une sous-session neuve** (outil Agent), qui ne part de rien d'autre
+  que son brief, ce fichier, le plan du lot, le journal du groupe et les fiches sur `origin/main`. La sous-session fait
+  **tout** le processus (rituel, fiche, code, preuves, PR, fusion en rebase, étiquette s'il y a lieu, PR de docs,
+  journal à jour avec la story suivante) et rend un rapport court. La session de groupe vérifie que les PR sont
+  fusionnées et que le verrou Docker est rendu, relaie le rapport, puis lance **une nouvelle** sous-session pour la
+  story suivante, sans demander. Une seule sous-session de story à la fois par groupe. Tout ce qu'une story suivante doit
+  savoir s'écrit donc dans le journal ou la fiche, jamais seulement dans la conversation.
 - Une pause demandée par l'utilisateur s'écrit dans le journal (« ⏸️ pause après STORY-xxx ») et se respecte jusqu'à
   sa reprise.
 
