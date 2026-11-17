@@ -691,6 +691,13 @@ reserved_ranges:
     note: >
       🏁 DONE le 2026-11-17 — balance#154 (dev 055b423). Lot 3 de A, n° 6. La route était déjà par dossier depuis STORY-422 et servait les versions ; 906 avait ajouté le tag. Reste : la portée déclarée
       (dossierId, referentielComptable), éprouvée sur deux dossiers d'un même cabinet. Ajout seul ; pas de Docker. NON SLOTTÉE.
+  - range: "STORY-926"
+    status: "RÉSERVÉ"
+    owner: "Chaque ligne de balance porte sa provenance (CAHIERS | FICHIER | DIRECTE | DERIVEE | NON_ENREGISTREE) et les transactions d'un compte de cahiers se lisent : route …/balance/{id}/lignes/{compte}/provenance (balance-service) ; débloque FE-075"
+    source_doc: "prospera-stories/stories/STORY-926.md"
+    reserved_on: "2026-11-17"
+    note: >
+      Lot 3 de A, n° 7. Source : tickets/TICKET-BACKEND-ligne-de-balance-sans-provenance.md. En cours. Ajouts seuls ; pas de migration ; pas de Docker. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
