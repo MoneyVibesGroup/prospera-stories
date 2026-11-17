@@ -1278,6 +1278,17 @@ reserved_ranges:
       portée réseau consommée (read-model, plus haute révision), appliquée quand reseau est installé ; hors portée =
       404 ; suite de conformité de D verte (6 cas, MongoDB) ; inscrit au registre de reseau-service,
       consommateurs-conformes VERT. Pile verte, rejouée depuis dev. Lot 2 de C, n° 15 : LOT 2 TERMINÉ. NON SLOTTÉE.
+  - range: "STORY-1005"
+    status: "RÉSERVÉ"
+    owner: "La garde lit l'état publié (etat-publie.changed.<espace>@1) au lieu d'entitlement.changed (sinistres, liaison-assureur, document-service)"
+    source_doc: "prospera-stories/stories/STORY-1005.md"
+    reserved_on: "2026-11-17"
+    note: >
+      🏁 DONE le 2026-11-17 — prospera-sinistres-service#16 (dev 4041d70), prospera-liaison-assureur-service#7
+      (dev faf4f7c), prospera-ocr-service#29 = document-service (dev da4ddf2). L'adaptateur d'EtatDesModules lit la
+      projection de l'état publié (garde de B copiée à l'octet, garde-etat-publie-v1) ; entitlement.changed retiré ;
+      LECTURE_SEULE refuse l'écriture (ABONNEMENT_EXPIRE) ; autre espace ignoré. Pile verte, rejouée depuis dev.
+      Écart : recette complète de l'Atelier (STORY-100) non rejouée. Lot 3 de C, n° 1. NON SLOTTÉE.
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
