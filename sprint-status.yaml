@@ -655,6 +655,14 @@ reserved_ranges:
       🏁 DONE le 2026-11-17 — admin-panel#36 (dev 18a9893). PATCH /api/v1/dossiers/:id (TENANT_ADMIN) vers dossier-service ; refus relayés par code
       HTTP + code applicatif (liste fermée de 11), aucun texte ajouté ; OpenAPI du BFF à jour ; DOSSIER_SERVICE_URL facultative. Unitaires 533, e2e 232,
       mutations rouges, admin-panel healthy sous Docker. Lot 3 de A, n° 4. NON SLOTTÉE.
+  - range: "STORY-924"
+    status: "RÉSERVÉ"
+    owner: "La fiche du dossier, surface 2 : GET /dossiers/{id}/completude — ce qui manque à CE dossier pour la DSF, en lecture, jamais en garde (dossier-service)"
+    source_doc: "prospera-stories/stories/STORY-924.md"
+    reserved_on: "2026-11-17"
+    note: >
+      En cours le 2026-11-17 (lot 3 de A, n° 5). Ticket « trois surfaces » : surface 2. Liste de STORY-079 (bloquants / optionnels), dirigeants bloquant
+      seulement si la forme l'exige. Ajout seul ; pas de Docker. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
