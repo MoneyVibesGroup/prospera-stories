@@ -1,6 +1,6 @@
 # STORY-968 : les comptes de tiers — clients, fournisseurs, salariés ; compte collectif ; balance âgée
 
-Status: in-progress
+Status: done
 
 **Complexité :** élevée (un registre neuf ; une règle neuve sur la saisie de 962 sans en renommer le contrat ; la
 concordance du collectif et des auxiliaires prouvée par construction ; une balance âgée datée par l'horloge de
@@ -167,11 +167,78 @@ compte collectif le tiers qu'elle concerne et son échéance, lit le grand livre
 
 ## Ce qui a été livré
 
-(à compléter à la fusion)
+Deux PR fusionnées en « Rebase and merge » le 17/11, l'annonce d'abord.
+
+| Dépôt | PR | Sur la branche |
+|---|---|---|
+| `prospera-stories` | #665 (fiche, tracker, manifeste amendé, annonce du contrat, AVANT le code) | `main` `c66177a` |
+| `prospera-comptabilite-service` | #8 | `dev` **`92a861a`** (rejoué de `84db48e` ; arbre identique) |
+
+- `src/tiers/` :
+  - `collectifs-declares.json` (`comptes-collectifs@1`) et `comptes-collectifs.ts` : la déclaration validée au
+    chargement, le collectif d'un compte, les règles d'une ligne de tiers (forme, registre, échéance) ;
+  - `balance-agee.ts` : tranches, retard, date d'arrêté, calcul (non-lettré, signé) ;
+  - `lettrages.ts` : le port `SOURCE_DES_LETTRAGES` et `AucunLettrage` ;
+  - `tiers.schema.ts` (`tiers`, en ajout seul), `registre-des-tiers.service.ts`, `auxiliaires.service.ts`,
+    `tiers.controller.ts` (deux contrôleurs), `tiers.dto.ts`, `vue.ts`, `tiers.module.ts`.
+- `src/ecritures/` : la ligne porte `tiersId` et `echeance` (schéma, DTO, vue, contrôleur) ; la saisie et la
+  correction passent par le registre des tiers ; la validation exige le tiers sur un collectif ; la contre-passation
+  garde tiers et échéance. Index `grand_livre_par_tiers`.
+- `src/grand-livre/` : le grand livre d'une sélection de lignes (un compte ou un tiers) ; `tiersId` et `echeance` sur
+  les mouvements.
+- `src/common/refus.ts` (huit refus neufs), `src/portee/portee.ts` (`porteeDuDossier`), `src/module.manifest.ts`
+  recopié à l'octet depuis `main`, README (section des tiers).
+- `test/socle/tiers.socle-spec.ts` (27 tests) ; `test/socle/outils.ts` (`poserLesTiers`, `avecTiers`) ; les suites
+  de 962 → 967 rattachent leurs lignes 411 et 401 à un tiers, sans rien changer de leurs attendus.
 
 ## Preuves
 
-(à compléter)
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive` du commit
+  poussé) : **44 suites, 639 passés, 3 sautés** ; `npm run lint`, `tsc --noEmit` et `npm run build` verts.
+- **`npm run test:socle`** (vrai MongoDB 8.0 `rs0`, vrai Kafka ; doublures HTTP d'auth, de dossier-service et de
+  document-service), sous `timeout 1500` et `--forceExit` : **177/177**, dont 27 neufs. L'horloge du service y est
+  FIXÉE (2026-05-04T10:00Z) :
+  - **registre** : quatre tiers par catégorie, lus par page et par catégorie ; la même création rejouée rend 200 sans
+    rien écrire ; dix créations concurrentes du même code ⇒ un 201, neuf 200, un document ; un autre tiers au même
+    code ⇒ 409 ; droits (403 sans `tiers:administrer`, lecture sous `dossier:consulter`) ; corps invalides 400 ;
+    tiers d'un autre dossier 404 ;
+  - **ligne de collectif sans tiers** ⇒ 422 `TIERS_REQUIS` (401, 411, 416, 421, 422), rien d'écrit, rien à la piste,
+    aucun numéro consommé (le brouillard suivant prend `VE-BR-000001`) ; tiers hors collectif, d'une autre catégorie,
+    inconnu, d'un autre dossier, échéance antérieure : 422 nommés ; la correction repasse par les mêmes règles ; un
+    brouillard d'avant 968 (posé en base sans tiers) est refusé à la validation, puis corrigé et validé ;
+  - **jeu connu** (huit pièces, dont une contre-passation et un brouillard) : échéances figées attendues ; **somme
+    des auxiliaires = collectif** pour 411, 401 et 422, `concorde`, et la route du grand livre de 966 sommée sur les
+    comptes 411… rend la même chose ; une période coupe l'ouverture ; grand livre d'un tiers par pages, curseur lié
+    au tiers ;
+  - **balance âgée juste à quatre dates d'arrêté** : au 30/06 (CAFI 59 000 en 91+ ; CKODJO 88 000 en 91+, la
+    contre-passation nette en 31-60 ; FSOTRA −136 000 en 61-90 ; SAMA −150 000 en 91+), au 15/03, au 12/02, et sans
+    date (le 04/05 de l'horloge ; un exercice passé s'arrête à sa fin) ; tranches paramétrées, filtre de catégorie,
+    `TRANCHES_INVALIDES` ;
+  - **lignes d'avant 968** (sans tiers) : auxiliaire `sansTiers`, la somme reste égale au collectif ; position sans
+    tiers dans la balance âgée ;
+  - **balance publiée inchangée** : le même jeu, saisi avec des tiers dans un dossier et posé sans tiers (comme 967
+    l'écrivait) dans un autre, publie les mêmes lignes, les mêmes totaux et le même checksum ; une ligne par compte
+    du plan, aucun champ de tiers.
+- **Mutations** (« rouge » = `Tests: … failed` et aucun `TS\d{4}`) : **unitaires 46/46** (collectif par racine,
+  tiers requis, interdit hors collectif, échéance, catégorie, sens naturel, délai, validation, déclaration ; tranches,
+  bornes, retard, date d'arrêté, lettrage, signe, regroupement par tiers et par catégorie ; registre ; concordance ;
+  contre-passation ; saisie). Cinq premières écritures rougissaient par compilation ou survivaient (catégories
+  confondues, jour inexistant postérieur) : réécrites, et deux tests ajoutés. **Socle 9/9** (lignes hors collectif
+  sommées, date d'arrêté ignorée par la base, brouillards comptés, grand livre du tiers sans filtre, registre lu hors
+  du dossier, correction sans tiers, `Date.now()` au lieu de l'horloge, validation sans contrôle, lignes sans tiers
+  oubliées).
+- **`docker compose -p grp-b --profile comptabilite up -d --build`** (volumes neufs) : conteneurs `healthy`,
+  `/api/v1/health` 200, les sept routes neuves mappées.
+- **Preuve de bout en bout, pile `grp-b`** (compose racine et surcouche locale non versionnée ; auth `913bd92`,
+  dossier-service `768a4aa` et balance-service `98078b0` reconstruits depuis `origin/dev` par `git archive`,
+  comptabilité du commit poussé) : **25/25**. Un associé réel (jeton RS256, `/moi/droits` :
+  `comptabilite:tiers:administrer`) crée un client, un fournisseur et un salarié (rejeu 200) ; une ligne 411100 sans
+  tiers ⇒ 422 `TIERS_REQUIS` ; **les quatre pièces de la preuve de 967**, saisies avec leurs tiers, sont validées ;
+  auxiliaires concordants ; grand livre du client soldé ; balance âgée au 30/06 (client net à 0 en 91+, fournisseur
+  −59 000 en 31-60) et au jour de l'horloge (17/11) ; **publication : checksum `16a6e637…`, EXACTEMENT celui de la
+  preuve de 967**, lignes au compte du plan, **ingérée** par le vrai hub (`INGEREE`, même checksum, `justifiée`,
+  trace `comptabilite-service` sans rejet) ; piste chaînée intacte. Pile descendue avec ses volumes, images de la
+  preuve supprimées, **verrou Docker rendu** (pris à 22:12 après D-1058, rendu à 22:26).
 
 ## Pour la suite
 
@@ -182,9 +249,9 @@ compte collectif le tiers qu'elle concerne et son échéance, lit le grand livre
 
 ## Definition of Done
 
-- [ ] Tests unitaires (Node 24, étage `verification`), lint des fichiers touchés, `tsc`, build.
-- [ ] `test:socle` sur un vrai MongoDB 8.0 en jeu de répliques et un vrai Kafka, sous `timeout`.
-- [ ] Mutations rouges sur l'assertion (logique neuve).
-- [ ] `docker compose up` sain (module Nest neuf).
-- [ ] Balance publiée inchangée et ingérée par le vrai hub.
-- [ ] PR de code fusionnée en rebase ; PR de docs (fiche, tracker, journal).
+- [x] Tests unitaires (Node 24, étage `verification`), lint des fichiers touchés, `tsc`, build.
+- [x] `test:socle` sur un vrai MongoDB 8.0 en jeu de répliques et un vrai Kafka, sous `timeout`.
+- [x] Mutations rouges sur l'assertion (logique neuve).
+- [x] `docker compose up` sain (module Nest neuf).
+- [x] Balance publiée inchangée et ingérée par le vrai hub.
+- [x] PR de code fusionnée en rebase ; PR de docs (fiche, tracker, journal).

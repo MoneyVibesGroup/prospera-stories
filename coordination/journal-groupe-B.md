@@ -169,10 +169,33 @@
      (`98078b0`) **ingère** la balance (origine `comptabilite`, même `checksum`, `statutPreuve: justifiée`, verdict
      `INGEREE` en 2 à 3 s), refuse une balance déséquilibrée (`ECART_EQUILIBRE`) et un `checksum` faux
      (`CONTENU_INVALIDE`). Verrou rendu.
-  - **Story suivante : STORY-968** (les comptes de tiers, `prospera-comptabilite-service`, EPIC-115 ; dépend de 964) :
-    clients, fournisseurs, salariés ; compte collectif ; balance âgée (plan §3, ligne 968). À lire avant : fiche 967
-    (« Pour la suite » : la balance publiée doit porter le **compte collectif**, le hub refuse un compte auxiliaire
-    au-delà du niveau de détail du plan). Droit déjà déclaré et attribué : `comptabilite:tiers:administrer`.
+  14. ~~STORY-968~~ : **prospera-comptabilite-service #8** (`92a861a` sur `dev`), contrat annoncé avant la fusion
+     (stories #665). Les comptes de tiers.
+     - **Registre des tiers du dossier** (clients, fournisseurs, salariés) : la comptabilité les POSSÈDE (rien de
+       tel chez dossier-service, reseau ou paiement pour le dossier d'un cabinet ; référence externe facultative,
+       jamais lue) ; figés à la création, idempotents par code (409 `TIERS_EN_DOUBLE`) (D-968-1, D-968-4).
+     - **Collectifs déclarés par référentiel** (`comptes-collectifs@1`) : SN, SMT 401, 409, 411, 416, 419, 421, 422 ;
+       CIMA 411, 414, 420, 425 ; SFD-BCEAO aucun (D-968-2).
+     - **Tiers OBLIGATOIRE sur une ligne de collectif** (champs facultatifs ajoutés `tiersId`, `echeance` ; 422
+       `TIERS_REQUIS` à la saisie, à la correction et à la validation) ; interdit ailleurs ; la contre-passation garde
+       tiers et échéance ; les lignes validées avant 968 forment l'auxiliaire `sansTiers` (D-968-3, D-968-6).
+     - **Échéance** : celle de la ligne, ou date + délai du tiers dans le sens naturel du collectif, figée (D-968-7).
+     - **Auxiliaires** : `…/comptes-collectifs/{racine}/auxiliaires` (somme par tiers et par compte, `concorde`) ;
+       grand livre d'un tiers (D-968-5). **Balance âgée** : NON_ECHU, 0-30, 31-60, 61-90, 91+ (paramétrables par
+       requête), date d'arrêté de l'horloge de référence, non-lettré par le port `SOURCE_DES_LETTRAGES` (vide en
+       968) (D-968-8, D-968-9). Aucun droit neuf (D-968-11).
+     Node 24 : 639/0/3 ; `test:socle` 177/177 (27 neufs ; la suite de 967 passe avec des tiers sur ses 411, même
+     checksum) ; 46/46 mutations unitaires, 9/9 du socle ; `docker compose up` sain. **Pile `grp-b` 25/25** : le jeu
+     de la preuve de 967, saisi avec ses tiers, publie **le même checksum `16a6e637…`** et le vrai hub l'ingère.
+     Verrou pris à 22:12 (après D-1058), rendu à 22:26.
+  - **Story suivante : STORY-969** (le lettrage, `prospera-comptabilite-service`, EPIC-116 ; dépend de 968) : manuel,
+    automatique (montant, référence, date), partiel, délettrage, écarts de règlement (plan §3, ligne 969). À lire
+    avant : fiche 968 (D-968-9 : remplacer `AucunLettrage` du port `SOURCE_DES_LETTRAGES`, une ligne citée par
+    `<ecritureId>:<rang>`, montant lettré en valeur absolue à la date d'arrêté ; une écriture validée est
+    inaltérable, le lettrage s'écrit à côté). Droit déjà déclaré et attribué : `comptabilite:lettrage:realiser`.
+  - **Demande de D reçue pendant 968** (STORY-1058, « → B, le jeu « Grossiste du Golfe » ») : à placer par la session
+    de groupe avant 969 ou en remplaçante (README de la plateforme, `INSTALLATION_SERVICES` du catalogue, comptes du
+    jeu dans auth) ; voir « Réponses aux demandes reçues ».
   - **Restent ouverts avant le réel** (demandes « → A » plus bas) : `comptabilite-service` dans
     `INGESTION_SOURCE_SYSTEMS` de balance-service (sinon toute publication est rejetée `SOURCE_SYSTEM_INCONNU`) ; la
     comptabilité dans la recette (`AUTH_AUDIENCE`, compose) ; le module `comptabilite` au catalogue (l'état publié se
@@ -583,6 +606,11 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
+- **← D (2026-11-17, STORY-1058) : le jeu « Grossiste du Golfe »** — **lue, pas encore servie** (arrivée pendant
+  STORY-968, hors de son dépôt). Trois gestes chez B : (1) la ligne du README de `prospera-plateforme` ; (2)
+  `INSTALLATION_SERVICES` du catalogue avec `commande` et `terrain` dans l'espace d'essai ; (3) les comptes du jeu sous
+  `identifiantDuJeu` dans auth (FR-21). La session de groupe les place avant STORY-969 ou en remplaçante.
+
 - **← D (2026-11-17, STORY-1053) : un droit neuf, `commande:parametres:modifier`, au catalogue de tenant** —
   **servie par STORY-971** (auth #43, `dev` `913bd92` ; annonce : stories #656). Le code est au catalogue de
   tenant, **hors du jeton** : servi par `GET /moi/droits` dans `droitsHorsJeton`, jamais dans `perms[]`. Rôles par
@@ -670,7 +698,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-17, STORY-968 — les comptes de tiers, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
-  EPIC-115 ; fiche `stories/STORY-968.md`, D-968-1 → 12). Des routes et des champs AJOUTÉS, rien de renommé ; **un
+  EPIC-115 ; fiche `stories/STORY-968.md`, D-968-1 → 12). **Fusionné le 17/11** : comptabilite #8, `92a861a` sur
+  `dev` (annonce : stories #665), sans écart au contrat annoncé. Des routes et des champs AJOUTÉS, rien de renommé ; **un
   comportement change** : une ligne sur un compte collectif sans tiers est refusée.
   - **Routes neuves** (droit de lecture `comptabilite:dossier:consulter`, au manifeste en `routesLectureSeule`) :
     - `POST /api/v1/dossiers/{d}/tiers` (**`comptabilite:tiers:administrer`**, déjà déclaré et attribué en 971 : aucun
@@ -1421,6 +1450,21 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Jest résout `./x` vers `x.json` avant `x.ts`** (`moduleFileExtensions: js, json, ts`) : un fichier de données
+  nommé comme un module TS du même dossier (`comptes-collectifs.json` à côté de `comptes-collectifs.ts`) remplace le
+  module sous jest (« … is not a function »), alors que `tsc` et Nest le lisent bien. Nommer les données autrement
+  (`collectifs-declares.json`) (STORY-968).
+- **Le contrôleur des écritures recopie les lignes champ par champ** : un champ ajouté au DTO (`tiersId`,
+  `echeance`) disparaît sans erreur s'il n'est pas recopié aussi. Les tests unitaires du service ne le voient pas ;
+  seul `test:socle` (HTTP réel) l'a vu (STORY-968).
+- **Mutations sous ts-jest** : un `return;` posé avant un `throw` rougit par compilation (TS7027,
+  `allowUnreachableCode` à faux) ; `if (objet) return` rétrécit l'objet en `never` pour la suite. Muter par une
+  condition qui ne rétrécit rien (`if (ligne > 0) return;`) ; un paramètre devenu inutile rougit aussi (`delai * 0`)
+  (STORY-968).
+- **Une ligne de collectif sans tiers est refusée depuis 968** : toute suite, script de preuve ou jeu qui saisit sur
+  401, 409, 411, 416, 419, 421, 422 (SN, SMT) doit d'abord créer un tiers (`POST /dossiers/{d}/tiers`, droit
+  `comptabilite:tiers:administrer`) et le citer. Le socle a `poserLesTiers` et `avecTiers` (`test/socle/outils.ts`).
 
 - **Le hub de balance juge le dossier sur son read-model** (STORY-967) : une balance publiée deux secondes après la
   création du dossier a été rejetée `DOSSIER_INCONNU` par le vrai balance-service (fait `dossier.*` pas encore
