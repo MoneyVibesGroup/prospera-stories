@@ -579,6 +579,35 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-17, STORY-966 — le grand livre, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
+  EPIC-114 ; fiche `stories/STORY-966.md`, D-966-1 → 11). Tout est AJOUT : rien d'existant ne change de forme.
+  - **Routes neuves** (sous `/api/v1/dossiers/{d}/exercices/{e}`), droit **`comptabilite:dossier:consulter`** (déjà
+    déclaré au manifeste depuis 958 : aucun droit neuf ; lu par `/moi/droits`, `droits ∪ droitsHorsJeton`), au
+    manifeste en `routesLectureSeule` :
+    - `GET …/grand-livre?du=&au=&devise=&apres=&limite=` → les comptes mouvementés de la période : `{ dossierId,
+      exerciceId, exercice: { debut, fin }, periode: { du, au }, devise, brouillardsDansLaPeriode, comptes: [{ compte,
+      soldeOuverture: { soldeDebiteur, soldeCrediteur }, aNouveaux: { debit, credit }, mouvements: { debit, credit },
+      soldeCloture: { soldeDebiteur, soldeCrediteur }, nombreDeLignes }], totaux: { soldeOuverture, aNouveaux,
+      mouvements, soldeCloture, equilibre }, nombreDeComptes, suivant }` (comptes en ordre de points de code, curseur =
+      dernier compte rendu, `limite` 1 → 1 000, 500 par défaut) ;
+    - `GET …/grand-livre/comptes/{compte}?du=&au=&devise=&apres=&limite=` → `{ dossierId, exerciceId, compte, exercice,
+      periode, devise, soldeOuverture, totaux: { debit, credit }, soldeCloture, nombreDeMouvements, reporte, mouvements:
+      [{ ecritureId, numero, journal, dateEcriture, ligne, libelle, libelleEcriture, pieceId, debit, credit,
+      soldeDebiteur, soldeCrediteur, contrePasse? }], suivant }` (ordre : date, journal, numéro définitif, ligne ;
+      curseur opaque ; `limite` 1 → 1 000, 200 par défaut).
+  - **Sémantique** : seules les écritures `VALIDEE` (contre-passations comprises) ; `du` et `au` inclusifs, par défaut
+    les bornes de l'exercice ; solde d'ouverture = cumul avant `du` dans l'exercice ; montants entiers en unité mineure
+    (nombres JSON), sommés exactement ; soldes en deux colonnes (`soldeDebiteur`, `soldeCrediteur`) comme le contrat
+    canonique de balance ; à-nouveaux = journaux de nature `A_NOUVEAUX` du plan arrêté.
+  - **Refus nommés neufs** : 422 `PERIODE_HORS_EXERCICE` (`details.du`, `au`, `debut`, `fin`), `PERIODE_INVALIDE`
+    (`details.du`, `au`), `MONTANT_HORS_BORNE` (`details.quoi`, `valeur` en chaîne) ; 409 `DEVISE_A_PRECISER`
+    (`details.devises`) ; 400 `COMPTE_MALFORME`, `CURSEUR_INVALIDE`. Existants : 409 `EXERCICE_TENU_AUX_CAHIERS`, 404
+    `EXERCICE_NON_OUVERT`, `EXERCICE_INTROUVABLE`, 403 `DROIT_INSUFFISANT`.
+  - **Base** : index neuf `grand_livre_par_compte` sur `ecritures`. **Manifeste** (`manifestes/comptabilite.manifest.ts`,
+    amendé dans cette PR) : les deux routes en `routesLectureSeule`, commentaire des droits et du grand livre.
+  - Aucun topic, aucun schéma au registre, aucune variable. **Pour A** (relecture) : la forme de la liste des comptes
+    est celle dont 967 dérivera `balance.submitted` (origine `comptabilite`) ; rien n'est publié par 966.
+
 - **2026-11-17, STORY-965 — la Créance (2) : `paiement.creance.changed@1`, le crédit du tiers et ses compteurs,
   annoncé AVANT la fusion du code** (`prospera-paiement-service`, EPIC-231 ; fiche `stories/STORY-965.md`,
   D-965-1 → 12). **Fusionné le 17/11** : paiement #123, `96c385f` → `ad35786` sur `dev` (annonce : stories #648).

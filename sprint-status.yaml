@@ -1210,6 +1210,16 @@ reserved_ranges:
       compteurs justes) ; Karapace : sujet paiement.creance.changed-value id 1, BACKWARD, test:schemas 7/7 ; 31
       faits lus sur le fil Kafka ; 32 mutations rouges. Pile grp-b : /health 200. Consommateur de
       facturation.facture.emise@1 reporté (charge non fixée par D). Lot 3 de B, n° 10 (EPIC-231). NON SLOTTÉE.
+  - range: "STORY-966"
+    status: "RÉSERVÉ"
+    owner: "Le grand livre — consultation par compte et par période des seules écritures VALIDÉES (contre-passations comprises, jamais un brouillard) : solde d'ouverture de la période, mouvements datés (pièce, journal, numéro définitif, libellé, débit, crédit, solde progressif), solde de clôture ; liste des comptes mouvementés et de leurs totaux (pour la balance de 967) ; calculé à la volée dans un instantané MongoDB, sommes exactes (Decimal128, bigint), pagination bornée ; droit comptabilite:dossier:consulter (prospera-comptabilite-service)"
+    source_doc: "prospera-stories/stories/STORY-966.md"
+    reserved_on: "2026-11-17"
+    note: >
+      EN COURS le 2026-11-17 — fiche écrite et contrat annoncé avant le code (GET …/grand-livre et GET
+      …/grand-livre/comptes/{compte} ; refus PERIODE_HORS_EXERCICE, PERIODE_INVALIDE, MONTANT_HORS_BORNE,
+      DEVISE_A_PRECISER, COMPTE_MALFORME, CURSEUR_INVALIDE ; index grand_livre_par_compte ; manifeste amendé).
+      Lot 3 de B, n° 11 (EPIC-114). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

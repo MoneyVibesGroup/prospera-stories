@@ -24,9 +24,12 @@
 //   jeton : depuis STORY-959, toute route qui écrit déclare le sien (`comptabilite:exercice:ouvrir` pour ouvrir un
 //   exercice, `comptabilite:ecriture:saisir` pour saisir, corriger ou abandonner un brouillard depuis STORY-962 et 964,
 //   `comptabilite:ecriture:valider` pour valider et contre-passer depuis STORY-964), sinon elle est fermée. La
-//   vérification de la piste chaînée exige `comptabilite:piste:consulter` (STORY-964). Pas de séparation des pouvoirs
-//   au niveau de l'acteur (D-964-7) : la piste dit qui a saisi et qui a validé. Tant qu'auth-service ne les attribue à
-//   aucun rôle, aucun geste d'écriture ne passe (403 `DROIT_INSUFFISANT`).
+//   vérification de la piste chaînée exige `comptabilite:piste:consulter` (STORY-964), le grand livre
+//   `comptabilite:dossier:consulter` (STORY-966). Pas de séparation des pouvoirs au niveau de l'acteur (D-964-7) : la
+//   piste dit qui a saisi et qui a validé. Tant qu'auth-service ne les attribue à aucun rôle, aucun geste d'écriture
+//   ne passe, ni la lecture du grand livre (403 `DROIT_INSUFFISANT`).
+// - Grand livre (STORY-966) : calculé à la volée sur les seules écritures VALIDÉES (contre-passations comprises, jamais
+//   un brouillard), lu dans un instantané MongoDB ; par compte et par période (bornes inclusives, dans l'exercice).
 // - Inaltérabilité (STORY-964) : une écriture validée porte son numéro définitif, continu et sans trou par journal et
 //   par exercice ; elle ne se modifie ni ne se supprime (409 `ECRITURE_VALIDEE_INALTERABLE`), elle se contre-passe. La
 //   piste d'audit est chaînée par empreinte (SHA-256), une chaîne par exercice, et se vérifie par une route.
@@ -110,6 +113,8 @@ export const MANIFESTE_COMPTABILITE = {
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ecritures', // STORY-962 : les écritures de l'exercice
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ecritures/{ecritureId}', // STORY-962 : une écriture
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/piste/verification', // STORY-964 : la piste chaînée
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/grand-livre', // STORY-966 : les comptes mouvementés
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/grand-livre/comptes/{compte}', // STORY-966 : un compte
   ],
 
   // C13, point 7 (chemins vus par le service). À créer.
