@@ -363,6 +363,27 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-17, STORY-958 — un module NEUF, `comptabilite`, annoncé AVANT la fusion du code**
+  (`prospera-comptabilite-service`, dépôt neuf). Tout est AJOUT : rien d'existant ne change.
+  - **Manifeste neuf** : `manifestes/comptabilite.manifest.ts` (code `comptabilite`, sans numéro M ; copie à l'octet
+    dans le service, `src/module.manifest.ts`). Neuf droits `comptabilite:*` **déclarés, pas encore attribuables**
+    (borne du jeton, jusqu'à l'étape 4 de l'ADR « droits hors du jeton »). Le catalogue ne le connaît pas encore : tant
+    qu'il ne l'a pas, le module se lit `NON_INSTALLE` et la garde refuse tout (fermé). Le porter au catalogue est une
+    story de B (« Pour la suite » de la fiche 958).
+  - **Topic consommé, existant** : `etat-publie.changed.reel` (ou `.essai`, selon `KAFKA_ESPACE`), groupe neuf
+    `comptabilite-etat-publie`, au contrat figé `contrat-etat-publie-v1`. **Aucun topic produit, aucun schéma au
+    registre** : le premier fait (exercice, STORY-959) sera annoncé ici avant sa fusion.
+  - **Route neuve** : `GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/referentiel` → `{ dossierId,
+    exerciceId, referentiel: SN|SMT|SFD-BCEAO|CIMA, famille: SYSCOHADA|SFD-BCEAO|CIMA, systemeComptable?, herite,
+    exercice }`. Refus nommés : 403 `EMAIL_NOT_VERIFIED`, `COMPTABILITE_NOT_ENTITLED`, `ABONNEMENT_EXPIRE`,
+    `KYC_NOT_APPROVED` (relayé) ; 404 `DOSSIER_INTROUVABLE` (hors portée compris), `EXERCICE_INTROUVABLE` ; 400
+    `IDENTIFIANT_MALFORME` ; 409 `REFERENTIEL_NON_DECIDE`, `REFERENTIEL_INCONNU` ; 503 `DOSSIER_SERVICE_INDISPONIBLE`.
+  - **Ce que le service lit chez A** (dossier-service, sans rien lui demander de changer) : `GET /dossiers/{id}`
+    (`id`, `orgId`, `referentielComptable`) et `GET /dossiers/{id}/axes?exerciceId=` (`effectifs.decision.
+    systemeComptable`, `effectifs.herite`, `effectifs.exercice`), **avec le jeton du membre** : la portée de
+    dossier-service s'applique. Un renommage de ces champs casserait la comptabilité : à annoncer à B.
+  - **Port** : 3420 (3417 et 3418 sont à l'IA commune, 3419 à `reseau-service`).
+
 - **2026-11-17, STORY-957 — aucun contrat ne change** (notification, paiement, catalogue). Mêmes topics, mêmes
   groupes, mêmes routes ; `/health` garde sa forme. Seul le texte du message `down` du contrôle Kafka est nouveau
   (« broker muet après 5000 ms (connexion ou métadonnées) »). Effet visible : Kafka arrêté, `/health` répond en
