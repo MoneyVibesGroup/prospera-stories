@@ -296,7 +296,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1049.md"
     reserved_on: "2026-11-17"
     note: >
-      🚧 EN COURS le 2026-11-17 — premier consommateur d'encours-v1. Lot D, n° 5 du lot 3 (EPIC-225). NON SLOTTÉE.
+      🏁 DONE le 2026-11-17 — prospera-ventes-service#3 (dev c8f5fd2). Premier consommateur d'encours-v1 : copie à
+      l'octet dans src/socle/encours/ (empreintes figées, dix vecteurs d'or rejoués). Paramètres de commande versionnés
+      par organisation (commande_parametres, AD-12), l'acte garde sa parametresVersion ; plafond jugé sur l'encours
+      certain sous verrou par tiers (AD-9) ; échec fermé : PLAFOND_INCONNU, CREDIT_BLOQUE, STOCK_NON_INSTALLE,
+      ENCOURS_NON_INSTALLE tant que la Créance n'est pas branchée ; squelette de la saga (AD-34). Node 24 : 339
+      unitaires, 11 e2e, 32 d'intégration sur MongoDB réel ; 12/12 mutations. Pile grp-d (rejouée depuis dev) :
+      PLAFOND_CREDIT_DEPASSE sur appel réel, acte relu avec sa version 1 après passage à la version 2. Annoncée avant le
+      code (docs #605). Lot D, n° 5 du lot 3 (EPIC-225). NON SLOTTÉE.
 
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
