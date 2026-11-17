@@ -116,3 +116,8 @@ purge des positions à 90 jours (EPIC-223, avec `terrain`).
 - 2026-11-17 : rituel fait (plan, règles, journaux A/B/C/D, fiches 960, 949, 1050, 1036, 1037, EPIC-223, annexe B) ;
   branches `MNV-1053` posées depuis `origin/dev` dans les cinq services ; verrou Docker tenu par B (STORY-963) au
   départ. Fiche, tracker et annonce « ⚠ Contrats » écrits (branche `docs-1053`).
+- 2026-11-17, 11:40 : annonce fusionnée (prospera-stories #638, `main` 200187c). Code écrit et poussé sur `MNV-1053` :
+  plateforme `cc7f1c9` (bibliothèque, 36 tests) ; ventes, terrain, recouvrement, pilotage, croissance (socle
+  `src/socle/acces/` identique). Verrou Docker pris à 11:05. Node 24 : plateforme 610 pass / 0 fail ; les cinq services
+  tsc, lint, build, unitaires, e2e, intégration verts ; mutations de la bibliothèque 16/16. Reste : mutations de
+  `ventes`, pile `grp-d`, PR et fusions, recette depuis `origin/dev`, PR de docs finale.
