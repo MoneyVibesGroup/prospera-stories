@@ -1077,6 +1077,15 @@ reserved_ranges:
       doublon ; une série par journal et par exercice ; plan arrêté malgré un changement de référentiel ; CAHIERS
       ⇒ 409) ; 23 mutations rouges. Pile grp-b : /health 200. series-v1 copiée à l'octet ; droits ∪ droitsHorsJeton.
       Demande de A servie avant (plateforme #26, étiquette jeu-cabinet-v1). Lot 3 de B, n° 6 (EPIC-112). NON SLOTTÉE.
+  - range: "STORY-962"
+    status: "RÉSERVÉ"
+    owner: "L'écriture en brouillard — une pièce équilibrée PAR PIÈCE (montants entiers en unité mineure), datée dans l'exercice ouvert et tenu au journal, justifiée par une pièce du dossier vérifiée chez document-service (pieceId) ; numéro provisoire continu par journal et par exercice, piste ECRITURE_SAISIE avec sa provenance ; cache des droits (membre, organisation, dv) (prospera-comptabilite-service)"
+    source_doc: "prospera-stories/stories/STORY-962.md"
+    reserved_on: "2026-11-17"
+    note: >
+      EN COURS le 2026-11-17 — fiche écrite et contrat annoncé avant le code (POST et GET …/ecritures, refus
+      PIECE_DESEQUILIBREE, DATE_HORS_EXERCICE, PIECE_JUSTIFICATIVE_INCONNUE, DOCUMENTS_INDISPONIBLES… ; manifeste
+      amendé ; lu chez C : GET /dossiers/{d}/pieces?pieceId=). Lot 3 de B, n° 7 (EPIC-113). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
