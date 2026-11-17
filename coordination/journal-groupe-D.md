@@ -158,7 +158,8 @@
     volumes neufs : verte, rejouée, tables identiques.
   - Décisions D-1057-1 → 9 (fiche) ; Q-D-7 et Q-D-8 au PO ; → C, → A, → B. **Verrou Docker pris à 17:10 sans attente**
     (B l'avait rendu avant 17:00), rendu à 17:45.
-- **Suivante : STORY-1058** 🚚 le jeu « Grossiste du Golfe » (EPIC-226), dans `ventes`, `terrain` et la plateforme : un
+- **STORY-1058** 🔄 🚚 — en cours : fiche écrite, annonce « ⚠ Contrats » avant le code.
+- **Suivante (fiche en cours) : STORY-1058** 🚚 le jeu « Grossiste du Golfe » (EPIC-226), dans `ventes`, `terrain` et la plateforme : un
   jeu au format `jeu-demonstration@1` (vérifié par `jeu:verifier`), avec les routes C13 d'import et d'effacement ;
   dépend de 1056, faite. Patron : STORY-1046 (le jeu de l'assurance, `jeux-demonstration/` de la plateforme, routes
   C13 sous `MOTEUR`) et STORY-1057 (les routes de vérification C13, contrat `verification-installation@1`).
@@ -558,6 +559,30 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-17, STORY-1058), avant la fusion du code. — `prospera-ventes-service` (module `commande`),
+  `prospera-terrain-service` (module `terrain`) : les routes C13 d'import et d'effacement ; `prospera-plateforme` : le
+  jeu « Grossiste du Golfe ».** Fiche : `stories/STORY-1058.md` (D-1058-1 → 14). Tout est AJOUT : aucune route, aucun
+  topic, aucun champ existants ne changent.
+  - **Routes neuves** (déjà déclarées aux manifestes, `routesInstance`), aux corps exacts de `contrats-instance-v1`
+    (copies à l'octet) : `POST /api/v1/instance/commande/{organisationId}/import` et `…/effacement`,
+    `POST /api/v1/instance/terrain/{organisationId}/import` et `…/effacement`. Import : `IMPORTE`, puis `DEJA_IMPORTE` ;
+    effacement : `EFFACE`, puis `DEJA_EFFACE`. **Seul le jeton de service du moteur** (`identite: MOTEUR`, limité à
+    l'organisation du chemin) ; **seulement dans un espace d'essai** (`INSTANCE_ESPACE=ESSAI`, variable neuve des deux
+    services, absente ⇒ réel). Refus : 401 `JETON_DE_SERVICE_INVALIDE` ; 403 `IDENTITE_DE_SERVICE_REQUISE`,
+    `ORGANISATION_HORS_JETON`, `ESPACE_REEL_REFUSE` ; 400 `IMPORT_HORS_CONTRAT`, `EFFACEMENT_HORS_CONTRAT`,
+    `ORGANISATION_INCOHERENTE` ; 409 `IDEMPOTENCE_REUTILISEE` ; 422 `SOURCE_NON_SERVIE` (`DOSSIER_INSTALLATION`),
+    `MOTIF_NON_SERVI` (`FIN_CONTRAT`), `OBJET_NON_IMPORTABLE`, `ENREGISTREMENT_INVALIDE`, `REFERENCE_INCONNUE`.
+  - **Un jeton de service sur toute autre route** de `ventes` ou de `terrain` : 403 **`IDENTITE_DE_SERVICE_REFUSEE`**
+    (code de garde neuf dans les deux services, celui du catalogue et du LC fictif).
+  - **Objets importés** : `commande` ← `point-de-vente`, `plafond`, `prix` (ils remplissent `commande_points_de_vente`,
+    `commande_plafonds`, `commande_prix`) ; `terrain` ← `commercial`, `point-de-vente`, `plan-de-journee`. Les références
+    sont des clefs du jeu, traduites par `identifiantDuJeu(organisationId, objet, clef)` (24 hex de
+    `sha256("jeu-demonstration|<org>|<objet>|<clef>")`, D-1058-4) : **pour B** (comptes du jeu, `objet = commercial`), et
+    pour les parts futures de `reseau`, `pdv`, `catalogue`, `stock`.
+  - **Jeux** : `jeux-demonstration/grossiste-golfe-petit/`, `grossiste-golfe/`, `grossiste-golfe-grand/` (deux parts,
+    `commande` puis `terrain`), étiquette `jeu-grossiste-golfe-v1`. **Pour B** : `INSTALLATION_SERVICES` doit nommer
+    `commande` (ventes) et `terrain` ; une ligne du tableau du README de la plateforme (dossiers de D).
 
 - **PUBLIÉ (2026-11-17, STORY-1057, prospera-assureur-fictif#5, `dev` 51f2639 → f9bbea5) ; ANNONCÉ avant la fusion
   du code (prospera-stories #658). Aucun écart avec l'annonce. — `prospera-assureur-fictif` : les cinq routes de
