@@ -1,6 +1,6 @@
 # STORY-1058 : le jeu « Grossiste du Golfe » — `jeu-demonstration@1` en trois tailles, routes C13 de `commande` et de `terrain`
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-226 (le jeu « Grossiste du Golfe », l'essai du prospect, la recette des deux parcours) · **Dépôts :**
 `prospera-plateforme` (dossiers `jeux-demonstration/grossiste-golfe*/`, tenus par D), `prospera-ventes-service` (module
@@ -19,12 +19,14 @@ personne) ; STORY-1053 (invariant : chaque route déclare son droit).
 ## Où en est-on (pour une reprise après interruption)
 
 - [x] Rituel, lecture (plan, règles, journaux de A, B, D, fiches 1046, 1057, 953, 927, 928, 1056), fiche.
-- [ ] Annonce « ⚠ Contrats » (PR de docs courte) fusionnée avant le code.
-- [ ] Plateforme `MNV-1058` : générateur et trois jeux, `jeu:verifier` ; PR, fusion, étiquette `jeu-grossiste-golfe-v1`.
-- [ ] `ventes` `MNV-1058` : identité de service, espace, routes C13 de `commande` ; tests ; PR, fusion.
-- [ ] `terrain` `MNV-1058` : identité de service, espace, routes C13 de `terrain` ; tests ; PR, fusion.
-- [ ] Verrou Docker (tenu par B, STORY-967, à 18:03) ; preuves Node 24 et pile `grp-d`, rejouées depuis `origin/dev`.
-- [ ] PR de docs finale.
+- [x] Annonce « ⚠ Contrats » fusionnée avant le code : prospera-stories #662 (`main` d707c71).
+- [x] Plateforme : PR #30 fusionnée en rebase (`dev` **d36623b**), étiquette **`jeu-grossiste-golfe-v1`**.
+- [x] `ventes` : PR #7 fusionnée en rebase (`dev` **88ee146 → 7f674ef**).
+- [x] `terrain` : PR #3 fusionnée en rebase (`dev` **cefe9b9, 068e1c0**).
+- [x] Verrou Docker : tenu par B (STORY-967) de 17:45 ; libre à 18:28 ; pris par D à 18:32 (attente ~30 min, passée à coder) ;
+  Verrou Docker attendu ~30 min (B, 967), pris à 18:32 ; rendu à B par la session de groupe après le blocage du rejeu de terrain ; aucun conteneur, volume ni réseau grp-d ne reste.
+- [x] Pile `grp-d` (branches), puis rejouée sur les images reconstruites depuis `origin/dev`.
+- [x] PR de docs finale.
 
 ## Ce qui doit être vrai à la fin
 
@@ -136,11 +138,87 @@ personne) ; STORY-1053 (invariant : chaque route déclare son droit).
   Sokodé…), jamais un client réel (FR-9). La gamme exacte reste à confirmer par le PO (A-5) : la taille du catalogue est
   un paramètre.
 
+## Ce qui a été livré
+
+**2026-11-17** — trois PR fusionnées en « Rebase and merge », après l'annonce #662 :
+
+- `prospera-plateforme` **#30** (`dev` `d36623b`, étiquette **`jeu-grossiste-golfe-v1`**) : `jeux-demonstration/grossiste-golfe-petit/`,
+  `grossiste-golfe/` (avec `generateur/generer.mjs` et `generer.test.mjs`), `grossiste-golfe-grand/` (données seules,
+  aucun fichier de B).
+- `prospera-ventes-service` **#7** (`dev` `88ee146`, `e35ad1a`, `1e60091`, `3cf9ffc`, `7f674ef`) :
+  - `src/socle/instance/` : contrats C13 copiés à l'octet (`ORIGINE.json`, invariant), `identifiantDuJeu`, `ServiceC13`
+    (import et effacement), `lignes.ts` (format fermé d'une ligne), refus, `@RoutesDInstance` et `exigerLeMoteur` ;
+  - identité de service (`JwtStrategy`, `EmailVerifiedGuard`, `@AdmetIdentitesDeService`), `INSTANCE_ESPACE` ;
+  - `src/modules/commande/instance/` : contrôleur, part `commande` (objets, plan d'effacement), invariant d'inventaire ;
+  - `acces.invariant.spec.ts` (exemption des routes C13), `ajv` en dépendance d'exécution, corps JSON de 10 Mo.
+- `prospera-terrain-service` **#3** (`dev` `cefe9b9`, `068e1c0`) : le même `src/socle/instance/` (identique, `diff -r`),
+  la même identité de service et le même `acces.invariant.spec.ts` ; `src/modules/terrain/jeu/` (trois collections) et
+  `instance/` (contrôleur, part `terrain`, jours relatifs, plan d'effacement).
+
+| Jeu | `commande` (point-de-vente, plafond, prix) | `terrain` (commercial, point-de-vente, plan-de-journee) | Total | `jeu.json` (sha256) |
+|---|---|---|---:|---|
+| `grossiste-golfe-petit@1.0.0` | 121, 121, 66 | 4, 120, 44 | 476 | `175e1928…5fbd` |
+| `grossiste-golfe@1.0.0` (la démo) | 602, 602, 172 | 12, 600, 132 | 2 120 | `98d7b1a8…a3f1` |
+| `grossiste-golfe-grand@1.0.0` | 2 004, 2 004, 449 | 40, 2 000, 440 | 6 937 | `7af61d26…b406` |
+
+Points de vente : 120 / 600 / 2 000, plus un client comptoir par point de stock (1 / 2 / 4). Articles : 40 / 72 / 80
+en 5 familles. Kodjo (COM-01, commercial à Bè) a 14 visites au jour 0. Mme Adjo (PDV-0001, Adidogomé) : plafond
+1 000 000, prix « ce client » du jus d'orange 1 L à 5 800.
+
+## Preuves
+
+- **Plateforme, Node 24** (`node:24-slim`, export `git archive`) : `typecheck` vert ; `npm test` **616 tests, 615 pass,
+  0 fail, 1 sauté** (la matrice du catalogue) ; `node --test …/generer.test.mjs` **25/25** ; `jeu:verifier` conforme pour
+  les trois tailles (et les jeux existants) ; deux écritures successives identiques et égales aux fichiers versionnés ;
+  empreintes figées. **Mutations du générateur : 11/11 rouges** (graine ignorée, Kodjo à 13 visites, TVA 15 %, comptoir
+  à crédit, prix « ce client » vers un point de vente absent, dix jours, positions hors commune, prix du PRD changé,
+  visites hors zone, une année figée, …).
+- **`ventes`, Node 24** (étage `verification`, export `git archive`) : `tsc` ; lint des 30 fichiers touchés (`endOfLine
+  auto`) ; build (les schémas JSON copiés dans `dist`) ; unitaires **Test Suites: 48 passed, 48 total ; Tests: 444
+  passed** (411 avant) ; e2e **2/2 suites, 24 tests** (16 avant) ; intégration sur MongoDB 8 en jeu de répliques **9/9
+  suites, 82 tests** (75 avant), dont `instance-c13.int-spec.ts` (7) : jeu réduit importé lot par lot, rejeu, 409,
+  référence absente et ligne fausse sans écriture, vente au comptoir validée `BL-2026-000001`, Mme Adjo
+  `ENCOURS_NON_INSTALLE`, effacement complet (commandes, bons, séries, faits), `DEJA_EFFACE`, réimport puis `EFFACE`,
+  témoin intact. **Mutations : 16/16 rouges sur une assertion** (espace réel admis, même clef autre lot, ligne non
+  validée, référence absente, `DEJA_EFFACE` sur des données, organisation sous une seule forme, identifiant décalé, bons
+  non effacés, outbox des autres organisations effacée, plafond sans montant, prix client sans tiers, jeton de service
+  partout, moteur d'une autre organisation, identité inconnue, contrôleur sans exemption, copie du contrat retouchée).
+- **`terrain`, Node 24** : `tsc`, lint, build ; unitaires **36/36 suites, 341 tests** ; e2e **2/2, 24** ; intégration
+  **3/3, 15**. **Mutations : 10/10** (dimanche non sauté, doublon de visite, ordre non vérifié, visites hors références,
+  jour relatif ignoré, piste non effacée, plans non effacés, latitude non bornée, zone du commercial perdue, routes C13
+  sans `MOTEUR`).
+- **Pile `grp-d`, branches** (export `git archive`, image `runtime`, MongoDB 8 en jeu de répliques, Kafka ; surcouche
+  hors dépôt : émetteur RS256 de recette qui tient le JWKS et `/moi/droits`, `INSTANCE_ESPACE=ESSAI`,
+  `COMMANDE_RESERVATION_STOCK=recette`). Un pilote joue la partie A (lots de 500, clef
+  `jeu|<org>|<code>@<version>|<module>|<objet>|<n>`, chaque réponse lue au contrat) :
+  - **`ventes`, 25/25** : jeu réduit 308 enregistrements en 1,0 s (3 appels), rejoué `DEJA_IMPORTE`, 409 ; refus
+    (utilisateur `IDENTITE_DE_SERVICE_REQUISE`, autre organisation, Reprise et moteur sur `/commande/module`
+    `IDENTITE_DE_SERVICE_REFUSEE`, `SOURCE_NON_SERVIE`, `REFERENCE_INCONNUE` sans écriture) ; **vente au comptoir de
+    Lomé Port saisie (172 000 HT, 202 960 TTC) et validée : `BL-2026-000001`, `VALIDEE`** ; Mme Adjo 5 800 « ce
+    client », 198 240 TTC, validation `ENCOURS_NON_INSTALLE` ; **jeu complet 1 376 enregistrements en 1,5 s, grande
+    taille 4 457 en 7,6 s** ; effacements `EFFACE` (330, 1 381, 4 468 : le décompte est celui des documents de
+    l'organisation, commandes, bons, séries et faits compris), rejoués `DEJA_EFFACE` au même `effaceLe` ; **témoin
+    intact** ; registre des effacements sans donnée personnelle. Service relancé avec `INSTANCE_ESPACE=REEL` : **403
+    `ESPACE_REEL_REFUSE`**, rien d'écrit.
+  - **`terrain`, 22/22** : jeu réduit 168 enregistrements, complet 744 en 1,6 s, grand 2 480 en 3,2 s ; mêmes rejeux et
+    refus ; **Kodjo (Bè) a 14 visites au jour 0 (2026-11-17), toutes vers des points de vente importés** ;
+    effacements (171, 748, 2 486), `DEJA_EFFACE`, témoin intact ; espace réel 403.
+- **Rejeu sur images reconstruites depuis origin/dev (--no-cache, volumes neufs) : ventes 25/25 et espace réel 403 ; terrain NON rejoué depuis origin/dev (session bloquée pendant ce rejeu, verrou rendu à B pour 968 ; à rejouer à la prochaine prise du verrou).**
+- `git diff --stat` = `--ignore-cr-at-eol` dans les trois dépôts ; aucun `index.ts` non suivi.
+- **Piège payé** : la surcouche de recette de `terrain` en `NODE_ENV=staging` fait tomber le service (`pino-pretty`
+  absent de l'image `runtime`) ; `ventes` lit `LOG_PRETTY`, `terrain` non. Sans rapport avec 1058 : la recette de
+  `terrain` garde `production`.
+
 ## Ce qui reste
 
 - `reseau`, `pdv`, `catalogue`, `stock`, `facturation`, `paiement` : leur part du jeu et leurs routes C13 (D-1058-1,
   D-1058-2), sous les identifiants de D-1058-4.
 - Les comptes du jeu (connexion « en tant que », FR-21) : **→ B** (auth), sous les identifiants `commercial` de D-1058-4.
+- Les routes de lecture des tournées (EPIC-233) ; l'historique de trois mois (factures, encaissements, relances) avec
+  `facturation` et `paiement` ; les camions, entrepôts et lots avec `stock` et `entrepot` (version `1.x` du jeu).
+- Le jour chômé (dimanche) est une règle de la route d'import ; les jours fériés du Togo n'y sont pas (Q-D-9).
+- Les copies du socle (portées, état publié) d'une organisation effacée restent dans `ventes` et `terrain` : à purger
+  par le socle quand tous les modules sont `DESINSTALLE` (D-1058-12).
 - Les routes C13 de `facturation`, `approvisionnement`, `entrepot` (ventes) et `conquete-objectifs` (terrain), déclarées
   aux manifestes mais pas servies : un module installé qui ne sert pas sa route d'effacement laisserait le plan
   d'effacement de l'essai `EN_COURS` (D-953-4).
