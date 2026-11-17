@@ -151,6 +151,18 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-17) : attribuer les droits `reseau:*` par auth-service (STORY-1050, pour B-960)** — **ouverte**.
+  Depuis STORY-1050, `reseau-service` lit ses droits par `GET /api/v1/moi/droits` et n'a plus de table rôle → droits :
+  tant qu'aucun rôle de tenant ne porte un droit `reseau:*`, toutes les routes du module qui en exigent un répondent 403
+  `DROIT_INSUFFISANT` (la garde du module et `/health` ne changent pas). Les cinq codes, tous vérifiés par une garde
+  (règle d'or du catalogue de tenant), 40 caractères au plus : `reseau:noeud:consulter`, `reseau:noeud:modifier`,
+  `reseau:decoupage:modifier`, `reseau:affectation:modifier`, `reseau:portee:attribuer`. Ce que la table retirée donnait
+  (D-1032-2), à reprendre dans la table d'accès de l'annexe B : `TENANT_ADMIN` les cinq, `TENANT_USER`
+  `reseau:noeud:consulter`. `reseau` ne lit pas `perms[]` : il lui suffit que `/moi/droits` rende ces codes, que la
+  borne du jeton (44) les laisse entrer dans `perms[]` ou non.
+  **→ C (2026-11-17), information** : `reseau.commercial.changed@1` se republie quand seul l'état du compte change
+  (« ⚠ Contrats ») ; `sinistres` n'en dépend pas.
+
 - **→ B (2026-11-17) : `commande` refuse toute commande à crédit tant que la Créance n'y est pas projetée
   (STORY-1049)** — **information**, aucune action avant 965. Les sources `creances` et `creditsTiers` de l'encours
   sont `ABSENTE` dans `ventes` (refus `ENCOURS_NON_INSTALLE`) jusqu'au consommateur de D-1059, qui lira
@@ -216,6 +228,33 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-17, STORY-1050) avant la fusion du code — `reseau-service` : la garde lit l'état publié, les
+  droits viennent de `/moi/droits`, le commercial est republié quand son compte change.** Aucun topic, aucune route,
+  aucun champ n'est renommé ni retiré du fil ; ce qui change, ce sont **trois comportements**.
+  - **La garde du module** lit `etat-publie.changed.<espace>@1` (contrat figé `contrat-etat-publie-v1`, groupe neuf
+    `reseau-service.etat-publie`, espace par `KAFKA_ESPACE`, `REEL` par défaut) et décide par la garde partagée
+    `garde-etat-publie-v1` copiée à l'octet. **`entitlement.changed` n'est plus lu** (groupe `reseau-service.droits`
+    arrêté). Mêmes codes : `RESEAU_NOT_ENTITLED` (aucun état reçu, état inconnu, `NON_INSTALLE`, `SUSPENDU`,
+    `ESSAI_TERMINE`, `DESINSTALLE`, `EN_INSTALLATION`), `ABONNEMENT_EXPIRE` (écriture en `LECTURE_SEULE`).
+    **Pour B (catalogue)** : une organisation dont le droit `reseau` date d'avant le moteur se lit `NON_INSTALLE` tant
+    que `migrate:reamorcage-moteur` n'a pas été joué ; la couverture lit `pdv`, `stock`, `freelance` de la même façon
+    (installé = lecture ouverte à l'utilisateur).
+  - **Les droits du module** (`reseau:noeud:consulter`, `reseau:noeud:modifier`, `reseau:decoupage:modifier`,
+    `reseau:affectation:modifier`, `reseau:portee:attribuer`) sont lus par `GET {AUTH_SERVICE_URL}/api/v1/moi/droits`
+    (B-949), avec le jeton de l'appelant ; seuls les `droits` de tenant comptent. La table rôle → droits du service est
+    retirée. Cache 60 s au plus, relu sur un `dv` plus récent, invalidé par `identity.droits.changed@1` (groupe
+    `reseau-service.droits-membres`). **Code neuf** : 503 `DROITS_INDISPONIBLES` (auth injoignable, délai de 2 s,
+    réponse illisible). **Variable neuve, requise** : `AUTH_SERVICE_URL`. ⚠️ **En réel, toute route du module qui exige
+    un droit répond 403 `DROIT_INSUFFISANT` jusqu'à ce qu'auth-service attribue les droits `reseau:*`** (B-960 ; voir
+    « → B » plus haut), comme la comptabilité (D-959-4).
+  - **`reseau.commercial.changed@1`** est désormais **republié quand seul l'état du compte change** (`etatDuCompte` :
+    invitation, acceptation, suspension, appartenance) **ou le compte lié** (`userId`), à la réception du fait
+    `identity.*`. Même topic, même clé (`organisationId`), même charge, même `rang` (il suit les écritures du commercial,
+    comme pour une affectation). Un consommateur reçoit donc des faits de plus, en état absolu ; il garde le plus
+    récent par `commercialId` (`occurredAt`). Consommateur aujourd'hui : aucun (pdv, demain) ; **→ C pour
+    information** : `sinistres` ne lit que `reseau.portee.changed@1`, qui ne change pas (la suite
+    `conformite-portee-reseau-v1` passe toujours).
 
 - **PUBLIÉ (2026-11-17, STORY-1049, prospera-ventes-service#3, `dev` c8f5fd2) ; ANNONCÉ avant la fusion du code
   (prospera-stories #605) — `prospera-ventes-service`, module `commande` : les garde-fous.** Aucun fait publié, aucun topic, aucun contrat existant ne change. Ajouts seulement, **sans consommateur
