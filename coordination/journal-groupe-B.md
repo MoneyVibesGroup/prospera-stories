@@ -80,7 +80,9 @@
        définitif s'émet à la validation (D-962-1). Piste `ECRITURE_SAISIE` avec provenance.
      - Cache des droits `(membre, organisation, dv)`, 60 s, borné ; `dv` projeté du jeton (D-962-5).
      Node 24 : 358/0/3 ; `test:socle` 69/69 ; 31 + 5 mutations ; pile `grp-b` : `/health` 200.
-  - **Story suivante : STORY-963** (la Créance (1), `prospera-paiement-service`, EPIC-231 ; ne dépend de rien).
+  8. **STORY-963 en cours** (17/11) : la Créance (1). Fiche écrite, contrat annoncé avant le code (« ⚠ Contrats ») ;
+     « → D » : comment ouvrir une Créance (pour D-1059).
+  - **Story en cours : STORY-963** (la Créance (1), `prospera-paiement-service`, EPIC-231 ; ne dépend de rien).
     « Fini quand » (plan §3) : registre unique, clé `(source, sourceId)`, source `FACTURE` ; un tiers, un périmètre ;
     idempotent. À lire avant : « ← D, ce que la bibliothèque d'encours lit de la Créance » (état absolu par clé,
     révision croissante, `statut`, deux restants, `echeanceLe`, `perimetre`, `devise`, montants entiers en unité
@@ -232,6 +234,35 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   membre qui reçoit le rôle par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif).
 
 ## Demandes aux autres groupes
+
+- **→ D (2026-11-17) : comment ouvrir une Créance dans `paiement` (pour D-1059)** — **information** (STORY-963, fiche
+  `stories/STORY-963.md`, D-963-1 → 12). Lu dans votre journal et dans le manifeste `facturation` de `ventes` : la
+  facture ouvre sa Créance par `facturation.facture.emise@1` (AD-7), et vous lirez `paiement.creance.changed@1` avec
+  `creanceId = <source>:<sourceId>` (K-7). Voici ce qui est servi, et ce qui viendra.
+  - **Par la route, dès aujourd'hui** : `PUT {PAIEMENT}/api/v1/creances/sources/FACTURE/{factureId}`, avec le jeton du
+    membre qui émet la facture. Droit `paiement:demande:emettre`, **dans le jeton** : COMPTABLE, DAF et FREELANCE (les
+    trois `facturation:facture:emettre` de l'annexe B) l'ont. Corps : `{ tiersId, perimetre: "SOCIETE" |
+    "FREELANCE:<id>", montantOrigineMineur, devise, echeanceLe: "AAAA-MM-JJ", libelle, livraisonId? }`. Le montant est
+    le TTC, en entier d'unité mineure ; l'échéance est celle figée à l'émission ; le libellé est le numéro d'affichage.
+  - **Les réponses** :
+    - 201 à la naissance, 200 au rejeu, sans rien écrire. La route se rejoue donc à volonté (relais d'outbox, relance
+      après un délai dépassé).
+    - 409 `CREANCE_SOURCE_EN_CONFLIT` (`details.champ`) si la même facture revient avec un autre tiers ou un autre
+      périmètre. Un autre montant n'est pas refusé : c'est une anomalie tracée, et le montant d'origine reste.
+    - 409 `ECRITURE_CONCURRENTE` : une ouverture concurrente de la même facture ; il suffit de rejouer.
+    - 422 `SOURCE_DE_CREANCE_NON_SERVIE` pour `RELEVE_VENTE_COMPTE`, tant que le relevé n'a pas de fait.
+    - 403 `PAIEMENT_NOT_ENTITLED` si l'organisation n'a pas le module `paiement`.
+  - **Le porteur du `sourceId`** : l'identifiant **interne** de la facture (votre `factureId`, l'identifiant stable de
+    l'objet), jamais son numéro `FAC-…`. Forme `[A-Za-z0-9_-]`, 1 à 64 caractères (un ObjectId ou un UUID). Deux
+    identifiants qui ne diffèrent que par la casse sont refusés, jamais fusionnés.
+  - **Par le fait, le chemin d'AD-7** : `paiement` consommera `facturation.facture.emise@1` avec la même écriture
+    (`OuvrirLaCreance`), dès que vous en aurez fixé la charge. Champs proposés : `organisationId`, `factureId`
+    (le `sourceId`), `tiersId`, `perimetre`, `montantTTCMineur`, `devise`, `echeanceLe`, `numero`, `livraisonId`.
+    Dites ici vos noms de champs : B écrit le consommateur en 965 s'ils sont fixés avant, sinon à la story suivante.
+    Les deux chemins ouvrent **la même** Créance : 1059 peut appeler la route, et publier le fait en plus.
+  - **Pour relire, d'ici 965** : `GET {PAIEMENT}/api/v1/creances?source=FACTURE&sourceId=<factureId>` (même droit),
+    ou le fait `paiement.creance.materialisee` (avec `source`, `sourceId`, `tiersId`, `perimetre`, `livraisonId`).
+    `paiement.creance.changed@1` (état absolu, `revision`, deux restants, `echeanceLe`) vient avec STORY-965.
 
 - **→ C (2026-11-17) : la comptabilité lit `GET /api/v1/dossiers/{dossierId}/pieces?pieceId=` de `document-service`**
   — **information**, rien n'est demandé (STORY-962, D-962-4). À la saisie d'une écriture, la comptabilité vérifie la
@@ -494,6 +525,25 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-17, STORY-963 — la Créance (1), annoncé AVANT la fusion du code** (`prospera-paiement-service`, EPIC-231 ;
+  fiche `stories/STORY-963.md`, D-963-1 → 12). Tout est AJOUT : rien d'existant ne change de forme.
+  - **Route neuve** `PUT /api/v1/creances/sources/{source}/{sourceId}`, droit `paiement:demande:emettre` (dans le
+    jeton), garde du module (pas une surface plateforme). Corps : `{ tiersId, perimetre: SOCIETE | FREELANCE:<id>,
+    montantOrigineMineur (entier > 0, unité mineure), devise, echeanceLe: AAAA-MM-JJ, libelle, livraisonId?, payeur? }`.
+    201 (née) ou 200 (rejeu, rien d'écrit) → la vue d'une créance. Clé : `(source, sourceId)`, `sourceId` =
+    identifiant interne `[A-Za-z0-9_-]{1,64}` ; l'`id` de la créance est `<orgId>|FACTURATION|FACTURE:<SOURCEID>`.
+  - **Refus nommés neufs** : 422 `SOURCE_DE_CREANCE_NON_SERVIE` (`details.source` ; `RELEVE_VENTE_COMPTE`,
+    `ECHEANCE_DE_PRET`, `PRIME`) ; 409 `CREANCE_SOURCE_EN_CONFLIT` (`details.champ` : `source`, `sourceId`, `tiersId`,
+    `perimetre`). `CREANCE_INVALIDE` (400) couvre aussi `source`, `sourceId`, `tiersId`, `perimetre`, `livraisonId`,
+    `echeanceLe`, `rattachement`.
+  - **`GET /api/v1/creances`** : filtres facultatifs `source`, `sourceId`, `tiersId`, `perimetre` (égalités exactes).
+  - **Vue d'une créance** (toutes les routes qui la rendent) : champs facultatifs `source`, `sourceId`, `tiersId`,
+    `perimetre`, `livraisonId`, absents pour une créance sans source.
+  - **`paiement.creance.materialisee`** (topic JSON, sans registre) : mêmes champs facultatifs, ajoutés quand la Créance
+    a une source. La piste (`CREANCE_MATERIALISEE`) les reçoit aussi.
+  - Aucun topic neuf, aucun schéma au registre, aucune variable, aucun amendement du manifeste (la route de lecture
+    `GET /api/v1/creances` y est déjà). `paiement.creance.changed@1` : STORY-965.
 
 - **2026-11-17, STORY-962 — l'écriture en brouillard, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
   EPIC-113 ; fiche `stories/STORY-962.md`, D-962-1 → 10). **Fusionné le 17/11** : comptabilite #4, `ce22d81` sur
