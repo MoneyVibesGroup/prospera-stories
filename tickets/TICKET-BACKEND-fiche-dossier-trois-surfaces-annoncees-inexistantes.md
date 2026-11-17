@@ -3,7 +3,7 @@
 **Cible :** `dossier-service` (:3009)
 **Ouvert par :** **FE-061** (barry thierno alhassane, 2026-08-19) — constat d'**intégration**, vérifié sur l'OpenAPI **vivant** puis dans le contrôleur sur `origin/dev`
 **Priorité :** Should — FE-061 est livrée **sans** ces trois volets ; ils ne bloquent pas la fiche, ils la privent de sa moitié « travail »
-**État :** 🟡 en partie fermé le 2026-11-16 — surfaces **1** (`PATCH /dossiers/{id}`, journalisé, `version` exigée, 409 si périmée) et **3** (`GET …/journal?type=MANDAT_ATTESTE`) livrées par **STORY-916** (dossier-service #53) ; surface **2** (`/completude`) **ouverte**.
+**État :** ✅ **FERMÉ le 2026-11-17** — surfaces **1** (`PATCH /dossiers/{id}`) et **3** (`GET …/journal?type=MANDAT_ATTESTE`) livrées par **STORY-916** (dossier-service #53) ; surface **2** (`GET /dossiers/{id}/completude`) livrée par **STORY-924** (dossier-service #55, dev `768a4aa`). Reste, hors ticket : le relais BFF de la complétude.
 
 ---
 

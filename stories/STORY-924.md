@@ -1,6 +1,6 @@
 # STORY-924 : la fiche du dossier, surface 2 — la complétude (`GET /dossiers/{id}/completude`)
 
-Status: in-progress
+Status: done
 
 **Complexité :** faible (une fonction pure, une route de lecture, un DTO)
 
@@ -85,7 +85,18 @@ livrées par STORY-916, dossier-service #53)
 
 ## Definition of Done
 
-- [ ] `tsc`/build, unitaires et e2e concernés (par chemin), lint des fichiers touchés.
-- [ ] Mutation rouge sur l'assertion.
-- [ ] PR code fusionnée (rebase), SHA sur `dev` noté.
-- [ ] PR de docs : tracker `done`, ticket fermé, journal (924 DONE, suite 925).
+- [x] `tsc`/build, unitaires et e2e concernés (par chemin), lint des fichiers touchés.
+- [x] Mutation rouge sur l'assertion.
+- [x] PR code fusionnée (rebase), SHA sur `dev` noté.
+- [x] PR de docs : tracker `done`, ticket fermé, journal (924 DONE, suite 925).
+
+## Livraison (2026-11-17)
+
+DONE : dossier-service #55 (dev `768a4aa`). `GET /api/v1/dossiers/{id}/completude`, fonction pure `calculerCompletudeDossier` (`completude.util.ts`), DTO
+`CompletudeDossierResponseDto`. `tsc` vert ; unitaires des deux suites touchées 49/49 (dont 23 pour la complétude) ; e2e `dossiers.e2e-spec.ts` 157/157 (10 neufs :
+complet, partiel sans NIF avec manquants nommés, prêt sans être complet, EI, archivé, autre cabinet 404, collaborateur non affecté 404 puis affecté 200,
+identifiant malformé 404, sans jeton 401, aucune écriture) ; lint des fichiers touchés propre.
+Mutations rouges sur l'assertion : (1) `nifSociete` retiré des bloquants ⇒ 2 unitaires + 1 e2e rouges ; (2) `dirigeants` jamais bloquant ⇒ 5 unitaires rouges (l'e2e ne peut pas
+l'éprouver : la création refuse déjà une SARL sans dirigeant, DIRIGEANT_REQUIS).
+Docker non requis : un contrôleur existant gagne une route, aucun module, provider, dépendance ni Dockerfile.
+Suite à prévoir : relais BFF (`GET /api/v1/dossiers/{id}/completude`, lecture, tout membre) avant l'onglet de la fiche dossier côté D.
