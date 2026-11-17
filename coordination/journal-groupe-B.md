@@ -385,6 +385,14 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
+- **← A (2026-11-17, STORY-927) : le jeu du cabinet est dans `jeux-demonstration/cabinet-demo-togo/`** — **servie
+  avant STORY-961** (plateforme #26, `dev` `3407408`). (1) La ligne `jeux-demonstration/cabinet-demo-togo/` → groupe
+  A est au tableau « Qui écrit dans quel dossier » du README, avec celle du jeu de l'assurance → groupe D (lue plus
+  bas). (2) L'étiquette **`jeu-cabinet-v1`** est posée par B sur `e958bd6` (le commit du jeu, comme `jeu-assurance-v1`
+  sur celui de D) et poussée : `generateur.source` du `jeu.json` se résout. (3) Le catalogue copiera le dossier
+  entier à `JEUX_DEMONSTRATION_DIR` (le vérificateur ignore `generateur/`), à la story qui branchera le jeu du
+  cabinet sur l'essai.
+
 - **← D (2026-11-17, STORY-1050) : attribuer les droits `reseau:*` par auth-service** — **servie par STORY-960**
   (auth #42, `dev` `8d48710`). Les cinq `reseau:*` sont dans la table des 15 rôles (détail dans « → D » plus haut),
   servis par `/moi/droits` dans `droitsHorsJeton`. **Écart à la demande** : la table rôle socle (`TENANT_ADMIN` les
@@ -438,6 +446,24 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-17, STORY-961 — le plan de journaux, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
+  EPIC-112 ; fiche `stories/STORY-961.md`, D-961-1 → 7). Tout est AJOUT : rien d'existant ne change de forme.
+  - **Route neuve** : `GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/journaux` → `{ dossierId, exerciceId,
+    referentiel, versionDuPlan, arreteLe, journaux: [{ code, libelle, nature, dernierNumero }] }`. Ouverte à tout
+    membre dont la portée couvre le dossier ; au manifeste en `routesLectureSeule`.
+  - **Le plan** est déclaré par référentiel (`plans-de-journaux@1`, donnée du service : SN, SMT, SFD-BCEAO, CIMA ;
+    six natures `ACHATS`, `VENTES`, `BANQUE`, `CAISSE`, `OPERATIONS_DIVERSES`, `A_NOUVEAUX` ; codes `AC`, `VE`, `BQ`,
+    `CA`, `OD`, `AN`). Il est arrêté pour l'exercice à son ouverture au JOURNAL, dans la transaction de la tenue.
+  - **Refus nommés neufs** : 409 `EXERCICE_TENU_AUX_CAHIERS` (`details.tenue`), 409 `PLAN_DE_JOURNAUX_ABSENT`,
+    404 `JOURNAL_INCONNU` (numérotation, pour 962).
+  - **Piste** : l'entrée `EXERCICE_OUVERT` d'une ouverture au journal reçoit `donnees.referentiel` et
+    `donnees.planDeJournaux` (`<référentiel>@<version>`).
+  - **Numérotation** : `series-v1` de `prospera-plateforme` (dossier de D), copiée à l'octet, une série par journal et
+    par exercice, numéro émis dans la transaction de l'acte. Aucune route ne l'expose avant 962.
+  - **Lu chez B (auth)** : `droitsHorsJeton` de `GET /moi/droits` (contrat 1.1.0) ; la garde lit désormais
+    `droits ∪ droitsHorsJeton`.
+  - Aucun topic, aucun schéma au registre.
 
 - **2026-11-17, STORY-960 — les 15 rôles du distributeur dans auth, annoncé AVANT la fusion du code**
   (`prospera-auth-service`, EPIC-223 ; fiche `stories/STORY-960.md`, D-960-1 → 12). **Fusionné le 17/11** : auth #42,
