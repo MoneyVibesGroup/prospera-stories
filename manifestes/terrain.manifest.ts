@@ -126,6 +126,11 @@ export const MANIFESTE_TERRAIN = {
     // ⚠️ Le PRD microfinance (A.9 C7) écrit `terrain:appareil:declarer-perdu` et le dit « format conforme » :
     // c'est faux, l'action ne prend pas de tiret (`[a-z]+`, même dans la forme élargie de C7). Forme retenue :
     'terrain:appareil-perdu:declarer', // [proposition, correction du format] RA ; ADMIN_IMF, sans lecture du métier (FR-204)
+    // Droit propre, STORY-1060 (D-1060-6 ; absent de l'annexe B.2, comme commande:parametres:modifier) : changer les
+    // paramètres de terrain, versionnés et figés au plan (AD-12) — d'abord le calendrier de l'organisation (jours
+    // travaillés, jours fériés) qui date les plans de journée (Q-D-9 renversée). DG et DIST_ADMIN par défaut, demandés à
+    // auth-service (hors du jeton). Lire les paramètres ne demande que l'un des droits du module.
+    'terrain:parametres:modifier',
   ],
 
   // C5.

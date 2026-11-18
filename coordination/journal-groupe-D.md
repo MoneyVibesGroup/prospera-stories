@@ -5,6 +5,16 @@
 
 ## État
 
+### Lot 4 (ouvert le 2026-11-18)
+
+- **Plan** : `PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §4 : **STORY-1060 → 1064**, le distributeur au backend (cinq stories ;
+  aucune pile prévue, §1.5 reste) ; une sous-session neuve par story (`REGLES-DES-GROUPES.md` §1.2). Même poste que B, qui
+  tient ce lot aussi le backend du cabinet (dix stories, cinq avec pile) : même verrou Docker. **Lot 4 constaté au rituel
+  de 1060** (le 2026-11-18) : aucune demande neuve à D dans les journaux de B et C ; celle de A (réponses de
+  l'utilisateur à Q-D-1 → 10) est lue (« Réponses aux demandes reçues »).
+- **STORY-1060** 🚧 🚚 — un calendrier propre à chaque organisation (Q-D-9 renversée par l'utilisateur) : annonce
+  « ⚠ Contrats » avant le code (cette PR, manifeste `terrain` amendé).
+
 ### Lot 3 (ouvert le 2026-11-17)
 
 - **Plan** : `PLAN-4-SESSIONS-LOT-3-2026-11-17.md` §4 : **STORY-1045 → 1059**, distributeur 🚚 et assurance 🛡 en
@@ -505,6 +515,16 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-18) : un droit neuf, `terrain:parametres:modifier`, au catalogue de tenant (STORY-1060, D-1060-6)** —
+  **ouverte**, sans urgence (aucun écran ne l'appelle ; l'essai prend le calendrier par défaut). Changer le calendrier de
+  l'organisation (jours travaillés, jours fériés), paramètre versionné de `terrain` (AD-12 : réservé au DG et à
+  `DIST_ADMIN`) ; l'annexe B ne nomme aucun droit pour ce geste. Demandé, comme `commande:parametres:modifier` (B-971) :
+  le code au catalogue, **hors du jeton** (`droitsHorsJeton`), rôles par défaut **`DIST_DG` et `DIST_ADMIN`** ; il est
+  déclaré au manifeste `terrain` (cette PR). Jusque-là, `PUT /api/v1/terrain/parametres` répond 403 à tous. Les rôles de
+  l'IMF (le module `terrain` est partagé) viendront avec la story qui l'emploie. **Information** : `contrats/distributeur/`
+  porte une troisième bibliothèque, `src/calendrier.ts` (`calendrier-distributeur-v1`) ; si vous tenez le README de la
+  plateforme, la ligne `contrats/distributeur/` peut le dire.
+
 - **→ B (2026-11-17) : consommer `facturation.facture.emise@1` dans `paiement` (STORY-1059 ; votre D-965-9)** —
   **ouverte**, sans urgence (la route reste le chemin de 1059). La charge est fixée et **publiée** (`ventes` `dev`
   1c1e944, schéma `facturation.facture.emise-value` en BACKWARD, topic `facturation.facture.emise`, clé
@@ -676,6 +696,12 @@
 
 ## Réponses aux demandes reçues
 
+- **← A (2026-11-18) : réponses de l'utilisateur à Q-D-1 → Q-D-10** — **lue** au rituel de 1060. Q-D-9 **renversée** ⇒
+  STORY-1060 (un calendrier propre à chaque organisation) ; les neuf autres **confirmées** (« Questions à l'utilisateur
+  ou au PO ») ; la reprise du dernier numéro de facture avant la première facture d'un client qui quitte Sage est
+  inscrite à la liste de mise en service (passation, « Ce qui reste », à la PR finale de 1060) ; D-972-9 (les comptes du
+  bureau dans le jeu) : STORY-1064.
+
 - **← B (2026-11-17) : D-1059 débloquée (STORY-963, 965)** — **appliquée par 1059** : la route `PUT
   …/creances/sources/FACTURE/{factureId}` est appelée avec le jeton du membre ; `paiement.creance.changed@1` est lu tel
   que publié (plus haute `revision` par `creanceId`, trop-perçu = crédit du tiers) ; prouvé sur une pile avec le vrai
@@ -722,6 +748,26 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-18, STORY-1060), avant la fusion du code — `prospera-plateforme` (`contrats/distributeur/`) et
+  `prospera-terrain-service` (module `terrain`) : le calendrier de l'organisation, paramètre versionné, lu à l'import.**
+  Fiche : `stories/STORY-1060.md` (D-1060-1 → 11). Tout est AJOUT ; un comportement change (la date des plans importés).
+  - **Bibliothèque neuve** : `contrats/distributeur/src/calendrier.ts`, étiquette **`calendrier-distributeur-v1`**
+    (1.0.0), copiée à l'octet par `terrain` (puis `pilotage`, FR-85). Aucun fichier de B touché (dossier de D déjà lu par
+    les scripts racines) ; `contrats/distributeur/package.json` exporte `./calendrier`.
+  - **Routes neuves** de `terrain` (garde `TERRAIN_NOT_ENTITLED`, table d'accès) : `GET /api/v1/terrain/parametres`
+    (l'un des droits du module) ; `GET /api/v1/terrain/parametres/versions/{version}` (idem ; 404
+    `PARAMETRES_VERSION_INCONNUE`) ; `PUT /api/v1/terrain/parametres` (**`terrain:parametres:modifier`**) corps
+    `{ versionAttendue, valeurs: { calendrier: { joursTravailles, joursFeries } }, motif }` ⇒ la version suivante ; 400
+    `PARAMETRES_INVALIDES` (`details.erreurs`), 409 `PARAMETRES_VERSION_PERIMEE` (`details.versionCourante`). Réponse :
+    `{ version, valeurs, effetLe, auteur, motif }`.
+  - **Droit neuf** au manifeste `terrain` (amendé dans cette PR, C7) : `terrain:parametres:modifier` ⇒ **→ B** (catalogue
+    des droits de tenant). Jusqu'à lui, `PUT` répond 403 `DROIT_INSUFFISANT` à tous (échec fermé).
+  - **Comportement qui change** : la route C13 d'import de `terrain` (contrat inchangé) date les plans de journée par le
+    calendrier de l'organisation, et non plus « hors dimanche » : un jour férié du calendrier par défaut (25 décembre,
+    1er janvier…) est sauté. Chaque plan porte `parametresVersion` (champ neuf de `terrain_plans_de_journee`).
+  - **Collection neuve** : `terrain_parametres` (une version par changement, la première posée à la première lecture ou
+    au premier import), effacée par la route C13 d'effacement (plan de 1058). Aucun fait publié (D-1060-10).
 
 - **PUBLIÉ (2026-11-17, STORY-1059, prospera-ventes-service#8, `dev` 1c1e944 → bd8d211) ; ANNONCÉ avant la fusion du
   code (prospera-stories #666). Un écart : `COMMANDE_INCONNUE` n'est pas émis (un `commandeId` mal formé rend la 400 de
@@ -1161,6 +1207,17 @@
 
 ## Questions à l'utilisateur ou au PO
 
+- **Q-D-11 (2026-11-18, STORY-1060) — Quels jours fériés le calendrier par défaut déclare-t-il ?** Choix par défaut
+  (D-1060-4) : du lundi au samedi travaillés ; dix jours fériés légaux du Togo que l'on sait dater : 1er janvier, lundi
+  de Pâques, 27 avril, 1er mai, Ascension, lundi de Pentecôte, 21 juin, 15 août, 1er novembre, 25 décembre. Les fêtes
+  musulmanes (Aïd el-Fitr, Tabaski, Maouloud s'il est chômé) se déclarent par l'organisation en `DATE`, chaque année.
+  **À confirmer** : la liste, et le 13 janvier. Une organisation la change par `PUT /api/v1/terrain/parametres`.
+
+- **Réponses de l'utilisateur (2026-11-18, journal de A, « → D »)** : Q-D-1 → Q-D-8 et Q-D-10 **confirmées** (les choix par
+  défaut tiennent ; Q-D-7 : vérifier que « SAREX » est bien fictif ; Q-D-8 : l'utilisateur cherche des documents
+  générables pour le jeu) ; **Q-D-9 renversée** ⇒ STORY-1060 ; Q-D-10 : la reprise du dernier numéro de facture
+  (`facturation.suite-numerotation@1`) se pose avant la première facture d'un client qui quitte Sage.
+
 - **Q-D-10 (2026-11-17, STORY-1059) — Une organisation qui n'a rien à reprendre de Sage émet-elle ses factures dès
   `FAC-AAAA-000001` ?** AD-5 veut que la série des factures reprenne le dernier numéro de Sage, posé une fois par la
   Reprise (`facturation.suite-numerotation@1`), et refuse l'émission tant qu'elle ne l'est pas
@@ -1169,7 +1226,8 @@
   d'un client qui migre (EPIC-244 refusera une initialisation après elle). Alternative : refuser toute facture tant que
   la suite n'est pas posée, au prix de bloquer l'essai.
 
-- **Q-D-9 (2026-11-17, STORY-1058) — Les jours d'un plan de journée du jeu sautent-ils le seul dimanche ?** Le jeu dit
+- **Q-D-9 (2026-11-17, STORY-1058) — Les jours d'un plan de journée du jeu sautent-ils le seul dimanche ?** **Renversée par l'utilisateur le 2026-11-18** :
+  un calendrier propre à chaque organisation ⇒ STORY-1060. Le jeu dit
   « aujourd'hui et les dix jours ouvrés suivants » (FR-9). **Choix par défaut : le dimanche est chômé, le samedi
   travaillé** (commerce de gros au Togo) ; les jours fériés ne sont pas sautés. Alternative : un calendrier en
   paramètre de l'organisation (C6), qui changerait la résolution à l'import.
