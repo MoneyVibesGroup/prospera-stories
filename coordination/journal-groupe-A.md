@@ -1,7 +1,7 @@
 # Journal du groupe A (poste principal)
 
 > Écrit par le groupe A seulement. Lot 1 : `PLAN-4-SESSIONS-2026-11-14.md` §3 (terminé). **Lot 2 :**
-> `PLAN-4-SESSIONS-LOT-2-2026-11-16.md` §2 (STORY-905 → 919), **terminé le 2026-11-16**. **Lot 3 :** `PLAN-4-SESSIONS-LOT-3-2026-11-17.md` §2 (STORY-920 → 929), **terminé le 2026-11-17**. **Lot 4 :** ordre validé par l'utilisateur le 2026-11-18 (« État »), en attente du plan.
+> `PLAN-4-SESSIONS-LOT-2-2026-11-16.md` §2 (STORY-905 → 919), **terminé le 2026-11-16**. **Lot 3 :** `PLAN-4-SESSIONS-LOT-3-2026-11-17.md` §2 (STORY-920 → 929), **terminé le 2026-11-17**. **Lot 4 :** `PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §2 — FE-069 ✅ (18/11), puis FE-034 et AP-38.
 
 ## État
 
@@ -61,6 +61,18 @@
 - **Passation à B (D-L4-1), à la fusion du plan** : balance, bilan, dossier, `admin-panel-service` (BFF),
   `prospera-recette`. Derniers commits sur `dev` : balance `98078b0`, bilan `1651d33`, dossier `768a4aa`, BFF `18a9893`,
   recette `f7944dc` (vérifiés le 18/11). **B lit d'abord « Pièges rencontrés » ci-dessous.**
+- **2026-11-18 (après-midi) — consigne de l'utilisateur** : « on débute par FE-069, celui qui refait tout ce qui est
+  cassé au niveau du cabinet » ; maquettes de FE-034 et d'AP-38 arrêtées (rien de commité, worktrees retirés). Docker
+  pris en exclusivité le temps de régénérer les types, puis rendu à C ; le code du front s'est fait sans Docker ; le
+  verrou a été repris à C (fin de sa vérification de 1015) pour le seul gate final, puis rendu.
+- ~~1. **FE-069**~~ ✅ **DONE (2026-11-18)** — prospera-frontend-expert-comptable **#54** (dev `6796601`). Types
+  régénérés depuis origin/dev du 18/11 ; A1 → A13 et B1 → B25 traités ; tsc 65 → 0 ; Vitest 148 fichiers ; e2e simulés
+  verts (7 rouges sur dev corrigés, 1 instable) ; **gate sur la vraie pile vert** (`npm run e2e:gate`, étanchéité A/B sur
+  les quatre services, CORS, collaborateur). Restes nommés dans la fiche : migration STORY-356 sur données anciennes,
+  AC-8 clavier, relecture des réserves de FE-059 → 068.
+- **Suite du lot** : FE-034 (maquette à revalider par l'utilisateur), puis AP-38 (maquette console à valider).
+- **Passation** : `prospera-frontend-expert-comptable` reste tenu par A pour le lot 4 (FE-034) ; dernier commit sur
+  `dev` : `6796601`.
 
 ### Lot 3 (depuis le 2026-11-17) — l'état courant
 
@@ -535,6 +547,18 @@ octets de `balance-service` du tag déployé.
 `RETIRED` tant que des exercices y sont rattachés : le catalogue cesse alors de la servir et de l'octroyer.
 
 ## Pièges rencontrés
+
+- **Gate front sur la vraie pile (FE-069, 18/11)** :
+  - les courriels de l'IdP passent par `notification-service` : sans lui, le courriel de vérification n'arrive jamais
+    (« Échec de remise du job send-verification-email : TypeError » dans auth) ;
+  - au catalogue, `bilan` exige `balance` (`422 MODULE_DEPENDANCE_MANQUANTE` si on octroie dans l'autre ordre) ;
+  - `expert-comptable` plante sans `NODE_ENV: production` (`pino-pretty`) ;
+  - les axes du dossier arrivent à balance par Kafka : réessayer l'analyse d'import quelques secondes ;
+  - les images ont été construites depuis `git -c core.autocrlf=false archive origin/dev` dans le scratchpad, avec une
+    surcouche `build.context` : aucun checkout d'un autre groupe n'est touché.
+- **Vitest** se lance depuis `C:\…` en majuscule (PowerShell `Set-Location`) ; depuis Git Bash, « no tests ».
+- Un `\b` écrit par un script Python dans une chaîne non brute devient un caractère de contrôle (0x08) : la regex
+  compile et ne reconnaît plus rien. Écrire les regex par l'outil d'édition, ou en chaîne brute.
 
 - **`bilan-service` aussi** : ses 72 JSON sortent en CRLF sous `core.autocrlf=true` ; son image refuse alors ses
   référentiels (« checksum invalide », 502 à la remise de `balance.created`). Il faut ré-extraire en LF
