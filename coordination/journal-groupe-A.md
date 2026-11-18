@@ -81,6 +81,10 @@
   partie double, achats et ventes, système normal), 1098 (mémoire des choix du cabinet pour les écritures), 1099
   (mémoire des choix pour les cahiers) ; écrans FE-149 (factures en écritures) et FE-150 (suggestions reprises).
   Jamais d'écriture sans relecture ; la proposition dit toujours sa source. Non slottées.
+- **Cloisonnement par cabinet et archives (2026-11-18, demande de l'utilisateur)** : STORY-1097 → 1099 et FE-150
+  amendées. Toute mémoire appartient au cabinet ; le même client suivi par deux cabinets ne partage rien (test à deux
+  cabinets obligatoire). STORY-1100 (document-service, ged) : la mémoire de classement des archives, et les factures
+  comptabilisées versées au fonds du client ; écran FE-151. Non slottées.
 - **Passation** : `prospera-frontend-expert-comptable` reste tenu par A pour le lot 4 (FE-034) ; dernier commit sur
   `dev` : `6796601`.
 
