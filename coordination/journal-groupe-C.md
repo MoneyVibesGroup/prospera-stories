@@ -106,7 +106,13 @@
     `sinistres_ia_registre` ; brouillon dans la ligne du registre, aucun dossier. **Passée avant 1015 pendant la pause
     Docker** (écrite sans Docker, vérifiée au retour). Node 24 : lint 0, unitaires 63 suites, e2e 4 suites, build 0,
     `docker compose up` healthy.
-  - **Suivante : STORY-1015.**
+  - ~~**STORY-1015**~~ : **plateforme #33 et #34** (dev `cd5a2b8`, `c4368ba`), **sinistres #27** (dev `87e0074`),
+    **liaison-assureur #8** (dev `a0713f4`) ; la déclaration part seule au LC : `sinistres.declaration.enregistree@1` et
+    `sinistres.garantie.decidee@1` au registre, publiés par `sinistres`, consommés par `liaison-assureur` (ligne C-13) ;
+    pile `grp-c` : envoi seul, `LCF-2026-000001` revenu au dossier, écart sans envoi sur une déclaration incomplète ;
+    Node 24 (sinistres 1289 unitaires / 33 e2e, liaison 500 / 21 e2e). D-1015-1 → 10.
+  - **Suivante : STORY-1016.** ⚠ **Déjà codée et poussée sans PR** (par une autre sous-session) : plateforme `MNV-1016`
+    `e5e812e`, sinistres `accc783`, assurance `fc6460a` ; reste PR, fusions, preuve et docs. Ne pas refaire le code.
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -217,6 +223,14 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-18, STORY-1015 — deux faits neufs et une nature d'écart.** `sinistres.declaration.enregistree@1` (clés :
+  `dossierId`, `reference` DEC-, `versionObjet`, `volet`, `canal`, `police`, `survenuLe`, `enregistreeLe`, `complete`,
+  `manque[]` ou `ligneChiffree` — enveloppe champs-sensibles `cs1.`, contexte `sinistres.declaration.ligne-c13` ; jamais
+  de donnée personnelle en clair) et `sinistres.garantie.decidee@1` (`decision`, `auteurId`, `roleExerce`, `decideLe`,
+  `versionObjet` ; sans motif). `liaison-assureur.ecart.ouvert@1` : nature `DECLARATION_INCOMPLETE` ajoutée.
+  ⚙ **Configuration à poser** : `SINISTRES_TROUSSEAU` = `LIAISON_TROUSSEAU` (même valeur, JSON, clés en base64) ; sans
+  elles la déclaration ne part pas seule. `LIAISON_ATTRIBUTEUR` (`LC` par défaut). Pour D et B : rien à changer côté
+  route.
 - **2026-11-15, STORY-980 — aucun contrat neuf sur le fil.** `prospera-sinistres-service` **consomme**
   `entitlement.changed` (groupe `sinistres-service.droits`, depuis le début), sans rien publier. Il expose deux routes
   gardées : `GET /api/v1/sinistres/module` et `GET /api/v1/expertises/module` (`{ module, version, organisationId,
@@ -579,6 +593,11 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
 - **D-1003-1 → D-1003-8** (`stories/STORY-1003.md`) : actes lus dans l'historique ; évaluer compte comme instruire ;
   affecter puis valider permis ; émettre n'est plus interdit à l'instructeur (FR-7) ; niveau 1 signé par RESP, DT ou
   DG ; cumul = montant évalué ; au-delà du niveau 1, aucun signataire seul ; le contrôle pose `CONTROLE_ABSENT`.
+- **D-1015-1 → D-1015-10** (`stories/STORY-1015.md`) : le fait ne porte que des clés, la ligne C-13 chiffrée ; le
+  déclarant est l'assuré saisi ; seule une déclaration créée publie (ni rattachement, ni recours) ; sans trousseau elle ne
+  part pas seule (config `SINISTRES_TROUSSEAU` = `LIAISON_TROUSSEAU`) ; incomplète = écart `DECLARATION_INCOMPLETE` ;
+  relevé déclenché après l'enfilage ; module en service requis (sinon écarté) ; garantie gardée par version sans envoi ;
+  `LIAISON_ATTRIBUTEUR` ; garantie de la preuve jouée par `RESP`.
 - **D-1002-1 → D-1002-8** (`stories/STORY-1002.md`) : registre tenu par `sinistres` ; poids de type à 1, poids de
   dossier non arrondi ; capacité de 20 points ; affecter est une commande hors transition ; cible surchargée ou absente
   = motif ; `RESP` seul ; fait du dossier inchangé ; envoi de la déclaration à la main dans la preuve.
@@ -620,6 +639,17 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **Un schéma de fait avec `required` dans un `then`/`else` sans `properties` est refusé par Ajv strict**
+  (`strictRequired`) côté service, pas côté plateforme si son test valide en non strict (vu en 1015) : déclarer les
+  propriétés (et les interdire par `false`), et valider le schéma en `strict: true` dans la plateforme.
+- **La projection de l'état publié vit dans `socle_etat_publie`** (`etatPublie`), plus dans `socle_etat_des_modules` : une
+  boucle d'attente sur l'ancienne collection ne sort jamais ; une pile de preuve doit publier
+  `etat-publie.changed.reel` (`module: {code, etat: EN_SERVICE}`, `versionMatrice`, `espace`, `epoque`, `numero`).
+- **Un `GEST` sans registre de gestionnaire n'a aucun dossier** (STORY-1004) : dans une preuve, la garantie se décide par
+  `RESP` ; un 404 `DOSSIER_INTROUVABLE` n'est pas un défaut de route.
+- **`pkill` n'existe pas dans Git Bash** : tuer un script par `ps -ef | grep … | awk '{print $2}'` puis `kill` ; son `trap`
+  rend le verrou, mais la pile reste à descendre.
 
 - **La suite complète de `sinistres` en parallèle rougit sur MongoDB quand le poste est chargé** (1010 : 8 puis 29 échecs,
   jamais les mêmes, sur des suites sans rapport avec le code ; les mêmes suites passent seules, 210/210, et la suite

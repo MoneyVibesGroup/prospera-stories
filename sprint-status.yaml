@@ -1902,13 +1902,6 @@ reserved_ranges:
       ExpertsService.exigerDesignable et par POST …/controle-de-designation ; GET experts/{expertId} déclaré en lecture
       seule au manifeste. Node 24 : 1056 unitaires sur MongoDB réel, 24 e2e, build 0 ; pas de pile. Lot 3 de C, n° 5.
       NON SLOTTÉE.
-  - range: "STORY-1015"
-    status: "RÉSERVÉ"
-    owner: "Groupe C — sinistres.declaration.enregistree@1 et sinistres.garantie.decidee@1 : schémas dans prospera-plateforme, publication par sinistres, consommation par liaison-assureur (ligne C-13) ; la déclaration part seule au LC (sinistres, liaison-assureur, plateforme)"
-    source_doc: "prospera-stories/stories/STORY-1002.md"
-    reserved_on: "2026-11-18"
-    note: >
-      Proposition de C acceptée ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). Avant la démo. NON SLOTTÉE.
   - range: "STORY-1016"
     status: "RÉSERVÉ"
     owner: "Groupe C — l'arrêt de l'évaluation propose la provision à assurance (motif EVALUATION, FR-76) ; motif ajouté au fait, facultatif (sinistres, assurance, plateforme)"
@@ -1939,6 +1932,18 @@ reserved_ranges:
       sur deux bancs, brouillon dans la ligne du registre (aucun dossier) ; Node 24 : lint 0, unitaires MongoDB réel 63
       suites / 1268 tests, e2e 4 suites / 33 tests, build 0, docker compose up healthy. Passée avant 1015 pendant la
       pause Docker. Lot 4 de C, n° 3. NON SLOTTÉE.
+  - range: "STORY-1015"
+    status: "DONE"
+    owner: "Groupe C — sinistres.declaration.enregistree@1 et sinistres.garantie.decidee@1 : schémas dans prospera-plateforme, publication par sinistres, consommation par liaison-assureur (ligne C-13) ; la déclaration part seule au LC (sinistres, liaison-assureur, plateforme)"
+    source_doc: "prospera-stories/stories/STORY-1015.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Proposition de C acceptée ; réservée par A le 2026-11-18 sur décision de l'utilisateur. 🏁 DONE le 2026-11-18 —
+      prospera-plateforme#33 et #34 (dev cd5a2b8, c4368ba), prospera-sinistres-service#27 (dev 87e0074),
+      prospera-liaison-assureur-service#8 (dev a0713f4). Ligne C-13 chiffrée dans le fait (champs-sensibles), écart
+      DECLARATION_INCOMPLETE, garantie gardée par version. Node 24 : sinistres 1289 unitaires sur MongoDB réel / 33 e2e,
+      liaison 500 / 21 e2e, lint 0. Pile grp-c : envoi seul, numéro LCF-2026-000001 revenu au dossier, écart sans envoi,
+      Karapace 19 sujets / 0 refus. Config à poser : SINISTRES_TROUSSEAU = LIAISON_TROUSSEAU. Lot 4 de C, n° 2. NON SLOTTÉE.
   - range: "STORY-1009"
     status: "RÉSERVÉ"
     owner: "Demander des pièces complémentaires pendant l'instruction : la liste des pièces attendues s'allonge avec un motif, les relances de 999 la reprennent (sinistres)"
