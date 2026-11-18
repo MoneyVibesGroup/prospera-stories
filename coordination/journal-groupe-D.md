@@ -67,6 +67,29 @@
   - Décisions D-1062-1 → 13 (fiche) ; recette versionnée `scripts/recette/1062/`. **Verrou Docker pris à 20:39 sans
     attente (libre au rituel), une seule prise, rendu à 21:43** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
   - **Suivante : STORY-1063** 🚚 (les référentiels du distributeur côté réseau, `reseau`).
+- **STORY-1063** ✅ 🚚 — les référentiels du distributeur côté réseau : le gabarit à zones à plat, les zones et les lieux
+  rattachés du jeu « Grossiste du Golfe » (reseau-service#16, `dev` 25de958, c11d990, 4b55ac1 ; prospera-plateforme#36,
+  `dev` 26977ca, étiquette **`jeu-grossiste-golfe-v1.1`** ; annonce « ⚠ Contrats » #712 avant le code). Rituel : aucune
+  demande neuve à D dans les journaux de A, B et C (l'information de B sur 976, D-976-7, est lue).
+  - **Le gabarit** (FR-180) : une donnée de la part du jeu (`hierarchie` : un niveau, libellé « Zone »), appliquée par la
+    règle de `PUT /hierarchie/configuration` ; sous lui, une zone sous une zone est refusée `PROFONDEUR_MAX_ATTEINTE`, par
+    la route **et par la Reprise** ; un réseau déjà plus profond refuse le gabarit.
+  - **Les zones** par le moteur des zones, **sous l'identifiant du jeu** (celui que `commande` et `terrain` portent en
+    `noeudId`) : la portée de `reseau` cadre désormais les points de vente du jeu chez `commande`, sans traduction.
+  - **Les lieux rattachés** en nombre : chaque point de vente et chaque point de stock (Lomé Port ; Kara dans la taille de
+    la démo), sous les identifiants de `commande` ; la résolution et la couverture les lisent ; le client comptoir ne l'est
+    pas (FR-241). Rejouer ne double rien ; un lieu rattaché ailleurs voit l'ancien rattachement terminé.
+  - **Les routes C13 de `reseau`** (import, effacement de fin d'essai), en essai seulement (`KAFKA_ESPACE=ESSAI`) ; le socle
+    C13 copié de `ventes` (Ajv 8 : seul écart) ; un invariant rougit sur toute collection oubliée par le plan.
+  - Node 24 : 50/50 suites unitaires (523 tests), e2e 17/17, intégration 16/16 suites (177 tests, 22 neufs) ; plateforme
+    647 tests (646 pass, 0 fail), générateur 31/31, `jeu:verifier` 3/3 ; mutations 12/12 (`reseau`) et 6/6 (générateur).
+    Pile `grp-d` : `docker compose up` sain, pilote 11/11 (essai) et 2/2 (réel), rejoué sur les images reconstruites
+    depuis `origin/dev` (`--no-cache`, volumes neufs).
+  - Décisions D-1063-1 → 12 (fiche) ; recette versionnée `scripts/recette/1063/` ; → B (information : `INSTALLATION_SERVICES`
+    nommera `reseau` au passage à `v1.1`). **Verrou Docker pris à 22:10 sans attente (libéré par B au rituel), une seule
+    prise, rendu à 22:55** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+  - **Suivante : STORY-1064** 🚚 (les comptes du bureau dans le jeu « Grossiste du Golfe », plateforme et `ventes` ; le jeu
+    est désormais en 1.1.0 : la version suivante sera 1.2.0, ses empreintes à refiger dans `generer.test.mjs`).
 
 ### Lot 3 (ouvert le 2026-11-17)
 
@@ -377,8 +400,10 @@
     légales A-1, PDF et lien public d'envoi ; l'avoir ; la facture par livraison et `SANS_BON` (après la commande (2)) ;
     la liste des factures et les balances ; (2) ~~la commande (2)~~ **livrée par 1062** (`CMD-`, `TRANSMISE`, annuler) ;
     **la commande (3)** et suivantes, dans l'ordre de D-1062-12 : modifier, livraison et reliquat (avec `entrepot`, puis la
-    facture par livraison), allocation du matin, remise, dérogation ; détail plus bas, « La commande (2) » ; (3) **les remplaçantes d'EPIC-227** (les
-    référentiels du distributeur côté réseau : zones à plat, points de vente rattachés) ; (4) les consommateurs qui
+    facture par livraison), allocation du matin, remise, dérogation ; détail plus bas, « La commande (2) » ; (3) ~~les remplaçantes d'EPIC-227~~
+    **la tranche de `reseau` livrée par 1063** (gabarit à zones à plat, zones et lieux rattachés du jeu, routes C13) ;
+    restent, dans `reseau`, les commerciaux du jeu, le consommateur de `pdv.point-de-vente.changed@1`, les faits
+    d'entrepôt de `stock`, l'export et la santé C13 (D-1063-12) ; (4) les consommateurs qui
     rempliront les read-models aujourd'hui remplis par personne (`pdv`, `catalogue`, `stock`) ; (5) les routes C13 de
     `facturation`, `approvisionnement`, `entrepot`, `conquete-objectifs` ; (6) les dettes héritées de `notification`
     (4 suites e2e rouges).
@@ -550,8 +575,8 @@
       (objets, `ouVivent`, plan d'effacement), un invariant d'inventaire du plan, et son code dans
       `MODULES_AVEC_ROUTES_C13` (`src/droits-des-modules.ts`) ;
     - **la recette** : pilote de la partie A et surcouche (émetteur RS256, `INSTANCE_ESPACE=ESSAI`) décrits dans la fiche ;
-    - **reste** : les routes C13 de `facturation`, `approvisionnement`, `entrepot`, `conquete-objectifs` ; la part
-      `reseau` (nœuds sous les identifiants du jeu) ; les routes de lecture des tournées (EPIC-233).
+    - **reste** : les routes C13 de `facturation`, `approvisionnement`, `entrepot`, `conquete-objectifs` ; ~~la part
+      `reseau`~~ (**livrée par 1063**) ; les routes de lecture des tournées (EPIC-233).
   - **La facture juste (1)** (STORY-1059, `ventes` `dev` 1c1e944 → bd8d211), `src/modules/facturation/` et
     `src/modules/commande/credit/` :
     - **l'émission** (`factures/factures.service.ts`) : `POST /facturation/factures { commandeId }` facture une commande
@@ -602,7 +627,22 @@
       `facturation_commandes_annulees`) ; la fenêtre résiduelle (facture émise avant que l'annulation soit lue) est
       tracée `FACTURE_D_UNE_COMMANDE_ANNULEE` et se corrigera par l'avoir ;
     - **recette** : `scripts/recette/1062/` (pile sans `stock` ni `paiement`, adaptateur de réservation de recette).
-  - **Le lot 3 de D est fini.** Le lot 4 continue : les remplaçantes d'EPIC-227 (1063), les comptes du jeu (1064).
+  - **Les référentiels côté réseau** (STORY-1063, `reseau` `dev` 25de958 → 4b55ac1 ; plateforme 26977ca,
+    `jeu-grossiste-golfe-v1.1`), `src/modules/reseau/instance/` et `src/socle/instance/` :
+    - **la part du jeu** (`part-reseau.ts`) : `hierarchie` (le gabarit, `HierarchieService.configurerDansLaSession`),
+      `zone` (moteur des zones, identifiant imposé `identifiantDuJeu(org, 'zone', clé)` ; une zone déjà là est gardée),
+      `rattachement` (`RattachementsService.rattacherEnNombreDansLaSession` ; la zone vérifiée dans la transaction, car
+      l'identifiant d'un nœud est un ObjectId que la vérification des références du socle ne voit pas) ;
+    - **un objet de plus** (les commerciaux du jeu : `commercial`) s'ajoute à `partDuReseau` et au générateur
+      (`PARTS`, part `reseau`), dans l'ordre des références ; le jeu change de version et ses empreintes se refigent ;
+    - **le plan d'effacement** (`PLAN_DE_RESEAU`, `EXCLUES_DU_PLAN`) : une collection neuve du service rougit
+      `plan-d-effacement.invariant.spec.ts` tant qu'elle n'y est pas (les constantes `COLLECTION_* = '…'` sont lues) ;
+    - **le socle C13** est la copie de `ventes` (Ajv 8 dans `contrats-instance.ts`) : une évolution du socle se fait dans
+      `ventes`, puis se recopie ici et dans `terrain` ;
+    - **l'espace** : `KAFKA_ESPACE` (pas `INSTANCE_ESPACE`) ; **recette** : `scripts/recette/1063/` (pilote de la pile,
+      mutations).
+  - **Le lot 3 de D est fini.** Le lot 4 continue : ~~les remplaçantes d'EPIC-227 (1063)~~ **livrée**, les comptes du
+    jeu (1064).
 
 ## Demandes aux autres groupes
 
@@ -854,7 +894,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-18, STORY-1063, avant la fusion du code : reseau-service#16, prospera-plateforme#36). —
+- **PUBLIÉ (2026-11-18, STORY-1063, reseau-service#16, `dev` 25de958 → 4b55ac1 ; prospera-plateforme#36, `dev` 26977ca,
+  étiquette `jeu-grossiste-golfe-v1.1`) ; ANNONCÉ avant la fusion du code (prospera-stories #712), sans écart. —
   `reseau-service`, routes C13 du module ; `prospera-plateforme`, jeu « Grossiste du Golfe » 1.1.0.** Fiche :
   `stories/STORY-1063.md` (D-1063-1 → 12). **Aucun manifeste amendé** (les routes sont déjà déclarées à
   `routesInstance`), aucun fait neuf, aucun droit neuf.
@@ -1454,6 +1495,26 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1063** :
+  - (1) **Une mutation qui rend une variable « peut-être `undefined` »** (`if (!noeud && …) throw`, puis `noeud.nature`)
+    ne compile pas (TS18048) : muter l'appel (`if (lignes.length < 0) await exigerLesZones(…)`). Retirer une constante
+    d'un tableau rend son import inutile (`noUnusedLocals`) : la garder par `...[X].filter((c) => c.length < 0)`.
+  - (2) **Le journal de D et le tracker sont en CRLF dans `_wt-d-stories`** (`core.autocrlf=true`) ; une fiche neuve écrite
+    par l'outil est en LF : un remplacement Python sur `\n` ne trouve rien dans le journal. Normaliser à la lecture, rendre
+    les fins de ligne d'origine à l'écriture (script de remplacements de la session).
+  - (3) **Un pilote HTTP sur la pile, entre deux `docker compose exec`** : le serveur ferme la connexion gardée ouverte
+    (5 s), `fetch` échoue « other side closed » au milieu d'un import ; et des organisations fixes rendent le pilote non
+    rejouable après un passage partiel. Rejouer sur `UND_ERR_SOCKET` (la route est idempotente) ; deux organisations
+    neuves à chaque passage.
+  - (4) **Le kit des cibles assemble le nom de ses collections à l'exécution** (préfixe `reprise_`) : l'invariant du plan
+    d'effacement ne les lit pas dans les sources ; elles sont nommées dans la part, et un test vérifie que le kit les crée.
+  - (5) Le verrou Docker était libre au rituel suivant (B l'avait rendu) : tout ce qui ne demandait pas Docker (générateur,
+    code, unitaires sous Node 25, lint) était fait avant ; une seule prise, toutes les preuves d'affilée.
+  - (6) **Sous charge (une construction `--no-cache` en parallèle)**, une passe d'intégration a compté un échec que la sortie
+    résumée ne nommait pas, et un `docker exec … mongosh` du pilote a échoué sans message (déjà vu en 1061-4). Rejouées
+    seules : vertes (deux fois). Ne pas jouer une suite pendant une construction ; garder la sortie complète (`●`), pas
+    seulement le résumé, pour pouvoir nommer un échec.
 
 - **STORY-1062** :
   - (1) **Une course réelle ne prouve pas à chaque passage** : le test de dix états concurrents (même sur trente objets)

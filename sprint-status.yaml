@@ -516,8 +516,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1063.md"
     reserved_on: "2026-11-18"
     note: >
-      🚧 EN COURS le 2026-11-18 — annonce « ⚠ Contrats » avant le code ; reseau-service#16, prospera-plateforme#36.
-      Lot D, n° 4 du lot 4 (EPIC-227, FR-180). NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — reseau-service#16 (dev 25de958 → 4b55ac1) ; prospera-plateforme#36 (dev 26977ca, étiquette
+      jeu-grossiste-golfe-v1.1) ; annonce « ⚠ Contrats » avant le code (docs #712). Le gabarit à zones à plat (une donnée,
+      la règle de PUT /hierarchie/configuration ; une zone sous une zone refusée, par la route et par la Reprise) ; les
+      zones du jeu par le moteur des zones sous l'identifiant du jeu (celui de commande et terrain) ; chaque point de vente
+      et chaque point de stock rattaché, en nombre, lisible par la résolution et la couverture ; routes C13 de reseau
+      (import, effacement de fin d'essai, essai seulement). Node 24 : 523 unitaires, 17 e2e, 177 d'intégration ; plateforme
+      647 ; mutations 12/12 et 6/6. Pile grp-d 11/11 et 2/2, rejouée depuis origin/dev. Lot D, n° 4 du lot 4 (EPIC-227,
+      FR-180). NON SLOTTÉE.
   - range: "STORY-1064"
     status: "RÉSERVÉ"
     owner: "Groupe D, lot 4 — les comptes du bureau dans le jeu Grossiste du Golfe (AKOSSIWA, MENSAH, YAWA, AYITE ; COM-nn ; D-972-9) (plateforme, ventes)"
