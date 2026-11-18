@@ -1,6 +1,6 @@
 # STORY-1062 : la commande (2) — le numéro `CMD-`, la commande transmise du terrain (`TRANSMISE`, `PRIX_CHANGE`, `COMMANDE_PROBABLEMENT_DOUBLE`), l'annulation, et le défaut de concurrence de `commande` corrigé
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-228 (la commande : saisie, validation, bon de livraison et prise de commande sur le terrain) ; EPIC-230
 pour ce que `facturation` fait d'une commande annulée · **Dépôt :** `prospera-ventes-service` (modules `commande` et
@@ -46,10 +46,10 @@ après : cette story ne crée pas la livraison ; ce que la facture en lira est c
   épic, spine, PRD, manifestes, table d'accès d'`auth`.
 - [x] Code sur `MNV-1062` (`ventes`) : 7e47ab6 (test rouge), ed9985a (correctif), 8693a3a (la commande (2)) ; tsc, lint
   des fichiers touchés, unitaires et mutations pures verts sous Node 25.
-- [ ] Annonce « ⚠ Contrats » fusionnée avant le code (cette PR de docs, avec le manifeste `facturation` amendé).
-- [ ] Manifeste recopié à l'octet dans `ventes` ; preuves sous le verrou Docker (Node 24, MongoDB réel, rouge puis
-  vert, mutations, Karapace, `docker compose up`, pilote, rejeu depuis `origin/dev`).
-- [ ] PR `ventes` fusionnée en rebase ; PR de docs finale.
+- [x] Annonce « ⚠ Contrats » fusionnée avant le code : prospera-stories **#698** (`main` `b8c2718`), avec le manifeste
+  `facturation` amendé.
+- [x] Manifeste recopié à l'octet dans `ventes` ; preuves sous le verrou Docker (une seule prise, 20:39 → 21:43).
+- [x] PR `ventes` **#11** fusionnée en rebase (`dev` `339a1ad` → `f49f3a6`) ; PR de docs finale.
 
 ## Ce qui doit être vrai à la fin
 
@@ -152,6 +152,72 @@ après : cette story ne crée pas la livraison ; ce que la facture en lira est c
   **avant** la correction (7e47ab6) et joué rouge sur ce commit ; la correction (ed9985a) reprend celle de 1061 :
   la clé dupliquée de l'upsert est rejouée (trois essais), la révision tenue décide.
 
+## Ce qui a été livré
+
+**2026-11-18** — après l'annonce « ⚠ Contrats » (prospera-stories **#698**, `main` `b8c2718`), une PR fusionnée en « Rebase
+and merge » :
+
+- `prospera-ventes-service` **#11** (`dev` **`339a1ad`** (test rouge), `b9a82a6` (correctif), `826105e` (la commande (2)),
+  `7cc143b` (manifeste), `46fc30f` (contrat), `805b63c`, `73b7a82`, `cb92e24`, **`f49f3a6`** ; tête de la branche
+  `bd99c8f` vérifiée `open` et égale au SHA poussé avant la fusion) :
+  - `src/modules/commande/commandes/` : `commandes.service.ts` (le numéro `CMD-` dans la transaction de la commande, le
+    canal `TERRAIN`, `PRIX_CHANGE`, `COMMANDE_PROBABLEMENT_DOUBLE`, la validation d'une `TRANSMISE`), `annulation.service.ts`
+    (`AnnulationDesCommandes`), `numero-de-bon.ts` (`numeroDeCommande`), `schemas.ts` (numéro, visite, écart de prix,
+    annulation ; index), `dto.ts`, `commandes.controller.ts` (route d'annulation) ;
+  - `garde-fous/` : `liberer` au port `ReservationStock` ; la saga ne réserve que les bons en attente et rend une
+    réservation obtenue pour un bon annulé ; bon `ANNULE` ; paramètre `fenetreCommandeDoubleMinutes` ;
+  - `credit/projection-du-credit.service.ts` : la plus haute révision gardée sous concurrence ; la facture d'une commande
+    annulée ne rebaisse pas l'engagement ;
+  - `facturation/` : `CommandesChiffrees.appliquer` corrigé, `commande.commande.annulee@1` lu
+    (`facturation_commandes_annulees`), `COMMANDE_ANNULEE` ; manifeste recopié (`b8c2718`) ;
+  - `contrat/schemas/commande.commande.annulee.json` (neuf), `commande.serie.changed.json` (énumérations retirées) ;
+  - **recette versionnée** : `scripts/recette/1062/` (`pile-1062.yml`, `emetteur-de-test.mjs`, `recette-1062.py`,
+    `mutations-1062.mjs`, `README.md`).
+- **Écart à l'annonce : aucun.**
+
 ## Preuves
 
-(à compléter à la fin de la story)
+- **Le défaut de D-1061-13, rouge puis vert** (MongoDB 8 en jeu de répliques, image `verification` du commit
+  `7e47ab6`, test seul, sans la correction) : trois passages, **rouges sur l'assertion** (facturation 3/3, commande 2/3 :
+  « Expected revision: 10 » reçu plus bas). Après la correction : cinq passages verts. La course réelle ne montrant pas le
+  défaut à chaque passage (une mutation a survécu une fois), deux tests **déterministes** jouent l'écrivain concurrent dans
+  l'appel (la ligne d'un état plus ancien créée juste avant que l'upsert du plus récent heurte sa clé) : la mutation
+  « clé dupliquée = ignoré » rougit à chaque passage (4/4 sur deux passages par module).
+- **Node 24** (étage `verification`, export `git -c core.autocrlf=false archive`) : `tsc` ; build ; lint de `src` et `test`
+  (`endOfLine auto`, `--max-warnings 0`) ; **unitaires : 57/57 suites, 599 tests** (569 avant) ; **e2e : 2/2, 24** ;
+  **intégration sur MongoDB réel : 13/13 suites, 150 tests** (123 avant), dont `commande-2.int-spec.ts` (21) et `projections-concurrentes.int-spec.ts` (6) : `CMD-2026-000001`
+  puis `000002` et leurs têtes conformes ; vingt saisies parallèles, vingt numéros continus ; rejeu, refus et dix rejeux
+  simultanés sans numéro de plus ; terrain `TRANSMISE` puis `VALIDEE` ; grille affichée périmée (`PRIX_CHANGE`, refus
+  sans confirmation et à une autre révision, validée à la sienne) ; grille changée avant la validation (prix du serveur
+  pris, 356 360 TTC, avant/après, piste, engagement au nouveau TTC) ; prix figé du bureau ; `COMMANDE_PROBABLEMENT_DOUBLE`
+  (fenêtre, autre membre, autre visite, paramètre à 5 min, jumelle annulée) ; **cinq transmissions identiques
+  simultanées : une seule passe** ; annulation d'un brouillon, d'une commande validée (bons `ANNULE` qui gardent
+  `BL-2026-000001`, engagement 344 560 → 0, deux réservations rendues, le numéro suivant `BL-2026-000002`), d'un acte en
+  attente (reprise sans réservation) ; rejeu et refus ; `COMMANDE_FACTUREE` sans écriture ; **cinq annulations
+  simultanées : une** ; **annulation pendant la réservation** : réservation rendue, aucun `BL-` ; panne de `stock` à la
+  libération, puis rejeu ; portée ; `COMMANDE_ANNULEE` chez facturation (aucun `FAC-`) ; la facture d'une commande
+  annulée dans la fenêtre : baisse 0, anomalie tracée.
+- **Mutations : 5/5 pures et 17/17 sur MongoDB réel, rouges sur une assertion** — numéro sur cinq chiffres, empreinte
+  dépendante de l'ordre, pose sans la fenêtre refusée, fenêtre lue à 0, annulation sans date lue ; clé dupliquée =
+  ignoré (commande, facturation) ; numéro tiré dans la série des bons ; double non cherché ; fenêtre ignorée ; jumelle
+  annulée comptée ; prix changé ignoré ; confirmation à une autre révision ; engagement non rendu ; numéro du bon perdu ;
+  commande facturée annulée ; annulation concurrente non vue ; réservations non rendues ; réservation orpheline gardée ;
+  reprise qui réserve un bon annulé ; facture d'une commande annulée ; engagement rebaissé.
+- **Karapace 6.2** : les schémas d'`origin/dev` d'avant la story enregistrés d'abord, puis ceux de la story :
+  `commande.commande.annulee-value` nouveau sujet, `commande.serie.changed-value` **compatible BACKWARD** (énumérations
+  retirées). **Témoin** (rencontré en chemin) : la même version avec un `minLength: 1` en remplacement était refusée
+  `INCOMPATIBLE` — corrigée avant la fusion (`46fc30f`).
+- **Pile `grp-d`** (`scripts/recette/1062/pile-1062.yml`, image de la branche) : `docker compose up` sain (modules Nest
+  changés, §1.5) ; pilote **24/24** : transmission `TRANSMISE` `CMD-2026-000001` avec `PRIX_CHANGE`, 403 au commercial,
+  409 sans confirmation, `VALIDEE` `BL-2026-000001` à la révision 1 ; `COMMANDE_PROBABLEMENT_DOUBLE` ;
+  `GRILLE_VERSION_MANQUANTE` ; `CMD-2026-000002` (aucun numéro perdu) ; facture `FAC-2026-000001` ; 403 et
+  `MOTIF_A_PRECISER` ; annulation (bon `ANNULE` qui garde son numéro, deux réservations rendues, engagement rendu) ;
+  rejeu ; `COMMANDE_DEJA_ANNULEE` ; `COMMANDE_ANNULEE` (l'annulation lue sur Kafka) ; `COMMANDE_FACTUREE` (la facture lue
+  sur Kafka) ; engagement 24 780 ; outbox vide ; `commande.commande.annulee`, `commande.serie.changed` (`CMD-` 1, 2 ;
+  `BL-` 1, 2) et `commande.engagement-tiers.changed` (344 560, 369 340, 24 780) lus sur Kafka.
+- **Rejeu sur les images reconstruites depuis `origin/dev`** (`f49f3a6`, `--no-cache`, volumes neufs) : registre (avant,
+  puis la story : BACKWARD), pilote **24/24** ; sous Node 24 : unitaires **57/57 suites, 599**, e2e **2/2, 24**,
+  intégration **13/13 suites, 150**, **mutations 5/5 et 17/17**.
+- `git diff --stat` = `--ignore-cr-at-eol` à chaque commit ; aucun `index.ts` non suivi.
+- **Verrou Docker** : libre au rituel ; **pris à 20:39** (`D STORY-1062`), une seule prise, **rendu à 21:43** après
+  `down -v` ; aucun conteneur, volume ni réseau `grp-d` ne reste.

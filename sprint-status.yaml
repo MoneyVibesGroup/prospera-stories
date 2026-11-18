@@ -502,8 +502,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1062.md"
     reserved_on: "2026-11-18"
     note: >
-      EN COURS le 2026-11-18 — fiche écrite, annonce « ⚠ Contrats » avant le code (manifeste facturation amendé, C5 :
-      + commande.commande.annulee@1 consommé). Lot 4 de D, n° 3 (EPIC-228, EPIC-230). NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — prospera-ventes-service#11 (dev 339a1ad → f49f3a6) ; annonce « ⚠ Contrats » avant le code
+      (docs #698, manifeste facturation amendé, C5 : + commande.commande.annulee@1 consommé). Défaut de D-1061-13 prouvé
+      rouge sur MongoDB réel puis corrigé dans commande et facturation (tests déterministes). Numéro CMD- tiré dans la
+      transaction de la commande ; commande terrain TRANSMISE, PRIX_CHANGE confirmé à sa révision,
+      COMMANDE_PROBABLEMENT_DOUBLE (fenêtre paramétrée) ; annulation (bons ANNULE qui gardent leur BL-, engagement
+      rendu, réservations rendues, commande.commande.annulee@1, COMMANDE_FACTUREE) ; COMMANDE_ANNULEE chez facturation.
+      Node 24 : 599 unitaires, 24 e2e, 150 d'intégration ; mutations 5/5 et 17/17. Karapace BACKWARD. Pile grp-d
+      24/24, rejouée depuis origin/dev. Lot D, n° 3 du lot 4 (EPIC-228, EPIC-230). NON SLOTTÉE.
   - range: "STORY-1063"
     status: "RÉSERVÉ"
     owner: "Groupe D, lot 4 — les référentiels du distributeur côté réseau : zones à plat, points de vente rattachés (EPIC-227) (reseau)"
