@@ -36,10 +36,18 @@
        (D-973-5).
      Node 25 : 741 passés (4 suites rouges à l'identique sur `origin/dev`) ; 10/10 mutations. **Sans Docker** :
      `test:socle` à jouer à STORY-975.
+  3. ~~STORY-977~~ (story **neuve** de la plage de B, hors des lignes du plan : la demande de D du 18/11, placée avant
+     1083 par la session de groupe, D-977-1, contestable) : **auth #46** (`682bba4` sur `dev`), contrat annoncé avant
+     la fusion (stories #690). `terrain:parametres:modifier` au catalogue de tenant, **hors du jeton**, à `DIST_DG` et
+     `DIST_ADMIN` seuls (`AJOUTS_A_L_ANNEXE_B`, comme `commande:parametres:modifier`) ; aucun rôle de l'IMF. Catalogue
+     153 codes, DG 46 droits, `DIST_ADMIN` 25. Node 25 : 7 suites des droits 167/167, suite complète 1 425 passés (4
+     suites rouges connues, binding de Confluent) ; 7/7 mutations. **Sans Docker** (D-977-7).
+     - **Vu au rituel, pour 975 ou 1080** : la copie des manifestes du catalogue (`copies.json`) est en retard sur
+       `prospera-stories/manifestes` : `npm run manifestes:garde` est **rouge** (`terrain : droits[11]`, le droit de
+       D-1060 ; `comptabilite` : `avertissementDesinstallation`, `routesLectureSeule[17 → 21]`). Sans effet sur auth ;
+       à recopier (`npm run manifestes:copier`) par la prochaine story de B qui touche le catalogue.
   - **Suivante : STORY-1083** (le dossier de financement existe, bilan, sans Docker). Première story de B sur un dépôt
     de A : constater la passation (bilan `1651d33`) et l'écrire ici.
-  - **Demande reçue, pas encore servie** : `terrain:parametres:modifier` au catalogue de tenant d'auth (← D, 18/11,
-    sans urgence ; voir « Réponses aux demandes reçues »).
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -765,10 +773,15 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 - **← A (2026-11-18) : réponses de l'utilisateur à nos questions au PO** — **lues**. D-951-8 servie par STORY-974 ;
   **D-961-1 renversée, servie par STORY-973** (comptabilite #11, `dev` `dd3dc52`) ; D-972-6 et D-972-9 acceptées
   (la pose des comptes par le catalogue reste une remplaçante du lot 4) ; 970 : rien ne change.
-- **← D (2026-11-18, STORY-1060) : `terrain:parametres:modifier` au catalogue de tenant** — **reçue, pas encore
-  servie** (sans urgence, aucun écran ne l'appelle). Lue au rituel de STORY-973 (une story = une sous-session) : à
-  servir par une story de B dans auth (code hors du jeton, rôles par défaut `DIST_DG` et `DIST_ADMIN`, comme
-  `commande:parametres:modifier`), à placer par la session de groupe.
+- **← D (2026-11-18, STORY-1060) : `terrain:parametres:modifier` au catalogue de tenant** — **servie par STORY-977**
+  (auth #46, `dev` `682bba4` ; annonce : stories #690). Le code est au catalogue de tenant, **hors du jeton** : servi
+  par `GET /moi/droits` dans `droitsHorsJeton`, jamais dans `perms[]`. Rôles par défaut : **`DIST_DG` et
+  `DIST_ADMIN`**, eux seuls (`AJOUTS_A_L_ANNEXE_B`, comme `commande:parametres:modifier` ; si le PO répond autrement
+  à Q-D-5, les deux lignes se retirent ensemble). Aucun rôle de l'IMF (D-1060-6 : avec la story qui emploie `terrain`
+  en microfinance). Aucun `dv` n'avance à la livraison : vos caches `(membre, organisation, dv)` le voient à leur
+  terme (60 s au plus). Pour votre recette : `PUT /api/v1/terrain/parametres` doit passer pour un DG ou un
+  `DIST_ADMIN` sur une image d'auth reconstruite depuis `dev`. Preuve sans Docker (fiche `stories/STORY-977.md`,
+  § Preuves) ; le mécanisme a sa preuve de bout en bout par vrai jeton RS256 à STORY-971.
 
 - **← D (2026-11-17, STORY-1058) : le jeu « Grossiste du Golfe »** — **servie par STORY-972** (fiche
   `stories/STORY-972.md`).
@@ -872,7 +885,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-18, STORY-977 — `terrain:parametres:modifier` au catalogue de tenant d'auth, hors du jeton, annoncé AVANT
-  la fusion du code** (`prospera-auth-service`, branche `MNV-977` ; fiche `stories/STORY-977.md`, D-977-1 → 7). Tout
+  la fusion du code** (`prospera-auth-service`, branche `MNV-977` ; fiche `stories/STORY-977.md`, D-977-1 → 7).
+  **Fusionné le 18/11** : auth #46, `682bba4` sur `dev` (annonce : stories #690), sans écart au contrat annoncé. Tout
   est AJOUT : aucune route, aucun champ, aucun topic ne change de forme.
   - **Catalogue** (`DROITS_HORS_JETON`, section `terrain`) : `terrain:parametres:modifier` (« Modifier les paramètres
     du terrain »), déclaré au manifeste `terrain` par D-1060. 153 codes en tout (24 du jeton, 129 hors du jeton).
@@ -1799,6 +1813,11 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Auth : une mutation qui retire un code du catalogue ne compile plus dans les tests qui le nomment** (STORY-977) :
+  `DroitDeTenant` et `TENANT_PERMISSION_LIBELLES` sont typés par le catalogue (TS2367 sur `d !== '<code>'`, TS7053
+  sur l'index du libellé). Elle rougit aussi sur des assertions (résolution, catalogue de composition), mais par deux
+  suites en « failed to run » : lire la ligne `Test Suites`, et compter la mutation pour ses assertions seulement.
 
 - **Une donnée validée au chargement fait d'une mutation un échec de chargement** (STORY-973) : changer la règle des
   plans de journaux (`FORMES_DE_PLAN`) rend le plan livré invalide, et toute la suite tombe en « Test suite failed to
