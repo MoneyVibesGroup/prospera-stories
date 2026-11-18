@@ -58,8 +58,9 @@
      story qui lève bilan (1082, au plus tard 1080)**.
      - **Le catalogue ne connaît pas encore `financement`** (D-1083-5) : à recopier avec les autres manifestes par
        975 ; d'ici là, toutes les routes du module répondent 403 `FINANCEMENT_NOT_ENTITLED`.
-  - **Suivante : STORY-1084** (l'échéancier de chaque emprunt et les ratios de dette, bilan, sans Docker ; fiche
-    « Pour la suite » de 1083).
+  5. **STORY-1084** (en cours, 18/11) : l'échéancier de chaque emprunt et les ratios de dette (bilan, sans Docker).
+     Fiche `stories/STORY-1084.md` (D-1084-1 → 15) ; contrat annoncé AVANT le code (« ⚠ Contrats ») ; manifeste
+     `financement` 0.2.0. Rituel : aucune demande neuve à B dans les journaux de A, C, D depuis 1083.
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -903,6 +904,36 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-18, STORY-1084 — emprunts, échéancier, scénario retenu et indicateurs de dette du module `financement`,
+  annoncés AVANT le code** (`prospera-bilan-service`, branche `MNV-1084` ; fiche `stories/STORY-1084.md`,
+  D-1084-1 → 15 ; manifeste `manifestes/financement.manifest.ts` 0.2.0). Tout est AJOUT : aucune route, aucun champ,
+  aucun topic existant ne change de forme ; **aucun droit neuf** (`preparer` pour saisir, `consulter` pour lire).
+  - **Routes neuves de bilan** (sous `/api/v1/dossiers/{dossierId}/financements/{financementId}`, mêmes gardes et
+    même portée que 1083) : `GET /emprunts` (consulter : chaque emprunt avec son échéancier — numéro, date, échéance,
+    intérêts, capital, restant dû — et ses totaux), `POST /emprunts` (préparer, 201), `PUT /emprunts/{empruntId}`
+    (préparer, 200), `DELETE /emprunts/{empruntId}` (préparer, 204), `GET /indicateurs` (consulter : dette par
+    exercice N+1 → N+3, indicateurs `COUVERTURE_SERVICE_DETTE`, `CAPACITE_ENDETTEMENT_RESIDUELLE`,
+    `AUTONOMIE_FINANCIERE` avec formule et sources, plan de financement emplois / ressources par année ; chaque
+    valeur `CALCULE` ou `INCALCULABLE` avec son motif, jamais 0). Saisie des emprunts en `BROUILLON` seulement.
+  - **Champs ajoutés** : `PATCH /{financementId}` et `POST /{financementId}/versions` acceptent `scenarioRetenu`
+    (`{ hypothesesId }` ou `null`) ; le dossier, sa liste et ses versions rendent `emprunts` (paramètres : `id`,
+    `libelle`, `nature` `DEMANDE`|`EXISTANT`, `capital`, `tauxAnnuelPct`, `dureeMois`, `differeMois`, `periodicite`
+    `MENSUELLE`|`TRIMESTRIELLE`|`SEMESTRIELLE`|`ANNUELLE`, `mode` `ECHEANCES_CONSTANTES`|`AMORTISSEMENT_CONSTANT`,
+    `dateDebut`) et `scenarioRetenu` dans leur contenu.
+  - **Refus neufs** : 404 `EMPRUNT_INTROUVABLE` ; 400 `DUREE_HORS_PERIODICITE` (durée ou différé qui n'est pas un
+    multiple de la période) et `DIFFERE_INVALIDE` (déjà connu, pour un emprunt) ; 422 `EMPRUNTS_TROP_NOMBREUX` (20
+    au plus) et `SCENARIO_INTROUVABLE` (jeu d'hypothèses absent de ce dossier client). 409
+    `DOSSIER_FINANCEMENT_NON_MODIFIABLE` et `CONFLIT_CONCURRENT` gardent leur sens.
+  - **Motifs d'`INCALCULABLE`** (fermés) : `SCENARIO_NON_RETENU`, `SCENARIO_INTROUVABLE`,
+    `EXERCICE_DE_BASE_SANS_MILLESIME`, `VENTILATION_FINANCEMENT_INDETERMINEE`, `AUCUN_SERVICE_DE_LA_DETTE`,
+    `RESSOURCES_STABLES_NON_POSITIVES`.
+  - **Prévisionnel** : aucune route ne change ; le moteur reçoit, pour `financement` seulement, les séries des
+    échéanciers en mémoire (sans elles, il rend la même projection qu'avant, au franc). Piste d'audit : aucun type
+    neuf (`FINANCEMENT_MODIFIE` avec `emprunt` et `geste`).
+  - **Manifeste `financement` 0.2.0** : `routesLectureSeule` + les deux lectures neuves ; copie à l'octet dans bilan.
+    Toujours pas au catalogue (975).
+  - **Pour A** (écrans, FE-140, FE-141) : types à générer depuis l'OpenAPI vivant de bilan. **Pour C, D** : rien.
 
 - **2026-11-18, STORY-1083 — le module `financement` (M49) dans bilan-service, et ses trois droits dans auth,
   annoncés AVANT la fusion du code** (`prospera-bilan-service` et `prospera-auth-service`, branches `MNV-1083` ; fiche
