@@ -29,7 +29,9 @@
 //   (STORY-964), le grand livre et les balances publiées `comptabilite:dossier:consulter` (STORY-966, 967). Pas de
 //   séparation des pouvoirs au niveau de l'acteur (D-964-7) : la piste dit qui a saisi, qui a validé, qui a publié.
 //   Créer un tiers exige `comptabilite:tiers:administrer` ; les lectures des tiers, des collectifs, des auxiliaires et
-//   de la balance âgée exigent `comptabilite:dossier:consulter` (STORY-968, aucun droit neuf).
+//   de la balance âgée exigent `comptabilite:dossier:consulter` (STORY-968, aucun droit neuf). Lettrer, délettrer et
+//   demander des propositions de lettrage exigent `comptabilite:lettrage:realiser` ; lire les lettrages et les lignes
+//   à lettrer, `comptabilite:dossier:consulter` (STORY-969, aucun droit neuf).
 // - Grand livre (STORY-966) : calculé à la volée sur les seules écritures VALIDÉES (contre-passations comprises, jamais
 //   un brouillard), lu dans un instantané MongoDB ; par compte et par période (bornes inclusives, dans l'exercice).
 // - Balance (STORY-967) : dérivée du grand livre (mouvements hors à-nouveaux, soldes de clôture), équilibrée, refusée
@@ -46,7 +48,17 @@
 //   L'auxiliaire et le collectif concordent par construction (ce sont les mêmes lignes) ; la balance publiée garde le
 //   compte du plan (le collectif), jamais un compte auxiliaire. Balance âgée par tiers et par tranche d'ancienneté
 //   (0-30, 31-60, 61-90, 91+ par défaut, paramétrables), à une date d'arrêté (l'horloge du service par défaut), sur
-//   les lignes non lettrées (le lettrage vient en STORY-969).
+//   les lignes non lettrées (le lettrage de STORY-969).
+// - Lettrage (STORY-969) : des lignes VALIDÉES d'un même compte de tiers (même collectif, même tiers, même devise),
+//   équilibrées ; PARTIEL (une ligne garde son reste, jamais lettrée au-delà de son montant, même sous la concurrence :
+//   verrou du compte de tiers dans la transaction) ; code AA, AB… unique par compte de tiers et par exercice, jamais
+//   réutilisé. Il ne touche aucune écriture : collections `lettrages` et `delettrages` en ajout seul. Un écart de
+//   règlement sous le seuil (`LETTRAGE_SEUIL_ECART`, 1 000 par défaut) se solde par une écriture d'écart née validée et
+//   numérotée (journal des opérations diverses ; `comptes-d-ecart@1` : SN et SMT 658 et 758, CIMA 844 et 849). Le
+//   lettrage automatique PROPOSE (référence, puis montant et date dans une fenêtre de 90 jours) ; un membre accepte
+//   (`PROPOSE_PAR_LA_MACHINE`) ou modifie (`CHOISI_PAR_L_UTILISATEUR`), Q3. Le délettrage est tracé, refusé sur un
+//   exercice clos ; une écriture lettrée se délettre avant d'être contre-passée. La balance âgée ne prend que le
+//   non-lettré ; la balance publiée ne change pas (le lettrage n'affecte aucun solde).
 // - Inaltérabilité (STORY-964) : une écriture validée porte son numéro définitif, continu et sans trou par journal et
 //   par exercice ; elle ne se modifie ni ne se supprime (409 `ECRITURE_VALIDEE_INALTERABLE`), elle se contre-passe. La
 //   piste d'audit est chaînée par empreinte (SHA-256), une chaîne par exercice, et se vérifie par une route.
@@ -116,7 +128,7 @@ export const MANIFESTE_COMPTABILITE = {
 
   // C9 : texte rendu par la partie A avant la désinstallation.
   avertissementDesinstallation:
-    "Journaux, écritures validées, tiers, grand livre et piste d'audit restent enregistrés et lisibles ; aucune nouvelle écriture ne pourra être saisie et aucune balance ne sera plus dérivée du grand livre.",
+    "Journaux, écritures validées, tiers, lettrages, grand livre et piste d'audit restent enregistrés et lisibles ; aucune nouvelle écriture ne pourra être saisie et aucune balance ne sera plus dérivée du grand livre.",
 
   // C12 : format lisible par la version précédente pendant 7 jours.
   retourArriere: 'SANS_PERTE',
@@ -142,6 +154,9 @@ export const MANIFESTE_COMPTABILITE = {
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/comptes-collectifs/{racine}/auxiliaires', // STORY-968
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/tiers/balance-agee', // STORY-968 : la balance âgée
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/tiers/{tiersId}/grand-livre', // STORY-968 : un auxiliaire
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/tiers/{tiersId}/lignes-a-lettrer', // STORY-969
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/lettrages', // STORY-969 : les lettrages de l'exercice
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/lettrages/{lettrageId}', // STORY-969 : un lettrage
   ],
 
   // C13, point 7 (chemins vus par le service). À créer.

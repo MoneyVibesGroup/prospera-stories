@@ -1362,6 +1362,15 @@ reserved_ranges:
       l'état publié ; essai 19/19 — quatre comptes du jeu posés par le moteur, connexion « en tant que » Kodjo puis
       Ayité, réel 403 ; le catalogue de l'essai appelle terrain à http://terrain-service:3413. Lot 3 de B (EPIC-226,
       EPIC-111). NON SLOTTÉE.
+  - range: "STORY-969"
+    status: "RÉSERVÉ"
+    owner: "Le lettrage — des lignes validées d'un même compte de tiers (collectif, tiers, devise), équilibrées ; manuel ; partiel (une ligne garde son reste, jamais lettrée au-delà de son montant, même sous la concurrence : verrou du compte de tiers) ; code AA, AB… par compte de tiers et exercice ; automatique par PROPOSITIONS (référence, puis montant et date, fenêtre de 90 jours), acceptées (PROPOSE_PAR_LA_MACHINE) ou modifiées (CHOISI_PAR_L_UTILISATEUR) ; délettrage tracé, refusé sur un exercice clos ; écarts de règlement sous un seuil (1 000) soldés par une écriture d'écart validée et numérotée (658 / 758) ; le lettrage vit à côté des écritures (en ajout seul) ; balance âgée par le port de 968 ; balance publiée inchangée (prospera-comptabilite-service)"
+    source_doc: "prospera-stories/stories/STORY-969.md"
+    reserved_on: "2026-11-18"
+    note: >
+      🚧 EN COURS le 2026-11-18 — fiche, manifeste amendé (trois routes de lecture) et annonce du contrat (« ⚠ Contrats »
+      du journal de B) AVANT la fusion du code. Aucun droit neuf (comptabilite:lettrage:realiser, déclaré en 958 et
+      attribué en 971). Lot 3 de B, n° 15 (EPIC-116). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
