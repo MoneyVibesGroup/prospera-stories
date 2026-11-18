@@ -131,7 +131,8 @@ rien n'a bougé depuis la passation. Le checkout du poste était 13 commits derr
   d'exercice : un dossier se crée avant que la balance soit dans Prospera (FR-2 : un exercice absent est « manquant »,
   il ne bloque pas la création). 1085 lira les jeux d'états validés de cette année et des précédentes.
 - **D-1083-14 — Les champs** : `objet` (3 à 500), `montant` (entier FCFA, 1 → 10¹²), `dureeMois` (1 → 360),
-  `differeMois` (0 → durée − 1, 0 par défaut), `type` (`INVESTISSEMENT` | `TRESORERIE` | `CREDIT_BAIL`), `banque`,
+  `differeMois` (0 → durée − 1, 0 par défaut ; sinon 400 `DIFFERE_INVALIDE`, jugé sur la durée en place quand elle
+  ne change pas), `type` (`INVESTISSEMENT` | `TRESORERIE` | `CREDIT_BAIL`), `banque`,
   `garanties` (texte, 2 000 au plus, facultatif), `exerciceReference`. Aucun flottant pour un montant (NFR-3).
 - **D-1083-15 — La piste d'audit :** quatre types neufs d'`AuditType` (`FINANCEMENT_CREE`, `FINANCEMENT_MODIFIE`,
   `FINANCEMENT_ETAT_CHANGE` avec `depuis`, `vers`, `version`, `motif` ; `FINANCEMENT_VERSION_OUVERTE` avec
