@@ -2,7 +2,7 @@
 title: "PRD — Prospera Assurance (chaîne sinistres)"
 status: final
 created: 2026-11-13
-updated: 2026-11-13
+updated: 2026-11-18
 project: prospera
 verticale: assurance IARD (zone CIMA, Togo)
 contrat_de_module: CONTRAT-DE-MODULE-2026-11-09.md (C1 → C13)
@@ -1360,7 +1360,7 @@ Les autres formulaires d'instruction calculent comme suit (valeurs de la démo, 
 **Conséquences (testables) :**
 - Pour un vol de 400 000 FCFA d'objets avec 20 % de vétusté et une franchise de 25 000 FCFA, l'indemnité calculée est 295 000 FCFA, arrondie au multiple de 5 000.
 - Un montant corporel n'est pas arrondi à 5 000 : le décompte du poste est au franc.
-- Le montant arrêté par le gestionnaire est enregistré au franc près : pour `SIN-2026-9002`, 395 500 FCFA est conservé tel quel, alors que l'indemnité calculée par le formulaire d'instruction (702 000 FCFA dans le cas de FR-69) est un repère déjà arrondi au multiple de 5 000 ; un montant calculé de 297 400 FCFA par le système s'affiche arrondi à 295 000 FCFA, et un montant arrêté de 297 400 FCFA reste 297 400 FCFA.
+- Le montant arrêté par le gestionnaire est enregistré au franc près : pour `SIN-2026-9002`, 395 500 FCFA est conservé tel quel, alors que le formulaire d'instruction rend deux montants calculés : le **décompte**, au franc (702 000 FCFA dans le cas de FR-69), et l'**indemnité proposée**, arrondie au multiple de 5 000 le plus proche (700 000 FCFA) ; le gestionnaire qui arrête l'un ou l'autre n'a pas à motiver l'écart *(corrigé le 2026-11-18 : la version précédente appelait 702 000 « un repère déjà arrondi », ce qui est faux ; STORY-1018)* ; un montant calculé de 297 400 FCFA par le système s'affiche arrondi à 295 000 FCFA, et un montant arrêté de 297 400 FCFA reste 297 400 FCFA.
 - Un dossier matériel dont le poste « remorquage » est `A_EVALUER` affiche l'alerte « évaluation incomplète » ; elle disparaît quand tous les postes sont `EVALUE` ou `A_VERIFIER` explicitement.
 - Chaque formulaire affiche l'indemnité calculée comme **repère** et ne l'écrit pas d'office dans le montant arrêté (FR-75).
 - Les abattements, franchises par défaut et taux d'avarie sont des paramètres ; leur modification ne change pas les évaluations arrêtées.
