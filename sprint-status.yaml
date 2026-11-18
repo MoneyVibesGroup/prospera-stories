@@ -1573,15 +1573,21 @@ reserved_ranges:
       catalogue 102 suites 1548/1548 ; câblage du module racine vert (rouge sans RbacModule) ; 21/21 mutations rouges.
       Sans Docker (D-L4-3, D-974-11). D-951-8 tenue avant février. Lot 4 de B, n° 1 (EPIC-146). NON SLOTTÉE.
   - range: "STORY-975"
-    status: "EN COURS"
+    status: "done"
     owner: "Groupe B, lot 4 — la comptabilité installable par le moteur : vérification referentiel-resolu (verification-installation@1), import C13 sans objet et effacement complet sous l'identité MOTEUR, recopie des manifestes du catalogue (dont financement 0.2.0), POST /installations de comptabilite (D-972-2) (comptabilité, catalogue)"
     source_doc: "prospera-stories/stories/STORY-975.md"
     reserved_on: "2026-11-18"
     note: >
-      Ouverte le 2026-11-18. Contrat annoncé avant le code (journal de B, « ⚠ Contrats ») : trois routes du moteur
-      dans la comptabilité (chemins déjà au manifeste), refus nommés de l'identité de service, recopie des manifestes
-      du catalogue (financement neuf au catalogue), comptabilite dans INSTALLATION_SERVICES de l'essai ; manifeste
-      comptabilite changé dans ses commentaires seulement (0.1.0). Lot 4 de B, n° 7 (avec pile). NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — prospera-comptabilite-service #12 (dev dc6809d, ddc9fa5), platform-catalog-service #62
+      (dev a5a2676) ; contrat annoncé avant le code (stories #713). Identité de service MOTEUR seule, limitée à
+      l'organisation du chemin, routes du moteur hors de l'état publié (D-975-1, 2) ; referentiel-resolu mesure le
+      référentiel arrêté des exercices au journal non clôturés, par dossier (D-975-3) ; import sans objet ; effacement
+      complet par un plan gardé par un test qui lit tous les schémas (D-975-4 → 6) ; catalogue : 48 manifestes recopiés,
+      financement 0.2.0 neuf, comptabilite dans INSTALLATION_SERVICES de l'essai (D-975-8). Node 24 : comptabilité
+      815 passés (56/56), catalogue 1 568/1 568 ; test:socle 11/11, 244/244 sur la pile (dette de 973) ; mutations
+      20/20 ; pile grp-b : POST /installations TERMINE (VERIFIER VERT non différée, OUVRIR, EN_SERVICE), routes du
+      moteur 17/17 (réel) et 6/6 (essai). Suite : jeton du moteur par organisation dans le catalogue (D-975-11), avant
+      1080. Lot 4 de B, n° 7. NON SLOTTÉE.
   - range: "STORY-976"
     status: "RÉSERVÉ"
     owner: "Groupe B, lot 4 — paiement consomme facturation.facture.emise@1 (groupe paiement-factures, depuis le début) et ouvre la Créance (FACTURE, factureId) par la même OuvrirLaCreance que la route de D-1059 ; idempotent par (source, sourceId) ; même résultat par le fait et par la route (D-965-9) (paiement)"
