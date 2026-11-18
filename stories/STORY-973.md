@@ -1,6 +1,6 @@
 # STORY-973 : le plan SMT propre
 
-Status: in-progress
+Status: done
 
 **Complexité :** faible (une donnée déclarée, une nature de journal de plus, la règle de validation des plans, un refus
 nommé au lettrage ; aucun module, aucune dépendance, aucune collection, aucun topic)
@@ -81,3 +81,51 @@ Aucun autre code ne lit une nature ; la saisie (962) n'accepte que les codes du 
 - `POST …/lettrages` et `POST …/lettrages/propositions/{id}/acceptation` : refus neuf 409
   `JOURNAL_DES_OPERATIONS_DIVERSES_ABSENT` (au lieu d'une 500).
 - Aucun topic, aucun schéma au registre, aucune variable.
+
+## Ce qui a été livré
+
+Deux PR fusionnées en « Rebase and merge » le 18/11, l'annonce d'abord.
+
+| Dépôt | PR | Sur la branche |
+|---|---|---|
+| `prospera-stories` | #687 (fiche, tracker, annonce du contrat, AVANT le code) | `main` `dd14ea3` |
+| `prospera-comptabilite-service` | #11 | `dev` **`dd3dc52`** (rejoué de `91ee8ad` ; arbre identique) |
+
+- `src/journaux/plans-de-journaux.json` : SMT version 2, `TR` (`TRESORERIE`) et `AN` ; le commentaire de la donnée
+  dit les deux formes.
+- `src/journaux/plan-de-journaux.ts` : nature `TRESORERIE` ; `FORMES_DE_PLAN` (partie double, trésorerie) et
+  `NATURE_COMMUNE` (`A_NOUVEAUX`) ; `validerPlan` exige les natures de la forme et refuse les natures étrangères
+  (« plan de trésorerie mêlé : … »).
+- `src/lettrage/ecarts-de-reglement.ts` : `exigerJournalDesEcarts(plan)` (409 `JOURNAL_DES_OPERATIONS_DIVERSES_ABSENT`,
+  `details.planDeJournaux`) ; `lettrage.service.ts` l'appelle à la place de l'`Error` de 969.
+- `src/common/refus.ts` : le refus neuf (409). Descriptions OpenAPI de `GET …/journaux` et des deux routes de
+  lettrage à jour ; `NatureDeJournal` reçoit `TRESORERIE` par construction (le DTO lit `NATURES_DE_JOURNAL`).
+- Tests : `plan-de-journaux.spec.ts` (plan SMT livré, plan de trésorerie lu, cinq cas refusés neufs),
+  `plans-de-journaux.service.spec.ts` (l'arrêt d'un exercice SMT : `TR`, `AN`, version 2, quatre séries),
+  `ecarts-de-reglement.spec.ts` (journal d'OD trouvé ; refus sur `SMT@2`).
+
+## Preuves
+
+- **Node 25** (poste Windows, sans Docker, D-L4-3) :
+  - `jest src/journaux src/lettrage` : **116 passés** ; seul rouge, `series-des-journaux.spec` « la copie EST la
+    source » (compare la copie de `series-v1` au checkout local de `prospera-plateforme`, plus avancé : rouge à
+    l'identique sur `origin/dev`).
+  - Suite complète : 50 suites, **741 passés**, 3 rouges dans 4 suites, **toutes rouges à l'identique sur
+    `origin/dev`** (témoin par `git stash`) : binding de Confluent absent sous Node 25 (`auth/gardes.spec`,
+    `acces/etat-publie.spec`), copies comparées aux checkouts locaux (`series`, manifeste vs `prospera-stories`).
+  - Lint des fichiers touchés (`endOfLine: auto`), `tsc --noEmit`, `npm run build` verts ; `TRESORERIE` est dans
+    `dist/journaux/plans-de-journaux.json`.
+- **Mutations : 10/10 rougissent sur une assertion** (aucune par compilation ni par chargement) : plan mêlé admis,
+  à-nouveaux non exigés, forme mal nommée dans le refus, SMT resté en version 1, code et libellé du journal de
+  trésorerie, écart sans refus, mauvaise nature cherchée, détails sans version, 422 au lieu de 409.
+- **Non prouvé ici** (D-973-7) : l'appel d'`exigerJournalDesEcarts` dans la transaction du lettrage n'a pas de test
+  unitaire (le service n'en a que dans `test:socle`, sur MongoDB) ; il est relu et typé. Les suites `test:socle` ne
+  sont pas jouées : à la prochaine pile de la comptabilité (STORY-975).
+
+## Pour la suite
+
+- **STORY-975** (comptabilité installable, pile) : jouer `test:socle` ; y ajouter, si la pile le permet, un exercice
+  SMT ouvert au journal (`TR`, `AN`, `SMT@2`) et un lettrage avec écart refusé 409.
+- **Contestables** : D-973-2 (le journal `AN` gardé au SMT), D-973-5 (écart refusé plutôt que passé dans `TR`),
+  D-973-6 (aucun compte de trésorerie imposé dans `TR`). Un second journal de trésorerie (`TR2`) viendra avec
+  `comptabilite:journal:administrer`.
