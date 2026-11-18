@@ -1456,10 +1456,12 @@ reserved_ranges:
   - range: "STORY-973"
     status: "RÉSERVÉ"
     owner: "Groupe B — un plan SMT propre, comme l'AUDCIF le prévoit : le journal de trésorerie (recettes et dépenses) au lieu des six journaux du système normal (comptabilite)"
-    source_doc: "prospera-stories/stories/STORY-961.md"
+    source_doc: "prospera-stories/stories/STORY-973.md"
     reserved_on: "2026-11-18"
     note: >
-      D-961-1 renversée par l utilisateur ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). Fiche écrite par B juste avant de coder. NON SLOTTÉE.
+      🚧 EN COURS le 2026-11-18 — contrat annoncé AVANT la fusion du code (« ⚠ Contrats » du journal de B). D-961-1
+      renversée par l'utilisateur ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A,
+      « Demandes aux autres groupes »). Lot 4 de B, n° 2 (EPIC-112), sans Docker (D-L4-3). NON SLOTTÉE.
   - range: "STORY-974"
     status: "RÉSERVÉ"
     owner: "Groupe B — l'invitation au réel à la mise en service (AD-15) : une route d'invitation pour l'identité de service du moteur dans auth, appelée à la mise en service (auth, catalogue)"
