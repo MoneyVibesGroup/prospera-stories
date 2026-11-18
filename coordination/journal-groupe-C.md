@@ -745,7 +745,7 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
 - **Un motif de test de « 10 caractères au moins » : compter** (STORY-1013) : `trop court` en fait dix et passe ; écrire `trop bref` pour un refus.
 - **La suite unitaire de `sinistres` sur MongoDB réel rougit au hasard quand elle tourne en parallèle sur un poste chargé** (STORY-1018 : 5 échecs sur `dossiers.service.spec` en `-w 2`, tests sans rapport ; la même suite seule, `-w 1`, passe 214/214). Rejouer le fichier rouge seul avant de chercher un défaut.
 - **Un script de vérification Docker lancé avant une pause de verrou se tue en `kill -9`** : son `trap` supprimerait le verrou d'un autre groupe (STORY-1018).
-- **Une regex JS avec `` ne voit pas « à »** (STORY-1017) : `` est ASCII même avec `u`. Pour une préposition accentuée, `(?<![\p{L}\d])`.
-- **Une espace insécable littérale dans une regex fait rougir `no-irregular-whitespace`** (STORY-1017) : écrire `  `, et le vérifier par `cat -A`, un script Python avec `' '` non brut remet le caractère.
+- **Une regex JS avec `\b` ne voit pas « à »** (STORY-1017) : `\b` est ASCII même avec `u`. Pour une préposition accentuée, `(?<![\p{L}\d])`.
+- **Une espace insécable littérale dans une regex fait rougir `no-irregular-whitespace`** (STORY-1017) : écrire `\u00a0\u202f` ; vérifier par `cat -A` (un `\u00a0` dans une chaîne Python non brute remet le caractère).
 - **Le checkout `prospera-sinistres-service` porte une autre branche : ne pas y lancer `docker compose up`** (STORY-1017) : exporter la branche par `git archive` et lancer le compose depuis l'export (`COMPOSE_PROJECT_NAME=grp-c-<n>`).
 - **Les deux invariants `app.module` / `app-cablage` ne tournent qu'en Node 24** (client Kafka natif) : 5 échecs attendus sous Node 25, verts dans l'image `verification`.
