@@ -38,6 +38,12 @@
   5. **Demande de D** : la recette de la démo assurance dans `prospera-recette`, quand C aura le parcours
      `SIN-2026-9002`.
 
+- **2026-11-18 (suite)** : **Node 24 installé** sur le poste principal (nvm, `24.22.3`, à côté de `25.2.1` qui reste
+  active : `nvm use 24.22.3` pour basculer, ou `C:\Users\thier\CONFIG~1\herd\bin\nvm\v24.22.3\node.exe` pour une
+  suite). **Point 6** : le texte de la loi 2011-018 et l'avis du fiscaliste ne viendront pas de sitôt ; on avance
+  sans (D-901-5 et les lectures de 568 restent telles qu'appliquées). Réponses de l'utilisateur aux questions de B, C
+  et D : « Demandes aux autres groupes » ; STORY-973, 974 (B), 1015 → 1017 (C) et 1060 (D) réservées au tracker.
+
 ### Lot 3 (depuis le 2026-11-17) — l'état courant
 
 - ✅ **LOT 3 DE A TERMINÉ (2026-11-17) — en attente du plan suivant.** 920 → 929 : dix stories, toutes DONE le jour même.
@@ -238,6 +244,54 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-18) : réponses de l'utilisateur à tes questions au PO** — **ouverte** (à lire au rituel de ta
+  prochaine story ; A ne les recopie pas dans ton journal).
+  - **D-961-1 renversée** : un plan SMT **propre**, comme l'AUDCIF le prévoit (journal de trésorerie : recettes et
+    dépenses), au lieu des six journaux du système normal ⇒ **STORY-973**, réservée pour toi.
+  - **D-951-8** : la story de l'invitation au réel **doit exister avant février** ⇒ **STORY-974**, réservée pour toi,
+    à mettre en tête de ton prochain lot (route d'invitation pour l'identité de service du moteur dans auth, AD-15).
+  - **D-972-6 et D-972-9 : oui aux deux.** Les quatre modules sans routes C13 (`facturation`, `approvisionnement`,
+    `entrepot`, `conquete-objectifs`) restent hors de l'offre d'essai jusqu'à leurs routes ; les comptes du bureau
+    prennent tes clés et rôles par défaut (`AKOSSIWA`, `MENSAH`, `YAWA`, `AYITE` ; `COM-nn`), avec l'ajout facultatif
+    `comptes` à `jeu-demonstration@1` (toi) et le fichier des comptes du jeu (D).
+  - **Ta question à A (970)** : rouvrir N quand N+1 est OUVERT ? **Non**, rien ne change chez A.
+  - Sans réponse de l'utilisateur, **restent retenus par défaut** : D-960-10 (manifeste `automatisations` réaligné sur
+    l'annexe B), D-960-12 (aucun rôle par défaut au distributeur), D-955-2 (ni NestJS ni MongoDB ni Kafka au premier
+    incrément de l'agent et de la centrale), l'ADR « droits hors du jeton » (938).
+
+- **→ C (2026-11-18) : réponses de l'utilisateur à tes questions au PO** — **ouverte** (à lire au rituel).
+  - **Q de 1002 (`sinistres.declaration.enregistree@1`) : oui, ta proposition, avant la démo** ⇒ **STORY-1015**, avec
+    `sinistres.garantie.decidee@1`.
+  - **La déclaration rapide** ⇒ **STORY-1017** (FR-34, FR-35, EPIC-206, EPIC-217). L'utilisateur veut une page de
+    déclaration rapide, avec la fiche pré-remplie depuis un message WhatsApp, comme l'écran « Déclaration assistée » de
+    la démo (`prospera-font-end/prospera-assurance`, `src/components/ia/DeclarationIA.tsx`, page `/dossiers/nouveau`).
+    ⚠️ **Le vocal** : la démo a un bouton « Importer un vocal » (transcription factice) ; le PRD l'écarte (FR-35, D13 :
+    un vocal reçu est rangé comme pièce, non lu). Question reposée à l'utilisateur le 18/11 ; en attendant, FR-35 tient.
+  - **D-1010-4 (702 000 ou 700 000), tranchée selon les règles** (R8 des arbitrages, FR-73, H-060) : le décompte
+    s'affiche au franc, ligne à ligne (780 000 − 78 000 = **702 000**) ; l'**indemnité proposée** (un montant calculé
+    par le système, le repère) est arrondie au multiple de 5 000 le plus proche : **700 000** ; le **montant arrêté**
+    par le gestionnaire reste au franc et n'est jamais pré-rempli (FR-75). C'est ce que 1010 rend déjà
+    (`indemniteCalculee`, `reperePropose`) : l'écran montre les deux, nommés. À corriger dans le PRD : FR-73 appelle
+    702 000 « un repère déjà arrondi », c'est faux. Le pas de 5 000 reste un paramètre (`arrondi_indemnite_fcfa`).
+  - **D-1013 : oui**, l'arrêt de l'évaluation propose la provision (motif `EVALUATION`, FR-76) ⇒ **STORY-1016**.
+  - **Gardés** : D-981-1/2 (`compta-cima` éteinte par défaut), D-980-3 (pas de KYC dans la garde de `sinistres`),
+    D-983-8 (liste des champs de santé : éprouvée par un test au déploiement).
+  - **Grille de vétusté de la compagnie** (D-1012) : pas de sitôt ; la grille indicative de la démo (H-059) reste.
+
+- **→ D (2026-11-18) : réponses de l'utilisateur à Q-D-1 → Q-D-10** — **ouverte** (à lire au rituel).
+  - **Confirmées** : Q-D-1 (KYC exigé partout), Q-D-2 (une personne sur plusieurs branches), Q-D-3 (racine =
+    `TENANT_ADMIN`), Q-D-4 (encours certain : protège contre la fraude), Q-D-5 (droit propre
+    `commande:parametres:modifier`), Q-D-6 (seul le message du numéro officiel est facultatif), Q-D-7 (la recette lit
+    par rôle ; vérifier que « SAREX » est bien fictif), Q-D-8 (`VERT`, C-10 `SANS_OBJET` ; l'utilisateur cherche des
+    documents générables pour le jeu), Q-D-10 (la série démarre à 0 sans reprise).
+  - **Q-D-9 renversée** : un **calendrier propre à chaque organisation** (jours travaillés, jours fériés), dès
+    maintenant, paramètre C6 lu par le plan de journée et par la résolution à l'import ⇒ **STORY-1060**, réservée pour
+    toi.
+  - **Mise en service (Q-D-10)** : pour un client qui quitte Sage (le distributeur de février), la reprise du dernier
+    numéro de facture (`facturation.suite-numerotation@1`) se pose **avant sa première facture** : à inscrire à ta
+    liste de mise en service.
+  - **D-972-9 (de B)** : le fichier des comptes du bureau dans ton jeu est à faire, voir la réponse à B ci-dessus.
+
 - **→ C (2026-11-17, information) : le compose racine et le profil de recette de A portent désormais MinIO de Chainguard**
   (`cgr.dev/chainguard/minio:latest`, `user: '0'`), STORY-920, recette #24. Vos piles MinIO sur ce poste (`grp-c-…`,
   `document-service` 995 → 997) n'ont plus besoin d'une image en cache ; un compose de pile à vous qui définit son propre
@@ -373,7 +427,7 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 - **Réponses du 2026-11-18** : voir « État », lot 4 (D-923-1 renversée ; D-928-3 remplacée par STORY-1082 ; D-926-2,
   D-926-6 et la lecture du fichier déposé de 300 confirmées). **Restent retenues par défaut, sans réponse** : D-923-2,
   D-924-1, D-925-1, D-927-3, D-929-1, D-929-2 ; la question de B (970) « rouvrir N quand N+1 est OUVERT » (défaut :
-  rien ne change chez A). **Pièces attendues de l'utilisateur** : le texte de la loi 2011-018 (901) ; l'avis d'un
+  rien ne change chez A). **Pièces attendues de l'utilisateur, pas de sitôt (18/11 : on avance sans)** : le texte de la loi 2011-018 (901) ; l'avis d'un
   fiscaliste sur les deux lectures de 568.
 
 - **STORY-300** : le mode de compatibilité par rôle des droits fiscaux (TENANT_ADMIN = tout, TENANT_USER = préparer)

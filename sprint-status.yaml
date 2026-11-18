@@ -466,6 +466,13 @@ reserved_ranges:
       d'origin/dev : 30/30, rejouée sur les images reconstruites depuis origin/dev (30/30, deux organisations). Reste de 1058 (terrain sur origin/dev) joué : 22/22. Lot D, n° 15 du lot 3
       (EPIC-230) : lot 3 de D fini (15/15). NON SLOTTÉE.
 
+  - range: "STORY-1060"
+    status: "RÉSERVÉ"
+    owner: "Groupe D — un calendrier propre à chaque organisation (jours travaillés, jours fériés), paramètre C6 lu par le plan de journée et par la résolution à l'import (terrain, plateforme)"
+    source_doc: "prospera-stories/stories/STORY-1058.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Q-D-9 renversée par l utilisateur (dès maintenant) ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
@@ -1390,6 +1397,20 @@ reserved_ranges:
       l'état publié ; essai 19/19 — quatre comptes du jeu posés par le moteur, connexion « en tant que » Kodjo puis
       Ayité, réel 403 ; le catalogue de l'essai appelle terrain à http://terrain-service:3413. Lot 3 de B (EPIC-226,
       EPIC-111). NON SLOTTÉE.
+  - range: "STORY-973"
+    status: "RÉSERVÉ"
+    owner: "Groupe B — un plan SMT propre, comme l'AUDCIF le prévoit : le journal de trésorerie (recettes et dépenses) au lieu des six journaux du système normal (comptabilite)"
+    source_doc: "prospera-stories/stories/STORY-961.md"
+    reserved_on: "2026-11-18"
+    note: >
+      D-961-1 renversée par l utilisateur ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). Fiche écrite par B juste avant de coder. NON SLOTTÉE.
+  - range: "STORY-974"
+    status: "RÉSERVÉ"
+    owner: "Groupe B — l'invitation au réel à la mise en service (AD-15) : une route d'invitation pour l'identité de service du moteur dans auth, appelée à la mise en service (auth, catalogue)"
+    source_doc: "prospera-stories/stories/STORY-951.md"
+    reserved_on: "2026-11-18"
+    note: >
+      D-951-8 : la story doit exister avant février ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). En tête du prochain lot de B. NON SLOTTÉE.
   - range: "STORY-969"
     status: "RÉSERVÉ"
     owner: "Le lettrage — des lignes validées d'un même compte de tiers (collectif, tiers, devise), équilibrées ; manuel ; partiel (une ligne garde son reste, jamais lettrée au-delà de son montant, même sous la concurrence : verrou du compte de tiers) ; code AA, AB… par compte de tiers et exercice ; automatique par PROPOSITIONS (référence, puis montant et date, fenêtre de 90 jours), acceptées (PROPOSE_PAR_LA_MACHINE) ou modifiées (CHOISI_PAR_L_UTILISATEUR) ; délettrage tracé, refusé sur un exercice clos ; écarts de règlement sous un seuil (1 000) soldés par une écriture d'écart validée et numérotée (658 / 758) ; le lettrage vit à côté des écritures (en ajout seul) ; balance âgée par le port de 968 ; balance publiée inchangée (prospera-comptabilite-service)"
@@ -1721,6 +1742,27 @@ reserved_ranges:
       ExpertsService.exigerDesignable et par POST …/controle-de-designation ; GET experts/{expertId} déclaré en lecture
       seule au manifeste. Node 24 : 1056 unitaires sur MongoDB réel, 24 e2e, build 0 ; pas de pile. Lot 3 de C, n° 5.
       NON SLOTTÉE.
+  - range: "STORY-1015"
+    status: "RÉSERVÉ"
+    owner: "Groupe C — sinistres.declaration.enregistree@1 et sinistres.garantie.decidee@1 : schémas dans prospera-plateforme, publication par sinistres, consommation par liaison-assureur (ligne C-13) ; la déclaration part seule au LC (sinistres, liaison-assureur, plateforme)"
+    source_doc: "prospera-stories/stories/STORY-1002.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Proposition de C acceptée ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). Avant la démo. NON SLOTTÉE.
+  - range: "STORY-1016"
+    status: "RÉSERVÉ"
+    owner: "Groupe C — l'arrêt de l'évaluation propose la provision à assurance (motif EVALUATION, FR-76) ; motif ajouté au fait, facultatif (sinistres, assurance, plateforme)"
+    source_doc: "prospera-stories/stories/STORY-1013.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Suite de D-1013 acceptée ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). NON SLOTTÉE.
+  - range: "STORY-1017"
+    status: "RÉSERVÉ"
+    owner: "Groupe C — la déclaration rapide : la fiche de déclaration pré-remplie depuis un message WhatsApp ou un e-mail (FR-34, FR-35, EPIC-206, EPIC-217), modèle de la démo DeclarationIA (sinistres, ia)"
+    source_doc: "prospera-stories/prds/prd-assurance-2026-11-13/prd.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Demandée par l utilisateur ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). Texte seulement tant que l utilisateur n a pas tranché le vocal (FR-35, D13). NON SLOTTÉE.
   - range: "STORY-1009"
     status: "RÉSERVÉ"
     owner: "Demander des pièces complémentaires pendant l'instruction : la liste des pièces attendues s'allonge avec un motif, les relances de 999 la reprennent (sinistres)"
