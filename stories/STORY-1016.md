@@ -1,6 +1,6 @@
 # STORY-1016 : l'arrêt de l'évaluation propose la provision (FR-76)
 
-Status: in-progress
+Status: done
 
 **Complexité :** petite à moyenne (un motif dans trois contrats, une proposition dans la transaction de l'arrêt, un motif de plus chez `assurance`)
 
@@ -73,4 +73,23 @@ l'export d'`origin/dev` après fusion. Aucune pile : aucun module Nest ne change
 
 ## Ce qui a été livré
 
-_À remplir à la fusion._
+**2026-11-18** — trois PR fusionnées en « Rebase and merge » :
+
+- `prospera-plateforme` **#35** (`dev` `8ce4325`) : le motif `EVALUATION` dans `sinistres.provision.revisee`, `assurance.provision.changed`
+  et `assurance.provision.a-valider` ; 6 tests de contrat de plus (116/116).
+- `prospera-assurance-service` **#26** (`dev` `8dc3285`) : `MOTIFS_DE_PROVISION` ; la proposition est lue, jugée au seuil
+  glissant (2,5 M par un `GEST` : `EN_ATTENTE_RESP`), `MONTANT_INCHANGE`, `PAS_OUVERTE` ; copies du contrat à l'octet.
+- `prospera-sinistres-service` **#28** (`dev` `ea1a111`, après STORY-1015 `87e0074`) : `provision-evaluation.ts` (pur), le
+  crochet `faits` de `ecrireUneCommande` (même texte que 1015), la proposition dans la transaction de l'arrêt, piste
+  d'audit « provision proposée (id) » ou « provision non proposée (raison) ».
+- **Tests** : sinistres 6 purs + 6 de service (deux dépôts) + 1 d'invariant de contrat ; assurance 3 de service ;
+  mutations (`provisionOuverte` forcé à vrai : 3 rouges ; `EVALUATION` retiré de la liste d'assurance : 3 rouges).
+- **Node 24** (étage `verification`, image depuis `git archive`) : plateforme 116/116, typecheck 0 ; assurance lint 0, 127
+  suites / 2392 tests, 12 suites / 367 e2e, build 0 ; sinistres lint 0, 1306 unitaires sur MongoDB réel, 33 e2e, build 0.
+  Un test du banc MongoDB (STORY-1003, « réaffecté reste partie ») a rougi au hasard dans la suite complète, sans lien avec
+  la story ; le fichier rejoué seul en `-w 1` : 238/238. `docker compose up` de `sinistres` (le crochet `faits` change le
+  câblage) : healthy, `/api/v1/health` 200. Les dev rejoués : diff vide entre `origin/dev` et les branches vérifiées.
+
+**Reste** : lire `assurance.provision.changed@1` côté `sinistres` (provision en vigueur sur le dossier, D-1016-10) ; le
+corporel jamais ouvert n'est pas aligné (D-1016-4) ; le report de revue et l'écart de 15 % (expertise).
+
