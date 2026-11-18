@@ -29,6 +29,9 @@
     rejouée sur les images reconstruites depuis `origin/dev` (`--no-cache`, volumes neufs) : 349 unitaires, 29 e2e, 23 d'intégration, pilote 21/21.
   - Décisions D-1060-1 → 11 (fiche) ; Q-D-11 au PO ; → B (le droit). **Verrou Docker pris à 12:57 sans attente (libre au rituel), une seule prise, rendu à 13:18** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
   - **Suivante : STORY-1061** 🚚 (la facture juste (2), `ventes`).
+- **STORY-1061** 🚧 🚚 — la facture juste (2) : la suite de Sage posée avant la première facture (Q-D-10 répondue), le
+  format du numéro, le règlement de la facture lu chez `paiement` (`EMISE`, `PARTIELLE`, `PAYEE`, en retard). Rituel du
+  2026-11-18 : aucune demande neuve à D dans les journaux de A, B et C. Annonce « ⚠ Contrats » avant le code (ci-dessous).
 
 ### Lot 3 (ouvert le 2026-11-17)
 
@@ -774,6 +777,35 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-18, STORY-1061, avant la fusion du code) — `prospera-ventes-service`, module `facturation` : la suite
+  de Sage posée avant la première facture, le format du numéro, le règlement de la facture lu chez `paiement`.** Fiche :
+  `stories/STORY-1061.md` (D-1061-1 → 12). Aucun manifeste amendé : le droit (`facturation:numerotation:administrer`), le
+  fait publié (`facturation.serie.changed@1`) et le fait lu (`paiement.creance.changed@1`) y sont déjà.
+  - **Routes neuves** (garde `FACTURATION_NOT_ENTITLED`, table d'accès) :
+    - `PUT /api/v1/facturation/numerotation/factures` (**`facturation:numerotation:administrer`**, le `DAF`) corps
+      `{ format: { prefixe, annee, separateur, largeur }, dernierNumero, gelLe }` ⇒ 201 `{ serie, format, reprise:
+      { dernierNumero, rang, annee, gelLe, poseeLe, posePar }, dernier, epoque, prochainNumero, rejeu }` ; la même suite
+      rejouée : 200 (`rejeu: true`). Refus : 400 `SUITE_INVALIDE` (`details.erreurs`) ; 409 `SUITE_DEJA_REPRISE`, 409
+      `NUMEROTATION_DEJA_ENGAGEE` (une facture a déjà été émise par Prospera).
+    - `GET /api/v1/facturation/numerotation` (`facturation:numerotation:administrer` ou `facturation:facture:consulter`)
+      ⇒ `{ series: [{ serie, format, reprise | null, dernier, epoque, trous, prochainNumero }] }`.
+  - **Champ neuf** dans toute facture rendue (`POST /facturation/factures`, `GET …/factures/{id}`, `POST …/creance`) :
+    `reglement: { statut: INCONNU|EMISE|PARTIELLE|PAYEE|CLOTUREE, enRetard, joursDeRetard, resteDuMineur,
+    resteDuAfficheMineur, encaisseMineur, declareMineur, tropPercuMineur, revision, lueLe }` (montants `null` tant que
+    `INCONNU`) : lu de `paiement`, jamais tenu par `facturation`.
+  - **Comportement qui change** : une organisation dont la suite est posée numérote ses factures dans le format de la
+    suite, à partir du rang repris + 1 (`FAC-2026-8821` ⇒ `FAC-2026-8822`). **Sans suite, rien ne change** (`FAC-AAAA-NNNNNN`
+    depuis 1, Q-D-10).
+  - **Schémas relâchés (ajout de liberté, rien de renommé ; compatibilité BACKWARD vérifiée au registre avant la
+    fusion)** : `facturation.facture.emise-value`, champ `numero` : le motif `^FAC-[0-9]{4}-[0-9]{6,}$` est retiré (le
+    numéro suit le format de la série) ; `facturation.serie.changed-value`, champ `prefixe` : l'énumération `["FAC-"]` est
+    retirée. **Pour B** (consommateur à venir de `facturation.facture.emise@1`) : ne pas valider le numéro sur `FAC-` ;
+    c'est un libellé, la clé reste `factureId`.
+  - **Fait publié de plus** : `facturation.serie.changed@1` part aussi à la pose de la suite (`dernier` = le rang repris).
+  - **Fait lu de plus** : `paiement.creance.changed` par un groupe neuf, `ventes-service.reglements` (depuis le début),
+    variable facultative `KAFKA_REGLEMENTS_GROUP_ID`. **Pour B** : rien à faire ; si la charge change, le dire ici.
+  - **Collections neuves** : `facturation_suites_numerotation`, `facturation_creances_lues`.
 
 - **PUBLIÉ (2026-11-18, STORY-1060, prospera-plateforme#32, `dev` 8c61c48, étiquette `calendrier-distributeur-v1` ;
   prospera-terrain-service#4, `dev` fd5f4ee → 17bdba7) ; ANNONCÉ avant la fusion du code (prospera-stories #681), sans
