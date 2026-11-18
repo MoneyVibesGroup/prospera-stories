@@ -1,6 +1,6 @@
 # STORY-1064 : les comptes du bureau dans le jeu « Grossiste du Golfe » — le fichier des comptes (Akossiwa, Mensah, Yawa, Ayité, et les agents `COM-nn`), jeu 1.2.0
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-226 (le jeu « Grossiste du Golfe », l'essai du prospect : FR-9 → FR-12, **FR-21**, UJ-8) · **Dépôts :**
 `prospera-plateforme` (`jeux-demonstration/grossiste-golfe*/` : le fichier des comptes, jeu 1.2.0), par `_wt-d-plateforme` ;
@@ -41,9 +41,11 @@ le jour où le contrat la permet (D-1064-4), les commerciaux et les affectations
   prospera-ventes-service **#12**.
 - [x] Preuves sans Docker (Node 25) : `generer.test.mjs` 48/48, `npm test` 647/647, `typecheck`, `jeu:verifier` 3/3 ;
   `ventes` : spec 3/3, lint, `tsc` ; mutations du générateur 11/11 et de la règle 3/3.
-- [ ] Annonce « ⚠ Contrats » fusionnée avant le code.
-- [ ] Sous le verrou : plateforme sous Node 24 (`typecheck`, `npm test`, `generer.test.mjs`, `jeu:verifier`).
-- [ ] PR de code fusionnées en rebase ; étiquette `jeu-grossiste-golfe-v1.2` ; PR de docs finale.
+- [x] Annonce « ⚠ Contrats » fusionnée avant le code : prospera-stories **#715** (`main` `ade0913`).
+- [x] Sous le verrou (pris à 23:27, rendu à 23:32) : plateforme sous Node 24 (`typecheck`, `npm test`,
+  `generer.test.mjs`, `jeu:verifier`) ; `ventes` dans l'étage `verification` (Node 24).
+- [x] PR de code fusionnées en rebase : prospera-plateforme **#37** (`dev` `50c12a6`, étiquette
+  `jeu-grossiste-golfe-v1.2`), prospera-ventes-service **#12** (`dev` `edb3f8f`) ; PR de docs finale.
 
 ## Ce qui doit être vrai à la fin
 
@@ -106,3 +108,36 @@ le jour où le contrat la permet (D-1064-4), les commerciaux et les affectations
 - **D-1064-9 — Ce qui reste** : chez B, `comptes` dans `jeu-demonstration@1`, `verifierJeu`, la pose par le catalogue
   après l'import (remplaçante de B) ; chez D, la déclaration dans `jeu.json` (D-1064-4) et les affectations du jeu dans
   `reseau` (D-1064-8).
+
+## Ce qui a été livré
+
+**2026-11-18** — après l'annonce « ⚠ Contrats » (prospera-stories **#715**, `main` `ade0913`), deux PR fusionnées en
+« Rebase and merge » :
+
+- **prospera-plateforme#37** (`dev` `50c12a6`, étiquette **`jeu-grossiste-golfe-v1.2`**) : le générateur
+  (`jeux-demonstration/grossiste-golfe/generateur/generer.mjs`) produit `comptes.json` (`FICHIER_DES_COMPTES`,
+  `COMPTES_DU_BUREAU`, `ROLE_METIER_DES_AGENTS`) et monte le jeu en 1.2.0 (`generateur.parametres.comptes`, source à
+  l'étiquette `v1.2`) ; les trois tailles régénérées (`comptes.json` neuf, `jeu.json` ; aucun fichier de données
+  changé) ; `generer.test.mjs` (48 tests, 17 neufs) : empreintes 1.2.0 et des comptes figées, les neuf fichiers de 1.1.0
+  gardés à l'octet, les comptes du jeu, le corps de la pose d'auth, une identité avec `terrain` et `reseau`, les vecteurs
+  de `ventes` et d'auth, `verifierJeu` sur les trois dossiers versionnés.
+- **prospera-ventes-service#12** (`dev` `edb3f8f`) : `src/socle/instance/identifiant-du-jeu.spec.ts` (les identités des
+  comptes du jeu, à la source de la règle).
+
+## Preuves
+
+- **Plateforme sous Node 24** (`git -c core.autocrlf=false archive` de la branche dans `node:24-slim`) : `typecheck` ;
+  `npm test` **647 tests (646 pass, 1 sauté, 0 fail)** ; `generer.test.mjs` **48/48** ; `npm run jeu:verifier` conforme pour les trois tailles (600,
+  2 726, 8 947 enregistrements ; le fichier des comptes n'en est pas un, il est hors des parts). Sous Node 25 d'abord :
+  647/647, 48/48, `typecheck`.
+- **`ventes` sous Node 24** (étage `verification` construit depuis `git archive` de la branche) : unitaires
+  **58/58 suites, 602 tests**. Sous Node 25 : le spec neuf 3/3, lint du fichier, `tsc` ; les deux suites qui chargent l'`AppModule`
+  (client Kafka natif) ne se jugent que sous Node 24.
+- **Mutations** : générateur **11/11 rouges sur l'assertion** (freelance traduit en commercial, objet `agent`, Yawa
+  absente, un champ de plus, nom pris au prénom, un agent sans compte, tous les agents commerciaux, clé du bureau en
+  double, nombre des comptes faux, version non montée, DG au mauvais rôle) ; règle des identifiants de `ventes` **3/3**
+  (troncature, préfixe, objet).
+- **Pas de pile** : aucun module Nest, aucune dépendance, aucun Dockerfile ne change (§1.5) ; le fichier des comptes ne
+  sera posé que par le catalogue (B).
+- **Verrou Docker** : attendu de 23:20 (tenu par B, 975), pris à 23:27, une seule prise, rendu à 23:32 ;
+  aucun conteneur, volume ni réseau `grp-d` ne reste.

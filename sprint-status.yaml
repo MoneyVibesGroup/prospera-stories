@@ -530,9 +530,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1064.md"
     reserved_on: "2026-11-18"
     note: >
-      🚧 EN COURS le 2026-11-18 — annonce « ⚠ Contrats » avant le code ; prospera-plateforme#37,
-      prospera-ventes-service#12. Part de D de l accord de l utilisateur sur B8 (18/11) ; la pose par le catalogue reste à
-      B. Lot D, n° 5 du lot 4 (EPIC-226, FR-21). NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — prospera-plateforme#37 (dev 50c12a6, étiquette jeu-grossiste-golfe-v1.2) ;
+      prospera-ventes-service#12 (dev edb3f8f) ; annonce « ⚠ Contrats » avant le code (docs #715). comptes.json dans les
+      trois tailles (8, 16, 44 comptes) : AKOSSIWA, MENSAH, YAWA, AYITE (objet compte) puis les agents COM-nn (objet
+      commercial), rôles de D-972-9 ; le corps exact de la pose d'auth ; hors des parts, non déclaré (jeu-demonstration@1
+      fermé : comptes est à B) ; les neuf fichiers de 1.1.0 inchangés à l'octet ; identités cohérentes avec terrain et
+      reseau, vecteurs figés (générateur, ventes). Node 24 : plateforme 647 tests (646 pass, 1 sauté, 0 fail), générateur 48/48, jeu:verifier 3/3 ;
+      ventes 58/58 suites, 602 tests ; mutations 11/11 et 3/3. Part de D de l accord de l utilisateur sur B8 (18/11) ; la pose par le
+      catalogue reste à B. Lot D, n° 5 du lot 4, dernier (EPIC-226, FR-21). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
