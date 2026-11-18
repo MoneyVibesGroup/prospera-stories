@@ -1,6 +1,6 @@
 # STORY-1081 : le collaborateur modifie l'identité d'un dossier de son portefeuille, par le BFF
 
-Status: en cours
+Status: done
 
 **Complexité :** faible (3 pts ; une garde levée dans chaque service, une relecture mise sous portée)
 
@@ -109,6 +109,35 @@ FE-068 (D12 et le fil d'activité).
 
 ## Definition of Done
 
-- [ ] `tsc`, build, lint des fichiers touchés ; unitaires et e2e concernés relancés par chemin ; suites complètes.
-- [ ] Mutations sur la logique neuve.
-- [ ] Contrat annoncé dans « ⚠ Contrats » avant la fusion ; PR de code fusionnées en rebase ; PR de docs.
+- [x] `tsc`, build, lint des fichiers touchés ; unitaires et e2e concernés relancés par chemin ; suites complètes.
+- [x] Mutations sur la logique neuve.
+- [x] Contrat annoncé dans « ⚠ Contrats » avant la fusion (stories #706) ; PR de code fusionnées en rebase ; PR de docs.
+
+## Livraison (2026-11-18)
+
+🏁 **DONE** — **dossier #56** (`82642d6` sur `dev`), **admin-panel #37** (`650ae23` sur `dev`) ; annonce du contrat
+avant la fusion : stories #706. Chaque commit rejoué en rebase a le même arbre que la tête de sa PR
+(`b0b2e89`, `e3e3e35`).
+
+**Preuves (Node 25, sans Docker, D-L4-3) :**
+
+- **dossier-service** : unitaires `dossiers.service.spec.ts` + `dossiers.repository.spec.ts` **177/177** (7 neufs) ;
+  e2e `dossiers.e2e-spec.ts` **164/164** (8 neufs ; l'AC-3 de 916, « `TENANT_USER` ⇒ 403 », inversé) ; e2e complets
+  9/9 suites (380). Le double du modèle Mongo de l'e2e simule désormais l'index du NIF **à la mise à jour** (même
+  `E11000` qu'à la création, le dossier modifié ne se heurte pas à lui-même). Suite unitaire complète : 106 suites
+  vertes, **7 rouges préexistantes, identiques sur `origin/dev`** (témoin par `git stash`) : binding de Confluent ×6,
+  cohérence du registre des pays avec les dépôts voisins. `tsc`, `nest build`, lint des fichiers touchés verts.
+- **BFF** : e2e `dossiers.e2e-spec.ts` **15/15** (4 neufs : collaborateur relayé avec son jeton, `409
+  CONFLIT_CONCURRENT` muet au champ près, `409` du NIF sans le dossier nommé, `404` amont) ; e2e complets 13/13 suites
+  (236) ; unitaires 43/43 suites (533). `tsc`, `nest build`, lint des fichiers touchés verts.
+- **Mutations 7/7 rouges sur l'assertion** : garde `TENANT_ADMIN` remise dans le service (7 e2e) ; relecture sous la
+  portée de l'administratrice au lieu de celle de l'appelant (1 unitaire, 1 e2e) ; filtre de portée retiré de la
+  relecture (1, 1) ; clé d'un autre cabinet lue (1 unitaire) ; portée non transmise par `modifierIdentite` (2 e2e) ;
+  garde du BFF ramenée à `TENANT_ADMIN` (4 e2e) ; garde du BFF vidée (1 e2e).
+
+**Écart de forme :** le message du commit de dossier annonce « 5 neufs / 9 neufs » ; les chiffres exacts sont ceux
+ci-dessus (la PR le dit). Le corriger aurait demandé de réécrire une branche poussée, refusé par le poste.
+
+**Reste, sans story à ouvrir :** le round-trip réel BFF → `dossier-service` du collaborateur n'est pas joué (D-1081-7) :
+la recette croisée de STORY-1080 le jouera (le parcours 923 de `cabinet-moteur` l'éprouve déjà pour l'administratrice ;
+y ajouter le collaborateur est une ligne de cette recette).

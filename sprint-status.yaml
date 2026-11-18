@@ -957,15 +957,19 @@ reserved_ranges:
       service du cabinet par le moteur ; le catalogue de la recette reçoit INSTALLATION_SERVICES ; le test D-929-1
       s'inverse. NON SLOTTÉE.
   - range: "STORY-1081"
-    status: "EN COURS"
+    status: "RÉSERVÉ"
     owner: "Groupe B, lot 4 (reçue de A) — le collaborateur modifie l'identité d'un dossier de son portefeuille, par le BFF : PATCH /dossiers/{id} ouvert à TENANT_USER dans dossier-service (la portée décide, 404 hors portée) et dans le BFF ; le 409 DOSSIER_NIF_DEJA_UTILISE ne nomme le dossier en conflit que dans la portée de l'appelant ; le 409 de version reste muet (D12) ; D-923-1 renversée par l'utilisateur (dossier, admin-panel)"
     source_doc: "prospera-stories/stories/STORY-1081.md"
     reserved_on: "2026-11-18"
     note: >
-      Ouverte le 2026-11-18. Contrat annoncé avant le code (journal de B, « ⚠ Contrats ») : deux gardes de rôle levées
-      (dossier-service, BFF), 409 DOSSIER_NIF_DEJA_UTILISE sans details hors de la portée de l'appelant. Aucune route,
-      aucun champ, aucun code neuf. Passation de dossier (768a4aa) et du BFF (18a9893) constatée : rien n'a bougé. Sans
-      Docker (D-L4-3). Lot 4 de B, n° 5 de la ligne du plan. NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — dossier #56 (dev 82642d6), admin-panel #37 (dev 650ae23) ; contrat annoncé avant la
+      fusion (stories #706) : deux gardes de rôle levées (dossier-service, BFF), 409 DOSSIER_NIF_DEJA_UTILISE sans
+      details hors de la portée de l'appelant ; aucune route, aucun champ, aucun code neuf ; 409 CONFLIT_CONCURRENT muet
+      (D12). Passation de dossier (768a4aa) et du BFF (18a9893) constatée : rien n'avait bougé. Node 25 : dossier
+      unitaires 177/177 (7 neufs), e2e 164/164 (8 neufs), e2e complets 380 ; BFF e2e 15/15 (4 neufs), 236 e2e, 533
+      unitaires ; suite complète de dossier : 7 suites rouges préexistantes ; mutations 7/7. Sans Docker (D-L4-3) :
+      round-trip réel du collaborateur à jouer par la recette de 1080. Lot 4 de B, n° 5 de la ligne du plan. NON
+      SLOTTÉE.
   - range: "STORY-1082"
     status: "RÉSERVÉ"
     owner: "Groupe A, lot 4, n° 3 — le dossier de démonstration créé dans dossier-service par le moteur (identité MOTEUR, espace d'essai) ; l'import C13 de balance le résout au lieu de le dériver ; la balance validée de la démo arrive à bilan (dossier, balance)"
