@@ -1565,12 +1565,15 @@ reserved_ranges:
       catalogue 102 suites 1548/1548 ; câblage du module racine vert (rouge sans RbacModule) ; 21/21 mutations rouges.
       Sans Docker (D-L4-3, D-974-11). D-951-8 tenue avant février. Lot 4 de B, n° 1 (EPIC-146). NON SLOTTÉE.
   - range: "STORY-975"
-    status: "RÉSERVÉ"
-    owner: "Groupe B, lot 4 — la comptabilité installable par le moteur : vérification referentiel-resolu (verification-installation@1), routes C13, POST /installations de comptabilite (D-972-2) (comptabilité)"
-    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-LOT-4-2026-11-18.md"
+    status: "EN COURS"
+    owner: "Groupe B, lot 4 — la comptabilité installable par le moteur : vérification referentiel-resolu (verification-installation@1), import C13 sans objet et effacement complet sous l'identité MOTEUR, recopie des manifestes du catalogue (dont financement 0.2.0), POST /installations de comptabilite (D-972-2) (comptabilité, catalogue)"
+    source_doc: "prospera-stories/stories/STORY-975.md"
     reserved_on: "2026-11-18"
     note: >
-      Lot 4 de B, n° 7 (avec pile). Fiche écrite juste avant de coder. NON SLOTTÉE.
+      Ouverte le 2026-11-18. Contrat annoncé avant le code (journal de B, « ⚠ Contrats ») : trois routes du moteur
+      dans la comptabilité (chemins déjà au manifeste), refus nommés de l'identité de service, recopie des manifestes
+      du catalogue (financement neuf au catalogue), comptabilite dans INSTALLATION_SERVICES de l'essai ; manifeste
+      comptabilite changé dans ses commentaires seulement (0.1.0). Lot 4 de B, n° 7 (avec pile). NON SLOTTÉE.
   - range: "STORY-976"
     status: "RÉSERVÉ"
     owner: "Groupe B, lot 4 — paiement consomme facturation.facture.emise@1 (groupe paiement-factures, depuis le début) et ouvre la Créance (FACTURE, factureId) par la même OuvrirLaCreance que la route de D-1059 ; idempotent par (source, sourceId) ; même résultat par le fait et par la route (D-965-9) (paiement)"

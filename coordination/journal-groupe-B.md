@@ -962,6 +962,38 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-18, STORY-975 — la comptabilité sert ses routes C13 (vérification, import, effacement) et le catalogue
+  recopie ses manifestes, annoncé AVANT le code** (`prospera-comptabilite-service` et `platform-catalog-service`,
+  branches `MNV-975` ; fiche `stories/STORY-975.md`, D-975-1 → 10). **Aucune route, aucun champ, aucun topic existant
+  ne change** ; le manifeste `comptabilite` ne change que dans ses commentaires (0.1.0, D-975-9).
+  - **comptabilité, routes neuves** (chemins déjà déclarés au manifeste), sous l'**identité de service `MOTEUR` seule**,
+    limitée à l'organisation du chemin (jeton de `POST /api/v1/interne/jetons-de-service` d'auth-service) :
+    - `POST /api/v1/instance/comptabilite/{organisationId}/verifications/referentiel-resolu` → 200
+      `verification-installation@1` (`VERT` / `ROUGE`, `mesure` = dossiers dont un exercice au journal non clôturé n'a
+      pas de référentiel arrêté ou tenu) ; servie dans les deux espaces ; un autre code : 404 `VERIFICATION_INCONNUE` ;
+    - `POST …/import` (`import-c13-demande@1`) : **sans objet**, tout objet 422 `OBJET_INCONNU`
+      (`objetsImportables: []`) ; espace d'essai seulement ;
+    - `POST …/effacement` (`effacement-c13-demande@1` → `effacement-c13-accuse@1`) : espace d'essai, motif
+      `FIN_ESSAI` seul ; efface tout ce que le service tient de l'organisation ; `EFFACE` puis `DEJA_EFFACE`.
+  - **Refus neufs** (corps `{ statusCode, error, code, message, details? }`) : 401 `JETON_DE_SERVICE_INVALIDE` ; 403
+    `IDENTITE_DE_SERVICE_REQUISE` (jeton d'utilisateur sur une route du moteur), `IDENTITE_DE_SERVICE_REFUSEE` (jeton de
+    service sur une route métier, ou autre identité), `ORGANISATION_HORS_JETON`, `ESPACE_REEL_REFUSE` ; 400
+    `ORGANISATION_INCOHERENTE` ; 422 `SCHEMA_NON_CONFORME`, `SOURCE_NON_SERVIE`, `MOTIF_NON_SERVI`, `OBJET_INCONNU`. Les
+    routes métier ne changent pas pour un utilisateur ; un jeton de service y est désormais refusé 403 (il l'était
+    déjà, par l'e-mail non vérifié : le code change, `IDENTITE_DE_SERVICE_REFUSEE` au lieu d'`EMAIL_NOT_VERIFIED`).
+  - **Les routes du moteur ne lisent pas l'état publié** (D-975-2) : la matrice les ouvre déjà au `MOTEUR` ; seuls le
+    délai de propagation et `NON_INSTALLE` diffèrent.
+  - **Catalogue** : `copies.json` recopié depuis `prospera-stories@origin/main` (48 manifestes, `manifestes:garde`
+    verte) : `terrain` (droit de D-1060), `facturation` (D-1061), `comptabilite` (avertissement, routes de 969 et
+    970) et **`financement` 0.2.0, neuf au catalogue** (STORY-1083, 1084 : ses routes cessent de répondre 403
+    `FINANCEMENT_NOT_ENTITLED` dès qu'il est installé). `.env.essai.example` : `INSTALLATION_SERVICES` nomme
+    `comptabilite=http://comptabilite-service:3420`.
+  - **Déploiement** : `comptabilite-service` dans l'`AUTH_AUDIENCE` de l'IdP (déjà requis par 958) ; le catalogue doit
+    connaître l'adresse du service (`INSTALLATION_SERVICES`) et présenter le jeton du moteur
+    (`INSTALLATION_JETON_SERVICE`) pour que `POST /installations` l'installe. La recette : STORY-1093.
+  - **Pour A (relecture)** : la console et le cabinet ne voient rien de neuf ; `financement` apparaît au catalogue.
+    **Pour D** : rien.
+
 - **2026-11-18, STORY-976 — `paiement` consomme `facturation.facture.emise@1` et ouvre la Créance, annoncé AVANT le
   code** (`prospera-paiement-service`, branche `MNV-976` ; fiche `stories/STORY-976.md`, D-976-1 → 7). Demande de D
   (STORY-1059) ; D-965-9 levée. **Aucune route, aucun champ, aucun topic publié ne change.** **Fusionné le 18/11** :
