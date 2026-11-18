@@ -849,6 +849,24 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-18, STORY-973 — le plan SMT propre, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
+  EPIC-112 ; fiche `stories/STORY-973.md`, D-973-1 → 7). D-961-1 renversée par l'utilisateur. Rien n'est renommé ;
+  une valeur d'énumération et un refus AJOUTÉS.
+  - **Plan SMT, version 2** (`plans-de-journaux@1`, donnée du service) : le **journal de trésorerie** `TR`
+    (« Journal de trésorerie (recettes et dépenses) », nature neuve `TRESORERIE`) et le journal des à-nouveaux `AN`
+    (D-973-2), au lieu de `AC VE BQ CA OD AN`. SN, SFD-BCEAO et CIMA ne changent pas (six journaux, version 1). Un
+    exercice SMT déjà ouvert au journal garde son plan arrêté `SMT@1` (D-961-2) ; un exercice SMT ouvert après la
+    fusion reçoit `SMT@2` : `GET …/exercices/{e}/journaux` rend `versionDuPlan: 2` et deux journaux, la piste
+    `EXERCICE_OUVERT` porte `planDeJournaux: SMT@2`. La forme des réponses ne change pas.
+  - **OpenAPI** : l'énumération `NatureDeJournal` reçoit `TRESORERIE`. Un lecteur qui fait un `switch` exhaustif sur
+    la nature doit prévoir la valeur.
+  - **Refus neuf** : `POST …/lettrages` et `POST …/lettrages/propositions/{id}/acceptation` rendent 409
+    `JOURNAL_DES_OPERATIONS_DIVERSES_ABSENT` (`details.planDeJournaux`) quand un écart de règlement serait passé sur
+    un exercice dont le plan n'a pas de journal d'OD (un plan de trésorerie) ; c'était une 500. L'écart s'y passe par
+    une écriture saisie (D-973-5).
+  - Aucun topic, aucun schéma au registre, aucune variable. **Pour A** (front du cabinet) : une saisie SMT propose
+    `TR` et `AN` ; rien d'autre. **Pour C, D** : rien chez vous.
+
 - **2026-11-18, STORY-974 — l'invitation au réel à la mise en service, annoncé AVANT la fusion du code**
   (`prospera-auth-service`, `prospera-platform-catalog-service` ; fiche `stories/STORY-974.md`, D-974-1 → 11).
   **Fusionné le 18/11** : auth #45 `e83568d`, catalogue #61 `a672a44` (annonce : stories #682), sans écart au contrat
