@@ -390,6 +390,17 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-18, STORY-970) : la clôture comptable ne touche pas dossier-service ; deux verrous** — **information**,
+  aucune action demandée (D-970-1). L'exercice et sa clôture administrative restent chez vous (`POST …/clore`,
+  `POST …/rouvrir`, Q8). La comptabilité a son propre état « clôturé » : le sceau de la chaîne de piste de l'exercice,
+  posé par `POST /api/v1/dossiers/{d}/exercices/{e}/cloture` et levé par `…/cloture/reouverture` (motif tracé). Une
+  écriture exige l'exercice OUVERT chez vous ET non scellé chez nous. Conséquences de votre Q8, sans rien vous
+  demander : (1) la clôture comptable de N vient APRÈS votre `clore` de N et votre ouverture de N+1 (les à-nouveaux
+  vont dans N+1, qui doit être OUVERT chez vous) ; (2) pour corriger N après sa clôture, un `TENANT_ADMIN` doit aussi
+  rouvrir N chez vous, donc y clore N+1 d'abord ; nos refus le disent (`EXERCICE_CLOS`, `details.statut` = `CLOS`
+  chez vous, `CLOTURE` chez nous). **Question, sans urgence** : voulez-vous un jour permettre de rouvrir N alors que
+  N+1 est OUVERT, pour un exercice tenu au journal ? **Choix par défaut** : rien ne change chez vous.
+
 - **→ D (2026-11-17, STORY-972) : votre demande STORY-1058 est servie ; deux suites** — **information, et une
   question ouverte**.
   - **Point (4), décision D-972-6** : le catalogue n'exclut pas d'un essai les modules qui déclarent des routes C13 sans
@@ -773,6 +784,47 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-18, STORY-970 — la clôture, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`, EPIC-119 ;
+  fiche `stories/STORY-970.md`, D-970-1 → 14). Des routes, un champ et des collections AJOUTÉS, rien de renommé ;
+  **deux comportements changent** : un exercice clôturé refuse toute écriture, et des à-nouveaux nés d'une clôture ne
+  se contre-passent pas à la main.
+  - **Routes neuves** sous `/api/v1/dossiers/{d}/exercices/{e}`, écriture sous **`comptabilite:exercice:cloturer`**
+    (déclaré en 958, attribué à `CAB_ASSOCIE` seul en 971 : **aucun droit neuf**) :
+    - `POST …/cloture` (sans corps) → **201** `Cloture`, **200** au rejeu (rien d'écrit) ;
+    - `POST …/cloture/reouverture { motif }` (obligatoire, pas fait d'espaces, 500 au plus) → **201** `EtatDeCloture` ;
+    - lecture (`comptabilite:dossier:consulter`, au manifeste en `routesLectureSeule`) : `GET …/cloture`
+      (`EtatDeCloture` : `etat` NON_CLOTURE | CLOTURE | ROUVERT, `derniere`, `historique`) et `GET …/centralisation`
+      (`{ figee, clotureId, centralisation: { lignes: [{ journal, mois, devise, pieces, debit, credit, equilibree }],
+      journaux, totaux } }`).
+    - `Cloture` = `{ id, numero, referentiel, devise, debutExercice, finExercice, centralisation, resultat: { sens:
+      BENEFICE | PERTE | NUL, montant, compte, totalCharges, totalProduits }, aNouveaux: { exerciceId, ecritureId,
+      numero, journal, dateEcriture, nombreDeLignes, piecesOuvertes, totalDebit, totalCredit }, balance: { version,
+      checksum, publieeParLaCloture } | null, nombreDeComptes, rangDansLaPiste, cloturePar, clotureLe, reouverture }`.
+  - **Champ AJOUTÉ, facultatif** : `aNouveauDe: { clotureId, exerciceId }` sur toute écriture lue (les à-nouveaux nés
+    d'une clôture et leur contre-passation par la réouverture).
+  - **Comportements** : sur un exercice **clôturé**, saisie, correction, abandon, validation, contre-passation,
+    lettrage, propositions, acceptation, délettrage et publication de la balance rendent 409 **`EXERCICE_CLOS`** avec
+    `details: { statut: 'CLOTURE', clotureId }` — même si dossier-service l'a rouvert (dossier-service CLOS garde
+    `details.statut = 'CLOS'`) ; la consultation reste ouverte. La contre-passation d'à-nouveaux nés d'une clôture : 409
+    **`A_NOUVEAUX_DE_CLOTURE`** (seule la réouverture les annule).
+  - **Ce que fait la clôture**, dans une transaction : la balance définitive au 31/12 publiée sur `balance.submitted`
+    (le fait de 967, inchangé ; ou la même, déjà publiée, reprise) ; la centralisation figée ; l'écriture
+    d'à-nouveaux passée dans le journal `AN` de l'exercice SUIVANT (née validée, numérotée, datée du premier jour) ; le
+    sceau sur la chaîne de piste. `comptes-de-cloture@1` (donnée du service) : SN et SMT bilan 1-5, gestion 6-8,
+    résultat 131 / 139 ; CIMA bilan 1-5 et 88, gestion 6, 7, 82-86, résultat 88 ; SFD-BCEAO bilan 1-5, gestion 6, 7,
+    résultat 59.
+  - **Refus nommés neufs** : 409 `PISTE_ROMPUE`, `COMPTES_HORS_CLOTURE`, `EXERCICE_SUIVANT_NON_OUVERT`,
+    `EXERCICE_SUIVANT_TENU_AUX_CAHIERS`, `EXERCICE_SUIVANT_CLOS`, `EXERCICE_SUIVANT_CLOTURE`, `EXERCICES_NON_CONTIGUS`,
+    `REFERENTIELS_DIFFERENTS`, `JOURNAL_DES_A_NOUVEAUX_ABSENT`, `EXERCICE_NON_CLOTURE`, `A_NOUVEAUX_LETTRES`,
+    `A_NOUVEAUX_DE_CLOTURE` ; 422 `A_NOUVEAUX_TROP_VOLUMINEUX`. Piste : `EXERCICE_CLOTURE`, `EXERCICE_ROUVERT`,
+    `A_NOUVEAUX_GENERES`, `A_NOUVEAUX_CONTREPASSES`.
+  - **Base** : collections neuves `clotures`, `reouvertures` (en ajout seul) ; champ `scellee` sur `chaines_de_piste` ;
+    champ `aNouveauDe` sur `ecritures`. Aucun topic, aucun schéma au registre, aucune variable.
+  - **Manifeste** (`manifestes/comptabilite.manifest.ts`, amendé dans cette PR) : deux routes de lecture, commentaire
+    de la clôture et des droits, « clôtures » dans l'avertissement de désinstallation.
+  - **Pour A** (relecture) : rien à changer chez vous ; dossier-service n'est ni appelé en écriture ni modifié (voir
+    « → A » : les deux verrous). **Pour D** : rien.
 
 - **2026-11-18, STORY-969 — le lettrage, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`, EPIC-116 ;
   fiche `stories/STORY-969.md`, D-969-1 → 14). **Fusionné le 18/11** : comptabilite #9, `3f8806b` sur `dev` (annonce :
