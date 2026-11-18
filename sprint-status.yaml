@@ -1565,12 +1565,15 @@ reserved_ranges:
     note: >
       Lot 4 de B, n° 7 (avec pile). Fiche écrite juste avant de coder. NON SLOTTÉE.
   - range: "STORY-976"
-    status: "RÉSERVÉ"
-    owner: "Groupe B, lot 4 — paiement consomme facturation.facture.emise@1 et ouvre la créance, idempotent par (source, sourceId), même résultat que la route de D-1059 (D-965-9) (paiement)"
-    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-LOT-4-2026-11-18.md"
+    status: "EN COURS"
+    owner: "Groupe B, lot 4 — paiement consomme facturation.facture.emise@1 (groupe paiement-factures, depuis le début) et ouvre la Créance (FACTURE, factureId) par la même OuvrirLaCreance que la route de D-1059 ; idempotent par (source, sourceId) ; même résultat par le fait et par la route (D-965-9) (paiement)"
+    source_doc: "prospera-stories/stories/STORY-976.md"
     reserved_on: "2026-11-18"
     note: >
-      Lot 4 de B, n° 6 (avec pile) ; demande de D. NON SLOTTÉE.
+      Ouverte le 2026-11-18. Contrat annoncé avant le code (journal de B, « ⚠ Contrats ») : consommation neuve de
+      facturation.facture.emise (groupe paiement-factures), variable facultative KAFKA_FACTURES_GROUP_ID ; aucune
+      route, aucun champ, aucun topic publié ne change ; manifeste paiement inchangé (il déclarait déjà le fait). Lot 4
+      de B, n° 6 (avec pile) ; demande de D (STORY-1059). NON SLOTTÉE.
   - range: "STORY-977"
     status: "RÉSERVÉ"
     owner: "Groupe B, lot 4 — le droit terrain:parametres:modifier au catalogue de tenant d'auth, hors du jeton (droitsHorsJeton de /moi/droits, borne inchangée), rôles par défaut DIST_DG et DIST_ADMIN (demande de D, D-1060-6 ; sur le modèle de commande:parametres:modifier, STORY-971) (prospera-auth-service)"
