@@ -43,6 +43,24 @@ même libellé arrive, je dois lui rappeler son écriture comptable en premier c
    produit tant qu'aucun modèle d'IA n'est installé. Un futur modèle pourra proposer **après** ces règles, jamais à
    leur place.
 
+## ⛔ Cloisonnement par cabinet — exigence de l'utilisateur (2026-11-18), non négociable
+
+> « Ça doit être lié par cabinet. Un cabinet A a sa façon d'écrire et sa propre compta : s'il insère quelque chose et
+> que demain la même facture vient, on le lui suggère et on le remplit par défaut ; il peut modifier s'il veut, et
+> c'est pris. Mais cela ne va pas apparaître pour un cabinet B, **même s'il a le même client**. C'est important. »
+
+- Toute mémoire, toute suggestion et tout compte propre appartiennent à **l'organisation du cabinet** (`orgId` du
+  jeton). Ils ne sont **jamais** indexés par le seul NIF du client ou du fournisseur : la clé contient toujours le
+  cabinet.
+- **Le même client suivi par deux cabinets** (même NIF, un dossier chez A, un dossier chez B) : B ne reçoit **rien** de
+  A. Aucune suggestion, aucun compte, aucun tiers, aucune statistique, même anonymisée ou agrégée. Il n'existe **aucune
+  mémoire « plateforme »** partagée entre cabinets.
+- La valeur suggérée est **pré-remplie par défaut** ; le comptable la garde ou la change. **Ce qu'il valide devient la
+  nouvelle mémoire** de son cabinet.
+- **Test obligatoire** : deux cabinets A et B, un même client (même NIF) chez les deux. A comptabilise une facture de
+  ce client. B dépose la même facture et ne reçoit aucune suggestion venant de A, alors que A la reçoit à la facture
+  suivante.
+
 ## Critères d'acceptation
 
 - **AC-1** : une première facture du fournisseur X est comptabilisée en 6052 (le comptable a changé la proposition). La
@@ -53,3 +71,5 @@ même libellé arrive, je dois lui rappeler son écriture comptable en premier c
 - **AC-4** : une mémoire oubliée n'est plus proposée, et l'oubli est journalisé.
 - **AC-5** : un compte désactivé, ou absent du référentiel du dossier, n'est jamais reproposé.
 - **AC-6** : la mémoire d'un cabinet n'est jamais lue par un autre cabinet.
+- **AC-7** : le même client (même NIF) suivi par les cabinets A et B : B ne reçoit aucune suggestion, aucun compte ni
+  aucun tiers venant de A (test à deux cabinets, sur la vraie pile).
