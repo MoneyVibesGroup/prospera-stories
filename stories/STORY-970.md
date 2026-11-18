@@ -1,6 +1,6 @@
 # STORY-970 : la clôture — centralisation, à-nouveaux dérivés du grand livre, réouverture tracée, exercice clos inaltérable
 
-Status: in-progress
+Status: done
 
 **Complexité :** élevée (un état neuf qui doit tenir face à dossier-service sans le dupliquer ; un acte qui lit tout
 l'exercice et écrit dans DEUX exercices dans une seule transaction ; des à-nouveaux qui doivent redonner les soldes de
@@ -186,17 +186,106 @@ réouverture, motif à l'appui, que la piste dit.
 
 ## Ce qui a été livré
 
-_À compléter à la fusion._
+Deux PR fusionnées en « Rebase and merge » le 18/11, l'annonce d'abord.
+
+| Dépôt | PR | Sur la branche |
+|---|---|---|
+| `prospera-stories` | #674 (fiche, tracker, manifeste amendé, annonce du contrat, AVANT le code) | `main` `110ba05` |
+| `prospera-comptabilite-service` | #10 | `dev` **`b27593c`** (rejoué de `6c7a410` ; arbre identique) |
+
+- `src/cloture/` (neuf) :
+  - `comptes-de-cloture-declares.json` (`comptes-de-cloture@1`) et `comptes-de-cloture.ts` : racines de bilan et de
+    gestion, compte du résultat, validés au chargement (les quatre référentiels, aucun recouvrement, résultat de
+    bilan) ;
+  - `a-nouveaux.ts` : la dérivation pure (bilan, pièces ouvertes par tiers, ajustements de sous-comptes, sans tiers,
+    résultat), vérifiée par construction ; `centralisation.ts` : par journal, mois et devise ;
+  - `cloture.schema.ts` : `clotures`, `reouvertures` (en ajout seul) ;
+  - `cloture.service.ts` : clore (préalables, transaction, rejeu, trois essais sur un index unique), rouvrir
+    (contre-passation des à-nouveaux, descellement), lire, centraliser ;
+  - `cloture.controller.ts`, `cloture.dto.ts`, `vue.ts`, `cloture.module.ts`.
+- `src/piste/` : le sceau sur la tête de chaîne (`SceauDeLaChaine`) ; `consigner` refuse une chaîne scellée, la scelle
+  (`SCELLER`) ou la descelle (`DESCELLER`) ; `sceau`, `exigerNonScellee`.
+- `src/ecritures/exercice-ouvert.ts` : le sceau contrôlé par toutes les routes d'écriture (cinq services) ;
+  `aNouveauDe` (schéma, vue, DTO) ; la contre-passation refuse des à-nouveaux (`A_NOUVEAUX_DE_CLOTURE`).
+- `src/grand-livre/grand-livre.service.ts` : `comptesMouvementes` lit dans la session d'une transaction si on la lui
+  passe. `src/balance/publication.service.ts` : `publierDansLaTransaction` (le contenu de la balance mis en commun),
+  `PublicationDeLaBalance` exportée.
+- `src/common/refus.ts` (treize refus neufs) ; `src/module.manifest.ts` recopié à l'octet depuis `main` ; README.
+- `test/socle/cloture.socle-spec.ts` (29 tests) ; `src/cloture/*.spec.ts`, `src/piste/sceau.spec.ts`.
 
 ## Preuves
 
-_À compléter à la fusion._
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive` du commit poussé
+  `6c7a410`) : **50 suites, 752 passés, 3 sautés** ; `npm run lint`, `tsc --noEmit` et `npm run build` verts.
+- **`npm run test:socle`** (vrai MongoDB 8.0 `rs0`, vrai Kafka ; doublures HTTP d'auth, de dossier-service et de
+  document-service), sous `timeout 1400` et `--forceExit` : **232/232**, dont 29 neufs, sur le commit poussé. Horloge
+  FIXÉE (2027-01-31). Sur le jeu connu de la suite (huit pièces, trois tiers, trois lettrages, une contre-passation) :
+  - **préalables** : sans exercice suivant 409 `EXERCICE_SUIVANT_NON_OUVERT` ; collaborateur 403 `DROIT_INSUFFISANT` ;
+    un brouillard 409 `BROUILLARDS_A_VALIDER` (abandonné, la voie est libre) ; rien d'écrit ;
+  - **clôture n° 1** : perte de 20 000 au 139 ; `AN-000001` dans N+1, datée du 2027-01-01, née validée, pièce
+    `CLOTURE-<id>`, `aNouveauDe` ; huit lignes, 1 107 000 de chaque côté : 101000 C 1 000 000, 401100 C 80 000
+    FSOTRA (échéance 04-06, référence AC-000001), 411100 D 68 000 CKODJO (FA-001, 02-14) et D 59 000 CAFI
+    (VE-000002, 02-01), 443100 C 27 000, 521100 D 930 000, 571000 D 30 000, 139 D 20 000 ; la facture P8 contre-passée
+    et lettrée avec sa contre-passation ne se reporte pas ;
+  - **à-nouveaux justes** : le grand livre de N+1 ouvre (colonne à-nouveaux) exactement sur les soldes de clôture de
+    bilan de N, compte par compte, plus le résultat ; la balance âgée de N+1 range les trois pièces ouvertes en 91+ ;
+  - **centralisation figée** : huit lignes (AC, BQ ×2, CA, OD, VE ×3), toutes équilibrées, neuf pièces, 1 624 200 ;
+  - **balance définitive** : version 1 au 31/12, son fait dans l'outbox ; piste `BALANCE_PUBLIEE` puis
+    `EXERCICE_CLOTURE` (la dernière de N, au rang du sceau), `A_NOUVEAUX_GENERES` dans N+1 ; rejouée : 200, rien
+    d'écrit ;
+  - **inaltérable** : saisir, corriger, abandonner, valider, contre-passer, lettrer, proposer, délettrer, publier ⇒
+    409 `EXERCICE_CLOS` (`CLOS` quand dossier-service l'a clos ; `CLOTURE` et le `clotureId` quand il l'a rouvert) ;
+    aucune écriture, entrée de piste, lettrage, délettrage, proposition ni balance de plus en base ; treize lectures
+    200 ; à-nouveaux contre-passés à la main 409 `A_NOUVEAUX_DE_CLOTURE` ;
+  - **N+1 vit sur ses à-nouveaux** : le règlement de FA-001 dans N+1 se lettre (COMPLET) avec sa ligne d'à-nouveau ;
+  - **réouverture** : collaborateur 403, motif d'espaces 400 ; à-nouveaux lettrés 409 `A_NOUVEAUX_LETTRES` (`codes:
+    AA`), rien d'écrit ; délettrés, puis 201 : `AN-000002` contre-passe `AN-000001`, `EXERCICE_ROUVERT` (motif,
+    auteur) au rang suivant, sceau levé, la colonne à-nouveaux de N+1 revient à zéro sur chaque compte ; rejouée 409
+    `EXERCICE_NON_CLOTURE` ; N se saisit de nouveau (facture oubliée de 15 000) ;
+  - **nouvelle clôture** : n° 2, perte de 35 000, `AN-000003` (neuf lignes, quatre pièces ouvertes, 1 122 000),
+    balance version 2 ; N+1 ouvre sur les soldes neufs ; historique [1 rouverte, 2 en vigueur] ;
+  - **chaîne de piste** de N et de N+1 intacte du début à la fin ; la dernière entrée de N est `EXERCICE_CLOTURE` ;
+  - **concurrence** : cinq clôtures simultanées ⇒ un 201, quatre 200, la même clôture, une seule écriture
+    d'à-nouveaux, une balance, une entrée `EXERCICE_CLOTURE`, chaînes intactes ; **une clôture au milieu de dix
+    lettrages** (étalés de 60 ms) ⇒ 1 lettré avant le sceau, 9 refusés `EXERCICE_CLOS` (`CLOTURE`), les à-nouveaux
+    reportent la facture pour 90 000 et les neuf règlements non lettrés (sans l'étalement, la clôture est rejouée
+    derrière les dix lettrages : 10 / 0, cohérent aussi) ;
+  - **refus de l'exercice suivant et des préalables** : `EXERCICE_SUIVANT_CLOS`, `EXERCICES_NON_CONTIGUS`,
+    `REFERENTIELS_DIFFERENTS` (N+1 en SMT), `EXERCICE_SUIVANT_TENU_AUX_CAHIERS`, `COMPTES_HORS_CLOTURE` (901000, rien
+    d'écrit dans N+1, aucune balance), `PISTE_ROMPUE` (une entrée altérée en base, `EMPREINTE_ALTEREE`) ; un exercice
+    sans écriture se clôt (résultat nul, ni à-nouveaux ni balance) et se rouvre.
+- **Mutations** (« rouge » = `Tests: … failed` et aucune erreur de compilation) : **unitaires 23/23** (gestion
+  reportée, hors clôture ignoré, solde nul reporté, lettré ignoré, ajustement omis, sans tiers omis, sens du résultat,
+  concordance collectif / grand livre, lettré au-delà du montant, référence et échéance de repli, collectif sans
+  ligne ; recouvrement bilan / gestion, résultat hors bilan, référentiel manquant ; ligne équilibrée, pièces de
+  l'exercice ; le sceau ignoré, non levé, levé par une autre clôture, `exigerNonScellee` muet, la garde sans le sceau ;
+  des à-nouveaux contre-passables). Une première passe en jest parallèle donnait neuf fausses survivantes (un
+  `toEqual` raté sur des `bigint` fait tomber le worker, piège de 966) : rejouées en `-i`, rouges. **Socle 10/12**
+  (rejeu dans la transaction, brouillards, lettrages ignorés, date des à-nouveaux, contiguïté, réouverture sans
+  contre-passation, garde sans le sceau, piste rompue, hors clôture, exercice suivant clos), jouées sur une copie de
+  l'archive. **Deux survivantes nommées** : (1) `consigner` qui ignore le sceau — le contrôle avant l'acte refuse déjà
+  tout ce que la suite provoque ; le contrôle dans la transaction est prouvé par le test unitaire (M20) et par la
+  course des lettrages ; (2) le grand livre lu hors de la transaction de la clôture — équivalente : tout acte qui
+  change le grand livre avance la tête de la chaîne de N, que la clôture avance aussi, donc la fait rejouer.
+- **`docker compose -p grp-b --profile comptabilite up -d --build`** : conteneurs `healthy`, `/api/v1/health` 200
+  (MongoDB rs0 primaire, Kafka), les quatre routes neuves mappées, aucune erreur au journal. Pile descendue avec ses
+  volumes, images de vérification supprimées, **verrou Docker rendu** (pris à 03:07, rendu à 03:38).
+
+## Pour la suite
+
+- **Lot 4** : rien de prévu dans le plan du lot 3 après 970.
+- **Expert** : les comptes CIMA de la clôture (88, et 80 / 87 / 89 hors clôture) et des écarts (844 / 849, D-969-8).
+- La classe 9 (engagements hors bilan) refuse la clôture si elle garde un solde : la reporter se déclarerait par
+  référentiel (`comptes-de-cloture@2`), sans code.
+- Un exercice en plusieurs devises : une écriture d'à-nouveaux par devise (aujourd'hui 409 `DEVISE_A_PRECISER`).
+- L'affectation du résultat (AGO) est une écriture saisie dans N+1, sur le 131 / 139 reporté : aucun geste dédié.
+- Q8 de dossier-service rend lourde la correction d'un exercice clôturé (« → A », question sans urgence).
 
 ## Definition of Done
 
-- [ ] Tests unitaires (Node 24, étage `verification`), lint des fichiers touchés, `tsc`, build.
-- [ ] `test:socle` sur un vrai MongoDB 8.0 en jeu de répliques et un vrai Kafka, sous `timeout` : cycle complet,
+- [x] Tests unitaires (Node 24, étage `verification`), lint des fichiers touchés, `tsc`, build.
+- [x] `test:socle` sur un vrai MongoDB 8.0 en jeu de répliques et un vrai Kafka, sous `timeout` : cycle complet,
   chaîne intacte, concurrence.
-- [ ] Mutations rouges sur l'assertion (logique neuve).
-- [ ] `docker compose up` sain (module Nest neuf).
-- [ ] PR de code fusionnée en rebase ; PR de docs (fiche, tracker, journal, fin du lot 3 de B).
+- [x] Mutations rouges sur l'assertion (logique neuve).
+- [x] `docker compose up` sain (module Nest neuf).
+- [x] PR de code fusionnée en rebase ; PR de docs (fiche, tracker, journal, fin du lot 3 de B).
