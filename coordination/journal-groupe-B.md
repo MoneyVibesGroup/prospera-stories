@@ -58,9 +58,19 @@
      story qui lève bilan (1082, au plus tard 1080)**.
      - **Le catalogue ne connaît pas encore `financement`** (D-1083-5) : à recopier avec les autres manifestes par
        975 ; d'ici là, toutes les routes du module répondent 403 `FINANCEMENT_NOT_ENTITLED`.
-  5. **STORY-1084** (en cours, 18/11) : l'échéancier de chaque emprunt et les ratios de dette (bilan, sans Docker).
-     Fiche `stories/STORY-1084.md` (D-1084-1 → 15) ; contrat annoncé AVANT le code (« ⚠ Contrats ») ; manifeste
-     `financement` 0.2.0. Rituel : aucune demande neuve à B dans les journaux de A, C, D depuis 1083.
+  5. ~~STORY-1084~~ : **bilan #181** (`d236c56` sur `dev`), contrat annoncé avant la fusion (stories #695). Les emprunts
+     du dossier de financement (prêt demandé, dettes existantes), leur échéancier exact au franc (25 000 000, 12 %,
+     48 mois ⇒ 658 346 / 658 339 / 6 600 601, en dur dans les tests), le scénario retenu injecté dans le prévisionnel
+     en mémoire (aucune copie), les indicateurs de dette (DSCR, capacité d'endettement résiduelle, autonomie
+     financière) et le plan de financement, `INCALCULABLE` motivé. Aucun droit neuf ; manifeste `financement` 0.2.0.
+     Node 25 : e2e 21/21 (+ 82/82 de 1083), 71 unitaires neufs, mutations 28/28, câblage du module racine vert (rouge
+     sans l'export de `JeuHypothesesRepository`), suite complète 15 suites rouges préexistantes. **Sans Docker** :
+     `BilanModule` exporte deux fournisseurs de plus ; le démarrage réel reste à prouver par 1082 ou 1080 (avec 1083).
+     Rituel : aucune demande neuve à B ; **← D (18/11, information, STORY-1061)** lue : `numero` de
+     `facturation.facture.emise@1` n'a plus de motif `FAC-` (c'est un libellé, la clé reste `factureId`) — à garder en
+     tête pour STORY-976.
+  - **Suivante : STORY-1081** (le relais BFF `PATCH /dossiers/{id}` ouvert au collaborateur, BFF et dossier, sans
+    Docker).
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -909,6 +919,7 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   annoncés AVANT le code** (`prospera-bilan-service`, branche `MNV-1084` ; fiche `stories/STORY-1084.md`,
   D-1084-1 → 15 ; manifeste `manifestes/financement.manifest.ts` 0.2.0). Tout est AJOUT : aucune route, aucun champ,
   aucun topic existant ne change de forme ; **aucun droit neuf** (`preparer` pour saisir, `consulter` pour lire).
+  **Fusionné le 18/11** : bilan #181, `d236c56` sur `dev`, sans écart au contrat annoncé.
   - **Routes neuves de bilan** (sous `/api/v1/dossiers/{dossierId}/financements/{financementId}`, mêmes gardes et
     même portée que 1083) : `GET /emprunts` (consulter : chaque emprunt avec son échéancier — numéro, date, échéance,
     intérêts, capital, restant dû — et ses totaux), `POST /emprunts` (préparer, 201), `PUT /emprunts/{empruntId}`
@@ -1900,6 +1911,17 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **`eslint --fix` retire une assertion `as T` qu'il juge inutile, et le type se resserre** (STORY-1084) : un
+  `{ ...partiel, x: 0 } as Hypotheses` est devenu `{ ...partiel, x: 0 }`, puis TS2345. Écrire la variable avec son
+  type (`const sans: Hypotheses = { ...h }; delete sans.champFacultatif;`) plutôt qu'une assertion.
+- **`analyse.agnosticisme.spec.ts` rougit sous Windows** (STORY-1084, préexistant, dossier non touché) : il compare
+  des chemins relatifs à `/` et le poste rend `dto\…`. À compter parmi les rouges connues de la suite complète de bilan
+  sous Node 25 (15 suites ce jour : 13 binding, `dossier-scope.invariant`, `analyse.agnosticisme`).
+- **Mutations de bilan : 28 en ~45 min** (une suite ciblée `-i` par mutation, ts-jest à froid ≈ 1,5 min) : les lancer
+  en tâche de fond, et rien d'autre dans le dépôt pendant ce temps (les fichiers sont mutés en place).
+- **Une coupure réseau (ENOTFOUND) a interrompu la session** pendant les mutations (18/11) : le script de mutations
+  restaure chaque fichier dans un `finally` ; vérifier après reprise que `git diff --stat` est celui d'avant.
 
 - **bilan-service, checkout du poste en retard** (STORY-1083) : `dev` local à `3f8e235`, 13 commits derrière
   `origin/dev`, `node_modules` du 15/11 (`ajv` 6, `kafkajs`) : partir d'`origin/dev` et `npm ci --ignore-scripts`.

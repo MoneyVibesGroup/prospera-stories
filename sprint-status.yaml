@@ -1008,15 +1008,17 @@ reserved_ranges:
       (D-L4-3, D-1083-1) : démarrage réel à prouver par 1082 ou 1080. Lot 4 de B, n° 3 de la ligne du plan
       (EPIC-266, lot F1, FR-1). NON SLOTTÉE.
   - range: "STORY-1084"
-    status: "EN COURS"
+    status: "RÉSERVÉ"
     owner: "Groupe B, lot 4 (reçue de A) — chaque emprunt a son échéancier, et le prévisionnel le lit : emprunts du dossier de financement (prêt demandé et dettes existantes), échéancier exact au franc (25 000 000, 12 %, 48 mois ⇒ 658 346 / 658 339 / 6 600 601), scénario retenu injecté dans le prévisionnel sans copie, indicateurs de dette (DSCR, capacité d endettement résiduelle, autonomie financière) et plan de financement, INCALCULABLE motivé (bilan)"
     source_doc: "prospera-stories/stories/STORY-1084.md"
     reserved_on: "2026-11-18"
     note: >
-      Ouverte le 2026-11-18. Contrat annoncé avant le code (journal de B, « ⚠ Contrats ») : cinq opérations sous
+      🏁 DONE le 2026-11-18 — bilan #181 (dev d236c56) ; contrat annoncé avant la fusion (stories #695) : cinq opérations sous
       /dossiers/{id}/financements/{financementId} (emprunts, indicateurs), scenarioRetenu et emprunts au contenu,
       refus EMPRUNT_INTROUVABLE, DUREE_HORS_PERIODICITE, EMPRUNTS_TROP_NOMBREUX, SCENARIO_INTROUVABLE ; manifeste
-      financement 0.2.0. Aucun droit neuf. Sans Docker (D-L4-3). Lot 4 de B, n° 4 de la ligne du plan (EPIC-266,
+      financement 0.2.0. Aucun droit neuf. Référence 658 346 / 658 339 / 6 600 601 en dur dans les tests. Node 25 :
+      e2e 21/21 (+ 82/82 de 1083), 71 unitaires neufs, mutations 28/28, câblage du module racine vert, suite complète
+      15 suites rouges préexistantes. Sans Docker (D-L4-3). Lot 4 de B, n° 4 de la ligne du plan (EPIC-266,
       lot F1, FR-3, FR-4, FR-6). NON SLOTTÉE.
   - range: "STORY-1093"
     status: "RÉSERVÉ"
