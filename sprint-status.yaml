@@ -96,6 +96,7 @@ reserved_ranges:
       backend (lot 2 : 15 stories backend par groupe). La plage de Dev A (STORY-730 → 899) n'est pas touchée. Les
       fiches sont écrites juste avant de coder.
       Lot 3 (2026-11-17, PLAN-4-SESSIONS-LOT-3-2026-11-17.md §4) : STORY-1045 → 1059 (distributeur et assurance en alternance).
+      Lot 4 (2026-11-18, PLAN-4-SESSIONS-LOT-4-2026-11-18.md §4) : STORY-1060 → 1064 (le distributeur, au backend).
   - range: "STORY-1030"
     status: "RÉSERVÉ"
     owner: "Le squelette de reseau-service sur la pile du moteur — module reseau, gate RESEAU_NOT_ENTITLED, profil, manifeste copié à l'octet, démarrage dégradé sans Kafka, port 3419 (reseau-service)"
@@ -472,9 +473,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1060.md"
     reserved_on: "2026-11-18"
     note: >
-      🚧 EN COURS le 2026-11-18 — Q-D-9 renversée par l'utilisateur (dès maintenant) ; réservée par A le 2026-11-18 sur
-      décision de l'utilisateur. Annonce « ⚠ Contrats » avant le code (manifeste terrain amendé : droit
-      terrain:parametres:modifier). Lot D, n° 1 du lot 4 (EPIC-226, EPIC-233). NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — prospera-plateforme#32 (dev 8c61c48, étiquette calendrier-distributeur-v1) ;
+      prospera-terrain-service#4 (dev fd5f4ee, d9b524f, 17bdba7) ; annonce « ⚠ Contrats » avant le code (docs #681,
+      manifeste terrain amendé : droit terrain:parametres:modifier). Q-D-9 renversée par l'utilisateur, appliquée : jours
+      travaillés et jours fériés (FIXE, PAQUES, DATE) en paramètre versionné de terrain (terrain_parametres, AD-12, C6),
+      GET|PUT /api/v1/terrain/parametres ; la route C13 d'import date chaque plan de journée par le calendrier de
+      l'organisation, lu dans la transaction du lot, et garde parametresVersion. Node 24 : plateforme 634 tests (0 fail) ;
+      terrain 348 unitaires, 29 e2e, 23 d'intégration ; mutations 16/16 et 13/13. Pile grp-d : 21/21, rejouée depuis
+      origin/dev. Q-D-11 au PO ; → B (le droit). Lot D, n° 1 du lot 4 (EPIC-226, EPIC-233). NON SLOTTÉE.
   - range: "STORY-1061"
     status: "RÉSERVÉ"
     owner: "Groupe D, lot 4 — la facture juste (2), suite de 1059 (EPIC-230) (ventes)"
