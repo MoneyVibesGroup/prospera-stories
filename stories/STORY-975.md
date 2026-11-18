@@ -1,6 +1,6 @@
 # STORY-975 : la comptabilité installable par le moteur
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne à grande (une identité de service dans un service dont la garde est globale, une vérification
 C13, un plan d'effacement complet sur des collections en ajout seul, la recopie des manifestes du catalogue, une preuve
@@ -107,9 +107,70 @@ l'offre d'essai.
 - **D-975-10 — `export`, `sante` et `migrer` restent à créer** : hors de la ligne du plan ; rien ne les appelle encore
   pour ce module (« Ce qui reste »).
 
+- **D-975-11 — Le jeton que le moteur présente est STATIQUE, limité à UNE organisation : à suivre par 1080.** Le
+  catalogue envoie `INSTALLATION_JETON_SERVICE` tel quel (STORY-944), alors que le jeton de service d'auth est limité à
+  une organisation (C2, STORY-948) et vit 300 s par défaut. Les routes du moteur (comptabilité, comme balance et bilan,
+  D-928-1) refusent donc `ORGANISATION_HORS_JETON` pour toute autre organisation que celle du jeton : `POST
+  /installations` n'aboutit que pour elle. La preuve l'a fait (jeton de l'organisation de démonstration, durée portée à
+  3 600 s). **Suite, chez B (catalogue)** : le moteur demande à auth un jeton par organisation
+  (`POST /api/v1/interne/jetons-de-service`, secret `MOTEUR_JETON_SERVICE`) avant chaque appel, gardé jusqu'à son
+  terme ; nécessaire à STORY-1080 (`cabinet-moteur` par `POST /installations` dans la recette).
+
+## Preuves
+
+- **Node 24** (étages `verification` construits depuis `git -c core.autocrlf=false archive` des branches, conteneurs
+  nommés) : comptabilité **56/56 suites, 815 passés** (3 sautés préexistants) ; catalogue **102/102 suites,
+  1 568/1 568**.
+- **`test:socle` de la comptabilité sur la pile `grp-b` (dette de 973) : 11/11 suites, 244/244**, dont
+  `instance.socle-spec.ts` 12/12 : vérification VERT sans état publié reçu (D-975-2), VERT puis ROUGE mesure 1
+  (exercice au journal sans plan arrêté), rejouée identique ; identité (401, 403 `IDENTITE_DE_SERVICE_REQUISE`,
+  `ORGANISATION_HORS_JETON`, `IDENTITE_DE_SERVICE_REFUSEE` sur une route métier, 401 `JETON_DE_SERVICE_INVALIDE`) ;
+  import 422 `OBJET_INCONNU` ; **effacement de 29 documents dans 16 collections** (tenue, plan, séries, piste, tête de
+  chaîne et tiers écrits par les vraies routes, en ajout seul ; écritures dont une à organisation en chaîne, lettrage,
+  clôture, balance publiée, outbox, état publié) : plus rien de l'organisation, l'autre organisation intacte ; rejeu
+  `DEJA_EFFACE` à la date du premier. Premier passage complet : `cloture` rouge une fois sur sa course D-970-10 (une
+  clôture au milieu de dix lettrages, 409) pendant une construction d'image ; seule puis au second passage complet :
+  verte (piège ci-dessous).
+- **Node 25** (poste) : comptabilité 794 passés, 4 suites rouges connues (binding de Confluent, copies comparées aux
+  checkouts) ; catalogue 1 549 passés, 3 suites rouges connues (binding). `tsc`, lint des fichiers touchés (`endOfLine
+  auto`), `manifestes:garde` **verte, 48 manifestes** (rouge avant : `terrain`, `facturation`, `comptabilite`,
+  `financement`). `git diff --stat` = `--ignore-cr-at-eol` dans les trois dépôts ; aucun fichier non suivi.
+- **Mutations, comptabilité : 20/20 rouges sur une assertion** (identité : organisation du chemin, autre identité,
+  jeton de service sur une route métier, revérification par les deux gardes, organisation du service projetée,
+  organisation malformée ; mesure : exercices scellés, sans plan, référentiel non tenu, par exercice au lieu de dossier,
+  appariement par exercice seul ; code hérité d'`Object` ; import en espace réel ; `DEJA_EFFACE` sur des données
+  revenues ; heure du conteneur ; tiers oubliés par le plan ; organisation sous sa seule forme ObjectId ; séries des
+  brouillards oubliées ; tout espace pris pour un essai). Trois ne compilaient pas d'abord (import devenu inutile,
+  TS6133) : réécrites, rouges.
+- **Pile `grp-b`** (compose racine + surcouche locale non versionnée : auth d'`origin/dev` `96f8ab3`, catalogue et
+  comptabilité des branches ; MongoDB en jeu de répliques, Kafka, Redis, MinIO Chainguard, mailhog) : les trois
+  `healthy` ; la comptabilité démarre avec `InstanceModule` (trois routes mappées), image `runtime` avec `ajv` (`npm ci
+  --omit=dev` vert) ; semis du catalogue « créés 29, rattachés 19, refusés 0 » (48, `financement` ACTIVE).
+  - **Réel, 17/17** : référentiel `syscohada-revise@2.3` au registre, offre `comptabilite` ; **`POST /installations` :
+    201, plan `TERMINE` en 1,1 s** — `INSCRIRE`, `VERIFIER referentiel-resolu` **VERT, mesure 0, non différée**,
+    `OUVRIR` ; droit `ACTIVE`, source `moteur:<plan>` ; la comptabilité projette `EN_SERVICE` (fait émis par le
+    catalogue). Rejouée avec la même clef : 200, le même plan (une autre clef : 409 `MODULE_DEJA_INSTALLE`). La
+    vérification appelée deux fois par le moteur : même corps, aucun document écrit ; utilisateur 403
+    `IDENTITE_DE_SERVICE_REQUISE`, sans jeton 401, autre organisation 403, route métier 403
+    `IDENTITE_DE_SERVICE_REFUSEE` ; import et effacement 403 `ESPACE_REEL_REFUSE`.
+  - **Essai, 6/6** (comptabilité relancée `KAFKA_ESPACE=ESSAI`) : import 422 `OBJET_INCONNU` (`objetsImportables: []`) ;
+    `FIN_CONTRAT` 422 ; effacement **`EFFACE`**, `effaceLe` = `demandeLe`, plus aucun document de l'organisation ; rejeu
+    **`DEJA_EFFACE`**, même date et même décompte ; la vérification répond aussi.
+- Après la fusion : **arbres identiques** aux branches éprouvées (`ddc9fa5^{tree}` = `030393c^{tree}`,
+  `a5a2676^{tree}` = `0d76007^{tree}`).
+- **Verrou Docker** : D le tenait (STORY-1063, 22:10) ; code, tests et mutations faits pendant l'attente (un seul
+  moniteur borné, ré-armé) ; pris à 22:55 (atomique), pile descendue avec ses volumes, images de la preuve retirées,
+  **rendu à 23:27** ; aucune boucle d'attente ne tourne après la remise.
+
+## Livraison
+
+🏁 **DONE (2026-11-18)** — `prospera-comptabilite-service` #12 (`dev` `dc6809d`, `ddc9fa5`) ;
+`platform-catalog-service` #62 (`dev` `a5a2676`) ; annonce avant le code : stories #713 (`5eb9d9a`).
+
 ## Ce qui reste
 
 - Les routes `export`, `sante` et `migrer` de la comptabilité (D-975-10).
 - La vérification rappellera le référentiel de `dossier-service` quand celui-ci admettra le moteur (STORY-1082 le fait
   pour la création du dossier de démonstration).
 - La comptabilité dans la recette, dans `INGESTION_SOURCE_SYSTEMS` et dans l'`AUTH_AUDIENCE` de l'IdP : STORY-1093.
+- Le jeton du moteur par organisation dans le catalogue (D-975-11) : avant STORY-1080.

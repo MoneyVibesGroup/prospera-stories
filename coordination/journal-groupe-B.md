@@ -93,9 +93,27 @@
      suites, 4 702 passés, 2 sautés, 0 échec ; conformité `rs-paiement` 15/15 (dont `factures-emises` 5/5 : 10 faits + 10
      routes concurrents ⇒ 1 naissance) ; pile `grp-b` 26/26 ; mutations 20/20.
      Verrou pris à 21:43 (atomique, après D-1062), rendu à 21:54 ; aucun conteneur, volume ni réseau `grp-b` ne reste.
-  - **Suivante : STORY-975** (la comptabilité installable par le moteur : `referentiel-resolu`, routes C13,
-    `POST /installations` de `comptabilite`, D-972-2 ; avec pile ; `test:socle` de 973 à y jouer ; recopier les
-    manifestes du catalogue, dont `financement`, vu à 977 et 1083).
+  8. ~~STORY-975~~ : **comptabilite #12** (`dc6809d`, `ddc9fa5` sur `dev`), **catalogue #62** (`a5a2676`), contrat
+     annoncé avant la fusion (stories #713). La comptabilité installable par le moteur (D-972-2 levée).
+     - Comptabilité : identité de service `MOTEUR` seule, limitée à l'organisation du chemin ; routes du moteur hors de
+       l'état publié et des droits, la garde restant globale (D-975-1, D-975-2) ; `referentiel-resolu` au contrat
+       `verification-installation@1` (référentiel arrêté des exercices au journal non clôturés, par dossier, D-975-3) ;
+       import C13 sans objet ; effacement complet d'une organisation d'essai par un plan gardé par un test qui lit TOUS
+       les schémas, seul chemin natif qui passe outre l'ajout seul (D-975-4 → 6).
+     - Catalogue : 48 manifestes recopiés (`manifestes:garde` verte : `terrain`, `facturation`, `comptabilite` à jour,
+       **`financement` 0.2.0 neuf** — le 403 `FINANCEMENT_NOT_ENTITLED` de 1083 venait de là) ; l'espace d'essai nomme
+       `comptabilite`. Les points vus à 977 et 1083 sont soldés.
+     Node 24 : comptabilité 815 passés (56/56), catalogue 1 568/1 568 ; **`test:socle` 11/11, 244/244 sur la pile (dette
+     de 973)** ; mutations 20/20. Pile `grp-b` : **`POST /installations` de `comptabilite` TERMINE en 1,1 s** (VERIFIER
+     VERT non différée, OUVRIR, `EN_SERVICE` projeté), routes du moteur 17/17 (réel) et 6/6 (essai).
+     Verrou pris à 22:55 (atomique, après D-1063), rendu à 23:27 ; aucun conteneur, volume ni réseau `grp-b` ne reste.
+     - **⚠ Pour 1080 (D-975-11)** : le catalogue présente un jeton de service STATIQUE (`INSTALLATION_JETON_SERVICE`),
+       or ce jeton est limité à UNE organisation (C2) et vit 300 s : les routes du moteur (comptabilité, balance, bilan)
+       refusent `ORGANISATION_HORS_JETON` toute autre organisation. Avant que `cabinet-moteur` installe par
+       `POST /installations`, le catalogue doit demander un jeton par organisation à auth (`POST
+       /api/v1/interne/jetons-de-service`, secret `MOTEUR_JETON_SERVICE`) et le garder jusqu'à son terme.
+  - **Suivante : STORY-1082** (le dossier de démonstration créé par le moteur : dossier, balance ; avec pile ; démarrage
+    réel de bilan avec `FinancementModule` à prouver par la première story qui lève bilan, 1083/1084).
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -837,6 +855,13 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
+- **← D (2026-11-18, STORY-1064) : `comptes` dans `jeu-demonstration@1` et la pose des comptes par le catalogue** —
+  **lue, gardée pour la remplaçante de B** (D-972-9, plan §3) ; pas dans STORY-975. La forme proposée (un `comptes`
+  facultatif à la racine du jeu, `{ fichier, enregistrements, sha256 }`, vérifié comme un objet, posé après l'import
+  des parts) convient a priori ; elle sera confirmée ou amendée ici à l'ouverture de la story.
+- **← D (2026-11-18, STORY-1063) : la part `reseau` du jeu 1.1.0** — **lue** : le jour où le catalogue monte
+  `jeu-grossiste-golfe-v1.1`, `reseau=http://reseau-service:3419` entre dans `INSTALLATION_SERVICES` de l'essai.
+
 - **← D (2026-11-17, STORY-1059) : consommer `facturation.facture.emise@1` dans `paiement`** — **servie par
   STORY-976** (paiement #124, `dev` `4684d22` ; annonce : stories #709). Groupe `paiement-factures`, depuis le début
   du topic : les factures déjà émises ouvrent leur Créance, celles que la route a ouvertes retombent sur leur clé sans
@@ -965,7 +990,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 - **2026-11-18, STORY-975 — la comptabilité sert ses routes C13 (vérification, import, effacement) et le catalogue
   recopie ses manifestes, annoncé AVANT le code** (`prospera-comptabilite-service` et `platform-catalog-service`,
   branches `MNV-975` ; fiche `stories/STORY-975.md`, D-975-1 → 10). **Aucune route, aucun champ, aucun topic existant
-  ne change** ; le manifeste `comptabilite` ne change que dans ses commentaires (0.1.0, D-975-9).
+  ne change** ; le manifeste `comptabilite` ne change que dans ses commentaires (0.1.0, D-975-9). **Fusionné le 18/11** :
+  comptabilite #12 (`dc6809d`, `ddc9fa5` sur `dev`), catalogue #62 (`a5a2676`), sans écart au contrat annoncé.
   - **comptabilité, routes neuves** (chemins déjà déclarés au manifeste), sous l'**identité de service `MOTEUR` seule**,
     limitée à l'organisation du chemin (jeton de `POST /api/v1/interne/jetons-de-service` d'auth-service) :
     - `POST /api/v1/instance/comptabilite/{organisationId}/verifications/referentiel-resolu` → 200
@@ -2032,6 +2058,20 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Le moteur présente un jeton STATIQUE limité à une organisation** (STORY-975, D-975-11) : pour qu'un
+  `POST /installations` aboutisse sur une pile, obtenir le jeton de l'organisation (`POST
+  /api/v1/interne/jetons-de-service`, en-tête `Bearer <MOTEUR_JETON_SERVICE>`) APRÈS le démarrage d'auth, puis relancer
+  le catalogue avec `INSTALLATION_JETON_SERVICE` ; `JETON_DE_SERVICE_DUREE_S=3600` sur auth (300 s par défaut).
+- **Un témoin semé à la main dans une base partagée du socle heurte les index uniques** (STORY-975) :
+  `balances_publiees.un_fait_par_publication` sur `eventId: null`. Lire `collection.indexes()` et donner une valeur
+  propre à chaque clé d'un index unique.
+- **`cloture.socle-spec` (course D-970-10, une clôture au milieu de dix lettrages) a rougi une fois (409) pendant une
+  construction d'image** (STORY-975) : verte seule, et au second passage complet. À relancer seule avant de conclure.
+- **Surcouche compose : un `context` relatif se lit depuis le dossier du PREMIER fichier** (le compose racine), pas
+  depuis la surcouche : écrire des chemins absolus.
+- **Une commande Bash au premier plan de plus de 180 s part en arrière-plan** : pour attendre (verrou, `docker wait`,
+  mutations) sans rendre la main, des attentes bornées `timeout 170 …` répétées, ou un seul moniteur ré-armé.
 
 - **Paiement sur une pile de preuve : `/health` rend 503 sans les deux URL du paiement instantané** (STORY-976) :
   `API_BUSINESS` est déclaré et `FOURNISSEUR_NON_CONFIGURE` tant que `PI_SPI_API_BASE_URL` et `PI_SPI_TOKEN_URL`
