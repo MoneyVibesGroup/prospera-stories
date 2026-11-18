@@ -892,6 +892,34 @@ reserved_ranges:
       🏁 DONE le 2026-11-17 — prospera-recette#25 (dev f7944dc). Lot 3 de A, n° 10 et dernière (dette 3 de STORY-918). D-929-1 (b) : le moteur ne peut pas ouvrir balance ni bilan par POST /installations
       tant que 6 routes de vérification ne répondent pas ; le PUT reste, écrit et éprouvé (ticket verifications-de-balance-et-de-bilan-non-servies, story nommée STORY-1080, id proposé). Espace de la pile
       en un réglage (RECETTE_ESPACE, REEL par défaut). Recette croisée complète 10/10 suites, 134/134 tests, 1 044 s, pile neuve grp-a, images construites depuis origin/dev ; 3 essais avant. NON SLOTTÉE.
+  # ── LOT 4 DE A (2026-11-18) : STORY-1080 → 1082, au-delà de la plage de D (1030 → 1079), hors des sous-plages
+  #    du 2026-11-14. Ordre validé par l'utilisateur le 2026-11-18 (journal de A, « État », lot 4). Fiches écrites
+  #    juste avant de coder ; le story_id_high_water_mark reste le plafond RÉELLEMENT écrit.
+  - range: "STORY-1080"
+    status: "RÉSERVÉ"
+    owner: "Groupe A, lot 4, n° 1 — balance et bilan servent leurs six routes …/verifications/… (verification-installation@1) ; la recette cabinet-moteur installe par POST /installations, le PUT de la console sort de la recette (balance, bilan, recette)"
+    source_doc: "prospera-stories/tickets/TICKET-BACKEND-verifications-de-balance-et-de-bilan-non-servies.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Nommée par STORY-929 (D-929-1). Réservée sur validation de l'utilisateur du 2026-11-18. Débloque la mise en
+      service du cabinet par le moteur ; le catalogue de la recette reçoit INSTALLATION_SERVICES ; le test D-929-1
+      s'inverse. NON SLOTTÉE.
+  - range: "STORY-1081"
+    status: "RÉSERVÉ"
+    owner: "Groupe A, lot 4, n° 2 — le relais BFF PATCH /dossiers/{id} s'ouvre au collaborateur (D-923-1 renversée par l'utilisateur le 2026-11-18) (admin-panel, dossier si le 409 muet de D12 manque)"
+    source_doc: "prospera-stories/stories/STORY-923.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Le plan du lot 3 disait « le collaborateur modifie l'identité d'un dossier par le BFF » ; 923 l'avait réservé à
+      TENANT_ADMIN. Prérequis à vérifier au rituel : le 409 de version muet (D12) côté dossier-service. NON SLOTTÉE.
+  - range: "STORY-1082"
+    status: "RÉSERVÉ"
+    owner: "Groupe A, lot 4, n° 3 — le dossier de démonstration créé dans dossier-service par le moteur (identité MOTEUR, espace d'essai) ; l'import C13 de balance le résout au lieu de le dériver ; la balance validée de la démo arrive à bilan (dossier, balance)"
+    source_doc: "prospera-stories/tickets/TICKET-BACKEND-dossier-de-demonstration-sans-creation-par-le-moteur.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Remplace D-928-3 (dossier dérivé et projeté dans balance seul), sur décision de l'utilisateur du 2026-11-18.
+      Ferme le ticket. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"

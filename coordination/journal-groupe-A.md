@@ -1,9 +1,42 @@
 # Journal du groupe A (poste principal)
 
 > Écrit par le groupe A seulement. Lot 1 : `PLAN-4-SESSIONS-2026-11-14.md` §3 (terminé). **Lot 2 :**
-> `PLAN-4-SESSIONS-LOT-2-2026-11-16.md` §2 (STORY-905 → 919), **terminé le 2026-11-16**.
+> `PLAN-4-SESSIONS-LOT-2-2026-11-16.md` §2 (STORY-905 → 919), **terminé le 2026-11-16**. **Lot 3 :** `PLAN-4-SESSIONS-LOT-3-2026-11-17.md` §2 (STORY-920 → 929), **terminé le 2026-11-17**. **Lot 4 :** ordre validé par l'utilisateur le 2026-11-18 (« État »), en attente du plan.
 
 ## État
+
+### Lot 4 (ordre validé le 2026-11-18) — en attente du plan
+
+- **Réponses de l'utilisateur (2026-11-18)** à l'analyse des journaux des lots 1 à 3 :
+  1. **Ordre du lot 4 de A, validé** : STORY-1080 d'abord, puis les demandes ouvertes de B et de D (ci-dessous).
+     Identifiants réservés au tracker : **STORY-1080 → 1082** (au-delà de la plage de D, 1030 → 1079).
+  2. **FE-069** : l'utilisateur s'en charge (porteur, date). A n'y touche pas sans consigne.
+  3. **D-923-1 renversée** : le relais BFF `PATCH /dossiers/{id}` s'ouvre au **collaborateur**, comme le plan du
+     lot 3 le disait ⇒ **STORY-1081**.
+  4. **D-928-3 remplacée** : le dossier de démonstration se crée dans `dossier-service`, par une route appelable par le
+     moteur ⇒ **STORY-1082** (ferme le ticket `dossier-de-demonstration-sans-creation-par-le-moteur`).
+  5. **Confirmés** : D-926-2 (balances anciennes `NON_ENREGISTREE`, sans migration), D-926-6 (route de provenance
+     sous `/balance/`), STORY-300 (tout membre du cabinet lit le fichier déposé).
+  6. **Gestes réservés, vérifiés le 2026-11-18** : « Rebase and merge » seul sur les 32 dépôts dont le compte voit les
+     réglages (dont `prospera-plateforme`, `reseau-service`, les cinq du distributeur, `centrale-service`,
+     `agent-instance`, `prospera-comptabilite-service`, les trois de C). Réglage invisible (compte en lecture seule) :
+     `prospera-frontend-admin-panel` (ancien ; la console vit dans `frontend-admin-panel`), `prospera-platform-config`,
+     `prospera-infra`, `moneyvibeswebsite`. **Node 24 toujours absent du poste principal** (nvm : 25.2.1 seule ;
+     Laragon : 22) : les `*.module.spec.ts` restent rouges en local (`bindings`).
+- **Ordre du lot 4 de A** (identifiants des points 4 et 5 : au plan du lot 4) :
+  1. **STORY-1080** : les six routes `…/verifications/…` de balance et de bilan (`verification-installation@1`) ;
+     `INSTALLATION_SERVICES` au catalogue de la recette ; `cabinet-moteur` installe par `POST /installations` (le
+     test D-929-1 s'inverse) ; ensuite seulement, D peut retirer le `PUT` de la console.
+  2. **STORY-1081** : relais BFF ouvert au collaborateur ; au rituel, vérifier le 409 de version muet (D12) côté
+     `dossier-service`.
+  3. **STORY-1082** : création du dossier de démonstration par le moteur (identité `MOTEUR`, espace d'essai) ; l'import
+     C13 de balance le résout au lieu de le dériver ; la balance validée de la démo arrive à bilan.
+  4. **Demandes de B** : (a) `comptabilite-service` dans le défaut d'`INGESTION_SOURCE_SYSTEMS` de balance (absent de
+     `dev` `98078b0`, vérifié le 18/11) ; (b) la comptabilité dans la recette (audience de l'IdP, service au compose) ;
+     (c) relecture de `kit-cible` 1.0.1 (D4 → D8 restent ouverts) ; (d) client admin Kafka gardé dans `/health` et
+     `renouveler()` sans attendre la fermeture (balance, bilan, fiscal, dossier, kyc).
+  5. **Demande de D** : la recette de la démo assurance dans `prospera-recette`, quand C aura le parcours
+     `SIN-2026-9002`.
 
 ### Lot 3 (depuis le 2026-11-17) — l'état courant
 
@@ -270,7 +303,7 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   - L'opérateur voit le texte composé avant d'envoyer, et un dépassement est refusé sans troncature.
   - D inscrit AP-38 à son tracker.
 
-- **→ B (2026-11-17) : le jeu du cabinet est dans `jeux-demonstration/cabinet-demo-togo/`** — **à faire par B, ouverte**. A a ajouté ce dossier (données seules, plateforme #25, `dev` `e958bd6`), sur la phrase du README « les jeux des verticales viennent de leurs propriétaires ». (1) La ligne du tableau « Qui écrit dans quel dossier » : `jeux-demonstration/cabinet-demo-togo/` → groupe A. (2) **L'étiquette `jeu-cabinet-v1`** : `generateur.source` du `jeu.json` la nomme (`prospera-plateforme@jeu-cabinet-v1:jeux-demonstration/cabinet-demo-togo/generateur/generer.mjs`) ; je n'en crée pas dans votre dépôt (D l'a fait pour `jeu-assurance-v1` ; si vous préférez qu'A le fasse, le dire ici). (3) Pour le catalogue : le dossier du jeu porte aussi `generateur/` (le vérificateur l'ignore) ; à `JEUX_DEMONSTRATION_DIR`, copier le dossier entier ou seulement `jeu.json` et `balance/`. Le jeu seul se rejoue : `node jeux-demonstration/cabinet-demo-togo/generateur/generer.mjs <dossier>` (même graine, mêmes empreintes). Les routes C13 de balance et de bilan viennent en STORY-928.
+- **→ B (2026-11-17) : le jeu du cabinet est dans `jeux-demonstration/cabinet-demo-togo/`** — ~~à faire par B~~ **servie par B (2026-11-17)** : plateforme #26 (`dev` `3407408`), étiquette `jeu-cabinet-v1` posée sur `e958bd6`. A a ajouté ce dossier (données seules, plateforme #25, `dev` `e958bd6`), sur la phrase du README « les jeux des verticales viennent de leurs propriétaires ». (1) La ligne du tableau « Qui écrit dans quel dossier » : `jeux-demonstration/cabinet-demo-togo/` → groupe A. (2) **L'étiquette `jeu-cabinet-v1`** : `generateur.source` du `jeu.json` la nomme (`prospera-plateforme@jeu-cabinet-v1:jeux-demonstration/cabinet-demo-togo/generateur/generer.mjs`) ; je n'en crée pas dans votre dépôt (D l'a fait pour `jeu-assurance-v1` ; si vous préférez qu'A le fasse, le dire ici). (3) Pour le catalogue : le dossier du jeu porte aussi `generateur/` (le vérificateur l'ignore) ; à `JEUX_DEMONSTRATION_DIR`, copier le dossier entier ou seulement `jeu.json` et `balance/`. Le jeu seul se rejoue : `node jeux-demonstration/cabinet-demo-togo/generateur/generer.mjs <dossier>` (même graine, mêmes empreintes). Les routes C13 de balance et de bilan viennent en STORY-928.
 
 ## Réponses aux demandes reçues
 
@@ -337,6 +370,12 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## Questions à l'utilisateur ou au PO
 
+- **Réponses du 2026-11-18** : voir « État », lot 4 (D-923-1 renversée ; D-928-3 remplacée par STORY-1082 ; D-926-2,
+  D-926-6 et la lecture du fichier déposé de 300 confirmées). **Restent retenues par défaut, sans réponse** : D-923-2,
+  D-924-1, D-925-1, D-927-3, D-929-1, D-929-2 ; la question de B (970) « rouvrir N quand N+1 est OUVERT » (défaut :
+  rien ne change chez A). **Pièces attendues de l'utilisateur** : le texte de la loi 2011-018 (901) ; l'avis d'un
+  fiscaliste sur les deux lectures de 568.
+
 - **STORY-300** : le mode de compatibilité par rôle des droits fiscaux (TENANT_ADMIN = tout, TENANT_USER = préparer)
   reste-t-il, et jusqu'à quand ? **Retenu par défaut (2026-11-15)**, selon la règle de l'utilisateur : « appliquer ce
   que A recommande, contestable après coup ».
@@ -368,7 +407,10 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
      `POST /installations` quand balance et bilan serviront leurs routes de vérification (C13, D-918-4). **Import et effacement servis par STORY-928 (2026-11-17) ; restent les `verifications/…`** (STORY-929).
   4. ~~**BFF** : `PATCH /dossiers/{id}` (916) n'est pas relayé pour le collaborateur ; le 409 de version doit rester muet
      côté écran.~~ **Faite par STORY-923 (2026-11-17).** Reste : la console doit migrer vers les routes d'installation (lot de D).
-  5. **Fiche dossier, surface 2 (complétude)** : ouverte, `tickets/TICKET-BACKEND-fiche-dossier-trois-surfaces.md`.
+  5. ~~**Fiche dossier, surface 2 (complétude)** : ouverte.~~ **Faite par STORY-924 (2026-11-17)**, ticket « trois surfaces » fermé. Reste le relais BFF de la complétude, à la demande de l'écran.
+
+- **Mise en service des invitations (569)** : poser `JETONS_DE_SERVICE` dans fiscal-service, `NOTIFICATION_*` et
+  `ESPACE_DECLARANT_URL` (fiche 569). Écrit jusqu'ici dans la relecture finale seulement.
 
 - **Audit fiscal (299)** : la suppression de la **dernière** entrée d'une chaîne est indétectable. Seul le rôle
   find+insert du compte l'empêche. L'ancre externe (empreinte de tête publiée) sera à décider avec la spine fiscale.

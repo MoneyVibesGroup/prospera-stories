@@ -3,7 +3,7 @@
 **Cible :** `dossier-service` (tenu par A), puis le jeu `cabinet-demo-togo` (STORY-927)
 **Ouvert par :** STORY-928 (A, 2026-11-17), décision D-928-3
 **Priorité :** Must avant que la démonstration du cabinet montre un bilan (EPIC-147, essai prospect, 15/01/2027) ; sans effet sur l'import et l'effacement
-**État :** 🟡 ouvert
+**État :** 🟡 ouvert — porté par **STORY-1082** (réservée le 2026-11-18, lot 4 de A, sur validation de l'utilisateur)
 
 ---
 
