@@ -72,6 +72,11 @@
   AC-8 clavier, relecture des réserves de FE-059 → 068.
 - **Suite du lot** : FE-034 (maquette à revalider par l'utilisateur), puis AP-38 (maquette console à valider).
 - **FE-146 créée (2026-11-18, demande de l'utilisateur)** : le message de l'Atelier pendant la propagation des axes (409 SYSTEME_COMPTABLE_INDETERMINE juste après la décision). Front seul, 3 pts, quatrième story du lot 4 de A, après AP-38.
+- **Comptabilité propre et export des clients (2026-11-18, demande de l'utilisateur)** : STORY-1094 (plan propre du
+  cabinet), 1095 (plan propre d'un client), 1096 (import du plan comptable de Sage 100) dans `comptabilite-service`
+  (tenu par B) ; écrans FE-147 (exporter la liste des clients, CSV ou Excel) et FE-148 (plan propre à l'écran). Règle
+  retenue : un compte propre est une subdivision d'une racine du référentiel, pour que la liasse reste juste.
+  Toutes non slottées : à placer au prochain plan.
 - **Passation** : `prospera-frontend-expert-comptable` reste tenu par A pour le lot 4 (FE-034) ; dernier commit sur
   `dev` : `6796601`.
 
