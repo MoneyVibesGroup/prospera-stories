@@ -1466,9 +1466,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-974.md"
     reserved_on: "2026-11-18"
     note: >
-      🚧 EN COURS le 2026-11-18 — contrat annoncé AVANT la fusion du code (« ⚠ Contrats » du journal de B). D-951-8 : la
-      story doit exister avant février ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A,
-      « Demandes aux autres groupes »). Lot 4 de B, n° 1 (EPIC-146), sans Docker (D-L4-3). NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — auth #45 (dev e83568d), catalogue #61 (dev a672a44) ; contrat annoncé avant la fusion
+      (stories #682 : PUT /interne/organisations/{id}/invitations sous l'identité du moteur, réel seul ; invites et
+      invitations dans mise-en-service.openapi.json 1.1.0 ; refus ESPACE_D_ESSAI_REFUSE, MEMBRE_EN_DOUBLE,
+      MEMBRE_EN_CONFLIT, COMPTE_DU_JEU_HORS_DU_REEL, TENANT_ROLE_INCONNU, TENANT_ROLE_NON_PROPOSE). Chaque membre de
+      l'essai naît dans le réel sous son identifiant (FR-42), INVITED, et reçoit l'invitation au nom de l'organisation ;
+      idempotente par membre ; la liste vient de l'ordre de la console (D-974-8). Node 25 : auth 102 suites 1423/1423,
+      catalogue 102 suites 1548/1548 ; câblage du module racine vert (rouge sans RbacModule) ; 21/21 mutations rouges.
+      Sans Docker (D-L4-3, D-974-11). D-951-8 tenue avant février. Lot 4 de B, n° 1 (EPIC-146). NON SLOTTÉE.
   - range: "STORY-975"
     status: "RÉSERVÉ"
     owner: "Groupe B, lot 4 — la comptabilité installable par le moteur : vérification referentiel-resolu (verification-installation@1), routes C13, POST /installations de comptabilite (D-972-2) (comptabilité)"
