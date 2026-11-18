@@ -69,9 +69,21 @@
      Rituel : aucune demande neuve à B ; **← D (18/11, information, STORY-1061)** lue : `numero` de
      `facturation.facture.emise@1` n'a plus de motif `FAC-` (c'est un libellé, la clé reste `factureId`) — à garder en
      tête pour STORY-976.
-  6. **STORY-1081 — en cours** (le relais BFF `PATCH /dossiers/{id}` ouvert au collaborateur, BFF et dossier, sans
-     Docker) : contrat annoncé avant le code (« ⚠ Contrats ») ; passations du BFF et de dossier constatées (voir
-     « Passations »).
+  6. ~~STORY-1081~~ : **dossier #56** (`82642d6` sur `dev`), **admin-panel #37** (`650ae23`), contrat annoncé avant la
+     fusion (stories #706). D-923-1 renversée par l'utilisateur : le collaborateur modifie l'identité d'un dossier de
+     son portefeuille, par le BFF comme en direct.
+     - dossier : `PATCH /dossiers/{id}` sans `@Roles` ; **la portée décide, dans `dossier-service` seul** (D-1081-1 :
+       le BFF n'a pas les affectations) ; hors portée ou « Mon cabinet » ⇒ 404. Le `409 DOSSIER_NIF_DEJA_UTILISE` ne
+       nomme le dossier en conflit que s'il est dans la portée de l'appelant (relecture sous `filtrePortee`), sinon
+       muet. `CONFLIT_CONCURRENT` était déjà muet ; des tests le figent pour le collaborateur.
+     - BFF : `@Roles(TENANT_ADMIN, TENANT_USER)` ; D-923-2 (code seulement) tenue.
+     Première story de B sur ces deux dépôts : **passations du BFF (`18a9893`) et de dossier (`768a4aa`) constatées**
+     (« Passations »). Node 25 : dossier 177/177 unitaires ciblés, 164/164 e2e (380 au complet), 7 suites rouges
+     préexistantes ; BFF 15/15 e2e (236 au complet), 533 unitaires ; mutations 7/7. **Sans Docker** (D-1081-7) : le
+     round-trip réel du collaborateur est une ligne à ajouter à la recette de **STORY-1080** (`cabinet-moteur`, parcours
+     923, aujourd'hui joué par l'administratrice).
+  - **Suivante : STORY-976** (`paiement` reçoit `facturation.facture.emise@1` et ouvre la créance ; première story de
+    B avec une pile, sous le verrou Docker du poste partagé avec D ; ← D (1061) : `numero` n'a plus de motif `FAC-`).
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -930,7 +942,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 - **2026-11-18, STORY-1081 — `PATCH /api/v1/dossiers/{id}` ouvert au collaborateur, dans `dossier-service` et dans le
   BFF, annoncé AVANT le code** (`prospera-dossier-service` et `prospera-admin-panel-service`, branches `MNV-1081` ;
   fiche `stories/STORY-1081.md`, D-1081-1 → 7). D-923-1 renversée par l'utilisateur (18/11). **Aucune route, aucun
-  champ, aucun code neuf** ; aucun topic touché.
+  champ, aucun code neuf** ; aucun topic touché. **Fusionné le 18/11** : dossier #56 (`82642d6` sur `dev`),
+  admin-panel #37 (`650ae23`), sans écart au contrat annoncé.
   - **dossier-service** : la route n'exige plus `TENANT_ADMIN` ; tout membre du cabinet modifie l'identité **dans sa
     portée** (`TENANT_USER` : dossiers dont il est responsable ou contributeur ; hors portée ou « Mon cabinet » ⇒
     `404 DOSSIER_INTROUVABLE`, jamais `403`). Le `403` « réservé à TENANT_ADMIN » de cette route disparaît.
@@ -1942,6 +1955,22 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **`grep -c $'\r$'` sous Git Bash rend 0 sur un fichier en CRLF** (STORY-1081 : dossier-service et BFF sont bien en
+  CRLF dans le checkout, `core.autocrlf=true`) : compter les fins de ligne par Python (`data.count(b'\r\n')`). L'outil
+  d'édition garde le CRLF ; un script de remplacement doit lire en binaire, normaliser en LF, vérifier le compte
+  attendu de chaque motif, puis réécrire dans la fin de ligne d'origine.
+- **dossier-service sous Node 25 : 7 suites rouges sur `origin/dev`** (6 binding de Confluent, dont le câblage du
+  module racine ; `registre-pays.coherence`, qui lit les dépôts voisins) ; **9 si le paquet fiscal embarqué
+  (`src/modules/portefeuille/echeance/assets/paquet-fiscal-togo-2026.json`) est sorti en CRLF** (empreinte fausse) :
+  le supprimer puis `git -c core.autocrlf=false checkout -- src/modules/portefeuille/echeance/assets/`.
+- **Le double Mongo de `dossiers.e2e-spec.ts` ne connaissait l'index du NIF qu'à la création** : 1081 l'a étendu à
+  `findOneAndUpdate` (le dossier modifié exclu). Tout test d'écriture du NIF par la modification passe par lui.
+- **Le filtre d'exceptions du BFF ajoute `requestId` à chaque corps d'erreur** : un test « au champ près » l'extrait
+  avant le `toEqual`.
+- **Pousser en force une branche de story est refusé par le poste** (classifieur du mode automatique, 18/11), même
+  avant toute PR : relire le message de commit (chiffres des preuves) **avant** le premier `git push`. Un écart se dit
+  dans la PR et la fiche.
 
 - **`eslint --fix` retire une assertion `as T` qu'il juge inutile, et le type se resserre** (STORY-1084) : un
   `{ ...partiel, x: 0 } as Hypotheses` est devenu `{ ...partiel, x: 0 }`, puis TS2345. Écrire la variable avec son
