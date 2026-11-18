@@ -1571,15 +1571,20 @@ reserved_ranges:
     note: >
       Lot 4 de B, n° 7 (avec pile). Fiche écrite juste avant de coder. NON SLOTTÉE.
   - range: "STORY-976"
-    status: "EN COURS"
+    status: "RÉSERVÉ"
     owner: "Groupe B, lot 4 — paiement consomme facturation.facture.emise@1 (groupe paiement-factures, depuis le début) et ouvre la Créance (FACTURE, factureId) par la même OuvrirLaCreance que la route de D-1059 ; idempotent par (source, sourceId) ; même résultat par le fait et par la route (D-965-9) (paiement)"
     source_doc: "prospera-stories/stories/STORY-976.md"
     reserved_on: "2026-11-18"
     note: >
-      Ouverte le 2026-11-18. Contrat annoncé avant le code (journal de B, « ⚠ Contrats ») : consommation neuve de
-      facturation.facture.emise (groupe paiement-factures), variable facultative KAFKA_FACTURES_GROUP_ID ; aucune
-      route, aucun champ, aucun topic publié ne change ; manifeste paiement inchangé (il déclarait déjà le fait). Lot 4
-      de B, n° 6 (avec pile) ; demande de D (STORY-1059). NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — prospera-paiement-service #124 (dev 4684d22) ; contrat annoncé avant la fusion
+      (stories #709 : consommation neuve de facturation.facture.emise, groupe paiement-factures, variable facultative
+      KAFKA_FACTURES_GROUP_ID ; aucune route, aucun champ, aucun topic publié ne change ; manifeste paiement inchangé).
+      Même OuvrirLaCreance que la route ; auteur MODULE FAIT_DE_FACTURE ; refus métier ignoré et journalisé ; aucune
+      garde d'accès au module sur le chemin du fait (D-976-3). Node 24 : paquets 130/130, service 347 suites, 4702
+      passés, 2 sautés, 0 échec ; conformité rs-paiement 15/15 (10 faits + 10 routes concurrents ⇒ 1 naissance) ;
+      pile grp-b 26/26 (fait ⇒ Créance en 2,9 s ; rejeux et route sans écriture ; même Créance et même état que la
+      route ; /health 200) ; 20/20 mutations rouges. Lot 4 de B, n° 6 (avec pile) ; demande de D (STORY-1059). NON
+      SLOTTÉE.
   - range: "STORY-977"
     status: "RÉSERVÉ"
     owner: "Groupe B, lot 4 — le droit terrain:parametres:modifier au catalogue de tenant d'auth, hors du jeton (droitsHorsJeton de /moi/droits, borne inchangée), rôles par défaut DIST_DG et DIST_ADMIN (demande de D, D-1060-6 ; sur le modèle de commande:parametres:modifier, STORY-971) (prospera-auth-service)"

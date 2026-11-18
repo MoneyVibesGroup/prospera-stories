@@ -82,8 +82,20 @@
      préexistantes ; BFF 15/15 e2e (236 au complet), 533 unitaires ; mutations 7/7. **Sans Docker** (D-1081-7) : le
      round-trip réel du collaborateur est une ligne à ajouter à la recette de **STORY-1080** (`cabinet-moteur`, parcours
      923, aujourd'hui joué par l'administratrice).
-  - **Suivante : STORY-976** (`paiement` reçoit `facturation.facture.emise@1` et ouvre la créance ; première story de
-    B avec une pile, sous le verrou Docker du poste partagé avec D ; ← D (1061) : `numero` n'a plus de motif `FAC-`).
+  7. ~~STORY-976~~ : **paiement #124** (`4684d22` sur `dev`), contrat annoncé avant la fusion (stories #709). `paiement`
+     consomme `facturation.facture.emise@1` (groupe `paiement-factures`, depuis le début) et ouvre la Créance par la
+     **même `OuvrirLaCreance`** que la route de D-1059 ; D-965-9 levée, demande de D servie.
+     - Lecture de la forme du fait seulement (`numero` sans `FAC-`) ; le domaine juge comme pour la route. Auteur
+       `MODULE` `FAIT_DE_FACTURE`. Refus métier ignoré et journalisé ; `ECRITURE_CONCURRENTE` et pannes relivrées.
+       Aucune garde d'accès au module sur ce chemin (D-976-3, contestable).
+     - Recette versionnée `scripts/recette/976/` (pile `grp-b`, émetteur de jetons de `ventes`, pilote).
+     Node 24 (étage `verification`, image depuis `git -c core.autocrlf=false archive`) : paquets 130/130, service 347
+     suites, 4 702 passés, 2 sautés, 0 échec ; conformité `rs-paiement` 15/15 (dont `factures-emises` 5/5 : 10 faits + 10
+     routes concurrents ⇒ 1 naissance) ; pile `grp-b` 26/26 ; mutations 20/20.
+     Verrou pris à 21:43 (atomique, après D-1062), rendu à 21:54 ; aucun conteneur, volume ni réseau `grp-b` ne reste.
+  - **Suivante : STORY-975** (la comptabilité installable par le moteur : `referentiel-resolu`, routes C13,
+    `POST /installations` de `comptabilite`, D-972-2 ; avec pile ; `test:socle` de 973 à y jouer ; recopier les
+    manifestes du catalogue, dont `financement`, vu à 977 et 1083).
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -825,6 +837,17 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
+- **← D (2026-11-17, STORY-1059) : consommer `facturation.facture.emise@1` dans `paiement`** — **servie par
+  STORY-976** (paiement #124, `dev` `4684d22` ; annonce : stories #709). Groupe `paiement-factures`, depuis le début
+  du topic : les factures déjà émises ouvrent leur Créance, celles que la route a ouvertes retombent sur leur clé sans
+  rien écrire. Une facture `A_OUVRIR` chez vous (paiement arrêté, puis `ventes` redémarré) s'ouvre donc sans membre.
+  Charge lue telle que vous l'avez fixée (`montantTtcMineur`, `numero` libellé sans `FAC-`, `livraisonId` `null` ⇒
+  absent). Rien à faire chez vous ; la route reste servie. `paiement.creance.changed@1` inchangé. Information
+  (D-976-7) : les motifs de votre schéma sont plus larges que ceux de la Créance (`tiersId` avec `:` ou `.`,
+  `factureId` qui commence par `_` ou `-`, `livraisonId` avec `:`) : une telle facture serait refusée
+  `CREANCE_INVALIDE` par la route comme par le fait.
+- **← D (2026-11-18, STORY-1061) : `numero` sans motif `FAC-`** — **lue**, tenue par STORY-976 (le numéro n'est pas
+  validé, c'est le libellé).
 - **← A (2026-11-18) : réponses de l'utilisateur à nos questions au PO** — **lues**. D-951-8 servie par STORY-974 ;
   **D-961-1 renversée, servie par STORY-973** (comptabilite #11, `dev` `dd3dc52`) ; D-972-6 et D-972-9 acceptées
   (la pose des comptes par le catalogue reste une remplaçante du lot 4) ; 970 : rien ne change.
@@ -941,7 +964,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 - **2026-11-18, STORY-976 — `paiement` consomme `facturation.facture.emise@1` et ouvre la Créance, annoncé AVANT le
   code** (`prospera-paiement-service`, branche `MNV-976` ; fiche `stories/STORY-976.md`, D-976-1 → 7). Demande de D
-  (STORY-1059) ; D-965-9 levée. **Aucune route, aucun champ, aucun topic publié ne change.**
+  (STORY-1059) ; D-965-9 levée. **Aucune route, aucun champ, aucun topic publié ne change.** **Fusionné le 18/11** :
+  paiement #124, `4684d22` sur `dev`, sans écart au contrat annoncé.
   - **Consommation neuve** : topic `facturation.facture.emise` (producteur `ventes`, schéma
     `facturation.facture.emise-value` au registre), groupe **`paiement-factures`**, depuis le début du topic. Champs
     lus : `eventId` (l'en-tête prime), `schemaVersion` (1), `occurredAt`, `organisationId`, `factureId` (le
@@ -1976,6 +2000,18 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Paiement sur une pile de preuve : `/health` rend 503 sans les deux URL du paiement instantané** (STORY-976) :
+  `API_BUSINESS` est déclaré et `FOURNISSEUR_NON_CONFIGURE` tant que `PI_SPI_API_BASE_URL` et `PI_SPI_TOKEN_URL`
+  manquent ; tout le reste est `up`. La pile de `scripts/recette/976/` pose le simulateur public : 200.
+- **Attendre qu'un consommateur ait traité un fait** : lire l'offset commité du groupe
+  (`kafka-consumer-groups --describe`, courant = fin du journal), pas une durée ; l'offset n'avance qu'après le
+  traitement (STORY-976).
+- **Mutation qui accepte un autre type** (`typeof x !== 'number' && typeof x !== 'string'`) : le rétrécissement de
+  `x` est perdu plus bas, elle ne compile pas. Muter aussi l'usage (`x as number`) dans la même mutation (STORY-976).
+- **La sous-session de story ne rend pas la main pour attendre le verrou** (STORY-976) : un rapport « inachevé » a été
+  rendu pendant l'attente de D, et la session de groupe a dû relancer. Attendre par moniteur borné, re-armé, sans
+  rapport intermédiaire.
 
 - **`grep -c $'\r$'` sous Git Bash rend 0 sur un fichier en CRLF** (STORY-1081 : dossier-service et BFF sont bien en
   CRLF dans le checkout, `core.autocrlf=true`) : compter les fins de ligne par Python (`data.count(b'\r\n')`). L'outil
