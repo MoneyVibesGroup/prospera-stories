@@ -44,6 +44,14 @@
   sans (D-901-5 et les lectures de 568 restent telles qu'appliquées). Réponses de l'utilisateur aux questions de B, C
   et D : « Demandes aux autres groupes » ; STORY-973, 974 (B), 1015 → 1017 (C) et 1060 (D) réservées au tracker.
 
+- **2026-11-18 (services du cabinet)** : sur demande de l'utilisateur, **PRD court** `prds/prd-services-cabinet-2026-11-18/`
+  (financement bancaire, archives du client, missions et facturation, paie ; FR-1 → FR-25 ; relu, corrigé) et **épics**
+  `epics-services-cabinet-2026-11-18.md` : EPIC-266 → 269, **cinq lots de quatre** (F1, F2, G1, M1, P1) :
+  STORY-1083 → 1092, écrans FE-140 → 145, console AP-50 → 53. **Consigne de l'utilisateur : les lots sont désormais de
+  quatre stories.** Le lot 4 de A (1080, 1081, 1082 + l'habilitation de `comptabilite-service` demandée par B) en fait
+  quatre. ⚠️ La paie entre dans Prospera (renverse FR-F28, D-SC-10). Gestes réservés : créer
+  `prospera-cabinet-service` et `prospera-paie-service` avant M1 et P1.
+
 ### Lot 3 (depuis le 2026-11-17) — l'état courant
 
 - ✅ **LOT 3 DE A TERMINÉ (2026-11-17) — en attente du plan suivant.** 920 → 929 : dix stories, toutes DONE le jour même.
