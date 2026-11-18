@@ -210,11 +210,33 @@
      jeton de l'associé, sans doublure de l'état publié** ; essai 19/19 — Kodjo, Folly, Akossiwa, Ayité posés ;
      connexion « en tant que » Kodjo (jeton `DIST_COMMERCIAL`), puis Ayité (`DIST_DG`). Verrou attendu (D-1059), pris à
      23:29, rendu à 23:45.
-  - **Story suivante : STORY-969** (le lettrage, `prospera-comptabilite-service`, EPIC-116 ; dépend de 968) : manuel,
-    automatique (montant, référence, date), partiel, délettrage, écarts de règlement (plan §3, ligne 969). À lire
-    avant : fiche 968 (D-968-9 : remplacer `AucunLettrage` du port `SOURCE_DES_LETTRAGES`, une ligne citée par
-    `<ecritureId>:<rang>`, montant lettré en valeur absolue à la date d'arrêté ; une écriture validée est
-    inaltérable, le lettrage s'écrit à côté). Droit déjà déclaré et attribué : `comptabilite:lettrage:realiser`.
+  16. ~~STORY-969~~ : **prospera-comptabilite-service #9** (`3f8806b` sur `dev`, rejoué de `a0af53a`, arbre
+     identique), contrat annoncé avant la fusion (stories #672). Le lettrage.
+     - `POST …/lettrages` : lignes VALIDÉES d'un même compte de tiers (racine du collectif, tiers, devise), équilibrées ;
+       `montant` par ligne = lettrage PARTIEL (la ligne garde son reste, jamais au-delà, même sous la concurrence :
+       verrou `comptes_de_lettrage` avancé dans la transaction) ; code AA, AB… par compte de tiers et exercice, jamais
+       réutilisé (D-969-1 → 4).
+     - **Écart de règlement** (`solderLEcart`, seuil `LETTRAGE_SEUIL_ECART` = 1 000) : écriture née validée et
+       numérotée au journal OD (`OD-000001`), piste `ECART_DE_REGLEMENT_PASSE` ; `comptes-d-ecart@1` : SN, SMT 658 /
+       758 ; CIMA 844 / 849 ; SFD-BCEAO aucun (D-969-8, D-969-9).
+     - **Automatique** : il PROPOSE (RÉFÉRENCE — champ ajouté `reference` de la ligne —, puis MONTANT_ET_DATE à 90
+       jours), il n'applique jamais ; acceptée telle quelle ⇒ `PROPOSE_PAR_LA_MACHINE`, reprise modifiée ⇒
+       `CHOISI_PAR_L_UTILISATEUR` (Q3, D-969-7).
+     - **Délettrage** en ajout seul (`delettrages`), tracé, refusé sur un exercice clos ; une écriture lettrée ne se
+       contre-passe pas (409 `ECRITURE_LETTREE`, D-969-10). Le lettrage ne touche aucune écriture (D-969-5).
+     - Le port `SOURCE_DES_LETTRAGES` de 968 lit les lettrages actifs datés à la date d'arrêté : `balanceAgee`
+       inchangé (D-969-6). Balance publiée inchangée (D-969-12). Aucun droit neuf (D-969-13).
+     Node 24 : 47 suites, 714 passés, 3 sautés ; `test:socle` 203/203 (26 neufs : 10 lettrages concurrents sur une
+     facture de 100 000 ⇒ 3 × 201, 7 × 409, 90 000 lettrés ; balance âgée avant / après au 30/04 et au 25/02 ; même
+     checksum avant et après un lettrage ; exercice clos) ; mutations 32/32 unitaires, 5/6 du socle (survivante nommée :
+     le `$inc` du verrou, redondant avec la tête de la piste chaînée) ; `docker compose up` sain, sept routes mappées.
+     Verrou pris à 01:54, rendu à 02:29.
+  - **Story suivante : STORY-970** (la clôture, `prospera-comptabilite-service`, EPIC-119 ; dépend de 966) :
+    centralisation ; à-nouveaux dérivés du grand livre ; réouverture tracée ; exercice clos inaltérable (plan §3,
+    ligne 970). **C'est la dernière story du plan du lot 3 pour B.** À lire avant : fiches 968 (« Pour la suite » : les
+    à-nouveaux des collectifs PAR TIERS) et 969 (« Pour la suite » : le non-lettré et le lettrage à reporter ; un
+    exercice clos refuse déjà lettrage, délettrage et propositions, 409 `EXERCICE_CLOS`). Droit déjà déclaré et
+    attribué : `comptabilite:exercice:cloturer` (à `CAB_ASSOCIE` seul, D-971-2).
   - **Restent ouverts avant le réel** (demandes « → A » plus bas) : `comptabilite-service` dans
     `INGESTION_SOURCE_SYSTEMS` de balance-service (sinon toute publication est rejetée `SOURCE_SYSTEM_INCONNU`) ; la
     comptabilité dans la recette (`AUTH_AUDIENCE`, compose). **Le module `comptabilite` est au catalogue depuis 972**
@@ -753,7 +775,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-18, STORY-969 — le lettrage, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`, EPIC-116 ;
-  fiche `stories/STORY-969.md`, D-969-1 → 14). Des routes, un champ et des collections AJOUTÉS, rien de renommé ; **un
+  fiche `stories/STORY-969.md`, D-969-1 → 14). **Fusionné le 18/11** : comptabilite #9, `3f8806b` sur `dev` (annonce :
+  stories #672), sans écart au contrat annoncé. Des routes, un champ et des collections AJOUTÉS, rien de renommé ; **un
   comportement change** : la contre-passation d'une écriture lettrée est refusée.
   - **Routes neuves** sous `/api/v1/dossiers/{d}/exercices/{e}`, écriture sous **`comptabilite:lettrage:realiser`**
     (déclaré en 958, attribué en 971 aux deux rôles du cabinet : **aucun droit neuf**) :
@@ -1573,6 +1596,21 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Un `open(p, 'w')` de Python sous Windows écrit des CRLF** (STORY-969) : un fichier LF réécrit ainsi change toutes
+  ses fins de ligne (`git diff --stat` le montre). Toujours `open(p, 'w', encoding='utf-8', newline='')`. Le worktree
+  `_wt-b-stories` est en `core.autocrlf=true` : ses fichiers sont en CRLF sur le disque ; une édition par script garde
+  le CRLF (le commit le normalise).
+- **Une erreur de type dans un module importé par `await import()` dans un `beforeAll` fait rougir TOUS les tests
+  sans aucun message** (STORY-969) : une mutation qui ne compile pas (`TS6133`, `TS2339`) passe pour « rouge (26) ».
+  Le script de mutations du socle lance d'abord `tsc --noEmit`.
+- **Les suites du socle partagent une base** (STORY-969) : un `countDocuments({ journal: 'OD' })` sans filtre compte
+  les écritures des autres suites (1 attendu, 12 lus). Filtrer par organisation ou exercice.
+- **`subprocess.run(['bash', …])` lance le bash de WSL** sous Windows, pas Git Bash : nommer le chemin complet de
+  Git Bash (`C:/Program Files/Git/usr/bin/bash.exe`). Un heredoc qui contient `\u` casse un script Python : l'écrire
+  avec l'outil d'écriture.
+- **La normalisation d'une référence ne retire que les espaces** : `fa-001` = `FA-001`, mais `fa 001` = `FA001` ≠
+  `FA-001` (STORY-969, le jeu de la preuve l'a appris).
 
 - **Une promesse rejetée qu'on n'attend pas encore fait tomber jest sous Node 25** (STORY-972) : un test qui crée trois
   appels d'un coup (`for (const p of [a(), b(), c()]) await refus(p)`) laisse un rejet sans gestionnaire pendant
