@@ -1368,9 +1368,16 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-969.md"
     reserved_on: "2026-11-18"
     note: >
-      🚧 EN COURS le 2026-11-18 — fiche, manifeste amendé (trois routes de lecture) et annonce du contrat (« ⚠ Contrats »
-      du journal de B) AVANT la fusion du code. Aucun droit neuf (comptabilite:lettrage:realiser, déclaré en 958 et
-      attribué en 971). Lot 3 de B, n° 15 (EPIC-116). NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — prospera-comptabilite-service #9 (dev 3f8806b) ; contrat annoncé avant la fusion
+      (stories #672 : POST …/lettrages, …/lettrages/propositions, …/propositions/{id}/acceptation,
+      …/lettrages/{id}/delettrage ; GET …/lettrages, …/lettrages/{id}, …/tiers/{t}/lignes-a-lettrer ; champ ajouté
+      reference ; contre-passation d'une écriture lettrée refusée, ECRITURE_LETTREE ; quinze refus neufs ; collections
+      lettrages, delettrages, propositions_de_lettrage, comptes_de_lettrage ; comptes-d-ecart@1 ; LETTRAGE_SEUIL_ECART ;
+      manifeste amendé). Aucun droit neuf. Node 24 : 714 passés / 0 échec / 3 sautés ; test:socle 203/203 sur MongoDB
+      8.0 rs0 et Kafka (10 lettrages concurrents sur une facture ⇒ 3 passent, 7 refusés, 90 000 lettrés sur 100 000 ;
+      balance âgée avant / après sur un jeu connu ; écart soldé par OD-000001 validée, 658 ; délettrage tracé ;
+      exercice clos refusé ; même checksum publié avant et après) ; 32/32 mutations unitaires, 5/6 du socle (une
+      survivante nommée) ; docker compose up sain. Lot 3 de B, n° 15 (EPIC-116). NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"

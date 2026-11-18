@@ -1,6 +1,6 @@
 # STORY-969 : le lettrage — manuel, automatique (montant, référence, date), partiel, délettrage, écarts de règlement
 
-Status: in-progress
+Status: done
 
 **Complexité :** élevée (un acte neuf sur des écritures inaltérables, qui vit à côté d'elles ; une borne qui doit
 tenir sous la concurrence ; une écriture d'écart passée selon les règles de 964 dans la transaction du lettrage ; la
@@ -153,11 +153,79 @@ validée.
 
 ## Ce qui a été livré
 
-_(à la fusion)_
+Deux PR fusionnées en « Rebase and merge » le 18/11, l'annonce d'abord.
+
+| Dépôt | PR | Sur la branche |
+|---|---|---|
+| `prospera-stories` | #672 (fiche, tracker, manifeste amendé, annonce du contrat, AVANT le code) | `main` `7009dfd` |
+| `prospera-comptabilite-service` | #9 | `dev` **`3f8806b`** (rejoué de `a0af53a` ; arbre identique) |
+
+- `src/lettrage/` (neuf) :
+  - `regles-du-lettrage.ts` : code AA…, lignes distinctes, ligne lettrable, un seul compte de tiers, montants à
+    lettrer (jamais au-delà du reste), équilibre et écart, type, date, décision sur la proposition ;
+  - `propositions.ts` : le lettrage automatique (RÉFÉRENCE, MONTANT_ET_DATE, fenêtre), pur et déterministe ;
+  - `ecarts-declares.json` (`comptes-d-ecart@1`) et `ecarts-de-reglement.ts` : comptes d'écart validés au chargement,
+    les deux lignes de l'écriture d'écart ;
+  - `lettrage.schema.ts` : `lettrages`, `delettrages`, `propositions_de_lettrage` (en ajout seul),
+    `comptes_de_lettrage` (versionnée) ;
+  - `registre-des-lettrages.ts` : le verrou du compte de tiers, les lettrages actifs d'une ligne, le port de la balance
+    âgée (`SOURCE_DES_LETTRAGES`), le refus de contre-passer une écriture lettrée ;
+  - `lettrage.service.ts`, `lettrage.controller.ts`, `lettrage.dto.ts`, `vue.ts`, `lettrage.module.ts`.
+- `src/tiers/tiers.module.ts` : `SOURCE_DES_LETTRAGES` ⇒ `RegistreDesLettrages` (à la place d'`AucunLettrage`) ;
+  `balance-agee.ts` inchangé.
+- `src/ecritures/` : `reference` sur la ligne (pièce, schéma, DTO, contrôleur, vue, contre-passation) ; la
+  contre-passation prépare puis verrouille les comptes de tiers de l'écriture et refuse une écriture lettrée.
+- `src/grand-livre/` : `reference` sur les mouvements. `src/config/` : `LETTRAGE_SEUIL_ECART` (validée au démarrage).
+  `src/common/refus.ts` (quinze refus neufs). `src/module.manifest.ts` recopié à l'octet depuis `main`. README,
+  `docker-compose.yml` (la variable).
+- `test/socle/lettrage.socle-spec.ts` (26 tests).
 
 ## Preuves
 
-_(à la fusion)_
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive` du commit poussé) :
+  **47 suites, 714 passés, 3 sautés** ; `npm run lint`, `tsc --noEmit` et `npm run build` verts.
+- **`npm run test:socle`** (vrai MongoDB 8.0 `rs0`, vrai Kafka ; doublures HTTP d'auth, de dossier-service et de
+  document-service), sous `timeout 1400` et `--forceExit` : **203/203**, dont 26 neufs. Horloge FIXÉE (2026-05-04),
+  seuil 1 000. Sur un jeu connu de sept pièces (CKODJO, CAFI, FSOTRA) :
+  - **référence** saisie, gardée, lue ; référence malformée 400 ;
+  - **refus nommés, rien d'écrit** : brouillard (`NON_VALIDEE`), ligne de produit (`HORS_COLLECTIF`), deux tiers ou
+    deux collectifs, déséquilibre (écart 68 000, non soldable), ligne en double, un seul sens, ligne ou écriture
+    introuvable, montant au-delà du reste (409, reste 59 000), proposition introuvable ; corps invalides 400 ; sans
+    `lettrage:realiser` 403 ;
+  - **automatique** : RÉFÉRENCE pour CKODJO (trois lignes, écart 600), MONTANT_ET_DATE pour CAFI (28 jours), rien pour
+    FSOTRA ; à 20 jours, CAFI n'est plus proposé ; acceptée telle quelle ⇒ AA COMPLET `PROPOSE_PAR_LA_MACHINE`, la
+    proposition citée `ACCEPTEE` dans la piste ; reprise modifiée ⇒ PARTIEL `CHOISI_PAR_L_UTILISATEUR`, `MODIFIEE` ;
+  - **partiel** : FSOTRA lettré à 120 000 sur 200 000, reste 80 000 ;
+  - **écart** : le solde à 600 près ⇒ 422 sans `solderLEcart` (soldable), puis `OD-000001` née validée, 411100 C 600
+    au tiers / 658 D 600, pièce du règlement, AB COMPLET ; écart de 2 000 ⇒ 422 `ECART_AU_DELA_DU_SEUIL`, aucune
+    écriture ; écart sur un partiel ⇒ 422 ; un client qui paie 300 de plus ⇒ `OD-000002`, 411200 D 300 / 758 C 300 ;
+  - **balance âgée avant / après** : au 30/04, CKODJO (600) et CAFI (0) sortent, FSOTRA garde −80 000 en 0-30 (une
+    ligne au lieu de sept) ; au 25/02, seul le lettrage daté du 20/02 compte (CKODJO 68 000, une ligne au lieu de
+    deux), CAFI et FSOTRA identiques à l'avant ; le collectif 411 concorde toujours ;
+  - **inaltérabilité** : la facture lettrée n'a pas changé d'un octet en base ; `updateOne` sur `lettrages` et
+    `delettrages` lève ; piste chaînée intacte ;
+  - **délettrage** : AB DEFAIT, tracé (`LETTRAGE_DEFAIT`), rejoué 409 ; les restes reviennent, la ligne d'écart
+    redevient ouverte (CKODJO solde 0 en trois lignes) ; relettré AVEC la ligne d'écart ⇒ AC (AB n'est pas
+    réutilisé), aucune écriture d'écart de plus ; la liste garde AB défait ;
+  - **contre-passation** : écriture lettrée ⇒ 409 `ECRITURE_LETTREE` (`codes: AA`) ; délettrée, contre-passée, puis
+    lettrée avec sa contre-passation (COMPLET) ;
+  - **concurrence** : dix lettrages simultanés de 30 000 sur une facture de 100 000 ⇒ trois 201 (AD, AE, AF), sept
+    409 `LIGNE_DEJA_LETTREE` ; 90 000 lettrés en base, reste 10 000 ; piste intacte ;
+  - **balance publiée** : publiée (201), lettrée, republiée ⇒ 200, même version, même `checksum`, rien dans l'outbox ;
+  - **exercice clos** : lettrage, délettrage et propositions ⇒ 409 `EXERCICE_CLOS` ; le lettrage se lit.
+- **Mutations** (« rouge » = `Tests: … failed` et aucune erreur de compilation) : **unitaires 32/32** (code, bornes du
+  reste, un seul sens, seuil, écart partiel, type, date, décision, devise, statut, sens, casse, doublon, partielle ;
+  écart de référence, fenêtre, plus proche, devise du groupe, montant égal, un seul sens d'une référence (deux règles),
+  ligne prise une fois, ligne sans reste, borne de la fenêtre ; sens de l'écart, charge, produit, classe du compte ;
+  seuil de l'environnement et son défaut ; référence gardée par la contre-passation ; garde de la contre-passation).
+  Quatre premières écritures n'étaient pas probantes (deux survivantes, une qui ne compilait pas, une introuvable après prettier) : deux tests renforcés, deux mutations réécrites. **Socle
+  5/6** : date d'arrêté ignorée par le port, lettrages défaits comptés, numéro provisoire sur l'écart, port vide,
+  exercice clos non contrôlé. **Survivante nommée** : le `$inc` de `version` du verrou retiré — équivalente
+  aujourd'hui, car la tête de la piste chaînée de l'exercice (écrite par tout acte) sérialise déjà les transactions ;
+  le verrou reste, pour ne pas dépendre de la piste et pour le compteur des codes.
+- **`docker compose -p grp-b --profile comptabilite up -d --build`** : conteneurs `healthy`, `/api/v1/health` 200,
+  les sept routes neuves mappées. Pile descendue avec ses volumes, image de vérification supprimée, **verrou Docker
+  rendu** (pris à 01:54, rendu à 02:29).
 
 ## Pour la suite
 
@@ -167,9 +235,9 @@ _(à la fusion)_
 
 ## Definition of Done
 
-- [ ] Tests unitaires (Node 24, étage `verification`), lint des fichiers touchés, `tsc`, build.
-- [ ] `test:socle` sur un vrai MongoDB 8.0 en jeu de répliques et un vrai Kafka, sous `timeout`.
-- [ ] Mutations rouges sur l'assertion (logique neuve).
-- [ ] `docker compose up` sain (module Nest neuf).
-- [ ] Balance publiée inchangée.
-- [ ] PR de code fusionnée en rebase ; PR de docs (fiche, tracker, journal).
+- [x] Tests unitaires (Node 24, étage `verification`), lint des fichiers touchés, `tsc`, build.
+- [x] `test:socle` sur un vrai MongoDB 8.0 en jeu de répliques et un vrai Kafka, sous `timeout`.
+- [x] Mutations rouges sur l'assertion (logique neuve).
+- [x] `docker compose up` sain (module Nest neuf).
+- [x] Balance publiée inchangée.
+- [x] PR de code fusionnée en rebase ; PR de docs (fiche, tracker, journal).
