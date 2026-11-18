@@ -1,6 +1,6 @@
 # STORY-1018 : l'indemnité proposée est arrondie, le décompte et le montant arrêté restent au franc (correctif de FR-73)
 
-Status: ready-for-dev
+Status: done
 
 **Complexité :** faible (une règle de comparaison, un détail de refus, des tests ; aucun contrat neuf)
 
@@ -64,3 +64,16 @@ peut même pas lui montrer le montant proposé. Et le test de référence de 780
 
 Tests purs et de service par chemin de fichier, mutation de AC-2, e2e HTTP du refus (AC-3), lint ; Node 24
 (étage `verification` ou nvm `24.22.3` sur le poste principal). Docker : non (aucune dépendance neuve).
+
+## Ce qui a été livré
+
+- **prospera-sinistres-service#25**, fusionnée en rebase : dev `034ddba` (branche `MNV-1018`, commit `3bd0bbc` avant rebase).
+- `jugerLArret` compare le montant arrêté à `indemniteCalculee` **et** à `reperePropose` ; le refus `MOTIF_ECRIT` porte
+  `details: { calcule, propose }` ; OpenAPI (DTO et contrôleur) décrit les deux montants. Aucun renommage, aucun contrat.
+- Tests : AC-1 → AC-4, AC-6, AC-7 en tests purs (`evaluation.spec.ts`, cas 752 000 → 702 000 / 700 000 et 347 400 → 297 400
+  / 295 000), AC-5 au service (`dossiers.service.spec.ts`), AC-3 en e2e HTTP. Mutation de AC-2 (retirer la comparaison au
+  repère) : rouge.
+- Node 24 (image `verification`) : e2e 27/27, build 0 ; unitaires sur MongoDB réel : `dossiers.service.spec` 214/214 seul
+  (la suite complète en `-w 2` a rougi au hasard sur 5 tests sans rapport : piège connu, voir le journal). Rejeu depuis
+  `dev` : l'arbre de `dev` est identique à celui de la branche vérifiée (aucun commit intercalé).
+- Reste : l'écran « Pourquoi ce montant ? » (FR-74) lira `details.propose` et `reperePropose`.
