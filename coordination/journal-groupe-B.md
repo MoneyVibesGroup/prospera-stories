@@ -25,7 +25,21 @@
      Docker** : le démarrage se verra à STORY-1080 (D-974-11). Aucun dépôt de A touché : la passation de A
      (balance `98078b0`, bilan `1651d33`, dossier `768a4aa`, BFF `18a9893`, recette `f7944dc`) reste à constater par la
      première story de B sur ces dépôts (1083).
-  - **Suivante : STORY-973** (le plan SMT propre, comptabilité, sans Docker).
+  2. ~~STORY-973~~ : **comptabilite #11** (`dd3dc52` sur `dev`), contrat annoncé avant la fusion (stories #687). Le
+     plan SMT propre (D-961-1 renversée par l'utilisateur).
+     - Plan SMT version 2 : le **journal de trésorerie** `TR` (recettes et dépenses, nature neuve `TRESORERIE`) et les
+       à-nouveaux `AN` (lus par la clôture, le grand livre et la balance, D-973-2). Un exercice arrêté en `SMT@1` garde
+       ses six journaux.
+     - Deux formes de plan reconnues à leurs natures, sans nommer de référentiel (D-973-3) : partie double ou
+       trésorerie, jamais mêlées ; démarrage refusé sinon.
+     - Lettrage avec écart sans journal d'OD : 409 `JOURNAL_DES_OPERATIONS_DIVERSES_ABSENT` au lieu d'une 500
+       (D-973-5).
+     Node 25 : 741 passés (4 suites rouges à l'identique sur `origin/dev`) ; 10/10 mutations. **Sans Docker** :
+     `test:socle` à jouer à STORY-975.
+  - **Suivante : STORY-1083** (le dossier de financement existe, bilan, sans Docker). Première story de B sur un dépôt
+    de A : constater la passation (bilan `1651d33`) et l'écrire ici.
+  - **Demande reçue, pas encore servie** : `terrain:parametres:modifier` au catalogue de tenant d'auth (← D, 18/11,
+    sans urgence ; voir « Réponses aux demandes reçues »).
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -748,6 +762,14 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
+- **← A (2026-11-18) : réponses de l'utilisateur à nos questions au PO** — **lues**. D-951-8 servie par STORY-974 ;
+  **D-961-1 renversée, servie par STORY-973** (comptabilite #11, `dev` `dd3dc52`) ; D-972-6 et D-972-9 acceptées
+  (la pose des comptes par le catalogue reste une remplaçante du lot 4) ; 970 : rien ne change.
+- **← D (2026-11-18, STORY-1060) : `terrain:parametres:modifier` au catalogue de tenant** — **reçue, pas encore
+  servie** (sans urgence, aucun écran ne l'appelle). Lue au rituel de STORY-973 (une story = une sous-session) : à
+  servir par une story de B dans auth (code hors du jeton, rôles par défaut `DIST_DG` et `DIST_ADMIN`, comme
+  `commande:parametres:modifier`), à placer par la session de groupe.
+
 - **← D (2026-11-17, STORY-1058) : le jeu « Grossiste du Golfe »** — **servie par STORY-972** (fiche
   `stories/STORY-972.md`).
   1. **README** : plateforme #31 (`dev` `a06d8c9`), la ligne des trois dossiers → groupe D, `jeu-grossiste-golfe-v1`.
@@ -850,8 +872,9 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-18, STORY-973 — le plan SMT propre, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
-  EPIC-112 ; fiche `stories/STORY-973.md`, D-973-1 → 7). D-961-1 renversée par l'utilisateur. Rien n'est renommé ;
-  une valeur d'énumération et un refus AJOUTÉS.
+  EPIC-112 ; fiche `stories/STORY-973.md`, D-973-1 → 7). **Fusionné le 18/11** : comptabilite #11, `dd3dc52` sur
+  `dev` (annonce : stories #687), sans écart au contrat annoncé. D-961-1 renversée par l'utilisateur. Rien n'est
+  renommé ; une valeur d'énumération et un refus AJOUTÉS.
   - **Plan SMT, version 2** (`plans-de-journaux@1`, donnée du service) : le **journal de trésorerie** `TR`
     (« Journal de trésorerie (recettes et dépenses) », nature neuve `TRESORERIE`) et le journal des à-nouveaux `AN`
     (D-973-2), au lieu de `AC VE BQ CA OD AN`. SN, SFD-BCEAO et CIMA ne changent pas (six journaux, version 1). Un
@@ -1726,10 +1749,10 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Questions à l'utilisateur ou au PO
 
-- **STORY-961, le plan de journaux du SMT** (D-961-1) : le système minimal de trésorerie tient, selon l'AUDCIF, un
-  journal de trésorerie (recettes et dépenses) plutôt que des journaux d'achats et de ventes. Choix par défaut : le
-  plan SMT déclare les six journaux, comme SN, puisqu'un exercice SMT tenu AU JOURNAL tient une comptabilité en
-  partie double ; un plan SMT propre se déclarerait en version 2, sans code. Contestable.
+- ~~**STORY-961, le plan de journaux du SMT**~~ (D-961-1) : **renversée** par l'utilisateur (18/11) et **servie par
+  STORY-973** : le plan SMT déclare le journal de trésorerie (recettes et dépenses) et les à-nouveaux. Restent
+  contestables D-973-2 (le journal `AN` gardé), D-973-5 (l'écart de règlement refusé sans journal d'OD) et D-973-6
+  (aucun compte de trésorerie imposé dans `TR`).
 - **STORY-960, les droits d'`automatisations`** (D-960-10) : l'annexe B (et l'annexe A, C7) du PRD distributeur
   nomment `automatisations:regle:gerer`, `:regle:activer`, `:cible:valider`, `:journal:consulter` ; le manifeste
   `manifestes/automatisations.manifest.ts` déclare `:regle:ecrire`, `:regle:activer`, `:arbitrage:decider`,
@@ -1761,6 +1784,16 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une donnée validée au chargement fait d'une mutation un échec de chargement** (STORY-973) : changer la règle des
+  plans de journaux (`FORMES_DE_PLAN`) rend le plan livré invalide, et toute la suite tombe en « Test suite failed to
+  run » au lieu de rougir sur une assertion. Muter la règle par ses refus (message, nature étrangère admise) ou la
+  donnée par un champ que les tests lisent (version, code, libellé).
+- **Quatre suites de la comptabilité sont rouges sous Node 25 sur `origin/dev`** (STORY-973) : `auth/gardes.spec` et
+  `acces/etat-publie.spec` (binding de Confluent), `series-des-journaux.spec` et `module.manifest.spec` (« la copie EST
+  la source » : comparées aux checkouts locaux de `prospera-plateforme` et `prospera-stories`, qui ne sont pas à
+  l'étiquette). Témoin par `git stash` avant de conclure ; elles passent dans l'étage `verification` (Node 24, sans les
+  checkouts).
 
 - **Sous Node 25, le câblage du module racine rougit sans rien dire du câblage** (STORY-974) :
   `app-cablage.invariant.spec.ts` et les suites `src/kafka/*` tombent sur « Could not locate the bindings file »

@@ -1465,9 +1465,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-973.md"
     reserved_on: "2026-11-18"
     note: >
-      🚧 EN COURS le 2026-11-18 — contrat annoncé AVANT la fusion du code (« ⚠ Contrats » du journal de B). D-961-1
-      renversée par l'utilisateur ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A,
-      « Demandes aux autres groupes »). Lot 4 de B, n° 2 (EPIC-112), sans Docker (D-L4-3). NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — comptabilite #11 (dev dd3dc52) ; contrat annoncé avant la fusion (stories #687 :
+      TRESORERIE dans NatureDeJournal ; plan SMT version 2, journal de trésorerie TR et à-nouveaux AN ; refus 409
+      JOURNAL_DES_OPERATIONS_DIVERSES_ABSENT au lettrage avec écart). D-961-1 renversée par l'utilisateur ; réservée
+      par A le 2026-11-18 (journal de A, « Demandes aux autres groupes »). Deux formes de plan reconnues à leurs
+      natures (partie double ou trésorerie, jamais mêlées). Node 25 : journaux et lettrage 116 passés, suite complète
+      741 passés (4 suites rouges à l'identique sur origin/dev : binding de Confluent, copies locales) ; lint, tsc,
+      build verts ; 10/10 mutations rouges. Sans Docker (D-L4-3) : test:socle à jouer à STORY-975. Lot 4 de B, n° 2
+      (EPIC-112). NON SLOTTÉE.
   - range: "STORY-974"
     status: "RÉSERVÉ"
     owner: "Groupe B — l'invitation au réel à la mise en service (AD-15) : une route d'invitation pour l'identité de service du moteur dans auth, appelée à la mise en service (auth, catalogue)"
