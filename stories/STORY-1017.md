@@ -1,6 +1,6 @@
 # STORY-1017 : la déclaration rapide, la fiche pré-remplie depuis le texte d'un message WhatsApp ou d'un e-mail
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (une extraction par règles explicables, un registre de l'IA sur deux bancs, un port de lecture des polices, deux routes)
 
@@ -81,4 +81,16 @@ Tests purs et de service (bancs mémoire et MongoDB réel), mutation d'un AC cl�
 
 ## Ce qui a été livré
 
-*(à remplir à la fusion)*
+**2026-11-18** — `prospera-sinistres-service` **#26** (`dev` 6d81cc4, un commit rejoué en « Rebase and merge », branche
+vérifiée = `dev` : `git diff` vide). Écrite sans Docker pendant la pause (le groupe A tenait le poste pour FE-069), vérifiée
+au retour de Docker : passée **avant** STORY-1015.
+
+- `src/modules/sinistres/declaration-rapide/` : `extraction.ts` (pur, règles explicables), `declaration-rapide-2026.1.json`
+  (figé, empreinte), `extracteur.ts` (port `ExtracteurDeDeclaration`, `origine: REGLE`), `port-de-polices.ts` (lecture
+  d'`assurance` par le numéro), `registre-de-l-ia.ts` (mémoire et Mongo, `sinistres_ia_registre`), service, contrôleur,
+  invariant de routes ; module câblé ; e2e `test/declaration-rapide.e2e-spec.ts`.
+- Preuves Node 24 sur MongoDB réel : lint 0 ; unitaires `Test Suites: 1 skipped, 63 passed` (1268 tests) ; e2e
+  `4 passed` (33 tests) ; build 0 ; `docker compose up` : service healthy, `/api/v1/health` ok (mongodb, kafka, redis up),
+  aucune `UnknownDependenciesException` ; mutation de AC-2 : 2 tests rouges. Aucune suite MongoDB rouge au hasard cette fois.
+- Reste : l'écran « Déclarer » et le dépôt du vocal comme pièce (`ged`) ; la lecture du registre et le fait de décision
+  (D-1017-8) ; la recherche de police par plaque ou téléphone (D-1017-4).

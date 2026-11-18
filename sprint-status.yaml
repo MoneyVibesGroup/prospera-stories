@@ -1839,13 +1839,6 @@ reserved_ranges:
     reserved_on: "2026-11-18"
     note: >
       Suite de D-1013 acceptée ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). NON SLOTTÉE.
-  - range: "STORY-1017"
-    status: "RÉSERVÉ"
-    owner: "Groupe C — la déclaration rapide : la fiche de déclaration pré-remplie depuis un message WhatsApp ou un e-mail (FR-34, FR-35, EPIC-206, EPIC-217), modèle de la démo DeclarationIA (sinistres, ia)"
-    source_doc: "prospera-stories/prds/prd-assurance-2026-11-13/prd.md"
-    reserved_on: "2026-11-18"
-    note: >
-      Demandée par l utilisateur ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). Texte seulement tant que l utilisateur n a pas tranché le vocal (FR-35, D13). NON SLOTTÉE.
   - range: "STORY-1018"
     status: "RÉSERVÉ"
     owner: "Groupe C — correctif de FR-73 : l indemnité proposée arrondie à 5 000 et le décompte au franc sont tous deux conformes à l arrêt de l évaluation (pas de motif), le refus MOTIF_ECRIT nomme les deux, le montant arrêté reste au franc (sinistres)"
@@ -1857,6 +1850,18 @@ reserved_ranges:
       🏁 DONE le 2026-11-18 — prospera-sinistres-service#25 (dev 034ddba) : arrêt au décompte OU à l'indemnité proposée sans
       motif, MOTIF_ECRIT nomme calcule et propose, montant arrêté au franc, OpenAPI ; Node 24 : e2e 27, build 0, unitaires
       MongoDB réel verts (fichier de service seul). Lot 4 de C, n° 1. NON SLOTTÉE.
+  - range: "STORY-1017"
+    status: "DONE"
+    owner: "Groupe C — la déclaration rapide : la fiche de déclaration pré-remplie depuis le texte d'un message WhatsApp ou e-mail (FR-34, FR-35, EPIC-206, EPIC-217), règles explicables, registre de l'IA (sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1017.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Demandée par l utilisateur ; réservée par A le 2026-11-18. 🏁 DONE le 2026-11-18 — prospera-sinistres-service#26 (dev
+      6d81cc4) : POST /declarations-rapides et POST .../decision, chaque champ avec confiance et extrait, police inconnue
+      jamais proposée, type incertain jamais inventé, vocal non lu (RANGER_COMME_PIECE), registre sinistres_ia_registre
+      sur deux bancs, brouillon dans la ligne du registre (aucun dossier) ; Node 24 : lint 0, unitaires MongoDB réel 63
+      suites / 1268 tests, e2e 4 suites / 33 tests, build 0, docker compose up healthy. Passée avant 1015 pendant la
+      pause Docker. Lot 4 de C, n° 3. NON SLOTTÉE.
   - range: "STORY-1009"
     status: "RÉSERVÉ"
     owner: "Demander des pièces complémentaires pendant l'instruction : la liste des pièces attendues s'allonge avec un motif, les relances de 999 la reprennent (sinistres)"
