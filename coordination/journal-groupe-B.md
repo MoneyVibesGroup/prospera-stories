@@ -46,8 +46,9 @@
        `prospera-stories/manifestes` : `npm run manifestes:garde` est **rouge** (`terrain : droits[11]`, le droit de
        D-1060 ; `comptabilite` : `avertissementDesinstallation`, `routesLectureSeule[17 → 21]`). Sans effet sur auth ;
        à recopier (`npm run manifestes:copier`) par la prochaine story de B qui touche le catalogue.
-  - **Suivante : STORY-1083** (le dossier de financement existe, bilan, sans Docker). Première story de B sur un dépôt
-    de A : constater la passation (bilan `1651d33`) et l'écrire ici.
+  4. 🚧 **STORY-1083** (le dossier de financement existe, bilan + auth, sans Docker) : **en cours** (fiche
+     `stories/STORY-1083.md`, D-1083-1 → 17 ; contrat annoncé ci-dessous, « ⚠ Contrats », avant le code). Première
+     story de B sur un dépôt de A : **passation de bilan constatée** (voir « Passations »).
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -440,6 +441,14 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 `dev` posées par STORY-955).
 
 ## Passations
+
+- **Reçue le 2026-11-18 (D-L4-1) : `prospera-bilan-service`**, de A, pour le lot 4. **Constatée par STORY-1083** :
+  `origin/dev` = **`1651d33`** (STORY-928), le commit nommé par A ; **rien n'a bougé depuis**. Le checkout du poste
+  (`bilan-service`) était sur `dev` à `3f8e235`, 13 commits derrière, avec des `node_modules` du 15/11 (`ajv` 6,
+  `kafkajs`) : branche partie d'`origin/dev`, `npm ci --ignore-scripts` (Node 25 ; le client de Confluent n'a pas son
+  binding, voir « Pièges »). Deux brouillons non suivis du 15/11 (`cr-map.txt`, `cr-postes.txt`) restent hors de tout
+  commit. Balance (`98078b0`), dossier (`768a4aa`), BFF (`18a9893`) et recette (`f7944dc`) : à constater par la
+  première story de B qui les touche (1081 pour le BFF et dossier).
 
 - **→ D (2026-11-17) : `prospera-notification-service` est à D** (lot 3, D-L3-3), à la fusion de STORY-957.
   **Dernier commit de B sur `dev` : `5e6c553`** (notification #89, rejoué en rebase ; arbre identique à celui éprouvé).
@@ -883,6 +892,39 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-18, STORY-1083 — le module `financement` (M49) dans bilan-service, et ses trois droits dans auth,
+  annoncés AVANT la fusion du code** (`prospera-bilan-service` et `prospera-auth-service`, branches `MNV-1083` ; fiche
+  `stories/STORY-1083.md`, D-1083-1 → 17 ; manifeste `manifestes/financement.manifest.ts`). Tout est AJOUT : aucune
+  route, aucun champ, aucun topic existant ne change de forme.
+  - **Manifeste neuf** `financement` 0.1.0 (verticale cabinet, `depends: bilan`, profil compose `bilan`), copié à
+    l'octet dans bilan (`src/vendor/manifestes/`). **Pas encore au catalogue** (D-1083-5 : la copie des manifestes du
+    catalogue est déjà en retard ; à recopier par 975) : tant que le moteur ne publie aucun état pour `financement`,
+    toutes ses routes répondent 403 `FINANCEMENT_NOT_ENTITLED`.
+  - **Routes neuves de bilan** (sous `/api/v1/dossiers/{dossierId}/financements`, portée du dossier, `TENANT_ADMIN`
+    et `TENANT_USER`) : `POST /`, `GET /`, `GET /{financementId}`, `PATCH /{financementId}`,
+    `POST /{financementId}/transitions`, `POST /{financementId}/versions`, `GET /{financementId}/versions`,
+    `GET /{financementId}/versions/{version}`. États `BROUILLON`, `PRET`, `REMIS`, `ACCORDE`, `REFUSE`, `ABANDONNE`.
+  - **Refus neufs** : 403 `FINANCEMENT_NOT_ENTITLED`, `DROIT_INSUFFISANT` (`details.droit`) ; 503
+    `DROITS_INDISPONIBLES` ; 404 `DOSSIER_FINANCEMENT_INTROUVABLE`, `VERSION_INTROUVABLE` ; 409
+    `TRANSITION_INTERDITE` (`details.depuis`, `details.vers`), `VERSION_FIGEE_ABSENTE`,
+    `DOSSIER_FINANCEMENT_NON_MODIFIABLE`, `CONFLIT_CONCURRENT` ; 422 `TRANSITION_INCOMPLETE` (`details.champs`).
+    `ABONNEMENT_EXPIRE`, `EMAIL_NOT_VERIFIED`, `KYC_NOT_APPROVED` gardent leur sens.
+  - **Piste d'audit** (`GET /dossiers/{id}/bilan/audit`) : quatre valeurs AJOUTÉES à `type` — `FINANCEMENT_CREE`,
+    `FINANCEMENT_MODIFIE`, `FINANCEMENT_ETAT_CHANGE`, `FINANCEMENT_VERSION_OUVERTE`.
+  - **Bilan lit `GET /api/v1/moi/droits` d'auth** (jeton du membre relayé ; nouveau pour ce service). Variable
+    `AUTH_SERVICE_URL` **facultative** (défaut : l'origine d'`AUTH_JWKS_URI` + `/api/v1`) : aucun compose à changer.
+  - **Bilan projette l'état publié de `financement`** depuis le même `etat-publie.changed.<espace>` (collection
+    `etats_publies_financement`). Collections neuves `dossiers_financement`, `versions_dossier_financement` (dans le
+    plan d'effacement C13 de bilan).
+  - **Auth** (`DROITS_HORS_JETON`, section `financement`) : `financement:dossier:preparer` (« Préparer un dossier de
+    financement »), `financement:dossier:valider` (« Valider un dossier de financement »),
+    `financement:dossier:consulter` (« Consulter les dossiers de financement »). **Jamais dans `perms[]`** (borne
+    du jeton inchangée). Attribution par la table d'accès du cabinet : préparer et consulter à `CAB_ASSOCIE` et
+    `CAB_COLLABORATEUR`, valider à `CAB_ASSOCIE` (PRD §2.3). Contrat `moi-droits` 1.1.0 et
+    `identity.droits.changed@1` inchangés.
+  - **Pour A** (écrans, FE-140) : types à générer depuis l'OpenAPI vivant de bilan quand l'écran viendra ; un
+    collaborateur n'a pas `valider` (« Valider » caché). **Pour C, D** : rien chez vous.
 
 - **2026-11-18, STORY-977 — `terrain:parametres:modifier` au catalogue de tenant d'auth, hors du jeton, annoncé AVANT
   la fusion du code** (`prospera-auth-service`, branche `MNV-977` ; fiche `stories/STORY-977.md`, D-977-1 → 7).
