@@ -52,6 +52,16 @@
   quatre. ⚠️ La paie entre dans Prospera (renverse FR-F28, D-SC-10). Gestes réservés : créer
   `prospera-cabinet-service` et `prospera-paie-service` avant M1 et P1.
 
+### Lot 4 (proposé le 2026-11-18) — `PLAN-4-SESSIONS-LOT-4-2026-11-18.md`
+
+- **Consigne de l'utilisateur (18/11)** : le backend de A (1080 → 1084, 1093) est fait par **B, sur l'autre poste** ;
+  A, avec l'utilisateur, fait les **écrans** : FE-069 (en cours, tenue par l'utilisateur), puis **FE-034** et **AP-38**
+  (console tenue par A pour ce lot). L'ordre de lot 4 écrit plus bas (« Lot 4 (ordre validé le 2026-11-18) ») est
+  **remplacé** par ce plan : ses stories passent à B.
+- **Passation à B (D-L4-1), à la fusion du plan** : balance, bilan, dossier, `admin-panel-service` (BFF),
+  `prospera-recette`. Derniers commits sur `dev` : balance `98078b0`, bilan `1651d33`, dossier `768a4aa`, BFF `18a9893`,
+  recette `f7944dc` (vérifiés le 18/11). **B lit d'abord « Pièges rencontrés » ci-dessous.**
+
 ### Lot 3 (depuis le 2026-11-17) — l'état courant
 
 - ✅ **LOT 3 DE A TERMINÉ (2026-11-17) — en attente du plan suivant.** 920 → 929 : dix stories, toutes DONE le jour même.
