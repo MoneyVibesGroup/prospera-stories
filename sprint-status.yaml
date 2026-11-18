@@ -473,6 +473,34 @@ reserved_ranges:
     reserved_on: "2026-11-18"
     note: >
       Q-D-9 renversée par l utilisateur (dès maintenant) ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). NON SLOTTÉE.
+  - range: "STORY-1061"
+    status: "RÉSERVÉ"
+    owner: "Groupe D, lot 4 — la facture juste (2), suite de 1059 (EPIC-230) (ventes)"
+    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-LOT-4-2026-11-18.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Lot 4 de D, n° 2. NON SLOTTÉE.
+  - range: "STORY-1062"
+    status: "RÉSERVÉ"
+    owner: "Groupe D, lot 4 — la commande (2), suite de 1056 (EPIC-228) (ventes)"
+    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-LOT-4-2026-11-18.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Lot 4 de D, n° 3. NON SLOTTÉE.
+  - range: "STORY-1063"
+    status: "RÉSERVÉ"
+    owner: "Groupe D, lot 4 — les référentiels du distributeur côté réseau : zones à plat, points de vente rattachés (EPIC-227) (reseau)"
+    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-LOT-4-2026-11-18.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Lot 4 de D, n° 4. NON SLOTTÉE.
+  - range: "STORY-1064"
+    status: "RÉSERVÉ"
+    owner: "Groupe D, lot 4 — les comptes du bureau dans le jeu Grossiste du Golfe (AKOSSIWA, MENSAH, YAWA, AYITE ; COM-nn ; D-972-9) (plateforme, ventes)"
+    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-LOT-4-2026-11-18.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Part de D de l accord de l utilisateur sur B8 (18/11) ; la pose par le catalogue reste à B. NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
@@ -946,6 +974,13 @@ reserved_ranges:
       Porteurs proposés : bilan-service, prospera-cabinet-service, prospera-paie-service → A ; document-service → C.
       Dépôts prospera-cabinet-service et prospera-paie-service à créer par l utilisateur avant M1 et P1. Fiches
       écrites juste avant de coder. NON SLOTTÉES.
+  - range: "STORY-1093"
+    status: "RÉSERVÉ"
+    owner: "Lot 4, porté par B (backend du cabinet) — la comptabilité branchée : comptabilite-service dans INGESTION_SOURCE_SYSTEMS de balance-service, le service dans la pile de recette et dans l AUTH_AUDIENCE de l IdP (balance, recette)"
+    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-LOT-4-2026-11-18.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Les deux demandes de B à A du 17/11 (STORY-967) ; lot 4 de B, n° 9, avant la recette complète de 1080. NON SLOTTÉE.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
@@ -1430,6 +1465,20 @@ reserved_ranges:
     reserved_on: "2026-11-18"
     note: >
       D-951-8 : la story doit exister avant février ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). En tête du prochain lot de B. NON SLOTTÉE.
+  - range: "STORY-975"
+    status: "RÉSERVÉ"
+    owner: "Groupe B, lot 4 — la comptabilité installable par le moteur : vérification referentiel-resolu (verification-installation@1), routes C13, POST /installations de comptabilite (D-972-2) (comptabilité)"
+    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-LOT-4-2026-11-18.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Lot 4 de B, n° 7 (avec pile). Fiche écrite juste avant de coder. NON SLOTTÉE.
+  - range: "STORY-976"
+    status: "RÉSERVÉ"
+    owner: "Groupe B, lot 4 — paiement consomme facturation.facture.emise@1 et ouvre la créance, idempotent par (source, sourceId), même résultat que la route de D-1059 (D-965-9) (paiement)"
+    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-LOT-4-2026-11-18.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Lot 4 de B, n° 6 (avec pile) ; demande de D. NON SLOTTÉE.
   - range: "STORY-969"
     status: "RÉSERVÉ"
     owner: "Le lettrage — des lignes validées d'un même compte de tiers (collectif, tiers, devise), équilibrées ; manuel ; partiel (une ligne garde son reste, jamais lettrée au-delà de son montant, même sous la concurrence : verrou du compte de tiers) ; code AA, AB… par compte de tiers et exercice ; automatique par PROPOSITIONS (référence, puis montant et date, fenêtre de 90 jours), acceptées (PROPOSE_PAR_LA_MACHINE) ou modifiées (CHOISI_PAR_L_UTILISATEUR) ; délettrage tracé, refusé sur un exercice clos ; écarts de règlement sous un seuil (1 000) soldés par une écriture d'écart validée et numérotée (658 / 758) ; le lettrage vit à côté des écritures (en ajout seul) ; balance âgée par le port de 968 ; balance publiée inchangée (prospera-comptabilite-service)"
