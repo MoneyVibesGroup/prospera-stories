@@ -71,6 +71,7 @@
   les quatre services, CORS, collaborateur). Restes nommés dans la fiche : migration STORY-356 sur données anciennes,
   AC-8 clavier, relecture des réserves de FE-059 → 068.
 - **Suite du lot** : FE-034 (maquette à revalider par l'utilisateur), puis AP-38 (maquette console à valider).
+- **FE-146 créée (2026-11-18, demande de l'utilisateur)** : le message de l'Atelier pendant la propagation des axes (409 SYSTEME_COMPTABLE_INDETERMINE juste après la décision). Front seul, 3 pts, quatrième story du lot 4 de A, après AP-38.
 - **Passation** : `prospera-frontend-expert-comptable` reste tenu par A pour le lot 4 (FE-034) ; dernier commit sur
   `dev` : `6796601`.
 
