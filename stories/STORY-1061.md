@@ -1,6 +1,6 @@
 # STORY-1061 : la facture juste (2) — la suite de Sage reprise avant la première facture, le format du numéro, et le règlement de la facture lu chez `paiement`
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-230 (la facturation : la facture juste) ; FR-43 et FR-217 portés par EPIC-224 et EPIC-244 pour la
 suite de numérotation · **Dépôt :** `prospera-ventes-service` (module `facturation`) ; `prospera-paiement-service`
@@ -39,11 +39,11 @@ Le reste est écrit dans D-1061-12.
 
 - [x] Rituel : plan du lot 4, règles, journaux de A, B, C, D (aucune demande neuve à D ; Q-D-10 répondue), fiches 1059 et
   1060, épic, spine, PRD, manifeste, table d'accès d'`auth`, schéma de `paiement.creance.changed`.
-- [ ] Annonce « ⚠ Contrats » fusionnée avant le code.
-- [ ] `ventes` : branche `MNV-1061`, code, tests ; PR fusionnée en rebase.
-- [ ] Verrou Docker (une prise) : Node 24, mutations, Karapace (compatibilité BACKWARD des deux schémas relâchés),
-  `docker compose up` (§1.5), pilote, rejeu depuis `origin/dev`.
-- [ ] PR de docs finale.
+- [x] Annonce « ⚠ Contrats » fusionnée avant le code : prospera-stories **#689** (`main` `45cedbe`).
+- [x] `ventes` : PR **#10** fusionnée en rebase (`dev` **`33bd0e7`**, `29b55a7`, `88d50d6`, `e1d370c`, **`68b293c`**).
+- [x] Verrou Docker : libre au rituel ; **pris à 13:47**, une seule prise (Node 24, mutations, Karapace, `docker compose
+  up`, pilote, rejeu depuis `origin/dev`) ; rendu (heure dans « Preuves ») ; aucun conteneur, volume ni réseau `grp-d`.
+- [x] PR de docs finale.
 
 ## Ce qui doit être vrai à la fin
 
@@ -128,10 +128,75 @@ Le reste est écrit dans D-1061-12.
   5. les routes C13 de `facturation` ; l'objet de Reprise `facturation.suite-numerotation@1` (EPIC-244) branché sur la
      route de D-1061-2 ; `facturation.facture.changed@1` ; la proforma ; la facture du freelance.
 
+- **D-1061-13 — Deux défauts trouvés par la preuve, corrigés dans la story ; le même défaut latent, ailleurs, reste
+  nommé.** (1) Deux classes `@Schema` du même nom (`CreanceLue`, dans `commande` et dans `facturation`) partagent la
+  connexion du service : l'une écrivait dans la collection de l'autre. La classe de `facturation` s'appelle
+  `CreanceDeFactureLue` ; un invariant neuf (`src/modeles-uniques.invariant.spec.ts`) refuse tout nom de modèle déclaré
+  deux fois. (2) Deux premiers états simultanés d'une même facture : l'upsert conditionnel de l'un heurtait la clé de
+  l'autre et le plus récent était perdu (dix états concurrents : révision 6 gardée au lieu de 10, une fois sur trois) ;
+  la clé dupliquée est rejouée et la révision tenue décide. **Le même motif** (clé dupliquée ⇒ « ignoré ») existe dans
+  `commande` (`ProjectionDuCredit.plusHauteRevision`, 1059) et dans `CommandesChiffrees.appliquer` : sans effet tant
+  qu'un seul consommateur lit une partition (les faits d'une Créance arrivent dans l'ordre), il est inscrit à « Ce qui
+  reste » plutôt que changé sans preuve dans cette story.
+
 ## Ce qui a été livré
 
-(à remplir)
+**2026-11-18** — après l'annonce « ⚠ Contrats » (prospera-stories **#689**, `main` `45cedbe`), une PR fusionnée en « Rebase
+and merge » :
+
+- `prospera-ventes-service` **#10** (`dev` **`33bd0e7`**, `29b55a7`, `88d50d6`, `e1d370c`, **`68b293c`** ; tête de la branche
+  `56849a7` vérifiée `open` et égale au SHA poussé avant la fusion) :
+  - `src/modules/facturation/numerotation/` : `format.ts` (format pur : mettre en forme, lire un numéro dans son format,
+    défauts nommés), `schemas.ts` (`facturation_suites_numerotation`, index unique `(organisation, série)`),
+    `suites.service.ts` (`SuitesDeNumerotation` : poser une fois, rejeu, refus, lecture, format lu dans la transaction de
+    l'émission), `numerotation.controller.ts` (`GET /facturation/numerotation`, `PUT /facturation/numerotation/factures`) ;
+  - `src/modules/facturation/reglements/` : `reglement.ts` (lecture pure de `paiement.creance.changed@1`, statut du
+    règlement), `schemas.ts` (`facturation_creances_lues`, modèle `CreanceDeFactureLue`), `reglements.service.ts`
+    (projection à la plus haute révision, consommateur `ventes-service.reglements`) ;
+  - `factures.service.ts` : le numéro mis en forme par le format de la série, lu dans la transaction ; `reglement` dans
+    toute facture rendue ; `faits.ts` : la tête porte le préfixe du format ;
+  - `src/socle/series/numerotation.service.ts` : `amorcerDansUneTransaction` (bibliothèque `series-v1.1` inchangée) ;
+  - `contrat/schemas/` : motif de `numero` et énumération de `prefixe` retirés ; configuration `KAFKA_REGLEMENTS_GROUP_ID` ;
+  - `src/modeles-uniques.invariant.spec.ts` (D-1061-13) ;
+  - **recette versionnée** : `scripts/recette/1061/` (`pile-1061.yml`, `emetteur-de-test.mjs`, `recette-1061.py`,
+    `mutations-1061.mjs`, `README.md`).
+- **Écart à l'annonce : aucun.** Le nom de modèle Mongoose `CreanceDeFactureLue` est interne (la collection annoncée,
+  `facturation_creances_lues`, ne change pas).
 
 ## Preuves
 
-(à remplir)
+- **Node 24** (étage `verification`, export `git -c core.autocrlf=false archive`) : `tsc` ; build ; lint de `src` et `test`
+  (`endOfLine auto`) ; **unitaires : 55/55 suites, 569 tests** (506 avant) ; **e2e : 2/2, 24** ; **intégration sur MongoDB 8 en
+  jeu de répliques : 11/11 suites, 123 tests** (98 avant), dont :
+  - `facturation.int-spec.ts` (+18) : `FAC-2026-8821` repris ⇒ `FAC-2026-8822`, `8823`, têtes 8821 → 8823 conformes au
+    schéma, piste `REPRISE_DE_LA_SUITE` puis `EMISSION` ; `FAC-2026-0412` repris, émise le 01/02/2027 ⇒ `FAC-2027-0413` ;
+    `FA000123` ⇒ `FA000124` ; sans suite, `FAC-2026-000001` ; rejeu, `SUITE_DEJA_REPRISE` (dernier numéro, format, gel),
+    `NUMEROTATION_DEJA_ENGAGEE` puis la série continue ; six suites invalides, chaque défaut nommé, rien d'écrit ; **dix
+    poses simultanées** : une pose, neuf rejeux, une tête ; **six suites différentes en même temps** : une seule ;
+    **une pose et la première émission simultanées** (huit organisations) : jamais à moitié ; **vingt factures en
+    parallèle** : `8822` → `8841` ; le règlement `INCONNU` → `EMISE` → `PARTIELLE` → `PAYEE`, état ancien ou égal ignoré,
+    déclaré à part, en retard le lendemain de l'échéance, **dix états concurrents dans le désordre : la révision 10** ;
+  - `numerotation-http.int-spec.ts` (4, vraie chaîne de gardes, ancre dans une base à part) : 403 au comptable, 201 puis
+    200 (rejeu), 400 `SUITE_INVALIDE` et champ inconnu, 409 `SUITE_DEJA_REPRISE`, **plancher 8821 posé dans l'ancre** et
+    une émission ancrée qui suit sans trou ; une ancre entamée seule ⇒ `NUMEROTATION_DEJA_ENGAGEE`.
+  - Les deux suites neuves jouées **cinq fois de suite** : 41/41 à chaque passage (après le correctif (2) de D-1061-13).
+- **Mutations : 19/19 rouges sur une assertion** (9 pures, sous Node 25 puis Node 24 ; 10 sur MongoDB réel) — forme non
+  canonique, séparateur, séparateur sans année, préfixe non échappé, le déclaré qui paie, retard le jour même, Créance
+  clôturée en retard, autre source lue, `PARTIELLE` sur le déclaré ; révision égale qui réécrit, empreinte sans le gel,
+  gel futur admis, préfixe perdu (pose, émission), série entamée prise pour une suite reprise, autre suite rendue en
+  rejeu, émission qui ignore le format, ancre entamée ignorée, aucun plancher dans l'ancre. Une mutation qui ne compilait
+  pas (paramètre inutilisé) a été réécrite. L'invariant des noms de modèles rougit sur le nom d'avant le correctif.
+- **Karapace 6.2** sur la pile : les schémas d'`origin/dev` d'avant la story enregistrés d'abord, puis ceux de la story :
+  `facturation.facture.emise-value` et `facturation.serie.changed-value` **compatibles BACKWARD** (motif et énumération
+  retirés) ; **témoin** : un motif changé (`[0-9]{7,}`) est refusé `INCOMPATIBLE`.
+- **Pile `grp-d`** (`scripts/recette/1061/pile-1061.yml`, image de la branche) : `docker compose up` sain (module Nest
+  changé, §1.5) ; pilote **22/22** : 403 au comptable, `SUITE_INVALIDE` nommée, pose 201, rejeu 200, 409, lecture
+  `FAC-2026-8822` ; factures `FAC-2026-8822`, `8823` ; règlement `EMISE` → `PARTIELLE` → `PAYEE` lu de faits publiés sur
+  Kafka, un état ancien, une autre source et un message illisible sans effet, le déclaré ne paie pas, aucun solde dans le
+  document ; sans reprise `FAC-2026-000001` puis `NUMEROTATION_DEJA_ENGAGEE` ; outbox vide ; têtes 8821, 8822, 8823 et
+  factures lues sur Kafka.
+- **Rejeu sur les images reconstruites depuis `origin/dev`** (`68b293c`, `--no-cache`, volumes neufs) : registre (base
+  d'avant, puis la story : compatibles BACKWARD), pilote **22/22** ; sous Node 24 sur l’image d’`origin/dev` : unitaires **55/55 suites, 569**, e2e **2/2, 24**, intégration **11/11 suites, 123** ; **mutations 19/19** rejouées d’une traite (10 sur MongoDB réel, 9 pures).
+- `git diff --stat` = `--ignore-cr-at-eol` à chaque commit ; aucun `index.ts` non suivi.
+- **Verrou Docker** : libre au rituel ; **pris à 13:47** (`D STORY-1061`), une seule prise, **rendu à 15:07** après `down -v` ; aucun conteneur, volume ni réseau `grp-d` ne reste. Images de
+  preuve (branche et `origin/dev`) reconstruites trois fois sous la même prise, après chaque correctif.

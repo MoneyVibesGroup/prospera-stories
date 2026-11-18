@@ -487,9 +487,15 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1061.md"
     reserved_on: "2026-11-18"
     note: >
-      🚧 EN COURS le 2026-11-18 — suite de 1059 (EPIC-230) ; Q-D-10 répondue par l'utilisateur (reprise du dernier numéro
-      avant la première facture d'un client qui quitte Sage). Annonce « ⚠ Contrats » avant le code (deux schémas relâchés,
-      routes de la numérotation, champ reglement). Lot D, n° 2 du lot 4. NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — prospera-ventes-service#10 (dev 33bd0e7, 29b55a7, 88d50d6, e1d370c, 68b293c) ; annonce
+      « ⚠ Contrats » avant le code (docs #689). Q-D-10 répondue appliquée : la suite de Sage se pose une fois, avant la
+      première facture (PUT /facturation/numerotation/factures, facturation:numerotation:administrer ; amorçage du
+      compteur, suite, tête et piste dans une transaction majority ; SUITE_INVALIDE, SUITE_DEJA_REPRISE,
+      NUMEROTATION_DEJA_ENGAGEE) ; format du numéro (préfixe, année, séparateur, largeur ; FAC-2026-8821 ⇒ FAC-2026-8822) ;
+      règlement lu de paiement.creance.changed@1 (EMISE, PARTIELLE, PAYEE, en retard ; aucun solde tenu). Motif de numero et
+      énumération de prefixe retirés (BACKWARD au registre). Deux défauts trouvés par la preuve et corrigés (nom de modèle
+      Mongoose partagé ; plus haute révision perdue sous concurrence). Node 24 : 569 unitaires, 24 e2e, 123 d'intégration ;
+      19/19 mutations. Pile grp-d : 22/22, rejouée depuis origin/dev. Lot D, n° 2 du lot 4 (EPIC-230). NON SLOTTÉE.
   - range: "STORY-1062"
     status: "RÉSERVÉ"
     owner: "Groupe D, lot 4 — la commande (2), suite de 1056 (EPIC-228) (ventes)"

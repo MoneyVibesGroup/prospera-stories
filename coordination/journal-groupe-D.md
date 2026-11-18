@@ -29,9 +29,27 @@
     rejouée sur les images reconstruites depuis `origin/dev` (`--no-cache`, volumes neufs) : 349 unitaires, 29 e2e, 23 d'intégration, pilote 21/21.
   - Décisions D-1060-1 → 11 (fiche) ; Q-D-11 au PO ; → B (le droit). **Verrou Docker pris à 12:57 sans attente (libre au rituel), une seule prise, rendu à 13:18** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
   - **Suivante : STORY-1061** 🚚 (la facture juste (2), `ventes`).
-- **STORY-1061** 🚧 🚚 — la facture juste (2) : la suite de Sage posée avant la première facture (Q-D-10 répondue), le
-  format du numéro, le règlement de la facture lu chez `paiement` (`EMISE`, `PARTIELLE`, `PAYEE`, en retard). Rituel du
-  2026-11-18 : aucune demande neuve à D dans les journaux de A, B et C. Annonce « ⚠ Contrats » avant le code (ci-dessous).
+- **STORY-1061** ✅ 🚚 — la facture juste (2) (prospera-ventes-service#10, `dev` 33bd0e7, 29b55a7, 88d50d6, e1d370c,
+  68b293c ; annonce « ⚠ Contrats » #689 avant le code). **Q-D-10 répondue, appliquée.** Rituel : aucune demande neuve à D
+  dans les journaux de A, B et C.
+  - **La suite de Sage, une fois, avant la première facture** : `PUT /api/v1/facturation/numerotation/factures`
+    (`facturation:numerotation:administrer`, le DAF ; corps = champs de l'objet de Reprise `facturation.suite-numerotation@1`) ;
+    amorçage du compteur, suite, tête `facturation.serie.changed@1` et piste dans une transaction `majority` ; plancher dans
+    l'ancre après l'acquittement ; `SUITE_INVALIDE`, `SUITE_DEJA_REPRISE`, `NUMEROTATION_DEJA_ENGAGEE` ;
+    `GET /api/v1/facturation/numerotation`.
+  - **Le format du numéro** (préfixe, année, séparateur, largeur), lu dans la transaction de l'émission : `FAC-2026-8821`
+    ⇒ `FAC-2026-8822` ; `FAC-2026-0412` émise le 01/02/2027 ⇒ `FAC-2027-0413` ; sans suite, rien ne change.
+  - **Le règlement lu chez `paiement`** : `paiement.creance.changed@1` projeté (`facturation_creances_lues`, groupe
+    `ventes-service.reglements`) ; `reglement` (`INCONNU`, `EMISE`, `PARTIELLE`, `PAYEE`, `CLOTUREE`, en retard) sur chaque
+    facture rendue ; la facture ne tient toujours aucun solde.
+  - **Deux défauts trouvés par la preuve, corrigés** (D-1061-13) : deux classes `@Schema` `CreanceLue` (commande,
+    facturation) sur la même connexion ; la plus haute révision perdue sous concurrence (clé dupliquée de l'upsert).
+    Invariant neuf : un nom de modèle par service.
+  - Node 24 : 569 unitaires (55/55 suites), 24 e2e, 123 d'intégration ; 19/19 mutations ; Karapace : les deux schémas
+    relâchés compatibles BACKWARD (témoin : un motif changé est refusé). Pile `grp-d` : `docker compose up` sain, pilote
+    22/22, rejoué sur les images reconstruites depuis `origin/dev` (`--no-cache`, volumes neufs).
+  - Décisions D-1061-1 → 13 (fiche) ; recette versionnée `scripts/recette/1061/`. **Verrou Docker pris à 13:47 sans attente (libre au rituel), une seule prise, rendu à 15:07** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+  - **Suivante : STORY-1062** 🚚 (la commande (2), `ventes`).
 
 ### Lot 3 (ouvert le 2026-11-17)
 
@@ -337,9 +355,10 @@
     paramètre est `terrain_parametres` (`src/modules/terrain/parametres/`) : les distances et le géorepérage de `terrain`
     (AD-12) s'y ajoutent comme clés de plus (valeurs complètes à chaque version). Un plan de journée garde
     `parametresVersion` ; un plan créé ailleurs qu'à l'import (EPIC-233) se datera par `dateDuPlanDeJournee`.
-  - **Ce qui reste, dans l'ordre conseillé** : (1) **la facture juste (2)** (facture par livraison, `SANS_BON`, mentions
-    légales A-1, PDF, envoi, avoir, `PARTIELLE`/`PAYEE` lus de `paiement.creance.changed@1`, balances ; fiche 1059
-    « Ce qui reste ») ; (2) **la commande (2)** (`TRANSMISE`, modifier, annuler, remise, dérogation, `CMD-`, livraison
+  - **Ce qui reste, dans l'ordre conseillé** : (1) ~~la facture juste (2)~~ **livrée par 1061** (suite de Sage, format,
+    `PARTIELLE`/`PAYEE`) ; **la facture juste (3)** et suivantes, dans l'ordre de D-1061-12 (fiche 1061) : mentions
+    légales A-1, PDF et lien public d'envoi ; l'avoir ; la facture par livraison et `SANS_BON` (après la commande (2)) ;
+    la liste des factures et les balances ; (2) **la commande (2)** (`TRANSMISE`, modifier, annuler, remise, dérogation, `CMD-`, livraison
     et reliquat, allocation du matin ; détail plus bas, « La commande (1) ») ; (3) **les remplaçantes d'EPIC-227** (les
     référentiels du distributeur côté réseau : zones à plat, points de vente rattachés) ; (4) les consommateurs qui
     rempliront les read-models aujourd'hui remplis par personne (`pdv`, `catalogue`, `stock`) ; (5) les routes C13 de
@@ -539,10 +558,31 @@
       scripts, Redis, `NODE_ENV=production`, `/health/live` : il est `unhealthy` par construction), KYC et droit
       `paiement` publiés sur Kafka, jetons à double audience (`ventes-service`, `paiement-service`) avec
       `perms: ['paiement:demande:emettre']` ; pilote et surcouche décrits dans la fiche 1059.
-  - **Le lot 3 de D est fini.** Prochaines stories du distributeur : la facture juste (2), la commande (2), puis les
-    remplaçantes d'EPIC-227.
+  - **La facture juste (2)** (STORY-1061, `ventes` `dev` 33bd0e7 → 68b293c), `src/modules/facturation/numerotation/` et
+    `reglements/` :
+    - **la suite de Sage** : `SuitesDeNumerotation.poser` est **le** geste ; le point d'import de la Reprise
+      (`facturation.suite-numerotation@1`, EPIC-244) l'appellera tel quel (même corps). Une série de plus qui reprend
+      Sage (avoir, proforma) s'ajoute à `SERIES_REPRISES` et à l'énumération de la route ;
+    - **le format** se lit par `SuitesDeNumerotation.formatDe(org, série, session)` **dans** la transaction du numéro ;
+      `mettreEnForme` / `lireLeNumero` (`numerotation/format.ts`) sont la seule règle ;
+    - **le socle** : `NumerotationDesSeries.amorcerDansUneTransaction` (le compteur amorcé et l'écrit dans une même
+      transaction ; plancher posé dans l'ancre après) ;
+    - **le règlement** : `ReglementsDesFactures.reglement(org, factureId, echeanceLe)` ; la balance clients et la balance
+      âgée liront `facturation_creances_lues` ;
+    - **défaut latent nommé** : `ProjectionDuCredit.plusHauteRevision` (commande) et `CommandesChiffrees.appliquer`
+      traitent une clé dupliquée comme « ignoré » ; sans effet tant qu'un consommateur lit une partition dans l'ordre, à
+      corriger comme dans `reglements.service.ts` (rejouer, la révision tenue décide) ;
+    - **recette** : `scripts/recette/1061/` (pile sans `paiement`, son fait publié par le pilote ; mutations).
+  - **Le lot 3 de D est fini.** Le lot 4 continue : la commande (2), les remplaçantes d'EPIC-227, les comptes du jeu.
 
 ## Demandes aux autres groupes
+
+- **→ B (2026-11-18), information : le numéro d'une facture suit désormais le format de la série (STORY-1061)** — aucune
+  action exigée. Pour votre consommateur à venir de `facturation.facture.emise@1` : `numero` n'a plus de motif `FAC-` au
+  registre (il suit la suite reprise de Sage, `FAC-2026-8822` ou `FA000124`) ; c'est un libellé, la clé reste
+  `factureId`. `ventes` lit aussi `paiement.creance.changed` par un second groupe, `ventes-service.reglements` : si la
+  charge change, le dire ici. La suite de Sage se pose par le DAF (`facturation:numerotation:administrer`, déjà dans votre
+  table d'accès) : rien à ajouter chez vous.
 
 - **→ B (2026-11-18) : un droit neuf, `terrain:parametres:modifier`, au catalogue de tenant (STORY-1060, D-1060-6)** —
   **ouverte**, sans urgence (aucun écran ne l'appelle ; l'essai prend le calendrier par défaut). Changer le calendrier de
@@ -778,9 +818,10 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-18, STORY-1061, avant la fusion du code) — `prospera-ventes-service`, module `facturation` : la suite
-  de Sage posée avant la première facture, le format du numéro, le règlement de la facture lu chez `paiement`.** Fiche :
-  `stories/STORY-1061.md` (D-1061-1 → 12). Aucun manifeste amendé : le droit (`facturation:numerotation:administrer`), le
+- **PUBLIÉ (2026-11-18, STORY-1061, prospera-ventes-service#10, `dev` 33bd0e7 → 68b293c) ; ANNONCÉ avant la fusion du
+  code (prospera-stories #689), sans écart ; schémas enregistrés en BACKWARD (Karapace, contre les versions d'`origin/dev`).
+  — `prospera-ventes-service`, module `facturation` : la suite de Sage posée avant la première facture, le format du
+  numéro, le règlement de la facture lu chez `paiement`.** Fiche : `stories/STORY-1061.md` (D-1061-1 → 13). Aucun manifeste amendé : le droit (`facturation:numerotation:administrer`), le
   fait publié (`facturation.serie.changed@1`) et le fait lu (`paiement.creance.changed@1`) y sont déjà.
   - **Routes neuves** (garde `FACTURATION_NOT_ENTITLED`, table d'accès) :
     - `PUT /api/v1/facturation/numerotation/factures` (**`facturation:numerotation:administrer`**, le `DAF`) corps
@@ -1327,6 +1368,23 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1061** :
+  - (1) **Deux classes `@Schema` du même nom dans deux modules d'un même service** (`CreanceLue` de `commande` et de
+    `facturation`) : le nom de la classe est celui du modèle Mongoose, et la connexion est partagée ; l'un écrivait dans la
+    collection de l'autre, sans erreur de compilation ni de démarrage. Seuls les tests d'intégration de 1059 (rouges sur
+    des montants) l'ont montré. Invariant `src/modeles-uniques.invariant.spec.ts` : nommer un modèle par son module.
+  - (2) **Un upsert conditionnel sur une ligne absente perd le plus récent sous concurrence** (déjà vu en 1050) : un test
+    de dix états simultanés passait deux fois sur trois. Jouer chaque test de concurrence **plusieurs fois** avant de
+    conclure (cinq passages d'affilée ici).
+  - (3) **Karapace juge un motif modifié incompatible, un motif retiré compatible** : un relâchement passe par le retrait
+    (motif, énumération), jamais par un motif élargi ; témoin joué.
+  - (4) Sous Git Bash, un `docker exec` (producteur et consommateur de console Kafka) échoue parfois sans message sur le
+    poste chargé, et le consommateur sort sur son délai avec un code non nul : le pilote rejoue et lit la sortie, pas le
+    code.
+  - (5) Les commandes passent en arrière-plan après 180 s : attendre sur le **fichier de sortie** que la commande écrit,
+    pas sur la sortie de la tâche (un `grep` sur le mauvais fichier n'aboutit jamais). Un heredoc avec des apostrophes et
+    des antiquotes a encore échoué : script écrit par l'outil d'écriture.
 
 - **STORY-1060** :
   - (1) **Un mutant « lu hors de la transaction » survit aux tests d'intégration de l'import C13** : les références se
