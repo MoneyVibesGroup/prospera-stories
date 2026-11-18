@@ -1,6 +1,6 @@
 # STORY-977 : le droit `terrain:parametres:modifier` au catalogue de tenant d'auth
 
-Status: in-progress
+Status: done
 
 **Complexité :** faible (un droit neuf au catalogue de tenant, hors du jeton ; une ligne d'ajout à l'annexe B ; aucun
 champ, aucune route, aucun topic)
@@ -75,11 +75,39 @@ distributeur nommés, que `droitsParDefautDu` dérive. Rien à construire : une 
 
 ## Livraison
 
-(à compléter)
+- **auth #46**, fusionnée en « Rebase and merge » : **`682bba4` sur `dev`** (tête de la PR `ed76972`, arbre identique
+  après rejeu ; `merged = true`, `head.sha` = SHA poussé).
+- Contrat annoncé avant la fusion : stories #690 (« ⚠ Contrats » du journal de B).
+- Fichiers : `src/common/rbac/droits-hors-jeton.ts` (une entrée, section `terrain`),
+  `src/modules/rbac/table-d-acces-distributeur.ts` (une ligne d'`AJOUTS_A_L_ANNEXE_B`) ; tests du catalogue
+  (`tenant-permission.enum.spec.ts`), de la table d'accès du distributeur, de la résolution des droits et du catalogue
+  de composition (`organization-roles.service.spec.ts`).
 
 ## Preuves
 
-(à compléter)
+- **Sans Docker** (D-977-7) : aucun module, aucune dépendance, aucun Dockerfile touchés.
+- **Node 25, tests relancés par chemin** : les sept suites des droits (catalogue, borne du jeton, table du
+  distributeur, table du cabinet, socle des rôles, résolution, catalogue de composition) : **7 suites, 167/167**.
+  Ce qu'elles vérifient du droit neuf :
+  - au catalogue, hors du jeton, au format C7, module `terrain`, libellé écrit en toutes lettres ; les droits `terrain`
+    du catalogue sont les six de l'annexe puis celui-ci ;
+  - détenu par `DIST_DG` et `DIST_ADMIN` et par eux seuls ; DG à 46 droits, liste de `DIST_ADMIN` écrite en toutes
+    lettres (25) ; chaque rôle = annexe B.2 + ajouts écrits dans le test (pas relus de la table) ;
+  - la résolution d'un DG et d'un `DIST_ADMIN` le met dans `droitsHorsJeton`, ni dans `perms[]` ni dans `droits` ;
+    `DIST_DC`, `DIST_SUPERVISEUR` et `DIST_COMMERCIAL` ne l'ont pas ;
+  - le catalogue de composition d'un rôle l'offre (153 codes), indisponible tant que `terrain` n'est pas souscrit.
+- **Suite complète (Node 25)** : 102 suites, **1 425 passés**, 4 suites rouges connues (binding natif de Confluent
+  absent sous Node 25 : `app-cablage.invariant.spec.ts` et les trois `src/kafka/*`, « Could not locate the bindings
+  file », piège de STORY-974). Le câblage du module racine joué avec le binding doublé (`moduleNameMapper`) : **vert**.
+- **Lint** des six fichiers touchés, **`tsc --noEmit`** et **build** : verts.
+- **Mutations : 7/7 rouges** :
+  - M1 la ligne d'ajout retirée (le droit au catalogue, à personne) : 6 tests rouges ;
+  - M2 sans `DIST_ADMIN`, M3 sans le DG : 4 chacune ; M4 trop large (`DC` aussi) : 3 ;
+  - M6 le libellé changé : 2 ; M7 le droit porté par le jeton (`JETON` élargi) : 5 ;
+  - M5 le droit retiré du catalogue (entrée et ajout) : 2 assertions rouges (résolution, catalogue de composition),
+    et deux suites ne compilent plus (le type `DroitDeTenant` refuse le code dans les tests qui le nomment) : la
+    compilation garde aussi, mais la mutation ne rougit pas que par elle.
+  - Écartée comme équivalente : ranger le code en fin de catalogue (il reste le dernier des droits `terrain`).
 
 ## Pour la suite
 
