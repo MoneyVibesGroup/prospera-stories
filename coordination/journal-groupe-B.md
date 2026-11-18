@@ -5,7 +5,7 @@
 
 ## État
 
-### Lot 3 (ouvert le 2026-11-17)
+### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
 - **Plan** : `PLAN-4-SESSIONS-LOT-3-2026-11-17.md` §3, décidé par l'utilisateur : B passe à la **comptabilité**
   (`prospera-comptabilite-service`, EPIC-111 → 119), et sert d'abord ce qu'il doit à A (kit 1.0.1, supervision) et à
@@ -231,12 +231,54 @@
      checksum avant et après un lettrage ; exercice clos) ; mutations 32/32 unitaires, 5/6 du socle (survivante nommée :
      le `$inc` du verrou, redondant avec la tête de la piste chaînée) ; `docker compose up` sain, sept routes mappées.
      Verrou pris à 01:54, rendu à 02:29.
-  - **Story suivante : STORY-970** (la clôture, `prospera-comptabilite-service`, EPIC-119 ; dépend de 966) :
-    centralisation ; à-nouveaux dérivés du grand livre ; réouverture tracée ; exercice clos inaltérable (plan §3,
-    ligne 970). **C'est la dernière story du plan du lot 3 pour B.** À lire avant : fiches 968 (« Pour la suite » : les
-    à-nouveaux des collectifs PAR TIERS) et 969 (« Pour la suite » : le non-lettré et le lettrage à reporter ; un
-    exercice clos refuse déjà lettrage, délettrage et propositions, 409 `EXERCICE_CLOS`). Droit déjà déclaré et
-    attribué : `comptabilite:exercice:cloturer` (à `CAB_ASSOCIE` seul, D-971-2).
+  17. ~~STORY-970~~ : **prospera-comptabilite-service #10** (`b27593c` sur `dev`, rejoué de `6c7a410`, arbre
+     identique), contrat annoncé avant la fusion (stories #674). La clôture.
+     - **L'état « clôturé à la comptabilité »** est le SCEAU de la chaîne de piste de l'exercice
+       (`chaines_de_piste.scellee`), posé par `EXERCICE_CLOTURE`, levé par `EXERCICE_ROUVERT` ; dossier-service n'est ni
+       appelé en écriture ni modifié : deux verrous, deux clés (D-970-1 ; « → A », information).
+     - `POST …/cloture` (`comptabilite:exercice:cloturer`, associé seul) : préalables bloquants — aucun brouillard (Q2),
+       balance équilibrée, chaînes de piste de N et N+1 intactes, aucun compte hors clôture, exercice suivant ouvert au
+       journal, OUVERT chez dossier-service, contigu, même référentiel, journal AN ; le non-lettré ne bloque pas
+       (D-970-3). Dans une transaction : balance définitive publiée (D-970-8), centralisation par journal et par mois
+       figée (D-970-4), à-nouveaux dérivés du grand livre passés dans le journal AN de N+1, nés validés et numérotés —
+       bilan reporté, collectifs PAR PIÈCE NON LETTRÉE et par tiers (échéance, référence), gestion soldée dans le
+       résultat à affecter (`comptes-de-cloture@1` : SN, SMT 131 / 139 ; CIMA 88 ; SFD-BCEAO 59) (D-970-5 → 7).
+     - **Inaltérable** : neuf routes d'écriture rendent 409 `EXERCICE_CLOS` (`details.statut: CLOTURE`), contrôlé avant
+       l'acte et dans sa transaction (`consigner`) ; des à-nouveaux ne se contre-passent pas à la main
+       (`A_NOUVEAUX_DE_CLOTURE`) (D-970-2, D-970-11).
+     - **Réouverture** `{ motif }` : les à-nouveaux contre-passés dans N+1 (refus s'ils y sont lettrés), tracée ; la
+       clôture suivante les régénère (D-970-9). Lectures `GET …/cloture`, `GET …/centralisation`. Aucun droit neuf.
+     Node 24 : 50 suites, 752 passés, 3 sautés ; `test:socle` 232/232 (29 neufs : le cycle complet sur un jeu connu,
+     chaîne intacte de bout en bout ; 5 clôtures simultanées ⇒ une ; une clôture au milieu de dix lettrages ⇒ 1 avant
+     le sceau, 9 refusés) ; mutations 23/23 unitaires, 10/12 du socle (deux survivantes nommées) ; `docker compose up`
+     sain, quatre routes mappées. Verrou pris à 03:07, rendu à 03:38.
+  - ✅ **LOT 3 DE B TERMINÉ (2026-11-18) — en attente du lot 4.** Il n'y a pas de story suivante dans le plan du lot 3.
+    **Livré : les quinze stories du plan, 956 → 970, plus deux insérées, 971 et 972** (décisions contestables, motifs
+    aux points 12 et 15) :
+    - **ce que B devait à A et à D** : 956 `kit-cible` 1.0.1 (et `encours/` de D) ; 957 la supervision Kafka (et la
+      passation de `notification` à D) ; 960 les quinze rôles du distributeur ; 963 et 965 la Créance (1) et (2) ;
+    - **la comptabilité** (`prospera-comptabilite-service`, neuf, EPIC-111 → 119) : 958 le socle ; 959 exercices et
+      tenue ; 961 le plan de journaux ; 962 le brouillard ; 964 la validation inaltérable et la piste chaînée ; 966 le
+      grand livre ; 967 la balance dérivée, publiée au hub ; 968 les tiers ; 969 le lettrage ; 970 la clôture ;
+    - **insérées** : 971 les droits de la comptabilité et des paramètres de `commande` (auth) ; 972 le jeu « Grossiste
+      du Golfe » chez B, les comptes du jeu et la comptabilité au catalogue.
+  - **Ce qui reste ouvert à la fin du lot 3** :
+    - **Demandes à A** (« Demandes aux autres groupes ») : `comptabilite-service` dans `INGESTION_SOURCE_SYSTEMS` de
+      balance-service (967) ; la comptabilité dans la recette (`AUTH_AUDIENCE`, compose ; 958, 967) ; relire
+      `kit-cible` 1.0.1 (D4 → D8 restent ouverts, 956) ; question sans urgence de 970 (rouvrir N quand N+1 est OUVERT,
+      Q8). La norme MinIO (17/11) est servie par A-920 (journal de A).
+    - **À valider par un expert** : l'écart CIMA 844 / 849 (D-969-8) et, de même nature, le résultat CIMA à 88 et les
+      comptes de passage 80 / 87 / 89 (D-970-6).
+    - **Le consommateur de `facturation.facture.emise@1` dans `paiement`** (D-965-9 ; demande de D, « sans urgence ») :
+      D a depuis fixé et publié la charge (journal de D, `ventes` `1c1e944`, `montantTtcMineur`) ; le consommateur
+      reste à écrire par B (même `OuvrirLaCreance`), au lot 4 ou en remplaçante. La route reste le chemin de D-1059.
+    - **Les remplaçantes** (plan §3) : l'export du journal général et du fichier des écritures (EPIC-120) ;
+      désinstaller et réinstaller (FR-39) ; les tickets `dates-cibles-de-module` et `repartition-par-version`
+      (catalogue). Nées de 972 : la pose des comptes du jeu par le catalogue à l'ouverture d'un essai (D-972-9) ; la
+      vérification `referentiel-resolu` et les routes C13 de la comptabilité (D-972-2) ; `referentiels` dans l'état
+      publié (question de C, D-972-10).
+    - **Questions au PO** (plus bas) : le plan de journaux du SMT (D-961-1), les droits d'`automatisations`
+      (D-960-10), le rôle par défaut du distributeur (D-960-12), l'invitation au réel (D-951-8).
   - **Restent ouverts avant le réel** (demandes « → A » plus bas) : `comptabilite-service` dans
     `INGESTION_SOURCE_SYSTEMS` de balance-service (sinon toute publication est rejetée `SOURCE_SYSTEM_INCONNU`) ; la
     comptabilité dans la recette (`AUTH_AUDIENCE`, compose). **Le module `comptabilite` est au catalogue depuis 972**
@@ -786,7 +828,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-18, STORY-970 — la clôture, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`, EPIC-119 ;
-  fiche `stories/STORY-970.md`, D-970-1 → 14). Des routes, un champ et des collections AJOUTÉS, rien de renommé ;
+  fiche `stories/STORY-970.md`, D-970-1 → 14). **Fusionné le 18/11** : comptabilite #10, `b27593c` sur `dev` (annonce :
+  stories #674), sans écart au contrat annoncé. Des routes, un champ et des collections AJOUTÉS, rien de renommé ;
   **deux comportements changent** : un exercice clôturé refuse toute écriture, et des à-nouveaux nés d'une clôture ne
   se contre-passent pas à la main.
   - **Routes neuves** sous `/api/v1/dossiers/{d}/exercices/{e}`, écriture sous **`comptabilite:exercice:cloturer`**
@@ -1648,6 +1691,21 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une suite qui compare des `bigint` en jest parallèle tombe sans le dire** (STORY-970, comme 966) : le script de
+  mutations a compté neuf fausses survivantes (« 24 passed, 24 total » au lieu de 44 : la suite mutée n'était plus
+  comptée). Jouer les mutations en `-i`, et comparer le TOTAL des tests à celui de la suite saine.
+- **Mutations du socle : sur une COPIE de l'archive**, jamais dans le dépôt (STORY-970). Copier l'export `git archive`,
+  muter la copie, construire l'image de vérification (le `npm ci` reste en cache : quelques secondes), jouer la suite ;
+  le dépôt reste libre pour les mutations unitaires qui tournent en même temps.
+- **Une course qui ne s'entrelace pas ne prouve rien** (STORY-970) : dix lettrages lancés d'un coup avec une clôture
+  passaient tous avant elle (la clôture, rejouée sur la tête de la chaîne, attend qu'ils aient fini : 10 / 0). Étalés
+  de 60 ms, 1 passe avant le sceau et 9 sont refusés. Écrire dans le test (`console.log`) combien de chaque côté.
+- **dossier-service : un seul exercice OUVERT par dossier (Q8)** : la clôture comptable de N vient après le `clore`
+  de N et l'ouverture de N+1 chez lui ; un test qui veut prouver le sceau seul pose N OUVERT chez la doublure
+  (« rouvert par le TENANT_ADMIN »), sinon le refus vient de dossier-service (`details.statut: CLOS`).
+- **`DELETE …/ecritures/{id}` rend 204**, pas 200 (STORY-964).
+- **Un script Python lancé en tâche de fond écrit sa sortie par blocs** : le journal reste vide jusqu'à la fin. `-u`.
 
 - **Un `open(p, 'w')` de Python sous Windows écrit des CRLF** (STORY-969) : un fichier LF réécrit ainsi change toutes
   ses fins de ligne (`git diff --stat` le montre). Toujours `open(p, 'w', encoding='utf-8', newline='')`. Le worktree

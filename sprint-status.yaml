@@ -1384,8 +1384,17 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-970.md"
     reserved_on: "2026-11-18"
     note: >
-      🚧 EN COURS le 2026-11-18 — contrat annoncé AVANT la fusion du code (« ⚠ Contrats » du journal de B). Lot 3 de B,
-      n° 15 (EPIC-119), la dernière story du plan du lot 3 pour B. NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — prospera-comptabilite-service #10 (dev b27593c) ; contrat annoncé avant la fusion
+      (stories #674 : POST et GET …/cloture, POST …/cloture/reouverture, GET …/centralisation ; champ ajouté aNouveauDe ;
+      exercice clôturé ⇒ 409 EXERCICE_CLOS (statut CLOTURE) sur toutes les routes d'écriture ; A_NOUVEAUX_DE_CLOTURE ;
+      treize refus neufs ; collections clotures et reouvertures, sceau scellee sur chaines_de_piste ; comptes-de-cloture@1
+      ; manifeste amendé). Aucun droit neuf, aucun topic, aucun schéma. Node 24 : 752 passés / 0 échec / 3 sautés ;
+      test:socle 232/232 sur MongoDB 8.0 rs0 et Kafka (cycle complet : N saisi, validé, lettré ⇒ clôture, perte 20 000 au
+      139, AN-000001 dans N+1 sur les soldes de clôture compte par compte, pièces ouvertes par tiers ; neuf routes
+      d'écriture refusées, même N rouvert chez dossier-service ; réouverture tracée, AN-000002 ; clôture n° 2, AN-000003 ;
+      chaîne intacte de bout en bout ; 5 clôtures simultanées ⇒ une ; une clôture au milieu de dix lettrages ⇒ 1 avant,
+      9 refusés) ; mutations 23/23 unitaires, 10/12 du socle (deux survivantes nommées) ; docker compose up sain. Lot 3
+      de B, n° 15 (EPIC-119) : le lot 3 de B est terminé. NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
