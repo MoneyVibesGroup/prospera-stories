@@ -1,6 +1,6 @@
 # STORY-1060 : un calendrier propre à chaque organisation — jours travaillés et jours fériés, paramètre C6 lu par le plan de journée et par la résolution à l'import
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-226 (le jeu « Grossiste du Golfe », ses plans de journée) et EPIC-233 (les tournées, plan de journée) ;
 spine distributeur AD-12 · **Dépôts :** `prospera-plateforme` (dossier `contrats/distributeur/`, tenu par D),
@@ -31,11 +31,16 @@ STORY-1049 (`commande_parametres`) et STORY-1053 (règle copiée à l'octet, dro
 - [x] Rituel : plan du lot 4, règles, journaux de A, B, C, D (réponses de l'utilisateur à Q-D-1 → 10, lues), fiche 1058.
 - [x] Règle du calendrier dans la plateforme (branche `MNV-1060`), 18 tests, 16/16 mutations.
 - [x] `terrain` : copie, paramètres, import, routes, tests (branche `MNV-1060`).
-- [ ] Annonce « ⚠ Contrats » fusionnée avant le code (cette PR, avec le manifeste `terrain` amendé).
-- [ ] Plateforme : PR fusionnée en rebase, étiquette `calendrier-distributeur-v1`.
-- [ ] `terrain` : copie et manifeste rattachés aux commits fusionnés ; Node 24 ; mutations ; `docker compose up` (§1.5) ;
-  PR fusionnée en rebase.
-- [ ] PR de docs finale.
+- [x] Annonce « ⚠ Contrats » fusionnée avant le code : prospera-stories **#681** (`main` `0761563`), manifeste `terrain`
+  amendé.
+- [x] Plateforme : PR **#32** fusionnée en rebase (`dev` **`8c61c48`**), étiquette **`calendrier-distributeur-v1`**.
+- [x] `terrain` : PR **#4** fusionnée en rebase (`dev` **`fd5f4ee`**, `d9b524f`, **`17bdba7`**) ; copie et manifeste rattachés
+  aux commits fusionnés (`8c61c48`, `0761563`) ; Node 24 ; mutations ; `docker compose up` (§1.5) ; rejoué depuis
+  `origin/dev`.
+- [x] Verrou Docker : libre au rituel ; **pris à 12:57**, une seule prise (Node 24 de la plateforme et de `terrain`,
+  mutations, pile, rejeu depuis `origin/dev`) ; rendu (heure dans « Preuves ») ; aucun conteneur, volume ni réseau `grp-d`
+  ne reste.
+- [x] PR de docs finale.
 
 ## Ce qui doit être vrai à la fin
 
@@ -96,6 +101,69 @@ STORY-1049 (`commande_parametres`) et STORY-1053 (règle copiée à l'octet, dro
 - **D-1060-11 — Codes** : `PARAMETRES_INVALIDES` (400, la liste des défauts dans `details.erreurs`),
   `PARAMETRES_VERSION_PERIMEE` (409, `details.versionCourante`), `PARAMETRES_VERSION_INCONNUE` (404) : ceux de
   `commande` (STORY-1049), même sens.
+
+## Ce qui a été livré
+
+**2026-11-18** — après l'annonce « ⚠ Contrats » (prospera-stories **#681**, `main` `0761563`, manifeste `terrain`
+amendé), deux PR fusionnées en « Rebase and merge », têtes vérifiées `open` et égales au SHA poussé avant la fusion :
+
+- `prospera-plateforme` **#32** (`dev` **`8c61c48`**, étiquette annotée **`calendrier-distributeur-v1`**) :
+  `contrats/distributeur/src/calendrier.ts` (sha256 `b3d06e53033c8177460992a3b472ec3a548a1edae29c21533aef2113b5d2fda8`),
+  `test/calendrier.test.ts` (18 tests), README (section du calendrier), `package.json` (export `./calendrier`). Aucun
+  fichier de B.
+- `prospera-terrain-service` **#4** (`dev` **`fd5f4ee`**, `d9b524f`, **`17bdba7`**) :
+  - `src/socle/calendrier/` : la copie à l'octet (hors lint et formatage) et sa provenance (`source.ts`) ;
+    `src/calendrier.invariant.spec.ts` (empreinte écrite, deux vecteurs de la plateforme) ;
+  - `src/modules/terrain/parametres/` : `ParametresTerrain` (`terrain_parametres`, index unique `(organisationId,
+    version)`), `parametresCourants` (lecture, et première version posée, dans une session donnée), `ParametresDeTerrain`
+    (courants, version, changer : version lue exigée, valeurs validées par la règle, ligne de `terrain_audit`),
+    `ParametresTerrainController` (trois routes), DTO, refus ;
+  - `instance/part-terrain.ts` : `dateDuPlanDeJournee(calendrier, maintenant, jourOuvre)` remplace `dateDuJourOuvre`
+    (« hors dimanche ») ; l'écriture d'un lot de plans lit le calendrier dans la transaction du lot et pose
+    `parametresVersion` ; `terrain_parametres` au plan d'effacement ;
+  - `jeu/schemas.ts` (`parametresVersion` au plan), `terrain.module.ts`, manifeste recopié (`0761563`, empreinte
+    `90ed46be…1b2f` dans `sources-des-manifestes.ts`), `.prettierignore` et `eslint.config.mjs` (la copie exclue).
+
+## Preuves
+
+- **Plateforme, Node 24** (`node:24-slim`, export `git archive`) : `typecheck` vert ; `npm test` **634 tests, 633 pass,
+  0 fail, 1 sauté** (616 avant ; le sauté est la matrice du catalogue de B) ; `calendrier.test.ts` **18/18**. **Mutations
+  de la règle : 16/16 rouges sur une assertion** (dimanche non sauté, jours fériés ignorés, rang 0 déplacé, Pâques décalé
+  d'un jour, 29 février des années communes, date qui revient chaque année, doublon admis, aucun jour travaillé admis,
+  borne de fin exclue, champ inconnu admis, libellé non nettoyé, jours non rangés, année non bornée, 27 avril déplacé,
+  décalage non borné, férié avant non travaillé).
+- **`terrain`, Node 24** (étage `verification`, export `git archive`) : `tsc`, build ; lint des fichiers touchés
+  (`endOfLine auto`) ; **unitaires : Test Suites: 38 passed, 38 total ; Tests: 348 passed** (341 avant) ; **e2e : 2/2
+  suites, 29 tests** (24 avant : lire avec un droit du module, 404 d'une version inconnue, 403 `DROIT_INSUFFISANT` sans
+  le droit, 200 avec, 400 sans motif) ; **intégration sur MongoDB 8 en jeu de répliques : 4/4 suites, 23 tests** (15
+  avant), dont `parametres.int-spec.ts` (8) : dix premières lectures simultanées ⇒ une version 1 ; changement tracé
+  (avant, après, motif) ; refus 409 et 400 sans écriture ; deux changements simultanés ⇒ un seul ; import daté par le
+  calendrier par défaut (version 1), par Noël et le 1er janvier d'une année sur l'autre, par le calendrier du bureau
+  (samedi et jour férié daté sautés, version 2) ; plan figé après un changement.
+- **Mutations de `terrain` : 13/13 rouges sur une assertion** (jours fériés ignorés à la date du plan, paramètre inconnu
+  admis, calendrier non retenu, `terrain_parametres` hors du plan d'effacement, copie retouchée, droit absent du manifeste,
+  `PUT` ouvert à un droit du module, calendrier lu hors de la session du lot, version non gardée au plan, version lue non
+  exigée, changement non tracé, plus basse version lue comme courante, calendrier invalide accepté). Le mutant « hors de
+  la session » survivait d'abord aux tests d'intégration (les références se vérifient avant l'écriture) : un test
+  unitaire de l'écriture d'un lot, sur une connexion factice qui note les sessions, le tue.
+- **Pile `grp-d`** (image `runtime` de la branche ; MongoDB 8 en jeu de répliques, Kafka, émetteur RS256 de recette qui
+  tient le JWKS et la doublure de `/moi/droits` ; `INSTANCE_ESPACE=ESSAI`) : **`docker compose up` sain** (`/health`
+  200, §1.5). Un pilote joue **21/21** sur appels réels, deux organisations, le 2026-11-18 (mercredi) :
+  - `GET /terrain/parametres` (un droit du module) : version 1, `SYSTEME`, lundi → samedi, 10 jours fériés ;
+  - `PUT` sans `terrain:parametres:modifier` : 403 `DROIT_INSUFFISANT` ; calendrier invalide : 400
+    `PARAMETRES_INVALIDES` (deux défauts nommés) ; version périmée : 409 ; avec le droit : version 2 ; version 1
+    relue telle quelle ; version 9 : 404 ; piste intègre, une ligne ;
+  - **import C13 du jeu (petite taille)** : organisation A (calendrier par défaut) : Kodjo a ses 11 plans du 18/11 au
+    **30/11** (dimanches 22 et 29 sautés, samedis gardés), version 1 posée par l'import ; organisation B (calendrier du
+    bureau : lundi → vendredi, le 19/11 « Inventaire ») : du 18/11 au **03/12** (19, 21, 22, 28, 29 sautés), version 2 ;
+    A rejouée : `DEJA_IMPORTE` ;
+  - A change ensuite son calendrier : les plans de Kodjo gardent leurs dates et leur version 1 ;
+  - effacement C13 de B : `EFFACE` (176 enregistrements), `terrain_parametres`, plans et piste vides ; **A (témoin)
+    intacte** (2 versions, 44 plans).
+- **Rejeu depuis `origin/dev`** (`17bdba7`, export `git archive`, images `verification` et `runtime` reconstruites
+  `--no-cache`, volumes neufs) : sous Node 24 sur l'image d'`origin/dev` : `tsc` ; unitaires **38/38 suites, 349 tests** (le test de la session du lot compris) ; e2e **2/2, 29** ; intégration **4/4 suites, 23** ; pile `grp-d` sur l'image `runtime` d'`origin/dev` : `/health` 200, pilote **21/21**. **Verrou Docker rendu à 13:18** (pris à 12:57) ; pile descendue (`down -v`), images de preuve supprimées.
+- `git diff --stat` = `--ignore-cr-at-eol` dans les deux dépôts ; aucun `index.ts` non suivi ; `dist/` supprimé du
+  checkout de `terrain`.
 
 ## Ce qui reste
 

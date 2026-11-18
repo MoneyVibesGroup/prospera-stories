@@ -12,8 +12,23 @@
   tient ce lot aussi le backend du cabinet (dix stories, cinq avec pile) : même verrou Docker. **Lot 4 constaté au rituel
   de 1060** (le 2026-11-18) : aucune demande neuve à D dans les journaux de B et C ; celle de A (réponses de
   l'utilisateur à Q-D-1 → 10) est lue (« Réponses aux demandes reçues »).
-- **STORY-1060** 🚧 🚚 — un calendrier propre à chaque organisation (Q-D-9 renversée par l'utilisateur) : annonce
-  « ⚠ Contrats » avant le code (cette PR, manifeste `terrain` amendé).
+- **STORY-1060** ✅ 🚚 — un calendrier propre à chaque organisation (prospera-plateforme#32, `dev` 8c61c48, étiquette
+  **`calendrier-distributeur-v1`** ; prospera-terrain-service#4, `dev` fd5f4ee, d9b524f, 17bdba7 ; annonce « ⚠ Contrats »
+  #681 avant le code, manifeste `terrain` amendé). **Q-D-9 renversée par l'utilisateur, appliquée.**
+  - **La règle** (plateforme, `contrats/distributeur/src/calendrier.ts`, copiée à l'octet par `terrain`) : jours
+    travaillés ; jours fériés `FIXE` (MM-JJ), `PAQUES` (décalage : lundi de Pâques, Ascension, Pentecôte) et `DATE` ;
+    jour ouvré, n-ième jour ouvré (rang 0 = le jour même), jours ouvrés d'une période (pour FR-85). Défaut : lundi →
+    samedi, dix jours fériés du Togo (Q-D-11).
+  - **Le paramètre** : `terrain_parametres` (AD-12, patron de `commande_parametres`), `GET|PUT /api/v1/terrain/parametres`
+    (droit propre `terrain:parametres:modifier`, « → B »), versions immuables, changement tracé.
+  - **La résolution à l'import** : chaque plan de journée est daté par le calendrier de l'organisation, lu dans la
+    transaction du lot, et garde `parametresVersion` (figé) ; `terrain_parametres` effacé par la route C13.
+  - Node 24 : plateforme 634 tests (633 pass, 0 fail) ; `terrain` 348 unitaires, 29 e2e, 23 d'intégration sur MongoDB
+    réel ; mutations 16/16 (règle) et 13/13 (`terrain`). Pile `grp-d` : `docker compose up` sain, **21/21** sur appels
+    réels (deux organisations, deux calendriers, deux plans différents ; plan figé ; effacement ; témoin intact) ;
+    rejouée sur les images reconstruites depuis `origin/dev` (`--no-cache`, volumes neufs) : 349 unitaires, 29 e2e, 23 d'intégration, pilote 21/21.
+  - Décisions D-1060-1 → 11 (fiche) ; Q-D-11 au PO ; → B (le droit). **Verrou Docker pris à 12:57 sans attente (libre au rituel), une seule prise, rendu à 13:18** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+  - **Suivante : STORY-1061** 🚚 (la facture juste (2), `ventes`).
 
 ### Lot 3 (ouvert le 2026-11-17)
 
@@ -264,7 +279,8 @@
   (`contrats-distributeur-v1` ; **`acces-distributeur-v1`** depuis STORY-1053, `src/acces.ts`) ; **lot 3** : `encours/` (inscrit au README par B-956) ;
   `contrats/objets/reseau/` (module `reseau`, README ; **`objets-reseau-v1`** depuis STORY-1055) ;
   `jeux-demonstration/grossiste-golfe-petit/`, `grossiste-golfe/` (avec son générateur), `grossiste-golfe-grand/`
-  (**`jeu-grossiste-golfe-v1`** depuis STORY-1058).
+  (**`jeu-grossiste-golfe-v1`** depuis STORY-1058) ; **lot 4** : `contrats/distributeur/src/calendrier.ts`
+  (**`calendrier-distributeur-v1`** depuis STORY-1060).
 - **`prospera-assureur-fictif`** (lot 3, reçu de C, passation constatée le 2026-11-17 au rituel de 1046) : port 3411,
   profil `assureur-fictif`, « Rebase and merge » seul ; dans `prospera-plateforme`, le jeu
   `jeux-demonstration/assurance-compagnie-demo-reduite/` (étiquette `jeu-assurance-v1`). Le générateur reste dans le
@@ -308,6 +324,16 @@
     les cinq services, la Reprise réseau, la commande (1), le jeu « Grossiste du Golfe » et ses routes C13, **la facture
     juste (1)** ; côté assurance : compagnie de démonstration, LC fictif refusé en réel, sa recette, prévenir l'assuré (1)
     et (2). Détail et SHA : « État », plus haut.
+  - **Mise en service d'un client qui quitte Sage** (réponse de l'utilisateur à Q-D-10, 2026-11-18) : la reprise du
+    dernier numéro de facture (`facturation.suite-numerotation@1`, EPIC-244) se pose **avant sa première facture** ; à
+    la liste de mise en service du distributeur de février.
+  - **Le calendrier de l'organisation** (STORY-1060, lot 4 ; `terrain` `dev` 17bdba7, plateforme `8c61c48`) : la règle
+    est `prospera-plateforme/contrats/distributeur/src/calendrier.ts` (`calendrier-distributeur-v1`), copiée à l'octet dans
+    `terrain/src/socle/calendrier/` (empreinte dans `src/calendrier.invariant.spec.ts`) ; `pilotage` la copiera pour
+    compter les jours ouvrés du mois (FR-85) et lira le calendrier de `terrain` (route ou fait à ajouter, D-1060-10). Le
+    paramètre est `terrain_parametres` (`src/modules/terrain/parametres/`) : les distances et le géorepérage de `terrain`
+    (AD-12) s'y ajoutent comme clés de plus (valeurs complètes à chaque version). Un plan de journée garde
+    `parametresVersion` ; un plan créé ailleurs qu'à l'import (EPIC-233) se datera par `dateDuPlanDeJournee`.
   - **Ce qui reste, dans l'ordre conseillé** : (1) **la facture juste (2)** (facture par livraison, `SANS_BON`, mentions
     légales A-1, PDF, envoi, avoir, `PARTIELLE`/`PAYEE` lus de `paiement.creance.changed@1`, balances ; fiche 1059
     « Ce qui reste ») ; (2) **la commande (2)** (`TRANSMISE`, modifier, annuler, remise, dérogation, `CMD-`, livraison
@@ -749,7 +775,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-18, STORY-1060), avant la fusion du code — `prospera-plateforme` (`contrats/distributeur/`) et
+- **PUBLIÉ (2026-11-18, STORY-1060, prospera-plateforme#32, `dev` 8c61c48, étiquette `calendrier-distributeur-v1` ;
+  prospera-terrain-service#4, `dev` fd5f4ee → 17bdba7) ; ANNONCÉ avant la fusion du code (prospera-stories #681), sans
+  écart. — `prospera-plateforme` (`contrats/distributeur/`) et
   `prospera-terrain-service` (module `terrain`) : le calendrier de l'organisation, paramètre versionné, lu à l'import.**
   Fiche : `stories/STORY-1060.md` (D-1060-1 → 11). Tout est AJOUT ; un comportement change (la date des plans importés).
   - **Bibliothèque neuve** : `contrats/distributeur/src/calendrier.ts`, étiquette **`calendrier-distributeur-v1`**
@@ -1267,6 +1295,20 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1060** :
+  - (1) **Un mutant « lu hors de la transaction » survit aux tests d'intégration de l'import C13** : les références se
+    vérifient avant l'écriture, si bien qu'aucun lot refusé n'atteint `ecrire` ; et lire le calendrier hors de la session
+    rend le même résultat sans concurrence. Le tuer par un test unitaire de `ecrire` sur une connexion factice qui note la
+    session de chaque appel.
+  - (2) **L'invariant du plan d'effacement lit `collection: '…'` en clair dans les sources** : un `@Schema({ collection:
+    UNE_CONSTANTE })` lui échappe (la collection paraît inconnue, le plan « nomme une coquille »). Écrire le nom en clair
+    dans le décorateur, et vérifier la constante par un test.
+  - (3) **`python - <<'EOF'` avec des accents dans le script** : sous Git Bash, l'entrée standard n'arrive pas en UTF-8 et
+    une assertion `s.count(…) == 1` échoue sur un motif accentué ; la commande suivante (après `;`) tourne quand même.
+    Écrire le script au fichier (outil d'écriture), le lancer avec `python -X utf8`, et chaîner par `&&`.
+  - (4) Le verrou Docker était libre au rituel ; tout ce qui ne demandait pas Docker (règle, tests locaux sous Node 25,
+    mutations unitaires, annonce fusionnée, pile et pilote écrits) a été fait **avant** de le prendre : une seule prise.
 
 - **STORY-1059** :
   - (1) **`eslint --fix` retire un `as string` devenu inutile après une garde** (`if (c.creanceId !== \`…\`)` rétrécit
