@@ -1461,10 +1461,12 @@ reserved_ranges:
   - range: "STORY-974"
     status: "RÉSERVÉ"
     owner: "Groupe B — l'invitation au réel à la mise en service (AD-15) : une route d'invitation pour l'identité de service du moteur dans auth, appelée à la mise en service (auth, catalogue)"
-    source_doc: "prospera-stories/stories/STORY-951.md"
+    source_doc: "prospera-stories/stories/STORY-974.md"
     reserved_on: "2026-11-18"
     note: >
-      D-951-8 : la story doit exister avant février ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). En tête du prochain lot de B. NON SLOTTÉE.
+      🚧 EN COURS le 2026-11-18 — contrat annoncé AVANT la fusion du code (« ⚠ Contrats » du journal de B). D-951-8 : la
+      story doit exister avant février ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A,
+      « Demandes aux autres groupes »). Lot 4 de B, n° 1 (EPIC-146), sans Docker (D-L4-3). NON SLOTTÉE.
   - range: "STORY-975"
     status: "RÉSERVÉ"
     owner: "Groupe B, lot 4 — la comptabilité installable par le moteur : vérification referentiel-resolu (verification-installation@1), routes C13, POST /installations de comptabilite (D-972-2) (comptabilité)"
