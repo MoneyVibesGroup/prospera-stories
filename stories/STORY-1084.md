@@ -1,6 +1,6 @@
 # STORY-1084 : chaque emprunt a son échéancier, et le prévisionnel le lit
 
-Status: in-progress
+Status: done
 
 **Complexité :** élevée (8 pts ; un calcul d'échéancier exact au franc, une injection dans le moteur du prévisionnel,
 quatre indicateurs de dette ; aucun droit neuf)
@@ -156,3 +156,60 @@ Recalculé avant la fiche en arithmétique rationnelle exacte : les quatre nombr
 Les exigences de la banque et leurs seuils (1085, AP-50) ; le dossier figé, l'échéancier et le plan de financement
 dans le PDF et l'Excel (1086) ; les écrans (FE-140, FE-141) ; le différé total (intérêts capitalisés) ; les
 intérêts courus au prorata ; les indicateurs de dette sur le réel.
+## Livraison
+
+- **bilan #181** — `d236c56` sur `dev` (branche `MNV-1084`, tête `dbe7901`, rejouée en rebase) : 31 fichiers.
+- **Annonce avant le code** : stories #695 (fiche, manifeste `financement` 0.2.0, « ⚠ Contrats »). Livré sans écart
+  au contrat annoncé.
+
+## Preuves
+
+Node 25.2.1 du poste, **sans Docker** (D-L4-3).
+
+- **Valeur de référence (AC-2)**, en dur dans trois suites (unitaire, service, e2e) : 25 000 000, 12 %, 48 mois ⇒
+  échéance **658 346** (×47), dernière **658 339**, intérêts **6 600 601**, total **31 600 601**, restant dû final 0 ;
+  ligne 1 = 250 000 d'intérêts, 408 346 de capital ; ligne 2 = 245 917 (demi vers le haut). Recalculée avant la fiche
+  en rationnels exacts (Python `fractions`).
+- **e2e `test/financement-emprunts.e2e-spec.ts` : 21/21.** Vrai contrôleur, vraies gardes (JWT → e-mail → rôles →
+  garde du module → portée), vrai service des emprunts, **vrai adaptateur du prévisionnel et vrai
+  `ProjectionService`** (moteur annuel compris) ; stockages en mémoire. Échéancier de référence ; collaborateur qui
+  saisit et lit ; PUT / DELETE (204) tracés `AJOUT`, `REMPLACEMENT`, `RETRAIT` ; 404 `EMPRUNT_INTROUVABLE` ; 7 corps
+  refusés (400) + `DIFFERE_INVALIDE` + `DUREE_HORS_PERIODICITE` ; 21ᵉ emprunt 422 ; saisie refusée 409 dans les 5
+  états hors brouillon (lecture 200) ; emprunts archivés avec la version d'un REMIS corrigé ; scénario d'un autre
+  dossier ou inconnu 422 `SCENARIO_INTROUVABLE`, identifiant mal formé 400, retenu puis retiré ; indicateurs sans
+  scénario (tout `INCALCULABLE`, `SCENARIO_NON_RETENU`), avec scénario (dette 2026 = 11 mensualités + la dette
+  existante, dette de la base 4 000 000 tirée des échéanciers, trois indicateurs calculés sur 2026 → 2028, plan
+  ressources − emplois), jeu disparu (`SCENARIO_INTROUVABLE`) ; `LECTURE_SEULE`, membre sans droit, hors portefeuille,
+  autre cabinet, module fermé ; OpenAPI (5 opérations, énumérations nommées).
+- **e2e de 1083 : 82/82** (fournisseurs ajoutés ; contrat OpenAPI : 13 opérations).
+- **Unitaires neufs : 71** — échéancier 13 (référence, report d'arrondi sur 5 jeux de paramètres, différé, amortissement
+  constant, borne du restant dû, taux nul, trimestriel, taux à 4 décimales, dates), dette par exercice 14 (rangement,
+  dette de la base, millésime absent, apport conservé, jeu non modifié, ventilation indéterminée, moteur sans le
+  paramètre identique, intérêts imposés, équilibre du bilan à écart nul), `projeterAvecEmprunts` 8, indicateurs 12
+  (DSCR, capacité, autonomie, identité solde = variation de trésorerie, 4 motifs globaux, deux motifs par exercice),
+  service des emprunts 15, service du dossier +5 (scénario contrôlé, archive), dépôts +4.
+- **Projection et invariants** : `src/modules/bilan/projection` 35 suites vertes (hors `restitution.spec`, binding) ;
+  `routes-sans-ecriture`, `routes-d-export-et-d-etats`, `plan-d-effacement`, `index-dossier` verts.
+- **Câblage du module racine** vert (binding de Confluent doublé), **rouge** si `BilanModule` n'exporte plus
+  `JeuHypothesesRepository` (« Nest can't resolve dependencies of the PrevisionnelDuBilan »).
+- **Mutations : 28/28 rouges sur l'assertion** (aucune ne compile pas) : report sur la dernière, arrondi tronqué,
+  intérêts sur le capital initial, différé ignoré, taux périodique figé, borne du restant dû, fin de mois, dette de la
+  base, remboursement = échéance, apport oublié, intérêts des échéanciers ignorés par le moteur, source de la dette de
+  la base, intérêts non passés, DSCR sans intérêts, DSCR à dénominateur nul, capacité sans dettes, augmentation du
+  BFR, apports du plan, saisie hors brouillon, borne des 20, emprunt inconnu, durée hors période, différé = durée,
+  scénario non contrôlé, emprunts hors archive, scénario jamais gardé, borne du dépôt, condition du remplacement.
+- **Suite complète** : 345 suites, 11 901 passés ; **15 suites rouges, toutes préexistantes et hors des fichiers
+  touchés** : 13 sur le binding de Confluent (Node 25), `dossier-scope.invariant` (« segment `:dossierId` », décorateur
+  en CRLF), `analyse.agnosticisme` (séparateur `\` de Windows dans un chemin, dossier `analyse/` non touché).
+  Lint des fichiers touchés, `tsc`, `nest build` verts.
+- **Docker : non** (D-L4-3). Le démarrage réel de bilan avec `financement` (1083 et 1084) reste à prouver par la
+  première story qui lève bilan (1082, au plus tard 1080).
+
+## Pour la suite
+
+- **FE-140 / FE-141** : types depuis l'OpenAPI vivant ; `echeancier.lignes` à afficher, `formule` au survol,
+  `INCALCULABLE` + `motif` à traduire en texte d'écran.
+- **STORY-1086** : figer l'échéancier, les indicateurs et le plan de financement avec la version (aujourd'hui calculés
+  à la lecture, D-1084-2) ; le scénario retenu désigne la version COURANTE du jeu (D-1084-8) : le figement en garde la
+  version (`scenario.hypothesesVersion` est déjà rendu).
+- **STORY-1085** : les seuils des indicateurs viendront du référentiel `exigences-bancaires-uemoa`.
