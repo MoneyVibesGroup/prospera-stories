@@ -95,6 +95,12 @@
   suite attend une consigne de l'utilisateur. Restes nommés dans les fiches : réalignement de la provision à l'évaluation
   (D-1013-8), fait `sinistres.evaluation.arretee@1` (D-1013-9), lever une alerte bloquante (D-1013-10), commande de
   décision de véhicule et cession de l'épave (1012), alertes d'instruction (H-046), questions au PO ci-dessous.
+- **2026-11-18 — LOT 4 DE C** (`PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §5), ordre : 1018, 1015, 1017, 1016. Une sous-session par story.
+  - ~~**STORY-1018**~~ : **sinistres #25** (dev `034ddba`) ; correctif de FR-73 : arrêter à l'indemnité proposée
+    (`reperePropose`, arrondie à 5 000) **ou** au décompte (`indemniteCalculee`, au franc) ne demande pas de motif ; tout
+    autre montant l'exige et `MOTIF_ECRIT` porte `details: { calcule, propose }` ; le montant arrêté reste au franc ;
+    OpenAPI décrit les deux montants ; aucun contrat ni route neufs ; Node 24 (e2e 27, build 0), rejouée depuis `dev`.
+  - **Suivante : STORY-1015.**
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -516,6 +522,9 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   (entrées absentes de tout extrait) ; contexte en 5e paramètre de l'adaptateur ; alertes d'instruction (H-046) hors
   story. **→ PO** : la grille de vétusté de la compagnie (A-5, H-059) est à obtenir ; les quatre catégories attendent
   ses valeurs.
+- **D-1018-1 → D-1018-3** (`stories/STORY-1018.md`) : deux montants « conformes » à l'arrêt (décompte au franc et
+  indemnité proposée), tout autre se motive ; le nom d'écran est « indemnité proposée », le champ garde `reperePropose` ;
+  le pas reste le paramètre `arrondi_indemnite_fcfa` (5 000, H-060). Contestables ; aucune question ouverte.
 - **D-1013-1 → D-1013-12** (`stories/STORY-1013.md`) : commande à part avant la transition 7 ; montant obligatoire, au
   franc, jamais écrit d'office ; décompte calculé une fois et copié ; les DEUX tables jugées à la survenance ; ajout seul,
   motif dès la version 2, permis en instruction et en évalué ; rôles de la transition 7 et partie « évaluer » ; motif
@@ -723,3 +732,5 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   (`lib/kafkajs/_consumer.js`). La santé d'un consommateur bloqué se mesure donc aux échecs consécutifs par partition.
 - **Un e2e qui pose un dossier directement dans le dépôt doit lui donner une déclaration COMPLÈTE** (STORY-1013) : `vueDeLaDeclaration` fait `new Date(recueLe).toISOString()`, qui lève sur une date absente ; la route rend 500 alors que le service a écrit. Poser `canal`, `typeSinistre`, `recueLe` et `saisieLe`, pas seulement le type.
 - **Un motif de test de « 10 caractères au moins » : compter** (STORY-1013) : `trop court` en fait dix et passe ; écrire `trop bref` pour un refus.
+- **La suite unitaire de `sinistres` sur MongoDB réel rougit au hasard quand elle tourne en parallèle sur un poste chargé** (STORY-1018 : 5 échecs sur `dossiers.service.spec` en `-w 2`, tests sans rapport ; la même suite seule, `-w 1`, passe 214/214). Rejouer le fichier rouge seul avant de chercher un défaut.
+- **Un script de vérification Docker lancé avant une pause de verrou se tue en `kill -9`** : son `trap` supprimerait le verrou d'un autre groupe (STORY-1018).

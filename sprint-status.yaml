@@ -1847,7 +1847,10 @@ reserved_ranges:
     reserved_on: "2026-11-18"
     note: >
       Demandée par l utilisateur le 2026-11-18 avec la correction de FR-73 (même PR) ; fiche écrite par A, prête pour C.
-      Défaut constaté sur origin/dev : jugerLArret compare le montant arrêté au seul décompte au franc. NON SLOTTÉE.
+      Défaut constaté sur origin/dev : jugerLArret compare le montant arrêté au seul décompte au franc.
+      🏁 DONE le 2026-11-18 — prospera-sinistres-service#25 (dev 034ddba) : arrêt au décompte OU à l'indemnité proposée sans
+      motif, MOTIF_ECRIT nomme calcule et propose, montant arrêté au franc, OpenAPI ; Node 24 : e2e 27, build 0, unitaires
+      MongoDB réel verts (fichier de service seul). Lot 4 de C, n° 1. NON SLOTTÉE.
   - range: "STORY-1009"
     status: "RÉSERVÉ"
     owner: "Demander des pièces complémentaires pendant l'instruction : la liste des pièces attendues s'allonge avec un motif, les relances de 999 la reprennent (sinistres)"
