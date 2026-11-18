@@ -1,6 +1,6 @@
 # STORY-976 : `paiement` reçoit `facturation.facture.emise@1` et ouvre la Créance
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (un consommateur neuf sur le socle supervisé ; aucune écriture neuve : la même
 `OuvrirLaCreance` que la route ; la preuve est sur une pile)
@@ -87,11 +87,52 @@ amendé.
 
 ## Ce qui a été livré
 
-_(à remplir à la fusion)_
+**paiement #124**, fusionnée en rebase : `6f8a0ea` sur la branche, **`4684d22` sur `dev`**. Contrat annoncé avant la
+fusion (stories #709), sans écart.
+
+- `src/application/creances/facture-emise.ts` : `lireLaFactureEmise` (la forme du fait), `TOPIC_FACTURE_EMISE`.
+- `src/application/creances/ouvrir-la-creance-de-la-facture.usecase.ts` : `OuvrirLaCreanceDeLaFacture`,
+  `ouvertureDeLaFacture` (l'ouverture que la route construit pour le corps de `ventes`), `MODULE_FAIT_DE_FACTURE`.
+- `src/modules/factures-emises/` : `FacturesEmisesConsumer` (socle `ConsommateurReadModel`, groupe
+  `paiement-factures`) et `FacturesEmisesModule` (importe `CreancesModule`), branché dans `AppModule`.
+- Configuration : `kafka.facturesGroupId` (`KAFKA_FACTURES_GROUP_ID`, facultative), `.env.example`.
+- Gardes mises à jour : `consommateurs-supervises.invariant.spec.ts` (7 consommateurs), `consommateurs-groupes.spec.ts`
+  (groupe et topic du neuf).
+- Conformité `test/factures-emises.conformite-spec.ts` ; recette `scripts/recette/976/` (pile, émetteur de jetons
+  copié à l'octet de `ventes`, validateur ajv, pilote, README). La pile pose `PI_SPI_API_BASE_URL` et
+  `PI_SPI_TOKEN_URL` (simulateur public) : sans elles, `API_BUSINESS` est indisponible et `/health` rend 503 par
+  construction.
 
 ## Preuves
 
-_(à remplir)_
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive` du commit, conteneur
+  nommé) : paquets 130/130 ; service **347 suites, 4 702 passés, 2 sautés, 0 échec** (dont
+  `consommateurs-groupes.spec`, qui ne charge pas sous Node 25).
+- **Poste (Node 25)** : `tsc` et `nest build` verts ; lint des fichiers touchés vert ; specs neuves et invariants
+  `etats-de-creance`, `creance-materialisation`, `consommateurs-supervises` : 71/71. Une spec compare l'ouverture
+  passée à `OuvrirLaCreance` par le contrôleur de la route (corps de `ventes`) et par le fait : égales.
+- **Conformité sur un vrai MongoDB en jeu de répliques** (`rs-paiement`, pile `grp-b`) : 15/15, dont
+  `factures-emises` 5/5 : fait, puis route, puis fait relivré trois fois ⇒ 1 Créance, 1 état, 1 trace, 1 fait de
+  chaque ; route d'abord puis fait ⇒ rien d'écrit ; une facture par le fait et une par la route ⇒ même document, même
+  état (révision 1, `OUVERTURE`) ; **10 faits et 10 appels de la route en même temps ⇒ 1 naissance** ; autre tiers ⇒
+  `REFUSEE`, rien d'écrit. `creances-ouverture` et `etats-de-creance` restent verts.
+- **Pile `grp-b`** (`scripts/recette/976/`, image `runtime` du commit) : **26/26**.
+  - Le schéma de `ventes` (`origin/dev`) est enregistré au registre Karapace (sujet `facturation.facture.emise-value`,
+    id 1, BACKWARD), relu ; le fait publié lui est conforme (numéro `FA000124`, sans `FAC-`).
+  - Fait publié ⇒ Créance ouverte, relue par l'API **2,9 s** après la publication ; trace attribuée à `MODULE`
+    `FAIT_DE_FACTURE`.
+  - Même fait relivré, puis sous deux autres `eventId` ⇒ toujours 1/1/1/1/1 (le groupe a lu tout le topic).
+  - La route sur la même facture ⇒ **200** (rejeu), la même Créance, rien d'écrit.
+  - Route d'abord (201) puis deux faits ⇒ rien d'écrit ; la trace reste celle du membre.
+  - **Même résultat** : la vue de l'API et l'état publié (`paiement.creance.changed@1`) de la facture ouverte par le
+    fait égalent ceux de la facture ouverte par la route, à l'identité près.
+  - Fait d'un autre tiers ⇒ ignoré, journalisé `CREANCE_SOURCE_EN_CONFLIT` ; le fait suivant ouvre sa Créance
+    (partition non bloquée).
+  - `/api/v1/health` **200** ; le groupe `paiement-factures` est sans retard. Au démarrage :
+    « topics créés avant l'abonnement (facturation.facture.emise) », « groupe paiement-factures démarré ».
+- **Mutations : 20/20 rougissent sur une assertion** (lecture du fait 10, cas d'usage 10 ; L6, « TTC textuel
+  accepté », ne compilait pas sous sa première forme : réécrite).
+- **Verrou Docker** pris de façon atomique (21:43, après la fin de D-1062), pile descendue (`down -v`), rendu à 21:54.
 
 ## Pour la suite
 
