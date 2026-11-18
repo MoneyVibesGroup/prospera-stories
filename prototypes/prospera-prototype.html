@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-036 Projection · FE-034 Validation revalidée</title>
+<title>Prospera · Prototype cumulatif — cabinet</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -3167,6 +3167,8 @@
     .dc-subtable .h { display: none; }
     .dc-subtable .r { grid-template-columns: 1fr; }
   }
+  .imp-table.cmp-tab { font-size: 0.76rem; }
+  .imp-table.cmp-tab th, .imp-table.cmp-tab td { white-space: normal; padding-left: 0.4rem; padding-right: 0.4rem; overflow-wrap: anywhere; }
 </style>
 
 <div class="ribbon">
@@ -4804,7 +4806,7 @@
                       <span><b>Changer le type d'entité après un exercice validé est refusé.</b> Une liasse figée cite son référentiel : le rejouer rétroactivement rendrait faux un document déjà déposé. La bascule passe par une demande tracée, avec reprise à-nouveaux.</span>
                     </div>
                     <div class="dc-edit-foot">
-                      <span class="dc-edit-note">Référentiel : <b>SYSCOHADA révisé @2.1</b> · paquet fiscal <b>Togo 2026</b> <span class="dc-badge warn">amorce</span></span>
+                      <span class="dc-edit-note">Référentiel : <b>SYSCOHADA révisé @2.3</b> · paquet fiscal <b>Togo 2026</b> <span class="dc-badge warn">amorce</span></span>
                       <span class="grow"></span>
                       <button class="btn btn-ghost btn-sm" type="button" data-dc-edit-cancel>Fermer</button>
                       <button class="btn btn-ghost btn-sm" type="button">Demander une bascule</button>
@@ -5725,7 +5727,7 @@
                       <span class="badge badge-active"><span class="d"></span>Ouvert</span>
                       <span class="grow" style="flex:1"></span>
                       <span class="cah-lig">Kossi Distribution · règles propres à CE dossier</span>
-                      <span class="cah-lig" title="Chaque encart « écart ouvert » de cet écran nomme le ticket qui le traite.">6 écarts du 27/08, livrés depuis + 2 arbitrés (STORY-422 voie A · STORY-424 voie B) · STORY-418 → 425</span>
+                      <span class="cah-lig" title="Chaque encart de cet écran nomme la story qui le traite.">STORY-418 → 425 livrées (31/08 → 01/09) · voie A (plan du dossier) et voie B (compte à 8 caractères) tenues</span>
                     </div>
 
                     <!-- RETOUR EC (2026-08-26) — « tous les comptes doivent être sur
@@ -5746,7 +5748,7 @@
                          meme sans backend, mais le dire ». -->
                     <div class="prof-note info">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                      <span><b>Les comptes de cet écran sont à 8 caractères — votre plan de travail, et c&rsquo;est désormais la cible retenue.</b> ✅ <b>Arbitré le 26/08 (voie B)</b>&nbsp;: la plateforme cesse de <b>jeter</b> le compte du cabinet. Le compte à 8 caractères devient une donnée de premier rang — <b>accepté à la saisie</b>, <b>conservé</b> et <b>publié</b> à côté du compte de plan dont il dérive. ⚠️ <b>Le compte de plan reste l&rsquo;identité de la balance</b>&nbsp;: c&rsquo;est lui que l&rsquo;administration reconnaît sur la liasse — rien ne change de ce côté. ⛔ <b>Non encore livré</b>&nbsp;: aujourd&rsquo;hui le service refuse toujours au-delà de 6 caractères (<span class="code">400 · COMPTE_INCONNU</span>). Ce que ça coûte, mesuré sur une balance cliente réelle&nbsp;: ramener à 6 fond <code>44280001</code> «&nbsp;Droit d&rsquo;enregistrement&nbsp;» et <code>44280002</code> «&nbsp;TH 2023&nbsp;» en un seul <code>442800</code> — <b>5 comptes réduits à 2</b>. <span class="code">arbitré · <b>STORY-424</b> · voie B · à livrer</span></span>
+                      <span><b>Les comptes de cet écran sont à 8 caractères — votre plan de travail, et la plateforme les garde.</b> ✅ <b>Livré le 01/09 (STORY-424, voie B)</b>&nbsp;: les portes de saisie (recette, dépense, règle de rattachement, catégorie, comptes de contrepartie) <b>acceptent</b> le compte à 8 caractères et le <b>conservent tel quel</b>&nbsp;; il n&rsquo;est <b>ramené au plan qu&rsquo;à l&rsquo;agrégation</b>. ⚠️ <b>Le compte de plan reste l&rsquo;identité de la balance</b> (c&rsquo;est lui que l&rsquo;administration reconnaît sur la liasse)&nbsp;: la ligne de balance le publie, avec <code>comptesSources</code> (les comptes de travail fondus dedans, plafonnés à 10) et <code>sourcesTotal</code> (leur nombre exact). Ce que ça évite, mesuré sur une balance cliente réelle&nbsp;: ramener à 6 sans rien garder fondait <code>44280001</code> «&nbsp;Droit d&rsquo;enregistrement&nbsp;» et <code>44280002</code> «&nbsp;TH 2023&nbsp;» en un seul <code>442800</code> — <b>5 comptes réduits à 2</b>. <span class="code">livré · <b>STORY-424</b> · voie B</span></span>
                     </div>
 
                     <!-- ═════════════ ① CE QUI DÉCIDE ═════════════ -->
@@ -5780,8 +5782,8 @@
                         <div class="rat-step">
                           <span class="n">3</span>
                           <div>
-                            <b>Le moteur de mots-clés — puis, à défaut, <span class="rat-src defaut">70100000 par défaut</span></b>
-                            <p>Le moteur cherche « vente », « prestation », « travaux », « loyer »… dans le libellé, puis dans <b>l'activité déclarée</b> du dossier. S'il ne trouve rien, il rend <b>70100000 Ventes de marchandises</b> — et la balance sera parfaitement équilibrée avec un chiffre d'affaires mal ventilé.</p>
+                            <b>Le moteur de mots-clés — puis, à défaut, <span class="rat-src defaut">701 par défaut</span></b>
+                            <p>Le moteur cherche « vente », « prestation », « travaux », « loyer »… dans le libellé, puis dans <b>l'activité déclarée</b> du dossier. S'il ne trouve rien, il rend <b>701 Ventes de marchandises</b> — et la balance sera parfaitement équilibrée avec un chiffre d'affaires mal ventilé.</p>
                           </div>
                         </div>
                       </div>
@@ -5822,7 +5824,8 @@
                               <option value="loyer" data-tiers="M. Amegan">Loyer local Adidogomé</option>
                               <option value="facture" data-tiers="SODIFAB">Facture n° 12</option>
                               <option value="change" data-tiers="Ecobank">Commission de change</option>
-                              <option value="ceet" data-tiers="CEET" data-depense="1">Électricité CEET</option>
+                              <option value="subv" data-tiers="Commune de Kara">Subvention mairie</option>
+<option value="ceet" data-tiers="CEET" data-depense="1">Électricité CEET</option>
                             </select>
                             <span class="fh">Texte libre dans le produit — liste ici pour la démo.</span>
                           </label>
@@ -5835,11 +5838,11 @@
                           <div class="rat-ecr-head">
                             <b>Compte proposé</b>
                             <span class="grow" style="flex:1"></span>
-                            <span class="cible" style="font-family:var(--font-mono);font-weight:750;font-size:1rem" data-rat-essai-compte>706</span>
+                            <span class="cible" style="font-family:var(--font-mono);font-weight:750;font-size:1rem" data-rat-essai-compte>70600000</span>
                             <span data-rat-essai-src><span class="rat-src regle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Règle du dossier</span></span>
                           </div>
                           <div style="padding:0.6rem 0.85rem;font-size:0.8rem;color:var(--muted-fg)" data-rat-essai-motif>
-                            <b style="color:var(--foreground)">Services vendus</b> — motif rendu par le serveur&nbsp;: «&nbsp;règle de l'organisation sur le tiers «&nbsp;Mairie de Kara&nbsp;»&nbsp;».
+                            <b style="color:var(--foreground)">Services vendus</b> — motif rendu par le serveur&nbsp;: «&nbsp;règle de l'organisation sur le tiers «&nbsp;Mairie de Kara&nbsp;»&nbsp;» · <code>origine: REGLE</code>.
                           </div>
                         </div>
                         <p class="helper" style="text-align:left">
@@ -5851,7 +5854,7 @@
                       <!-- ÉCART — relevé à la source, pas supposé. -->
                       <div class="prof-note warn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>À livrer côté backend — la provenance est aujourd'hui une phrase en français.</b> <code>PropositionRattachementDto</code> publie <code>compte</code>, <code>motif</code> (prose) et <code>surcharge</code> (booléen). On sait donc si c'est une règle&nbsp;; on ne sait <b>pas</b> distinguer «&nbsp;mot-clé du libellé&nbsp;», «&nbsp;activité de l'organisation&nbsp;» et «&nbsp;<b>défaut, faute d'indice</b>&nbsp;» sans <b>analyser du texte français</b> — fragile, et intraduisible. <b>Demandé&nbsp;: <code>origine: 'REGLE' | 'MOT_CLE' | 'ACTIVITE' | 'DEFAUT'</code></b>, typé, à côté du motif. <span class="code">écart du 27/08 · <b>STORY-418</b> livrée · ticket backend</span></span>
+                        <span><b>La provenance est un énuméré, plus une phrase.</b> ✅ <b>Livré le 31/08 (STORY-418)</b>&nbsp;: <code>PropositionRattachementDto</code> publie <code>origine</code> — <code>REGLE</code> (décidée par un humain) · <code>MOT_CLE</code> (indice dans le libellé ou le tiers, à confirmer) · <code>ACTIVITE</code> (indice dans l&rsquo;activité de l&rsquo;organisation) · ⛔ <code>DEFAUT</code> (aucun indice&nbsp;: <b>ce n&rsquo;est pas un choix</b>, la seule valeur qui appelle une relecture) — à côté du <code>motif</code>, qui reste la phrase à afficher, et de <code>surcharge</code>, conservé. L&rsquo;écran trie et traduit l&rsquo;<b>origine</b>&nbsp;; il n&rsquo;analyse plus du français. ⚠️ <b>Deux limites, vérifiées au code</b>&nbsp;: la pré-proposition de la <b>lecture des images</b> ne porte <b>ni compte ni origine</b> (son <code>motif</code> est celui du doublon) — le compte est déduit à l&rsquo;application&nbsp;; et l&rsquo;<b>origine n&rsquo;est pas conservée à l&rsquo;écriture</b> (une ligne créée sur le compte par défaut ne le dit plus après coup) — suite documentée, hors de cette story. <span class="code">livré · <b>STORY-418</b></span></span>
                       </div>
                     </div>
 
@@ -5860,7 +5863,7 @@
 
                       <div class="rat-sect">
                         <h4>Les règles de ce dossier</h4>
-                        <span class="c">4 règles · <b>propres à Kossi Distribution</b>, jamais partagées avec vos autres clients.</span>
+                        <span class="c">5 règles · <b>propres à Kossi Distribution</b>, jamais partagées avec vos autres clients.</span>
                       </div>
 
                       <div class="rat-regles">
@@ -5912,23 +5915,37 @@
                           <div class="tr"><b>Aucune ligne ne porte exactement ce tiers.</b> Vos 9 lignes SODIGAZ sont écrites «&nbsp;SODIGAZ SA&nbsp;» (6) et «&nbsp;Sodigaz Lomé&nbsp;» (3). <b>Cette règle est enregistrée et ne sert à rien</b> — il en faut une par écriture exacte. <button class="linklike" type="button" data-rat-goto="regles">Créer les deux règles manquantes</button></div>
                         </div>
 
-                        <!-- ⛔ LE CAS QUE LE SERVEUR TRAITE EN SILENCE : `proposerRattachement`
-                             n'applique une surcharge que si `compteDeposable(compte)` — sinon
-                             il RETOMBE sur le moteur de mots-clés, sans rien signaler. La
-                             règle reste en base, s'affiche « enregistrée », et n'agit plus. -->
-                        <div class="rat-regle inerte">
-                          <div class="cle">
-                            <span class="rat-type lib">Libellé</span>
-                            <b>«&nbsp;commission de change&nbsp;»</b>
-                            <span style="color:var(--muted-fg)">→</span>
-                            <span class="cible">70780000</span>
-                            <span class="badge badge-soon">Refusé — plan limité à 6</span>
-                          </div>
-                          <div class="por"><span class="c">—</span><span class="u">inapplicable</span>
-                            <button class="btn btn-primary btn-sm" type="button">Corriger le compte</button>
-                          </div>
-                          <div class="tr"><b>Ce compte est refusé par le référentiel — et c&rsquo;est ce que la voie B corrige.</b> <code>70780000</code> est reconnu par sa racine <code>707</code>, mais <code>syscohada-revise@2.1</code> s&rsquo;arrête à <b>6 caractères</b>&nbsp;: il n&rsquo;est pas <b>imputable</b>. Le serveur <b>ignore la règle sans le dire</b> et retombe sur le moteur — les 4 lignes concernées sont parties en <code>70700000</code>. ✅ <b>Après STORY-424, ce cas disparaît</b>&nbsp;: le compte saisi est accepté et conservé, et c&rsquo;est le compte de plan qui en sera <b>dérivé</b> pour la balance. En attendant, <b>toutes</b> les règles de cet écran tombent dans ce cas.</div>
-                        </div>
+                        <!-- ✅ STORY-424 : 8 caractères acceptés. Cette règle, qui était « inerte » parce que le plan
+                      était limité à 6, est désormais une règle vivante (707800 une fois ramenée au plan). -->
+                      <div class="rat-regle">
+                      <div class="cle">
+                      <span class="rat-type lib">Libellé</span>
+                      <b>«&nbsp;commission de change&nbsp;»</b>
+                      <span style="color:var(--muted-fg)">→</span>
+                      <span class="cible">70780000</span>
+                      <span style="font-size:0.78rem;color:var(--muted-fg)">Produits accessoires</span>
+                      </div>
+                      <div class="por"><span class="c">4</span><span class="u">lignes prises</span>
+                      <button class="btn btn-ghost btn-sm" type="button" aria-label="Supprimer la règle">Supprimer</button>
+                      </div>
+                      <div class="tr">Posée par <b>A. Mensah</b> le 12/02/2026 · clé comparée&nbsp;: <code>commission de change</code> · <b>compte à 8 caractères accepté</b> (STORY-424)&nbsp;: il est conservé tel quel, et c&rsquo;est <code>707800</code> — ramené au plan — qui entre en balance. Avant la story, cette règle était refusée («&nbsp;plan limité à 6&nbsp;»).</div>
+                      </div>
+
+                      <!-- ⛔ LA RÈGLE DONT LE COMPTE N'EST PLUS AU PLAN — STORY-419 : `applicable: false`. Avant la story,
+                      elle s'affichait « enregistrée » comme une règle vivante alors que le moteur l'ignorait. -->
+                      <div class="rat-regle inerte">
+                      <div class="cle">
+                      <span class="rat-type lib">Libellé</span>
+                      <b>«&nbsp;subvention mairie&nbsp;»</b>
+                      <span style="color:var(--muted-fg)">→</span>
+                      <span class="cible">74100000</span>
+                      <span class="badge badge-soon">Compte absent du plan</span>
+                      </div>
+                      <div class="por"><span class="c">—</span><span class="u">inapplicable</span>
+                      <button class="btn btn-primary btn-sm" type="button">Corriger le compte</button>
+                      </div>
+                      <div class="tr"><b><code>applicable: false</code> — le moteur ignore cette règle.</b> <code>74100000</code> se ramène à <code>741000</code>, dont la racine <code>74</code> n&rsquo;existe pas au plan actif (<code>syscohada-revise@2.3</code>&nbsp;: 21 comptes de classe 7, de <code>70</code> à <code>799</code>). La règle reste en base, mais elle sort <b>marquée</b> au lieu de s&rsquo;afficher comme une règle vivante&nbsp;: le serveur retombe sur les mots-clés (ici «&nbsp;subvention&nbsp;» → <code>71</code>) et l&rsquo;écran peut le dire. La cause «&nbsp;plan limité à 6&nbsp;» a disparu avec STORY-424&nbsp;: huit caractères ne suffisent plus à rendre une règle morte. <span class="code">livré · <b>STORY-419</b></span></div>
+                      </div>
                       </div>
 
                       <!-- Création — le PUT est idempotent : rejouer la même clé remplace la
@@ -5955,29 +5972,40 @@
                                (« le champ se tape de mémoire ») : elle est PÉRIMÉE. -->
                           <label>Compte de produits
                             <select data-rat-f-cpt>
-                              <option>70100000 — Ventes de marchandises</option>
-                              <option>70200000 — Ventes de produits finis</option>
-                              <option>70300000 — Ventes de produits intermédiaires</option>
-                              <option>70400000 — Ventes de produits résiduels</option>
-                              <option>70500000 — Travaux facturés</option>
-                              <option selected>70600000 — Services vendus</option>
-                              <option>70700000 — Produits accessoires</option>
-                              <option>71000000 — Subventions d'exploitation</option>
-                              <option>75000000 — Autres produits</option>
-                              <option>77000000 — Revenus financiers et produits assimilés</option>
-                              <option value="autre">Autre compte — le saisir…</option>
+<option>70 — Ventes</option>
+<option>701 — Ventes de marchandises</option>
+<option>702 — Ventes de produits finis</option>
+<option>703 — Ventes de produits intermédiaires</option>
+<option>704 — Ventes de produits résiduels</option>
+<option>705 — Travaux facturés</option>
+<option selected>706 — Services vendus</option>
+<option>707 — Produits accessoires</option>
+<option>71 — Subventions d'exploitation</option>
+<option>72 — Production immobilisée</option>
+<option>73 — Variations des stocks de biens et services produits</option>
+<option>75 — Autres produits</option>
+<option>77 — Revenus financiers et produits assimilés</option>
+<option>78 — Transferts de charges</option>
+<option>781 — Transferts de charges d'exploitation</option>
+<option>787 — Transferts de charges financières</option>
+<option>79 — Reprises de provisions, de dépréciations et autres</option>
+<option>791 — Reprises de provisions et dépréciations d'exploitation</option>
+<option>797 — Reprises de provisions et dépréciations financières</option>
+<option>798 — Reprises d'amortissements</option>
+<option>799 — Reprises de subventions d'investissement</option>
+<option value="autre">Subdivision de travail (8 caractères) — la saisir…</option>
                             </select>
-                            <span class="fh"><b>21 comptes de classe 7</b> au plan <code>syscohada-revise@2.1</code>.</span>
+                            <span class="fh"><b>21 comptes de classe 7</b> au plan <code>syscohada-revise@2.3</code> du dossier.</span>
                           </label>
                         </div>
                         <!-- ⚠️ ET POURQUOI LA SAISIE LIBRE RESTE : le plan packagé est un
-                             plan de TÊTES (174 comptes). `7073`, `7072`, `6055` n'y sont
+                             plan de TÊTES (179 comptes). `7073`, `7072`, `6055` n'y sont
                              pas — et sont pourtant ACCEPTÉS, parce que le rattachement se
                              fait par PRÉFIXE (`estCompteRattachable`). Une liste seule
                              empêcherait le cabinet de travailler à son niveau de détail. -->
                         <div class="prof-note info" style="margin:0.4rem 0 0.6rem">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                          <span><b>La liste vient du plan packagé, qui ne compte que 174 têtes.</b> Vos subdivisions de travail (<code>70730000</code>, <code>70720000</code>) n&rsquo;y figurent pas. ✅ <b>Voie B</b>&nbsp;: elles seront <b>saisissables et conservées</b>, la liste restant le repère de ceux qui ne connaissent pas leur plan par cœur. ⛔ Tant que <b>STORY-424</b> n&rsquo;est pas livrée, elles sont <b>refusées</b>.</span>
+                          <span><b>La liste vient du plan du dossier&nbsp;: 179 comptes, dont 21 de classe 7.</b> Vos subdivisions de travail (<code>70730000</code>, <code>70780000</code>) n&rsquo;y figurent pas. ✅ <b>Voie B livrée</b> (STORY-424)&nbsp;: elles sont <b>saisissables et conservées</b>, la liste restant le repère de ceux qui ne connaissent pas leur plan par cœur. ✅ <b>Et la liste est celle du dossier</b> (STORY-422)&nbsp;: <code>GET /dossiers/{id}/referentiels/plan-comptes?classe=7</code>, plus celle de l&rsquo;organisation.</span>
                         </div>
                         <!-- LA PORTÉE AVANT L'ENREGISTREMENT — le seul moment où une règle
                              morte se voit encore. Elle se calcule côté client, sur les
@@ -5998,7 +6026,7 @@
 
                       <div class="prof-note warn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>À livrer côté backend — «&nbsp;0 ligne prise&nbsp;» et «&nbsp;inapplicable&nbsp;» sont calculés ici, pas servis.</b> <code>SurchargeRattachementDto</code> ne publie <b>ni</b> le nombre de lignes que la règle prend, <b>ni</b> si son compte appartient encore au plan actif — alors que le serveur, lui, le sait&nbsp;: c'est exactement le test <code>compteDeposable()</code> qu'il applique avant d'ignorer la règle. L'écran le reconstitue en croisant <code>GET /referentiels/plan-comptes</code> et les lignes de l'exercice&nbsp;: <b>ça marche, mais c'est une vérité recalculée par chaque client</b>. <b>Demandé&nbsp;: <code>applicable: boolean</code> et <code>lignesPrises: number</code></b> sur la règle. <span class="code">écart du 27/08 · <b>STORY-419</b> livrée · ticket backend</span></span>
+                        <span><b>«&nbsp;0 ligne prise&nbsp;» et «&nbsp;inapplicable&nbsp;» sont servis, plus recalculés.</b> ✅ <b>Livré le 31/08 (STORY-419)</b>&nbsp;: <code>SurchargeRattachementDto</code> publie <code>applicable</code> (le compte est-il encore au plan actif&nbsp;? sinon le moteur ignore la règle) et, quand on désigne un exercice, <code>lignesPrises</code> — le nombre de lignes de recettes que la règle prend <b>réellement</b>, éclipse comprise (le libellé prime sur le tiers). ⛔ <b>Sans exercice, <code>lignesPrises</code> est ABSENT, jamais <code>0</code></b>&nbsp;: «&nbsp;0&nbsp;» se lirait «&nbsp;règle morte&nbsp;» là où il faut lire «&nbsp;on n&rsquo;a pas compté&nbsp;» — l&rsquo;écran passe donc toujours l&rsquo;exercice. Reste calculée ici la <b>portée d&rsquo;une règle avant son enregistrement</b> (compteur ci-dessus)&nbsp;: aucune règle n&rsquo;existe encore côté serveur. <span class="code">livré · <b>STORY-419</b></span></span>
                       </div>
                     </div>
 
@@ -6025,7 +6053,7 @@
 
                       <div class="prof-note warn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>620&nbsp;000&nbsp;F sont en <code>70100000</code> parce que rien n'a été trouvé, pas parce que c'est une vente de marchandises.</b> Ces 14 lignes portent des libellés qui ne disent rien au moteur («&nbsp;Facture n°&nbsp;12&nbsp;», «&nbsp;Règlement&nbsp;», «&nbsp;Versement&nbsp;»). <b>La balance sera équilibrée quand même</b> — c'est bien pour ça qu'il faut les regarder <b>ici</b>. <button class="linklike" type="button" data-rat-goto="regles">Poser une règle</button> ou <button class="linklike" type="button" data-goto-cahiers>corriger les lignes dans le cahier</button>.</span>
+                        <span><b>620&nbsp;000&nbsp;F sont en <code>701</code> parce que rien n'a été trouvé, pas parce que c'est une vente de marchandises.</b> Ces 14 lignes portent des libellés qui ne disent rien au moteur («&nbsp;Facture n°&nbsp;12&nbsp;», «&nbsp;Règlement&nbsp;», «&nbsp;Versement&nbsp;»). <b>La balance sera équilibrée quand même</b> — c'est bien pour ça qu'il faut les regarder <b>ici</b>. <button class="linklike" type="button" data-rat-goto="regles">Poser une règle</button> ou <button class="linklike" type="button" data-goto-cahiers>corriger les lignes dans le cahier</button>.</span>
                       </div>
 
                       <div class="imp-table-wrap">
@@ -6037,7 +6065,7 @@
                             </thead>
                             <tbody>
                               <tr class="rat-adefaut">
-                                <td class="fis-case">70100000</td><td>Ventes de marchandises</td><td class="fis-n">1 985 000</td><td class="fis-n">1 985 000</td><td class="fis-n">56,7&nbsp;%</td>
+                                <td class="fis-case">701</td><td>Ventes de marchandises</td><td class="fis-n">1 985 000</td><td class="fis-n">1 985 000</td><td class="fis-n">56,7&nbsp;%</td>
                                 <td><span class="rat-src motcle">mot-clé «&nbsp;vente&nbsp;»</span> <span class="rat-src defaut">14 lignes par défaut</span></td>
                               </tr>
                               <tr>
@@ -6049,7 +6077,7 @@
                                 <td><span class="rat-src regle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> règle «&nbsp;loyer local adidogomé&nbsp;»</span></td>
                               </tr>
                               <tr>
-                                <td class="fis-case">70700000</td><td>Produits accessoires <span class="fis-motif">⚠️ <b>même libellé que <code>70730000</code> ci-dessus</b> — et ici, contrairement aux dépenses, <b>aucune catégorie</b> ne porte le nom du cabinet</span></td><td class="fis-n">145 000</td><td class="fis-n">145 000</td><td class="fis-n">4,2&nbsp;%</td>
+                                <td class="fis-case">707</td><td>Produits accessoires <span class="fis-motif">⚠️ <b>même libellé que <code>70730000</code> ci-dessus</b> — et ici, contrairement aux dépenses, <b>aucune catégorie</b> ne porte le nom du cabinet</span></td><td class="fis-n">145 000</td><td class="fis-n">145 000</td><td class="fis-n">4,2&nbsp;%</td>
                                 <td><span class="rat-src motcle">mot-clé «&nbsp;transport&nbsp;»</span></td>
                               </tr>
                               <tr class="fis-cle">
@@ -6086,7 +6114,7 @@
 
                       <div class="prof-note warn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>À livrer côté backend — le libellé de la balance est celui de la <u>racine</u>, pas du compte.</b> <code>libelleDuCompte</code> résout par le plus long préfixe du plan&nbsp;: <code>60510000</code> et <code>60550000</code> ressortent tous deux «&nbsp;Autres achats&nbsp;», et <code>65810000</code> «&nbsp;Autres charges&nbsp;». Le repli est <b>juste</b> (un plan normalisé ne liste pas les subdivisions), mais la balance livrée devient <b>illisible pour celui qui l'a saisie</b> — deux lignes homonymes de montants différents. Le cabinet possède pourtant le bon libellé&nbsp;: c'est le <code>libelle</code> de sa <b>catégorie de dépense</b>. <b>Demandé&nbsp;: reporter le libellé de la catégorie sur la ligne de balance</b> (ou le publier à côté). <span class="code">écart du 27/08 · <b>STORY-420</b> livrée · ticket backend</span></span>
+                        <span><b>La balance nomme le compte avec le mot du cabinet, quand un seul de ses postes l&rsquo;alimente.</b> ✅ <b>Livré le 31/08 (STORY-420)</b>&nbsp;: chaque ligne de balance porte <code>libelleSource</code> — <code>CATEGORIE</code> (une <b>seule</b> catégorie de dépense alimente ce compte, c&rsquo;est elle qui le nomme&nbsp;: «&nbsp;Électricité CEET&nbsp;», plus «&nbsp;Autres achats&nbsp;») ou <code>PLAN</code> (libellé du plan&nbsp;: recettes, contreparties, ou <b>plusieurs</b> catégories sur un même compte). ⛔ Aucun libellé composite n&rsquo;est fabriqué, et le champ est <b>absent</b> des balances venues de Sage ou de la saisie directe. Ce tableau reste le <b>contrôle avant balance</b> (il donne le libellé du plan)&nbsp;; la balance, elle, se lit à l&rsquo;onglet «&nbsp;Balance&nbsp;». <span class="code">livré · <b>STORY-420</b></span></span>
                       </div>
                     </div>
 
@@ -6116,7 +6144,7 @@
                            position ». Une seule ligne du tableau suffit à le montrer, et
                            sans elle on croit que le sens est attaché au compte. -->
                       <div class="imp-table-wrap fis-wide">
-                        <div class="imp-table-cap">Les opérations de mars, telles qu'elles entreront en balance. <b>Les deux comptes sont reconstitués</b>&nbsp;: le cahier n'en porte qu'un — l'autre vient du <b>moyen de paiement</b> ou du <b>tiers</b>.</div>
+                        <div class="imp-table-cap">Les opérations de mars, telles qu'elles entreront en balance. <b>Les deux comptes sont servis</b> (<code>compteDebit</code> / <code>compteCredit</code>, STORY-425)&nbsp;: le cahier n'en saisit qu'un — l'autre vient du <b>moyen de paiement</b> ou du <b>tiers</b>, et <code>origineContrepartie</code> dit lequel.</div>
                         <div class="tbl-wrap">
                           <table class="imp-table">
                             <thead>
@@ -6125,12 +6153,12 @@
                             <tbody>
                               <tr>
                                 <td>14/03</td><td>Vente marchandises — Kodjo</td><td>Espèces</td><td class="fis-n">150 000</td>
-                                <td><b class="fis-case">57100000</b><span class="fis-motif">Caisse — <b>l'argent entre</b></span></td>
-                                <td><b class="fis-case">70100000</b><span class="fis-motif">Ventes de marchandises</span></td>
+                                <td><b class="fis-case">57100000</b><span class="fis-motif">Caisse — <b>l'argent entre</b> · <code>MOYEN_PAIEMENT</code></span></td>
+                                <td><b class="fis-case">701</b><span class="fis-motif">Ventes de marchandises</span></td>
                               </tr>
                               <tr>
                                 <td>18/03</td><td>Paiement reçu — Mairie de Kara</td><td>Mobile money</td><td class="fis-n">750 000</td>
-                                <td><b class="fis-case">55110000</b><span class="fis-motif">Monnaie électronique</span></td>
+                                <td><b class="fis-case">55110000</b><span class="fis-motif">Monnaie électronique · <code>MOYEN_PAIEMENT</code></span></td>
                                 <td><b class="fis-case">70600000</b><span class="fis-motif">Services vendus — <span class="rat-src regle">règle</span></span></td>
                               </tr>
                               <!-- ⚠️ LA LIGNE QUI PORTE TOUT LE PROPOS : même compte de
@@ -6144,18 +6172,18 @@
                               </tr>
                               <tr>
                                 <td>29/03</td><td>Loyer local Adidogomé</td><td>Virement</td><td class="fis-n">75 000</td>
-                                <td><b class="fis-case">52100000</b><span class="fis-motif">Banques</span></td>
+                                <td><b class="fis-case">52100000</b><span class="fis-motif">Banques · <code>MOYEN_PAIEMENT</code></span></td>
                                 <td><b class="fis-case">70730000</b><span class="fis-motif">Produits accessoires — <span class="rat-src regle">règle</span></span></td>
                               </tr>
                               <tr class="fis-attn">
                                 <td>05/03</td><td>Facture n° 12 — SODIFAB</td><td><b>—</b></td><td class="fis-n">420 000</td>
-                                <td><b class="fis-case">41100000</b><span class="fis-motif">⚠️ Clients — <b>déduit du tiers, faute de règlement</b>. Si elle a été encaissée, c'est faux.</span></td>
-                                <td><b class="fis-case">70100000</b><span class="fis-motif"><span class="rat-src defaut">défaut</span></span></td>
+                                <td><b class="fis-case">41100000</b><span class="fis-motif">⚠️ Clients — <b>déduit du tiers, faute de règlement</b> · <code>TIERS_SANS_MOYEN_PAIEMENT</code>. Si elle a été encaissée, c'est faux.</span></td>
+                                <td><b class="fis-case">701</b><span class="fis-motif"><span class="rat-src defaut">défaut</span></span></td>
                               </tr>
                               <tr class="fis-retard">
                                 <td>05/02</td><td>Vente au comptoir</td><td><b>—</b></td><td class="fis-n">90 000</td>
-                                <td><b class="fis-vide">indéterminable</b><span class="fis-motif">ni règlement, ni tiers — <b>l'opération est écartée</b>, pas rangée en compte d'attente</span></td>
-                                <td><b class="fis-case">70100000</b><span class="fis-motif">connu, mais seul</span></td>
+                                <td><b class="fis-vide">indéterminable</b><span class="fis-motif"><code>INDETERMINABLE</code> — ni règlement, ni tiers : <b>l'opération est écartée</b>, pas rangée en compte d'attente. Les deux comptes sont <code>null</code>.</span></td>
+                                <td><b class="fis-case">701</b><span class="fis-motif">connu, mais seul</span></td>
                               </tr>
                             </tbody>
                           </table>
@@ -6164,7 +6192,7 @@
                       <p class="helper" style="text-align:left">
                         ⚠️ <b>Le sens n'appartient pas au compte, il appartient à l'opération.</b> <code>57100000 Caisse</code> est <b>débité</b> quand vous encaissez et <b>crédité</b> quand vous payez —
                         c'est la même caisse. Un compte n'est «&nbsp;débiteur&nbsp;» ou «&nbsp;créditeur&nbsp;» qu'<b>une fois tous ses mouvements cumulés</b>, et c'est ce que dit la colonne <b>Solde</b> de la balance.
-                       <b>⚠️ Ces deux comptes sont reconstitués par l&rsquo;écran</b>&nbsp;: aucune route ne publie le couple pour une transaction — la règle de contrepartie vit côté serveur et devrait en sortir. <span class="code">écart du 27/08 · <b>STORY-425</b> livrée · ticket backend</span></p>
+                       ⚠️ <b>Les deux comptes sont servis par le serveur, plus reconstitués par l&rsquo;écran.</b> ✅ <b>Livré le 01/09 (STORY-425)</b>&nbsp;: chaque ligne de cahier publie <code>compteDebit</code>, <code>compteCredit</code> et <code>origineContrepartie</code> — <b>dérivés à la lecture, jamais persistés</b> (une copie divergerait au premier changement des comptes de contrepartie), par la même règle que l&rsquo;agrégation en balance. Les deux comptes sont <code>null</code> ensemble quand la contrepartie est indéterminable, jamais un seul. <span class="code">livré · <b>STORY-425</b></span></p>
 
                       <div class="rat-sect" style="margin-top:0.3rem">
                         <h4>D'où vient le second compte</h4>
@@ -6172,18 +6200,18 @@
                       </div>
 
                       <div class="rat-cpts">
-                        <div class="rat-cpt"><span class="k">Espèces</span><span class="v">57100000</span><span class="w">Caisse — défaut SYSCOHADA</span></div>
-                        <div class="rat-cpt"><span class="k">Virement / chèque</span><span class="v">52100000</span><span class="w">Banques — défaut SYSCOHADA</span></div>
-                        <div class="rat-cpt surcharge"><span class="k">Mobile money</span><span class="v">55110000</span><span class="w"><b>Paramétré sur ce dossier</b> — le défaut est <code>55100000</code>. Un compte par opérateur se règle ici.</span></div>
-                        <div class="rat-cpt"><span class="k">TVA collectée</span><span class="v">44300000</span><span class="w">État, TVA facturée</span></div>
-                        <div class="rat-cpt"><span class="k">TVA récupérable</span><span class="v">44500000</span><span class="w">État, TVA récupérable</span></div>
-                        <div class="rat-cpt"><span class="k">Recette non encaissée</span><span class="v">41100000</span><span class="w">Clients — créance</span></div>
-                        <div class="rat-cpt"><span class="k">Dépense non payée</span><span class="v">40100000</span><span class="w">Fournisseurs — dette</span></div>
-                      </div>
+                      <div class="rat-cpt surcharge"><span class="k">Espèces</span><span class="v">57100000</span><span class="w">Caisse — <b>paramétré sur ce dossier</b> (le défaut est <code>571</code>)</span></div>
+                      <div class="rat-cpt surcharge"><span class="k">Virement / chèque</span><span class="v">52100000</span><span class="w">Banques — <b>paramétré</b> (défaut <code>521</code>)</span></div>
+                      <div class="rat-cpt surcharge"><span class="k">Mobile money</span><span class="v">55110000</span><span class="w"><b>Paramétré sur ce dossier</b> — le défaut est <code>551</code>. Un compte par opérateur se règle ici.</span></div>
+                      <div class="rat-cpt"><span class="k">TVA collectée</span><span class="v">44300000</span><span class="w">État, TVA facturée — défaut <code>443</code></span></div>
+                      <div class="rat-cpt"><span class="k">TVA récupérable</span><span class="v">44500000</span><span class="w">État, TVA récupérable — défaut <code>445</code></span></div>
+                      <div class="rat-cpt surcharge"><span class="k">Recette non encaissée</span><span class="v">41100000</span><span class="w">Clients — créance, <b>paramétré</b> (défaut <code>411</code>)</span></div>
+                      <div class="rat-cpt surcharge"><span class="k">Dépense non payée</span><span class="v">40100000</span><span class="w">Fournisseurs — dette, <b>paramétré</b> (défaut <code>401</code>)</span></div>
+</div>
                       <div class="cah-actions">
                         <button class="btn btn-ghost btn-sm" type="button">Modifier les contreparties</button>
                         <span class="grow" style="flex:1"></span>
-                        <span class="cah-lig">GET / PUT …/balance/comptes-ventilation — validé contre le plan à l'écriture</span>
+                        <span class="cah-lig">GET / PUT …/balance/comptes-ventilation — validé contre le plan à l'écriture · les défauts livrés sont à 3 caractères, ce dossier les a paramétrés à 8 (STORY-424)</span>
                       </div>
 
                       <!-- ⚠️ LE NOMBRE DE LIGNES DÉPEND DU RÉGIME, ET C'EST UNE BASCULE,
@@ -6210,7 +6238,7 @@
                           <div class="rat-ecr-head"><b>14/03/2026</b> · Vente marchandises — Kodjo · espèces<span class="m">150 000 F</span></div>
                           <div class="rat-ecr-cols"><span>Compte</span><span>Libellé</span><span>Débit</span><span>Crédit</span></div>
                           <div class="rat-ecr-row"><span class="c">57100000</span><span>Caisse <span class="fis-motif">contrepartie — moyen de paiement «&nbsp;espèces&nbsp;»</span></span><span class="n">150 000</span><span class="n off">—</span></div>
-                          <div class="rat-ecr-row"><span class="c">70100000</span><span>Ventes de marchandises <span class="fis-motif">compte de la ligne — <span class="rat-src motcle">mot-clé «&nbsp;vente&nbsp;»</span></span></span><span class="n off">—</span><span class="n">150 000</span></div>
+                          <div class="rat-ecr-row"><span class="c">701</span><span>Ventes de marchandises <span class="fis-motif">compte de la ligne — <span class="rat-src motcle">mot-clé «&nbsp;vente&nbsp;»</span></span></span><span class="n off">—</span><span class="n">150 000</span></div>
                           <div class="rat-ecr-row tot"><span></span><span>Totaux</span><span class="n">150 000</span><span class="n">150 000</span></div>
                         </div>
                         <p class="helper" style="text-align:left">
@@ -6224,7 +6252,7 @@
                           <div class="rat-ecr-head"><b>14/03/2026</b> · Vente marchandises — Kodjo · espèces<span class="m">150 000 F TTC</span></div>
                           <div class="rat-ecr-cols"><span>Compte</span><span>Libellé</span><span>Débit</span><span>Crédit</span></div>
                           <div class="rat-ecr-row"><span class="c">57100000</span><span>Caisse <span class="fis-motif">contrepartie — le <b>TTC</b>, c’est ce qui est entré en caisse</span></span><span class="n">150 000</span><span class="n off">—</span></div>
-                          <div class="rat-ecr-row"><span class="c">70100000</span><span>Ventes de marchandises <span class="fis-motif">le <b>HT</b> — <code>150 000 / 1,18</code>, arrondi</span></span><span class="n off">—</span><span class="n">127 119</span></div>
+                          <div class="rat-ecr-row"><span class="c">701</span><span>Ventes de marchandises <span class="fis-motif">le <b>HT</b> — <code>150 000 / 1,18</code>, arrondi</span></span><span class="n off">—</span><span class="n">127 119</span></div>
                           <div class="rat-ecr-row"><span class="c">44300000</span><span>État, TVA facturée <span class="fis-motif">le reste — <b>calculé par différence</b>, jamais par HT&nbsp;×&nbsp;taux</span></span><span class="n off">—</span><span class="n">22 881</span></div>
                           <div class="rat-ecr-row tot"><span></span><span>Totaux</span><span class="n">150 000</span><span class="n">150 000</span></div>
                         </div>
@@ -6264,12 +6292,12 @@
                         <div class="rat-ecr-head"><b>05/03/2026</b> · Facture n° 12 — SODIFAB · <b>moyen de paiement non renseigné</b><span class="m">420 000 F</span></div>
                         <div class="rat-ecr-cols"><span>Compte</span><span>Libellé</span><span>Débit</span><span>Crédit</span></div>
                         <div class="rat-ecr-row"><span class="c">41100000</span><span>Clients <span class="fis-motif">contrepartie — <b>aucun moyen de paiement, mais un tiers nommé</b></span></span><span class="n">420 000</span><span class="n off">—</span></div>
-                        <div class="rat-ecr-row"><span class="c">70100000</span><span>Ventes de marchandises <span class="fis-motif">compte de la ligne — <span class="rat-src defaut">défaut, faute d'indice</span></span></span><span class="n off">—</span><span class="n">420 000</span></div>
+                        <div class="rat-ecr-row"><span class="c">701</span><span>Ventes de marchandises <span class="fis-motif">compte de la ligne — <span class="rat-src defaut">défaut, faute d'indice</span></span></span><span class="n off">—</span><span class="n">420 000</span></div>
                         <div class="rat-ecr-row tot"><span></span><span>Totaux</span><span class="n">420 000</span><span class="n">420 000</span></div>
                       </div>
                       <div class="prof-note warn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>Un oubli de moyen de paiement se transforme en créance client, et rien ne le signale.</b> Le système ne connaît pas d'état «&nbsp;à crédit&nbsp;»&nbsp;: il déduit la contrepartie du <b>moyen de paiement</b>, et à défaut — si un tiers est nommé — conclut à un <b>compte de tiers</b>. Une vente au comptant dont on a oublié de cocher «&nbsp;espèces&nbsp;» ressort donc en <code>411 Clients</code>&nbsp;: <b>la balance est équilibrée, la trésorerie est sous-évaluée, et le bilan porte une créance qui n'existe pas</b>. <b>3 lignes de l'exercice sont dans ce cas</b> (420 000 F). <button class="linklike" type="button" data-goto-cahiers>Les compléter dans le cahier</button>. <span class="code">écart du 27/08 · <b>STORY-421</b> livrée · ticket backend</span></span>
+                        <span><b>Un oubli de moyen de paiement se voit désormais avant la balance.</b> Le système ne connaît pas d&rsquo;état «&nbsp;à crédit&nbsp;»&nbsp;: sans moyen de paiement, un tiers nommé donne une <b>créance</b> (<code>411</code>) ou une <b>dette</b> (<code>401</code>) — la balance tombe juste, la trésorerie est mal évaluée et le bilan porte une créance qui n&rsquo;existe peut-être pas. ✅ <b>Livré le 31/08 (STORY-421)</b>&nbsp;: ce n&rsquo;est pas une correction du moteur — la règle est défendable — mais de la <b>visibilité</b>. Chaque ligne publie <code>origineContrepartie</code> (<code>MOYEN_PAIEMENT</code> constatée, <code>TIERS_SANS_MOYEN_PAIEMENT</code> déduite, <code>INDETERMINABLE</code> écartée)&nbsp;: <b>1 ligne</b> est dans le deuxième cas ici (SODIFAB, 420&nbsp;000&nbsp;F). L&rsquo;aperçu et la balance enregistrée publient en plus <code>contreparties[]</code> (compte, motif, nombre de transactions, montant) et un <b>avertissement chiffré</b> (voir «&nbsp;Balance&nbsp;»). <button class="linklike" type="button" data-goto-cahiers>Les compléter dans le cahier</button>. <span class="code">livré · <b>STORY-421</b></span></span>
                       </div>
                       <p class="helper" style="text-align:left">
                         ⚠️ <b>Et ces comptes de tiers ne se lettrent pas.</b> Le solde de <code>41100000</code> est un <b>cumul</b>, pas une liste de factures pointées&nbsp;: rien ne dit quelle vente reste due ni depuis quand.
@@ -6308,6 +6336,13 @@
                         <span><b>Cette balance ne porte aucune écriture d'inventaire.</b> Ni <b>variation de stocks</b>, ni <b>amortissements</b>, ni <b>provisions</b>&nbsp;: elles restent à saisir. Pour un commerçant en achat-revente, <b>la marge est calculée sur les achats et non sur le coût des marchandises vendues</b> — le résultat est donc faux tant que le stock de clôture n'est pas passé. <b>Elle est équilibrée, ce qui ne veut pas dire qu'elle est complète.</b></span>
                       </div>
 
+                      <!-- ✅ STORY-421 : le second avertissement de `avertissements[]`. Il cite ses montants (créances et dettes
+                      sans moyen de paiement) parce qu'une balance équilibrée ne dit pas que sa trésorerie est faussée. -->
+                      <div class="prof-note warn">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                      <span><b>2 transaction(s) sans moyen de paiement ont été portées en compte de tiers&nbsp;: 420&nbsp;000 XOF en créance client (recettes) et 500&nbsp;000 XOF en dette fournisseur (dépenses).</b> Si elles ont en réalité été encaissées ou payées, la trésorerie est faussée d&rsquo;autant&nbsp;: <b>sous-évaluée</b> par les créances, <b>sur-évaluée</b> par les dettes. <span class="code">livré · <b>STORY-421</b> · <code>avertissements[]</code> et <code>contreparties[]</code></span></span>
+                      </div>
+
                       <!-- ⛔ CE QUE LE COMPTABLE VENANT DE SAGE VOIT EN PREMIER, et que
                            l'avertissement d'inventaire ne disait PAS : il n'y a ici
                            **aucun compte de classe 1, 2 ni 3**. Un cahier ne produit que
@@ -6329,27 +6364,27 @@
                       </div>
 
                       <div class="imp-table-wrap fis-wide">
-                        <div class="imp-table-cap">Balance canonique de l'exercice, unités entières XOF. Version <b>3</b> si elle est enregistrée (les versions s'ajoutent, rien n'est écrasé). <b>Six colonnes de montants</b>, comme la balance que sort votre logiciel.</div>
+                        <div class="imp-table-cap">Balance canonique de l'exercice, unités entières XOF. Version <b>3</b> si elle est enregistrée (les versions s'ajoutent, rien n'est écrasé). <b>Six colonnes de montants</b>, comme la balance que sort votre logiciel. <b>Le compte est celui du plan</b> (ramené à 6 caractères)&nbsp;: les comptes de travail fondus dedans sont dans <code>comptesSources</code> (STORY-424), le libellé du cabinet dans <code>libelle</code> quand une seule catégorie l'alimente (STORY-420).</div>
                         <div class="tbl-wrap">
-                          <table class="imp-table">
+                          <table class="imp-table cmp-tab">
                             <thead>
                               <tr><th>Compte</th><th>Libellé</th><th class="fis-n">À-nouveau débit</th><th class="fis-n">À-nouveau crédit</th><th class="fis-n">Mouv. débit</th><th class="fis-n">Mouv. crédit</th><th class="fis-n">Solde débiteur</th><th class="fis-n">Solde créditeur</th><th>Preuve</th></tr>
                             </thead>
                             <tbody>
-                              <tr><td class="fis-case">40100000</td><td>Fournisseurs, dettes en compte</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td><span class="cah-conf ok">fichier</span></td></tr>
-                              <tr><td class="fis-case">41100000</td><td>Clients</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">420 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">420 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf warn">saisie</span></td></tr>
-                              <tr><td class="fis-case">55110000</td><td>Instruments de monnaie électronique</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 180 000</td><td class="fis-n">620 000</td><td class="fis-n">560 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
-                              <tr><td class="fis-case">57100000</td><td>Caisse</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 900 000</td><td class="fis-n">1 025 000</td><td class="fis-n">875 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf warn">estimé</span></td></tr>
-                              <tr><td class="fis-case">60100000</td><td>Achats de marchandises</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
-                              <tr><td class="fis-case">60510000</td><td>Autres achats</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">240 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">240 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
-                              <tr><td class="fis-case">60550000</td><td>Autres achats</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">385 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">385 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
-                              <tr><td class="fis-case">62200000</td><td>Services extérieurs A</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">900 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">900 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
-                              <tr><td class="fis-case">65810000</td><td>Autres charges</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">120 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">120 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
-                              <tr><td class="fis-case">70100000</td><td>Ventes de marchandises</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 985 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 985 000</td><td><span class="cah-conf warn">estimé</span></td></tr>
-                              <tr><td class="fis-case">70600000</td><td>Services vendus</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 050 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 050 000</td><td><span class="cah-conf ok">ocr</span></td></tr>
-                              <tr><td class="fis-case">70700000</td><td>Produits accessoires</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">145 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">145 000</td><td><span class="cah-conf ok">ocr</span></td></tr>
-                              <tr><td class="fis-case">70730000</td><td>Produits accessoires</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">320 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">320 000</td><td><span class="cah-conf ok">fichier</span></td></tr>
-                              <tr class="fis-cle"><td colspan="2">Totaux</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">5 645 000</td><td class="fis-n">5 645 000</td><td class="fis-n">4 000 000</td><td class="fis-n">4 000 000</td><td></td></tr>
+<tr><td class="fis-case">401000</td><td>Fournisseurs, dettes en compte <span class="fis-motif">plan · ← 40100000</span></td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td><span class="cah-conf ok">fichier</span></td></tr>
+<tr><td class="fis-case">411000</td><td>Clients <span class="fis-motif">plan · ← 41100000</span></td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">420 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">420 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf warn">saisie</span></td></tr>
+<tr><td class="fis-case">551100</td><td>Instruments de monnaie électronique <span class="fis-motif">plan · ← 55110000</span></td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 180 000</td><td class="fis-n">620 000</td><td class="fis-n">560 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
+<tr><td class="fis-case">571000</td><td>Caisse <span class="fis-motif">plan · ← 57100000</span></td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 900 000</td><td class="fis-n">1 025 000</td><td class="fis-n">875 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf warn">estimé</span></td></tr>
+<tr><td class="fis-case">601000</td><td>Achats de marchandises <span class="fis-motif">catégorie · ← 60100000</span></td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
+<tr><td class="fis-case">605100</td><td>Électricité CEET <span class="fis-motif">catégorie · ← 60510000</span></td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">240 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">240 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
+<tr><td class="fis-case">605500</td><td>Carburant motos <span class="fis-motif">catégorie · ← 60550000</span></td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">385 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">385 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
+<tr><td class="fis-case">622000</td><td>Loyer boutique <span class="fis-motif">catégorie · ← 62200000</span></td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">900 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">900 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
+<tr><td class="fis-case">658100</td><td>Amendes &amp; pénalités <span class="fis-motif">catégorie · ← 65810000</span></td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">120 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">120 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
+<tr><td class="fis-case">701</td><td>Ventes de marchandises <span class="fis-motif">plan</span></td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 985 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 985 000</td><td><span class="cah-conf warn">estimé</span></td></tr>
+<tr><td class="fis-case">706000</td><td>Services vendus <span class="fis-motif">plan · ← 70600000</span></td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 050 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 050 000</td><td><span class="cah-conf ok">ocr</span></td></tr>
+<tr><td class="fis-case">707</td><td>Produits accessoires <span class="fis-motif">plan</span></td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">145 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">145 000</td><td><span class="cah-conf ok">ocr</span></td></tr>
+<tr><td class="fis-case">707300</td><td>Produits accessoires <span class="fis-motif">plan · ← 70730000</span></td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">320 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">320 000</td><td><span class="cah-conf ok">fichier</span></td></tr>
+<tr class="fis-cle"><td colspan="2">Totaux</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">5 645 000</td><td class="fis-n">5 645 000</td><td class="fis-n">4 000 000</td><td class="fis-n">4 000 000</td><td></td></tr>
                             </tbody>
                           </table>
                         </div>
@@ -6357,7 +6392,7 @@
 
                       <div class="prof-note warn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>Les à-nouveaux sont à «&nbsp;—&nbsp;» parce qu'aucune balance d'ouverture n'est chaînée à cet exercice</b>, pas parce qu'ils valent zéro. ⛔ <b>Et quand il y en aura, le contrat ne les publiera pas</b>&nbsp;: <code>LigneBalanceApercuDto</code> ne rend que <b>quatre</b> montants, et documente le solde comme «&nbsp;à-nouveau&nbsp;+&nbsp;mouvements&nbsp;» — la composante d'ouverture est donc <b>repliée dans le solde</b>, et le contrôle <code>solde = à-nouveau + mouvements</code> que vous faites ligne à ligne devient <b>invérifiable</b>. <span class="code">écart du 27/08 · <b>STORY-423</b> livrée · ticket backend</span></span>
+                        <span><b>Les à-nouveaux sont à «&nbsp;—&nbsp;» parce qu&rsquo;aucune balance d&rsquo;ouverture n&rsquo;est chaînée à cet exercice</b>, pas parce qu&rsquo;ils valent zéro. ✅ <b>Livré le 31/08 (STORY-423)</b>&nbsp;: <code>LigneBalanceApercuDto</code> publie <code>aNouveauDebit</code> et <code>aNouveauCredit</code> — repris du <b>socle d&rsquo;ouverture</b>, <code>0</code> quand aucun socle n&rsquo;est chaîné (c&rsquo;est une <b>réponse</b>, pas une absence) — à côté des mouvements et des soldes&nbsp;: <code>solde = à-nouveau + mouvements</code> se vérifie <b>ligne à ligne</b>. ⚠️ L&rsquo;à-nouveau vient <b>toujours du socle</b>, jamais de <code>solde − mouvements</code>&nbsp;: la déduction rendrait le contrôle <b>tautologique</b>, vrai même si la reprise est fausse. <span class="code">livré · <b>STORY-423</b></span></span>
                       </div>
 
                       <!-- DEUX contrôles d'équilibre, pas un. Les fondre en un seul « ✓ »
@@ -6460,7 +6495,12 @@
                           <span class="m"><code>409 · EXERCICE_CLOS</code> · <code>DOSSIER_ARCHIVE</code></span>
                           <span class="why">Vérifié <b>avant tout autre contrôle</b>. Évité&nbsp;: l'exercice clos est marqué dans le sélecteur, et l'action de construction disparaît.</span>
                         </div>
-                        <div class="rap-ec">
+                        <div class="rap-ec attn">
+                      <span class="t">Référentiel non habilité</span>
+                      <span class="m"><code>409 · REFERENTIEL_NON_HABILITE</code></span>
+                      <span class="why">L'organisation n'a pas droit au référentiel que les <b>axes du dossier</b> désignent. <code>details</code> nomme les <b>deux côtés</b> (ce que le dossier demande, ce que l'organisation détient) — le refus dit lequel corriger. Remplace l'ancien <code>REFERENTIEL_AMBIGU</code> (STORY-422).</span>
+                      </div>
+                      <div class="rap-ec">
                           <span class="t">Référentiel non livré</span>
                           <span class="m"><code>409 · REFERENTIEL_NON_PACKAGE</code></span>
                           <span class="why">Le plan de comptes <b>SMT</b> n'est pas encore sourcé (décision assumée&nbsp;: le packager reviendrait à inventer du comptable). L'écran affiche le <b>motif exact rendu par le serveur</b>, pas «&nbsp;une erreur est survenue&nbsp;».</span>
@@ -6481,7 +6521,7 @@
                            Ni la revue de l'une ni celle de l'autre ne pouvait le voir. -->
                       <div class="prof-note info">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>✅ Arbitré le 26/08 (voie A)&nbsp;: le plan de comptes suivra le DOSSIER, plus l&rsquo;organisation.</b> Aujourd&rsquo;hui le <b>tag</b> de la balance vient des axes du <b>dossier</b> et le <b>plan</b> qui valide ses comptes vient de l&rsquo;<b>organisation</b> — rien ne force les deux à concorder, et la liste de comptes proposée ici est <b>la même pour tous vos dossiers</b>. <b>⚠️ Et ce n&rsquo;est pas une nuance&nbsp;:</b> les deux plans partagent <b>44 racines</b>, et <b>les 44 divergent</b>. <code>57</code> est la <b>Caisse</b> en SYSCOHADA et le <b>Capital social</b> en microfinance&nbsp;; <code>41</code> les <b>Clients</b> d&rsquo;un côté, les <b>Immobilisations financières</b> de l&rsquo;autre. Valider une IMF contre le plan SYSCOHADA&nbsp;: <b>tout passe, et tout est faux</b> — aucun refus, aucun déséquilibre, aucun signal. ⛔ <b>Non encore livré.</b> <span class="code">arbitré · <b>STORY-422</b> · voie A · à livrer</span></span>
+                        <span><b>✅ Livré le 31/08 (STORY-422, voie A)&nbsp;: le plan de comptes suit le DOSSIER, plus l&rsquo;organisation.</b> Le <b>tag</b> de la balance et le <b>plan</b> qui valide ses comptes viennent des <b>mêmes axes du dossier</b>, à la date de l&rsquo;exercice&nbsp;: la liste de comptes proposée ici est celle du dossier (<code>GET /dossiers/{id}/referentiels/plan-comptes</code>), et deux dossiers d&rsquo;un même cabinet peuvent avoir deux plans. Le fait était pire que la fiche&nbsp;: les deux plans partagent <b>44 racines</b> et <b>les 44 divergent</b> (<code>57</code> est la Caisse en SYSCOHADA, le Capital social en microfinance), et comme le rattachement se fait <b>par préfixe</b>, SYSCOHADA n&rsquo;en refusait que 21 sur 372&nbsp;: <b>94&nbsp;% du plan microfinance passait</b> et se rattachait au mauvais poste, sans aucun signal. ⚠️ <b>Refus</b>&nbsp;: <code>409 · REFERENTIEL_NON_HABILITE</code> (l&rsquo;organisation n&rsquo;a pas droit à ce référentiel, les deux côtés sont nommés dans <code>details</code>)&nbsp;; <code>REFERENTIEL_AMBIGU</code> n&rsquo;existe plus. <b>Reste à câbler côté écran réel</b>&nbsp;: 2 URL et 2 codes de refus. <span class="code">livré · <b>STORY-422</b> · voie A</span></span>
                       </div>
                     </div>
                   </div>
@@ -9632,7 +9672,6 @@
                        l'onglet « Cahier ». La preuve EXISTE en base et l'image EST stockée, mais
                        TROIS chaînons manquent au contrat pour relier l'une à l'autre. -->
                   <div class="atl-panel atl-body" data-atl-panel="cahiers" hidden>
-                    <div class="dc-note dc-gap" data-passe-a-reprendre><b>🕓 Panneau à reprendre sur le contrat livré.</b> Il date du 27/08. Les écarts backend qu'il décrit (STORY-418 → 425) sont aujourd'hui <b>livrés</b>&nbsp;: les phrases du type «&nbsp;aucune route&nbsp;», «&nbsp;demandé&nbsp;», «&nbsp;n'est pas publié&nbsp;» et les montants qui en découlent ne décrivent plus le contrat réel, et les marqueurs «&nbsp;écart du 27/08&nbsp;» sont à lire comme <b>livrés</b>. Ce panneau n'a pas été redessiné&nbsp;: sa passe reprendra les montants sur le vrai moteur de balance.</div>
 
                     <!-- ═══════════ FE-044 — LE LIVRE OUVERT : recettes ou dépenses ═══════════
                          Deux cahiers, un seul onglet. Ce ne sont PAS deux sources (D13 n'en
@@ -9832,11 +9871,11 @@
                       </div>
 
                       <div class="imp-table-wrap">
-                        <div class="imp-table-cap">Lot <code>PRET</code> — montants, dates et comptes <b>éditables</b>. Le <b>compte est proposé automatiquement</b>&nbsp;: vous ne le saisissez que pour le corriger.</div>
+                        <div class="imp-table-cap">Lot <code>PRET</code> — dates, libellés et montants <b>éditables</b>. <b>Aucun compte n'est proposé ici</b>&nbsp;: la pré-proposition n'en porte pas (elle ne publie ni compte ni origine), le compte est <b>déduit à l'application</b> et se lit sur la ligne créée.</div>
                         <div class="tbl-wrap">
                           <table class="imp-table">
                             <thead>
-                              <tr><th style="width:2.2rem"></th><th>Preuve</th><th>Date</th><th>Libellé lu</th><th class="num">Montant</th><th>Compte proposé</th><th>Confiance</th></tr>
+                              <tr><th style="width:2.2rem"></th><th>Preuve</th><th>Date</th><th>Libellé lu</th><th class="num">Montant</th><th>Ce que la lecture signale</th></tr>
                             </thead>
                             <tbody>
                               <tr>
@@ -9845,8 +9884,7 @@
                                 <td>14/03/2026</td>
                                 <td>Vente marchandises — Kodjo</td>
                                 <td class="num">150 000</td>
-                                <td class="cpt"><b>70100000</b><span class="cah-motif">libellé «&nbsp;vente&nbsp;»</span></td>
-                                <td><span class="cah-conf ok">96&nbsp;%</span></td>
+                                                                <td><span class="cah-conf ok">96&nbsp;%</span></td>
                               </tr>
                               <tr>
                                 <td><input type="checkbox" checked aria-label="Retenir cette pièce"></td>
@@ -9854,8 +9892,7 @@
                                 <td>18/03/2026</td>
                                 <td>Paiement reçu — Mairie de Kara</td>
                                 <td class="num">750 000</td>
-                                <td class="cpt"><b>70600000</b><span class="cah-motif">règle du cabinet · «&nbsp;Mairie&nbsp;»</span></td>
-                                <td><span class="cah-conf ok">93&nbsp;%</span></td>
+                                                                <td><span class="cah-conf ok">93&nbsp;%</span></td>
                               </tr>
                               <tr class="cah-warn">
                                 <td><input type="checkbox" aria-label="Retenir cette pièce"></td>
@@ -9863,8 +9900,7 @@
                                 <td><input class="cah-inline" type="date" aria-label="Date manquante"></td>
                                 <td>Vente au comptoir</td>
                                 <td class="num">300 000</td>
-                                <td class="cpt"><b>70100000</b><span class="cah-motif">libellé «&nbsp;vente&nbsp;»</span></td>
-                                <td><span class="cah-conf bad">date illisible</span></td>
+                                                                <td><span class="cah-conf bad">date illisible</span></td>
                               </tr>
                               <tr class="cah-warn">
                                 <td><input type="checkbox" aria-label="Retenir cette pièce"></td>
@@ -9872,8 +9908,7 @@
                                 <td>21/03/2026</td>
                                 <td>Transfert — SODIGAZ</td>
                                 <td class="num">48 000</td>
-                                <td class="cpt">—</td>
-                                <td><span class="cah-conf bad">sortie d'argent</span></td>
+                                                                <td><span class="cah-conf bad">sortie d'argent</span></td>
                               </tr>
                               <tr class="cah-warn">
                                 <td><input type="checkbox" aria-label="Retenir cette pièce"></td>
@@ -9881,8 +9916,7 @@
                                 <td>14/03/2026</td>
                                 <td>Vente marchandises — Kodjo</td>
                                 <td class="num">150 000</td>
-                                <td class="cpt"><b>70100000</b></td>
-                                <td><span class="cah-conf warn">doublon probable</span></td>
+                                                                <td><span class="cah-conf warn">doublon probable</span></td>
                               </tr>
                               <tr>
                                 <td><input type="checkbox" checked aria-label="Retenir cette pièce"></td>
@@ -9890,8 +9924,7 @@
                                 <td>29/03/2026</td>
                                 <td>Loyer local Adidogomé — M. Amegan</td>
                                 <td class="num">75 000</td>
-                                <td class="cpt"><b>70730000</b><span class="cah-motif">libellé «&nbsp;loyer&nbsp;»</span></td>
-                                <td><span class="cah-conf ok">preuve fichier</span></td>
+                                                                <td><span class="cah-conf ok">preuve fichier</span></td>
                               </tr>
                             </tbody>
                           </table>
@@ -9932,7 +9965,7 @@
                         <span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
                         <div>
                           <b>3 recettes entrées au cahier de mars 2026</b>
-                          <p class="atl-secsub" style="margin:0.15rem 0 0">975&nbsp;000&nbsp;F encaissés, rattachés aux comptes 701, 706 et 7073. Chaque ligne garde la trace de l'image qui l'a produite.</p>
+                          <p class="atl-secsub" style="margin:0.15rem 0 0">975&nbsp;000&nbsp;F encaissés (somme des lignes retenues). Le <b>compte</b> de chaque ligne est déduit à l'application et se lit au cahier&nbsp;; chaque ligne garde la trace de l'image qui l'a produite (<code>auditOcr</code>), et le rapport dit <b>par cahier</b> ce qui est entré (<code>creeesParCahier</code>).</p>
                         </div>
                       </div>
                       <div class="imp-warns">
@@ -9956,42 +9989,46 @@
                     <div class="cah-slot" data-cah-slot="cahier" hidden>
 
                       <div class="imp-tiles">
-                        <div class="imp-tile"><div class="k">Mars — HT</div><div class="v">1 080 508<span class="u">F</span></div></div>
-                        <div class="imp-tile"><div class="k">Mars — TVA collectée</div><div class="v">194 492<span class="u">F</span></div></div>
+                        <div class="imp-tile"><div class="k">Mars — HT</div><div class="v">1 275 000<span class="u">F</span></div></div>
+                        <div class="imp-tile"><div class="k">Mars — TVA collectée</div><div class="v">0<span class="u">F</span></div></div>
                         <div class="imp-tile"><div class="k">Mars — TTC encaissé</div><div class="v">1 275 000<span class="u">F</span></div></div>
-                        <div class="imp-tile"><div class="k">Exercice — HT cumulé</div><div class="v">3 813 559<span class="u">F</span></div><div class="u">22 recettes</div></div>
+                        <div class="imp-tile"><div class="k">Exercice — HT cumulé</div><div class="v">4 500 000<span class="u">F</span></div><div class="u">22 recettes</div></div>
                       </div>
 
-                      <div class="imp-table-wrap">
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span><b>HT = TTC, TVA à 0&nbsp;: ce dossier n'est pas assujetti.</b> Kossi Distribution est au régime <b>synthétique (TPU)</b>, et le serveur ne ventile la TVA que pour le régime <b>réel</b> (<code>assujetti = regime === REEL</code>, lu sur les <b>axes du dossier</b>) — un dossier sans régime décidé est lui aussi non assujetti, jamais le contraire. Chaque ligne porte donc <code>tva: {assujetti: false, taux: 0}</code>, et <b>aucun taux n'est lu</b> dans le paquet fiscal. Pour un dossier au réel, <code>HT = round(TTC / (1 + taux))</code> et <code>TVA = TTC − HT</code>.</span>
+                        </div>
+                        <div class="imp-table-wrap">
                         <div class="imp-table-cap">Recettes de <b>mars 2026</b> — 4 lignes. <b>La colonne « preuve » ouvre l'image</b> qui a produit la ligne.</div>
                         <div class="tbl-wrap">
                           <table class="imp-table">
                             <thead>
-                              <tr><th>Preuve</th><th>Date</th><th>Libellé</th><th>Tiers</th><th>Encaissé par</th><th>Compte</th><th class="num">HT</th><th class="num">TVA</th><th class="num">TTC</th><th></th></tr>
+                              <tr><th>Preuve</th><th>Date</th><th>Libellé</th><th>Tiers</th><th>Encaissé par</th><th>Compte · écriture</th><th class="num">HT</th><th class="num">TVA</th><th class="num">TTC</th><th></th></tr>
                             </thead>
                             <tbody>
                               <tr>
                                 <td><button class="cah-vign" type="button" aria-label="Voir la page 3 du cahier"><span class="pg"><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span></button></td>
-                                <td>14/03/2026</td><td>Vente de marchandises — Kodjo</td><td>SARL Kodjo &amp; Fils</td><td>Mobile money</td>
-                                <td class="cpt">701</td><td class="num">127 119</td><td class="num">22 881</td><td class="num">150 000</td>
+                                <td>14/03/2026</td><td>Vente de marchandises — Kodjo</td><td>SARL Kodjo &amp; Fils</td><td>Espèces</td>
+                                <td class="cpt">701<span class="cah-motif">D&nbsp;57100000 · C&nbsp;701</span></td><td class="num">150 000</td><td class="num">0</td><td class="num">150 000</td>
                                 <td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td>
                               </tr>
                               <tr>
                                 <td><button class="cah-vign" type="button" aria-label="Voir la capture TMoney"><span class="pg"><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span></button></td>
                                 <td>18/03/2026</td><td>Paiement reçu — Mairie de Kara</td><td>Mairie de Kara</td><td>Mobile money</td>
-                                <td class="cpt">706</td><td class="num">635 593</td><td class="num">114 407</td><td class="num">750 000</td>
+                                <td class="cpt">70600000<span class="cah-motif">D&nbsp;55110000 · C&nbsp;70600000</span></td><td class="num">750 000</td><td class="num">0</td><td class="num">750 000</td>
                                 <td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td>
                               </tr>
                               <tr>
                                 <td><span class="cah-vign absente" aria-hidden="true">saisie<br>à la main</span></td>
                                 <td>22/03/2026</td><td>Vente au comptoir</td><td>—</td><td>Espèces</td>
-                                <td class="cpt">701</td><td class="num">254 237</td><td class="num">45 763</td><td class="num">300 000</td>
+                                <td class="cpt">701<span class="cah-motif">D&nbsp;57100000 · C&nbsp;701</span></td><td class="num">300 000</td><td class="num">0</td><td class="num">300 000</td>
                                 <td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td>
                               </tr>
                               <tr>
                                 <td><button class="cah-vign" type="button" aria-label="Voir la facture 2026-031"><span class="pg"><i></i><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span></button></td>
-                                <td>29/03/2026</td><td>Loyer local Adidogomé</td><td>M. Amegan</td><td>Chèque</td>
-                                <td class="cpt">7073</td><td class="num">63 559</td><td class="num">11 441</td><td class="num">75 000</td>
+                                <td>29/03/2026</td><td>Loyer local Adidogomé</td><td>M. Amegan</td><td>Banque</td>
+                                <td class="cpt">70730000<span class="cah-motif">D&nbsp;52100000 · C&nbsp;70730000</span></td><td class="num">75 000</td><td class="num">0</td><td class="num">75 000</td>
                                 <td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td>
                               </tr>
                             </tbody>
@@ -10003,26 +10040,20 @@
                         une balance construite sur des lignes justifiées ne se défend pas comme une balance de mémoire, et ce niveau de preuve remonte jusqu'à la liasse.
                       </p>
 
-                      <!-- ⚠️ LE TROU. Trouvé en câblant la demande PO « voir la preuve clairement ». -->
-                      <div class="prof-note bad">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>⛔ Écart de contrat — cette colonne n'est PAS servable aujourd'hui, et c'est le plus gros manque de la story.</b>
-                        La preuve existe en base (<code>auditOcr = {lotId, pieceId, confiance, brut}</code>) et l'image est bien stockée&nbsp;: <b>trois chaînons manquent</b> pour
-                        les relier. ① <code>LigneRecetteResponseDto</code> <b>ne publie pas <code>auditOcr</code></b> — depuis le cahier, aucun moyen de nommer la pièce ;
-                        ② <code>LignePreProposeeDto</code> porte un <code>pieceId</code> mais <b>aucune URL d'image</b> ;
-                        ③ <code>GET /dossiers/{id}/pieces</code> (:3006) porte bien l'<code>urlConsultation</code> présignée navigateur, mais <b>ne publie ni <code>pieceId</code>
-                        ni <code>correlationId</code></b> — la jointure est donc impossible dans les deux sens.
-                        ⇒ L'image est <b>listable</b> (onglet «&nbsp;Pièces&nbsp;» du dossier, FE-064), <b>jamais rattachable à sa ligne</b>. ⇒ écart tracé pour le backend.</span>
-                      </div>
+                      <!-- ✅ LE TROU EST FERMÉ — STORY-391 et 392 (26/08). Voir « La preuve est servie ». -->
+                        <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span><b>✅ La preuve est servie (STORY-391 et STORY-392, livrées le 26/08).</b> Une ligne née d'une image publie <code>auditOcr</code> (<code>lotId</code>, <code>pieceId</code>, <code>confiance</code>, <code>brut</code>)&nbsp;— <b>absent, et non vide</b>, sur une ligne saisie à la main&nbsp;; et <code>GET /dossiers/{id}/pieces?pieceId=…</code> rend <b>la seule pièce</b> correspondante, avec son URL présignée valable depuis un navigateur. La vignette ouvre donc <b>l'image de CETTE ligne</b>, plus l'onglet «&nbsp;Pièces&nbsp;» entier. ⚠️ <b>Reste à câbler côté écran réel</b>&nbsp;: la cellule «&nbsp;preuve&nbsp;» livrée affiche l'origine et le niveau de preuve avec un renvoi vers l'onglet Pièces, et un lot rouvert le lendemain montre des chiffres sans leurs images.</span>
+                        </div>
 
-                      <!-- Le REPLI : la saisie manuelle. Présente, mais repliée (revue PO ②). -->
+                        <!-- Le REPLI : la saisie manuelle. Présente, mais repliée (revue PO ②). -->
                       <details class="cah-repli">
                         <summary>Ajouter une recette à la main <span>— quand l'image manque</span></summary>
                         <div class="cah-form">
                           <label>Date<input type="date" value="2026-03-31"><span class="fh">range le mois</span></label>
                           <label style="grid-column:span 2">Libellé<input type="text" placeholder="Vente de marchandises"></label>
                           <label>Tiers<input type="text" placeholder="SARL Kodjo &amp; Fils"></label>
-                          <label>Encaissé par<select><option>—</option><option>Espèces</option><option>Mobile money</option><option>Virement</option><option>Chèque</option><option>Carte</option></select></label>
+                          <label>Encaissé par<select><option>—</option><option>Espèces</option><option>Mobile money</option><option>Banque</option></select></label>
                           <label>Montant encaissé (TTC)<input type="text" inputmode="decimal" placeholder="150 000"><span class="fh">en francs</span></label>
                         </div>
                         <div class="cah-actions">
@@ -10037,13 +10068,10 @@
                         </p>
                       </details>
 
-                      <div class="prof-note warn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>Écart de contrat — corriger un compte reste une saisie libre.</b> Vérifié route par route sur l'OpenAPI de <code>:3007</code>&nbsp;:
-                        <b>aucune route n'énumère les comptes de classe 7</b> du plan de l'organisation. La correction se fait donc au clavier, et c'est le serveur qui refuse
-                        (<span class="code">400 · COMPTE_HORS_CLASSE_7</span> / <span class="code">COMPTE_INCONNU</span>). Sur le chemin nominal cela ne se voit pas — le compte est
-                        proposé — mais le jour où il faut le corriger, l'écran ne peut offrir <b>aucune</b> liste. ⇒ écart tracé pour le backend.</span>
-                      </div>
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span><b>✅ Corriger un compte se fait dans une liste (STORY-394, livrée le 26/08).</b> <code>GET /dossiers/{id}/referentiels/plan-comptes?classe=7</code> énumère les comptes de produits <b>du plan du dossier</b> (21 au plan <code>syscohada-revise@2.3</code>), avec leurs libellés — par dossier depuis STORY-422. La saisie libre reste ouverte pour les <b>subdivisions à 8 caractères</b> (STORY-424)&nbsp;; le serveur refuse toujours ce qui n'est pas de la classe 7 (<span class="code">400 · COMPTE_HORS_CLASSE_7</span>) ou inconnu du plan (<span class="code">COMPTE_INCONNU</span>). ⚠️ <b>Reste à câbler côté écran réel</b>&nbsp;: la correction y est encore un champ libre.</span>
+                        </div>
                     </div>
 
                     <!-- ═════════════ LA SYNTHÈSE DE L'EXERCICE ═════════════ -->
@@ -10054,13 +10082,13 @@
                           <table class="imp-table">
                             <thead><tr><th>Mois</th><th class="num">HT</th><th class="num">TVA collectée</th><th class="num">TTC</th><th class="num">Recettes</th></tr></thead>
                             <tbody>
-                              <tr><td>Janvier 2026</td><td class="num">1 050 847</td><td class="num">189 153</td><td class="num">1 240 000</td><td class="num">8</td></tr>
-                              <tr><td>Février 2026</td><td class="num">834 745</td><td class="num">150 255</td><td class="num">985 000</td><td class="num">6</td></tr>
-                              <tr><td>Mars 2026</td><td class="num">1 080 508</td><td class="num">194 492</td><td class="num">1 275 000</td><td class="num">4</td></tr>
-                              <tr><td>Juillet 2026</td><td class="num">847 458</td><td class="num">152 542</td><td class="num">1 000 000</td><td class="num">4</td></tr>
+                              <tr><td>Janvier 2026</td><td class="num">1 240 000</td><td class="num">0</td><td class="num">1 240 000</td><td class="num">8</td></tr>
+                              <tr><td>Février 2026</td><td class="num">985 000</td><td class="num">0</td><td class="num">985 000</td><td class="num">6</td></tr>
+                              <tr><td>Mars 2026</td><td class="num">1 275 000</td><td class="num">0</td><td class="num">1 275 000</td><td class="num">4</td></tr>
+                              <tr><td>Juillet 2026</td><td class="num">1 000 000</td><td class="num">0</td><td class="num">1 000 000</td><td class="num">4</td></tr>
                             </tbody>
                             <tfoot>
-                              <tr><th>Exercice 2026</th><th class="num">3 813 558</th><th class="num">686 442</th><th class="num">4 500 000</th><th class="num">22</th></tr>
+                              <tr><th>Exercice 2026</th><th class="num">4 500 000</th><th class="num">0</th><th class="num">4 500 000</th><th class="num">22</th></tr>
                             </tfoot>
                           </table>
                         </div>
@@ -10091,7 +10119,7 @@
                       </div>
                       <div class="prof-note warn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>Aucun taux de TVA n'est publié pour votre paquet fiscal.</b> La ventilation ne peut pas se faire&nbsp;: un taux ne s'invente pas dans le code — une TVA calculée au jugé est une déclaration fausse. <span class="code">400 · TAUX_TVA_INTROUVABLE</span></span>
+                        <span><b>Aucun taux de TVA n'est publié pour votre paquet fiscal.</b> La ventilation ne peut pas se faire&nbsp;: un taux ne s'invente pas dans le code — une TVA calculée au jugé est une déclaration fausse. <b>Cas d'un dossier assujetti seulement</b>&nbsp;: un non-assujetti, comme ce dossier, n'a pas besoin de taux. <span class="code">400 · TAUX_TVA_INTROUVABLE</span></span>
                       </div>
                       <p class="helper" style="text-align:left">
                         ⚠️ <b>Six refus, comptés sur les <code>throw</code> du service et non sur les puces de la fiche&nbsp;:</b>
@@ -10130,13 +10158,10 @@
                         </div>
                         <span class="authority"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Un exercice REPRIS (antérieur à l'entrée en portefeuille) ne se rouvre pas — le bouton n'apparaît alors pas.</span>
                       </div>
-                      <div class="prof-note warn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>Écart de contrat — ce refus n'est documenté nulle part.</b> Le contrôleur de <code>:3007</code> n'annonce qu'un seul <code>40900000</code>
-                        (<code>BALANCE_VALIDEE_IMMUABLE</code>) alors que le service en lève <b>deux</b>, et teste <code>EXERCICE_CLOS</code> <b>en premier</b>. Un écran qui
-                        n'aurait lu que le Swagger aurait envoyé le comptable créer une nouvelle version de balance — <b>le geste opposé</b> de celui qui débloque.
-                        ⇒ écart tracé pour le backend.</span>
-                      </div>
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span><b>✅ Les deux 409 sont documentés, avec un troisième refus devant eux (STORY-393, livrée le 26/08).</b> Les 9 routes des cahiers publient <code>EXERCICE_CLOS</code> <b>et</b> <code>BALANCE_VALIDEE_IMMUABLE</code> — deux gestes opposés, deux écrans — et <b>en tête</b> <code>DOSSIER_ARCHIVE</code>, posé par la garde de portée <b>avant même le contrôleur</b>&nbsp;: le geste est alors un troisième, <b>désarchiver le dossier</b>. ⚠️ Le refus est atteignable <b>même sur un exercice que l'écran affiche ouvert</b> (le read-model des exercices est alimenté par événements, sa cohérence est différée)&nbsp;: désactiver la saisie sur le statut lu ne dispense pas de savoir recevoir ce <code>409</code>.</span>
+                        </div>
                     </div>
 
                     <!-- ═════════════ 409 BALANCE_VALIDEE_IMMUABLE ═════════════ -->
@@ -10274,7 +10299,7 @@
                     <div class="cah-bar">
                       <div>
                         <b>Mars 2026</b>
-                        <div class="sub">6 dépenses · 842 500 F décaissés · <b>810 771 F</b> imputés en charges</div>
+                        <div class="sub">6 dépenses · 842 500 F décaissés · <b>842 500 F</b> imputés en charges</div>
                       </div>
                       <span class="grow" style="flex:1"></span>
                       <button class="btn btn-ghost btn-sm" type="button" data-dep-goto="categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M7 12h14"/><path d="M11 18h10"/></svg> Mes catégories</button>
@@ -10287,22 +10312,18 @@
 
                       <div class="imp-tiles">
                         <div class="imp-tile"><div class="k">Décaissé (TTC)</div><div class="v">842 500<span class="u">F · sorti de la caisse</span></div></div>
-                        <div class="imp-tile"><div class="k">Imputé en charges</div><div class="v">810 771<span class="u">F · classe 6</span></div></div>
-                        <div class="imp-tile"><div class="k">TVA déductible</div><div class="v">31 729<span class="u">F · récupérable</span></div></div>
+                        <div class="imp-tile"><div class="k">Imputé en charges</div><div class="v">842 500<span class="u">F · classe 6</span></div></div>
+                        <div class="imp-tile"><div class="k">TVA déductible</div><div class="v">0<span class="u">F · dossier non assujetti</span></div></div>
                         <div class="imp-tile dep-attn"><div class="k">Part non déductible</div><div class="v">345 000<span class="u">F · à réintégrer</span></div></div>
                       </div>
 
                       <!-- ⚡ LA NOTE QUI JUSTIFIE DEUX COLONNES DE MONTANT. -->
                       <p class="helper" style="text-align:left">
-                        ⚠️ <b>Décaissé et imputé ne sont pas le même chiffre, et l'écart n'est pas toujours la TVA.</b> Quand la TVA est <b>récupérable</b>, la charge vaut le
-                        <b>HT</b> — la TVA part en créance sur l'État. Quand elle ne l'est <b>pas</b> (organisation non assujettie, ligne sans facture), elle fait partie du
-                        <b>coût</b> et s'impute <b>avec la charge</b>, en TTC. Imputer systématiquement le HT minorerait les charges de toute la TVA non récupérable —
-                        donc <b>majorerait le résultat imposable</b>, en silence. D'où deux colonnes, toutes deux nommées.
-                      </p>
+                        ⚠️ <b>Décaissé et imputé sont deux grandeurs, qui ici se confondent.</b> L'assujettissement se dérive du <b>régime</b> (D-082-4)&nbsp;: seul le <b>réel</b> récupère la TVA. Ce dossier est au synthétique — rien n'est récupérable, la TVA fait partie du <b>coût</b> et s'impute <b>avec la charge</b>, en TTC&nbsp;; la colonne «&nbsp;TVA déductible&nbsp;» vaut donc <b>0</b>. Pour un dossier au réel avec facture, la charge vaut le <b>HT</b> et l'écart part en créance sur l'État. Imputer systématiquement le HT à un non-assujetti minorerait les charges de toute la TVA — donc <b>majorerait le résultat imposable</b>, en silence. D'où deux colonnes, toutes deux nommées.</p>
 
                       <div class="imp-table-wrap">
                         <div class="imp-table-cap">Dépenses de <b>mars 2026</b> — 6 lignes. <code>GET …/cahiers/depenses?mois=2026-03</code>. Les totaux ci-dessus viennent du serveur&nbsp;: <b>l'écran ne resomme jamais la liste affichée</b>.</div>
-                        <table class="imp-table">
+                        <table class="imp-table cmp-tab">
                           <thead>
                             <tr>
                               <th>Preuve</th><th>Date</th><th>Libellé</th><th>Fournisseur</th><th>Catégorie</th><th>Compte</th>
@@ -10318,7 +10339,7 @@
                               <td><span class="badge badge-active"><span class="d"></span>Électricité CEET</span></td>
                               <td><code>60510000</code></td>
                               <td class="num">118 000</td>
-                              <td class="num"><b>100 000</b><span class="cah-motif">HT — TVA 18 000 récupérable</span></td>
+                              <td class="num"><b>118 000</b><span class="cah-motif">TTC — dossier non assujetti</span></td>
                               <td><span class="cah-conf ok">déductible</span></td>
                               <td><button class="btn btn-ghost btn-sm" type="button" aria-label="Supprimer la dépense « Facture CEET mars 2026 »"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></td>
                             </tr>
@@ -10342,7 +10363,7 @@
                               <td><span class="badge badge-active"><span class="d"></span>Carburant motos</span></td>
                               <td><code>60550000</code></td>
                               <td class="num">90 000</td>
-                              <td class="num"><b>76 271</b><span class="cah-motif">HT — TVA 13 729 récupérable</span></td>
+                              <td class="num"><b>90 000</b><span class="cah-motif">TTC — dossier non assujetti</span></td>
                               <td><span class="cah-conf ok">déductible</span></td>
                               <td><button class="btn btn-ghost btn-sm" type="button" aria-label="Supprimer la dépense « Carburant motos livraison »"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></td>
                             </tr>
@@ -10355,7 +10376,7 @@
                               <td><code>65810000</code></td>
                               <td class="num">25 000</td>
                               <td class="num"><b>25 000</b><span class="cah-motif">TTC — aucune TVA récupérable</span></td>
-                              <td><span class="cah-conf bad">non déductible</span><span class="cah-motif">catégorie non déductible · code <b>30</b></span></td>
+                              <td><span class="cah-conf bad">non déductible</span><span class="cah-motif">catégorie non déductible · code <b>25</b></span></td>
                               <td><button class="btn btn-ghost btn-sm" type="button" aria-label="Supprimer la dépense « Amende de stationnement »"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></td>
                             </tr>
                             <tr class="cah-warn">
@@ -10488,8 +10509,7 @@
                         <div>
                           <b>2 pièces de cette page appartiennent à l'autre cahier.</b> La machine y a lu une <b>entrée d'argent</b> alors que vous importez des dépenses —
                           c'est le cas courant d'une page de cahier où les ventes et les achats se suivent. Elles ne sont <b>pas cochées</b>&nbsp;:
-                          <button class="linklike" type="button" data-cah-livre-goto="recettes">redéposez la même image dans le cahier de recettes</button>, elles y seront proposées.
-                          <b>Rien n'est perdu, rien n'entre deux fois</b>, et la pièce reste justifiée des deux côtés.
+                          <button class="linklike" type="button" data-cah-livre-goto="recettes">redéposez la même image dans le cahier de recettes</button>, elles y seront proposées. <b>Rien n'est perdu, rien n'entre deux fois</b>, et la pièce reste justifiée des deux côtés. ✅ <b>Le serveur sait désormais faire mieux</b> (STORY-403, 27/08)&nbsp;: la destination est une propriété de la <b>ligne</b> (<code>lignesRetenues[].destination</code>), pas du lot — une page mixte alimente les deux cahiers en un seul appel, <code>creeesParCahier</code> dit où chaque ligne est entrée, et un refus du second cahier est rapporté ligne à ligne sans effacer ce qui est déjà entré. <b>Reste à câbler côté écran réel</b>&nbsp;: il renvoie encore vers l'autre cahier.
                         </div>
                       </div>
 
@@ -10575,7 +10595,7 @@
                             <tr><td><b>Électricité CEET</b></td><td><code>60510000</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">3</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
                             <tr><td><b>Loyer boutique</b></td><td><code>62210000</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">3</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
                             <tr><td><b>Carburant motos</b></td><td><code>60550000</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">8</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
-                            <tr><td><b>Amendes &amp; pénalités</b></td><td><code>65810000</code></td><td><span class="cah-conf bad">non</span></td><td><code>30</code></td><td class="num">1</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
+                            <tr><td><b>Amendes &amp; pénalités</b></td><td><code>65810000</code></td><td><span class="cah-conf bad">non</span></td><td><code>25</code></td><td class="num">1</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
                             <tr><td><b>Frais de représentation</b></td><td><code>62810000</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">0</td><td><span class="badge"><span class="d"></span>Désactivée</span></td><td><button class="btn btn-ghost btn-sm" type="button">Réactiver</button></td></tr>
                           </tbody>
                         </table>
@@ -10589,6 +10609,10 @@
                         </label>
                         <label>Déductible par défaut
                           <select><option>Oui — charge normale</option><option>Non — amendes, pénalités, dons…</option></select>
+                        </label>
+                        <label>Code de réintégration (liasse)
+                        <select><option value="">Aucun — charge déductible</option><option value="10">10 — BENEFICE NET COMPTABLE ou PERTE NETTE COMPTABLE</option><option value="11">11 — Amortissements excédentaires et autres amortissements non déductibles</option><option value="12">12 — Amortissements réputés différés créés au titre de l'exercice</option><option value="15">15 — Impôts sur le revenu (IR ou IS) ou Minimum Forfaitaire de Perception (MFP), impôts non payés</option><option value="20">20 — Provisions et charges à payer non déductibles</option><option value="25">25 — Amendes et pénalités de toute nature</option><option value="30">30 — Rémunération du travail de l'exploitant, des associés ou des membres de sociétés soumises à l'impôt sur le revenu</option><option value="40">40 — Charges et dépenses somptuaires</option><option value="45">45 — Jetons de présence non déductibles</option><option value="50">50 — Quote-part de charges liées aux titres de placement exonérés</option><option value="60">60 — Intérêts excédentaires des comptes courants d'associés et assimilés (article 99 - m du CGI)</option><option value="80">80 — Autres réintégrations (à détailler)</option></select>
+                        <span class="fh">12 codes, servis avec leur libellé par <code>GET /referentiels/reintegrations</code> — uniquement si la catégorie est non déductible</span>
                         </label>
                       </div>
                       <div class="cah-actions" style="padding-top:0.55rem">
@@ -10615,27 +10639,29 @@
                         <table class="imp-table">
                           <thead><tr><th>Mois</th><th class="num">Décaissé</th><th class="num">Charges</th><th class="num">TVA déductible</th><th class="num">Non déductible</th><th class="num">Lignes</th></tr></thead>
                           <tbody>
-                            <tr><td>Janvier 2026</td><td class="num">612 000</td><td class="num">572 881</td><td class="num">39 119</td><td class="num">0</td><td class="num">9</td></tr>
-                            <tr><td>Février 2026</td><td class="num">498 500</td><td class="num">470 890</td><td class="num">27 610</td><td class="num">45 000</td><td class="num">7</td></tr>
-                            <tr><td>Mars 2026</td><td class="num">842 500</td><td class="num">810 771</td><td class="num">31 729</td><td class="num">345 000</td><td class="num">6</td></tr>
-                            <tr class="tot"><td><b>Exercice</b></td><td class="num"><b>1 953 000</b></td><td class="num"><b>1 854 542</b></td><td class="num"><b>98 458</b></td><td class="num"><b>390 000</b></td><td class="num"><b>22</b></td></tr>
+                            <tr><td>Janvier 2026</td><td class="num">612 000</td><td class="num">612 000</td><td class="num">0</td><td class="num">0</td><td class="num">9</td></tr>
+                            <tr><td>Février 2026</td><td class="num">498 500</td><td class="num">498 500</td><td class="num">0</td><td class="num">45 000</td><td class="num">7</td></tr>
+                            <tr><td>Mars 2026</td><td class="num">842 500</td><td class="num">842 500</td><td class="num">0</td><td class="num">345 000</td><td class="num">6</td></tr>
+                            <tr class="tot"><td><b>Exercice</b></td><td class="num"><b>1 953 000</b></td><td class="num"><b>1 953 000</b></td><td class="num"><b>0</b></td><td class="num"><b>390 000</b></td><td class="num"><b>22</b></td></tr>
                           </tbody>
                         </table>
                       </div>
 
                       <div class="imp-table-wrap">
-                        <div class="imp-table-cap">Par <b>catégorie</b> — triées par charge décroissante&nbsp;: <b>ce qui pèse d'abord</b>. C'est la vue dans laquelle le cabinet raisonne, pas le plan de comptes.</div>
+                        <div class="imp-table-cap">Par <b>catégorie</b>, pour <b>mars 2026</b> — triées par charge décroissante&nbsp;: <b>ce qui pèse d'abord</b>. Rejouée sur les six lignes du cahier de mars&nbsp;; c'est la vue dans laquelle le cabinet raisonne, pas le plan de comptes.</div>
                         <table class="imp-table">
-                          <thead><tr><th>Catégorie</th><th>Compte</th><th class="num">Charges</th><th class="num">dont non déductible</th><th class="num">Lignes</th></tr></thead>
-                          <tbody>
-                            <tr><td><b>Achats de marchandises</b></td><td><code>60100000</code></td><td class="num">980 000</td><td class="num">320 000</td><td class="num">14</td></tr>
-                            <tr><td><b>Loyer boutique</b></td><td><code>62210000</code></td><td class="num">750 000</td><td class="num">0</td><td class="num">3</td></tr>
-                            <tr><td><b>Carburant motos</b></td><td><code>60550000</code></td><td class="num">228 813</td><td class="num">45 000</td><td class="num">8</td></tr>
-                            <tr><td><b>Électricité CEET</b></td><td><code>60510000</code></td><td class="num">300 000</td><td class="num">0</td><td class="num">3</td></tr>
-                            <tr><td><b>Amendes &amp; pénalités</b></td><td><code>65810000</code></td><td class="num">25 000</td><td class="num">25 000</td><td class="num">1</td></tr>
-                          </tbody>
+                        <thead><tr><th>Catégorie</th><th>Compte</th><th class="num">Charges</th><th class="num">dont non déductible</th><th class="num">Lignes</th></tr></thead>
+                        <tbody>
+<tr><td><b>Achats de marchandises</b></td><td><code>60100000</code></td><td class="num">320 000</td><td class="num">320 000</td><td class="num">1</td></tr>
+<tr><td><b>Loyer boutique</b></td><td><code>62210000</code></td><td class="num">250 000</td><td class="num">0</td><td class="num">1</td></tr>
+<tr><td><b>Électricité CEET</b></td><td><code>60510000</code></td><td class="num">118 000</td><td class="num">0</td><td class="num">1</td></tr>
+<tr><td><b>Carburant motos</b></td><td><code>60550000</code></td><td class="num">90 000</td><td class="num">0</td><td class="num">1</td></tr>
+<tr><td><b>Entretien &amp; réparations</b></td><td><code>61520000</code></td><td class="num">39 500</td><td class="num">0</td><td class="num">1</td></tr>
+<tr><td><b>Amendes &amp; pénalités</b></td><td><code>65810000</code></td><td class="num">25 000</td><td class="num">25 000</td><td class="num">1</td></tr>
+                        <tr class="tot"><td colspan="2"><b>Mars 2026</b></td><td class="num"><b>842 500</b></td><td class="num"><b>345 000</b></td><td class="num"><b>6</b></td></tr>
+                        </tbody>
                         </table>
-                      </div>
+                        </div>
 
                       <p class="helper" style="text-align:left">
                         ⚠️ <b>Une catégorie sans ligne n'apparaît pas</b>, comme un mois sans ligne. Et une catégorie <b>supprimée</b> laisse malgré tout ses charges dans la
@@ -10754,11 +10780,8 @@
                       de rattrapage, pas le chemin de tous les jours.
                     </div>
                     <div class="dc-note">
-                      <b>Un écart de contrat que cette maquette rend visible.</b> Le <b>code de réintégration</b> d'une catégorie est validé contre les codes publiés par le
-                      paquet fiscal (<code>togo@2026</code> en publie douze) — mais <b>aucune route ne les énumère</b>, et le paquet les publie <b>sans libellés</b>. L'écran ne
-                      peut donc offrir ni liste ni aide&nbsp;: le comptable taperait un code à l'aveugle pour recevoir un <code>400</code>. Le champ reste donc <b>absent du
-                      formulaire de création</b> et n'apparaît qu'en <b>lecture</b> sur les catégories qui en portent déjà un. ⇒ écart ouvert, à instruire côté backend.
-                    </div>
+<b>✅ Le code de réintégration est servi, avec son libellé (STORY-397 le 27/08, STORY-415 le 30/08).</b> <code>GET /api/v1/referentiels/reintegrations</code> rend <code>{paquetFiscal, codes: [{code, libelle?}]}</code>, dans l'ordre de la liasse — <b>douze codes</b> pour <code>togo@2026</code>. Le champ rejoint donc le formulaire de création, sous forme de liste&nbsp;: plus de code tapé à l'aveugle pour recevoir un <code>400 · CODE_REINTEGRATION_INCONNU</code>. ⚠️ Ces codes sont ceux du paquet fiscal <b>par défaut</b> de la plateforme — celui qui valide une catégorie, laquelle n'est rattachée à aucun exercice (D-083-3)&nbsp;; la grille <b>de l'exercice</b> se lit sur le résultat fiscal du dossier. ⚠️ <b>Correction de la maquette</b>&nbsp;: «&nbsp;Amendes &amp; pénalités&nbsp;» porte le code <code>25</code> — le <code>30</code> qu'elle affichait est la rémunération de l'exploitant.
+</div>
 
                     </div><!-- /livre depenses -->
                   </div>
@@ -11093,7 +11116,7 @@
                         <span class="av" data-sg-av>CD</span>
                         <div>
                           <b data-sg-orgname>Cabinet Diallo &amp; Associés</b>
-                          <div class="plan"><span data-sg-metier>Expertise comptable</span> · référentiel résolu par le serveur — <b data-sd-refname>SYSCOHADA révisé (syscohada-revise@2.1)</b></div>
+                          <div class="plan"><span data-sg-metier>Expertise comptable</span> · référentiel résolu par le serveur — <b data-sd-refname>SYSCOHADA révisé (syscohada-revise@2.3)</b></div>
                         </div>
                       </div>
                       <span class="grow" style="flex:1"></span>
@@ -11218,7 +11241,7 @@
 
                     <p class="helper" style="margin-top:0.2rem">FE-026 · adaptateur <code>direct</code> du hub D13. On assemble une <code>SubmitBalanceDto</code> et on la soumet au contrat canonique : <code>POST /balances</code>. Montants en <b>unités mineures XOF</b> (entiers, ×100), équilibre en <b>arithmétique entière</b> (tolérance &lt;&nbsp;100). Le <code>checksum</code> SHA-256 est recalculé et comparé par le serveur.</p>
                     <p class="helper" style="margin-top:0.2rem"><b>FE-056</b> (retrofit) · le compte proposé vient de <code>POST /balances/suggest-comptes</code> (STORY-139) — <b>en lot</b>, ordre d'entrée préservé, résolu sur le <b>référentiel actif de l'organisation</b> : le front <b>n'envoie aucun code de référentiel</b>. <code>origine</code> ∈ <code>SURCHARGE</code> (règle du cabinet, prioritaire) · <code>EXACT</code> · <code>APPROCHANT</code> (à vérifier) · <code>AUCUN</code> (« à préciser », rien de pré-rempli) ; <code>alternatives[]</code> est un <b>choix rendu à l'humain</b>, jamais départagé côté client. Une suggestion en échec (403/400/réseau) <b>ne bloque pas la saisie</b> — c'est une assistance, pas un prérequis (DO-1). Le champ <code>referentiel</code> de la soumission est repris de l'<b>enveloppe renvoyée par le serveur</b>. Le serveur reste <b>seul juge</b> du compte à la persistance. La <b>validation d'état</b> ne se fait pas ici mais sur le détail de la balance (onglet Balances) — livrée par <b>FE-058</b>.</p>
-                    <p class="helper" style="margin-top:0.2rem"><b>Les cinq secteurs.</b> Le référentiel est attribué à l'<b>octroi</b>, par la console (pack vertical AP-06), puis lu dans <code>OrgBalanceEntitlement.referentiel</code> : <b>en ajouter un ne demande pas une ligne de code d'écran</b>. Ce que le service sait en faire, en revanche, dépend de son manifeste. <b>Cabinet</b> et <b>distributeur</b> partagent <code>syscohada-revise@2.1</code> — un distributeur ne change pas de plan, il change de <b>vocabulaire</b> (stocks, démarque, transport sur ventes) et surtout de <b>volume</b> : ses auxiliaires par point de vente dépassent la borne de <code>200</code> libellés par lot, alors le front <b>découpe</b> (241 lignes → 2 appels, jamais 241). <b>IMF</b> : <code>sfd-bceao@2.0</code>. <b>TPE au SMT</b> : <code>smt-togo@1.0</code> est <b>déclaré mais non packagé</b> — refus <code>409 REFERENTIEL_NON_PACKAGE</code> avec son motif, et rien à réessayer. <b>Assurance</b> : <code>cima-assurances@1.0</code> existe côté <code>bilan-service</code> (STORY-122) mais <b>ne figure ni au manifeste de balance-service ni au contrat canonique</b> <code>REFERENTIELS_BALANCE</code> (<code>SN</code>&nbsp;|&nbsp;<code>SMT</code>&nbsp;|&nbsp;<code>SFD-BCEAO</code>) ⇒ <code>500 REFERENTIEL_UNAVAILABLE</code>. Dans les deux cas, la <b>saisie reste entière</b> : c'est l'assistance qui manque, pas la fonction.</p>
+                    <p class="helper" style="margin-top:0.2rem"><b>Les cinq secteurs.</b> Le référentiel est attribué à l'<b>octroi</b>, par la console (pack vertical AP-06), puis lu dans <code>OrgBalanceEntitlement.referentiel</code> : <b>en ajouter un ne demande pas une ligne de code d'écran</b>. Ce que le service sait en faire, en revanche, dépend de son manifeste. <b>Cabinet</b> et <b>distributeur</b> partagent <code>syscohada-revise@2.3</code> — un distributeur ne change pas de plan, il change de <b>vocabulaire</b> (stocks, démarque, transport sur ventes) et surtout de <b>volume</b> : ses auxiliaires par point de vente dépassent la borne de <code>200</code> libellés par lot, alors le front <b>découpe</b> (241 lignes → 2 appels, jamais 241). <b>IMF</b> : <code>sfd-bceao@2.0</code>. <b>TPE au SMT</b> : <code>smt-togo@1.0</code> est <b>déclaré mais non packagé</b> — refus <code>409 REFERENTIEL_NON_PACKAGE</code> avec son motif, et rien à réessayer. <b>Assurance</b> : <code>cima-assurances@1.0</code> existe côté <code>bilan-service</code> (STORY-122) mais <b>ne figure ni au manifeste de balance-service ni au contrat canonique</b> <code>REFERENTIELS_BALANCE</code> (<code>SN</code>&nbsp;|&nbsp;<code>SMT</code>&nbsp;|&nbsp;<code>SFD-BCEAO</code>) ⇒ <code>500 REFERENTIEL_UNAVAILABLE</code>. Dans les deux cas, la <b>saisie reste entière</b> : c'est l'assistance qui manque, pas la fonction.</p>
                   </div>
                 </div>
               </div>
@@ -11604,12 +11627,12 @@
                         <div class="ref-grid">
                           <div class="ref-item">
                             <div class="ref-k">Référentiel actif</div>
-                            <div class="ref-v">SYSCOHADA révisé · <span data-tdp-refver>syscohada-revise@2.1</span></div>
+                            <div class="ref-v">SYSCOHADA révisé · <span data-tdp-refver>syscohada-revise@2.3</span></div>
                             <div class="ref-sum">sha256:9f2c8b41…a71e</div>
                           </div>
                           <div class="ref-item">
                             <div class="ref-k">Ce que le paquet contient</div>
-                            <div class="ref-v">918 comptes · 214 postes · 371 règles</div>
+                            <div class="ref-v">179 comptes · 169 postes · 126 règles</div>
                             <div class="ref-sum">chargé depuis le cache</div>
                           </div>
                         </div>
@@ -13695,7 +13718,7 @@
     <div class="ref-item"><div class="ref-k">Statut du cycle de vie</div><div class="ref-v">BROUILLON</div><div class="ref-txt">Recalculable autant que nécessaire&nbsp;; rien n'est figé tant que personne n'a validé.</div></div>
     <div class="ref-item"><div class="ref-k">Dossier &amp; exercice</div><div class="ref-v">Ets Kossi Distribution</div><div class="ref-txt"><b>2025</b> — exercice ouvert</div></div>
     <div class="ref-item"><div class="ref-k">Ce qui fait foi</div><div class="ref-v">Aucune version figée</div><div class="ref-txt">Cette liasse n'a jamais été validée — <b>rien ne fait foi</b>.</div></div>
-    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0 · paquet sha256:e9370b14…a71e</div><div class="ref-txt"><code>referentielChecksum</code> = celui du <b>paquet</b>. L'<b>empreinte</b> du contenu n'existe qu'à la validation · <b>STORY-452</b></div></div>
+    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.3</div><div class="ref-sum">bilan-engine@1.0.0 · paquet sha256:a2fd635c…f94c</div><div class="ref-txt"><code>referentielChecksum</code> = celui du <b>paquet</b>. L'<b>empreinte</b> du contenu n'existe qu'à la validation · <b>STORY-452</b></div></div>
   </div>
 </div>
                       <div class="coh-verdict stop">
@@ -13710,7 +13733,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     <b>Le gate de validation — ce que le serveur re-vérifiera</b>
     <span class="grow"></span>
-    <span class="badge badge-invited"><span class="d"></span>1 bloquant en anomalie</span>
+    <span class="badge badge-invited"><span class="d"></span>2 bloquants en anomalie · 3 OK · 4 informatifs hors gate · <code>recapitulatif</code> : 8 calculés · 1 indéterminable</span>
   </div>
   <div class="coh-row ko">
   <span class="ic">!</span>
@@ -13730,23 +13753,50 @@
   <span class="coh-cat blk">Bloquant</span>
   <span class="val"><b>écart 0</b>par construction</span>
 </div>
+  <div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b><code>COMPTES_NON_AFFECTES</code> — Comptes non affectés, ou rattachés à un poste qui ne les reçoit pas, à solde non nul</b>
+<p>Des comptes créditeurs non rattachés portent <b>412&nbsp;300</b> à solde non nul. Le contrôle rougit <b>même quand des soldes écartés se compensent</b>&nbsp;: c'est le même fait que l'équilibre ci-dessus, vu par un contrôle qui ne dépend pas de la même agrégation. <span class="code">STORY-401</span></p>
+<span class="el"><i>soldesComptesNonMappes ≠ ∅</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 412 300</b>anomalie</span>
+</div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>RESULTAT_NON_AFFECTE</code> — Résultat antérieur non affecté (la case du passif et les comptes de gestion portent deux résultats)</b>
+<p><code>etatBalance</code> = <code>AVANT_CLOTURE</code> (la case <code>CJ</code> vaut 0 pendant que les comptes de gestion portent 120 000)&nbsp;: rien à affecter. <span class="code">STORY-426</span></p>
+<span class="el"><i>etatBalance = AVANT_CLOTURE</i><i>resultatPorteAuPassif = 0</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>OK</b>sévérité AUCUNE</span>
+</div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>CASCADE_SOUS_TOTAUX</code> — Cascade des sous-totaux du Bilan (grands totaux imprimés = totaux des comptes)</b>
+<p>La cascade imprimée est <b>complète</b> (<code>syscohada-revise@2.3</code>)&nbsp;: les grands totaux imprimés valent les totaux des comptes. Bloquant pour tout paquet qui n'est pas un amorçage. <span class="code">STORY-678</span></p>
+<span class="el"><i>BZ = 5 620 000</i><i>DZ = 5 207 700</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
   <div class="coh-row na">
   <span class="ic">–</span>
-  <span class="t"><b>Les 2 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
-    <p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033) et <code>ARTICULATION_NOTES</code> est nul par construction. <b>Ni l'un ni l'autre n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
+  <span class="t"><b>Les 4 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
+<p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033)&nbsp;; <code>ARTICULATION_NOTES</code> est <b>indéterminable</b> (la note <code>3A</code> est une trame dont le détail n'est dérivable d'aucune balance — <span class="code">STORY-439</span>)&nbsp;; <code>INTEGRITE_NOTES</code> est vrai par construction (43 notes)&nbsp;; <code>COHERENCE_STOCKS</code> est <b>OK</b>. <b>Aucun n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
   </span>
   <span class="coh-cat inf">Hors gate</span>
   <span class="val"><b>905 000</b>sans effet</span>
 </div>
   <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
     <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:14rem">La liste ci-dessus vient des <b>contrôles</b> (FE-033), pas du refus <code>422</code>&nbsp;: le serveur ne renvoie que des chaînes <code>«&nbsp;CODE&nbsp;: STATUT (écart N)&nbsp;»</code>, sans libellé ni cible. Le <code>422</code> sert de <b>garde-fou de dernière seconde</b>, jamais de source d'affichage.</span>
-    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 4 contrôles en détail</button>
+    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 9 contrôles en détail</button>
   </div>
 </div>
                       <div class="vact">
   <div class="txt">
     <b>Valider la liasse</b>
-    <p><b>1 blocage à lever</b>&nbsp;: l'équilibre du Bilan. Le geste qui le résout est à la <b>table de passage</b> — rattacher les comptes créditeurs écartés.</p>
+    <p><b>2 blocages à lever, une seule cause</b>&nbsp;: l'équilibre du Bilan et les comptes non affectés. Le geste qui les résout est à la <b>table de passage</b> — rattacher les comptes créditeurs écartés.</p>
   </div>
   <div class="go">
     <button class="btn btn-primary" type="button" disabled title="Un contrôle bloquant est en anomalie">Valider la liasse</button>
@@ -13808,14 +13858,14 @@
     <div class="ref-item"><div class="ref-k">Statut du cycle de vie</div><div class="ref-v">BROUILLON</div><div class="ref-txt">Recalculable autant que nécessaire&nbsp;; rien n'est figé tant que personne n'a validé.</div></div>
     <div class="ref-item"><div class="ref-k">Dossier &amp; exercice</div><div class="ref-v">Ets Kossi Distribution</div><div class="ref-txt"><b>2025</b> — exercice ouvert</div></div>
     <div class="ref-item"><div class="ref-k">Ce qui fait foi</div><div class="ref-v">Aucune version figée</div><div class="ref-txt">Cette liasse n'a jamais été validée — <b>rien ne fait foi</b>.</div></div>
-    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0 · paquet sha256:e9370b14…a71e</div><div class="ref-txt"><code>referentielChecksum</code> = celui du <b>paquet</b>. L'<b>empreinte</b> du contenu n'existe qu'à la validation · <b>STORY-452</b></div></div>
+    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.3</div><div class="ref-sum">bilan-engine@1.0.0 · paquet sha256:a2fd635c…f94c</div><div class="ref-txt"><code>referentielChecksum</code> = celui du <b>paquet</b>. L'<b>empreinte</b> du contenu n'existe qu'à la validation · <b>STORY-452</b></div></div>
   </div>
 </div>
                       <div class="coh-verdict go">
   <span class="flag">✅</span>
   <div style="flex:1">
     <h4>Prête à être figée — <code>valide: true</code></h4>
-    <p>Les <b>deux</b> contrôles bloquants passent&nbsp;: le serveur acceptera la validation. <b>Cela ne veut pas dire que la liasse est juste</b> — voir l'onglet <b>Contrôles de cohérence</b>&nbsp;: le tableau des flux est en anomalie de <b>905&nbsp;000</b>, et <b>4 des 8 contrôles</b> que l'administration applique au dépôt ne sont calculés nulle part.</p>
+    <p>Les <b>cinq</b> contrôles bloquants passent&nbsp;: le serveur acceptera la validation. <b>Cela ne veut pas dire que la liasse est juste</b> — voir l'onglet <b>Contrôles de cohérence</b>&nbsp;: le tableau des flux est en anomalie de <b>905&nbsp;000</b>, et <b>4 des 8 contrôles</b> que l'administration applique au dépôt ne sont calculés nulle part.</p>
   </div>
 </div>
                       <div class="coh">
@@ -13823,7 +13873,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     <b>Le gate de validation — ce que le serveur re-vérifiera</b>
     <span class="grow"></span>
-    <span class="badge badge-active"><span class="d"></span>2 bloquants OK · 2 informatifs hors gate</span>
+    <span class="badge badge-active"><span class="d"></span>5 bloquants OK · 4 informatifs hors gate · <code>recapitulatif</code> : 8 calculés · 1 indéterminable</span>
   </div>
   <div class="coh-row ok">
   <span class="ic">✓</span>
@@ -13843,17 +13893,43 @@
   <span class="coh-cat blk">Bloquant</span>
   <span class="val"><b>écart 0</b>par construction</span>
 </div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>COMPTES_NON_AFFECTES</code> — Comptes non affectés, ou rattachés à un poste qui ne les reçoit pas, à solde non nul</b>
+<p>Aucun compte écarté à solde non nul (<code>soldesComptesNonMappes</code> et <code>diagnosticEquilibre.comptesSansRegle</code> sont vides). <span class="code">STORY-401</span></p>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>RESULTAT_NON_AFFECTE</code> — Résultat antérieur non affecté (la case du passif et les comptes de gestion portent deux résultats)</b>
+<p><code>etatBalance</code> = <code>AVANT_CLOTURE</code> (la case <code>CJ</code> vaut 0 pendant que les comptes de gestion portent 120 000)&nbsp;: rien à affecter. <span class="code">STORY-426</span></p>
+<span class="el"><i>etatBalance = AVANT_CLOTURE</i><i>resultatPorteAuPassif = 0</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>OK</b>sévérité AUCUNE</span>
+</div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>CASCADE_SOUS_TOTAUX</code> — Cascade des sous-totaux du Bilan (grands totaux imprimés = totaux des comptes)</b>
+<p>La cascade imprimée est <b>complète</b> (<code>syscohada-revise@2.3</code>)&nbsp;: les grands totaux imprimés valent les totaux des comptes. Bloquant pour tout paquet qui n'est pas un amorçage. <span class="code">STORY-678</span></p>
+<span class="el"><i>BZ = 5 620 000</i><i>DZ = 5 620 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
   <div class="coh-row na">
   <span class="ic">–</span>
-  <span class="t"><b>Les 2 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
-    <p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033) et <code>ARTICULATION_NOTES</code> est nul par construction. <b>Ni l'un ni l'autre n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
+  <span class="t"><b>Les 4 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
+<p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033)&nbsp;; <code>ARTICULATION_NOTES</code> est <b>indéterminable</b> (la note <code>3A</code> est une trame dont le détail n'est dérivable d'aucune balance — <span class="code">STORY-439</span>)&nbsp;; <code>INTEGRITE_NOTES</code> est vrai par construction (43 notes)&nbsp;; <code>COHERENCE_STOCKS</code> est <b>OK</b>. <b>Aucun n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
   </span>
   <span class="coh-cat inf">Hors gate</span>
   <span class="val"><b>905 000</b>sans effet</span>
 </div>
   <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
     <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:14rem">La liste ci-dessus vient des <b>contrôles</b> (FE-033), pas du refus <code>422</code>&nbsp;: le serveur ne renvoie que des chaînes <code>«&nbsp;CODE&nbsp;: STATUT (écart N)&nbsp;»</code>, sans libellé ni cible. Le <code>422</code> sert de <b>garde-fou de dernière seconde</b>, jamais de source d'affichage.</span>
-    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 4 contrôles en détail</button>
+    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 9 contrôles en détail</button>
   </div>
 </div>
                       <div class="vact">
@@ -13931,7 +14007,7 @@
     <div class="ref-item"><div class="ref-k">Statut du cycle de vie</div><div class="ref-v">VALIDÉ</div><div class="ref-txt">Non recalculable&nbsp;: <code>409 JEU_VALIDE_NON_RECALCULABLE</code>.</div></div>
     <div class="ref-item"><div class="ref-k">Dossier &amp; exercice</div><div class="ref-v">Ets Kossi Distribution</div><div class="ref-txt"><b>2025</b> — exercice ouvert</div></div>
     <div class="ref-item"><div class="ref-k">Ce qui fait foi</div><div class="ref-v">Version 1</div><div class="ref-txt">Figée le 18/07/2026 à 16:40 — c'est elle qui fait foi.</div></div>
-    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0 · paquet sha256:e9370b14…a71e</div><div class="ref-txt"><code>referentielChecksum</code> = celui du <b>paquet</b>. <b>Empreinte de la version 1</b> : <code>sha256:3f9ac2d1…7b04</code>, revérifiée à chaque lecture (<code>500 SNAPSHOT_ALTERE</code> sinon) · <b>STORY-452</b></div></div>
+    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.3</div><div class="ref-sum">bilan-engine@1.0.0 · paquet sha256:a2fd635c…f94c</div><div class="ref-txt"><code>referentielChecksum</code> = celui du <b>paquet</b>. <b>Empreinte de la version 1</b> : <code>sha256:3f9ac2d1…7b04</code>, revérifiée à chaque lecture (<code>500 SNAPSHOT_ALTERE</code> sinon) · <b>STORY-452</b></div></div>
   </div>
 </div>
                       <div class="coh-verdict go">
@@ -13947,7 +14023,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     <b>Le gate de validation — ce que le serveur re-vérifiera</b>
     <span class="grow"></span>
-    <span class="badge badge-active"><span class="d"></span>2 bloquants OK · 2 informatifs hors gate</span>
+    <span class="badge badge-active"><span class="d"></span>5 bloquants OK · 4 informatifs hors gate · <code>recapitulatif</code> : 8 calculés · 1 indéterminable</span>
   </div>
   <div class="coh-row ok">
   <span class="ic">✓</span>
@@ -13967,17 +14043,43 @@
   <span class="coh-cat blk">Bloquant</span>
   <span class="val"><b>écart 0</b>par construction</span>
 </div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>COMPTES_NON_AFFECTES</code> — Comptes non affectés, ou rattachés à un poste qui ne les reçoit pas, à solde non nul</b>
+<p>Aucun compte écarté à solde non nul (<code>soldesComptesNonMappes</code> et <code>diagnosticEquilibre.comptesSansRegle</code> sont vides). <span class="code">STORY-401</span></p>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>RESULTAT_NON_AFFECTE</code> — Résultat antérieur non affecté (la case du passif et les comptes de gestion portent deux résultats)</b>
+<p><code>etatBalance</code> = <code>AVANT_CLOTURE</code> (la case <code>CJ</code> vaut 0 pendant que les comptes de gestion portent 120 000)&nbsp;: rien à affecter. <span class="code">STORY-426</span></p>
+<span class="el"><i>etatBalance = AVANT_CLOTURE</i><i>resultatPorteAuPassif = 0</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>OK</b>sévérité AUCUNE</span>
+</div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>CASCADE_SOUS_TOTAUX</code> — Cascade des sous-totaux du Bilan (grands totaux imprimés = totaux des comptes)</b>
+<p>La cascade imprimée est <b>complète</b> (<code>syscohada-revise@2.3</code>)&nbsp;: les grands totaux imprimés valent les totaux des comptes. Bloquant pour tout paquet qui n'est pas un amorçage. <span class="code">STORY-678</span></p>
+<span class="el"><i>BZ = 5 620 000</i><i>DZ = 5 620 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
   <div class="coh-row na">
   <span class="ic">–</span>
-  <span class="t"><b>Les 2 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
-    <p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033) et <code>ARTICULATION_NOTES</code> est nul par construction. <b>Ni l'un ni l'autre n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
+  <span class="t"><b>Les 4 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
+<p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033)&nbsp;; <code>ARTICULATION_NOTES</code> est <b>indéterminable</b> (la note <code>3A</code> est une trame dont le détail n'est dérivable d'aucune balance — <span class="code">STORY-439</span>)&nbsp;; <code>INTEGRITE_NOTES</code> est vrai par construction (43 notes)&nbsp;; <code>COHERENCE_STOCKS</code> est <b>OK</b>. <b>Aucun n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
   </span>
   <span class="coh-cat inf">Hors gate</span>
   <span class="val"><b>905 000</b>sans effet</span>
 </div>
   <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
     <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:14rem">La liste ci-dessus vient des <b>contrôles</b> (FE-033), pas du refus <code>422</code>&nbsp;: le serveur ne renvoie que des chaînes <code>«&nbsp;CODE&nbsp;: STATUT (écart N)&nbsp;»</code>, sans libellé ni cible. Le <code>422</code> sert de <b>garde-fou de dernière seconde</b>, jamais de source d'affichage.</span>
-    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 4 contrôles en détail</button>
+    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 9 contrôles en détail</button>
   </div>
 </div>
                       <div class="vact locked">
@@ -14070,7 +14172,7 @@
     <div class="ref-item"><div class="ref-k">Statut du cycle de vie</div><div class="ref-v">BROUILLON</div><div class="ref-txt">Recalculable autant que nécessaire&nbsp;; rien n'est figé tant que personne n'a validé.</div></div>
     <div class="ref-item"><div class="ref-k">Dossier &amp; exercice</div><div class="ref-v">Ets Kossi Distribution</div><div class="ref-txt"><b>2025</b> — exercice ouvert</div></div>
     <div class="ref-item"><div class="ref-k">Ce qui fait foi</div><div class="ref-v">Version 1</div><div class="ref-txt">Un brouillon est ouvert par-dessus&nbsp;: la version 1 reste <b>la seule qui fasse foi</b>.</div></div>
-    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0 · paquet sha256:e9370b14…a71e</div><div class="ref-txt"><code>referentielChecksum</code> = celui du <b>paquet</b>. <b>Empreinte de la version 1</b> : <code>sha256:3f9ac2d1…7b04</code>, revérifiée à chaque lecture (<code>500 SNAPSHOT_ALTERE</code> sinon) · <b>STORY-452</b></div></div>
+    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.3</div><div class="ref-sum">bilan-engine@1.0.0 · paquet sha256:a2fd635c…f94c</div><div class="ref-txt"><code>referentielChecksum</code> = celui du <b>paquet</b>. <b>Empreinte de la version 1</b> : <code>sha256:3f9ac2d1…7b04</code>, revérifiée à chaque lecture (<code>500 SNAPSHOT_ALTERE</code> sinon) · <b>STORY-452</b></div></div>
   </div>
 </div>
                       <div class="coh-verdict go">
@@ -14086,7 +14188,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     <b>Le gate de validation — ce que le serveur re-vérifiera</b>
     <span class="grow"></span>
-    <span class="badge badge-active"><span class="d"></span>2 bloquants OK · 2 informatifs hors gate</span>
+    <span class="badge badge-active"><span class="d"></span>5 bloquants OK · 4 informatifs hors gate · <code>recapitulatif</code> : 8 calculés · 1 indéterminable</span>
   </div>
   <div class="coh-row ok">
   <span class="ic">✓</span>
@@ -14106,17 +14208,43 @@
   <span class="coh-cat blk">Bloquant</span>
   <span class="val"><b>écart 0</b>par construction</span>
 </div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>COMPTES_NON_AFFECTES</code> — Comptes non affectés, ou rattachés à un poste qui ne les reçoit pas, à solde non nul</b>
+<p>Aucun compte écarté à solde non nul (<code>soldesComptesNonMappes</code> et <code>diagnosticEquilibre.comptesSansRegle</code> sont vides). <span class="code">STORY-401</span></p>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>RESULTAT_NON_AFFECTE</code> — Résultat antérieur non affecté (la case du passif et les comptes de gestion portent deux résultats)</b>
+<p><code>etatBalance</code> = <code>AVANT_CLOTURE</code> (la case <code>CJ</code> vaut 0 pendant que les comptes de gestion portent 120 000)&nbsp;: rien à affecter. <span class="code">STORY-426</span></p>
+<span class="el"><i>etatBalance = AVANT_CLOTURE</i><i>resultatPorteAuPassif = 0</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>OK</b>sévérité AUCUNE</span>
+</div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>CASCADE_SOUS_TOTAUX</code> — Cascade des sous-totaux du Bilan (grands totaux imprimés = totaux des comptes)</b>
+<p>La cascade imprimée est <b>complète</b> (<code>syscohada-revise@2.3</code>)&nbsp;: les grands totaux imprimés valent les totaux des comptes. Bloquant pour tout paquet qui n'est pas un amorçage. <span class="code">STORY-678</span></p>
+<span class="el"><i>BZ = 5 620 000</i><i>DZ = 5 620 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
   <div class="coh-row na">
   <span class="ic">–</span>
-  <span class="t"><b>Les 2 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
-    <p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033) et <code>ARTICULATION_NOTES</code> est nul par construction. <b>Ni l'un ni l'autre n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
+  <span class="t"><b>Les 4 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
+<p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033)&nbsp;; <code>ARTICULATION_NOTES</code> est <b>indéterminable</b> (la note <code>3A</code> est une trame dont le détail n'est dérivable d'aucune balance — <span class="code">STORY-439</span>)&nbsp;; <code>INTEGRITE_NOTES</code> est vrai par construction (43 notes)&nbsp;; <code>COHERENCE_STOCKS</code> est <b>OK</b>. <b>Aucun n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
   </span>
   <span class="coh-cat inf">Hors gate</span>
   <span class="val"><b>905 000</b>sans effet</span>
 </div>
   <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
     <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:14rem">La liste ci-dessus vient des <b>contrôles</b> (FE-033), pas du refus <code>422</code>&nbsp;: le serveur ne renvoie que des chaînes <code>«&nbsp;CODE&nbsp;: STATUT (écart N)&nbsp;»</code>, sans libellé ni cible. Le <code>422</code> sert de <b>garde-fou de dernière seconde</b>, jamais de source d'affichage.</span>
-    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 4 contrôles en détail</button>
+    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 9 contrôles en détail</button>
   </div>
 </div>
                       <div class="vact">
@@ -14215,7 +14343,7 @@
     <div class="ref-item"><div class="ref-k">Statut du cycle de vie</div><div class="ref-v">VALIDÉ</div><div class="ref-txt">Non recalculable&nbsp;: <code>409 JEU_VALIDE_NON_RECALCULABLE</code>.</div></div>
     <div class="ref-item"><div class="ref-k">Dossier &amp; exercice</div><div class="ref-v">Ets Kossi Distribution</div><div class="ref-txt"><b>2025</b> — exercice ouvert</div></div>
     <div class="ref-item"><div class="ref-k">Ce qui fait foi</div><div class="ref-v">Version 2</div><div class="ref-txt">Figée le 22/07/2026 à 11:47 — c'est elle qui fait foi.</div></div>
-    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0 · paquet sha256:e9370b14…a71e</div><div class="ref-txt"><code>referentielChecksum</code> = celui du <b>paquet</b>. <b>Empreinte de la version 2</b> : <code>sha256:c81e5a60…92de</code>, revérifiée à chaque lecture (<code>500 SNAPSHOT_ALTERE</code> sinon) · <b>STORY-452</b></div></div>
+    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.3</div><div class="ref-sum">bilan-engine@1.0.0 · paquet sha256:a2fd635c…f94c</div><div class="ref-txt"><code>referentielChecksum</code> = celui du <b>paquet</b>. <b>Empreinte de la version 2</b> : <code>sha256:c81e5a60…92de</code>, revérifiée à chaque lecture (<code>500 SNAPSHOT_ALTERE</code> sinon) · <b>STORY-452</b></div></div>
   </div>
 </div>
                       <div class="coh-verdict go">
@@ -14231,7 +14359,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     <b>Le gate de validation — ce que le serveur re-vérifiera</b>
     <span class="grow"></span>
-    <span class="badge badge-active"><span class="d"></span>2 bloquants OK · 2 informatifs hors gate</span>
+    <span class="badge badge-active"><span class="d"></span>5 bloquants OK · 4 informatifs hors gate · <code>recapitulatif</code> : 8 calculés · 1 indéterminable</span>
   </div>
   <div class="coh-row ok">
   <span class="ic">✓</span>
@@ -14251,17 +14379,43 @@
   <span class="coh-cat blk">Bloquant</span>
   <span class="val"><b>écart 0</b>par construction</span>
 </div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>COMPTES_NON_AFFECTES</code> — Comptes non affectés, ou rattachés à un poste qui ne les reçoit pas, à solde non nul</b>
+<p>Aucun compte écarté à solde non nul (<code>soldesComptesNonMappes</code> et <code>diagnosticEquilibre.comptesSansRegle</code> sont vides). <span class="code">STORY-401</span></p>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>RESULTAT_NON_AFFECTE</code> — Résultat antérieur non affecté (la case du passif et les comptes de gestion portent deux résultats)</b>
+<p><code>etatBalance</code> = <code>AVANT_CLOTURE</code> (la case <code>CJ</code> vaut 0 pendant que les comptes de gestion portent 200 000)&nbsp;: rien à affecter. <span class="code">STORY-426</span></p>
+<span class="el"><i>etatBalance = AVANT_CLOTURE</i><i>resultatPorteAuPassif = 0</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>OK</b>sévérité AUCUNE</span>
+</div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>CASCADE_SOUS_TOTAUX</code> — Cascade des sous-totaux du Bilan (grands totaux imprimés = totaux des comptes)</b>
+<p>La cascade imprimée est <b>complète</b> (<code>syscohada-revise@2.3</code>)&nbsp;: les grands totaux imprimés valent les totaux des comptes. Bloquant pour tout paquet qui n'est pas un amorçage. <span class="code">STORY-678</span></p>
+<span class="el"><i>BZ = 5 700 000</i><i>DZ = 5 700 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
   <div class="coh-row na">
   <span class="ic">–</span>
-  <span class="t"><b>Les 2 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
-    <p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033) et <code>ARTICULATION_NOTES</code> est nul par construction. <b>Ni l'un ni l'autre n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
+  <span class="t"><b>Les 4 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
+<p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033)&nbsp;; <code>ARTICULATION_NOTES</code> est <b>indéterminable</b> (la note <code>3A</code> est une trame dont le détail n'est dérivable d'aucune balance — <span class="code">STORY-439</span>)&nbsp;; <code>INTEGRITE_NOTES</code> est vrai par construction (43 notes)&nbsp;; <code>COHERENCE_STOCKS</code> est <b>OK</b>. <b>Aucun n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
   </span>
   <span class="coh-cat inf">Hors gate</span>
   <span class="val"><b>905 000</b>sans effet</span>
 </div>
   <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
     <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:14rem">La liste ci-dessus vient des <b>contrôles</b> (FE-033), pas du refus <code>422</code>&nbsp;: le serveur ne renvoie que des chaînes <code>«&nbsp;CODE&nbsp;: STATUT (écart N)&nbsp;»</code>, sans libellé ni cible. Le <code>422</code> sert de <b>garde-fou de dernière seconde</b>, jamais de source d'affichage.</span>
-    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 4 contrôles en détail</button>
+    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 9 contrôles en détail</button>
   </div>
 </div>
                       <div class="vact locked">
@@ -14308,7 +14462,7 @@
     <button class="btn btn-ghost btn-sm" type="button" data-val-cmp-toggle aria-expanded="false">Comparer v1 et v2</button>
   </div>
   <div data-val-cmp hidden style="border-top:1px solid var(--border)">
-    <div style="padding:0.55rem 0.95rem;font-size:0.76rem;color:var(--muted-fg)"><b>Aucun recalcul</b>&nbsp;: les deux liasses sont lues telles qu'elles ont été figées. <code>referentielHomogene: true</code> (même paquet, sha256:e9370b14…a71e). Balance <code>soldesN</code>&nbsp;: <b>0</b> compte ajouté · <b>0</b> retiré · <b>1</b> modifié (<code>476200</code>). La maquette ne déroule que les postes de totaux&nbsp;; la route rend tous ceux qui diffèrent.</div>
+    <div style="padding:0.55rem 0.95rem;font-size:0.76rem;color:var(--muted-fg)"><b>Aucun recalcul</b>&nbsp;: les deux liasses sont lues telles qu'elles ont été figées. <code>referentielHomogene: true</code> (même paquet, sha256:a2fd635c…f94c). Balance <code>soldesN</code>&nbsp;: <b>0</b> compte ajouté · <b>0</b> retiré · <b>1</b> modifié (<code>476200</code>). La maquette ne déroule que les postes de totaux&nbsp;; la route rend tous ceux qui diffèrent.</div>
     <table class="vver"><thead><tr><th>Poste</th><th>Nature</th><th class="n">v1</th><th class="n">v2</th><th class="n">Écart</th></tr></thead><tbody>
       <tr><td><b>BZ</b> — Total actif</td><td><code>MODIFIE</code></td><td class="n">5 620 000</td><td class="n">5 700 000</td><td class="n">+80 000</td></tr>
       <tr><td><b>DZ</b> — Total passif</td><td><code>MODIFIE</code></td><td class="n">5 620 000</td><td class="n">5 700 000</td><td class="n">+80 000</td></tr>
@@ -14394,7 +14548,7 @@
     <div class="ref-item"><div class="ref-k">Statut du cycle de vie</div><div class="ref-v">VALIDÉ</div><div class="ref-txt">Non recalculable&nbsp;: <code>409 JEU_VALIDE_NON_RECALCULABLE</code>.</div></div>
     <div class="ref-item"><div class="ref-k">Dossier &amp; exercice</div><div class="ref-v">Ets Kossi Distribution</div><div class="ref-txt"><b>2025</b> — exercice <b>CLOS</b> le 31/07/2026</div></div>
     <div class="ref-item"><div class="ref-k">Ce qui fait foi</div><div class="ref-v">Version 2</div><div class="ref-txt">Figée le 22/07/2026 à 11:47 — c'est elle qui fait foi.</div></div>
-    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0 · paquet sha256:e9370b14…a71e</div><div class="ref-txt"><code>referentielChecksum</code> = celui du <b>paquet</b>. <b>Empreinte de la version 2</b> : <code>sha256:c81e5a60…92de</code>, revérifiée à chaque lecture (<code>500 SNAPSHOT_ALTERE</code> sinon) · <b>STORY-452</b></div></div>
+    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.3</div><div class="ref-sum">bilan-engine@1.0.0 · paquet sha256:a2fd635c…f94c</div><div class="ref-txt"><code>referentielChecksum</code> = celui du <b>paquet</b>. <b>Empreinte de la version 2</b> : <code>sha256:c81e5a60…92de</code>, revérifiée à chaque lecture (<code>500 SNAPSHOT_ALTERE</code> sinon) · <b>STORY-452</b></div></div>
   </div>
 </div>
                       <div class="coh-verdict stop">
@@ -14415,7 +14569,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     <b>Le gate de validation — ce que le serveur re-vérifiera</b>
     <span class="grow"></span>
-    <span class="badge badge-active"><span class="d"></span>2 bloquants OK · 2 informatifs hors gate</span>
+    <span class="badge badge-active"><span class="d"></span>5 bloquants OK · 4 informatifs hors gate · <code>recapitulatif</code> : 8 calculés · 1 indéterminable</span>
   </div>
   <div class="coh-row ok">
   <span class="ic">✓</span>
@@ -14435,17 +14589,43 @@
   <span class="coh-cat blk">Bloquant</span>
   <span class="val"><b>écart 0</b>par construction</span>
 </div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>COMPTES_NON_AFFECTES</code> — Comptes non affectés, ou rattachés à un poste qui ne les reçoit pas, à solde non nul</b>
+<p>Aucun compte écarté à solde non nul (<code>soldesComptesNonMappes</code> et <code>diagnosticEquilibre.comptesSansRegle</code> sont vides). <span class="code">STORY-401</span></p>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>RESULTAT_NON_AFFECTE</code> — Résultat antérieur non affecté (la case du passif et les comptes de gestion portent deux résultats)</b>
+<p><code>etatBalance</code> = <code>AVANT_CLOTURE</code> (la case <code>CJ</code> vaut 0 pendant que les comptes de gestion portent 200 000)&nbsp;: rien à affecter. <span class="code">STORY-426</span></p>
+<span class="el"><i>etatBalance = AVANT_CLOTURE</i><i>resultatPorteAuPassif = 0</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>OK</b>sévérité AUCUNE</span>
+</div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>CASCADE_SOUS_TOTAUX</code> — Cascade des sous-totaux du Bilan (grands totaux imprimés = totaux des comptes)</b>
+<p>La cascade imprimée est <b>complète</b> (<code>syscohada-revise@2.3</code>)&nbsp;: les grands totaux imprimés valent les totaux des comptes. Bloquant pour tout paquet qui n'est pas un amorçage. <span class="code">STORY-678</span></p>
+<span class="el"><i>BZ = 5 700 000</i><i>DZ = 5 700 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
   <div class="coh-row na">
   <span class="ic">–</span>
-  <span class="t"><b>Les 2 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
-    <p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033) et <code>ARTICULATION_NOTES</code> est nul par construction. <b>Ni l'un ni l'autre n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
+  <span class="t"><b>Les 4 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
+<p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033)&nbsp;; <code>ARTICULATION_NOTES</code> est <b>indéterminable</b> (la note <code>3A</code> est une trame dont le détail n'est dérivable d'aucune balance — <span class="code">STORY-439</span>)&nbsp;; <code>INTEGRITE_NOTES</code> est vrai par construction (43 notes)&nbsp;; <code>COHERENCE_STOCKS</code> est <b>OK</b>. <b>Aucun n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
   </span>
   <span class="coh-cat inf">Hors gate</span>
   <span class="val"><b>905 000</b>sans effet</span>
 </div>
   <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
     <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:14rem">La liste ci-dessus vient des <b>contrôles</b> (FE-033), pas du refus <code>422</code>&nbsp;: le serveur ne renvoie que des chaînes <code>«&nbsp;CODE&nbsp;: STATUT (écart N)&nbsp;»</code>, sans libellé ni cible. Le <code>422</code> sert de <b>garde-fou de dernière seconde</b>, jamais de source d'affichage.</span>
-    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 4 contrôles en détail</button>
+    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 9 contrôles en détail</button>
   </div>
 </div>
                       <div class="vact locked">
@@ -14493,7 +14673,7 @@
     <button class="btn btn-ghost btn-sm" type="button" data-val-cmp-toggle aria-expanded="false">Comparer v1 et v2</button>
   </div>
   <div data-val-cmp hidden style="border-top:1px solid var(--border)">
-    <div style="padding:0.55rem 0.95rem;font-size:0.76rem;color:var(--muted-fg)"><b>Aucun recalcul</b>&nbsp;: les deux liasses sont lues telles qu'elles ont été figées. <code>referentielHomogene: true</code> (même paquet, sha256:e9370b14…a71e). Balance <code>soldesN</code>&nbsp;: <b>0</b> compte ajouté · <b>0</b> retiré · <b>1</b> modifié (<code>476200</code>). La maquette ne déroule que les postes de totaux&nbsp;; la route rend tous ceux qui diffèrent.</div>
+    <div style="padding:0.55rem 0.95rem;font-size:0.76rem;color:var(--muted-fg)"><b>Aucun recalcul</b>&nbsp;: les deux liasses sont lues telles qu'elles ont été figées. <code>referentielHomogene: true</code> (même paquet, sha256:a2fd635c…f94c). Balance <code>soldesN</code>&nbsp;: <b>0</b> compte ajouté · <b>0</b> retiré · <b>1</b> modifié (<code>476200</code>). La maquette ne déroule que les postes de totaux&nbsp;; la route rend tous ceux qui diffèrent.</div>
     <table class="vver"><thead><tr><th>Poste</th><th>Nature</th><th class="n">v1</th><th class="n">v2</th><th class="n">Écart</th></tr></thead><tbody>
       <tr><td><b>BZ</b> — Total actif</td><td><code>MODIFIE</code></td><td class="n">5 620 000</td><td class="n">5 700 000</td><td class="n">+80 000</td></tr>
       <tr><td><b>DZ</b> — Total passif</td><td><code>MODIFIE</code></td><td class="n">5 620 000</td><td class="n">5 700 000</td><td class="n">+80 000</td></tr>
@@ -15582,7 +15762,7 @@
 
                 <div class="dc-note dc-gap"><b>⛔ CE QUE CET ÉCRAN REFUSE DE CALCULER, ET POURQUOI.</b> Pas de <b>total actif / total passif</b>. Techniquement, sommer les soldes par état est trivial&nbsp;; comptablement, ce serait faux&nbsp;: les règles de solde (net d'amortissement, sens créditeur…) et surtout la <b>ventilation des classes 4/5</b> appartiennent au moteur, à la production des états. Un total calculé ici ferait de cet écran un <b>second arbitre</b>, avec sa propre règle — donc deux vérités selon l'écran ouvert, le défaut même que Q6 a supprimé sur les exercices. Les totaux par poste affichés n'additionnent que les comptes <b>sans ambiguïté d'affectation</b>, et l'écran l'écrit&nbsp;: c'est un outil de <b>rapprochement</b>, pas un état. Les états arrivent en <b>FE-031</b>, et il n'y aura qu'un seul endroit où ils sont calculés.</div>
 
-                <div class="dc-note dc-gap"><b>⚡ LA PHRASE QUE LA FICHE DEMANDAIT ÉTAIT FAUSSE, ET ELLE EST CORRIGÉE ICI.</b> L'AC-4 d'origine voulait annoncer que «&nbsp;des comptes significatifs non mappés <b>bloquent la validation</b>&nbsp;». <b>Aucun contrôle du serveur ne fait cela.</b> La batterie bloquante en compte quatre — <code>EQUILIBRE_BILAN</code>, <code>COHERENCE_RESULTAT</code>, <code>VARIATION_TRESORERIE</code>, <code>ARTICULATION_NOTES</code> — et pas un seul ne regarde les comptes non affectés&nbsp;; le service l'écrit lui-même (« la significativité = solde, indisponible ici → hook »). Un bandeau «&nbsp;la validation sera bloquée&nbsp;» aurait donc été <b>démenti par le serveur au premier essai</b>. L'écran dit ce qui est vrai et <b>démontrable</b>&nbsp;: les soldes non affectés sont écartés des totaux, le débit et le crédit écartés <b>ne se compensent pas</b>, et comme la balance retenue est équilibrée, ce qui reste ne peut plus l'être. Un montant, une conséquence, pas une menace. <b>Demande&nbsp;: STORY-401.</b></div>
+                <div class="dc-note dc-gap"><b>⚡ LA PHRASE QUE LA FICHE DEMANDAIT ÉTAIT FAUSSE, ET ELLE EST CORRIGÉE ICI.</b> L'AC-4 d'origine voulait annoncer que «&nbsp;des comptes significatifs non mappés <b>bloquent la validation</b>&nbsp;». <b>Aucun contrôle du serveur ne fait cela.</b> La batterie bloquante en compte quatre — <code>EQUILIBRE_BILAN</code>, <code>COHERENCE_RESULTAT</code>, <code>VARIATION_TRESORERIE</code>, <code>ARTICULATION_NOTES</code> — et — à la date de cette maquette — pas un seul ne regardait les comptes non affectés (✅ STORY-401 a livré depuis un cinquième contrôle bloquant, <code>COMPTES_NON_AFFECTES</code>)&nbsp;; le service l'écrit lui-même (« la significativité = solde, indisponible ici → hook »). Un bandeau «&nbsp;la validation sera bloquée&nbsp;» aurait donc été <b>démenti par le serveur au premier essai</b>. L'écran dit ce qui est vrai et <b>démontrable</b>&nbsp;: les soldes non affectés sont écartés des totaux, le débit et le crédit écartés <b>ne se compensent pas</b>, et comme la balance retenue est équilibrée, ce qui reste ne peut plus l'être. Un montant, une conséquence, pas une menace. <b>Demande&nbsp;: STORY-401.</b></div>
 
                 <div class="dc-note dc-gap"><b>⛔ ON N'AFFECTE PAS UNE RACINE, ET UNE RACINE SAISIE SERAIT UN PIÈGE SILENCIEUX.</b> Un compte d'attente n'existe jamais au singulier&nbsp;: <code>47620000</code>, <code>47621000</code>, <code>47622000</code>… Sur Sage on affecte <code>47620000</code> une fois. Ici <code>POST /mapping-overrides</code> prend <b>un compte exact</b> — <code>chargerSurchargesActives</code> construit un <code>Map(compte → cible)</code> et <code>mapComptes</code> fait un <code>.get(compte)</code> strict. Donc 40 comptes = <b>40 propositions et 40 validations d'administrateur</b>. ⚡ Et pire&nbsp;: <code>47620000</code> <b>passe le format</b> (<code>^\\d[0-9A-Za-z]{1,19}$</code>), la validation du serveur ne porte que sur la <b>cible</b>, jamais sur le compte ⇒ la surcharge est <b>acceptée, validée, affichée « Validée », et sans aucun effet</b>. ⇒ <b>Garde posée tout de suite</b>&nbsp;: le dialogue n'a pas de champ « compte », il porte celui de la ligne d'où l'on vient. <b>Demande&nbsp;: STORY-400.</b></div>
 
@@ -16030,7 +16210,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
         <div>
           <b>Poste cible inconnu du référentiel de votre organisation</b>
-          <p>Le couple saisi ne correspond à aucun poste de <code>syscohada-revise@2.1</code>. Vérifiez le code auprès de la liasse officielle&nbsp;: la liste complète n'est pas encore publiée par le service.</p>
+          <p>Le couple saisi ne correspond à aucun poste de <code>syscohada-revise@2.3</code>. Vérifiez le code auprès de la liasse officielle&nbsp;: la liste complète n'est pas encore publiée par le service.</p>
           <span class="code">422 · POSTE_INCONNU</span>
         </div>
       </div>
@@ -16113,7 +16293,7 @@
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:0.5rem">
           <div class="ref-item"><div class="ref-k">Total général</div><div class="ref-v" data-val-dlg-bz>5 700 000</div><div class="ref-sum">BZ = DZ</div></div>
           <div class="ref-item"><div class="ref-k">Résultat net</div><div class="ref-v" data-val-dlg-cj>200 000</div><div class="ref-sum">CJ = XI</div></div>
-          <div class="ref-item"><div class="ref-k">Référentiel</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0</div></div>
+          <div class="ref-item"><div class="ref-k">Référentiel</div><div class="ref-v">syscohada-revise@2.3</div><div class="ref-sum">bilan-engine@1.0.0</div></div>
         </div>
       </div>
 
@@ -18234,26 +18414,27 @@
         };
 
         /* Les regles de CE dossier (STORY-236), dans leur ordre d'application.
-           `hors` = compte absent du plan actif : le serveur IGNORE alors la regle
-           et retombe sur le moteur, sans jamais le dire. */
+           `hors` = compte absent du plan actif (`applicable: false`, STORY-419) :
+           le serveur IGNORE alors la regle et retombe sur le moteur. */
         var RAT_REGLES = [
           { type: "LIBELLE", cle: "loyer local adidogome", saisie: "loyer local Adidogomé", compte: "70730000" },
-          { type: "LIBELLE", cle: "commission de change", saisie: "commission de change", compte: "70780000", hors: true },
+          { type: "LIBELLE", cle: "commission de change", saisie: "commission de change", compte: "70780000" },
+          { type: "LIBELLE", cle: "subvention mairie", saisie: "subvention mairie", compte: "74100000", hors: true },
           { type: "TIERS", cle: "mairie de kara", saisie: "Mairie de Kara", compte: "70600000" },
           { type: "TIERS", cle: "sodigaz", saisie: "SODIGAZ", compte: "70700000" }
         ];
 
-        /* Table de STORY-082, dans SON ordre : la premiere regle qui matche gagne,
-           du plus specifique au plus generique. La recopier fidelement est ce qui
-           rend l'essai credible — une table inventee ferait mentir la maquette. */
+        /* Table de `cahiers-recettes.regles.ts` (balance-service, origin/dev), dans SON
+           ordre et avec SES comptes — des comptes de PLAN a 2 ou 3 caracteres, pas des
+           comptes de travail a 8 : un moteur ne devine pas la subdivision du cabinet. */
         var RAT_MOTS = [
-          { compte: "70600000", libelle: "Services vendus", mots: ["prestation", "service", "honoraire", "consultation", "conseil", "reparation", "maintenance", "formation"] },
-          { compte: "70500000", libelle: "Travaux facturés", mots: ["travaux", "chantier", "construction", "maconnerie"] },
-          { compte: "70700000", libelle: "Produits accessoires", mots: ["location", "loyer", "commission", "redevance", "transport"] },
-          { compte: "70200000", libelle: "Ventes de produits finis", mots: ["production", "produit fini", "fabrication", "atelier"] },
-          { compte: "71000000", libelle: "Subventions d'exploitation", mots: ["subvention"] },
-          { compte: "77000000", libelle: "Revenus financiers", mots: ["interet", "dividende", "placement", "financier"] },
-          { compte: "70100000", libelle: "Ventes de marchandises", mots: ["vente", "marchandise", "boutique", "revente", "article"] }
+          { compte: "706", libelle: "Services vendus", mots: ["prestation", "service", "honoraire", "consultation", "conseil", "reparation", "maintenance", "formation"] },
+          { compte: "705", libelle: "Travaux facturés", mots: ["travaux", "chantier", "construction", "maconnerie"] },
+          { compte: "707", libelle: "Produits accessoires", mots: ["location", "loyer", "commission", "redevance", "transport"] },
+          { compte: "702", libelle: "Ventes de produits finis", mots: ["production", "produit fini", "fabrication", "atelier"] },
+          { compte: "71", libelle: "Subventions d'exploitation", mots: ["subvention"] },
+          { compte: "77", libelle: "Revenus financiers et produits assimilés", mots: ["interet", "dividende", "placement", "financier"] },
+          { compte: "701", libelle: "Ventes de marchandises", mots: ["vente", "marchandise", "boutique", "revente", "article"] }
         ];
 
         var ratProposer = function (libelle, tiers) {
@@ -18274,7 +18455,7 @@
                 }
                 return {
                   compte: r.compte, src: "regle",
-                  libelle: r.compte === "70730000" ? "Produits accessoires" : "Services vendus",
+                  libelle: ({ "70730000": "Produits accessoires", "70780000": "Produits accessoires", "70700000": "Produits accessoires", "70600000": "Services vendus" })[r.compte] || "Services vendus",
                   motif: "règle de l'organisation sur le " + (r.type === "LIBELLE" ? "libellé" : "tiers") + " « " + r.saisie + " »"
                 };
               }
@@ -18296,7 +18477,7 @@
             }
           }
           return {
-            compte: "70100000", src: "defaut", libelle: "Ventes de marchandises",
+            compte: "701", src: "defaut", libelle: "Ventes de marchandises",
             motif: "aucun indice dans la ligne ni dans l’activité — défaut « ventes de marchandises »"
           };
         };
@@ -18320,11 +18501,12 @@
           };
           poser("[data-rat-essai-compte]", p.compte);
           poser("[data-rat-essai-src]", RAT_PASTILLE[p.src]);
-          var txt = '<b style="color:var(--foreground)">' + p.libelle + "</b> — motif rendu par le serveur : « " + p.motif + " ».";
+          var ORIG = { regle: "REGLE", motcle: "MOT_CLE", defaut: "DEFAUT" };
+          var txt = '<b style="color:var(--foreground)">' + p.libelle + "</b> — motif rendu par le serveur : « " + p.motif + " » · <code>origine: " + ORIG[p.src] + "</code>.";
           if (p.ignoree) {
-            txt += '<br><b style="color:var(--foreground)">⚠️ Une règle existait pourtant</b> — « ' + p.ignoree.saisie +
-              " » → <code>" + p.ignoree.compte + "</code>. Ce compte est <b>trop détaillé</b> pour le plan de ce dossier (8 chiffres, format Sage&nbsp;; le plan s'arrête à 6) : " +
-              "<b>le serveur l'ignore sans le dire</b> et retombe sur le moteur.";
+            txt += '<br><b style="color:var(--foreground)">⚠️ Une règle existait pourtant</b> — « ' + p.ignoree.saisie +
+              " » → <code>" + p.ignoree.compte + "</code>. Ce compte n'appartient pas au plan actif du dossier (<code>applicable: false</code>, STORY-419) : " +
+              "<b>le moteur l'ignore</b> et retombe sur les mots-clés — et la liste des règles le dit.";
           }
           if (opt.dataset.depense === "1") {
             txt += '<br><b style="color:var(--foreground)">⚠️ C\'est une dépense.</b> Cette route ne connaît que la <b>classe 7</b> : ' +
