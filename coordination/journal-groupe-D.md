@@ -90,10 +90,28 @@
     prise, rendu à 22:55** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
   - **Suivante : STORY-1064** 🚚 (les comptes du bureau dans le jeu « Grossiste du Golfe », plateforme et `ventes` ; le jeu
     est désormais en 1.1.0 : la version suivante sera 1.2.0, ses empreintes à refiger dans `generer.test.mjs`).
-- **STORY-1064** 🚧 en cours — les comptes du bureau dans le jeu « Grossiste du Golfe » (jeu 1.2.0, `comptes.json` ;
-  prospera-plateforme#37, prospera-ventes-service#12 ; annonce « ⚠ Contrats » avant le code). Rituel : aucune demande
-  neuve à D dans les journaux de A, B et C (la réponse de l'utilisateur sur D-972-9, relayée par A, est celle que cette
-  story sert).
+- **STORY-1064** ✅ 🚚 — les comptes du bureau dans le jeu « Grossiste du Golfe » (prospera-plateforme#37, `dev`
+  50c12a6, étiquette **`jeu-grossiste-golfe-v1.2`** ; prospera-ventes-service#12, `dev` edb3f8f ; annonce « ⚠ Contrats »
+  #715 avant le code). Rituel : aucune demande neuve à D dans les journaux de A, B et C (la réponse de l'utilisateur sur
+  D-972-9, relayée par A, est celle que cette story sert).
+  - **Le fichier des comptes** (`comptes.json`, dans chaque taille : 8, 16, 44 comptes) : le bureau (`compte` :
+    `AKOSSIWA` Akossiwa ATTISSO `DIST_COMPTABLE`, `MENSAH` Mensah KPOGO `DIST_RECOUVREMENT`, `YAWA` Yawa AMEDOME
+    `DIST_SUPERVISEUR`, `AYITE` Ayité GBADOE `DIST_DG`), puis un compte par agent (`commercial`, `COM-nn`, prénom et nom de
+    `terrain`, `DIST_COMMERCIAL` | `DIST_FREELANCE` | `DIST_PROSPECTION`) ; chaque compte est **exactement** le corps de la
+    pose d'auth (`{ objet, cle, prenom, nom, roleMetier }`).
+  - **Hors des parts, pas encore déclaré** : `jeu-demonstration@1` est fermé, `comptes` est à B (D-1064-4) ; `jeu.json`
+    1.2.0 en porte le nombre (`generateur.parametres.comptes`). Les neuf fichiers de données de 1.1.0 inchangés à l'octet.
+  - **Une identité** : le compte d'un agent est son commercial de `terrain` (`identifiantDuJeu(org, 'commercial',
+    COM-nn)`), dans une zone de `reseau` ; vecteurs figés dans le générateur et dans `ventes` (Kodjo
+    `c6e2275ff50ddb28e5cf12c2`, celui d'auth).
+  - Node 24 : plateforme `typecheck`, `npm test` **647 tests (646 pass, 1 sauté, 0 fail)**, `generer.test.mjs` **48/48**, `jeu:verifier` 3/3 ; `ventes`
+    unitaires **58/58 suites, 602 tests** ; mutations 11/11 (générateur) et 3/3 (règle). Aucune pile (rien qui démarre ne change).
+  - Décisions D-1064-1 → 9 (fiche) ; → B (`comptes` dans `jeu-demonstration@1`, la pose par le catalogue). **Verrou
+    Docker attendu de 23:20 (B, 975) à 23:27, une seule prise, rendu à 23:32** ; aucun conteneur, volume ni
+    réseau `grp-d` ne reste.
+- **Le lot 4 de D est fini : 5 stories sur 5 (1060 → 1064)**, le 2026-11-18. Passation à Dev A mise à jour (« Passations »,
+  « Ce qui reste », dans l'ordre conseillé). Aucune story de D n'est réservée au-delà ; la suivante viendra du plan
+  suivant.
 
 ### Lot 3 (ouvert le 2026-11-17)
 
@@ -381,7 +399,8 @@
     `prospera-plateforme` : `series/`, `vocabulaires/`, `contrats/distributeur/`, `encours/`, `contrats/objets/reseau/`,
     `jeux-demonstration/grossiste-golfe*/` et `assurance-compagnie-demo-reduite/`. Étiquettes : `series-v1`,
     `series-v1.1`, `vocabulaires-v1`, `contrats-distributeur-v1`, `acces-distributeur-v1`, `encours-v1`,
-    `objets-reseau-v1`, `jeu-grossiste-golfe-v1`, `jeu-assurance-v1`, `conformite-portee-reseau-v1`. Fusion en « Rebase
+    `objets-reseau-v1`, `jeu-grossiste-golfe-v1`, `jeu-grossiste-golfe-v1.1`, `jeu-grossiste-golfe-v1.2`,
+    `calendrier-distributeur-v1`, `jeu-assurance-v1`, `conformite-portee-reseau-v1`. Fusion en « Rebase
     and merge » seulement ; branches `MNV-<n>` depuis `origin/dev` ; Node 24 pour les tests du client Kafka de Confluent
     (étage `verification` des Dockerfile).
   - **Livré** : lot 2 (1030 → 1044 : `reseau-service` complet, les cinq squelettes, `series-v1`) ; lot 3 (1045 → 1059) :
@@ -407,10 +426,15 @@
     facture par livraison), allocation du matin, remise, dérogation ; détail plus bas, « La commande (2) » ; (3) ~~les remplaçantes d'EPIC-227~~
     **la tranche de `reseau` livrée par 1063** (gabarit à zones à plat, zones et lieux rattachés du jeu, routes C13) ;
     restent, dans `reseau`, les commerciaux du jeu, le consommateur de `pdv.point-de-vente.changed@1`, les faits
-    d'entrepôt de `stock`, l'export et la santé C13 (D-1063-12) ; (4) les consommateurs qui
+    d'entrepôt de `stock`, l'export et la santé C13 (D-1063-12) ; **(3 bis) avant que la démo se joue : les portées des
+    comptes du jeu dans `reseau`** (D-1064-8 ; un objet de plus dans la part `reseau`, 1.3.0) : chaque agent → sa zone,
+    Yawa → `LOME-CENTRE`, Ayité, Akossiwa, Mensah → `TOTALE` ; sans elles, un compte du jeu ne voit aucun point de vente
+    (échec fermé) ; avec elles, les commerciaux du jeu dans `reseau` (même identité que leur compte) ; puis, quand B aura
+    `comptes` dans `jeu-demonstration@1`, **déclarer `comptes.json` dans `jeu.json`** (D-1064-4) ; (4) les consommateurs qui
     rempliront les read-models aujourd'hui remplis par personne (`pdv`, `catalogue`, `stock`) ; (5) les routes C13 de
     `facturation`, `approvisionnement`, `entrepot`, `conquete-objectifs` ; (6) les dettes héritées de `notification`
-    (4 suites e2e rouges).
+    (4 suites e2e rouges). Les restes nommés par story, dans les fiches : D-1061-12 (la facture), D-1062-12 (la
+    commande), D-1063-12 (`reseau`), D-1064-9 (les comptes du jeu).
   - **Demandes ouvertes chez les autres groupes** (détail dans « Demandes aux autres groupes ») : **chez B** — le jeu
     « Grossiste du Golfe » (README, `INSTALLATION_SERVICES` avec `commande` et `terrain`, comptes du jeu : STORY-972
     annoncée), **le consommateur de `facturation.facture.emise@1`** (charge fixée par 1059), le crédit du tiers (2)
@@ -645,14 +669,23 @@
       `ventes`, puis se recopie ici et dans `terrain` ;
     - **l'espace** : `KAFKA_ESPACE` (pas `INSTANCE_ESPACE`) ; **recette** : `scripts/recette/1063/` (pilote de la pile,
       mutations).
-  - **Le lot 3 de D est fini.** Le lot 4 continue : ~~les remplaçantes d'EPIC-227 (1063)~~ **livrée**, les comptes du
-    jeu (1064).
+  - **Les comptes du jeu** (STORY-1064, plateforme `50c12a6`, `jeu-grossiste-golfe-v1.2` ; `ventes` `edb3f8f`) :
+    - **le fichier** : `jeux-demonstration/grossiste-golfe*/comptes.json`, produit par le générateur (`COMPTES_DU_BUREAU`,
+      `ROLE_METIER_DES_AGENTS`, `compteDeLAgent`), sans tirer un nombre ; le corps exact de `PUT
+      /api/v1/interne/organisations/{org}/comptes-du-jeu` d'auth (B, STORY-972) : un champ de plus y est refusé ;
+    - **la déclaration** dans `jeu.json` attend `comptes` dans `jeu-demonstration@1` (B) : ajouter alors l'entrée au
+      manifeste dans `jeu()` du générateur, version 1.3.0, et refiger les empreintes de `generer.test.mjs` ;
+    - **l'identité** : un compte d'agent = son commercial de `terrain` ; un compte du bureau a l'objet `compte` ; vecteurs
+      dans `generer.test.mjs` et `ventes` (`src/socle/instance/identifiant-du-jeu.spec.ts`) ;
+    - **les portées** des comptes dans `reseau` sont la suite (D-1064-8, « Ce qui reste » (3 bis)).
+  - **Le lot 3 de D est fini.** **Le lot 4 de D est fini** (1060 → 1064, le 2026-11-18) : ~~les remplaçantes
+    d'EPIC-227 (1063)~~ **livrée**, ~~les comptes du jeu (1064)~~ **livrée**.
 
 ## Demandes aux autres groupes
 
 - **→ B (2026-11-18) : le fichier des comptes du jeu est prêt ; `comptes` dans `jeu-demonstration@1` et la pose par le
   catalogue (votre remplaçante, D-972-9 ; STORY-1064, D-1064-4)** — **ouverte**, sans urgence (le catalogue monte le jeu
-  à `jeu-grossiste-golfe-v1`). Le jeu **1.2.0** (étiquette `jeu-grossiste-golfe-v1.2` après la fusion) porte dans chaque
+  à `jeu-grossiste-golfe-v1`). Le jeu **1.2.0** (étiquette `jeu-grossiste-golfe-v1.2`, plateforme `dev` 50c12a6) porte dans chaque
   dossier `comptes.json` : un tableau `{ objet, cle, prenom, nom, roleMetier }`, **exactement** le `comptes` de votre
   `PUT /api/v1/interne/organisations/{org}/comptes-du-jeu` (aucun champ de plus ; 8, 16 et 44 comptes, un appel). Les
   clés et rôles sont les vôtres (D-972-9, confirmés par l'utilisateur) : `compte` `AKOSSIWA` `DIST_COMPTABLE`, `MENSAH`
@@ -913,7 +946,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-18, STORY-1064, avant la fusion du code : prospera-plateforme#37, prospera-ventes-service#12). —
+- **PUBLIÉ (2026-11-18, STORY-1064, prospera-plateforme#37, `dev` 50c12a6, étiquette `jeu-grossiste-golfe-v1.2` ;
+  prospera-ventes-service#12, `dev` edb3f8f) ; ANNONCÉ avant la fusion du code (prospera-stories #715), sans écart. —
   `prospera-plateforme`, jeu « Grossiste du Golfe » 1.2.0 : le fichier des comptes.** Fiche : `stories/STORY-1064.md`
   (D-1064-1 → 9). Aucun manifeste, aucun fait, aucune route, aucun droit ne change ; `jeu-demonstration@1` n'est pas
   touché (il est à B).
@@ -1530,6 +1564,21 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1064** :
+  - (1) **Le piège 1063-2 (CRLF du journal) a resservi**, aggravé : un script de remplacements corrigé par un second
+    script **écrit par heredoc** a perdu ses antislashs (`\r\n` devenus de vraies fins de ligne), puis réécrit en mode
+    texte sous Windows (chaque `\n` devenu `\r\n`, et `\r\n` devenu `\r\r\n`). Écrire ces scripts **avec l'outil
+    d'écriture**, et y nommer les fins de ligne par `chr(13)` et `chr(10)`, jamais par un littéral (§1.7).
+  - (2) **Sous Node 25, deux suites de `ventes` rougissent** (`app.module.invariant`, `app-cablage.invariant` : elles
+    chargent l'`AppModule` et le client Kafka natif) : attendu ; la suite complète se juge sous Node 24 (étage
+    `verification`).
+  - (3) **Un contrat fermé** (`additionalProperties: false`) qu'on ne tient pas : ne rien y glisser (le jeu serait refusé
+    par `jeu:verifier` et par le catalogue) ; poser le fichier à côté, le vérifier par son propre test (la règle de
+    `verifierJeu` jouée par le test, plus les règles du consommateur), et demander le champ au groupe qui tient le
+    contrat.
+  - (4) Le verrou Docker était tenu par B (975, pris à 22:55) : tout ce qui ne demandait pas Docker (code, tests sous
+    Node 25, mutations, PR, annonce fusionnée) a été fait d'abord ; attente par boucles bornées de 9 min ; une prise.
 
 - **STORY-1063** :
   - (1) **Une mutation qui rend une variable « peut-être `undefined` »** (`if (!noeud && …) throw`, puis `noeud.nature`)
