@@ -908,7 +908,9 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   - **Refus neufs** : 403 `FINANCEMENT_NOT_ENTITLED`, `DROIT_INSUFFISANT` (`details.droit`) ; 503
     `DROITS_INDISPONIBLES` ; 404 `DOSSIER_FINANCEMENT_INTROUVABLE`, `VERSION_INTROUVABLE` ; 409
     `TRANSITION_INTERDITE` (`details.depuis`, `details.vers`), `VERSION_FIGEE_ABSENTE`,
-    `DOSSIER_FINANCEMENT_NON_MODIFIABLE`, `CONFLIT_CONCURRENT` ; 422 `TRANSITION_INCOMPLETE` (`details.champs`).
+    `DOSSIER_FINANCEMENT_NON_MODIFIABLE`, `CONFLIT_CONCURRENT` ; 422 `TRANSITION_INCOMPLETE` (`details.champs`) ;
+    **400 `DIFFERE_INVALIDE`** (un différé qui n'est pas strictement inférieur à la durée ; ajouté au code, annoncé
+    le 18/11 avant la fusion par un amendement de cette annonce).
     `ABONNEMENT_EXPIRE`, `EMAIL_NOT_VERIFIED`, `KYC_NOT_APPROVED` gardent leur sens.
   - **Piste d'audit** (`GET /dossiers/{id}/bilan/audit`) : quatre valeurs AJOUTÉES à `type` — `FINANCEMENT_CREE`,
     `FINANCEMENT_MODIFIE`, `FINANCEMENT_ETAT_CHANGE`, `FINANCEMENT_VERSION_OUVERTE`.
