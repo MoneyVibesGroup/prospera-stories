@@ -939,6 +939,27 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-18, STORY-976 — `paiement` consomme `facturation.facture.emise@1` et ouvre la Créance, annoncé AVANT le
+  code** (`prospera-paiement-service`, branche `MNV-976` ; fiche `stories/STORY-976.md`, D-976-1 → 7). Demande de D
+  (STORY-1059) ; D-965-9 levée. **Aucune route, aucun champ, aucun topic publié ne change.**
+  - **Consommation neuve** : topic `facturation.facture.emise` (producteur `ventes`, schéma
+    `facturation.facture.emise-value` au registre), groupe **`paiement-factures`**, depuis le début du topic. Champs
+    lus : `eventId` (l'en-tête prime), `schemaVersion` (1), `occurredAt`, `organisationId`, `factureId` (le
+    `sourceId`), `numero` (le libellé, **sans motif `FAC-`**, STORY-1061), `tiersId`, `perimetre`, `devise`,
+    `montantTtcMineur` (le montant d'origine), `echeanceLe`, `livraisonId` (`null` ⇒ absent). Non lus : `commandeId`,
+    `montantHtMineur`, `montantTvaMineur`, `emiseLe`, `rang`.
+  - **Effet** : la même `OuvrirLaCreance` que `PUT /creances/sources/FACTURE/{factureId}`, auteur `MODULE`
+    `FAIT_DE_FACTURE`. Le premier chemin arrivé fait naître la Créance (trace, `paiement.creance.materialisee`,
+    `paiement.creance.changed@1` révision 1) ; l'autre, et tout fait relivré, n'écrit rien. La route reste servie,
+    inchangée. Une facture laissée `A_OUVRIR` par `ventes` (paiement arrêté) s'ouvre ainsi sans membre.
+  - **Refus** : un fait mal formé, ou que la route refuserait (`CREANCE_INVALIDE`, `CREANCE_SOURCE_EN_CONFLIT`), est
+    ignoré et journalisé avec son code (l'offset avance) ; une panne ou `ECRITURE_CONCURRENTE` le fait relivrer.
+    **Aucune garde d'accès au module** sur ce chemin (D-976-3).
+  - **Variable facultative neuve** : `KAFKA_FACTURES_GROUP_ID` (défaut `paiement-factures`).
+  - **Pour D** : rien à faire ; `ventes` peut garder la route. Information (D-976-7) : les motifs du schéma de `ventes`
+    sont plus larges que ceux de la Créance (`tiersId` avec `:` ou `.`, `factureId` qui commence par `_` ou `-`,
+    `livraisonId` avec `:`) ; une telle facture est refusée `CREANCE_INVALIDE` par la route comme par le fait.
+
 - **2026-11-18, STORY-1081 — `PATCH /api/v1/dossiers/{id}` ouvert au collaborateur, dans `dossier-service` et dans le
   BFF, annoncé AVANT le code** (`prospera-dossier-service` et `prospera-admin-panel-service`, branches `MNV-1081` ;
   fiche `stories/STORY-1081.md`, D-1081-1 → 7). D-923-1 renversée par l'utilisateur (18/11). **Aucune route, aucun
