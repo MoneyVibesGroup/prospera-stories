@@ -752,6 +752,41 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-18, STORY-969 — le lettrage, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`, EPIC-116 ;
+  fiche `stories/STORY-969.md`, D-969-1 → 14). Des routes, un champ et des collections AJOUTÉS, rien de renommé ; **un
+  comportement change** : la contre-passation d'une écriture lettrée est refusée.
+  - **Routes neuves** sous `/api/v1/dossiers/{d}/exercices/{e}`, écriture sous **`comptabilite:lettrage:realiser`**
+    (déclaré en 958, attribué en 971 aux deux rôles du cabinet : **aucun droit neuf**) :
+    - `POST …/lettrages` `{ lignes: [{ ecritureId, ligne, montant? }] (2 à 200), solderLEcart?, propositionId? }` →
+      201 `Lettrage` (`code` AA, AB…, `type` COMPLET | PARTIEL, `etat` ACTIF | DEFAIT, `dateDuLettrage`, `lignes` avec
+      `montant` et `resteApres`, `ecart` | null, `provenance`, `proposition` | null, `delettrage` | null) ;
+    - `POST …/lettrages/propositions` `{ tiersId?, fenetreJours? }` → 201 `{ fenetreJours, seuilEcart, propositions:
+      [{ id, critere: REFERENCE | MONTANT_ET_DATE, racine, tiers, lignes, totalDebit, totalCredit, ecart }] }` (rien
+      n'est lettré) ; `POST …/lettrages/propositions/{id}/acceptation` → 201 `Lettrage` (`PROPOSE_PAR_LA_MACHINE`) ;
+    - `POST …/lettrages/{id}/delettrage` `{ motif }` → 201 `Lettrage` (`etat: DEFAIT`) ;
+    - lecture (`comptabilite:dossier:consulter`, au manifeste en `routesLectureSeule`) : `GET …/lettrages`, `GET
+      …/lettrages/{id}`, `GET …/tiers/{tiersId}/lignes-a-lettrer`.
+  - **Champ AJOUTÉ, facultatif** : `reference` (1 à 40 caractères) sur les lignes de `POST …/ecritures` et `PUT
+    …/ecritures/{id}`, sur les lignes de toute écriture lue et sur les mouvements du grand livre.
+  - **Comportement** : `POST …/ecritures/{id}/contre-passation` d'une écriture dont une ligne est lettrée ⇒ 409
+    **`ECRITURE_LETTREE`** (`details.codes`) : délettrer d'abord.
+  - **Écart de règlement** : sous le seuil (variable facultative neuve **`LETTRAGE_SEUIL_ECART`**, 1 000 par défaut,
+    0 à 100 000), une écriture née VALIDÉE et numérotée dans le journal des opérations diverses (`OD-000001`), comptes
+    `comptes-d-ecart@1` (SN, SMT : 658 / 758 ; CIMA : 844 / 849 ; SFD-BCEAO : aucun). Elle entre au grand livre et à
+    la balance comme toute écriture validée.
+  - **Refus nommés neufs** : 422 `LIGNE_EN_DOUBLE`, `LIGNE_NON_LETTRABLE` (`details.motif` : NON_VALIDEE,
+    HORS_COLLECTIF, SANS_TIERS), `COMPTES_DE_TIERS_DIFFERENTS`, `LETTRAGE_D_UN_SEUL_SENS`, `LETTRAGE_DESEQUILIBRE`,
+    `ECART_SUR_LETTRAGE_PARTIEL`, `ECART_AU_DELA_DU_SEUIL`, `FENETRE_INVALIDE` ; 409 `LIGNE_DEJA_LETTREE`,
+    `ECART_NON_DECLARE`, `LETTRAGE_DEJA_DEFAIT`, `ECRITURE_LETTREE` ; 404 `LIGNE_INTROUVABLE`, `LETTRAGE_INTROUVABLE`,
+    `PROPOSITION_INTROUVABLE`. Piste : `LETTRAGE_REALISE`, `LETTRAGE_DEFAIT`, `ECART_DE_REGLEMENT_PASSE`.
+  - **Base** : collections neuves `lettrages`, `delettrages`, `propositions_de_lettrage` (en ajout seul),
+    `comptes_de_lettrage` (versionnée : verrou et compteur des codes). **Aucune écriture n'est modifiée.**
+  - **Inchangé** : `balance.submitted` (le lettrage n'affecte aucun solde : même version, même `checksum`) ; aucun
+    topic, aucun schéma au registre.
+  - **Manifeste** (`manifestes/comptabilite.manifest.ts`, amendé dans cette PR) : trois routes de lecture, commentaire
+    du lettrage et des droits, « lettrages » dans l'avertissement de désinstallation.
+  - **Pour A** (relecture) : rien chez vous. **Pour D** : rien.
+
 - **2026-11-17, STORY-972 — les comptes du jeu et la connexion « en tant que » dans auth, la comptabilité au
   catalogue, annoncé AVANT la fusion du code** (`prospera-auth-service`, `prospera-platform-catalog-service`,
   `prospera-plateforme` ; fiche `stories/STORY-972.md`, D-972-1 → 10). **Fusionné le 17/11** : auth #44 `8661bbf`,
