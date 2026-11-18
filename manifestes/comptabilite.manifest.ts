@@ -129,7 +129,9 @@ export const MANIFESTE_COMPTABILITE = {
   // C13, point 1 : rien d'extérieur. Le référentiel vient du catalogue de l'espace, le dossier de dossier-service.
   prerequis: [],
 
-  // C13, points 2 et 8 : à créer avec la route d'instance (le moteur n'installe pas le module avant).
+  // C13, points 2 et 8 : servie depuis STORY-975, sous l'identité du moteur seule (`verification-installation@1`).
+  // La mesure lit le référentiel ARRÊTÉ à l'ouverture au journal (plan de journaux, D-961-2), exercices clôturés
+  // exclus (D-975-3).
   verifications: [
     {
       code: 'referentiel-resolu',
@@ -175,7 +177,9 @@ export const MANIFESTE_COMPTABILITE = {
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/centralisation', // STORY-970 : par journal et par mois
   ],
 
-  // C13, point 7 (chemins vus par le service). À créer.
+  // C13, point 7 (chemins vus par le service). Servis depuis STORY-975, sous l'identité du moteur seule : `import`
+  // sans objet (le jeu du cabinet n'a pas de part `comptabilite`, 422 OBJET_INCONNU) et `effacement` (espace d'essai,
+  // fin d'essai : tout ce que le service tient de l'organisation). `export` et `sante` : à créer.
   routesInstance: {
     export: 'GET /api/v1/instance/comptabilite/{organisationId}/export',
     import: 'POST /api/v1/instance/comptabilite/{organisationId}/import',
