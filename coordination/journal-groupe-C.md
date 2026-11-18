@@ -111,8 +111,13 @@
     `sinistres.garantie.decidee@1` au registre, publiés par `sinistres`, consommés par `liaison-assureur` (ligne C-13) ;
     pile `grp-c` : envoi seul, `LCF-2026-000001` revenu au dossier, écart sans envoi sur une déclaration incomplète ;
     Node 24 (sinistres 1289 unitaires / 33 e2e, liaison 500 / 21 e2e). D-1015-1 → 10.
-  - **Suivante : STORY-1016.** ⚠ **Déjà codée et poussée sans PR** (par une autre sous-session) : plateforme `MNV-1016`
-    `e5e812e`, sinistres `accc783`, assurance `fc6460a` ; reste PR, fusions, preuve et docs. Ne pas refaire le code.
+  - ~~**STORY-1016**~~ : **plateforme #35** (dev `8ce4325`), **assurance #26** (dev `8dc3285`), **sinistres #28** (dev
+    `ea1a111`) ; l'arrêt de l'évaluation propose la provision au montant arrêté (motif `EVALUATION`, FR-76) dans la
+    transaction du dossier ; `assurance` reste seul écrivain ; rien sans provision ouverte ni pour un recours ; Node 24
+    (sinistres 1306 unitaires / 33 e2e, assurance 2392 / 367, plateforme 116), `docker compose up` healthy. D-1016-1 → 10.
+- **🏁 2026-11-18 — LOT 4 DE C TERMINÉ** (1018, 1015, 1017, 1016). **Aucune story suivante n'est assignée.** La remplaçante
+  du plan est la mission d'expertise (FR-61), non lancée. Restes nommés : lecture de `provision.changed@1` par `sinistres`
+  (D-1016-10), `sinistres.evaluation.arretee@1` (D-1013-9), lever une alerte bloquante (D-1013-10).
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
 - **2026-11-16 — lot 2** (`PLAN-4-SESSIONS-LOT-2-2026-11-16.md`, rédigé par C sur consigne de l'utilisateur : 15
@@ -223,6 +228,11 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-18, STORY-1016 — un motif de plus, aucun champ ni version.** `EVALUATION` entre dans l'énumération `motif` de
+  `sinistres.provision.revisee@1`, `assurance.provision.changed@1` et `assurance.provision.a-valider@1` (BACKWARD : un
+  message d'avant reste valide ; le motif reste obligatoire). Un consommateur qui énumère les motifs d'`assurance`
+  doit accepter `EVALUATION` (« provision réajustée à l'évaluation »). `sinistres` propose à chaque arrêt d'évaluation
+  (`propositionId` = `evaluation-<dossierId>-<rang>`, devise `XOF`, montant arrêté) quand une provision est ouverte.
 - **2026-11-18, STORY-1015 — deux faits neufs et une nature d'écart.** `sinistres.declaration.enregistree@1` (clés :
   `dossierId`, `reference` DEC-, `versionObjet`, `volet`, `canal`, `police`, `survenuLe`, `enregistreeLe`, `complete`,
   `manque[]` ou `ligneChiffree` — enveloppe champs-sensibles `cs1.`, contexte `sinistres.declaration.ligne-c13` ; jamais
@@ -493,6 +503,11 @@ seulement.
 
 ## Questions à l'utilisateur ou au PO
 
+- **❓ 2026-11-18 — STORY-1016, décisions contestables (D-1016-1 → 10, fiche).** Les quatre qui comptent : D-1016-4 (rien
+  ne part sans provision ouverte : un corporel jamais ouvert à la main n'est pas aligné), D-1016-6 (le corporel propose
+  aussi : le montant est celui du gestionnaire), D-1016-7 (`GREC` propose comme `GEST`, le seuil glissant s'applique à lui),
+  D-1016-10 (`sinistres` ne lit pas la réponse d'`assurance` : l'écran ne dit pas encore si l'alignement est retenu ou attend
+  le `RESP`).
 - **❓ 2026-11-17 — STORY-1002, question au PO : qui porte `sinistres.declaration.enregistree@1` ?** La spine (AD-16)
   le fait consommer par `liaison-assureur` ; aucune story ne le crée. Proposition de C : une story de C dans son lot 3
   (schéma dans `prospera-plateforme`, publication par `sinistres` à la déclaration, consommation par
@@ -779,3 +794,8 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
 - **Une espace insécable littérale dans une regex fait rougir `no-irregular-whitespace`** (STORY-1017) : écrire `\u00a0\u202f` ; vérifier par `cat -A` (un `\u00a0` dans une chaîne Python non brute remet le caractère).
 - **Le checkout `prospera-sinistres-service` porte une autre branche : ne pas y lancer `docker compose up`** (STORY-1017) : exporter la branche par `git archive` et lancer le compose depuis l'export (`COMPOSE_PROJECT_NAME=grp-c-<n>`).
 - **Les deux invariants `app.module` / `app-cablage` ne tournent qu'en Node 24** (client Kafka natif) : 5 échecs attendus sous Node 25, verts dans l'image `verification`.
+- **Git Bash convertit `-w /w` en `W:/`** (STORY-1016) : `export MSYS_NO_PATHCONV=1` avant un `docker run -v … -w /w`.
+- **Un test du banc MongoDB peut rougir au hasard dans la suite complète** (STORY-1003, « réaffecté reste partie », 1016) : le
+  fichier rejoué seul en `-w 1` passe (238/238) ; ne pas corriger le code d'une autre story sur ce seul signal.
+- **L'outil coupe à 180 s et passe la commande en arrière-plan** (1016) : lancer les scripts de vérification avec
+  `run_in_background`, redirigés dans un fichier, et attendre leur notification ; ne jamais enchaîner des `sleep`.

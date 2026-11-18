@@ -1916,13 +1916,6 @@ reserved_ranges:
       ExpertsService.exigerDesignable et par POST …/controle-de-designation ; GET experts/{expertId} déclaré en lecture
       seule au manifeste. Node 24 : 1056 unitaires sur MongoDB réel, 24 e2e, build 0 ; pas de pile. Lot 3 de C, n° 5.
       NON SLOTTÉE.
-  - range: "STORY-1016"
-    status: "RÉSERVÉ"
-    owner: "Groupe C — l'arrêt de l'évaluation propose la provision à assurance (motif EVALUATION, FR-76) ; motif ajouté au fait, facultatif (sinistres, assurance, plateforme)"
-    source_doc: "prospera-stories/stories/STORY-1013.md"
-    reserved_on: "2026-11-18"
-    note: >
-      Suite de D-1013 acceptée ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). NON SLOTTÉE.
   - range: "STORY-1018"
     status: "RÉSERVÉ"
     owner: "Groupe C — correctif de FR-73 : l indemnité proposée arrondie à 5 000 et le décompte au franc sont tous deux conformes à l arrêt de l évaluation (pas de motif), le refus MOTIF_ECRIT nomme les deux, le montant arrêté reste au franc (sinistres)"
@@ -1958,6 +1951,19 @@ reserved_ranges:
       DECLARATION_INCOMPLETE, garantie gardée par version. Node 24 : sinistres 1289 unitaires sur MongoDB réel / 33 e2e,
       liaison 500 / 21 e2e, lint 0. Pile grp-c : envoi seul, numéro LCF-2026-000001 revenu au dossier, écart sans envoi,
       Karapace 19 sujets / 0 refus. Config à poser : SINISTRES_TROUSSEAU = LIAISON_TROUSSEAU. Lot 4 de C, n° 2. NON SLOTTÉE.
+  - range: "STORY-1016"
+    status: "DONE"
+    owner: "Groupe C — l'arrêt de l'évaluation propose la provision à assurance (motif EVALUATION, FR-76) ; motif ajouté au fait, facultatif (sinistres, assurance, plateforme)"
+    source_doc: "prospera-stories/stories/STORY-1016.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Suite de D-1013 acceptée ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — prospera-plateforme#35 (dev 8ce4325), prospera-assurance-service#26 (dev 8dc3285),
+      prospera-sinistres-service#28 (dev ea1a111). Motif EVALUATION dans la liste fermée des trois faits de provision
+      (revisee, changed, a-valider ; BACKWARD) ; l'arrêt de l'évaluation propose le montant arrêté dans la transaction ;
+      rien sans provision ouverte ni pour un recours ; assurance seul écrivain. Node 24 : plateforme 116/116, assurance
+      127 suites / 2392 + 12 suites / 367 e2e, sinistres 1306 unitaires sur MongoDB réel (1 rouge au hasard, 238/238 en -w 1)
+      + 33 e2e, docker compose up healthy. D-1016-1 → 10. Lot 4 de C, n° 4 et dernier. NON SLOTTÉE.
   - range: "STORY-1009"
     status: "RÉSERVÉ"
     owner: "Demander des pièces complémentaires pendant l'instruction : la liste des pièces attendues s'allonge avec un motif, les relances de 999 la reprennent (sinistres)"
