@@ -69,8 +69,9 @@
      Rituel : aucune demande neuve à B ; **← D (18/11, information, STORY-1061)** lue : `numero` de
      `facturation.facture.emise@1` n'a plus de motif `FAC-` (c'est un libellé, la clé reste `factureId`) — à garder en
      tête pour STORY-976.
-  - **Suivante : STORY-1081** (le relais BFF `PATCH /dossiers/{id}` ouvert au collaborateur, BFF et dossier, sans
-    Docker).
+  6. **STORY-1081 — en cours** (le relais BFF `PATCH /dossiers/{id}` ouvert au collaborateur, BFF et dossier, sans
+     Docker) : contrat annoncé avant le code (« ⚠ Contrats ») ; passations du BFF et de dossier constatées (voir
+     « Passations »).
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -463,6 +464,17 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 `dev` posées par STORY-955).
 
 ## Passations
+
+- **Reçues le 2026-11-18 (D-L4-1) : `prospera-admin-panel-service` (BFF de la console) et `prospera-dossier-service`**,
+  de A, pour le lot 4. **Constatées par STORY-1081** :
+  - BFF : `origin/dev` = **`18a9893`** (STORY-923), le commit nommé par A ; **rien n'a bougé depuis**. Le checkout du
+    poste (`admin-panel`) était sur `dev` à `b10fedd`, 4 commits derrière (STORY-911 : Node 24, `package.json` et
+    `Dockerfile` changés ; 917 ; 923) : branche partie d'`origin/dev`, `npm ci --ignore-scripts` (Node 25).
+  - dossier : `origin/dev` = **`768a4aa`** (STORY-924), le commit nommé par A ; **rien n'a bougé depuis**. Le checkout
+    (`dossier-service`) était sur `dev`, 8 commits derrière (`package.json` changé : client Kafka de Confluent) :
+    avance rapide de `dev` (propre), branche partie d'`origin/dev`, `npm ci --ignore-scripts`.
+  - Restent à constater : balance (`98078b0`) et recette (`f7944dc`), par la première story de B qui les touche
+    (1082 ou 1093).
 
 - **Reçue le 2026-11-18 (D-L4-1) : `prospera-bilan-service`**, de A, pour le lot 4. **Constatée par STORY-1083** :
   `origin/dev` = **`1651d33`** (STORY-928), le commit nommé par A ; **rien n'a bougé depuis**. Le checkout du poste
@@ -914,6 +926,25 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-18, STORY-1081 — `PATCH /api/v1/dossiers/{id}` ouvert au collaborateur, dans `dossier-service` et dans le
+  BFF, annoncé AVANT le code** (`prospera-dossier-service` et `prospera-admin-panel-service`, branches `MNV-1081` ;
+  fiche `stories/STORY-1081.md`, D-1081-1 → 7). D-923-1 renversée par l'utilisateur (18/11). **Aucune route, aucun
+  champ, aucun code neuf** ; aucun topic touché.
+  - **dossier-service** : la route n'exige plus `TENANT_ADMIN` ; tout membre du cabinet modifie l'identité **dans sa
+    portée** (`TENANT_USER` : dossiers dont il est responsable ou contributeur ; hors portée ou « Mon cabinet » ⇒
+    `404 DOSSIER_INTROUVABLE`, jamais `403`). Le `403` « réservé à TENANT_ADMIN » de cette route disparaît.
+  - **dossier-service, `409 DOSSIER_NIF_DEJA_UTILISE`** (création et modification) : `details.dossierId` et
+    `details.raisonSociale` ne sont rendus **que si le dossier en conflit est dans la portée de l'appelant** ; sinon le
+    refus part **sans `details`** (même code, même statut). Pour `TENANT_ADMIN`, rien ne change. Un écran qui lit
+    `details` doit déjà tolérer son absence (clé inexploitable, STORY-354).
+  - **`409 CONFLIT_CONCURRENT`** : inchangé, sans `details` (D12 : muet) ; par le BFF, `{ statusCode, error,
+    message: code, code }`.
+  - **BFF** : `@Roles(TENANT_ADMIN, TENANT_USER)` au lieu de `TENANT_ADMIN` ; un opérateur plateforme sans rôle de
+    cabinet reste refusé `403` avant l'amont. Liste fermée des codes relayés inchangée (D-923-2). OpenAPI du BFF : la
+    description de la route change, son schéma non (`npm run gen:api` ne produit aucun type neuf).
+  - **Pour A (écrans)** : l'onglet Identité de la fiche dossier peut s'ouvrir au collaborateur (FE-061, D12) ; sur
+    `404`, « introuvable » ; sur `409 DOSSIER_NIF_DEJA_UTILISE` sans `details`, aucun lien vers le dossier existant.
 
 - **2026-11-18, STORY-1084 — emprunts, échéancier, scénario retenu et indicateurs de dette du module `financement`,
   annoncés AVANT le code** (`prospera-bilan-service`, branche `MNV-1084` ; fiche `stories/STORY-1084.md`,
