@@ -4,7 +4,7 @@
 **Ouvert par :** STORY-929 (A, 2026-11-17), décision D-929-1
 **Story nommée :** **STORY-1080** (id proposé : le max réservé est 1079, groupe D ; la plage suivante de A reste à fixer par le plan suivant)
 **Priorité :** Must avant que la console quitte le `PUT` des droits (lot de D) et avant la mise en service (installation par le moteur, S13)
-**État :** 🟡 ouvert
+**État :** 🟡 ouvert — porté par **STORY-1080** (réservée le 2026-11-18, lot 4 de A, sur validation de l'utilisateur)
 
 ---
 
