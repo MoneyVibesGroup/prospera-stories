@@ -50,9 +50,23 @@
     22/22, rejoué sur les images reconstruites depuis `origin/dev` (`--no-cache`, volumes neufs).
   - Décisions D-1061-1 → 13 (fiche) ; recette versionnée `scripts/recette/1061/`. **Verrou Docker pris à 13:47 sans attente (libre au rituel), une seule prise, rendu à 15:07** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
   - **Suivante : STORY-1062** 🚚 (la commande (2), `ventes`).
-- **STORY-1062** 🚧 — la commande (2) (`ventes`) : le numéro `CMD-`, la commande transmise du terrain (`TRANSMISE`,
-  `PRIX_CHANGE`, `COMMANDE_PROBABLEMENT_DOUBLE`), l'annulation, et le défaut de concurrence de D-1061-13 corrigé (test
-  rouge d'abord). Rituel : aucune demande neuve à D dans les journaux de A, B et C. Annonce « ⚠ Contrats » avant le code.
+- **STORY-1062** ✅ 🚚 — la commande (2) (prospera-ventes-service#11, `dev` 339a1ad → f49f3a6 ; annonce « ⚠ Contrats »
+  #698 avant le code, manifeste `facturation` amendé). Rituel : aucune demande neuve à D dans les journaux de A, B et C.
+  - **Le défaut de D-1061-13** (décision du groupe) : prouvé **rouge** sur MongoDB réel au commit du test (339a1ad, avant
+    la correction), puis corrigé dans `ProjectionDuCredit.plusHauteRevision` et `CommandesChiffrees.appliquer` comme
+    1061 (clé dupliquée rejouée, la révision tenue décide) ; deux tests déterministes le gardent.
+  - **`CMD-AAAA-NNNNNN`** tiré dans la transaction de la commande (série `commandes`, tête sur `commande.serie.changed`).
+  - **La commande terrain** : canal `TERRAIN` ⇒ `TRANSMISE` ; `PRIX_CHANGE` à la transmission et à la validation,
+    confirmé par `prixConfirmes.revision` ; `COMMANDE_PROBABLEMENT_DOUBLE` (paramètre `fenetreCommandeDoubleMinutes`).
+  - **L'annulation** : `POST /commande/commandes/{id}/annulation` ; bons `ANNULE` qui gardent leur `BL-` ; engagement
+    rendu ; réservations rendues (port `liberer`) ; `commande.commande.annulee@1` ; `facturation` refuse
+    `COMMANDE_ANNULEE`.
+  - Node 24 : 599 unitaires, 24 e2e, 150 d'intégration ; mutations 5/5 (pures) et 17/17 (MongoDB réel) ; Karapace
+    BACKWARD. Pile `grp-d` : `docker compose up` sain, pilote 24/24, rejoué sur les images reconstruites depuis
+    `origin/dev` (`--no-cache`, volumes neufs).
+  - Décisions D-1062-1 → 13 (fiche) ; recette versionnée `scripts/recette/1062/`. **Verrou Docker pris à 20:39 sans
+    attente (libre au rituel), une seule prise, rendu à 21:43** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+  - **Suivante : STORY-1063** 🚚 (les référentiels du distributeur côté réseau, `reseau`).
 
 ### Lot 3 (ouvert le 2026-11-17)
 
@@ -361,8 +375,9 @@
   - **Ce qui reste, dans l'ordre conseillé** : (1) ~~la facture juste (2)~~ **livrée par 1061** (suite de Sage, format,
     `PARTIELLE`/`PAYEE`) ; **la facture juste (3)** et suivantes, dans l'ordre de D-1061-12 (fiche 1061) : mentions
     légales A-1, PDF et lien public d'envoi ; l'avoir ; la facture par livraison et `SANS_BON` (après la commande (2)) ;
-    la liste des factures et les balances ; (2) **la commande (2)** (`TRANSMISE`, modifier, annuler, remise, dérogation, `CMD-`, livraison
-    et reliquat, allocation du matin ; détail plus bas, « La commande (1) ») ; (3) **les remplaçantes d'EPIC-227** (les
+    la liste des factures et les balances ; (2) ~~la commande (2)~~ **livrée par 1062** (`CMD-`, `TRANSMISE`, annuler) ;
+    **la commande (3)** et suivantes, dans l'ordre de D-1062-12 : modifier, livraison et reliquat (avec `entrepot`, puis la
+    facture par livraison), allocation du matin, remise, dérogation ; détail plus bas, « La commande (2) » ; (3) **les remplaçantes d'EPIC-227** (les
     référentiels du distributeur côté réseau : zones à plat, points de vente rattachés) ; (4) les consommateurs qui
     rempliront les read-models aujourd'hui remplis par personne (`pdv`, `catalogue`, `stock`) ; (5) les routes C13 de
     `facturation`, `approvisionnement`, `entrepot`, `conquete-objectifs` ; (6) les dettes héritées de `notification`
@@ -572,11 +587,22 @@
       transaction ; plancher posé dans l'ancre après) ;
     - **le règlement** : `ReglementsDesFactures.reglement(org, factureId, echeanceLe)` ; la balance clients et la balance
       âgée liront `facturation_creances_lues` ;
-    - **défaut latent nommé** : `ProjectionDuCredit.plusHauteRevision` (commande) et `CommandesChiffrees.appliquer`
-      traitent une clé dupliquée comme « ignoré » ; sans effet tant qu'un consommateur lit une partition dans l'ordre, à
-      corriger comme dans `reglements.service.ts` (rejouer, la révision tenue décide) ;
+    - ~~défaut latent nommé~~ (`ProjectionDuCredit.plusHauteRevision`, `CommandesChiffrees.appliquer`) : **corrigé par
+      1062** (`dev` b9a82a6), prouvé rouge puis vert sur MongoDB réel ;
     - **recette** : `scripts/recette/1061/` (pile sans `paiement`, son fait publié par le pilote ; mutations).
-  - **Le lot 3 de D est fini.** Le lot 4 continue : la commande (2), les remplaçantes d'EPIC-227, les comptes du jeu.
+  - **La commande (2)** (STORY-1062, `ventes` `dev` 339a1ad → f49f3a6), `src/modules/commande/commandes/` :
+    - **le numéro `CMD-`** : série `commandes` de `SeriesDeCommande`, tirée dans la transaction de la saisie
+      (`emettreDansUneTransaction`) ; une commande d'avant 1062 n'a pas de numéro (`null`) ;
+    - **la commande terrain** : `TRANSMISE` dès la saisie ; `jugerLePrix` (commandes.service) relit la grille à la
+      validation et pose `ecartDePrix` ; la confirmation cite la révision ; le double se cherche par `empreinteDuContenu`
+      **dans** la transaction du numéro (le compteur sérialise deux transmissions) ;
+    - **l'annulation** : `AnnulationDesCommandes` ; le port `ReservationStock.liberer` est celui que l'API de `stock`
+      devra servir (même clé `<bonId>:<ligne>`) ; une ligne `A_LIBERER` se rend au rejeu de l'annulation ;
+    - **facturation** lit `commande.commande.annulee@1` (groupe `ventes-service.commandes-chiffrees`,
+      `facturation_commandes_annulees`) ; la fenêtre résiduelle (facture émise avant que l'annulation soit lue) est
+      tracée `FACTURE_D_UNE_COMMANDE_ANNULEE` et se corrigera par l'avoir ;
+    - **recette** : `scripts/recette/1062/` (pile sans `stock` ni `paiement`, adaptateur de réservation de recette).
+  - **Le lot 3 de D est fini.** Le lot 4 continue : les remplaçantes d'EPIC-227 (1063), les comptes du jeu (1064).
 
 ## Demandes aux autres groupes
 
@@ -821,8 +847,10 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-18, STORY-1062), avant la fusion du code — `prospera-ventes-service`, modules `commande` et
-  `facturation` : le numéro `CMD-`, la commande transmise du terrain, l'annulation.** Fiche : `stories/STORY-1062.md`
+- **PUBLIÉ (2026-11-18, STORY-1062, prospera-ventes-service#11, `dev` 339a1ad → f49f3a6) ; ANNONCÉ avant la fusion du
+  code (prospera-stories #698), sans écart ; schémas enregistrés en BACKWARD (Karapace, contre les versions
+  d'`origin/dev`). — `prospera-ventes-service`, modules `commande` et `facturation` : le numéro `CMD-`, la commande
+  transmise du terrain, l'annulation.** Fiche : `stories/STORY-1062.md`
   (D-1062-1 → 13). **Manifeste `facturation` amendé** (C5) : + consommé `commande.commande.annulee@1` (recopié à l'octet
   dans `ventes`). Le manifeste `commande` ne change pas (`commande.commande.annulee@1` et `commande:commande:annuler` y
   sont déjà).
@@ -1400,6 +1428,24 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1062** :
+  - (1) **Une course réelle ne prouve pas à chaque passage** : le test de dix états concurrents (même sur trente objets)
+    n'a montré le défaut que deux fois sur trois ; une mutation a survécu. Rendre la course **déterministe** : un espion
+    sur `updateOne` du modèle joue l'écrivain concurrent (la ligne d'un état plus ancien) puis lève l'erreur 11000.
+  - (2) **Karapace refuse une contrainte ajoutée** : remplacer une énumération par `minLength: 1` est `INCOMPATIBLE` ;
+    retirer l'énumération sans rien ajouter est BACKWARD. Vérifier la compatibilité **avant** d'enregistrer (le script
+    s'arrête au premier refus, mais il avait déjà enregistré les sujets précédents).
+  - (3) **L'invariant des modules isolés vaut aussi pour les tests** : un `*.spec.ts` de `commande` qui importe le
+    lecteur de `facturation` le fait rougir. La lecture du fait se prouve dans `facturation`, sur un fait écrit à la main
+    et validé contre le schéma publié.
+  - (4) Une série de plus (`commandes`) change les lectures qui listent les séries (`GET /commande/series`) et un
+    paramètre de plus change toute version lue (`parametres.valeurs`) : des tests HTTP de 1052 et 1049 les comparaient
+    en `toEqual`. Les jouer tous sous Node 24 avant de pousser.
+  - (5) Une commande Docker longue (`jest` complet) dépasse les 180 s de l'outil et part en arrière-plan : écrire sa
+    sortie dans un fichier et attendre ce fichier, une suite par conteneur, en parallèle.
+  - (6) La session a été coupée une fois par une erreur réseau pendant l'écriture de la recette ; le travail non commité
+    était intact. Commiter par étapes (test rouge, correctif, la story) avant de longues écritures.
 
 - **STORY-1061** :
   - (1) **Deux classes `@Schema` du même nom dans deux modules d'un même service** (`CreanceLue` de `commande` et de
