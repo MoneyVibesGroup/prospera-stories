@@ -31,7 +31,9 @@
 //   Créer un tiers exige `comptabilite:tiers:administrer` ; les lectures des tiers, des collectifs, des auxiliaires et
 //   de la balance âgée exigent `comptabilite:dossier:consulter` (STORY-968, aucun droit neuf). Lettrer, délettrer et
 //   demander des propositions de lettrage exigent `comptabilite:lettrage:realiser` ; lire les lettrages et les lignes
-//   à lettrer, `comptabilite:dossier:consulter` (STORY-969, aucun droit neuf).
+//   à lettrer, `comptabilite:dossier:consulter` (STORY-969, aucun droit neuf). Clore et rouvrir un exercice exigent
+//   `comptabilite:exercice:cloturer` (à `CAB_ASSOCIE` seul) ; lire l'état de clôture et la centralisation,
+//   `comptabilite:dossier:consulter` (STORY-970, aucun droit neuf).
 // - Grand livre (STORY-966) : calculé à la volée sur les seules écritures VALIDÉES (contre-passations comprises, jamais
 //   un brouillard), lu dans un instantané MongoDB ; par compte et par période (bornes inclusives, dans l'exercice).
 // - Balance (STORY-967) : dérivée du grand livre (mouvements hors à-nouveaux, soldes de clôture), équilibrée, refusée
@@ -59,6 +61,18 @@
 //   (`PROPOSE_PAR_LA_MACHINE`) ou modifie (`CHOISI_PAR_L_UTILISATEUR`), Q3. Le délettrage est tracé, refusé sur un
 //   exercice clos ; une écriture lettrée se délettre avant d'être contre-passée. La balance âgée ne prend que le
 //   non-lettré ; la balance publiée ne change pas (le lettrage n'affecte aucun solde).
+// - Clôture (STORY-970) : l'exercice et sa clôture administrative restent chez dossier-service (`statut: CLOS`) ; la
+//   clôture COMPTABLE est un état propre au module : le SCEAU de la chaîne de piste de l'exercice, posé avec l'entrée
+//   `EXERCICE_CLOTURE`, levé par `EXERCICE_ROUVERT`. Préalables : aucun brouillard (Q2), balance équilibrée, chaînes de
+//   piste intactes, aucun compte hors clôture avec un solde, et l'exercice SUIVANT ouvert au journal (OUVERT chez
+//   dossier-service, contigu, même référentiel, journal des à-nouveaux). Dans une transaction : la balance définitive
+//   publiée au hub (ou la même reprise), la centralisation par journal et par mois figée, et les À-NOUVEAUX dérivés du
+//   grand livre passés dans le journal des à-nouveaux de l'exercice suivant, nés validés et numérotés (comptes de bilan
+//   reportés ; collectifs par pièce non lettrée et par tiers ; comptes de gestion soldés dans le résultat à affecter,
+//   `comptes-de-cloture@1` : SN et SMT 131 / 139, CIMA 88, SFD-BCEAO 59). Un exercice clôturé refuse toute écriture,
+//   validation, contre-passation, lettrage, délettrage et publication (409 `EXERCICE_CLOS`) ; il se consulte. La
+//   réouverture (motif obligatoire, tracée) contre-passe les à-nouveaux dans l'exercice suivant (refusée s'ils y sont
+//   lettrés) ; la clôture suivante les régénère. Collections `clotures` et `reouvertures`, en ajout seul.
 // - Inaltérabilité (STORY-964) : une écriture validée porte son numéro définitif, continu et sans trou par journal et
 //   par exercice ; elle ne se modifie ni ne se supprime (409 `ECRITURE_VALIDEE_INALTERABLE`), elle se contre-passe. La
 //   piste d'audit est chaînée par empreinte (SHA-256), une chaîne par exercice, et se vérifie par une route.
@@ -95,7 +109,7 @@ export const MANIFESTE_COMPTABILITE = {
     'comptabilite:ecriture:valider', // brouillard → définitif, contre-passation (STORY-964)
     'comptabilite:tiers:administrer', // comptes de tiers auxiliaires (STORY-968)
     'comptabilite:lettrage:realiser', // lettrage et délettrage (STORY-969)
-    'comptabilite:exercice:cloturer', // clôture, à-nouveaux, réouverture tracée (STORY-970)
+    'comptabilite:exercice:cloturer', // clôture, à-nouveaux, réouverture tracée (STORY-970, CAB_ASSOCIE seul)
     'comptabilite:piste:consulter', // piste d'audit et fichier des écritures (EPIC-120)
   ],
 
@@ -128,7 +142,7 @@ export const MANIFESTE_COMPTABILITE = {
 
   // C9 : texte rendu par la partie A avant la désinstallation.
   avertissementDesinstallation:
-    "Journaux, écritures validées, tiers, lettrages, grand livre et piste d'audit restent enregistrés et lisibles ; aucune nouvelle écriture ne pourra être saisie et aucune balance ne sera plus dérivée du grand livre.",
+    "Journaux, écritures validées, tiers, lettrages, clôtures, grand livre et piste d'audit restent enregistrés et lisibles ; aucune nouvelle écriture ne pourra être saisie et aucune balance ne sera plus dérivée du grand livre.",
 
   // C12 : format lisible par la version précédente pendant 7 jours.
   retourArriere: 'SANS_PERTE',
@@ -157,6 +171,8 @@ export const MANIFESTE_COMPTABILITE = {
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/tiers/{tiersId}/lignes-a-lettrer', // STORY-969
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/lettrages', // STORY-969 : les lettrages de l'exercice
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/lettrages/{lettrageId}', // STORY-969 : un lettrage
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/cloture', // STORY-970 : l'état de clôture, l'historique
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/centralisation', // STORY-970 : par journal et par mois
   ],
 
   // C13, point 7 (chemins vus par le service). À créer.

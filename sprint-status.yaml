@@ -1378,6 +1378,14 @@ reserved_ranges:
       balance âgée avant / après sur un jeu connu ; écart soldé par OD-000001 validée, 658 ; délettrage tracé ;
       exercice clos refusé ; même checksum publié avant et après) ; 32/32 mutations unitaires, 5/6 du socle (une
       survivante nommée) ; docker compose up sain. Lot 3 de B, n° 15 (EPIC-116). NON SLOTTÉE.
+  - range: "STORY-970"
+    status: "RÉSERVÉ"
+    owner: "La clôture — l'état « clôturé à la comptabilité » est le sceau de la chaîne de piste de l'exercice (posé par EXERCICE_CLOTURE, levé par EXERCICE_ROUVERT ; dossier-service inchangé) ; préalables : aucun brouillard (Q2), balance équilibrée, chaînes de piste intactes, aucun compte hors clôture, exercice suivant ouvert au journal (OUVERT, contigu, même référentiel, journal des à-nouveaux) ; dans une transaction : balance définitive publiée, centralisation par journal et par mois figée, à-nouveaux dérivés du grand livre passés dans le journal AN de l'exercice suivant, nés validés et numérotés (bilan reporté, collectifs par pièce non lettrée et par tiers, gestion soldée dans le résultat à affecter, comptes-de-cloture@1 : 131/139, CIMA 88, SFD 59) ; exercice clôturé inaltérable sur toutes les routes d'écriture (409 EXERCICE_CLOS) ; réouverture tracée (motif) qui contre-passe les à-nouveaux (prospera-comptabilite-service)"
+    source_doc: "prospera-stories/stories/STORY-970.md"
+    reserved_on: "2026-11-18"
+    note: >
+      🚧 EN COURS le 2026-11-18 — contrat annoncé AVANT la fusion du code (« ⚠ Contrats » du journal de B). Lot 3 de B,
+      n° 15 (EPIC-119), la dernière story du plan du lot 3 pour B. NON SLOTTÉE.
   - range: "STORY-980"
     status: "RÉSERVÉ"
     owner: "Le squelette de prospera-sinistres-service — modules sinistres et expertises, pile du moteur (Node 24, Confluent, MongoDB 8), gate par module, profil de démarrage, garde de câblage (prospera-sinistres-service)"
