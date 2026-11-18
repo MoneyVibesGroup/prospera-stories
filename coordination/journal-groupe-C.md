@@ -100,6 +100,12 @@
     (`reperePropose`, arrondie à 5 000) **ou** au décompte (`indemniteCalculee`, au franc) ne demande pas de motif ; tout
     autre montant l'exige et `MOTIF_ECRIT` porte `details: { calcule, propose }` ; le montant arrêté reste au franc ;
     OpenAPI décrit les deux montants ; aucun contrat ni route neufs ; Node 24 (e2e 27, build 0), rejouée depuis `dev`.
+  - ~~**STORY-1017**~~ : **sinistres #26** (dev `6d81cc4`) ; la déclaration rapide (FR-34, FR-35) : `POST
+    /api/v1/sinistres/declarations-rapides` (propose) et `POST …/{propositionId}/decision` ; chaque champ avec confiance,
+    extrait et règle ; police inconnue jamais proposée ; type incertain jamais inventé ; vocal non lu ; registre
+    `sinistres_ia_registre` ; brouillon dans la ligne du registre, aucun dossier. **Passée avant 1015 pendant la pause
+    Docker** (écrite sans Docker, vérifiée au retour). Node 24 : lint 0, unitaires 63 suites, e2e 4 suites, build 0,
+    `docker compose up` healthy.
   - **Suivante : STORY-1015.**
 - **⏸ 2026-11-16 — PAUSE demandée par l'utilisateur après STORY-988** ; **levée le 2026-11-16** (« reprends C pour
   terminer son lot ») : C enchaîne son lot 2.
@@ -525,6 +531,11 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
 - **D-1018-1 → D-1018-3** (`stories/STORY-1018.md`) : deux montants « conformes » à l'arrêt (décompte au franc et
   indemnité proposée), tout autre se motive ; le nom d'écran est « indemnité proposée », le champ garde `reperePropose` ;
   le pas reste le paramètre `arrondi_indemnite_fcfa` (5 000, H-060). Contestables ; aucune question ouverte.
+- **D-1017-1 → D-1017-9** (`stories/STORY-1017.md`) : brouillon dans la ligne du registre (jamais un dossier) ; une ligne
+  du registre par usage, écrite par `sinistres` ; mots-clés et confiances en paramètre figé, formats dans le code ; police
+  lue par son numéro seul (pas de recherche par plaque ou téléphone chez `assurance`) ; vocal refusé sans trace ; dates en
+  jours ; « pas de blessé » = gravité légère ; lecture du registre et fait `sinistres.ia.decision.enregistree@1` renvoyés
+  (manifeste) ; extracteur derrière un port pour l'IA commune. Contestables ; aucune question ouverte.
 - **D-1013-1 → D-1013-12** (`stories/STORY-1013.md`) : commande à part avant la transition 7 ; montant obligatoire, au
   franc, jamais écrit d'office ; décompte calculé une fois et copié ; les DEUX tables jugées à la survenance ; ajout seul,
   motif dès la version 2, permis en instruction et en évalué ; rôles de la transition 7 et partie « évaluer » ; motif
@@ -734,3 +745,7 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
 - **Un motif de test de « 10 caractères au moins » : compter** (STORY-1013) : `trop court` en fait dix et passe ; écrire `trop bref` pour un refus.
 - **La suite unitaire de `sinistres` sur MongoDB réel rougit au hasard quand elle tourne en parallèle sur un poste chargé** (STORY-1018 : 5 échecs sur `dossiers.service.spec` en `-w 2`, tests sans rapport ; la même suite seule, `-w 1`, passe 214/214). Rejouer le fichier rouge seul avant de chercher un défaut.
 - **Un script de vérification Docker lancé avant une pause de verrou se tue en `kill -9`** : son `trap` supprimerait le verrou d'un autre groupe (STORY-1018).
+- **Une regex JS avec `` ne voit pas « à »** (STORY-1017) : `` est ASCII même avec `u`. Pour une préposition accentuée, `(?<![\p{L}\d])`.
+- **Une espace insécable littérale dans une regex fait rougir `no-irregular-whitespace`** (STORY-1017) : écrire `  `, et le vérifier par `cat -A`, un script Python avec `' '` non brut remet le caractère.
+- **Le checkout `prospera-sinistres-service` porte une autre branche : ne pas y lancer `docker compose up`** (STORY-1017) : exporter la branche par `git archive` et lancer le compose depuis l'export (`COMPOSE_PROJECT_NAME=grp-c-<n>`).
+- **Les deux invariants `app.module` / `app-cablage` ne tournent qu'en Node 24** (client Kafka natif) : 5 échecs attendus sous Node 25, verts dans l'image `verification`.
