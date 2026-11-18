@@ -1,6 +1,6 @@
 # STORY-974 : l'invitation des utilisateurs à la mise en service
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (deux dépôts ; une route interne et un module neufs dans auth ; un champ facultatif de l'ordre
 de mise en service et du bilan dans le catalogue ; aucun topic, aucune collection)
@@ -101,4 +101,29 @@ l'essai vers le réel (FR-8, « rôles et comptes ») n'existe pas : rien ne rec
 
 ## Preuves
 
-À remplir.
+**Fusionné le 2026-11-18** (annonce : stories #682, avant le code) :
+- **auth #45** : `c8cd619` poussé, rejoué sous **`e83568d`** sur `dev` (arbre identique) ;
+- **catalogue #61** : `17ddb56` poussé, rejoué sous **`a672a44`** sur `dev` (arbre identique).
+
+Node 25 local, tests relancés par chemin, puis suites complètes :
+- **auth** : `invitations-au-reel.spec.ts` 30/30 (garde et validation réelles par HTTP : sans jeton, autre secret, jeton
+  d'un utilisateur ⇒ 401 `IDENTITE_DU_MOTEUR_REQUISE` sans appel du service ; essai ⇒ 403 avant le corps, même un corps
+  faux ; 201 puis 200 ; six corps refusés 400 ; service : même identifiant, `INVITED`, rôle et rôle métier, événements,
+  e-mail APRÈS la transaction au nom de l'organisation, rejeu sans rien renvoyer, membre neuf invité seul, tous les
+  refus nommés sans écriture, E11000 traduit) ; `invitation.service.spec.ts` 24/24 (+2 : jeton, e-mail).
+  Suite complète : 102 suites, 1 423 tests verts.
+- **catalogue** : `services.spec.ts` 27/27 (+9 : invités après la réception définitive, issue au bilan validée contre
+  le contrat publié, aucune donnée personnelle en base ; cinq refus de mise en service n'invitent personne ;
+  `A_REPRENDRE` puis reprise au rejeu sans second événement ; rejeu sans liste sans appel ; `REFUSEES` ; horloge muette
+  au rejeu) ; `invitations-au-reel.spec.ts` 18/18 (route, verbe, en-tête et corps ; 201/200, 4xx, 401/403/5xx,
+  injoignable, délai ; DTO de l'ordre). Suite complète : 102 suites, 1 548 tests verts.
+- **Câblage sans pile (D-974-11)** : `app-cablage.invariant.spec.ts` vert dans les deux services ; il rougit
+  (`Nest can't resolve dependencies of the InvitationsAuReelService … TenantRolesService`) quand on retire `RbacModule`
+  du module neuf. Sous Node 25, le binding natif de Confluent manque : le câblage et les suites Kafka se jouent avec une
+  configuration jest qui double `@confluentinc/kafka-javascript` (preview n'instancie rien) — voir « Pièges » du journal.
+- **Mutations** : 21/21 rouges sur une assertion (13 auth, 8 catalogue) ; quatre mutations écrites d'abord rendaient
+  du code qui ne compilait pas (`0 total`), réécrites pour compiler.
+- Lint des fichiers touchés, `tsc --noEmit`, `nest build` verts dans les deux services ; `git diff --stat` identique avec
+  et sans `--ignore-cr-at-eol`.
+- **Docker** : aucun (D-L4-3). Le démarrage réel d'auth (module neuf) et du catalogue (fournisseur neuf) se verra à la
+  première pile du lot où ils tournent (STORY-1080).

@@ -5,6 +5,28 @@
 
 ## État
 
+### Lot 4 (ouvert le 2026-11-18)
+
+- **Plan** : `PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §3 : B tient le backend du cabinet (balance, bilan, dossier, BFF
+  `admin-panel`, `prospera-recette`, venus de A, D-L4-1) en plus du sien ; **sans Docker d'abord** (D-L4-3). Ordre :
+  974, 973, 1083, 1084, 1081 (sans Docker), puis 976, 975, 1082, 1093, 1080 (pile ; recette croisée complète jouée une
+  fois, en dernier). Même poste que D, même verrou Docker.
+- **Avancement** :
+  1. ~~STORY-974~~ : **auth #45** (`e83568d` sur `dev`), **catalogue #61** (`a672a44`), contrat annoncé avant la fusion
+     (stories #682). L'invitation au réel à la mise en service (AD-15, FR-42 ; D-951-8 tenue avant février).
+     - Auth : `PUT /api/v1/interne/organisations/{org}/invitations`, identité du moteur seule, réel seul (403
+       `ESPACE_D_ESSAI_REFUSE` avant le corps) ; chaque membre de l'essai naît sous **son identifiant de l'essai**,
+       `INVITED`, avec son rôle et son rôle métier ; e-mail après la transaction, au nom de l'organisation ;
+       idempotente par membre, refus en bloc.
+     - Catalogue : l'ordre de mise en service reçoit `invites` (les utilisateurs de l'essai, transmis par la console :
+       le réel ne connaît pas l'essai, D-974-8) ; acceptée ou rejouée, elle les invite après sa transaction ; issue dans
+       le bilan (`invitations`), sans donnée personnelle ; contrat `mise-en-service` 1.1.0.
+     Node 25 : auth 1 423/1 423, catalogue 1 548/1 548 ; câblage du module racine vert ; 21/21 mutations. **Sans
+     Docker** : le démarrage se verra à STORY-1080 (D-974-11). Aucun dépôt de A touché : la passation de A
+     (balance `98078b0`, bilan `1651d33`, dossier `768a4aa`, BFF `18a9893`, recette `f7944dc`) reste à constater par la
+     première story de B sur ces dépôts (1083).
+  - **Suivante : STORY-973** (le plan SMT propre, comptabilité, sans Docker).
+
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
 - **Plan** : `PLAN-4-SESSIONS-LOT-3-2026-11-17.md` §3, décidé par l'utilisateur : B passe à la **comptabilité**
@@ -828,8 +850,9 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-18, STORY-974 — l'invitation au réel à la mise en service, annoncé AVANT la fusion du code**
-  (`prospera-auth-service`, `prospera-platform-catalog-service` ; fiche `stories/STORY-974.md`, D-974-1 → 11). Tout
-  est AJOUT : aucune route, aucun champ, aucun topic existants ne changent de forme.
+  (`prospera-auth-service`, `prospera-platform-catalog-service` ; fiche `stories/STORY-974.md`, D-974-1 → 11).
+  **Fusionné le 18/11** : auth #45 `e83568d`, catalogue #61 `a672a44` (annonce : stories #682), sans écart au contrat
+  annoncé. Tout est AJOUT : aucune route, aucun champ, aucun topic existants ne changent de forme.
   - **Auth, route neuve (moteur)** : `PUT /api/v1/interne/organisations/{organisationId}/invitations`, sous l'identité
     de service du moteur seule (`MOTEUR_JETON_SERVICE`, comme la naissance et les comptes du jeu ; tout autre jeton,
     même d'un administrateur de la plateforme : 401 `IDENTITE_DU_MOTEUR_REQUISE`), **dans l'espace réel seulement**
@@ -1697,9 +1720,9 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 - **STORY-960, rôle par défaut du distributeur** (D-960-12) : aucun ; un membre sans rôle `DIST_*` n'a aucun droit.
   Choix par défaut : on garde (FR-4). Alternative : `DIST_ADMIN` par défaut au `TENANT_ADMIN`.
 
-- **STORY-951, l'invitation au réel** (AD-15 : « l'invitation au réel part à la mise en service ») : **pas faite**
-  dans 951 (D-951-8). Il manque une route d'invitation pour l'identité de service du moteur dans auth. Choix retenu
-  par défaut : elle viendra avec la console de mise en service, dans une story de B. Contestable.
+- ~~**STORY-951, l'invitation au réel**~~ (D-951-8) : **tranchée** par l'utilisateur (« avant février ») et
+  **servie par STORY-974** (18/11). Reste contestable D-974-8 : la liste des invités vient de l'ordre de la console,
+  tant que le dossier d'installation (FR-8) n'est pas rejoué.
 
 - **Réglages de `centrale-service` et `agent-instance`** (STORY-955) : la fusion par commit, par squash et par rebase
   est permise dans les deux dépôts. « Rebase and merge » seul est **à poser par l'utilisateur** dans les réglages
@@ -1721,6 +1744,17 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Pièges rencontrés
 
+- **Sous Node 25, le câblage du module racine rougit sans rien dire du câblage** (STORY-974) :
+  `app-cablage.invariant.spec.ts` et les suites `src/kafka/*` tombent sur « Could not locate the bindings file »
+  (binding natif de Confluent, absent sous Node 25). Sans Docker, les jouer avec une configuration jest qui double le
+  module : `moduleNameMapper: { '^@confluentinc/kafka-javascript$': '<stub>.js' }` (le stub exporte
+  `KafkaJS.Kafka`, une classe vide) et `rootDir` absolu ; `preview: true` n'instancie aucun fournisseur. Vérifier qu'il
+  mord : retirer un import du module neuf ⇒ `Nest can't resolve dependencies`.
+- **Une mutation qui laisse un import ou une variable inutilisés ne compile pas** (STORY-974) : ts-jest rend
+  « 0 total » et le script la compte « survivante ». La réécrire pour qu'elle compile (`&& false`, `Date.now() < 0 ?
+  … : undefined`, retirer aussi l'import).
+- **Un heredoc de plus d'environ 200 lignes casse le shell** (« unexpected EOF ») avant même d'écrire : écrire le
+  script (et le texte qu'il insère) avec l'outil d'écriture.
 - **Une suite qui compare des `bigint` en jest parallèle tombe sans le dire** (STORY-970, comme 966) : le script de
   mutations a compté neuf fausses survivantes (« 24 passed, 24 total » au lieu de 44 : la suite mutée n'était plus
   comptée). Jouer les mutations en `-i`, et comparer le TOTAL des tests à celui de la suite saine.
