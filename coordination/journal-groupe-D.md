@@ -50,6 +50,9 @@
     22/22, rejoué sur les images reconstruites depuis `origin/dev` (`--no-cache`, volumes neufs).
   - Décisions D-1061-1 → 13 (fiche) ; recette versionnée `scripts/recette/1061/`. **Verrou Docker pris à 13:47 sans attente (libre au rituel), une seule prise, rendu à 15:07** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
   - **Suivante : STORY-1062** 🚚 (la commande (2), `ventes`).
+- **STORY-1062** 🚧 — la commande (2) (`ventes`) : le numéro `CMD-`, la commande transmise du terrain (`TRANSMISE`,
+  `PRIX_CHANGE`, `COMMANDE_PROBABLEMENT_DOUBLE`), l'annulation, et le défaut de concurrence de D-1061-13 corrigé (test
+  rouge d'abord). Rituel : aucune demande neuve à D dans les journaux de A, B et C. Annonce « ⚠ Contrats » avant le code.
 
 ### Lot 3 (ouvert le 2026-11-17)
 
@@ -817,6 +820,35 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-18, STORY-1062), avant la fusion du code — `prospera-ventes-service`, modules `commande` et
+  `facturation` : le numéro `CMD-`, la commande transmise du terrain, l'annulation.** Fiche : `stories/STORY-1062.md`
+  (D-1062-1 → 13). **Manifeste `facturation` amendé** (C5) : + consommé `commande.commande.annulee@1` (recopié à l'octet
+  dans `ventes`). Le manifeste `commande` ne change pas (`commande.commande.annulee@1` et `commande:commande:annuler` y
+  sont déjà).
+  - **Fait neuf publié** : `commande.commande.annulee@1` (topic `commande.commande.annulee`, clé
+    `<organisationId>:<commandeId>`, schéma `commande.commande.annulee-value` en BACKWARD) : `commandeId`, `numero`
+    (`CMD-…` ou `null`), `pointDeVenteId`, `noeudId`, `canal`, `statutAvant`, `motif` (`CLIENT_ANNULE`,
+    `ERREUR_DE_SAISIE`, `RUPTURE`, `PLAFOND_DE_CREDIT`, `AUTRE`), `bons` (`bonId`, `numero` `BL-` ou `null`,
+    `pointDeStockId`), `annuleeLe`, `rang`. Ni prix, ni montant, ni texte libre. Consommé par `facturation` (même
+    groupe `ventes-service.commandes-chiffrees`).
+  - **Fait relâché** : `commande.serie.changed@1` porte aussi la série `commandes` (préfixe `CMD-`) : les
+    énumérations de `serie` et de `prefixe` sont **retirées** (BACKWARD, vérifié au registre). Un consommateur qui
+    gardait la tête des seuls bons filtre `serie = bons-livraison`.
+  - **Routes** : `POST /api/v1/commande/commandes` sert le canal `TERRAIN` (la commande naît `TRANSMISE` ; corps
+    `+ visiteId?`, `+ lignes[].grilleVersion`, exigée sur ce canal : 400 `GRILLE_VERSION_MANQUANTE` ; 409
+    `COMMANDE_PROBABLEMENT_DOUBLE`) ; `CANAL_NON_SERVI` n'est plus rendu. **Neuve** : `POST
+    /api/v1/commande/commandes/{commandeId}/annulation` (`commande:commande:annuler`, `Idempotency-Key`, corps `{ motif,
+    texte? }`) ⇒ 201 la commande (+ `rejeu`, `liberations`) ; 400 `MOTIF_A_PRECISER` ; 404 ; 403 `HORS_PORTEE` ; 409
+    `TRANSITION_INTERDITE`, `COMMANDE_FACTUREE`, `COMMANDE_DEJA_ANNULEE`, `CLE_REUTILISEE_AVEC_AUTRE_CHARGE`. `POST
+    /api/v1/commande/validations` : `+ prixConfirmes?: { revision }` ; 409 `PRIX_CHANGE` (`details` : `revision`,
+    `montantTtcMineur`, `lignes` avant et après). `POST /api/v1/facturation/factures` : 409 `COMMANDE_ANNULEE`.
+  - **Lectures** (ajouts) : la commande rend `numero`, `revision`, `visiteId`, `ecartDePrix`, `annulation`, `lignes[]
+    .grilleVersionAffichee`, `bons[].annuleLe` ; un bon peut être `ANNULE`. Les paramètres de `commande` gagnent
+    `fenetreCommandeDoubleMinutes` (30 par défaut, de 1 à 1 440), **facultatif au `PUT`** (la forme de 1049 reste
+    valide) et rendu par toute version lue.
+  - **Aucun droit neuf** ; `commande:commande:annuler` est déjà dans la table d'accès d'`auth` (DC, RESP_VENTES,
+    COMPTABLE). Rien n'est demandé aux autres groupes.
 
 - **PUBLIÉ (2026-11-18, STORY-1061, prospera-ventes-service#10, `dev` 33bd0e7 → 68b293c) ; ANNONCÉ avant la fusion du
   code (prospera-stories #689), sans écart ; schémas enregistrés en BACKWARD (Karapace, contre les versions d'`origin/dev`).

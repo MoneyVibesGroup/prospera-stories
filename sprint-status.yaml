@@ -498,11 +498,12 @@ reserved_ranges:
       19/19 mutations. Pile grp-d : 22/22, rejouée depuis origin/dev. Lot D, n° 2 du lot 4 (EPIC-230). NON SLOTTÉE.
   - range: "STORY-1062"
     status: "RÉSERVÉ"
-    owner: "Groupe D, lot 4 — la commande (2), suite de 1056 (EPIC-228) (ventes)"
-    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-LOT-4-2026-11-18.md"
+    owner: "La commande (2) — le numéro CMD-, la commande transmise du terrain (TRANSMISE, PRIX_CHANGE, COMMANDE_PROBABLEMENT_DOUBLE), l'annulation (bons ANNULE qui gardent leur numéro, engagement rendu, réservations rendues, commande.commande.annulee@1 ; facturation refuse COMMANDE_ANNULEE) ; le défaut de concurrence de D-1061-13 corrigé dans commande et facturation (prospera-ventes-service)"
+    source_doc: "prospera-stories/stories/STORY-1062.md"
     reserved_on: "2026-11-18"
     note: >
-      Lot 4 de D, n° 3. NON SLOTTÉE.
+      EN COURS le 2026-11-18 — fiche écrite, annonce « ⚠ Contrats » avant le code (manifeste facturation amendé, C5 :
+      + commande.commande.annulee@1 consommé). Lot 4 de D, n° 3 (EPIC-228, EPIC-230). NON SLOTTÉE.
   - range: "STORY-1063"
     status: "RÉSERVÉ"
     owner: "Groupe D, lot 4 — les référentiels du distributeur côté réseau : zones à plat, points de vente rattachés (EPIC-227) (reseau)"
