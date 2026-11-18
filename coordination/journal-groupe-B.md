@@ -827,6 +827,35 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-18, STORY-974 — l'invitation au réel à la mise en service, annoncé AVANT la fusion du code**
+  (`prospera-auth-service`, `prospera-platform-catalog-service` ; fiche `stories/STORY-974.md`, D-974-1 → 11). Tout
+  est AJOUT : aucune route, aucun champ, aucun topic existants ne changent de forme.
+  - **Auth, route neuve (moteur)** : `PUT /api/v1/interne/organisations/{organisationId}/invitations`, sous l'identité
+    de service du moteur seule (`MOTEUR_JETON_SERVICE`, comme la naissance et les comptes du jeu ; tout autre jeton,
+    même d'un administrateur de la plateforme : 401 `IDENTITE_DU_MOTEUR_REQUISE`), **dans l'espace réel seulement**
+    (`INSTANCE_ESPACE=ESSAI` : 403 `ESPACE_D_ESSAI_REFUSE` avant la lecture du corps). Corps `{ membres: [{ userId,
+    email, prenom, nom, role?, roleMetier? }] }` (1 à 200 ; `role` = `TENANT_ADMIN` | `TENANT_USER`, défaut
+    `TENANT_USER`). Chaque membre naît **sous le `userId` qu'il a dans l'essai** (FR-42), `INVITED`, membre de
+    l'organisation avec son rôle et son rôle métier ; l'e-mail d'invitation part après la transaction (même file et
+    même gabarit que l'invitation d'un administrateur ; `orgName` = le nom de l'organisation, `inviterName` =
+    `Prospera`). Réponse `{ organisationId, invites, existants, membres: [{ userId, issue: INVITE | EXISTANT }] }` :
+    **201** si un membre est invité, **200** sinon. Idempotente : un membre déjà là n'est ni réécrit ni réinvité. Refus
+    (rien d'écrit) : 404 `ORGANISATION_INCONNUE` ; 422 `MEMBRE_EN_DOUBLE`, `COMPTE_DU_JEU_HORS_DU_REEL` (adresse
+    `@jeu-demonstration.invalid`), `TENANT_ROLE_INCONNU`, `TENANT_ROLE_NON_PROPOSE` ; 409 `MEMBRE_EN_CONFLIT`.
+    `identity.user.registered@1` (statut `INVITED`), `identity.membership.changed@1` et `identity.droits.changed@1`
+    partent dans la transaction, **charges inchangées**, aucun schéma touché.
+  - **Catalogue, contrat `mise-en-service.openapi.json` 1.0.0 → 1.1.0** (ajouts facultatifs) :
+    `POST /api/instance/v1/mises-en-service/{organisationId}` reçoit `invites` (facultatif, 200 au plus, schéma
+    `InviteDuReel` : la forme d'un membre ci-dessus) ; le bilan reçoit `invitations` (facultatif,
+    `InvitationsDeLaMiseEnService` : `{ etat: ENVOYEES | A_REPRENDRE | REFUSEES, demandes, invites?, existants?, code?,
+    motif?, le? }`, sans nom ni adresse). Une mise en service acceptée (201) ou rejouée (200) avec `invites` appelle la
+    route d'auth APRÈS sa transaction ; elle ne la conditionne pas ; un refus (404, 409, 503) n'invite personne ;
+    rejouer l'ordre avec la liste reprend une invitation `A_REPRENDRE`. Aucune variable neuve : l'adresse d'auth et le
+    secret de la naissance (`NAISSANCE_AUTH_URL`, `MOTEUR_JETON_SERVICE`, `NAISSANCE_DELAI_MS`).
+  - **Pour A** (console, D-L4-2) : l'écran de mise en service pourra transmettre les utilisateurs de l'essai
+    (`invites`, lus dans l'auth de l'essai) et afficher `invitations` ; sans écran, rien ne change. **Pour C, D** :
+    rien chez vous.
+
 - **2026-11-18, STORY-970 — la clôture, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`, EPIC-119 ;
   fiche `stories/STORY-970.md`, D-970-1 → 14). **Fusionné le 18/11** : comptabilite #10, `b27593c` sur `dev` (annonce :
   stories #674), sans écart au contrat annoncé. Des routes, un champ et des collections AJOUTÉS, rien de renommé ;
