@@ -1,6 +1,6 @@
 # STORY-1063 : les référentiels du distributeur côté réseau — le gabarit à zones à plat, les zones et les lieux rattachés du jeu « Grossiste du Golfe », par les routes C13 de `reseau`
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-227 (les référentiels : réseau, points de vente, catalogue et stock, les écarts du distributeur), FR-180
 · **Dépôts :** `reseau-service` (routes C13 du module, part du jeu, effacement) ; `prospera-plateforme`
@@ -50,9 +50,10 @@ l'écran du module.
 - [x] Preuves sous le verrou : Node 24 (unitaires, e2e, intégration, lint, tsc, build ; plateforme), mutations 12/12,
   `docker compose up` sain, pilote 11/11 et 2/2 ; PR de code ouvertes : reseau-service **#16**, prospera-plateforme
   **#36**.
-- [ ] Annonce « ⚠ Contrats » fusionnée avant le code (cette PR).
-- [ ] Preuves complètes (Node 24, mutations, `docker compose up`), PR fusionnées, étiquette `jeu-grossiste-golfe-v1.1`,
-  PR de docs finale.
+- [x] Annonce « ⚠ Contrats » fusionnée avant le code : prospera-stories **#712** (`main` `d9b538c`).
+- [x] PR fusionnées en rebase : prospera-plateforme **#36** (`dev` `26977ca`, étiquette `jeu-grossiste-golfe-v1.1`),
+  reseau-service **#16** (`dev` `25de958`, `c11d990`, `4b55ac1`) ; preuves rejouées sur les images reconstruites depuis
+  `origin/dev` ; verrou rendu ; PR de docs finale.
 
 ## Ce qui doit être vrai à la fin
 
@@ -140,8 +141,53 @@ l'écran du module.
 
 ## Ce qui a été livré
 
-(rempli à la fin)
+**2026-11-18** — après l'annonce « ⚠ Contrats » (prospera-stories **#712**, `main` `d9b538c`), deux PR fusionnées en
+« Rebase and merge » :
+
+- **prospera-plateforme#36** (`dev` `26977ca`, étiquette **`jeu-grossiste-golfe-v1.1`**) : le générateur
+  (`jeux-demonstration/grossiste-golfe/generateur/generer.mjs`) ajoute la part `reseau` (`GABARIT_ZONES_A_PLAT`,
+  `TYPE_DE_ZONE`, `PARTS` : `reseau` d'abord) ; les trois tailles régénérées en 1.1.0 (`reseau/hierarchie.json`,
+  `reseau/zone.json`, `reseau/rattachement.json`) ; `generer.test.mjs` : empreintes 1.1.0 figées, fichiers de 1.0.0
+  gardés à l'octet (empreintes écrites), la part `reseau` éprouvée pour chaque taille.
+- **reseau-service#16** (`dev` `25de958`, `c11d990`, `4b55ac1`) :
+  - `src/socle/instance/` : le socle C13 copié de `ventes` (service, refus, lignes, décorateur, règle des identifiants ;
+    `contrats-instance.ts` sur Ajv 8) et les quatre schémas à l'octet (`ORIGINE.json`, `copie.invariant.spec.ts`) ;
+  - `src/modules/reseau/instance/` : `part-reseau.ts` (les trois objets, le plan d'effacement, les exclusions),
+    `instance-c13.controller.ts` (`@RoutesDInstance('reseau')`, `@AdmetIdentitesDeService('MOTEUR')`,
+    `@SansDroitDuModule`), le service fourni par `ReseauModule` (espace lu dans `kafka.espace`) ;
+  - `HierarchieService.configurerDansLaSession` (la route et le gabarit, une règle) ; `ZoneAEcrire.id` et
+    `creerZoneDansLaSession({ id })` (identifiant imposé, facultatif) ; `RattachementsService.rattacherEnNombreDansLaSession` ;
+    `Journal.ecrireEnNombre` (en ajout seul) ;
+  - invariants : `routes-du-module.invariant.spec.ts` (les routes C13 sont celles du manifeste et n'admettent que le
+    moteur), `plan-d-effacement.invariant.spec.ts` (aucune collection oubliée) ;
+  - tests : `part-reseau.spec.ts` (validation fermée, vecteur des identifiants, espace réel refusé),
+    `test/integration/instance-c13.int-spec.ts` (22 cas sur MongoDB réel, vraie chaîne de gardes), fixtures
+    `test/fixtures/grossiste-golfe-petit/` (copie à l'octet de 1.1.0, part `reseau`) ;
+  - recette : `scripts/recette/1063/pilote-1063.mjs` (la pile), `mutations-1063.mjs`.
+
+**Ce que `commande` peut lire désormais** (D-1063-10) : les `noeudId` de `commande_points_de_vente` sont des zones de
+`reseau` ; la portée publiée par `reseau` les cadre ; la zone d'un point de vente ou d'un point de stock se lit par la
+résolution (`lieuType`, `lieuId` = l'identifiant de `commande`).
 
 ## Preuves
 
-(remplies à la fin)
+- **Node 24** (image `verification` construite depuis `git -c core.autocrlf=false archive`, puis **reconstruite
+  `--no-cache` depuis `origin/dev`**) : unitaires **50/50 suites, 523 tests** ; e2e **17/17** ; intégration sur MongoDB
+  réel **16/16 suites, 177 tests** (dont les 22 de `instance-c13.int-spec.ts`) ; lint complet, `tsc`, `nest build`.
+  Une passe d'intégration sur l'image de `origin/dev`, jouée pendant la construction `--no-cache` de l'image `runtime`
+  (poste chargé), a compté un échec non identifié (sortie résumée seulement) ; rejouée deux fois seule : 177/177 et
+  177/177.
+- **Plateforme** (Node 24, `git archive` de la branche) : `typecheck` ; `npm test` **647 tests, 646 pass, 0 fail** ;
+  `generer.test.mjs` **31/31** ; `jeu:verifier` conforme pour les trois tailles (600, 2 726, 8 947 enregistrements).
+- **Mutations** : `reseau` **12/12 rouges sur l'assertion** (MongoDB réel ou unitaires : rattachement identique non
+  gardé, remplacé non terminé, zone du jeu recréée, identifiant du jeu perdu deux fois, zone non vérifiée dans le lot,
+  refus du gabarit non rendu, gabarit non appliqué, commerciaux oubliés du plan, configuration non effacée, lieu
+  `MAGASIN` servi, parent de zone admis) ; générateur **6/6** (client comptoir rattaché, zone avec parent, gabarit à
+  trois niveaux, point de vente dans une autre zone, entrepôts absents, part retirée).
+- **Pile `grp-d`** (`docker compose up`, image `runtime`, MongoDB en jeu de répliques, Kafka, émetteur RS256 de recette) :
+  service sain ; pilote **11/11** en essai (jeu importé dans deux organisations neuves, gabarit, zones à plat sous
+  l'identifiant du jeu, 121 rattachements, faits dans l'outbox, rejeu `DEJA_IMPORTE` sans écriture, effacement de 257
+  enregistrements, rien de l'organisation ne reste, témoin intact) et **2/2** en espace réel (`ESPACE_REEL_REFUSE`, rien
+  n'est écrit) ; **rejoué sur les images reconstruites depuis `origin/dev`** (`--no-cache`, volumes neufs) : 11/11, 2/2.
+- **Verrou Docker** : pris à 22:10 (libre), une seule prise, rendu à 22:55 ; `down -v` : aucun conteneur, volume ni
+  réseau `grp-d` ne reste.
