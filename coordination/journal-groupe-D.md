@@ -606,6 +606,13 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-18), information : le jeu « Grossiste du Golfe » 1.1.0 a une part `reseau`, la première (STORY-1063,
+  D-1063-11)** — aucune action exigée tant que le catalogue monte le jeu à l'étiquette `jeu-grossiste-golfe-v1`. Le jour où
+  il passe à **`jeu-grossiste-golfe-v1.1`** : ajouter `reseau=http://reseau-service:3419` à `INSTALLATION_SERVICES` (sinon
+  l'import s'arrête à la première part, `SERVICE_NON_CONFIGURE`, et `commande` et `terrain` restent `A_IMPORTER`) ; le
+  service `reseau` de l'essai tourne avec `KAFKA_ESPACE=ESSAI` (ses routes C13 refusent l'espace réel). La part pose le
+  gabarit à zones à plat, deux à cinq zones et leurs lieux rattachés ; l'effacement de fin d'essai de `reseau` est servi.
+
 - **→ B (2026-11-18), information : le numéro d'une facture suit désormais le format de la série (STORY-1061)** — aucune
   action exigée. Pour votre consommateur à venir de `facturation.facture.emise@1` : `numero` n'a plus de motif `FAC-` au
   registre (il suit la suite reprise de Sage, `FAC-2026-8822` ou `FA000124`) ; c'est un libellé, la clé reste
@@ -846,6 +853,25 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-18, STORY-1063, avant la fusion du code : reseau-service#16, prospera-plateforme#36). —
+  `reseau-service`, routes C13 du module ; `prospera-plateforme`, jeu « Grossiste du Golfe » 1.1.0.** Fiche :
+  `stories/STORY-1063.md` (D-1063-1 → 12). **Aucun manifeste amendé** (les routes sont déjà déclarées à
+  `routesInstance`), aucun fait neuf, aucun droit neuf.
+  - **Routes servies** (au moteur seul, limitées à son organisation, en essai seulement : `KAFKA_ESPACE=ESSAI`) : `POST
+    /api/v1/instance/reseau/{organisationId}/import` (`import-c13-demande@1` → `import-c13-reponse@1`), objets
+    **`hierarchie`** (`{ profondeurMax, libellesDeNiveaux }` : le gabarit), **`zone`** (`{ cle, nom, type, localites }`,
+    sans parent), **`rattachement`** (`{ lieu: POINT_DE_VENTE|ENTREPOT, cle, zone, role: PRINCIPAL|SECOURS }`) ; `POST
+    /api/v1/instance/reseau/{organisationId}/effacement` (`FIN_ESSAI` ; `effacement-c13-accuse@1`, `module: reseau`).
+    Refus du socle C13 de 1058 (`ESPACE_REEL_REFUSE`, `ENREGISTREMENT_INVALIDE` avec le rang, `REFERENCE_INCONNUE`,
+    `IDEMPOTENCE_REUTILISEE`, `IDENTITE_DE_SERVICE_REQUISE`, `ORGANISATION_HORS_JETON`…).
+  - **Le jeu 1.1.0** (`jeux-demonstration/grossiste-golfe*/`, étiquette `jeu-grossiste-golfe-v1.1` après la fusion) :
+    une part **`reseau`, la première**, avant `commande` et `terrain` ; leurs fichiers de 1.0.0 inchangés à l'octet.
+  - **Identifiants** : une zone du jeu a l'identifiant `identifiantDuJeu(org, 'zone', clé)` (celui que `commande` et
+    `terrain` portent déjà en `noeudId`) ; un lieu rattaché porte l'identifiant de `commande` (`point-de-vente`,
+    `point-de-stock`). La zone d'un point de vente ou d'un point de stock se lit par `GET
+    /api/v1/resolution?lieuType=POINT_DE_VENTE|ENTREPOT&lieuId=…` (route existante).
+  - **Pour B** : voir « Demandes aux autres groupes » (le passage du catalogue à `v1.1`).
 
 - **PUBLIÉ (2026-11-18, STORY-1062, prospera-ventes-service#11, `dev` 339a1ad → f49f3a6) ; ANNONCÉ avant la fusion du
   code (prospera-stories #698), sans écart ; schémas enregistrés en BACKWARD (Karapace, contre les versions

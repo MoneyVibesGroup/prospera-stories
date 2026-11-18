@@ -512,11 +512,12 @@ reserved_ranges:
       24/24, rejouée depuis origin/dev. Lot D, n° 3 du lot 4 (EPIC-228, EPIC-230). NON SLOTTÉE.
   - range: "STORY-1063"
     status: "RÉSERVÉ"
-    owner: "Groupe D, lot 4 — les référentiels du distributeur côté réseau : zones à plat, points de vente rattachés (EPIC-227) (reseau)"
-    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-LOT-4-2026-11-18.md"
+    owner: "Les référentiels du distributeur côté réseau — le gabarit à zones à plat, les zones et les lieux rattachés du jeu Grossiste du Golfe (1.1.0, part reseau), par les routes C13 de reseau (import, effacement) (reseau-service, prospera-plateforme)"
+    source_doc: "prospera-stories/stories/STORY-1063.md"
     reserved_on: "2026-11-18"
     note: >
-      Lot 4 de D, n° 4. NON SLOTTÉE.
+      🚧 EN COURS le 2026-11-18 — annonce « ⚠ Contrats » avant le code ; reseau-service#16, prospera-plateforme#36.
+      Lot D, n° 4 du lot 4 (EPIC-227, FR-180). NON SLOTTÉE.
   - range: "STORY-1064"
     status: "RÉSERVÉ"
     owner: "Groupe D, lot 4 — les comptes du bureau dans le jeu Grossiste du Golfe (AKOSSIWA, MENSAH, YAWA, AYITE ; COM-nn ; D-972-9) (plateforme, ventes)"
