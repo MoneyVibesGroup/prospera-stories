@@ -24,13 +24,18 @@
 //   remis, `financement:dossier:valider` ; toute lecture, `financement:dossier:consulter`.
 // - Banque cible : code du référentiel `exigences-bancaires-uemoa` (console, AP-50) et version lue, gardée par le
 //   dossier (NFR-8). La lecture du référentiel et la complétude viennent avec STORY-1085.
+// - Emprunts et échéancier (FR-3, STORY-1084, amendement 0.2.0) : le prêt demandé et les dettes existantes se saisissent
+//   dans un brouillon (`…/financements/{financementId}/emprunts`, droit `preparer`) ; l'échéancier est calculé au franc
+//   (échéance et intérêts arrondis, écart sur la dernière). Le dossier retient un jeu d'hypothèses du prévisionnel
+//   (FR-6) : ses emprunts y remplacent `empruntsNouveaux`, les remboursements et les intérêts, en mémoire (aucune
+//   copie). Indicateurs de dette et plan de financement : `…/indicateurs` (droit `consulter`). Aucun droit neuf.
 // - Montants entiers en FCFA (NFR-3) ; aucune transmission à la banque (D-SC-2) : le cabinet remet le document figé.
 // - Le catalogue ne connaît pas encore ce module (copie des manifestes en retard, STORY-977) : tant qu'il ne publie
 //   aucun état pour `financement`, la garde refuse tout (fermé, voulu).
 
 export const MANIFESTE_FINANCEMENT = {
   code: 'financement',
-  version: '0.1.0',
+  version: '0.2.0',
 
   // C1 : bilan est une dépendance DURE. Le dossier de financement lit les états validés (historique), le prévisionnel
   // (scénario retenu, STORY-1084) et l'analyse (indicateurs) du module Bilan, dans le même service.
@@ -83,6 +88,8 @@ export const MANIFESTE_FINANCEMENT = {
     'GET /api/v1/dossiers/{dossierId}/financements/{financementId}',
     'GET /api/v1/dossiers/{dossierId}/financements/{financementId}/versions',
     'GET /api/v1/dossiers/{dossierId}/financements/{financementId}/versions/{version}',
+    'GET /api/v1/dossiers/{dossierId}/financements/{financementId}/emprunts', // STORY-1084
+    'GET /api/v1/dossiers/{dossierId}/financements/{financementId}/indicateurs', // STORY-1084
   ],
 
   // C13, point 7 (chemins vus par le service). À créer : l'effacement de l'organisation passe aujourd'hui par celui de
