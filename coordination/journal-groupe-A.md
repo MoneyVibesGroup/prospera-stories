@@ -77,6 +77,10 @@
   (tenu par B) ; écrans FE-147 (exporter la liste des clients, CSV ou Excel) et FE-148 (plan propre à l'écran). Règle
   retenue : un compte propre est une subdivision d'une racine du référentiel, pour que la liasse reste juste.
   Toutes non slottées : à placer au prochain plan.
+- **Des factures aux écritures (2026-11-18, demande de l'utilisateur)** : STORY-1097 (facture → écriture proposée en
+  partie double, achats et ventes, système normal), 1098 (mémoire des choix du cabinet pour les écritures), 1099
+  (mémoire des choix pour les cahiers) ; écrans FE-149 (factures en écritures) et FE-150 (suggestions reprises).
+  Jamais d'écriture sans relecture ; la proposition dit toujours sa source. Non slottées.
 - **Passation** : `prospera-frontend-expert-comptable` reste tenu par A pour le lot 4 (FE-034) ; dernier commit sur
   `dev` : `6796601`.
 
