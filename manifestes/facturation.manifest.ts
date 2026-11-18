@@ -1,3 +1,4 @@
+// Amendé le 2026-11-18 (STORY-1062) : C5, + `commande.commande.annulee@1` consommé (une commande annulée ne se facture plus, FR-35).
 // Amendé le 2026-11-17 (STORY-1059) : C5, + `facturation.serie.changed@1` publié (tête de la série des factures, AD-5) et + `commande.commande.chiffree@1` consommé (la facture d'une commande validée, AD-3, AD-29).
 // Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
 // Manifeste M09 — Facturation, proformas et e-facture (format du contrat de module, clause C1, amendée le
@@ -133,6 +134,7 @@ export const MANIFESTE_FACTURATION = {
     'commande.bon-livraison.livre@1', // la facture naît à la livraison, sur les quantités livrées confirmées (FR-42)
     'commande.commande.validee@1', // option « facturer dès la validation »
     'commande.commande.chiffree@1', // [AD-3 ; STORY-1059] les montants de la commande validée : la facture « dès la validation » (AD-29)
+    'commande.commande.annulee@1', // [AD-3 ; STORY-1062] une commande annulée ne se facture plus (COMMANDE_ANNULEE)
     'paiement.creance.changed@1', // reste dû, échéance, ancienneté : de quoi déduire PARTIELLE et PAYEE (FR-49)
     'paiement.creance.soldee', // topic de `paiement`, sans suffixe de version
     'catalogue.grille.publiee@1', // prix résolus pour les lignes et les proformas
