@@ -46,9 +46,20 @@
        `prospera-stories/manifestes` : `npm run manifestes:garde` est **rouge** (`terrain : droits[11]`, le droit de
        D-1060 ; `comptabilite` : `avertissementDesinstallation`, `routesLectureSeule[17 → 21]`). Sans effet sur auth ;
        à recopier (`npm run manifestes:copier`) par la prochaine story de B qui touche le catalogue.
-  4. 🚧 **STORY-1083** (le dossier de financement existe, bilan + auth, sans Docker) : **en cours** (fiche
-     `stories/STORY-1083.md`, D-1083-1 → 17 ; contrat annoncé ci-dessous, « ⚠ Contrats », avant le code). Première
-     story de B sur un dépôt de A : **passation de bilan constatée** (voir « Passations »).
+  4. ~~STORY-1083~~ : **bilan #180** (`36c22fa` sur `dev`), **auth #47** (`96f8ab3`), contrat annoncé avant la
+     fusion (stories #692, amendement #693). Le module `financement` (M49) dans bilan : garde
+     `FINANCEMENT_NOT_ENTITLED` par l'état publié du module, droits lus par `GET /moi/droits` (première lecture de
+     `/moi/droits` dans bilan), table de FR-1 exacte, versions d'un dossier remis, piste d'audit ; trois droits hors
+     du jeton dans auth (associé : les trois ; collaborateur : préparer et consulter). Première story de B sur un
+     dépôt de A : **passation de bilan constatée** (voir « Passations »).
+     Node 25 : e2e 82/82, unitaires neufs 130, suite complète 16 suites rouges à l'identique sur `origin/dev` ;
+     câblage du module racine vert (binding doublé) ; mutations 14/15 + 1 équivalente (bilan), 5/5 (auth).
+     **Sans Docker** (D-1083-1) : **le démarrage réel de bilan avec `FinancementModule` est à prouver par la première
+     story qui lève bilan (1082, au plus tard 1080)**.
+     - **Le catalogue ne connaît pas encore `financement`** (D-1083-5) : à recopier avec les autres manifestes par
+       975 ; d'ici là, toutes les routes du module répondent 403 `FINANCEMENT_NOT_ENTITLED`.
+  - **Suivante : STORY-1084** (l'échéancier de chaque emprunt et les ratios de dette, bilan, sans Docker ; fiche
+    « Pour la suite » de 1083).
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -896,7 +907,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 - **2026-11-18, STORY-1083 — le module `financement` (M49) dans bilan-service, et ses trois droits dans auth,
   annoncés AVANT la fusion du code** (`prospera-bilan-service` et `prospera-auth-service`, branches `MNV-1083` ; fiche
   `stories/STORY-1083.md`, D-1083-1 → 17 ; manifeste `manifestes/financement.manifest.ts`). Tout est AJOUT : aucune
-  route, aucun champ, aucun topic existant ne change de forme.
+  route, aucun champ, aucun topic existant ne change de forme. **Fusionné le 18/11** : bilan #180 (`36c22fa` sur
+  `dev`), auth #47 (`96f8ab3`), sans écart au contrat annoncé (amendement #693 compris).
   - **Manifeste neuf** `financement` 0.1.0 (verticale cabinet, `depends: bilan`, profil compose `bilan`), copié à
     l'octet dans bilan (`src/vendor/manifestes/`). **Pas encore au catalogue** (D-1083-5 : la copie des manifestes du
     catalogue est déjà en retard ; à recopier par 975) : tant que le moteur ne publie aucun état pour `financement`,
@@ -1857,6 +1869,23 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **bilan-service, checkout du poste en retard** (STORY-1083) : `dev` local à `3f8e235`, 13 commits derrière
+  `origin/dev`, `node_modules` du 15/11 (`ajv` 6, `kafkajs`) : partir d'`origin/dev` et `npm ci --ignore-scripts`.
+- **bilan sous Node 25 : 16 suites rouges sur `origin/dev`** (binding de Confluent ; `dossier-scope.invariant`
+  « segment `:dossierId` » qui cherche `\n` dans un décorateur sorti en CRLF). Témoin : `git worktree add --detach`
+  d'`origin/dev` + jonction `mklink /J` vers `node_modules` ; **retirer la jonction par `rmdir` AVANT
+  `git worktree remove`** (sinon la suppression récursive peut traverser la jonction). `export.service` et
+  `homogeneisation.regles` rougissent sous la charge (délais) : les relancer seules.
+- **`eslint --fix` retire les assertions de type qu'il juge inutiles** (`x as unknown as T` sur un double) puis
+  signale l'import de type devenu inutile : relancer le lint après `--fix`.
+- **Une mutation qui rend un symbole inutilisé ou un type plus étroit ne compile pas** (TS6133, TS2367, TS2345) :
+  la réécrire (`ligne ?? { … }`, `MODULE.replace(…)`, `&& x.length < 0`). Le script de mutations le dit (« NE COMPILE
+  PAS ») au lieu de la compter.
+- **Python sous Windows : `print` d'une flèche « → » plante en cp1252** : `PYTHONIOENCODING=utf-8`.
+- **L'invariant du plan d'effacement C13 de bilan** (928) rougit pour toute collection neuve à champ d'organisation :
+  l'ajouter au plan (`plan-d-effacement.ts`) avec le bon champ ; `dossier-scope.invariant` compte les contrôleurs
+  (29 / 25 nichés depuis 1083).
 
 - **Auth : une mutation qui retire un code du catalogue ne compile plus dans les tests qui le nomment** (STORY-977) :
   `DroitDeTenant` et `TENANT_PERMISSION_LIBELLES` sont typés par le catalogue (TS2367 sur `d !== '<code>'`, TS7053

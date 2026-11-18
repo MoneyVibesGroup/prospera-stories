@@ -1,6 +1,6 @@
 # STORY-1083 : le dossier de financement existe
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (5 pts ; un module neuf dans un service existant : garde, droits hors du jeton, états,
 versions, piste d'audit ; un droit de plus au catalogue d'auth)
@@ -153,6 +153,68 @@ Emprunts, échéancier, indicateurs de dette, scénario retenu (1084) ; exigence
 document figé et version figée (1086) ; le manifeste au catalogue (975) ; les écrans (FE-140) ; le relais BFF
 (aucun : l'app du cabinet parle à bilan directement, comme pour le prévisionnel).
 
+## Livraison
+
+- **bilan #180** — `36c22fa` sur `dev` (branche `MNV-1083`, tête `8846d7a`, rejouée en rebase) : module `financement`,
+  36 fichiers.
+- **auth #47** — `96f8ab3` sur `dev` (tête `28b3ce9`) : trois droits au catalogue de tenant, table d'accès du cabinet.
+- **Annonce avant le code** : stories #692 (fiche, manifeste M49, « ⚠ Contrats »), amendement #693 (`DIFFERE_INVALIDE`).
+
 ## Preuves
 
-À remplir à la livraison.
+Node 25.2.1 du poste, **sans Docker** (D-L4-3) ; `npm ci --ignore-scripts` (binding de Confluent absent).
+
+- **bilan, e2e `test/financement.e2e-spec.ts` : 82/82.** Le vrai contrôleur derrière les vraies gardes dans l'ordre
+  d'`AppModule` (JWT RS256 → e-mail → rôles → garde du module → `DossierScopeGuard` réel), le VRAI adaptateur de
+  `GET /moi/droits` (fetch doublé : droits par membre, panne). AC-1 : état publié inconnu ⇒ 403
+  `FINANCEMENT_NOT_ENTITLED` même sur le dossier d'un autre cabinet (rien n'est dit du dossier), `NON_INSTALLE`,
+  `LECTURE_SEULE` (GET 200, POST `ABONNEMENT_EXPIRE`), KYC, collaborateur sans `valider` (403 `DROIT_INSUFFISANT`,
+  `details.droit`), membre sans droit, auth en panne (503). AC-2 : création (201, BROUILLON v1, champs), version du
+  référentiel facultative, 7 corps refusés (400), `DIFFERE_INVALIDE`, liste, lecture, `PATCH` d'un brouillon, `PATCH`
+  refusé dans les 5 autres états. AC-3 : **les 36 couples (6 × 6) éprouvés** contre la table recopiée du PRD (8
+  permises, `PRET` → `REMIS` refusé `VERSION_FIGEE_ABSENTE`, 28 `TRANSITION_INTERDITE` avec `details`), accord gardé,
+  5 conditions manquantes (422, champs nommés), aller-retour avec motif et piste. AC-4 : correction d'un REMIS (v1
+  archivée REMIS, v2 BROUILLON, `GET …/versions`, `…/versions/1` telle qu'elle était, `…/versions/3` 404), archive
+  orpheline ignorée puis réécrite, correction refusée dans les 5 autres états, motif et droit exigés. AC-5 :
+  collaborateur hors portefeuille 404 (et 201 sur son dossier), autre cabinet 404, dossier de financement d'un autre
+  dossier client 404 en lecture et en écriture, dossier archivé (lecture 200, écriture 409 `DOSSIER_ARCHIVE`),
+  identifiant mal formé 404. OpenAPI : 5 chemins, 8 opérations, `EtatFinancement` en énumération nommée.
+- **bilan, unitaires neufs : 130 passés** (14 suites des chemins touchés ; table des transitions 6 × 6 recopiée du
+  PRD, garde du module, adaptateur `/moi/droits` fermé à 7 pannes, dépôts conditionnels et cloisonnés, service,
+  projection de l'état publié de `financement`, copie du manifeste par empreinte, `urlDeLApiAuth`, plan
+  d'effacement C13, invariant de portée 29 contrôleurs / 25 nichés).
+- **bilan, suite complète** : 332 suites, 11 738 passés ; 18 suites rouges, dont **16 rouges à l'identique sur
+  `origin/dev`** (témoin dans un worktree détaché de `1651d33` : binding de Confluent sous Node 25, et
+  `dossier-scope.invariant` « segment `:dossierId` déclaré » qui lit un décorateur en CRLF) ; les deux autres
+  (`export.service`, `homogeneisation.regles`, sensibles à la charge) **vertes relancées seules** (91/91).
+- **Câblage du module racine** (`app-cablage.invariant.spec.ts`, `NestFactory.create(AppModule, { preview: true })`)
+  **vert** avec le client de Confluent doublé (`moduleNameMapper`), **rouge** si `FinancementModule` n'exporte plus la
+  source des droits (« Nest can't resolve dependencies of the FinancementAccessGuard … SourceDesDroits »).
+- **Mutations bilan : 14/15 rouges sur l'assertion**, une **équivalente** : retirer une ligne de la table, ne plus
+  regarder l'état d'arrivée, « rien ne manque », ne plus exiger la version figée, ne plus lire la table, écriture
+  sans l'état lu, sans la version lue, droit non exigé, état publié inconnu qui ouvre, état de `bilan` projeté dans
+  `financement`, version n non archivée, archive de la version courante comptée, correction d'un non-REMIS,
+  modification d'un non-BROUILLON — toutes rouges. **Équivalente** : passer `bilan` au lieu de `financement` à la
+  garde partagée ne change que le libellé de son code, que la garde du module n'emploie pas (elle répond
+  `FINANCEMENT_NOT_ENTITLED` elle-même). Lint des fichiers touchés, `tsc`, `nest build` verts.
+- **auth** : suites des droits 23/23 (385 tests) ; suite complète 102 suites, 1 429 passés, 4 rouges connues (binding
+  de Confluent : `app-cablage`, trois `kafka/*`, comme 977) ; **mutations 5/5 rouges** (valider retiré, valider au
+  collaborateur, consulter retiré au collaborateur, libellé changé, ordre du catalogue) ; lint, `tsc`, build verts.
+- **Docker : non** (D-L4-3). **Le démarrage réel de bilan avec le module neuf reste à prouver** par la première story
+  qui lève bilan sur une pile (1082 si elle le lève, au plus tard 1080, recette complète) : `docker compose up` de
+  bilan sain, route `GET /api/v1/dossiers/{id}/financements` mappée, 403 `FINANCEMENT_NOT_ENTITLED` tant que le
+  catalogue n'a pas le manifeste.
+
+## Pour la suite
+
+- **STORY-1084** (même module) : les emprunts s'ajoutent au dossier de financement (une sous-ressource, ou un champ
+  de la version : le contenu archivé par `POST …/versions` doit les porter) ; le scénario retenu (jeu d'hypothèses).
+  Un dossier `REMIS` ne se modifie pas : ses emprunts non plus.
+- **STORY-1085** : poser `EXIGENCES_BANCAIRES_INCOMPLETES` dans la ligne `BROUILLON` → `PRET` (aujourd'hui sans
+  condition, D-1083-8) ; lire le référentiel `exigences-bancaires-uemoa` et fixer `banque.versionReferentiel`.
+- **STORY-1086** : remplacer `AucuneVersionFigee` (port `VersionsFigees`) par la lecture des versions figées ; `PRET`
+  → `REMIS` s'ouvre alors (le test unitaire « avec une version figée » le prouve déjà).
+- **Catalogue (975)** : recopier les manifestes (`npm run manifestes:copier`), `financement` compris, pour que le
+  moteur installe le module et publie son état ; sans cela, FE-140 ne peut rien afficher en réel.
+- Routes C13 propres à `financement` (`instance/financement/…`) : à créer ; l'effacement de bilan efface déjà ses
+  collections.

@@ -990,9 +990,16 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1083.md"
     reserved_on: "2026-11-18"
     note: >
-      🚧 EN COURS le 2026-11-18 — contrat annoncé avant le code (journal de B, « ⚠ Contrats »). Lot 4 de B, n° 3 de la
-      ligne du plan (EPIC-266, lot F1, FR-1). Sans Docker (D-L4-3, D-1083-1). Passation de bilan constatée : origin/dev
-      1651d33, rien n a bougé depuis. NON SLOTTÉE.
+      🏁 DONE le 2026-11-18 — bilan #180 (dev 36c22fa), auth #47 (dev 96f8ab3) ; contrat annoncé avant la fusion
+      (stories #692, amendement #693 : manifeste financement M49 ; huit opérations sous /dossiers/{id}/financements ;
+      refus FINANCEMENT_NOT_ENTITLED, DROIT_INSUFFISANT, DROITS_INDISPONIBLES, DOSSIER_FINANCEMENT_INTROUVABLE,
+      VERSION_INTROUVABLE, TRANSITION_INTERDITE, TRANSITION_INCOMPLETE, VERSION_FIGEE_ABSENTE,
+      DOSSIER_FINANCEMENT_NON_MODIFIABLE, CONFLIT_CONCURRENT, DIFFERE_INVALIDE ; quatre types d audit ; trois droits hors
+      du jeton dans auth). Première story de B sur bilan : passation constatée (1651d33, rien n a bougé). Node 25 :
+      e2e 82/82 (36 transitions), unitaires neufs 130, suite complète 16 suites rouges à l identique sur origin/dev ;
+      câblage du module racine vert ; mutations 14/15 rouges + 1 équivalente (bilan), 5/5 (auth). Sans Docker
+      (D-L4-3, D-1083-1) : démarrage réel à prouver par 1082 ou 1080. Lot 4 de B, n° 3 de la ligne du plan
+      (EPIC-266, lot F1, FR-1). NON SLOTTÉE.
   - range: "STORY-1093"
     status: "RÉSERVÉ"
     owner: "Lot 4, porté par B (backend du cabinet) — la comptabilité branchée : comptabilite-service dans INGESTION_SOURCE_SYSTEMS de balance-service, le service dans la pile de recette et dans l AUTH_AUDIENCE de l IdP (balance, recette)"
