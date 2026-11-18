@@ -1763,6 +1763,14 @@ reserved_ranges:
     reserved_on: "2026-11-18"
     note: >
       Demandée par l utilisateur ; réservée par A le 2026-11-18 sur décision de l'utilisateur (journal de A, « Demandes aux autres groupes »). Texte seulement tant que l utilisateur n a pas tranché le vocal (FR-35, D13). NON SLOTTÉE.
+  - range: "STORY-1018"
+    status: "RÉSERVÉ"
+    owner: "Groupe C — correctif de FR-73 : l indemnité proposée arrondie à 5 000 et le décompte au franc sont tous deux conformes à l arrêt de l évaluation (pas de motif), le refus MOTIF_ECRIT nomme les deux, le montant arrêté reste au franc (sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1018.md"
+    reserved_on: "2026-11-18"
+    note: >
+      Demandée par l utilisateur le 2026-11-18 avec la correction de FR-73 (même PR) ; fiche écrite par A, prête pour C.
+      Défaut constaté sur origin/dev : jugerLArret compare le montant arrêté au seul décompte au franc. NON SLOTTÉE.
   - range: "STORY-1009"
     status: "RÉSERVÉ"
     owner: "Demander des pièces complémentaires pendant l'instruction : la liste des pièces attendues s'allonge avec un motif, les relances de 999 la reprennent (sinistres)"

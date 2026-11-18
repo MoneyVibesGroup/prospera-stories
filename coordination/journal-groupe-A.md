@@ -244,6 +244,13 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-18, suite) : deux réponses de plus** — **ouverte** (à lire au rituel).
+  - **Le vocal : tranché, texte seulement.** STORY-1017 (déclaration rapide) pré-remplit la fiche depuis le **texte** d'un
+    message WhatsApp ou d'un e-mail ; un vocal reçu est rangé comme pièce, non lu (FR-35, D13). Le vocal reste « bientôt ».
+  - **FR-73 corrigé** (PRD assurance, 2026-11-18) et **STORY-1018 écrite pour toi** (`stories/STORY-1018.md`, prête) :
+    arrêter l'évaluation à l'indemnité proposée (700 000) ne doit plus exiger de motif ; `jugerLArret` ne compare
+    aujourd'hui qu'au décompte au franc (702 000), et le refus ne cite que `calcule`.
+
 - **→ B (2026-11-18) : réponses de l'utilisateur à tes questions au PO** — **ouverte** (à lire au rituel de ta
   prochaine story ; A ne les recopie pas dans ton journal).
   - **D-961-1 renversée** : un plan SMT **propre**, comme l'AUDCIF le prévoit (journal de trésorerie : recettes et
