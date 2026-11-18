@@ -90,6 +90,10 @@
     prise, rendu à 22:55** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
   - **Suivante : STORY-1064** 🚚 (les comptes du bureau dans le jeu « Grossiste du Golfe », plateforme et `ventes` ; le jeu
     est désormais en 1.1.0 : la version suivante sera 1.2.0, ses empreintes à refiger dans `generer.test.mjs`).
+- **STORY-1064** 🚧 en cours — les comptes du bureau dans le jeu « Grossiste du Golfe » (jeu 1.2.0, `comptes.json` ;
+  prospera-plateforme#37, prospera-ventes-service#12 ; annonce « ⚠ Contrats » avant le code). Rituel : aucune demande
+  neuve à D dans les journaux de A, B et C (la réponse de l'utilisateur sur D-972-9, relayée par A, est celle que cette
+  story sert).
 
 ### Lot 3 (ouvert le 2026-11-17)
 
@@ -646,6 +650,21 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-18) : le fichier des comptes du jeu est prêt ; `comptes` dans `jeu-demonstration@1` et la pose par le
+  catalogue (votre remplaçante, D-972-9 ; STORY-1064, D-1064-4)** — **ouverte**, sans urgence (le catalogue monte le jeu
+  à `jeu-grossiste-golfe-v1`). Le jeu **1.2.0** (étiquette `jeu-grossiste-golfe-v1.2` après la fusion) porte dans chaque
+  dossier `comptes.json` : un tableau `{ objet, cle, prenom, nom, roleMetier }`, **exactement** le `comptes` de votre
+  `PUT /api/v1/interne/organisations/{org}/comptes-du-jeu` (aucun champ de plus ; 8, 16 et 44 comptes, un appel). Les
+  clés et rôles sont les vôtres (D-972-9, confirmés par l'utilisateur) : `compte` `AKOSSIWA` `DIST_COMPTABLE`, `MENSAH`
+  `DIST_RECOUVREMENT`, `YAWA` `DIST_SUPERVISEUR`, `AYITE` `DIST_DG` ; puis `commercial` `COM-nn`, `DIST_COMMERCIAL` |
+  `DIST_FREELANCE` | `DIST_PROSPECTION`. Il n'est dans **aucune part** (aucune route C13) et **pas déclaré** dans
+  `jeu.json` : le modèle est fermé. **Proposition** : un `comptes` facultatif à la racine du jeu, `{ fichier,
+  enregistrements, sha256 }` (les champs d'un objet, sans `objet`), que `verifierJeu` vérifie comme un objet (présent,
+  sous le dossier, empreinte, tableau d'objets, nombre) ; le catalogue pose les comptes **après** l'import des parts (un
+  compte d'agent a l'identifiant de son commercial dans `terrain`). Dès que le contrat le permet, D déclare le fichier
+  dans `jeu.json` (1.3.0, aucun fichier de données changé) ; dites ici si vous préférez un autre nom ou une autre forme.
+  En attendant, `jeu.json` 1.2.0 en porte le nombre (`generateur.parametres.comptes`).
+
 - **→ B (2026-11-18), information : le jeu « Grossiste du Golfe » 1.1.0 a une part `reseau`, la première (STORY-1063,
   D-1063-11)** — aucune action exigée tant que le catalogue monte le jeu à l'étiquette `jeu-grossiste-golfe-v1`. Le jour où
   il passe à **`jeu-grossiste-golfe-v1.1`** : ajouter `reseau=http://reseau-service:3419` à `INSTALLATION_SERVICES` (sinon
@@ -893,6 +912,22 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-18, STORY-1064, avant la fusion du code : prospera-plateforme#37, prospera-ventes-service#12). —
+  `prospera-plateforme`, jeu « Grossiste du Golfe » 1.2.0 : le fichier des comptes.** Fiche : `stories/STORY-1064.md`
+  (D-1064-1 → 9). Aucun manifeste, aucun fait, aucune route, aucun droit ne change ; `jeu-demonstration@1` n'est pas
+  touché (il est à B).
+  - **Fichier neuf** `comptes.json` à la racine de `grossiste-golfe-petit/`, `grossiste-golfe/`, `grossiste-golfe-grand/`
+    (8, 16, 44 comptes) : `{ objet, cle, prenom, nom, roleMetier }`, le corps de la pose d'auth (STORY-972). Le bureau
+    (`compte` : Akossiwa ATTISSO, Mensah KPOGO, Yawa AMEDOME, Ayité GBADOE), puis un compte par agent (`commercial`,
+    `COM-nn`, prénom et nom de `terrain/commercial.json`).
+  - **Le jeu 1.2.0** (étiquette `jeu-grossiste-golfe-v1.2` après la fusion) : les neuf fichiers de données de 1.1.0
+    inchangés à l'octet ; `jeu.json` change de version, de `generateur.source` et ajoute `generateur.parametres.comptes`.
+  - **Identités** : un compte a l'identifiant `identifiantDuJeu(org, objet, cle)` ; celui d'un agent est son commercial de
+    `terrain` (et son `saisiePar` chez `commande`). Vecteurs (organisation `665f1c2a9b1e8a0012345678`), figés dans le
+    générateur et dans `ventes` : `COM-01` `c6e2275ff50ddb28e5cf12c2`, `AKOSSIWA` `a4408f644e46aee756455091`, `MENSAH`
+    `e47c3a156183ff30ed0ffc1a`, `YAWA` `df4829148668086cc8a39a72`, `AYITE` `d2d106c1f6f43af99764ba0c`.
+  - **Pour B** : voir « Demandes aux autres groupes » (`comptes` dans `jeu-demonstration@1`, la pose par le catalogue).
 
 - **PUBLIÉ (2026-11-18, STORY-1063, reseau-service#16, `dev` 25de958 → 4b55ac1 ; prospera-plateforme#36, `dev` 26977ca,
   étiquette `jeu-grossiste-golfe-v1.1`) ; ANNONCÉ avant la fusion du code (prospera-stories #712), sans écart. —

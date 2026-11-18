@@ -526,11 +526,13 @@ reserved_ranges:
       FR-180). NON SLOTTÉE.
   - range: "STORY-1064"
     status: "RÉSERVÉ"
-    owner: "Groupe D, lot 4 — les comptes du bureau dans le jeu Grossiste du Golfe (AKOSSIWA, MENSAH, YAWA, AYITE ; COM-nn ; D-972-9) (plateforme, ventes)"
-    source_doc: "prospera-stories/coordination/PLAN-4-SESSIONS-LOT-4-2026-11-18.md"
+    owner: "Les comptes du bureau dans le jeu Grossiste du Golfe — le fichier des comptes (AKOSSIWA, MENSAH, YAWA, AYITE ; agents COM-nn ; rôles de D-972-9), au corps de la pose d'auth, jeu 1.2.0 ; la pose par le catalogue reste à B (prospera-plateforme, prospera-ventes-service)"
+    source_doc: "prospera-stories/stories/STORY-1064.md"
     reserved_on: "2026-11-18"
     note: >
-      Part de D de l accord de l utilisateur sur B8 (18/11) ; la pose par le catalogue reste à B. NON SLOTTÉE.
+      🚧 EN COURS le 2026-11-18 — annonce « ⚠ Contrats » avant le code ; prospera-plateforme#37,
+      prospera-ventes-service#12. Part de D de l accord de l utilisateur sur B8 (18/11) ; la pose par le catalogue reste à
+      B. Lot D, n° 5 du lot 4 (EPIC-226, FR-21). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
