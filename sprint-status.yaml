@@ -1501,6 +1501,16 @@ reserved_ranges:
     reserved_on: "2026-11-18"
     note: >
       Lot 4 de B, n° 6 (avec pile) ; demande de D. NON SLOTTÉE.
+  - range: "STORY-977"
+    status: "RÉSERVÉ"
+    owner: "Groupe B, lot 4 — le droit terrain:parametres:modifier au catalogue de tenant d'auth, hors du jeton (droitsHorsJeton de /moi/droits, borne inchangée), rôles par défaut DIST_DG et DIST_ADMIN (demande de D, D-1060-6 ; sur le modèle de commande:parametres:modifier, STORY-971) (prospera-auth-service)"
+    source_doc: "prospera-stories/stories/STORY-977.md"
+    reserved_on: "2026-11-18"
+    note: >
+      🚧 EN COURS le 2026-11-18 — contrat annoncé AVANT la fusion du code (« ⚠ Contrats » du journal de B). Story
+      neuve de la plage de B (930 → 979), hors des lignes du plan : la demande de D du 2026-11-18 (STORY-1060,
+      D-1060-6), placée avant STORY-1083 par la session du groupe B (D-977-1, contestable). Sans Docker (D-977-7).
+      NON SLOTTÉE.
   - range: "STORY-969"
     status: "RÉSERVÉ"
     owner: "Le lettrage — des lignes validées d'un même compte de tiers (collectif, tiers, devise), équilibrées ; manuel ; partiel (une ligne garde son reste, jamais lettrée au-delà de son montant, même sous la concurrence : verrou du compte de tiers) ; code AA, AB… par compte de tiers et exercice ; automatique par PROPOSITIONS (référence, puis montant et date, fenêtre de 90 jours), acceptées (PROPOSE_PAR_LA_MACHINE) ou modifiées (CHOISI_PAR_L_UTILISATEUR) ; délettrage tracé, refusé sur un exercice clos ; écarts de règlement sous un seuil (1 000) soldés par une écriture d'écart validée et numérotée (658 / 758) ; le lettrage vit à côté des écritures (en ajout seul) ; balance âgée par le port de 968 ; balance publiée inchangée (prospera-comptabilite-service)"

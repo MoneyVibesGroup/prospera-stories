@@ -871,6 +871,21 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-18, STORY-977 — `terrain:parametres:modifier` au catalogue de tenant d'auth, hors du jeton, annoncé AVANT
+  la fusion du code** (`prospera-auth-service`, branche `MNV-977` ; fiche `stories/STORY-977.md`, D-977-1 → 7). Tout
+  est AJOUT : aucune route, aucun champ, aucun topic ne change de forme.
+  - **Catalogue** (`DROITS_HORS_JETON`, section `terrain`) : `terrain:parametres:modifier` (« Modifier les paramètres
+    du terrain »), déclaré au manifeste `terrain` par D-1060. 153 codes en tout (24 du jeton, 129 hors du jeton).
+    **Jamais dans `perms[]`** : la borne du jeton ne bouge pas (17 + 24 = 41 ≤ 44).
+  - **Servi par** `GET /api/v1/moi/droits`, dans `droitsHorsJeton` (contrat `moi-droits` 1.1.0, inchangé).
+  - **Attribution par défaut** : `DIST_DG` et `DIST_ADMIN`, eux seuls (`AJOUTS_A_L_ANNEXE_B`, comme
+    `commande:parametres:modifier`). Le DG passe à 46 droits de tenant, `DIST_ADMIN` à 25. Aucun rôle de l'IMF
+    (D-977-4).
+  - **Pas d'avance de `dv`** à la livraison (D-949-3) : les caches `(membre, organisation, dv)` voient le droit à leur
+    terme (60 s au plus). `identity.droits.changed@1` ne change pas (il ne porte aucun droit).
+  - **Pour D** : `PUT /api/v1/terrain/parametres` passe pour un DG ou un `DIST_ADMIN` dès le déploiement d'auth.
+    **Pour A, C** : rien chez vous.
+
 - **2026-11-18, STORY-973 — le plan SMT propre, annoncé AVANT la fusion du code** (`prospera-comptabilite-service`,
   EPIC-112 ; fiche `stories/STORY-973.md`, D-973-1 → 7). **Fusionné le 18/11** : comptabilite #11, `dd3dc52` sur
   `dev` (annonce : stories #687), sans écart au contrat annoncé. D-961-1 renversée par l'utilisateur. Rien n'est
