@@ -75,6 +75,10 @@
   905 000 gardé, paquet `syscohada-revise@2.3`). **Code de FE-034 non lancé** (consigne de l'utilisateur). Puis AP-38
   (maquette console à valider).
 - **Ticket ouvert pour le groupe qui tient bilan-service** : `tickets/TICKET-BACKEND-projection-remboursements-non-plafonnes.md`.
+- ⏰ **À REPRENDRE EN FIN DE CHANTIER (consigne de l'utilisateur, 2026-11-19)** : `revue-ux-prototype-cabinet-2026-11-19.md`.
+  Le prototype est utilisable sur le fond, mais pas facile : trop d'écrit, notes de conception mêlées à l'écran, jargon
+  technique, 13 onglets dans l'Atelier. Recommandations : interrupteur « Notes de conception », passe « langage métier »,
+  tableau de bord « à faire », onglets regroupés, test avec de vrais experts-comptables. Aucune story créée à ce stade.
 - **FE-146 créée (2026-11-18, demande de l'utilisateur)** : le message de l'Atelier pendant la propagation des axes (409 SYSTEME_COMPTABLE_INDETERMINE juste après la décision). Front seul, 3 pts, quatrième story du lot 4 de A, après AP-38.
 - **Comptabilité propre et export des clients (2026-11-18, demande de l'utilisateur)** : STORY-1094 (plan propre du
   cabinet), 1095 (plan propre d'un client), 1096 (import du plan comptable de Sage 100) dans `comptabilite-service`
