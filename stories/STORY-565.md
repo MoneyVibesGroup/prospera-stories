@@ -99,6 +99,13 @@ point de reprise humaine — se relève sur le portail, elle ne se suppose pas.
 7. Une déclaration non due (verdict de STORY-568) **ne peut pas être déposée** : le refus cite le
    motif de dispense.
 
+## ✅ Ce que les cabinets veulent qu'on leur valide — salle du 2026-11-19 (V3)
+
+Ajouté depuis `salle-cabinets-validations-2026-11-19.md`. Ce sont les critères qu'un cabinet vérifie lui-même avant d'adopter la solution.
+
+- Pour un même client, l'entreprise et le dirigeant ont chacun leurs déclarations du mois, leurs valeurs copiables et leur accusé ; rien ne se mélange (test : deux NIF, deux accusés).
+- Le montant à payer s'affiche avec sa date limite ; le produit ne paie jamais.
+
 ## Notes
 
 - ⚡ **La décision du PO simplifie le produit et réduit son risque en une phrase.** Elle supprime

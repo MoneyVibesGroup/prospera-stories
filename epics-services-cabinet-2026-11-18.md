@@ -164,6 +164,11 @@ Dépôt : `bilan-service` (`financement/`, `export/`). FR-4 (exports), FR-5.
 | AC-4 | Le document porte « préparé par <cabinet> », la date et la version ; aucune transmission à la banque. |
 | AC-5 | Générer exige `PRET` ; les chiffres du PDF sont ceux de l'API (test qui compare). |
 
+**✅ Ce que les cabinets veulent qu'on leur valide** *(salle du 2026-11-19, V8 — `salle-cabinets-validations-2026-11-19.md`)*
+
+- Depuis une liasse figée, le dossier pour la banque sort sans qu'aucun chiffre soit saisi : seuls l'objet, le montant demandé et la banque se renseignent.
+- Mesure attendue : le dossier d'un client réel sort dans la journée (Me Akossiwa : « c'est le dossier de prêt qui paie mon loyer »).
+
 #### FE-141 : L'analyse financière à l'écran (5 pts)
 
 *En tant que collaborateur, je lis les indicateurs du client, leur formule et leur verdict, avant de parler à la
@@ -234,6 +239,11 @@ Dépôt : `document-service` (module `ged`). FR-10, FR-11 ; reprend FR-170, FR-1
 | AC-4 | Récolement daté : boîtes trouvées, manquantes, en trop ; écarts nommés. Restitution au client avec bordereau. |
 | AC-5 | Recherche dans un fonds par nature, exercice, tiers, date, montant, référence et texte lu — **sauf le texte des natures sensibles** (métadonnées seulement) ; le résultat donne la copie et la cote de l'original. |
 | AC-6 | La durée de conservation s'affiche par pièce (paramètre, 10 ans par défaut) ; aucune destruction. |
+
+**✅ Ce que les cabinets veulent qu'on leur valide** *(salle du 2026-11-19, V9 — `salle-cabinets-validations-2026-11-19.md`)*
+
+- Une boîte papier reçue a sa cote et son emplacement, et chaque pièce numérisée renvoie à son original papier.
+- Une pièce se retrouve en tapant le fournisseur ou le mois, en moins de trois gestes.
 
 #### AP-51 : La console voit l'archivage de chaque cabinet (3 pts)
 

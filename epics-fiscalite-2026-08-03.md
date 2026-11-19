@@ -680,6 +680,10 @@ En tant qu'**expert-comptable**, je veux un cheminement unique de la préparatio
 - **Étant donné** une transition quelconque **quand** elle aboutit **alors** l'état et son entrée d'audit sont écrits dans la **même** transaction.
 - **Étant donné** une transition non prévue par le cycle **quand** elle est tentée **alors** la réponse est `409`.
 
+**✅ Ce que les cabinets veulent qu'on leur valide** *(salle du 2026-11-19, V6 — `salle-cabinets-validations-2026-11-19.md`)*
+
+- **Étant donné** une obligation « Validée » **quand** on ouvre son dossier de dépôt **alors** le nom de l'associé qui l'a visée et la date du visa y figurent **et** un collaborateur ne peut pas la passer « À déposer » sans ce visa.
+
 ### STORY-324 — Validation du client capturée comme pièce
 
 En tant qu'**expert-comptable**, je veux consigner l'accord du client sans lui ouvrir l'application, afin que la validation reste opposable. *(FR-F35)*
@@ -689,6 +693,10 @@ En tant qu'**expert-comptable**, je veux consigner l'accord du client sans lui o
 - **Étant donné** un dossier exigeant la validation du client **quand** aucune pièce de validation n'est déposée **alors** l'obligation ne peut pas atteindre « Déposée ».
 - **Étant donné** une pièce de validation (document signé, courriel, ou mention manuelle) **quand** elle est enregistrée **alors** elle est horodatée et attribuée à celui qui la consigne.
 - **Étant donné** la société cliente **quand** on cherche son accès applicatif **alors** il n'en existe aucun.
+
+**✅ Ce que les cabinets veulent qu'on leur valide** *(salle du 2026-11-19, V6 — `salle-cabinets-validations-2026-11-19.md`)*
+
+- **Étant donné** l'accord du client reçu en capture WhatsApp ou par courriel **quand** il est consigné **alors** il est accepté comme pièce, au même titre qu'un document signé, en un seul geste.
 
 ### STORY-325 — Rectificatives versionnées, immuabilité et clôture
 
@@ -778,6 +786,11 @@ En tant que **collaborateur de cabinet**, je veux être guidé écran par écran
 - **Étant donné** une étape comportant des valeurs à reporter **quand** je la consulte **alors** chaque valeur est **copiable individuellement**.
 - **Étant donné** un montant déjà connu du système **quand** le guidage le présente **alors** il n'est jamais demandé en saisie.
 
+**✅ Ce que les cabinets veulent qu'on leur valide** *(salle du 2026-11-19, V3 — `salle-cabinets-validations-2026-11-19.md`)*
+
+- **Étant donné** un dépôt sur GUDEF **quand** le guidage s'affiche **alors** le geste principal est le téléversement d'**un seul fichier** : aucune des 92 feuilles n'est à ressaisir.
+- **Étant donné** une déclaration du mois sur dimana **quand** le guidage s'affiche **alors** les valeurs suivent l'ordre des champs du formulaire, chacune copiable en un geste, **et** l'entreprise et le dirigeant ont chacun leur guidage.
+
 ### STORY-333 — Capture de l'accusé et qualification du retard
 
 En tant qu'**expert-comptable**, je veux archiver la preuve du dépôt, afin de pouvoir la produire deux ans plus tard. *(FR-F42, FR-F43)*
@@ -789,6 +802,10 @@ En tant qu'**expert-comptable**, je veux archiver la preuve du dépôt, afin de 
 - **Étant donné** une obligation sans accusé **quand** on tente de la passer à « Accusé reçu » **alors** la transition est refusée avec `ACCUSE_REQUIS`.
 - **Étant donné** une date réelle de dépôt postérieure à l'échéance **quand** elle est enregistrée **alors** le retard est qualifié et le risque associé affiché.
 
+**✅ Ce que les cabinets veulent qu'on leur valide** *(salle du 2026-11-19, V2 — `salle-cabinets-validations-2026-11-19.md`)*
+
+- **Étant donné** un accusé GUDEF ou dimana capturé **quand** on le cherche **alors** il se retrouve depuis le dossier en moins de trois gestes ; le premier accusé réel est celui de STORY-1102.
+
 ### STORY-334 — Rejet administratif
 
 En tant qu'**expert-comptable**, je veux traiter un rejet sans perdre l'historique, afin que la reprise reste traçable. *(FR-F44)*
@@ -798,6 +815,10 @@ En tant qu'**expert-comptable**, je veux traiter un rejet sans perdre l'historiq
 - **Étant donné** un rejet notifié **quand** je l'enregistre avec son motif et sa date **alors** l'obligation revient dans le cycle sans qu'aucune version antérieure ne soit altérée.
 - **Étant donné** une obligation rejetée puis redéposée **quand** on consulte son dossier de contrôle **alors** le rejet, son motif et le nouveau dépôt y figurent tous les trois.
 
+**✅ Ce que les cabinets veulent qu'on leur valide** *(salle du 2026-11-19, V5 — `salle-cabinets-validations-2026-11-19.md`)*
+
+- **Étant donné** un rejet enregistré **quand** il s'affiche **alors** sa cause est dite en clair (la feuille, la cellule et la règle quand on les connaît) avec la correction proposée, **et** la correction se fait dans le produit, jamais dans le fichier déposé.
+
 ### STORY-335 — Archivage des livrables et accusés
 
 En tant qu'**expert-comptable**, je veux retrouver toute pièce depuis l'obligation qu'elle concerne, afin de ne plus fouiller une boîte mail. *(FR-F45)*
@@ -806,6 +827,10 @@ En tant qu'**expert-comptable**, je veux retrouver toute pièce depuis l'obligat
 
 - **Étant donné** un livrable ou un accusé **quand** il est archivé **alors** il l'est dans `document-service`, rattaché au dossier, à l'implantation, à l'obligation et à la période.
 - **Étant donné** une pièce archivée **quand** je la consulte **alors** l'accès passe par une URL présignée à durée limitée, vérifiée depuis le client qui la consomme. *(NFR-F07)*
+
+**✅ Ce que les cabinets veulent qu'on leur valide** *(salle du 2026-11-19, V9 — `salle-cabinets-validations-2026-11-19.md`)*
+
+- **Étant donné** une liasse déposée **quand** on ouvre le dossier du client des années plus tard **alors** la liasse figée, son accusé et la validation du client sont dans le même fonds d'archives que les pièces (STORY-1100).
 
 ### STORY-336 — Dossier de contrôle à la demande
 

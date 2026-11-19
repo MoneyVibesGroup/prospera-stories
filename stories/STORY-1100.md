@@ -54,3 +54,9 @@ CEET, les relevés de la banque, les avis d'imposition. Comme pour les écriture
 - **AC-4** : deux cabinets suivent le même client (même NIF) ; B ne reçoit aucune suggestion ni aucune pièce de A
   (test à deux cabinets, sur la vraie pile).
 - **AC-5** : une mémoire oubliée n'est plus proposée, et l'oubli est journalisé.
+
+## ✅ Ce que les cabinets veulent qu'on leur valide — salle du 2026-11-19 (V9)
+
+Ajouté depuis `salle-cabinets-validations-2026-11-19.md`. Ce sont les critères qu'un cabinet vérifie lui-même avant d'adopter la solution.
+
+- Le cabinet retrouve une pièce, une liasse ou un accusé d'un client en tapant le fournisseur ou le mois, en moins de trois gestes.
