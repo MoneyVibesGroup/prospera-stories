@@ -69,6 +69,13 @@ lendemain, parfois après contrôle. **Le suivi est donc récurrent, pas synchro
 8. **Non-régression** : sans connecteur, STORY-333 fonctionne à l'identique — aucun travail
    récurrent n'est créé pour un dépôt assisté.
 
+## ✅ Ce que les cabinets veulent qu'on leur valide — salle du 2026-11-19 (V2, V5)
+
+Ajouté depuis `salle-cabinets-validations-2026-11-19.md`. Ce sont les critères qu'un cabinet vérifie lui-même avant d'adopter la solution.
+
+- Un accusé ou un rejet rapporté apparaît sur le dossier dès qu'il est enregistré ; un rejet porte sa cause en clair (la feuille, la cellule et la règle quand on les connaît).
+- Le parcours se recette d'abord sur le dépôt réel de STORY-1102.
+
 ## Notes
 
 - ⚡ **La valeur n'est pas le gain de clics, c'est la fin de l'oubli.** Aujourd'hui, un accusé

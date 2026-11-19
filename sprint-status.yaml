@@ -1176,6 +1176,15 @@ reserved_ranges:
     note: >
       Valeurs de référence : couverture 1,76 / 1,56 / 1,65 ; soutenable 20 492 000 ; prudent négatif en 2027 (-754 142), +687 296
       avec 6 mois de différé. 13 pts. NON SLOTTÉE.
+  - range: "STORY-1101 → STORY-1102"
+    status: "RÉSERVÉ"
+    owner: "À placer au prochain plan — salle des cabinets du 19/11 : 1101 les douze mois déclarés sur dimana face à la liasse (fiscal-service) ; 1102 le premier dépôt réel, une liasse acceptée sur GUDEF et un mois sur dimana, chez un cabinet pilote (recette de terrain). Écran : FE-081."
+    source_doc: "prospera-stories/salle-cabinets-validations-2026-11-19.md"
+    reserved_on: "2026-11-19"
+    note: >
+      Demande de l'utilisateur du 2026-11-19 (« ajoute ce qu'ils veulent qu'on leur valide dans les stories »).
+      Points V1 → V11 ; blocs ajoutés à STORY-323, 324, 332, 333, 334, 335, 562, 565, 1086, 1088, 1097, 1100 et
+      FE-081. V10 (hébergement, export complet) sans story. 1102 passe AVANT la première démarche commerciale. NON SLOTTÉES.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"
