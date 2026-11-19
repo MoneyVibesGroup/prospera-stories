@@ -74,6 +74,9 @@
   réaligné sur TOUT le livré en cinq passes, version 17 ; décisions de A : Ets Kossi au régime réel partout, écart du TFT
   905 000 gardé, paquet `syscohada-revise@2.3`). **Code de FE-034 non lancé** (consigne de l'utilisateur). Puis AP-38
   (maquette console à valider).
+- **2026-11-19 — consigne de l'utilisateur** : code de FE-034 lancé (sous-session, sans Docker d'abord) ; pour la
+  console, « tout tester comme FE-069 avant d'ajouter AP-38 » ⇒ **AP-54** (gate de la console) créée et lancée ; AP-38
+  (maquette arrêtée avant toute écriture) reprendra après AP-54.
 - **Ticket ouvert pour le groupe qui tient bilan-service** : `tickets/TICKET-BACKEND-projection-remboursements-non-plafonnes.md`.
 - ⏰ **À REPRENDRE EN FIN DE CHANTIER (consigne de l'utilisateur, 2026-11-19)** : `revue-ux-prototype-cabinet-2026-11-19.md`.
   Le prototype est utilisable sur le fond, mais pas facile : trop d'écrit, notes de conception mêlées à l'écran, jargon
