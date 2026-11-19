@@ -70,7 +70,11 @@
   verts (7 rouges sur dev corrigés, 1 instable) ; **gate sur la vraie pile vert** (`npm run e2e:gate`, étanchéité A/B sur
   les quatre services, CORS, collaborateur). Restes nommés dans la fiche : migration STORY-356 sur données anciennes,
   AC-8 clavier, relecture des réserves de FE-059 → 068.
-- **Suite du lot** : FE-034 (maquette à revalider par l'utilisateur), puis AP-38 (maquette console à valider).
+- **Suite du lot** : ~~FE-034 maquette~~ ✅ **validée par l'utilisateur le 2026-11-19** (prospera-stories #703 ; prototype cabinet
+  réaligné sur TOUT le livré en cinq passes, version 17 ; décisions de A : Ets Kossi au régime réel partout, écart du TFT
+  905 000 gardé, paquet `syscohada-revise@2.3`). **Code de FE-034 non lancé** (consigne de l'utilisateur). Puis AP-38
+  (maquette console à valider).
+- **Ticket ouvert pour le groupe qui tient bilan-service** : `tickets/TICKET-BACKEND-projection-remboursements-non-plafonnes.md`.
 - **FE-146 créée (2026-11-18, demande de l'utilisateur)** : le message de l'Atelier pendant la propagation des axes (409 SYSTEME_COMPTABLE_INDETERMINE juste après la décision). Front seul, 3 pts, quatrième story du lot 4 de A, après AP-38.
 - **Comptabilité propre et export des clients (2026-11-18, demande de l'utilisateur)** : STORY-1094 (plan propre du
   cabinet), 1095 (plan propre d'un client), 1096 (import du plan comptable de Sage 100) dans `comptabilite-service`
