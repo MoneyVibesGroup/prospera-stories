@@ -273,6 +273,14 @@ Règles de proposition :
   cabinet pour le même NIF n'est jamais retrouvé ni proposé.
 - **AC-10** : les factures comptabilisées rejoignent le fonds d'archives du client **de ce cabinet** (STORY-1100).
 
+## ✅ Ce que les cabinets veulent qu'on leur valide — salle du 2026-11-19 (V7)
+
+Ajouté depuis `salle-cabinets-validations-2026-11-19.md`. Ce sont les critères qu'un cabinet vérifie lui-même avant d'adopter la solution.
+
+- Une facture photographiée au téléphone (photo penchée, lumière moyenne) donne une écriture proposée ; ce que l'OCR n'a pas lu est surligné, jamais deviné.
+- Le lot de factures du mois se valide en un clic pour les écritures sûres ; seules les écritures douteuses restent à regarder.
+- Mesure attendue : le temps de saisie d'un mois de factures d'un client réel est noté avant et après (dossier de STORY-1102).
+
 ## Hors périmètre (nommé pour plus tard)
 
 - Le **règlement** de la facture : l'écriture banque/401 et le lettrage automatique, à partir du relevé bancaire déjà

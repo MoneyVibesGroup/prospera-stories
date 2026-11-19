@@ -219,6 +219,10 @@ Dépôt : `bilan-service` (`financement/`, `export/`). FR-4 (exports), FR-5.
 > | AC-11 | **Mention fixe de responsabilité du cabinet**, en pied de **chaque page** : « Établi par <cabinet> sur la base des informations fournies par le client. Ne constitue pas une certification des comptes. » (référence : Cabinet Diallo & Associés) ; avec « préparé par <cabinet> », la date et la version. |
 > | AC-12 | **PDF et Excel** : le PDF porte la synthèse, la présentation, le projet (pro forma, coût), l'historique, l'analyse, le prévisionnel, la trésorerie mensuelle si exigée, le plan de financement, l'échéancier, les garanties (décote, valeur retenue), la note ou le plan, la liste des pièces jointes **de cette banque** ; l'Excel porte les tableaux. Les chiffres du PDF sont ceux de l'API (test qui compare, comme AC-5). |
 > | AC-13 | **Voir avant de télécharger** (exigence de l'utilisateur, 21/11) : le PDF et l'Excel de chaque banque, générés ou figés, s'affichent dans l'application (`…/documents/{id}/apercu`, contrat de STORY-1104) **avant** tout téléchargement ; le téléchargement d'une version figée rend les mêmes octets. |
+**✅ Ce que les cabinets veulent qu'on leur valide** *(salle du 2026-11-19, V8 — `salle-cabinets-validations-2026-11-19.md`)*
+
+- Depuis une liasse figée, le dossier pour la banque sort sans qu'aucun chiffre soit saisi : seuls l'objet, le montant demandé et la banque se renseignent.
+- Mesure attendue : le dossier d'un client réel sort dans la journée (Me Akossiwa : « c'est le dossier de prêt qui paie mon loyer »).
 
 #### FE-141 : L'analyse financière à l'écran (5 pts)
 
@@ -297,6 +301,11 @@ Dépôt : `document-service` (module `ged`). FR-10, FR-11 ; reprend FR-170, FR-1
 | AC-4 | Récolement daté : boîtes trouvées, manquantes, en trop ; écarts nommés. Restitution au client avec bordereau. |
 | AC-5 | Recherche dans un fonds par nature, exercice, tiers, date, montant, référence et texte lu — **sauf le texte des natures sensibles** (métadonnées seulement) ; le résultat donne la copie et la cote de l'original. |
 | AC-6 | La durée de conservation s'affiche par pièce (paramètre, 10 ans par défaut) ; aucune destruction. |
+
+**✅ Ce que les cabinets veulent qu'on leur valide** *(salle du 2026-11-19, V9 — `salle-cabinets-validations-2026-11-19.md`)*
+
+- Une boîte papier reçue a sa cote et son emplacement, et chaque pièce numérisée renvoie à son original papier.
+- Une pièce se retrouve en tapant le fournisseur ou le mois, en moins de trois gestes.
 
 #### AP-51 : La console voit l'archivage de chaque cabinet (3 pts)
 
