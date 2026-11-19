@@ -1,6 +1,6 @@
 # STORY-1093 : la comptabilité branchée au hub et à la recette
 
-Status: in-progress
+Status: done
 
 **Complexité :** faible à moyenne (un défaut de configuration dans balance ; un service neuf dans le profil de recette,
 l'audience de l'IdP, une garde étendue ; une suite de recette sans doublure)
@@ -110,8 +110,47 @@ balance) ; code sur `origin/dev` : balance `d43fbe4` (`config/configuration.ts`,
 
 ## Preuves
 
-(à compléter)
+- **balance (Node 25)** : `src/config` et `src/modules/balance/ingestion` **8 suites, 126/126** ; `configuration.spec.ts`
+  7/7 (3 neufs : défaut, remplacement, vide) ; `tsc --noEmit` et lint des fichiers touchés (`endOfLine auto`) propres ;
+  **mutation** (retrait de `comptabilite-service` du défaut) : rouge sur l'assertion (1 échec, valeur attendue écrite
+  dans le test). Aucun module Nest, aucune dépendance, aucun Dockerfile changés.
+- **recette** : `npm test` **10 suites, 97/97** ; `npm run verifier` (tsc, prettier) vert ; **mutations de la garde du
+  profil : 8/8 rouges sur une assertion** (audience retirée du profil, audience retirée de la surcouche fiscale,
+  émetteurs redéfinis au lieu de retirés, `KAFKA_ESPACE: ESSAI` en dur, MongoDB hors jeu de répliques, sans
+  `DOCUMENT_SERVICE_URL`, port publié sur toutes les interfaces, un volume pour la comptabilité). `docker compose config`
+  du compose racine + profil : `INGESTION_SOURCE_SYSTEMS` absent de balance, audience complète sur l'IdP.
+- **Pile `grp-b`, recette `comptabilite` — 5/5 sur pile neuve** (`COMPOSE_PROJECT_NAME=grp-b`, volumes neufs, images
+  des neuf services construites depuis `git -c core.autocrlf=false archive`, surcouche de contextes hors dépôt,
+  `COMPOSE_PARALLEL_LIMIT=2` : auth `96f8ab3`, kyc `d4932c6`, catalogue `a5a2676`, notification `e0a50c0`, paiement
+  `4684d22`, dossier `2bf9dbd`, document `da4ddf2`, comptabilité `ddc9fa5`, balance de la branche) :
+  - l'IdP émet `comptabilite-service` (`AUTH_AUDIENCE` de l'IdP lu dans le conteneur : onze audiences) ; balance-service
+    tourne sans `INGESTION_SOURCE_SYSTEMS` (lit son défaut) ;
+  - `balance` et `comptabilite` installés par le `PUT` de la console (`source: moteur:<plan>`) ; ouverture au JOURNAL
+    201 ; une pièce déposée chez le vrai `document-service` (`POST /piece-extractions`, 202), écriture BQ 521100 D /
+    101300 C 500 000 saisie (201) et validée (201) ;
+  - **publication 201** (version 1, `origine: comptabilite`, `source: direct`, `sourceSystem: comptabilite-service`) ;
+    **`INGEREE` en 2,4 s** avec le `balanceId` du hub ; au hub, une balance `origine: comptabilite`, `source: direct`,
+    version 1, **même empreinte** (`adac0d30…`), mêmes comptes ; trace d'ingestion `sourceSystem: comptabilite-service`
+    sans rejet ; rejeu 200, même version, toujours une seule balance au hub.
+- **Témoin « avant »** : la même suite avec balance-service d'`origin/dev` `d43fbe4` (défaut sans la comptabilité,
+  image vérifiée : `comptabilite-service` absent du `dist`) : **la publication passe `REJETEE`,
+  `SOURCE_SYSTEM_INCONNU`** (2 échecs sur l'assertion, 3 tests verts avant). C'est bien le défaut qui ingère.
+- **Après la fusion, rejouée sur `origin/dev`** : balance reconstruite depuis `695b6c7`, recette `a1d68d7` (checkout en
+  avance rapide), pile neuve : **5/5 en 175 s**. Arbres identiques aux branches éprouvées (`origin/dev^{tree}` =
+  `MNV-1093^{tree}` dans les deux dépôts). La comptabilité tient en 136 Mio.
+- **Verrou Docker** : pris à 01:07 (atomique, libre) ; tâches de fond perdues par la coupure de l'API (01:10 → 01:30),
+  aucune pile ne tournait ; reprise sous le même verrou ; `down -v` (aucun conteneur, volume ni réseau `grp-b` ne
+  reste) ; **rendu à 01:51**. Aucune boucle d'attente.
 
 ## Livraison
 
-(à compléter)
+🏁 **DONE (2026-11-19)** — balance **#158** (`dev` **`695b6c7`**), recette **#26** (`dev` **`a1d68d7`**) ; contrat
+annoncé avant la fusion (stories #723), sans écart.
+
+## Ce qui reste
+
+- STORY-1080 (recette croisée complète, jouée une fois) lève la comptabilité par ce profil ; `INSTALLATION_SERVICES`
+  du catalogue de la recette y nommera `comptabilite=http://comptabilite-service:3420` pour `POST /installations`
+  (D-975-11 d'abord).
+- Le compose racine de chaque poste (non versionné) pose encore `INGESTION_SOURCE_SYSTEMS` sans la comptabilité : hors
+  recette, une pile racine la rejette tant que la variable n'est pas corrigée sur le poste (geste local, aucun dépôt).

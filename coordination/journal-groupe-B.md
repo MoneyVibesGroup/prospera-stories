@@ -133,8 +133,27 @@
        socle.
      - **Pour 1080** : D-975-11 n'a pas servi ici (jeton de l'organisation obtenu à la main) ; la recette
        `cabinet-moteur` joue désormais l'import contre le vrai dossier-service et peut ajouter validation + jeu d'états.
-  - **En cours : STORY-1093** (la comptabilité branchée au hub et à la recette : balance, recette ; pile de recette).
-    Contrat annoncé (« ⚠ Contrats »), passation de la recette constatée (« Passations »).
+  10. ~~STORY-1093~~ : **balance #158** (`695b6c7` sur `dev`), **recette #26** (`a1d68d7`), contrat annoncé avant la
+     fusion (stories #723). La comptabilité branchée au hub et à la recette ; les deux demandes de B à A du 17/11
+     (STORY-967) sont servies.
+     - balance : `comptabilite-service` dans le **défaut** d'`INGESTION_SOURCE_SYSTEMS` (une variable posée le remplace
+       toujours) ; JSON Schema non touché (copie à l'octet chez la comptabilité, D-1093-2).
+     - recette : `comptabilite-service` **au profil** (profil `recette`, levé à la demande ; port 3420 en boucle locale ;
+       base dans le MongoDB `rs0` de la pile, aucun MongoDB dédié ; `KAFKA_ESPACE` de la pile ; `AUTH_*`,
+       `AUTH_SERVICE_URL`, `DOSSIER_SERVICE_URL`, `DOCUMENT_SERVICE_URL`) ; l'IdP émet l'audience (profil, et surcouche
+       fiscale qui reprend la liste entière) ; **balance lit son défaut** (`INGESTION_SOURCE_SYSTEMS: !reset null` : le
+       compose racine du poste posait une liste sans la comptabilité) ; garde du profil étendue ; suite
+       `recette/comptabilite.recette.ts` (sans doublure : vraie pièce chez `document-service`).
+     Pile `grp-b` neuve, images depuis `git archive` : **5/5** (publication `INGEREE`, même empreinte au hub, rejeu sans
+     doublon) ; témoin balance d'`origin/dev` `d43fbe4` : `REJETEE SOURCE_SYSTEM_INCONNU` ; **rejouée 5/5 sur
+     `origin/dev` après la fusion** (175 s). Mutations 1/1 (balance), 8/8 (garde). **Passation de la recette constatée**
+     (« Passations ») : les cinq dépôts venus de A le sont.
+     Verrou pris à 01:07 (atomique, libre), rendu à 01:51 ; coupure de l'API de 01:10 à 01:30 (tâches de fond perdues,
+     aucune pile ne tournait) ; aucun conteneur, volume ni réseau `grp-b` ne reste.
+  - **Suivante : STORY-1080** (le cabinet installé par le moteur, clôture : balance, bilan, recette ; **recette croisée
+    complète, jouée une fois** ; D-975-11 d'abord ; `INSTALLATION_SERVICES` du catalogue de la recette nommera
+    `comptabilite=http://comptabilite-service:3420` ; la recette `cabinet-moteur` peut ajouter le round-trip du
+    collaborateur de 1081 et la validation + jeu d'états de 1082).
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -1029,6 +1048,7 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
     (`INGESTION_SOURCE_SYSTEMS: !reset null`, Compose 2.24 ou plus) : il lit son défaut. Une suite neuve,
     `recette/comptabilite.recette.ts`. **Pour A, C, D** : une pile de recette levée avant ce changement émet des jetons
     sans l'audience de la comptabilité ; la descendre et la relancer.
+  - **Fusionné le 19/11** : balance #158 (`695b6c7` sur `dev`), recette #26 (`a1d68d7`), sans écart au contrat annoncé.
 
 - **2026-11-19, STORY-1082 — le dossier de démonstration créé par le moteur dans `dossier-service`, résolu par
   l'import C13 de balance, annoncé AVANT le code** (`prospera-dossier-service` et `prospera-balance-service`, branches
@@ -2134,6 +2154,19 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Le compose racine du poste pose `INGESTION_SOURCE_SYSTEMS` sur balance** (sans la comptabilité, ni
+  `microfinance-service`) : il cache le défaut du service. Le profil de recette la retire par `KEY: !reset null`
+  (Compose ≥ 2.24 ; vérifier par `docker compose … config`). Hors recette, une pile racine rejette encore une balance de
+  la comptabilité `SOURCE_SYSTEM_INCONNU` (STORY-1093).
+- **Une écriture de la comptabilité exige une vraie pièce chez `document-service`** : sans doublure, la déposer par
+  `POST /api/v1/piece-extractions` (multipart : `type` `FACTURE`, `correlationId`, `pieceId`, `dossierId`, `file`), en
+  réessayant le temps que `document-service` connaisse le dossier (STORY-1093).
+- **Une surcouche fiscale chargée après le profil remplace l'`AUTH_AUDIENCE` de l'IdP** : toute audience ajoutée au
+  profil doit l'être aussi dans `docker-compose.fiscal.yml` (une garde l'exige depuis 1093).
+- **Coupure de l'API en pleine story** (19/11, 01:10 → 01:30) : les tâches de fond (construction d'images) sont
+  perdues pour la session, mais la construction elle-même a fini (journal `code 0`) ; relire le journal avant de
+  relancer.
 
 - **Un `@Body()` typé est validé AVANT le handler** (STORY-1082) : un refus d'identité ou d'espace jugé dans le handler
   rend 400 sur un corps malformé au lieu de 403. Le juger dans une garde de classe (`@UseGuards`), qui passe avant les
