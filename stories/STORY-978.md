@@ -1,6 +1,6 @@
 # STORY-978 : le catalogue demande un jeton du moteur par organisation
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (un fournisseur neuf et son module dans le catalogue, trois appelants qui changent de jeton,
 une variable retirée et une neuve ; aucune route, aucun topic, aucune collection ; auth inchangé)
@@ -12,6 +12,7 @@ route `POST /api/v1/interne/jetons-de-service` de STORY-948 sert telle quelle, r
 « ⚠ Pour 1080 (D-975-11) »), sorti de 1080 par la session du groupe B (D-978-1).
 **Plan :** `coordination/PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §3 (B), avant la ligne 10 (1080). **Docker : non**
 (décision de la session du groupe B).
+**Livraison :** catalogue #63 (`dev` **`f9e9e26`**) ; contrat annoncé avant la fusion (stories #725), sans écart.
 **Suivante :** STORY-1080 (le cabinet installé par le moteur, clôture ; recette croisée complète).
 
 **Sources lues :** plan du lot 4 (§0, §1, §3, §7, §8) ; `REGLES-DES-GROUPES.md` ; journal de B (état du lot 4, D-975-11,
@@ -104,6 +105,40 @@ du moteur).
 - **D-978-11 — Pas de Docker** (décision de la session du groupe B). Un module Nest neuf : câblage prouvé par
   `app-cablage.invariant.spec.ts` (binding de Confluent doublé sous Node 25, comme à 974), qui rougit sans l'import du
   module neuf. Aucune dépendance, aucun Dockerfile ne change. Le démarrage réel est celui de 1080.
+
+## Preuves
+
+- **Node 25 (poste), tests relancés par chemin** :
+  - `src/jetons-du-moteur/jetons-du-moteur.spec.ts` **31/31** (auth doublée par un vrai serveur HTTP : forme de la
+    demande ; deux organisations ⇒ deux jetons, chacun le sien, gardés ; gardé jusqu'à 239,999 s, neuf à 240 s ; marge
+    réglée ; jeton plus court que la marge servi sans être gardé ; appels simultanés partagés ; `oublier` ; 404, 401,
+    503, 500, injoignable, délai, non configuré, cinq réponses hors contrat ⇒ résultat nommé, UN appel, rien de gardé ;
+    jeton échu jamais présenté quand le renouvellement échoue ; purge) ;
+  - `src/installation/verifications.spec.ts` **25/25** (jeton de l'organisation du plan ; deux organisations ; panne
+    d'auth ⇒ module non appelé ; module sans adresse : `SERVICE_NON_CONFIGURE` sans demander de jeton ; 401 oublie,
+    403 non) ; `acquis.spec.ts` (`JETON_DU_MOTEUR_INDISPONIBLE` jamais différée) ; `config/` 5 suites (validation :
+    jeton statique refusé en nommant la remplaçante, marge 1 → 3 600 ; configuration).
+  - **e2e** `test/jetons-du-moteur.e2e-spec.ts` **9/9** : vrais appelants et vrai fournisseur câblés par Nest avec la
+    VRAIE configuration (environnement + `validateEnv`), auth doublée et un module doublé qui refuse
+    `ORGANISATION_HORS_JETON` comme les vrais : deux organisations ⇒ deux jetons, aucun refus ; vérification, import
+    C13 et Reprise de la même organisation ne redemandent rien ; renouvelé à 240 s ; auth en panne ⇒ trois résultats
+    nommés, **trois demandes à auth pour trois appels**, aucun appel au module, puis reprise ; auth injoignable ;
+    organisation inconnue ; 401 du module (×3 appelants) ⇒ jeton neuf à la tentative suivante ; jeton statique refusé.
+  - Suite complète : **100/103 suites, 1 592 passés** ; 3 rouges connues (binding de Confluent : câblage du module
+    racine, producteur, relais d'outbox), **vertes avec le binding doublé** (19/19). E2e complète : 5 suites rouges
+    (172 tests) **identiques sur `origin/dev`** (témoin par `git stash`), plus la suite neuve verte.
+  - **Câblage** (`app-cablage.invariant.spec.ts`, binding doublé) : vert ; **rouge** (« can't resolve dependencies of
+    the AppelsC13ParHttp … JETONS_DU_MOTEUR ») quand on retire `JetonsDuMoteurModule` d'`EssaiModule`.
+- **Mutations : 26/26 rouges sur une assertion** (borne et usage du cache, appels partagés, marge, jeton court gardé,
+  organisation du corps, claim du jeton, identité, durée nulle, 404, délai, secret absent, purge, `oublier`, statut
+  200, clé du jeton et raison dans les trois appelants, ordre adresse/jeton, 401 ×3, jeton statique accepté, marge par
+  défaut). Trois ont demandé une reprise : une survivante d'abord (jeton court gardé : effet seulement en mémoire, le
+  test vérifie désormais que rien n'est gardé), deux qui ne compilaient pas (paramètre inutilisé ; import `IsEmpty`
+  inutilisé), réécrites.
+- `tsc --noEmit`, lint des fichiers touchés (`endOfLine auto`), `nest build` verts ; `git diff --stat` =
+  `--ignore-cr-at-eol` ; aucun fichier non suivi hors des quatre neufs.
+- Après la fusion : arbre de `f9e9e26` (dev) = arbre de la branche poussée `51723c3`.
+- **Docker** : aucun (D-978-11) ; aucun verrou pris.
 
 ## Pour STORY-1080 (points ouverts, à reprendre par sa fiche)
 
