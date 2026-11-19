@@ -1031,6 +1031,29 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-19, STORY-978 — le catalogue demande un jeton du moteur par organisation, annoncé AVANT la fusion du
+  code** (`prospera-platform-catalog-service`, branche `MNV-978` ; fiche `stories/STORY-978.md`, D-978-1 → 11).
+  **Aucune route, aucun topic, aucune collection ne change ; auth-service n'est pas touché.**
+  - **Ce que voient les modules** (comptabilité, balance, bilan, Reprise, ventes, terrain, assureur fictif…) : sur leurs
+    routes du moteur (`…/{organisationId}/verifications/…`, import et effacement C13), le jeton présenté est désormais
+    celui de l'identité `MOTEUR` **pour l'organisation du chemin**, émis par l'auth-service de l'espace
+    (`POST /api/v1/interne/jetons-de-service`, STORY-948) et renouvelé avant son terme. Rien à changer chez eux : leur
+    garde (`ORGANISATION_HORS_JETON`) est enfin satisfaite pour toute organisation.
+  - **Configuration du catalogue** (pour qui lève une pile, dont `prospera-recette`) :
+    - **`INSTALLATION_JETON_SERVICE` est RETIRÉE** : posée (non vide), **le catalogue refuse de démarrer** (message qui
+      nomme la remplaçante). Aucun compose versionné ne la pose ;
+    - le moteur lit l'adresse et le secret de la naissance : **`NAISSANCE_AUTH_URL`** (`http://auth-service:3001/api/v1`)
+      et **`MOTEUR_JETON_SERVICE`** (la valeur d'auth-service) ; sans eux, chaque appel du moteur à un module rend
+      `JETON_DU_MOTEUR_INDISPONIBLE` (cause `NON_CONFIGURE`) au lieu d'appeler le module ;
+    - variable **neuve, facultative** : `JETON_DU_MOTEUR_MARGE_S` (60 par défaut, 1 → 3 600).
+  - **Raison neuve, chaîne libre (ajout)** : `JETON_DU_MOTEUR_INDISPONIBLE`, cause dans `detail` (`NON_CONFIGURE`,
+    `AUTH_INJOIGNABLE`, `DELAI_DEPASSE`, `ORGANISATION_INCONNUE`, `HTTP_<n>`, `REPONSE_HORS_CONTRAT`) : dans l'étape
+    `VERIFIER` d'un plan d'installation (`resultat.voyant: NON_EXECUTEE`, plan `EN_ATTENTE`, jamais différée par le
+    `PUT` de la console) et dans la part non importée d'un essai (`essai-prospect.openapi.json`, description de
+    `raison` ; type et version inchangés). **Pour A (console)** : un libellé à prévoir si l'écran traduit les raisons.
+  - **Pour la recette (STORY-1080, B)** : le catalogue de `docker-compose.recette.yml` doit recevoir
+    `NAISSANCE_AUTH_URL`, `MOTEUR_JETON_SERVICE` (même valeur qu'auth) et `INSTALLATION_SERVICES`.
+
 - **2026-11-19, STORY-1093 — la comptabilité branchée au hub et à la recette, annoncé AVANT le code**
   (`prospera-balance-service` et `prospera-recette`, branches `MNV-1093` ; fiche `stories/STORY-1093.md`, D-1093-1 →
   10). **Aucune route, aucun topic, aucun schéma ne change.**
