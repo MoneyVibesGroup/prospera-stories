@@ -987,6 +987,38 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-19, STORY-1082 — le dossier de démonstration créé par le moteur dans `dossier-service`, résolu par
+  l'import C13 de balance, annoncé AVANT le code** (`prospera-dossier-service` et `prospera-balance-service`, branches
+  `MNV-1082` ; fiche `stories/STORY-1082.md`, D-1082-1 → 11). **Aucun événement, aucune route existante, aucun corps
+  C13 ne change** ; fin de D-928-3 (ticket `dossier-de-demonstration-sans-creation-par-le-moteur`).
+  - **dossier-service, routes neuves**, sous l'**identité de service `MOTEUR` seule**, limitée à l'organisation du
+    chemin, **espace d'essai seulement** (`INSTANCE_ESPACE=ESSAI`, jugé avant le corps) :
+    - `PUT /api/v1/instance/dossier/{organisationId}/dossiers-de-demonstration/{dossierRef}` (corps : l'identité de
+      `POST /dossiers` sans `typeEntite` ni `attestationMandat`, plus `systemeComptable` et `regimeFiscal`) → 200
+      `{ dossierId, cree, dossier: <état publié de dossier.created> }` ; crée une fois (publie `dossier.created`),
+      rejouée rend le même ;
+    - `PUT …/{dossierRef}/exercices` (`{ debut, fin }`) → 200 `{ dossierId, exerciceId, ouvert, dossier, exercices[],
+      axes[] }` (états publiés) ; ouvre l'exercice (l'ouvert antérieur clos par le moteur), décide les axes du jeu au
+      premier exercice ; publie `dossier.exercice.*` et `dossier.axes.decides` comme les routes du cabinet.
+    - Refus : 401 `JETON_DE_SERVICE_INVALIDE` ; 403 `IDENTITE_DE_SERVICE_REQUISE`, `ORGANISATION_HORS_JETON`,
+      `ESPACE_REEL_REFUSE` ; 400 `DOSSIER_REF_INVALIDE` (et ceux du DTO) ; 404 `DOSSIER_DE_DEMONSTRATION_INCONNU` ; 409
+      `EXERCICE_DE_DEMONSTRATION_HORS_ORDRE` ; les refus de la création et de l'ouverture (`PAYS_NON_SERVI`,
+      `DIRIGEANT_REQUIS`, `DOSSIER_NIF_DEJA_UTILISE`, `EXERCICE_BORNES_DEJA_UTILISEES`…).
+    - **Routes existantes** : un jeton de service y est refusé 403 `IDENTITE_DE_SERVICE_REFUSEE` (code neuf des gardes,
+      `RefusGardeDto`) ; il l'était déjà par `EMAIL_NOT_VERIFIED`. Rien ne change pour un utilisateur.
+    - Le dossier de démonstration : `origine: JEU_DEMONSTRATION` et `demonstration` (clef du jeu, axes) **non
+      publiés** ; sans responsable (l'administratrice le voit et l'affecte) ; sans mandat ; hors palier.
+  - **balance-service** : l'import C13 (`import-c13-*@1`, corps inchangés) appelle `dossier-service` avec le jeton du
+    moteur relayé ; l'identifiant du dossier de démonstration n'est **plus dérivé** (sha256) : c'est un `ObjectId` de
+    `dossier-service` ; chaque balance du jeu porte son `exerciceId`. Refus neufs (ajouts) : 422
+    `DOSSIER_DE_DEMONSTRATION_REFUSE` (statut et code de `dossier-service` dans `details`), 502
+    `DOSSIER_SERVICE_INJOIGNABLE`. Réglages neufs : `DOSSIER_SERVICE_URL` (défaut `http://dossier-service:3009`, le nom
+    et le port du compose et de la recette), `DOSSIER_SERVICE_TIMEOUT_MS`.
+  - **Déploiement** : `INSTANCE_ESPACE=ESSAI` sur `dossier-service` dans un espace d'essai (la recette le pose déjà,
+    D-929-2). **Effacement** : `dossier-service` n'efface rien en fin d'essai (D-1082-10, dette nommée).
+  - **Pour A (relecture)** : la console verra le dossier de démonstration dans le portefeuille d'un essai. **Pour C,
+    D** : rien.
+
 - **2026-11-18, STORY-975 — la comptabilité sert ses routes C13 (vérification, import, effacement) et le catalogue
   recopie ses manifestes, annoncé AVANT le code** (`prospera-comptabilite-service` et `platform-catalog-service`,
   branches `MNV-975` ; fiche `stories/STORY-975.md`, D-975-1 → 10). **Aucune route, aucun champ, aucun topic existant
