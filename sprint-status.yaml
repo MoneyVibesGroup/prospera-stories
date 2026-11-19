@@ -1637,6 +1637,15 @@ reserved_ranges:
       suites des droits 167/167 ; suite complète 1425 passés (4 suites rouges connues, binding de Confluent ; câblage
       vert avec le binding doublé) ; lint, tsc, build verts ; 7/7 mutations rouges. Sans Docker (D-977-7). Lot 4 de B,
       n° 3 (EPIC-223). NON SLOTTÉE.
+  - range: "STORY-978"
+    status: "RÉSERVÉ"
+    owner: "Groupe B, lot 4 — le catalogue demande un jeton du moteur par organisation à auth (POST /interne/jetons-de-service, STORY-948) pour chaque appel du moteur à un module (vérifications, C13, Reprise), gardé par organisation et renouvelé avant son terme ; panne d'auth ⇒ JETON_DU_MOTEUR_INDISPONIBLE ; INSTALLATION_JETON_SERVICE retirée (préalable D-975-11 de STORY-1080) (prospera-platform-catalog-service)"
+    source_doc: "prospera-stories/stories/STORY-978.md"
+    reserved_on: "2026-11-19"
+    note: >
+      En cours (2026-11-19). Story neuve de la plage de B (930 → 979), hors des lignes du plan : le préalable D-975-11
+      de STORY-1080, sorti de 1080 par la session du groupe B (D-978-1) ; 978 vérifié libre sur toutes les branches.
+      Sans Docker : la preuve de bout en bout est celle de la recette croisée complète de 1080. NON SLOTTÉE.
   - range: "STORY-969"
     status: "RÉSERVÉ"
     owner: "Le lettrage — des lignes validées d'un même compte de tiers (collectif, tiers, devise), équilibrées ; manuel ; partiel (une ligne garde son reste, jamais lettrée au-delà de son montant, même sous la concurrence : verrou du compte de tiers) ; code AA, AB… par compte de tiers et exercice ; automatique par PROPOSITIONS (référence, puis montant et date, fenêtre de 90 jours), acceptées (PROPOSE_PAR_LA_MACHINE) ou modifiées (CHOISI_PAR_L_UTILISATEUR) ; délettrage tracé, refusé sur un exercice clos ; écarts de règlement sous un seuil (1 000) soldés par une écriture d'écart validée et numérotée (658 / 758) ; le lettrage vit à côté des écritures (en ajout seul) ; balance âgée par le port de 968 ; balance publiée inchangée (prospera-comptabilite-service)"
