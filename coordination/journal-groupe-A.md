@@ -304,6 +304,15 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-19) : relais du BFF `admin-panel-service` pour la console** (tri du bloc C d'AP-54, prospera-stories #732).
+  La console ne peut afficher ces fonctions que si le BFF les relaie :
+  - `mises-en-service`, `sorties-essai`, `naissances` (AP-56) ;
+  - `essais` : prolonger, signer, jeu de démo, effacement (AP-57) ;
+  - `etat-publie` d'une organisation (AP-55) ;
+  - le champ `vertical` dans `/admin/orgs` (AP-59).
+  Les relais `/offre` et `/installations` existent déjà. Aucun id de story backend n'est réservé par A : B le prend dans
+  sa plage. Pas urgent : AP-55 → AP-59 sont non slottées, et AP-55 attend de toute façon STORY-1080.
+
 - **→ C (2026-11-18, suite) : deux réponses de plus** — **ouverte** (à lire au rituel).
   - **Le vocal : tranché, texte seulement.** STORY-1017 (déclaration rapide) pré-remplit la fiche depuis le **texte** d'un
     message WhatsApp ou d'un e-mail ; un vocal reçu est rangé comme pièce, non lu (FR-35, D13). Le vocal reste « bientôt ».
