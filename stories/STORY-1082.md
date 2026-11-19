@@ -1,6 +1,6 @@
 # STORY-1082 : le dossier de démonstration créé par le moteur
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne à grande (une identité de service neuve dans `dossier-service`, deux routes du moteur, la
 résolution du dossier dans l'import C13 de balance, la première pile de B qui lève bilan)
@@ -14,6 +14,8 @@ de balance le résout au lieu de le dériver (fin de D-928-3) ; la balance valid
 `dossier-de-demonstration-sans-creation-par-le-moteur` fermé.
 **Points ouverts à prouver ici** (première pile de B qui lève bilan) : le démarrage réel de bilan avec le module
 `financement` (STORY-1083, 1084) ; celui de `dossier-service` après 1081.
+**Livraison :** dossier #57 (`dev` **`2bf9dbd`**), balance #157 (`dev` **`d43fbe4`**) ; contrat annoncé avant la fusion
+(stories #721), sans écart.
 **Suivante :** STORY-1093.
 
 **Sources lues :** plan du lot 4 (§0, §1, §3, §7, §8) ; `REGLES-DES-GROUPES.md` ; journal de B (état, passations,
@@ -128,3 +130,55 @@ STORY-928 »), 928 (D-928-1 → 9), 929 (D-929-2), 975 (D-975-1 → 3, D-975-11)
   `DOSSIER_DE_DEMONSTRATION_REFUSE`, 502 `DOSSIER_SERVICE_INJOIGNABLE` ; réglages neufs `DOSSIER_SERVICE_URL`,
   `DOSSIER_SERVICE_TIMEOUT_MS` ; l'identifiant du dossier de démonstration n'est plus dérivé (un `ObjectId` de
   `dossier-service`).
+
+## Preuves
+
+- **dossier-service, Node 25** : `tsc` propre ; lint des fichiers touchés propre (`endOfLine auto`) ; unitaires **115
+  suites, 1 871 passés**, 7 suites rouges **préexistantes** (6 binding de Confluent, `registre-pays.coherence`) ; e2e
+  **10/10 suites, 395/395** (15 neufs : `test/demonstration.e2e-spec.ts`, vraie chaîne RS256/JWKS → gardes → garde du
+  moteur → `ValidationPipe`, services doublés en mémoire avec Q8 et l'exercice ouvert exigé par les axes) ; neufs
+  unitaires : stratégie (4), garde d'e-mail (5), `creerDossierDeDemonstration` (7) ; invariants : STORY-363 (exception
+  nommée vérifiée), exhaustivité des codes (`demonstration`), méthodes du dépôt. Câblage du module racine **vert** avec
+  le client Kafka doublé, **rouge** sans `AxesModule`.
+- **balance-service, Node 25** : `npm ci --ignore-scripts` (checkout de 15/11) ; `tsc` propre ; lint propre ;
+  instance-c13 : 7 suites, 18 tests neufs (importateur, client HTTP, bornes, identité) ; e2e `instance-c13` **19/19**
+  (jeton relayé) ; suite complète **282 suites, 14 rouges préexistantes** (13 binding, `devise-paquet.exhaustivite` ;
+  quatre suites lentes rouges sous charge, vertes seules : `sage-parser`, `plan-amortissement.regles`,
+  `export-balance`, `export-balance.cout`). Câblage du module racine vert, rouge sans le fournisseur du client.
+- **Mutations, rouges sur une assertion** : dossier **13/13** (identité traitée en utilisateur, `@AllowUnverified`
+  avant l'identité, identité inconnue acceptée, organisation non vérifiée, espace jugé après le corps, hors ordre
+  accepté, axes non décidés avant la clôture, exercice existant rouvert, précédent non clos, rejeu recréé, course non
+  rattrapée, palier appliqué, marque du moteur retirée) ; balance **9/9** (autre organisation acceptée, pré-projection
+  du dossier puis des exercices en `$set`, axes non pré-projetés, 404 non traduit, jeton non relayé ×2, 4xx pris pour
+  une panne, NIF non traduit). Cinq réécrites d'abord pour compiler (`&& false` ⇒ `&& Date.now() < 0`).
+- **Pile `grp-b`** (verrou pris à 00:13, rendu à 00:41 ; compose racine + surcouche hors dépôt ; images `runtime`
+  depuis `git -c core.autocrlf=false archive` : auth `96f8ab3` et bilan `d236c56` d'`origin/dev`, dossier et balance
+  des branches ; MongoDB en jeu de répliques, Kafka ; `INSTANCE_ESPACE=ESSAI` sur dossier, balance, bilan). Les quatre
+  services `healthy` ; **bilan démarre avec `FinancementModule`** (huit routes `financement` mappées ; `GET
+  /dossiers/{id}/financements` **200**) ; **dossier-service démarre après 1081** avec `DemonstrationModule` (deux
+  routes). Accès de l'organisation de démonstration d'auth (`68a1…01aa`) **semés** (KYC, droits, états publiés
+  `balance`, `bilan`, `financement` : hors de cette story). Script hors dépôt, **46 contrôles verts** :
+  - refus : sans jeton 401 ; administratrice vérifiée 403 `IDENTITE_DE_SERVICE_REQUISE` ; jeton du moteur sur une autre
+    organisation 403 `ORGANISATION_HORS_JETON` ; jeton du moteur sur `GET /dossiers` 403 `IDENTITE_DE_SERVICE_REFUSEE` ;
+    rien d'écrit ;
+  - import C13 du jeu `cabinet-demo-togo` par balance : la balance avant le profil 422
+    `DOSSIER_DE_DEMONSTRATION_INCONNU` ; `profil-societe` `IMPORTE` (1), `balance` `IMPORTE` (2), rejeux `DEJA_IMPORTE` ;
+    réimport sous d'autres clefs : rien de neuf ; `PUT` du dossier rejoué `cree: false` ;
+  - dossier-service : **un** dossier (origine `JEU_DEMONSTRATION`, identité du jeu, sans responsable), visible de
+    l'administratrice (`GET /dossiers`) ; 2024 `CLOS` et 2025 `OUVERT` par le moteur ; une décision d'axes `SN`/`REEL`
+    au 2024-01-01 par le moteur ;
+  - balance : deux balances `BROUILLON` sous le dossier de dossier-service, chacune avec son `exerciceId` (2025 = celui
+    de dossier-service) ; la clôture de 2024 arrive par l'événement malgré la pré-projection ;
+  - bilan : dossier et deux exercices projetés (événements de dossier-service) ; **balance 2025 validée** par
+    l'administratrice, reçue `VALIDÉE` par bilan, **jeu d'états bâti (201, exercice 2025, `syscohada-revise`)**.
+- **Suite, 11 contrôles verts** : dossier-service relancé en espace `REEL` : `PUT` (corps malformé) et exercice 403
+  `ESPACE_REEL_REFUSE` ; l'import par balance 422 `DOSSIER_DE_DEMONSTRATION_REFUSE` (`details` : 403
+  `ESPACE_REEL_REFUSE`), rien d'écrit nulle part ; effacement C13 de balance `EFFACE`, balances et projections
+  (dossier, exercices, axes, profil) effacées. `down -v` : aucun conteneur, volume ni réseau `grp-b`.
+
+## Ce qui reste
+
+- **D-1082-10** : `dossier-service` n'efface pas le dossier de démonstration en fin d'essai (dette nommée au journal).
+- **D-975-11** (jeton statique du moteur) reste à STORY-1080 : cette preuve n'en a pas eu besoin.
+- La recette `cabinet-moteur` (1080) joue l'import C13 contre le vrai dossier-service : elle doit avoir
+  `INSTANCE_ESPACE` sur dossier-service (D-929-2 le pose déjà) et peut ajouter la validation et le jeu d'états.

@@ -992,12 +992,20 @@ reserved_ranges:
       SLOTTÉE.
   - range: "STORY-1082"
     status: "RÉSERVÉ"
-    owner: "Groupe A, lot 4, n° 3 — le dossier de démonstration créé dans dossier-service par le moteur (identité MOTEUR, espace d'essai) ; l'import C13 de balance le résout au lieu de le dériver ; la balance validée de la démo arrive à bilan (dossier, balance)"
-    source_doc: "prospera-stories/tickets/TICKET-BACKEND-dossier-de-demonstration-sans-creation-par-le-moteur.md"
+    owner: "Groupe B, lot 4 (reçue de A) — le dossier de démonstration créé dans dossier-service par le moteur (identité MOTEUR, espace d'essai) ; l'import C13 de balance le résout au lieu de le dériver ; la balance validée de la démo arrive à bilan (dossier, balance)"
+    source_doc: "prospera-stories/stories/STORY-1082.md"
     reserved_on: "2026-11-18"
     note: >
-      Remplace D-928-3 (dossier dérivé et projeté dans balance seul), sur décision de l'utilisateur du 2026-11-18.
-      Ferme le ticket. NON SLOTTÉE.
+      🏁 DONE le 2026-11-19 — dossier #57 (dev 2bf9dbd), balance #157 (dev d43fbe4) ; contrat annoncé avant la fusion
+      (stories #721) : deux routes du moteur dans dossier-service (PUT …/instance/dossier/{org}/dossiers-de-demonstration/
+      {dossierRef} et …/exercices, MOTEUR seul, espace d'essai seul), identité de service dans dossier-service
+      (IDENTITE_DE_SERVICE_REFUSEE sur les autres routes) ; balance : dossier résolu au lieu d'être dérivé (fin de
+      D-928-3), exerciceId porté par chaque balance du jeu, 422 DOSSIER_DE_DEMONSTRATION_REFUSE, 502
+      DOSSIER_SERVICE_INJOIGNABLE, DOSSIER_SERVICE_URL. Ticket dossier-de-demonstration-sans-creation-par-le-moteur
+      fermé. Node 25 : dossier 1 871 unitaires (7 suites rouges préexistantes), e2e 395/395 ; balance instance-c13 18
+      tests neufs, e2e 19/19, 14 suites rouges préexistantes ; mutations 13/13 et 9/9. Pile grp-b : 46 + 11 contrôles
+      verts (balance 2025 validée reçue par bilan, jeu d'états 201) ; bilan démarre avec FinancementModule (GET
+      financements 200). Passation de balance (98078b0) constatée. Lot 4 de B, n° 8 de la ligne du plan. NON SLOTTÉE.
   # ── SERVICES DU CABINET (2026-11-18) : PRD prds/prd-services-cabinet-2026-11-18/, épics et stories en cinq lots de
   #    quatre (F1, F2, G1, M1, P1). Identifiants au-delà de STORY-1082 (lot 4 de A), dans la plage de Dev B (900 → 1199).
   - range: "EPIC-266 → EPIC-269"
