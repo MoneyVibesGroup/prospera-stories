@@ -112,8 +112,28 @@
        refusent `ORGANISATION_HORS_JETON` toute autre organisation. Avant que `cabinet-moteur` installe par
        `POST /installations`, le catalogue doit demander un jeton par organisation à auth (`POST
        /api/v1/interne/jetons-de-service`, secret `MOTEUR_JETON_SERVICE`) et le garder jusqu'à son terme.
-  - **Suivante : STORY-1082** (le dossier de démonstration créé par le moteur : dossier, balance ; avec pile ; démarrage
-    réel de bilan avec `FinancementModule` à prouver par la première story qui lève bilan, 1083/1084).
+  9. ~~STORY-1082~~ : **dossier #57** (`2bf9dbd` sur `dev`), **balance #157** (`d43fbe4`), contrat annoncé avant la
+     fusion (stories #721). Le dossier de démonstration créé par le moteur ; fin de D-928-3, ticket
+     `dossier-de-demonstration-sans-creation-par-le-moteur` fermé.
+     - dossier-service : identité de service (patron D-928-1/D-975-1 ; `IDENTITE_DE_SERVICE_REFUSEE` sur les routes
+       métier) ; `PUT /api/v1/instance/dossier/{org}/dossiers-de-demonstration/{dossierRef}` (création idempotente,
+       origine `JEU_DEMONSTRATION`, sans responsable ni mandat, hors palier) et `…/exercices` (exercices du jeu dans
+       l'ordre, l'ouvert précédent clos par le moteur, axes du jeu au premier exercice) ; MOTEUR seul, espace d'essai
+       seul, garde avant le corps. L'invariant de 363 exclut nommément ce contrôleur.
+     - balance : l'import C13 relaie le jeton du moteur à dossier-service, écrit sous l'identifiant rendu, et
+       pré-projette les états publiés rendus en `$setOnInsert` hors transaction ; chaque balance porte son
+       `exerciceId` (sans lui, bilan refusait la liasse : `BALANCE_SANS_EXERCICE`).
+     Node 25 : dossier 1 871 unitaires (7 rouges préexistantes), e2e 395/395 ; balance 14 rouges préexistantes, e2e
+     19/19 ; mutations 13/13 et 9/9. **Pile `grp-b`** : 46 + 11 contrôles verts — la balance 2025 validée arrive à bilan
+     (jeu d'états 201) ; **bilan démarre avec `FinancementModule`** (`GET …/financements` 200) et **dossier-service après
+     1081** : les deux points ouverts de 1083/1084 et 1081 sont soldés. **Passation de balance constatée** (« Passations »).
+     Verrou pris à 00:13 (atomique, D libre), rendu à 00:41 ; aucun conteneur, volume ni réseau `grp-b` ne reste.
+     - **Dette D-1082-10** : `dossier-service` n'efface pas le dossier de démonstration en fin d'essai (`dossier`
+       n'est pas un module du catalogue : le moteur n'y appelle aucun effacement). À servir quand le moteur effacera le
+       socle.
+     - **Pour 1080** : D-975-11 n'a pas servi ici (jeton de l'organisation obtenu à la main) ; la recette
+       `cabinet-moteur` joue désormais l'import contre le vrai dossier-service et peut ajouter validation + jeu d'états.
+  - **Suivante : STORY-1093** (la comptabilité branchée au hub et à la recette : balance, recette ; pile de recette).
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -515,8 +535,10 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   - dossier : `origin/dev` = **`768a4aa`** (STORY-924), le commit nommé par A ; **rien n'a bougé depuis**. Le checkout
     (`dossier-service`) était sur `dev`, 8 commits derrière (`package.json` changé : client Kafka de Confluent) :
     avance rapide de `dev` (propre), branche partie d'`origin/dev`, `npm ci --ignore-scripts`.
-  - Restent à constater : balance (`98078b0`) et recette (`f7944dc`), par la première story de B qui les touche
-    (1082 ou 1093).
+  - balance : **constatée par STORY-1082** : `origin/dev` = **`98078b0`** (STORY-928), le commit nommé par A ; **rien
+    n'a bougé depuis**. Le checkout (`balance-service`) était sur `dev`, 19 commits derrière, `node_modules` du 15/11 :
+    branche partie d'`origin/dev`, `npm ci --ignore-scripts`.
+  - Reste à constater : recette (`f7944dc`), par 1093.
 
 - **Reçue le 2026-11-18 (D-L4-1) : `prospera-bilan-service`**, de A, pour le lot 4. **Constatée par STORY-1083** :
   `origin/dev` = **`1651d33`** (STORY-928), le commit nommé par A ; **rien n'a bougé depuis**. Le checkout du poste
@@ -990,7 +1012,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 - **2026-11-19, STORY-1082 — le dossier de démonstration créé par le moteur dans `dossier-service`, résolu par
   l'import C13 de balance, annoncé AVANT le code** (`prospera-dossier-service` et `prospera-balance-service`, branches
   `MNV-1082` ; fiche `stories/STORY-1082.md`, D-1082-1 → 11). **Aucun événement, aucune route existante, aucun corps
-  C13 ne change** ; fin de D-928-3 (ticket `dossier-de-demonstration-sans-creation-par-le-moteur`).
+  C13 ne change** ; fin de D-928-3 (ticket `dossier-de-demonstration-sans-creation-par-le-moteur`). **Fusionné le 19/11** :
+  dossier #57 (`2bf9dbd` sur `dev`), balance #157 (`d43fbe4`), sans écart au contrat annoncé.
   - **dossier-service, routes neuves**, sous l'**identité de service `MOTEUR` seule**, limitée à l'organisation du
     chemin, **espace d'essai seulement** (`INSTANCE_ESPACE=ESSAI`, jugé avant le corps) :
     - `PUT /api/v1/instance/dossier/{organisationId}/dossiers-de-demonstration/{dossierRef}` (corps : l'identité de
@@ -2090,6 +2113,20 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Un `@Body()` typé est validé AVANT le handler** (STORY-1082) : un refus d'identité ou d'espace jugé dans le handler
+  rend 400 sur un corps malformé au lieu de 403. Le juger dans une garde de classe (`@UseGuards`), qui passe avant les
+  pipes.
+- **L'invariant de STORY-363 (dossier-service) lit le TEXTE des contrôleurs** : un commentaire qui cite
+  `@RequiresDossierAccess()` fait échouer l'exclusion d'un contrôleur du moteur. Le nommer sans `@…()`.
+- **Pré-projeter dans la session d'un lot ne sert à rien** (STORY-1082) : `resoudreExerciceId` et la résolution du
+  référentiel de balance lisent HORS session. Écrire la pré-projection hors transaction, en `$setOnInsert`
+  (l'événement, en `$set`, reste maître).
+- **`fetch` de Node 25 vers un port Docker publié : `ECONNRESET` sur une connexion keep-alive réutilisée** après une
+  série de `/health` (curl passe). Rejouer l'appel une ou deux fois dans le script de preuve.
+- **Une mutation `x && false` ne compile pas** (TS2367/TS2872, rétrécissement) : écrire `x && Date.now() < 0`.
+- **`buildkit` « frontend grpc server closed unexpectedly »** pendant une construction lancée sous charge (jest en
+  parallèle) : relancer la construction, elle passe.
 
 - **Le moteur présente un jeton STATIQUE limité à une organisation** (STORY-975, D-975-11) : pour qu'un
   `POST /installations` aboutisse sur une pile, obtenir le jeton de l'organisation (`POST

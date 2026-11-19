@@ -3,7 +3,7 @@
 **Cible :** `dossier-service` (tenu par A), puis le jeu `cabinet-demo-togo` (STORY-927)
 **Ouvert par :** STORY-928 (A, 2026-11-17), décision D-928-3
 **Priorité :** Must avant que la démonstration du cabinet montre un bilan (EPIC-147, essai prospect, 15/01/2027) ; sans effet sur l'import et l'effacement
-**État :** 🟡 ouvert — porté par **STORY-1082** (réservée le 2026-11-18, lot 4 de A, sur validation de l'utilisateur)
+**État :** ✅ fermé le 2026-11-19 par **STORY-1082** (groupe B) — dossier #57 (`dev` `2bf9dbd`), balance #157 (`dev` `d43fbe4`). La seconde voie retenue (création par `dossier-service`, sous l'identité `MOTEUR`, avant toute balance : au premier objet du jeu, par l'import C13 de balance qui relaie le jeton du moteur, D-1082-1). Effacement de `dossier-service` en fin d'essai : non servi, dette nommée (D-1082-10).
 
 ---
 
