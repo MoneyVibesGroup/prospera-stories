@@ -150,10 +150,27 @@
      (« Passations ») : les cinq dépôts venus de A le sont.
      Verrou pris à 01:07 (atomique, libre), rendu à 01:51 ; coupure de l'API de 01:10 à 01:30 (tâches de fond perdues,
      aucune pile ne tournait) ; aucun conteneur, volume ni réseau `grp-b` ne reste.
+  11. ~~STORY-978~~ (story **neuve** de la plage de B, hors des lignes du plan : le préalable D-975-11 sorti de 1080 par
+     la session de groupe, D-978-1 ; 978 vérifié libre sur toutes les branches) : **catalogue #63** (`f9e9e26` sur
+     `dev`), contrat annoncé avant la fusion (stories #725). Le moteur demande à auth un jeton de l'identité `MOTEUR`
+     **par organisation** (`POST /api/v1/interne/jetons-de-service`, sous `NAISSANCE_AUTH_URL` et
+     `MOTEUR_JETON_SERVICE`, comme 974) pour chacun de ses appels aux modules : vérifications d'installation, import et
+     effacement C13, vérification `donnees-importees` de la Reprise. Gardé par organisation jusqu'à `vie −
+     JETON_DU_MOTEUR_MARGE_S` (60 s), demandes simultanées partagées, jamais présenté pour une autre organisation
+     (organisation du corps ET claim du jeton), oublié sur un 401 du module. Panne d'auth ⇒ `JETON_DU_MOTEUR_INDISPONIBLE`
+     (cause en `detail`), un seul appel, le module n'est pas appelé, plan `EN_ATTENTE`. **`INSTALLATION_JETON_SERVICE`
+     retirée : refusée au démarrage.** Auth non touché.
+     Node 25 : unitaires 31 + 25 + config, e2e auth doublée 9/9, suite complète 1 592 passés (3 suites rouges connues,
+     binding de Confluent, vertes avec le binding doublé) ; câblage du module racine vert (rouge sans l'import du module
+     neuf) ; 26/26 mutations ; lint, tsc, build. **Sans Docker** (D-978-11) : démarrage réel et preuve de bout en bout
+     dans la recette croisée complète de 1080.
   - **Suivante : STORY-1080** (le cabinet installé par le moteur, clôture : balance, bilan, recette ; **recette croisée
-    complète, jouée une fois** ; D-975-11 d'abord ; `INSTALLATION_SERVICES` du catalogue de la recette nommera
-    `comptabilite=http://comptabilite-service:3420` ; la recette `cabinet-moteur` peut ajouter le round-trip du
-    collaborateur de 1081 et la validation + jeu d'états de 1082).
+    complète, jouée une fois** ; D-975-11 servi par 978). **Le catalogue de `docker-compose.recette.yml` doit recevoir
+    `NAISSANCE_AUTH_URL=http://auth-service:3001/api/v1`, `MOTEUR_JETON_SERVICE` (même valeur qu'auth) et
+    `INSTALLATION_SERVICES`** (avec `comptabilite=http://comptabilite-service:3420`), **jamais
+    `INSTALLATION_JETON_SERVICE`** (démarrage refusé) ; preuve de 978 : deux organisations installées par
+    `POST /installations` sans jeton posé à la main (fiche 978, « Pour STORY-1080 ») ; la recette `cabinet-moteur` peut
+    ajouter le round-trip du collaborateur de 1081 et la validation + jeu d'états de 1082.
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -1053,6 +1070,7 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
     `raison` ; type et version inchangés). **Pour A (console)** : un libellé à prévoir si l'écran traduit les raisons.
   - **Pour la recette (STORY-1080, B)** : le catalogue de `docker-compose.recette.yml` doit recevoir
     `NAISSANCE_AUTH_URL`, `MOTEUR_JETON_SERVICE` (même valeur qu'auth) et `INSTALLATION_SERVICES`.
+  - **Fusionné le 19/11** : catalogue #63 (`f9e9e26` sur `dev`), sans écart au contrat annoncé.
 
 - **2026-11-19, STORY-1093 — la comptabilité branchée au hub et à la recette, annoncé AVANT le code**
   (`prospera-balance-service` et `prospera-recette`, branches `MNV-1093` ; fiche `stories/STORY-1093.md`, D-1093-1 →
@@ -2205,10 +2223,18 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 - **`buildkit` « frontend grpc server closed unexpectedly »** pendant une construction lancée sous charge (jest en
   parallèle) : relancer la construction, elle passe.
 
-- **Le moteur présente un jeton STATIQUE limité à une organisation** (STORY-975, D-975-11) : pour qu'un
-  `POST /installations` aboutisse sur une pile, obtenir le jeton de l'organisation (`POST
-  /api/v1/interne/jetons-de-service`, en-tête `Bearer <MOTEUR_JETON_SERVICE>`) APRÈS le démarrage d'auth, puis relancer
-  le catalogue avec `INSTALLATION_JETON_SERVICE` ; `JETON_DE_SERVICE_DUREE_S=3600` sur auth (300 s par défaut).
+- ~~**Le moteur présente un jeton STATIQUE limité à une organisation**~~ (STORY-975, D-975-11) — **soldé par
+  STORY-978** : le catalogue demande lui-même un jeton par organisation. Sur une pile, lui donner
+  `NAISSANCE_AUTH_URL` et `MOTEUR_JETON_SERVICE` (la valeur d'auth) ; **ne plus poser `INSTALLATION_JETON_SERVICE`** : le
+  catalogue refuse de démarrer.
+- **Catalogue sous Node 25 : la e2e complète a 5 suites rouges sur `origin/dev`** (STORY-978, témoin par `git stash`) :
+  `health` (`RedisHealthIndicator` absent du module de test), `catalog`, `packs`, `projects`, `entitlements`
+  (`PublicationDesManifestes` absent, et une base) — 172 tests rouges à l'identique. Compter avant de conclure.
+- **Mutation d'un décorateur de class-validator** (STORY-978) : `@IsEmpty({ groups: [...] })` s'exécute quand même
+  (aucun groupe demandé à la validation) : mutation équivalente. Muter en retirant le décorateur ET son import (sinon
+  TS6133, « 0 total »).
+- **Une mutation qui vide un corps de méthode laisse un paramètre inutilisé** (STORY-978) : ne compile pas. Écrire
+  `if (Date.now() < 0) …` à la place.
 - **Un témoin semé à la main dans une base partagée du socle heurte les index uniques** (STORY-975) :
   `balances_publiees.un_fait_par_publication` sur `eventId: null`. Lire `collection.indexes()` et donner une valeur
   propre à chaque clé d'un index unique.
