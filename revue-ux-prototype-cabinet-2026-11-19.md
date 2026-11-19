@@ -8,6 +8,25 @@
 > `https://claude.ai/artifact/Ujo3xV4jmSq35EtfbMVkDT`. Il est réaligné sur tout le livré le 2026-11-18 (prospera-stories
 > #703). Écrans regardés : cahier de recettes, contrôles de la liasse, validation de la liasse.
 
+## ⭐ La règle de l'utilisateur (2026-11-19) : un parcours facile, même pour un paresseux
+
+> « Pour moi, je veux un parcours facile, même pour un paresseux. »
+
+C'est le critère qui tranche toutes les recommandations ci-dessous, et tous les écrans à venir :
+
+- **Un geste principal par écran**, évident. Le reste est secondaire, replié ou derrière « plus d'options ».
+- **Rien à lire pour avancer** : un libellé clair suffit. Une aide d'une phrase au plus, jamais un paragraphe.
+- **Tout est pré-rempli** avec ce que le système sait déjà : mémoire des choix du cabinet (STORY-1098, 1099, 1100),
+  valeurs par défaut sûres, dernière période, dernier dossier. L'utilisateur corrige ; il ne saisit pas.
+- **Le moins de clics possible** : traiter un lot entier en une fois (« tout valider » sur ce qui est sûr, ne montrer
+  que ce qui demande un regard).
+- **Le produit dit quoi faire ensuite** : chaque écran se termine par l'étape suivante proposée (« 3 pièces à relire »,
+  « valider la balance »).
+- **Jamais de jargon** : pas de code, pas de route, pas d'empreinte à l'écran ; le technique reste derrière « détails
+  techniques ».
+- La rigueur ne baisse pas : rien n'est écrit sans le geste de l'utilisateur, mais ce geste doit être **un seul clic**
+  quand tout est en ordre.
+
 ## Verdict
 
 **Sur le fond, c'est solide et rassurant pour un cabinet. Dans sa forme actuelle, ce n'est pas facile :** un cabinet
