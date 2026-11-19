@@ -1048,6 +1048,33 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-19, STORY-1080 — balance et bilan servent leurs vérifications d'installation ; le catalogue de la recette
+  installe par le moteur, annoncé AVANT la fusion du code** (`prospera-balance-service`, `prospera-bilan-service`,
+  `prospera-recette`, branches `MNV-1080` ; fiche `stories/STORY-1080.md`, D-1080-1 → 13). Ticket
+  `verifications-de-balance-et-de-bilan-non-servies`. **Aucune route existante, aucun topic, aucun schéma de fait ne
+  change.**
+  - **Routes neuves** (chemins déjà déclarés aux manifestes), sous l'**identité de service `MOTEUR` seule**, limitée à
+    l'organisation du chemin, **dans les deux espaces** : `POST /api/v1/instance/balance/{organisationId}/verifications/
+    {referentiel-resolu|paquet-fiscal-disponible|balances-equilibrees}` et `POST /api/v1/instance/bilan/{organisationId}/
+    verifications/{referentiel-resolu|snapshots-intacts|consommateurs-actifs}` → 200 `verification-installation@1`
+    (`VERT` à 0 ; `ROUGE`, ou `ORANGE` pour le paquet fiscal ; `mesure`, `detail`, `action`). Corps ignoré,
+    `Idempotency-Key` acceptée et non exigée ; rien d'écrit.
+  - **Refus** : ceux des routes C13 (401 `JETON_DE_SERVICE_INVALIDE`, 403 `IDENTITE_DE_SERVICE_REQUISE`,
+    `ORGANISATION_HORS_JETON`, `IDENTITE_DE_SERVICE_REFUSEE`) ; **code neuf** 404 `VERIFICATION_INCONNUE`
+    (`details.verificationsServies`).
+  - **Ce que mesure chaque vérification** : fiche, D-1080-2 → 7 (l'habilitation n'est pas lue : le droit n'est pas encore
+    `ACTIVE` pendant le plan, D-1080-1).
+  - **`prospera-recette`** (pile partagée) : le catalogue reçoit `NAISSANCE_AUTH_URL`, `MOTEUR_JETON_SERVICE` (même
+    valeur qu'auth) et `INSTALLATION_SERVICES=balance=…:3007,bilan=…:3004,comptabilite=…:3420`. **Pour A, C, D** : dans
+    toute recette, le `PUT` de la console sur `balance`, `bilan` ou `comptabilite` (première installation) joue
+    désormais les VRAIES vérifications ; un cabinet qui aurait, AVANT d'installer `balance`, un exercice ouvert sur une
+    année sans paquet fiscal (2025, 2027 au Togo) recevrait 409 `INSTALLATION_INACHEVEE` (`paquet-fiscal-disponible`
+    🟠). Aucune recette d'aujourd'hui ne le fait. Les autres modules (`conseil`, `declarations`, …) restent sans
+    adresse : différés par le `PUT`, refusés par `POST /installations`. `cabinet-moteur` installe par
+    `POST /installations` ; le `PUT` n'y sert plus qu'à la sanction et à sa levée.
+  - **Pour A (relecture, console)** : rien à changer ; les bilans d'un plan d'installation de `balance` et `bilan`
+    portent désormais des voyants mesurés.
+
 - **2026-11-19, STORY-978 — le catalogue demande un jeton du moteur par organisation, annoncé AVANT la fusion du
   code** (`prospera-platform-catalog-service`, branche `MNV-978` ; fiche `stories/STORY-978.md`, D-978-1 → 11).
   **Aucune route, aucun topic, aucune collection ne change ; auth-service n'est pas touché.**
