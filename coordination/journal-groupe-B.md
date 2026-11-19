@@ -133,7 +133,8 @@
        socle.
      - **Pour 1080** : D-975-11 n'a pas servi ici (jeton de l'organisation obtenu à la main) ; la recette
        `cabinet-moteur` joue désormais l'import contre le vrai dossier-service et peut ajouter validation + jeu d'états.
-  - **Suivante : STORY-1093** (la comptabilité branchée au hub et à la recette : balance, recette ; pile de recette).
+  - **En cours : STORY-1093** (la comptabilité branchée au hub et à la recette : balance, recette ; pile de recette).
+    Contrat annoncé (« ⚠ Contrats »), passation de la recette constatée (« Passations »).
 
 ### Lot 3 (ouvert le 2026-11-17, fini le 2026-11-18)
 
@@ -538,7 +539,9 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   - balance : **constatée par STORY-1082** : `origin/dev` = **`98078b0`** (STORY-928), le commit nommé par A ; **rien
     n'a bougé depuis**. Le checkout (`balance-service`) était sur `dev`, 19 commits derrière, `node_modules` du 15/11 :
     branche partie d'`origin/dev`, `npm ci --ignore-scripts`.
-  - Reste à constater : recette (`f7944dc`), par 1093.
+  - recette : **constatée par STORY-1093** : `origin/dev` = **`f7944dc`** (STORY-929), le commit nommé par A ; **rien
+    n'a bougé depuis**. Le checkout (`prospera-recette`) était sur `dev` à `2daea0e`, 8 commits derrière, propre :
+    avance rapide, branche `MNV-1093` partie d'`origin/dev`. **Les cinq dépôts venus de A sont constatés.**
 
 - **Reçue le 2026-11-18 (D-L4-1) : `prospera-bilan-service`**, de A, pour le lot 4. **Constatée par STORY-1083** :
   `origin/dev` = **`1651d33`** (STORY-928), le commit nommé par A ; **rien n'a bougé depuis**. Le checkout du poste
@@ -1008,6 +1011,24 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-19, STORY-1093 — la comptabilité branchée au hub et à la recette, annoncé AVANT le code**
+  (`prospera-balance-service` et `prospera-recette`, branches `MNV-1093` ; fiche `stories/STORY-1093.md`, D-1093-1 →
+  10). **Aucune route, aucun topic, aucun schéma ne change.**
+  - **balance-service** : le **défaut** de l'allowlist d'ingestion directe (`INGESTION_SOURCE_SYSTEMS`) nomme
+    `comptabilite-service` (en plus de `ComptabiliteServiceIMF`, `ComptabiliteServiceDistributeur`,
+    `microfinance-service`) : une balance d'origine `comptabilite` publiée par la comptabilité est acceptée sur toute
+    pile qui ne pose pas la variable. Une variable posée remplace toujours le défaut. Le JSON Schema
+    `balance.submitted.v1` n'est pas touché (D-1093-2).
+  - **prospera-recette** (pile partagée par les quatre groupes) : `comptabilite-service` au profil
+    (`docker-compose.recette.yml`, profil `recette`, levé à la demande, port **3420 sur la boucle locale**, base
+    `comptabilite_service` dans le MongoDB `rs0` de la pile, `KAFKA_ESPACE: ${RECETTE_ESPACE:-REEL}`, `AUTH_*`,
+    `AUTH_SERVICE_URL`, `DOSSIER_SERVICE_URL`, `DOCUMENT_SERVICE_URL`) ; l'IdP émet l'audience `comptabilite-service`
+    (le profil reprend la liste du compose racine et l'ajoute ; `docker-compose.fiscal.yml` la reprend avec
+    `fiscal-service`) ; balance-service ne reçoit plus la liste d'émetteurs du compose racine du poste
+    (`INGESTION_SOURCE_SYSTEMS: !reset null`, Compose 2.24 ou plus) : il lit son défaut. Une suite neuve,
+    `recette/comptabilite.recette.ts`. **Pour A, C, D** : une pile de recette levée avant ce changement émet des jetons
+    sans l'audience de la comptabilité ; la descendre et la relancer.
 
 - **2026-11-19, STORY-1082 — le dossier de démonstration créé par le moteur dans `dossier-service`, résolu par
   l'import C13 de balance, annoncé AVANT le code** (`prospera-dossier-service` et `prospera-balance-service`, branches
