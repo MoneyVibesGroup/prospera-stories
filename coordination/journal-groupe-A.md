@@ -77,6 +77,10 @@
 - **2026-11-19 — consigne de l'utilisateur** : code de FE-034 lancé (sous-session, sans Docker d'abord) ; pour la
   console, « tout tester comme FE-069 avant d'ajouter AP-38 » ⇒ **AP-54** (gate de la console) créée et lancée ; AP-38
   (maquette arrêtée avant toute écriture) reprendra après AP-54.
+- ✅ **2026-11-19 (soir)** : **FE-034 DONE** (prospera-frontend-expert-comptable #55, `dev` `a257ebc`, gate vert 8,6 min) ;
+  **AP-54 code fusionné** (frontend-admin-panel #30, `dev` `50d9101`, gate console 69/69). Un seul passage Docker pour les
+  deux (pile `grp-a`, images depuis `git archive origin/dev` du 19/11), puis `down -v` et verrou rendu. Restent pour AP-54 :
+  tri du bloc C et prototype console ; puis AP-38. Ticket : `TICKET-BACKEND-liasse-rouverte-version-null.md`.
 - **Ticket ouvert pour le groupe qui tient bilan-service** : `tickets/TICKET-BACKEND-projection-remboursements-non-plafonnes.md`.
 - ⏰ **À REPRENDRE EN FIN DE CHANTIER (consigne de l'utilisateur, 2026-11-19)** : `revue-ux-prototype-cabinet-2026-11-19.md`.
   Le prototype est utilisable sur le fond, mais pas facile : trop d'écrit, notes de conception mêlées à l'écran, jargon
