@@ -89,6 +89,7 @@
   - Constat : le « renvoi pour correction » n'envoie aucun motif et ne prévient pas le cabinet. D'où **STORY-1103**
     (`kyc-service`, BFF, e-mail ; non slottée, porteur à désigner au rituel) et **AP-62** (écran, bloquée).
   - Suite de A : code d'AP-38, puis FE-146.
+- **2026-11-20 — AP-38 DONE** (frontend-admin-panel #33). Gate sur la vraie pile vert ; le gate de la console doit lever `document-service` (OCR) pour `kyc-chain`. Verrou Docker rendu, pile `down -v`. Suite de A : FE-146.
 - **Ticket ouvert pour le groupe qui tient bilan-service** : `tickets/TICKET-BACKEND-projection-remboursements-non-plafonnes.md`.
 - ⏰ **À REPRENDRE EN FIN DE CHANTIER (consigne de l'utilisateur, 2026-11-19)** : `revue-ux-prototype-cabinet-2026-11-19.md`.
   Le prototype est utilisable sur le fond, mais pas facile : trop d'écrit, notes de conception mêlées à l'écran, jargon
