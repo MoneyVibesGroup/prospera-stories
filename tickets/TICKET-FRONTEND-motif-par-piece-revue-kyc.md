@@ -6,7 +6,7 @@
 **Ouvert par :** groupe A, 2026-11-15 (`PLAN-4-SESSIONS-2026-11-14.md` §3.2).
 **Devient :** **AP-38** (lot de D, §6, n° 12), que D inscrit à son tracker (`frontend-sprint-status.yaml`).
 **Priorité :** Should. Rien ne casse, mais l'information que l'opérateur a saisie n'arrive pas.
-**Statut :** ouvert.
+**Statut :** servi par AP-38 pour le rejet global (maquette validée le 2026-11-20, fiche `frontend-stories/AP-38.md`). Le renvoi pour correction, qui n'envoie aujourd'hui aucun motif et ne prévient pas le cabinet, passe à STORY-1103 (backend) et AP-62 (écran).
 
 ---
 
