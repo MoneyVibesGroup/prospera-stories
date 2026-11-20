@@ -82,6 +82,13 @@
   deux (pile `grp-a`, images depuis `git archive origin/dev` du 19/11), puis `down -v` et verrou rendu. Restent pour AP-54 :
   tri du bloc C et prototype console ; puis AP-38. Ticket : `TICKET-BACKEND-liasse-rouverte-version-null.md`.
 - **2026-11-19 (nuit) — AP-54, AC-4 FAIT : le bloc C est trié** (sous-session, PR docs `docs-ap-54-tri-c`). 7 stories neuves, non slottées, à placer au prochain plan : **AP-55** (offre et installation, état publié ; remplace l'octroi par `PUT`, **bloquée jusqu'à STORY-1080**), **AP-56** (mise en service, sorties d'essai), **AP-57** (essai du prospect), **AP-58** (packs et manifestes, `ready-for-dev`), **AP-59** (métier de l'organisation), **AP-60** (rôle plateforme d'un membre), **AP-61** (annuaire : actions en lot et filtre propriétaire). Réancrées : AP-17 et AP-34 (rôles de tenant, `blocked` à tort, STORY-166/167 sont `done`), AP-21 (`kycStatus` désormais servi). C10 : sans écran de console, voulu (routes du moteur). ⛔ Le BFF `admin-panel` ne relaie pas `mises-en-service`, `sorties-essai`, `naissances`, `essais`, `etat-publie` ni `vertical` : relais à demander au groupe qui le tient (aucune story backend réservée). Reste pour AP-54 : AC-5, le prototype de la console.
+- **2026-11-20 — AP-54 DONE, maquette AP-38 VALIDÉE.**
+  - Prototype de la console aligné (frontend-admin-panel #31) et republié en force sur son Artifact, avec l'accord de
+    l'utilisateur (version 8). La version en ligne était le prototype de `dev`, plus l'enveloppe de publication.
+  - Maquette AP-38 (#32, Artifact version 9) validée. Portée : rejet global seul (fiche `frontend-stories/AP-38.md`).
+  - Constat : le « renvoi pour correction » n'envoie aucun motif et ne prévient pas le cabinet. D'où **STORY-1103**
+    (`kyc-service`, BFF, e-mail ; non slottée, porteur à désigner au rituel) et **AP-62** (écran, bloquée).
+  - Suite de A : code d'AP-38, puis FE-146.
 - **Ticket ouvert pour le groupe qui tient bilan-service** : `tickets/TICKET-BACKEND-projection-remboursements-non-plafonnes.md`.
 - ⏰ **À REPRENDRE EN FIN DE CHANTIER (consigne de l'utilisateur, 2026-11-19)** : `revue-ux-prototype-cabinet-2026-11-19.md`.
   Le prototype est utilisable sur le fond, mais pas facile : trop d'écrit, notes de conception mêlées à l'écran, jargon
