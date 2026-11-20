@@ -3300,6 +3300,7 @@
   .fin-inc { display: flex; flex-direction: column; gap: 0.5rem; }
   .fin-inc-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; font-size: 0.83rem; padding: 0.55rem 0.7rem; border: 1px dashed var(--border-strong); border-radius: 0.5rem; }
   .fin-inc-row b { min-width: 16rem; }
+  .fin-inc-list { margin: 0.6rem 0 0; padding-left: 1.2rem; font-size: 0.83rem; color: var(--muted-fg); }
   .fin-pick { display: flex; gap: 0.6rem; align-items: flex-end; flex-wrap: wrap; margin-top: 0.8rem; }
   .fin-pick .dc-field { min-width: 16rem; }
   .fin-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem; }
@@ -5178,8 +5179,20 @@
 
                     <div class="fin-steps" data-fin-if="etat=brouillon|pret|accorde"><span data-st="brouillon">Brouillon</span><span data-st="pret">Prêt</span><span data-st="remis">Remis à la banque</span><span data-st="final">Réponse de la banque</span></div>
 
-                    <div class="fin-act" data-fin-if="etat=brouillon admin=1">
+                    <div class="fin-act" data-fin-if="etat=brouillon admin=1 scen=1">
                       <button class="btn btn-primary" type="button" data-fin-pret><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg> Marquer le dossier comme prêt</button>
+                      <span class="grow"></span>
+                      <button class="btn btn-ghost" type="button" data-fin-motif="abandon">Abandonner la demande</button>
+                    </div>
+                    <div class="fin-act" data-fin-if="etat=brouillon admin=1 scen=0 proj=dispo">
+                      <button class="btn btn-primary" type="button" data-fin-retenir><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg> Retenir la projection</button>
+                      <button class="btn btn-ghost" type="button" data-fin-pret>Marquer le dossier comme prêt</button>
+                      <span class="grow"></span>
+                      <button class="btn btn-ghost" type="button" data-fin-motif="abandon">Abandonner la demande</button>
+                    </div>
+                    <div class="fin-act" data-fin-if="etat=brouillon admin=1 scen=0 proj=aucune">
+                      <button class="btn btn-primary" type="button" data-fin-prep><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg> Préparer une projection</button>
+                      <button class="btn btn-ghost" type="button" data-fin-pret>Marquer le dossier comme prêt</button>
                       <span class="grow"></span>
                       <button class="btn btn-ghost" type="button" data-fin-motif="abandon">Abandonner la demande</button>
                     </div>
@@ -5222,15 +5235,22 @@
                   <div class="fin-card">
                     <h3>Ce que la banque va regarder</h3>
                     <div data-fin-if="scen=0">
-                      <p class="fin-sub">Aucune projection n’est encore choisie, les trois repères ne peuvent pas être calculés.</p>
-                      <div class="fin-inc">
-                        <div class="fin-inc-row"><b>Couverture du service de la dette</b><span class="dc-badge fin-mute">Incalculable</span><span>Aucun scénario du prévisionnel n’est retenu pour ce dossier.</span></div>
-                        <div class="fin-inc-row"><b>Capacité d’endettement restante</b><span class="dc-badge fin-mute">Incalculable</span><span>Aucun scénario du prévisionnel n’est retenu pour ce dossier.</span></div>
-                        <div class="fin-inc-row"><b>Autonomie financière</b><span class="dc-badge fin-mute">Incalculable</span><span>Aucun scénario du prévisionnel n’est retenu pour ce dossier.</span></div>
-                      </div>
-                      <div class="fin-pick" data-fin-if="etat=brouillon">
-                        <div class="dc-field"><label for="finScen">Projection à présenter</label><select id="finScen"><option>Avec le camion (version 2)</option><option>Prudent (version 1)</option></select></div>
+                      <div class="fin-notice" style="margin-top:0.4rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span><b>Incalculable pour l’instant.</b> Les trois repères se calculent dès qu’une projection du prévisionnel est retenue.</span></div>
+                      <ul class="fin-inc-list"><li>Couverture du service de la dette</li><li>Capacité d’endettement restante</li><li>Autonomie financière</li></ul>
+                      <div class="fin-pick" data-fin-if="etat=brouillon proj=dispo">
+                        <div class="dc-field"><label for="finScen">Projection à présenter</label><select id="finScen"><option>Avec le camion (version 2) · la plus récente</option><option>Prudent (version 1)</option></select></div>
                         <button class="btn btn-primary" type="button" data-fin-retenir>Retenir cette projection</button>
+                      </div>
+                      <div class="fin-pick" data-fin-if="etat=brouillon proj=aucune">
+                        <span class="fin-sub" style="margin:0;flex:1 1 16rem">Ce client n’a encore aucune projection dans son prévisionnel.</span>
+                        <button class="btn btn-primary" type="button" data-fin-prep><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg> Préparer une projection</button>
+                      </div>
+                      <div class="fin-pick" data-fin-if="etat=pret admin=1">
+                        <span class="fin-sub" style="margin:0;flex:1 1 16rem">Le dossier est prêt, il ne se modifie plus. Repassez le dossier en brouillon pour choisir une projection.</span>
+                        <button class="btn btn-primary" type="button" data-fin-motif="brouillon">Revenir au brouillon</button>
+                      </div>
+                      <div class="fin-pick" data-fin-if="etat=pret admin=0">
+                        <span class="fin-sub" style="margin:0">Un associé peut repasser le dossier en brouillon.</span>
                       </div>
                     </div>
                     <div data-fin-if="scen=1">
@@ -5268,6 +5288,9 @@
                     <button class="btn btn-ghost" type="button" data-fin-m="collab">7 · Collaborateur</button>
                     <button class="btn btn-ghost" type="button" data-fin-m="nonmod">8 · Refus : plus modifiable</button>
                     <button class="btn btn-ghost" type="button" data-fin-m="conflit">9 · Refus : modifié par un collègue</button>
+                    <button class="btn btn-ghost" type="button" data-fin-m="inc-brouillon">10 · Incalculable : brouillon</button>
+                    <button class="btn btn-ghost" type="button" data-fin-m="inc-aucune">11 · Incalculable : aucune projection</button>
+                    <button class="btn btn-ghost" type="button" data-fin-m="inc-pret">12 · Incalculable : prêt</button>
                   </div>
                 </details>
 
@@ -5278,6 +5301,7 @@
                   ② <b>Les verdicts</b> (Solide / Juste / Insuffisant…) n’existent pas côté serveur&nbsp;: <code>indicateurs</code> rend la valeur, la formule et les sources ; les seuils viendront du référentiel bancaire (STORY-1085, AP-50). Les repères affichés ici sont indicatifs. <span class="code" data-note>écart ouvert · STORY-1085</span>
                   ③ <b>Le scénario</b> «&nbsp;Avec le camion&nbsp;» et ses chiffres sont <b>générés pour la démo</b>&nbsp;: le prévisionnel d’Ets Kossi déjà dessiné (CA ≈ 17&nbsp;M) ne peut pas porter un prêt de 25&nbsp;M, la maquette ne le reprend donc pas.
                   ④ <b>« Remis »</b> n’est pas proposé tant que rien n’est figé (<code>VERSION_FIGEE_ABSENTE</code>, STORY-1086)&nbsp;; la réponse de la banque (accordé) se joue sur le banc d’essai. <span class="code" data-note>écart ouvert · STORY-1086</span>
+                  ⑥ <b>Projection retenue d’office</b> à la création&nbsp;: dans l’app, <code>POST /</code> puis <code>PATCH /{id}</code> avec <code>scenarioRetenu</code> (le <code>POST</code> ne l’accepte pas, seul le <code>PATCH</code>) ; un seul geste pour l’utilisateur. Les trois moments «&nbsp;Incalculable&nbsp;» ne se voient que par le banc d’essai.
                   ⑤ <b>Banque</b>&nbsp;: le dossier ne porte que son code (<code>banque.code</code>), le nom affiché viendra du référentiel (STORY-1085).</div>
               </div>
               </div>
@@ -21395,7 +21419,7 @@
       var ETATS = {
         brouillon: ['Brouillon', 'fin-mute'], pret: ['Prêt', 'info'], accorde: ['Accordé', 'ok'], abandonne: ['Abandonné', 'fin-mute']
       };
-      var S = { vue: 'liste', vide: 1, etat: 'brouillon', scen: 0, dette: 0, admin: 1, banner: '' };
+      var S = { vue: 'liste', vide: 1, etat: 'brouillon', scen: 1, dette: 0, proj: 'dispo', admin: 1, banner: '' };
 
       function estAdmin() {
         var b = document.querySelector('#roleSeg [data-role][aria-selected="true"]');
@@ -21432,11 +21456,14 @@
         vide:      { vue: 'liste', vide: 1, etat: 'brouillon', scen: 0, dette: 0, banner: '', admin: true },
         liste:     { vue: 'liste', vide: 0, etat: 'brouillon', scen: 0, dette: 0, banner: '', admin: true },
         creation:  { vue: 'creation', vide: 1, etat: 'brouillon', scen: 0, dette: 0, banner: '', admin: true },
-        brouillon: { vue: 'detail', vide: 0, etat: 'brouillon', scen: 0, dette: 0, banner: '', admin: true },
+        brouillon: { vue: 'detail', vide: 0, etat: 'brouillon', scen: 1, dette: 0, banner: '', admin: true },
         pret:      { vue: 'detail', vide: 0, etat: 'pret', scen: 1, dette: 1, banner: '', admin: true },
         accorde:   { vue: 'detail', vide: 0, etat: 'accorde', scen: 1, dette: 1, banner: '', admin: true },
         collab:    { vue: 'detail', vide: 0, etat: 'brouillon', scen: 1, dette: 1, banner: '', admin: false },
         nonmod:    { vue: 'detail', vide: 0, etat: 'pret', scen: 1, dette: 1, banner: 'nonmod', admin: false },
+        'inc-brouillon': { vue: 'detail', vide: 0, etat: 'brouillon', scen: 0, dette: 1, proj: 'dispo', banner: '', admin: true },
+        'inc-aucune':    { vue: 'detail', vide: 0, etat: 'brouillon', scen: 0, dette: 1, proj: 'aucune', banner: '', admin: true },
+        'inc-pret':      { vue: 'detail', vide: 0, etat: 'pret', scen: 0, dette: 1, proj: 'dispo', banner: '', admin: true },
         conflit:   { vue: 'detail', vide: 0, etat: 'brouillon', scen: 1, dette: 1, banner: 'conflit', admin: true }
       };
       var box = root.querySelector('[data-fin-motifbox]');
@@ -21447,6 +21474,7 @@
       function fermerMotif() { box.hidden = true; txt.value = ''; ok.disabled = true; geste = ''; }
       function moment(nom) {
         var m = MOMENTS[nom]; if (!m) return;
+        S.proj = 'dispo';
         Object.keys(m).forEach(function (k) { if (k !== 'admin') S[k] = m[k]; });
         afficherOnglet('financement');
         choisirRole(m.admin);
@@ -21472,9 +21500,9 @@
         if (chiffres !== '25000000') {
           notify('success', 'Demande enregistrée', 'Cette maquette ne calcule que le cas de référence (25 000 000 FCFA).');
         } else {
-          notify('success', 'Demande enregistrée', 'Elle est en brouillon : ajoutez les emprunts, puis marquez-la comme prête.');
+          notify('success', 'Demande enregistrée', 'Brouillon créé, projection « Avec le camion » retenue d’office : ajoutez les dettes existantes, puis marquez-la comme prête.');
         }
-        S.vue = 'detail'; S.vide = 0; S.etat = 'brouillon'; S.scen = 0; S.dette = 0; S.banner = '';
+        S.vue = 'detail'; S.vide = 0; S.etat = 'brouillon'; S.scen = 1; S.dette = 0; S.proj = 'dispo'; S.banner = '';
         appliquer();
       });
 
@@ -21486,17 +21514,21 @@
       root.querySelectorAll('[data-fin-retirer]').forEach(function (b) {
         b.addEventListener('click', function () { S.dette = 0; appliquer(); });
       });
-      root.querySelector('[data-fin-retenir]').addEventListener('click', function () {
+      root.querySelectorAll('[data-fin-retenir]').forEach(function (b) { b.addEventListener('click', function () {
         S.scen = 1; appliquer();
         notify('success', 'Projection retenue', 'Les trois repères sont calculés sur ses trois exercices.');
-      });
+      }); });
+      root.querySelectorAll('[data-fin-prep]').forEach(function (b) { b.addEventListener('click', function () {
+        var nav = document.querySelector('.nav-item[data-page="bilan"]'); if (nav) nav.click();
+        var t = document.querySelector('[data-bil-tab="previsionnel"]'); if (t) t.click();
+      }); });
 
       /* États : le motif n'est demandé que pour revenir au brouillon ou abandonner. */
       root.querySelectorAll('[data-fin-motif]').forEach(function (b) {
         b.addEventListener('click', function () {
           geste = b.dataset.finMotif;
           lbl.textContent = geste === 'abandon' ? 'Pourquoi abandonner cette demande ?' : 'Pourquoi revenir au brouillon ?';
-          box.hidden = false; txt.focus();
+          box.hidden = false; txt.focus(); box.scrollIntoView({ block: 'center' });
         });
       });
       txt.addEventListener('input', function () { ok.disabled = txt.value.trim().length < 10; });
@@ -21514,10 +21546,10 @@
         }
         appliquer();
       });
-      root.querySelector('[data-fin-pret]').addEventListener('click', function () {
+      root.querySelectorAll('[data-fin-pret]').forEach(function (b) { b.addEventListener('click', function () {
         S.etat = 'pret'; appliquer();
         notify('success', 'Dossier prêt', 'Prochaine étape : générer le dossier pour la banque.');
-      });
+      }); });
       root.querySelectorAll('[data-fin-banner-off]').forEach(function (b) { b.addEventListener('click', function () { S.banner = ''; appliquer(); }); });
       var v1 = root.querySelector('[data-fin-v1]');
       if (v1) v1.addEventListener('click', function () { root.querySelector('[data-fin-v1box]').hidden = false; });
