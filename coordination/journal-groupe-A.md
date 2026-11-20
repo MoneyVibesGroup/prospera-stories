@@ -91,6 +91,12 @@
   - Suite de A : code d'AP-38, puis FE-146.
 - **2026-11-20 — AP-38 DONE** (frontend-admin-panel #33). Gate sur la vraie pile vert ; le gate de la console doit lever `document-service` (OCR) pour `kyc-chain`. Verrou Docker rendu, pile `down -v`. Suite de A : FE-146.
 - **2026-11-20 — Lot 5 planifié** (`coordination/PLAN-LOT-5-2026-11-20.md`, consigne de l'utilisateur : 4 stories, expert-comptable seul, backend et écrans) : FE-140, STORY-1086, FE-141, STORY-1094 (remplaçante FE-147). 1085/FE-142 au lot 6 avec AP-50.
+- 🏁 **2026-11-20 — FE-146 DONE (#56), LOT 4 DE A CLOS.** Bilan du lot :
+  - FE-069 (#54), FE-034 (#55), AP-54 (#30, #31, tri C #732), AP-38 (#33), FE-146 (#56) : toutes avec un gate réel vert.
+  - Créées en route, non slottées : FE-146 → 151, STORY-1094 → 1100, AP-55 → 62, STORY-1103.
+  - Tickets laissés à B : liasse rouverte relue avec `version` null ; projection des remboursements non plafonnés.
+  - Le prototype cabinet a une NOUVELLE adresse (`claude.ai/artifact/9iBJj5jTd1552uNPpZDJiL`) ; la console reste `7rbu7npMzRV9QE45CZsjJZ`.
+  - Suite : revue UX du prototype (interrupteur « Notes de conception » d'abord), puis lot 5 (FE-140).
 - **Ticket ouvert pour le groupe qui tient bilan-service** : `tickets/TICKET-BACKEND-projection-remboursements-non-plafonnes.md`.
 - ⏰ **À REPRENDRE EN FIN DE CHANTIER (consigne de l'utilisateur, 2026-11-19)** : `revue-ux-prototype-cabinet-2026-11-19.md`.
   Le prototype est utilisable sur le fond, mais pas facile : trop d'écrit, notes de conception mêlées à l'écran, jargon
