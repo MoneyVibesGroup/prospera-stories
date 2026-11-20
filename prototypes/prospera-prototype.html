@@ -3176,6 +3176,20 @@
   }
   .imp-table.cmp-tab { font-size: 0.76rem; }
   .imp-table.cmp-tab th, .imp-table.cmp-tab td { white-space: normal; padding-left: 0.4rem; padding-right: 0.4rem; overflow-wrap: anywhere; }
+  /* ============ FE-146 · PROPAGATION DES AXES (attente calme, jamais un refus) ====
+     Un bandeau, une phrase, un indicateur ; aucun bouton tant que l'écran rejoue
+     seul. */
+  .prp-wait { display: flex; align-items: center; gap: 0.8rem; padding: 1.1rem 1.2rem; font-size: 0.9rem; }
+  .prp-wait p { margin: 0; flex: 1; min-width: 0; }
+  .prp-wait .prp-btn { flex: none; }
+  .prp-spin { flex: none; width: 1.15rem; height: 1.15rem; border-radius: 50%; border: 2px solid var(--border-strong); border-top-color: var(--primary); animation: prpspin 0.9s linear infinite; }
+  @keyframes prpspin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .prp-spin { animation: none; border-top-color: var(--border-strong); } }
+  .prp-wait .prp-ico { flex: none; width: 1.15rem; height: 1.15rem; color: var(--muted-fg); }
+  .prp-note { align-items: center; margin-top: 0.1rem; }
+  .prp-note p { margin: 0; flex: 1; min-width: 0; }
+  .prp-bench { display: flex; flex-direction: column; gap: 0.6rem; padding: 0.2rem 0 0.7rem; }
+  .prp-team { margin: 0; padding: 0 0 0.3rem 1.1rem; font-size: 0.8rem; color: var(--muted-fg); display: flex; flex-direction: column; gap: 0.3rem; }
 </style>
 
 <div class="ribbon">
@@ -5465,6 +5479,25 @@
                             <h3>Le système comptable de ce dossier n'est pas encore décidé</h3>
                             <p>Décidez les axes du dossier (système comptable et régime) dans sa fiche : le référentiel en découle.</p>
                             <span class="code">409 · SYSTEME_COMPTABLE_INDETERMINE</span>
+                            <button class="btn btn-primary btn-sm" type="button" data-fe146-axes>Les 2 axes</button>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- FE-146 · propagation des axes : la lecture se rejoue SEULE, l'aperçu apparaît sans geste -->
+                      <div class="ref-slot" data-ref-slot="propag" hidden>
+                        <div class="ref-card">
+                          <div class="prp-wait" role="status" aria-live="polite">
+                            <span class="prp-spin" aria-hidden="true"></span>
+                            <p><b>Les axes viennent d'être décidés&nbsp;; l'Atelier les reçoit.</b></p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="ref-slot" data-ref-slot="propaglong" hidden>
+                        <div class="ref-card">
+                          <div class="prp-wait" role="status">
+                            <svg class="prp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            <p><b>L'Atelier met plus de temps que prévu à recevoir les axes.</b></p>
+                            <button class="btn btn-primary btn-sm prp-btn" type="button" data-fe146-retry>Réessayer</button>
                           </div>
                         </div>
                       </div>
@@ -5480,6 +5513,26 @@
                         </div>
                       </div>
                     </div>
+
+                      <details class="cah-repli" data-fe146-notes="sources" style="margin-top:0.9rem">
+                        <summary>Notes de conception <span>— FE-146 · l'Atelier attend les axes qu'on vient de décider</span></summary>
+                        <div class="prp-bench">
+                          <div class="atelier-demo" role="tablist" aria-label="Propagation des axes (démo)">
+                            <span class="lbl">Propagation</span>
+                            <button class="btn btn-ghost btn-sm" role="tab" data-fe146="normal" aria-selected="true">Aucune</button>
+                            <button class="btn btn-ghost btn-sm" role="tab" data-fe146="lecture" aria-selected="false">Lecture en attente</button>
+                            <button class="btn btn-ghost btn-sm" role="tab" data-fe146="longue" aria-selected="false">Trop longue</button>
+                            <button class="btn btn-ghost btn-sm" role="tab" data-fe146="ecriture" aria-selected="false">Écriture (Analyser)</button>
+                            <button class="btn btn-ghost btn-sm" role="tab" data-fe146="axes" aria-selected="false">Axes non décidés</button>
+                          </div>
+                          <ul class="prp-team">
+                            <li><b>FE-146</b> (écart du gate de FE-069) : après la décision des axes, <code>balance-service</code> répond quelques secondes <code>409 SYSTEME_COMPTABLE_INDETERMINE</code> le temps que Kafka (<code>dossier.axes.decides</code>) propage la décision. Le front lit <code>GET /dossiers/{id}/axes</code> pour distinguer les deux cas.</li>
+                            <li><b>Axes décidés</b> dans <code>dossier-service</code> ⇒ propagation. <b>Lecture</b> : rejeu seul, délai croissant 1 · 2 · 3 · 5 · 8 s (borne ≈ 19 s), puis message + « Réessayer ». <b>Écriture</b> (analyser / enregistrer un import, saisie directe, cahiers) : jamais rejouée seule, le bouton reste.</li>
+                            <li><b>Axes non décidés</b> ⇒ le message actuel (<code>cahier-refus-alerte</code>, clé <code>axes.*</code>) inchangé + le lien « Les 2 axes ».</li>
+                            <li>Démo : « Lecture en attente » se résout seule au bout de 4 s ; « Écriture » : le 1er clic sur « Analyser » montre l'attente, le 2e passe (la propagation est finie).</li>
+                          </ul>
+                        </div>
+                      </details>
 
                       <!-- ══════ FE-073 · D3 — DIRE CE QU'ON NE FAIT PAS ══════
                            La reponse aux TROIS menus que le comptable cherche et qui ne
@@ -10876,6 +10929,17 @@
                       <!-- Progression d'envoi (uploadMultipart → XHR.upload.onprogress). -->
                       <div class="imp-prog" data-imp-prog hidden><span></span></div>
 
+                      <!-- FE-146 · ÉCRITURE refusée pendant la propagation : on le dit, le bouton reste, RIEN n'est rejoué seul -->
+                      <div class="prof-note info prp-note" data-imp-wait="propag" role="status" hidden>
+                        <svg class="prp-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        <p><b>Les axes viennent d'être décidés&nbsp;; l'Atelier les reçoit.</b> Réessayez dans un instant.</p>
+                      </div>
+                      <div class="prof-note warn prp-note" data-imp-wait="axes" role="status" hidden>
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/></svg>
+                        <p><b>Le système comptable de ce dossier n'est pas encore décidé.</b> Décidez les axes du dossier (système comptable et régime) dans sa fiche&nbsp;: le référentiel en découle.</p>
+                        <button class="btn btn-primary btn-sm" type="button" data-fe146-axes>Les 2 axes</button>
+                      </div>
+
                       <div class="imp-actions">
                         <span class="grow"></span>
                         <button class="btn btn-primary btn-sm" type="button" data-imp-analyze>
@@ -11029,6 +11093,26 @@
                         <button class="btn btn-primary btn-sm" type="button" data-goto-balances><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M3 16v5h5"/><path d="M16 21h5v-5"/><path d="M9 12h6"/></svg> Voir la balance</button>
                       </div>
                     </div>
+
+                      <details class="cah-repli" data-fe146-notes="import" style="margin-top:0.9rem">
+                        <summary>Notes de conception <span>— FE-146 · l'Atelier attend les axes qu'on vient de décider</span></summary>
+                        <div class="prp-bench">
+                          <div class="atelier-demo" role="tablist" aria-label="Propagation des axes (démo)">
+                            <span class="lbl">Propagation</span>
+                            <button class="btn btn-ghost btn-sm" role="tab" data-fe146="normal" aria-selected="true">Aucune</button>
+                            <button class="btn btn-ghost btn-sm" role="tab" data-fe146="lecture" aria-selected="false">Lecture en attente</button>
+                            <button class="btn btn-ghost btn-sm" role="tab" data-fe146="longue" aria-selected="false">Trop longue</button>
+                            <button class="btn btn-ghost btn-sm" role="tab" data-fe146="ecriture" aria-selected="false">Écriture (Analyser)</button>
+                            <button class="btn btn-ghost btn-sm" role="tab" data-fe146="axes" aria-selected="false">Axes non décidés</button>
+                          </div>
+                          <ul class="prp-team">
+                            <li><b>FE-146</b> (écart du gate de FE-069) : après la décision des axes, <code>balance-service</code> répond quelques secondes <code>409 SYSTEME_COMPTABLE_INDETERMINE</code> le temps que Kafka (<code>dossier.axes.decides</code>) propage la décision. Le front lit <code>GET /dossiers/{id}/axes</code> pour distinguer les deux cas.</li>
+                            <li><b>Axes décidés</b> dans <code>dossier-service</code> ⇒ propagation. <b>Lecture</b> : rejeu seul, délai croissant 1 · 2 · 3 · 5 · 8 s (borne ≈ 19 s), puis message + « Réessayer ». <b>Écriture</b> (analyser / enregistrer un import, saisie directe, cahiers) : jamais rejouée seule, le bouton reste.</li>
+                            <li><b>Axes non décidés</b> ⇒ le message actuel (<code>cahier-refus-alerte</code>, clé <code>axes.*</code>) inchangé + le lien « Les 2 axes ».</li>
+                            <li>Démo : « Lecture en attente » se résout seule au bout de 4 s ; « Écriture » : le 1er clic sur « Analyser » montre l'attente, le 2e passe (la propagation est finie).</li>
+                          </ul>
+                        </div>
+                      </details>
 
                     <p class="helper" style="margin-top:0.2rem">FE-025 · le front n'interprète jamais le fichier : <code>POST /balance/import/sage</code> (multipart, 50&nbsp;Mo) fait toute la normalisation. Montants en unités mineures XOF (entiers ÷100 à l'affichage). Le choix du <b>profil d'import</b> (<code>profilImportId</code>) est livré par <b>FE-048</b> : sans profil, cet écran lit du Sage&nbsp;100 standard ; avec un profil, l'import part sur la route <b>générique</b> <code>POST /balance/import</code> — même orchestrateur, mais l'URL cesse d'annoncer du Sage sur l'export d'un autre logiciel. <i>(Cette phrase annonçait <code>mappingProfile</code> « accepté-mais-ignoré » : le champ n'existe plus au contrat depuis STORY-088, 2026-07-30.)</i></p>
                   </div>
@@ -19010,6 +19094,7 @@
         var impAnalyze = impPanel.querySelector("[data-imp-analyze]");
         if (impAnalyze) impAnalyze.addEventListener("click", function () {
           if (impFileChip && impFileChip.hidden) { pickFile(); }
+          if (window.__fe146 && window.__fe146.gateEcriture()) { return; }
           if (!impProg) { renderApercu(); showSlot(analyzeTarget()); return; }
           impProg.hidden = false;
           var bar = impProg.firstElementChild, pct = 0;
@@ -19883,6 +19968,53 @@
         render();
         runSuggest();
       }
+
+      /* ═══ FE-146 · propagation des axes — banc d'essai de démo ═══
+         Lecture : la carte du référentiel rejoue SEULE (délai croissant, borne ≈ 19 s) puis
+         l'aperçu apparaît. Écriture : « Analyser » ne rejoue rien, le bouton reste.
+         Le JS ne connaît aucun texte : il ne fait qu'afficher les blocs du HTML. */
+      (function () {
+        var state = "normal", timer = null, ecritureServie = false;
+        var benchBtns = page.querySelectorAll("[data-fe146]");
+        function showRef(name) {
+          page.querySelectorAll("[data-ref]").forEach(function (x) { x.setAttribute("aria-selected", String(x.dataset.ref === name)); });
+          page.querySelectorAll("[data-ref-slot]").forEach(function (sl) { sl.hidden = sl.dataset.refSlot !== name; });
+        }
+        function waitBanner(name) {
+          page.querySelectorAll("[data-imp-wait]").forEach(function (b) { b.hidden = b.dataset.impWait !== name; });
+        }
+        function clear() { if (timer) { clearTimeout(timer); timer = null; } }
+        function apply(next, delai) {
+          clear(); state = next; ecritureServie = false; waitBanner("");
+          var lit = next === "retry" ? "lecture" : next;
+          benchBtns.forEach(function (b) { b.setAttribute("aria-selected", String(b.dataset.fe146 === lit)); });
+          if (next === "lecture" || next === "retry") {
+            showRef("propag");
+            timer = setTimeout(function () { showRef("ok"); }, delai || 4000);
+          }
+          else if (next === "longue") { showRef("propaglong"); }
+          else if (next === "axes") { showRef("indetermine"); }
+          else { showRef("ok"); }
+        }
+        benchBtns.forEach(function (b) { b.addEventListener("click", function () { apply(b.dataset.fe146); }); });
+        page.querySelectorAll("[data-fe146-retry]").forEach(function (b) {
+          b.addEventListener("click", function () { apply("retry", 2500); });
+        });
+        page.querySelectorAll("[data-fe146-axes]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            var t = document.querySelector('.nav-item[data-page="dossiers"]');
+            if (t) { t.click(); }
+          });
+        });
+        window.__fe146 = {
+          /* true = écriture refusée : l'appelant s'arrête, rien n'est rejoué. */
+          gateEcriture: function () {
+            if (state === "ecriture" && !ecritureServie) { ecritureServie = true; waitBanner("propag"); return true; }
+            if (state === "axes") { waitBanner("axes"); return true; }
+            waitBanner(""); return false;
+          }
+        };
+      })();
 
       /* Référentiel actif : résolu / indisponible. */
       page.querySelectorAll("[data-ref]").forEach(function (b) {
