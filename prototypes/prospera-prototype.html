@@ -3212,6 +3212,113 @@
   .prp-note p { margin: 0; flex: 1; min-width: 0; }
   .prp-bench { display: flex; flex-direction: column; gap: 0.6rem; padding: 0.2rem 0 0.7rem; }
   .prp-team { margin: 0; padding: 0 0 0.3rem 1.1rem; font-size: 0.8rem; color: var(--muted-fg); display: flex; flex-direction: column; gap: 0.3rem; }
+
+  /* ====================== FE-140 · Dossier de financement (onglet « Financement ») ====================== */
+  .fin-tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--border); margin: 1rem 0 0.2rem; }
+  .fin-tabs button { font: inherit; font-size: 0.86rem; font-weight: 600; padding: 0.6rem 1rem; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted-fg); cursor: pointer; margin-bottom: -1px; }
+  .fin-tabs button:hover { color: var(--foreground); }
+  .fin-tabs button[aria-selected="true"] { color: var(--foreground); border-bottom-color: var(--primary); }
+  .fin-tabs button:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+  .fin { margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+  .fin .fin-off { display: none !important; }
+  .fin-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; }
+  .fin-card h3 { font-size: 0.98rem; margin: 0 0 0.15rem; }
+  .fin-sub { color: var(--muted-fg); font-size: 0.82rem; margin: 0 0 0.8rem; }
+  .fin-top { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+  .fin-top h3 { margin: 0; }
+  .fin-top .grow, .fin-emp-h .grow { flex: 1 1 auto; }
+  .fin-empty { text-align: center; padding: 2.4rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.7rem; }
+  .fin-empty .ic { width: 3.2rem; height: 3.2rem; border-radius: 50%; display: grid; place-items: center; background: var(--hover-surface); color: var(--muted-fg); }
+  .fin-empty .ic svg { width: 1.5rem; height: 1.5rem; }
+  .fin-empty p { margin: 0; color: var(--muted-fg); font-size: 0.86rem; max-width: 30rem; }
+  .fin-empty h3 { font-size: 1.05rem; }
+  .fin .btn-lg { height: 2.8rem; padding: 0 1.3rem; font-size: 0.92rem; }
+  .fin .btn svg { width: 1rem; height: 1rem; }
+  .fin-list { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 44rem; }
+  .fin-list th { text-align: left; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted-fg); padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--border); font-weight: 600; }
+  .fin-list td { padding: 0.7rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .fin-list tr:last-child td { border-bottom: 0; }
+  .fin-list td.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .fin-list tr[data-fin-open] { cursor: pointer; }
+  .fin-list tr[data-fin-open]:hover { background: var(--hover-surface); }
+  .fin-list a { color: var(--foreground); font-weight: 600; text-decoration: none; }
+  .fin-list small { display: block; color: var(--muted-fg); font-size: 0.74rem; margin-top: 0.15rem; font-weight: 400; }
+  .dc-badge.fin-ko { background: var(--danger-soft); color: var(--danger); }
+  .dc-badge.fin-mute { background: var(--hover-surface); color: var(--muted-fg); border-color: var(--border); }
+  .fin-crumb { align-self: flex-start; }
+  .fin-head h2 { font-size: 1.15rem; margin: 0; }
+  .fin-meta { color: var(--muted-fg); font-size: 0.82rem; margin: 0.35rem 0 0; }
+  .fin-steps { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.85rem; }
+  .fin-steps span { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 999px; border: 1px solid var(--border); color: var(--muted-fg); }
+  .fin-steps span.done { color: var(--success); background: var(--success-soft); border-color: transparent; }
+  .fin-steps span.now { color: var(--primary-fg); background: var(--primary); border-color: transparent; }
+  .fin-act { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid var(--border); }
+  .fin-act .grow { flex: 1 1 auto; }
+  .fin-notice { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.6rem 0.75rem; border-radius: 0.5rem; font-size: 0.82rem; background: var(--hover-surface); border: 1px solid var(--border); }
+  .fin-notice svg { flex: none; margin-top: 0.1rem; color: var(--muted-fg); }
+  .fin-notice.warn { background: var(--warning-soft); border-color: transparent; }
+  .fin-notice.ko { background: var(--danger-soft); border-color: transparent; }
+  .fin-notice.ko svg { color: var(--danger); }
+  .fin-notice.okk { background: var(--success-soft); border-color: transparent; }
+  .fin-notice.okk svg { color: var(--success); }
+  .fin-notice b { font-weight: 700; }
+  .fin-notice .btn { margin-left: auto; flex: none; }
+  .fin-motif { margin-top: 0.9rem; padding: 0.8rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--content-bg); display: flex; flex-direction: column; gap: 0.5rem; }
+  .fin-motif label { font-size: 0.8rem; font-weight: 600; }
+  .fin-motif textarea { font: inherit; font-size: 0.85rem; color: var(--foreground); background: var(--card); border: 1px solid var(--border-strong); border-radius: 0.5rem; padding: 0.5rem 0.65rem; min-height: 4rem; width: 100%; resize: vertical; }
+  .fin-motif .row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+  .fin-motif .hint { color: var(--muted-fg); font-size: 0.75rem; }
+  .fin-emp { border: 1px solid var(--border); border-radius: 0.6rem; padding: 0.8rem 0.9rem; margin-top: 0.7rem; background: var(--card); }
+  .fin-emp-h { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .fin-emp-p { margin: 0.35rem 0 0.6rem; font-size: 0.82rem; color: var(--muted-fg); }
+  .fin-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0.6rem; }
+  .fin-kpis > div { background: var(--content-bg); border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem 0.7rem; }
+  .fin-kpis small { display: block; font-size: 0.7rem; color: var(--muted-fg); text-transform: uppercase; letter-spacing: 0.05em; }
+  .fin-kpis b { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 1rem; }
+  .fin-det { margin-top: 0.6rem; }
+  .fin-det > summary, .fin-plan-det > summary { cursor: pointer; font-size: 0.82rem; font-weight: 600; color: var(--link); padding: 0.2rem 0; }
+  .fin-scroll { max-height: 18rem; overflow: auto; margin-top: 0.4rem; border: 1px solid var(--border); border-radius: 0.5rem; }
+  table.fin-tbl { border-collapse: collapse; width: 100%; font-size: 0.78rem; min-width: 34rem; }
+  table.fin-tbl th { text-align: left; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); padding: 0.45rem 0.7rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--card); white-space: normal; }
+  table.fin-tbl td { padding: 0.35rem 0.7rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  table.fin-tbl td.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  table.fin-tbl thead th:not(:first-child):not(:nth-child(2)) { text-align: right; }
+  table.fin-plan th[scope="row"] { text-transform: none; letter-spacing: 0; font-size: 0.78rem; color: var(--foreground); font-weight: 500; position: static; white-space: normal; }
+  table.fin-plan tr.sec th { background: var(--content-bg); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); position: static; }
+  table.fin-plan tr.tot th, table.fin-plan tr.tot td { font-weight: 700; }
+  table.fin-tbl.fin-plan thead th:not(:first-child) { text-align: right; }
+  table.fin-ind { border-collapse: collapse; width: 100%; min-width: 36rem; font-size: 0.82rem; }
+  table.fin-ind th, table.fin-ind td { padding: 0.7rem 0.8rem; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  table.fin-ind thead th { font-size: 0.7rem; letter-spacing: 0.05em; color: var(--muted-fg); text-transform: uppercase; }
+  table.fin-ind tr:last-child th, table.fin-ind tr:last-child td { border-bottom: 0; }
+  table.fin-ind th[scope="row"] { width: 38%; font-weight: 600; }
+  table.fin-ind th small { display: block; font-weight: 400; color: var(--muted-fg); font-size: 0.75rem; margin-top: 0.15rem; }
+  table.fin-ind td { white-space: nowrap; }
+  table.fin-ind td b { font-family: var(--font-mono); font-variant-numeric: tabular-nums; display: block; margin-bottom: 0.25rem; }
+  .fin-help { cursor: help; border-bottom: 1px dotted var(--muted-fg); }
+  .fin-help i { font-style: normal; display: inline-grid; place-items: center; width: 1rem; height: 1rem; margin-left: 0.3rem; border-radius: 50%; background: var(--hover-surface); color: var(--muted-fg); font-size: 0.68rem; font-weight: 700; }
+  .fin-inc { display: flex; flex-direction: column; gap: 0.5rem; }
+  .fin-inc-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; font-size: 0.83rem; padding: 0.55rem 0.7rem; border: 1px dashed var(--border-strong); border-radius: 0.5rem; }
+  .fin-inc-row b { min-width: 16rem; }
+  .fin-pick { display: flex; gap: 0.6rem; align-items: flex-end; flex-wrap: wrap; margin-top: 0.8rem; }
+  .fin-pick .dc-field { min-width: 16rem; }
+  .fin-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem; }
+  .fin-form .col2 { grid-column: 1 / -1; }
+  .fin-form .dc-field input, .fin-form .dc-field select { height: 2.6rem; }
+  .fin-def { color: var(--muted-fg); font-size: 0.8rem; margin-top: 0.9rem; }
+  .fin-more { margin-top: 0.8rem; }
+  .fin-more > summary { cursor: pointer; font-size: 0.82rem; font-weight: 600; color: var(--link); }
+  .fin-more .fin-form { margin-top: 0.7rem; }
+  .fin-accord { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.6rem; margin-top: 0.7rem; }
+  .fin-accord > div { background: var(--success-soft); border-radius: 0.5rem; padding: 0.5rem 0.7rem; }
+  .fin-accord small { display: block; font-size: 0.7rem; color: var(--muted-fg); text-transform: uppercase; letter-spacing: 0.05em; }
+  .fin-accord b { font-family: var(--font-mono); font-size: 1rem; }
+  .fin-ver { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 0; border-bottom: 1px solid var(--border); font-size: 0.83rem; flex-wrap: wrap; }
+  .fin-ver .grow { flex: 1 1 auto; }
+  .fin-bench { border: 1px dashed var(--border-strong); border-radius: 0.5rem; padding: 0.5rem 0.8rem; font-size: 0.78rem; background: var(--content-bg); }
+  .fin-bench > summary { cursor: pointer; font-weight: 600; color: var(--muted-fg); }
+  .fin-bench .row { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.6rem; }
+  .fin-bench .btn { height: 1.8rem; font-size: 0.74rem; }
 </style>
 
 <div class="ribbon">
@@ -4635,6 +4742,11 @@
                   </div>
                 </div>
 
+                <div class="fin-tabs" role="tablist" aria-label="Sections du dossier client">
+                  <button type="button" role="tab" aria-selected="true" data-dc-tab="dossier">Dossier</button>
+                  <button type="button" role="tab" aria-selected="false" data-dc-tab="financement">Financement</button>
+                </div>
+
                 <!-- Panneaux d'action, mêmes mécaniques que l'édition de configuration -->
                 <div class="dc-panel-edit dc-panel-solo" data-dc-panel-edit="affectation" hidden>
                   <div class="dc-edit-lbl">Responsable du dossier</div>
@@ -4783,6 +4895,7 @@
                   </div>
                 </div>
 
+                <div data-dc-tabpanel="dossier">
                 <!-- ═══ 1 · CONFIGURATION — MODIFIABLE ═══
                      Un dossier vit : un NIF se corrige, un CA franchit un seuil et fait
                      basculer un axe, un référentiel mûrit. Poser la configuration une
@@ -4998,6 +5111,175 @@
 
                 <div class="dc-note" data-note><b>La source est ici — après le dossier et sa configuration.</b> Le choix Sage / Saisie / Cahiers vit <b>à l'intérieur</b> d'un dossier + exercice, une fois les 2 axes et le référentiel posés : on ne choisit pas une source « dans le vide », mais pour un client donné.</div>
                 <div class="dc-note dc-gap" data-note><b>⚠️ Écart backend.</b> Aujourd'hui l'Atelier (<code>balance-service</code>) et le Bilan (<code>bilan-service</code>) lisent l'<code>orgId</code> du jeton — <b>pas un <code>dossierId</code></b>. Cet écran suppose un scope qui n'existe pas encore côté serveur (REQ-8 : <code>societeId</code> sur la balance).</div>
+                </div>
+
+              <div class="fin" data-dc-tabpanel="financement" data-fin-root hidden>
+
+                <!-- ─── LISTE ─── -->
+                <div class="fin-card fin-empty" data-fin-if="vue=liste vide=1">
+                  <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M3 21h18M5 21V10m4 11V10m6 11V10m4 11V10M2 10l10-6 10 6"/></svg></span>
+                  <h3>Aucune demande de prêt pour Ets Kossi Distribution</h3>
+                  <p>Préparez le dossier que la banque attend : nous reprenons les chiffres du client et calculons les remboursements.</p>
+                  <button class="btn btn-primary btn-lg" type="button" data-fin-go="creation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg> Préparer une demande de prêt</button>
+                </div>
+
+                <div class="fin-card" data-fin-if="vue=liste vide=0">
+                  <div class="fin-top"><div><h3>Demandes de prêt</h3><p class="fin-sub" style="margin:0">Ets Kossi Distribution · 2 demandes</p></div><span class="grow"></span>
+                    <button class="btn btn-primary" type="button" data-fin-go="creation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg> Préparer une demande de prêt</button></div>
+                  <div class="scroll-x" style="margin-top:0.7rem"><table class="fin-list">
+                    <thead><tr><th>État</th><th>Objet</th><th style="text-align:right">Montant (FCFA)</th><th>Banque</th><th>Créée le</th><th>Remise le</th></tr></thead>
+                    <tbody>
+                      <tr data-fin-open tabindex="0"><td><span class="dc-badge" data-fin-badge>Brouillon</span></td><td><a>Achat d’un camion de livraison</a><small>Investissement · 48&nbsp;mois · exercice de référence 2024</small></td><td class="num">25&nbsp;000&nbsp;000</td><td>BOA Togo</td><td>12/01/2025</td><td>—</td></tr>
+                      <tr><td><span class="dc-badge fin-mute">Abandonné</span></td>
+                        <td><a>Aménagement de l’entrepôt de Kara</a><small>Investissement · 60&nbsp;mois · exercice de référence 2023 · «&nbsp;Le gérant a préféré louer.&nbsp;»</small></td>
+                        <td class="num">12&nbsp;000&nbsp;000</td><td>Orabank Togo</td><td>03/09/2024</td><td>—</td></tr>
+                    </tbody></table></div>
+                </div>
+
+                <!-- ─── CRÉATION ─── -->
+                <div class="fin-card" data-fin-if="vue=creation">
+                  <button class="btn btn-ghost btn-sm fin-crumb" type="button" data-fin-go="liste"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="m15 18-6-6 6-6"/></svg> Demandes de prêt</button>
+                  <h3 style="margin-top:0.8rem">Préparer une demande de prêt</h3>
+                  <p class="fin-sub">Deux informations suffisent. Le reste est déjà rempli, vous pourrez le changer plus tard.</p>
+                  <div class="fin-form">
+                    <div class="dc-field col2"><label for="finObjet">À quoi servira le prêt&nbsp;?</label><input id="finObjet" value="Achat d’un camion de livraison" autocomplete="off"></div>
+                    <div class="dc-field"><label for="finMontant">Montant demandé (FCFA)</label><input id="finMontant" inputmode="numeric" value="25&nbsp;000&nbsp;000" autocomplete="off"></div>
+                    <div class="dc-field"><label for="finBanque">Banque</label><select id="finBanque"><option>BOA Togo</option><option>Orabank Togo</option><option>Ecobank Togo</option></select></div>
+                  </div>
+                  <p class="fin-def">Prêt d’investissement · 48&nbsp;mois, sans différé · chiffres de l’exercice 2024 (le dernier exercice validé de ce client).</p>
+                  <details class="fin-more"><summary>Modifier ces réglages</summary>
+                    <div class="fin-form">
+                      <div class="dc-field"><label for="finType">Type de prêt</label><select id="finType"><option>Investissement</option><option>Trésorerie</option><option>Crédit-bail</option></select></div>
+                      <div class="dc-field"><label for="finExo">Exercice de référence</label><select id="finExo"><option>2024 (dernier exercice validé)</option><option>2023</option></select></div>
+                      <div class="dc-field"><label for="finDuree">Durée (mois)</label><input id="finDuree" value="48"></div>
+                      <div class="dc-field"><label for="finDiffere">Différé (mois)</label><input id="finDiffere" value="0"></div>
+                      <div class="dc-field col2"><label for="finGaranties">Garanties proposées <span class="dc-tag todo">facultatif</span></label><input id="finGaranties" placeholder="Ex. : nantissement du camion"></div>
+                    </div>
+                  </details>
+                  <div class="dc-edit-foot">
+                    <span class="grow"></span>
+                    <button class="btn btn-ghost" type="button" data-fin-go="liste">Annuler</button>
+                    <button class="btn btn-primary" type="button" data-fin-save>Enregistrer la demande</button>
+                  </div>
+                </div>
+
+                <!-- ─── DÉTAIL ─── -->
+                <div data-fin-if="vue=detail" style="display:flex;flex-direction:column;gap:1rem">
+
+                  <div class="fin-notice ko" data-fin-if="banner=nonmod" role="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg><span><b>Ce dossier est prêt, il ne se modifie plus.</b> Repassez-le en brouillon pour changer les emprunts.</span>
+                    <button class="btn btn-ghost btn-sm" type="button" data-fin-banner-off>Compris</button></div>
+                  <div class="fin-notice ko" data-fin-if="banner=conflit" role="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg><span><b>Un collègue vient de modifier ce dossier.</b> Rechargez pour voir sa version avant de continuer.</span>
+                    <button class="btn btn-primary btn-sm" type="button" data-fin-banner-off>Recharger</button></div>
+
+                  <div class="fin-card fin-head">
+                    <button class="btn btn-ghost btn-sm fin-crumb" type="button" data-fin-go="liste"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="m15 18-6-6 6-6"/></svg> Demandes de prêt</button>
+                    <div class="fin-top" style="margin-top:0.8rem"><h2 data-fin-objet>Achat d’un camion de livraison</h2><span class="dc-badge" data-fin-badge>Brouillon</span></div>
+                    <p class="fin-meta"><b data-fin-montant>25&nbsp;000&nbsp;000</b>&nbsp;FCFA · BOA Togo · prêt d’investissement · 48&nbsp;mois · chiffres de l’exercice 2024<span data-fin-if="etat=accorde"> · version 2</span></p>
+
+                    <div class="fin-steps" data-fin-if="etat=brouillon|pret|accorde"><span data-st="brouillon">Brouillon</span><span data-st="pret">Prêt</span><span data-st="remis">Remis à la banque</span><span data-st="final">Réponse de la banque</span></div>
+
+                    <div class="fin-act" data-fin-if="etat=brouillon admin=1">
+                      <button class="btn btn-primary" type="button" data-fin-pret><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg> Marquer le dossier comme prêt</button>
+                      <span class="grow"></span>
+                      <button class="btn btn-ghost" type="button" data-fin-motif="abandon">Abandonner la demande</button>
+                    </div>
+                    <div class="fin-act" data-fin-if="etat=pret admin=1">
+                      <div class="fin-notice" style="flex:1 1 20rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span><b>Générez d’abord le dossier pour la banque.</b> Tant qu’il n’est pas généré, on ne peut pas le marquer « remis ».</span></div>
+                      <button class="btn btn-ghost" type="button" data-fin-motif="brouillon">Revenir au brouillon</button>
+                      <button class="btn btn-ghost" type="button" data-fin-motif="abandon">Abandonner la demande</button>
+                    </div>
+                    <div class="fin-act" data-fin-if="etat=brouillon|pret admin=0">
+                      <div class="fin-notice" style="flex:1 1 20rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Vous préparez les emprunts. <b>Seul un associé</b> marque le dossier comme prêt, le remet à la banque ou l’abandonne.</span></div>
+                    </div>
+
+                    <div class="fin-motif" data-fin-motifbox hidden>
+                      <label for="finMotifTxt" data-fin-motif-label>Pourquoi abandonner cette demande&nbsp;?</label>
+                      <textarea id="finMotifTxt" placeholder="Une phrase suffit"></textarea>
+                      <div class="row"><button class="btn btn-primary btn-sm" type="button" data-fin-motif-ok disabled>Confirmer</button>
+                        <button class="btn btn-ghost btn-sm" type="button" data-fin-motif-cancel>Annuler</button>
+                        <span class="hint">10 caractères au moins. Ce motif est visible de toute l’équipe du cabinet.</span></div>
+                    </div>
+
+                    <div class="fin-notice" style="margin-top:1rem" data-fin-if="etat=abandonne"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span><b>Demande abandonnée.</b> Motif&nbsp;: «&nbsp;<span data-fin-motif-out></span>&nbsp;». Elle reste consultable ; pour repartir, préparez une nouvelle demande.</span></div>
+
+                    <div data-fin-if="etat=accorde">
+                      <div class="fin-notice okk" style="margin-top:1rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg><span><b>La banque a accordé le prêt</b> le 25/02/2025. Ces conditions remplacent celles de la demande.</span></div>
+                      <div class="fin-accord"><div><small>Montant accordé</small><b>22&nbsp;000&nbsp;000</b> FCFA</div><div><small>Taux annuel</small><b>11,5&nbsp;%</b></div><div><small>Durée</small><b>48&nbsp;mois</b></div></div>
+                    </div>
+                  </div>
+
+                  <div class="fin-card">
+                    <h3>Les emprunts du dossier</h3>
+                    <p class="fin-sub">Le prêt demandé est déjà là. Ajoutez les dettes que le client rembourse déjà&nbsp;: la banque les regarde aussi.</p>
+                    <div class="fin-emp" data-fin-emp="1"><div class="fin-emp-h"><span class="dc-badge info">Prêt demandé</span><b>Achat d’un camion de livraison</b><span class="grow"></span></div><p class="fin-emp-p">25&nbsp;000&nbsp;000&nbsp;FCFA · 12&nbsp;% l’an · 48&nbsp;mois · remboursé chaque mois · versé le 1er mars 2025</p><div class="fin-kpis"><div><small>Mensualité</small><b>658&nbsp;346</b></div><div><small>Dernière échéance</small><b>658&nbsp;339</b></div><div><small>Total des intérêts</small><b>6&nbsp;600&nbsp;601</b></div><div><small>Total à rembourser</small><b>31&nbsp;600&nbsp;601</b></div></div><details class="fin-det"><summary>Voir mois par mois (48 échéances)</summary><div class="scroll-x fin-scroll" tabindex="0"><table class="fin-tbl"><thead><tr><th>N°</th><th>Date</th><th>À payer</th><th>dont intérêts</th><th>dont capital</th><th>Reste dû</th></tr></thead><tbody><tr><td>1</td><td>01/04/2025</td><td class="num">658&nbsp;346</td><td class="num">250&nbsp;000</td><td class="num">408&nbsp;346</td><td class="num">24&nbsp;591&nbsp;654</td></tr><tr><td>2</td><td>01/05/2025</td><td class="num">658&nbsp;346</td><td class="num">245&nbsp;917</td><td class="num">412&nbsp;429</td><td class="num">24&nbsp;179&nbsp;225</td></tr><tr><td>3</td><td>01/06/2025</td><td class="num">658&nbsp;346</td><td class="num">241&nbsp;792</td><td class="num">416&nbsp;554</td><td class="num">23&nbsp;762&nbsp;671</td></tr><tr><td>4</td><td>01/07/2025</td><td class="num">658&nbsp;346</td><td class="num">237&nbsp;627</td><td class="num">420&nbsp;719</td><td class="num">23&nbsp;341&nbsp;952</td></tr><tr><td>5</td><td>01/08/2025</td><td class="num">658&nbsp;346</td><td class="num">233&nbsp;420</td><td class="num">424&nbsp;926</td><td class="num">22&nbsp;917&nbsp;026</td></tr><tr><td>6</td><td>01/09/2025</td><td class="num">658&nbsp;346</td><td class="num">229&nbsp;170</td><td class="num">429&nbsp;176</td><td class="num">22&nbsp;487&nbsp;850</td></tr><tr><td>7</td><td>01/10/2025</td><td class="num">658&nbsp;346</td><td class="num">224&nbsp;879</td><td class="num">433&nbsp;467</td><td class="num">22&nbsp;054&nbsp;383</td></tr><tr><td>8</td><td>01/11/2025</td><td class="num">658&nbsp;346</td><td class="num">220&nbsp;544</td><td class="num">437&nbsp;802</td><td class="num">21&nbsp;616&nbsp;581</td></tr><tr><td>9</td><td>01/12/2025</td><td class="num">658&nbsp;346</td><td class="num">216&nbsp;166</td><td class="num">442&nbsp;180</td><td class="num">21&nbsp;174&nbsp;401</td></tr><tr><td>10</td><td>01/01/2026</td><td class="num">658&nbsp;346</td><td class="num">211&nbsp;744</td><td class="num">446&nbsp;602</td><td class="num">20&nbsp;727&nbsp;799</td></tr><tr><td>11</td><td>01/02/2026</td><td class="num">658&nbsp;346</td><td class="num">207&nbsp;278</td><td class="num">451&nbsp;068</td><td class="num">20&nbsp;276&nbsp;731</td></tr><tr><td>12</td><td>01/03/2026</td><td class="num">658&nbsp;346</td><td class="num">202&nbsp;767</td><td class="num">455&nbsp;579</td><td class="num">19&nbsp;821&nbsp;152</td></tr><tr><td>13</td><td>01/04/2026</td><td class="num">658&nbsp;346</td><td class="num">198&nbsp;212</td><td class="num">460&nbsp;134</td><td class="num">19&nbsp;361&nbsp;018</td></tr><tr><td>14</td><td>01/05/2026</td><td class="num">658&nbsp;346</td><td class="num">193&nbsp;610</td><td class="num">464&nbsp;736</td><td class="num">18&nbsp;896&nbsp;282</td></tr><tr><td>15</td><td>01/06/2026</td><td class="num">658&nbsp;346</td><td class="num">188&nbsp;963</td><td class="num">469&nbsp;383</td><td class="num">18&nbsp;426&nbsp;899</td></tr><tr><td>16</td><td>01/07/2026</td><td class="num">658&nbsp;346</td><td class="num">184&nbsp;269</td><td class="num">474&nbsp;077</td><td class="num">17&nbsp;952&nbsp;822</td></tr><tr><td>17</td><td>01/08/2026</td><td class="num">658&nbsp;346</td><td class="num">179&nbsp;528</td><td class="num">478&nbsp;818</td><td class="num">17&nbsp;474&nbsp;004</td></tr><tr><td>18</td><td>01/09/2026</td><td class="num">658&nbsp;346</td><td class="num">174&nbsp;740</td><td class="num">483&nbsp;606</td><td class="num">16&nbsp;990&nbsp;398</td></tr><tr><td>19</td><td>01/10/2026</td><td class="num">658&nbsp;346</td><td class="num">169&nbsp;904</td><td class="num">488&nbsp;442</td><td class="num">16&nbsp;501&nbsp;956</td></tr><tr><td>20</td><td>01/11/2026</td><td class="num">658&nbsp;346</td><td class="num">165&nbsp;020</td><td class="num">493&nbsp;326</td><td class="num">16&nbsp;008&nbsp;630</td></tr><tr><td>21</td><td>01/12/2026</td><td class="num">658&nbsp;346</td><td class="num">160&nbsp;086</td><td class="num">498&nbsp;260</td><td class="num">15&nbsp;510&nbsp;370</td></tr><tr><td>22</td><td>01/01/2027</td><td class="num">658&nbsp;346</td><td class="num">155&nbsp;104</td><td class="num">503&nbsp;242</td><td class="num">15&nbsp;007&nbsp;128</td></tr><tr><td>23</td><td>01/02/2027</td><td class="num">658&nbsp;346</td><td class="num">150&nbsp;071</td><td class="num">508&nbsp;275</td><td class="num">14&nbsp;498&nbsp;853</td></tr><tr><td>24</td><td>01/03/2027</td><td class="num">658&nbsp;346</td><td class="num">144&nbsp;989</td><td class="num">513&nbsp;357</td><td class="num">13&nbsp;985&nbsp;496</td></tr><tr><td>25</td><td>01/04/2027</td><td class="num">658&nbsp;346</td><td class="num">139&nbsp;855</td><td class="num">518&nbsp;491</td><td class="num">13&nbsp;467&nbsp;005</td></tr><tr><td>26</td><td>01/05/2027</td><td class="num">658&nbsp;346</td><td class="num">134&nbsp;670</td><td class="num">523&nbsp;676</td><td class="num">12&nbsp;943&nbsp;329</td></tr><tr><td>27</td><td>01/06/2027</td><td class="num">658&nbsp;346</td><td class="num">129&nbsp;433</td><td class="num">528&nbsp;913</td><td class="num">12&nbsp;414&nbsp;416</td></tr><tr><td>28</td><td>01/07/2027</td><td class="num">658&nbsp;346</td><td class="num">124&nbsp;144</td><td class="num">534&nbsp;202</td><td class="num">11&nbsp;880&nbsp;214</td></tr><tr><td>29</td><td>01/08/2027</td><td class="num">658&nbsp;346</td><td class="num">118&nbsp;802</td><td class="num">539&nbsp;544</td><td class="num">11&nbsp;340&nbsp;670</td></tr><tr><td>30</td><td>01/09/2027</td><td class="num">658&nbsp;346</td><td class="num">113&nbsp;407</td><td class="num">544&nbsp;939</td><td class="num">10&nbsp;795&nbsp;731</td></tr><tr><td>31</td><td>01/10/2027</td><td class="num">658&nbsp;346</td><td class="num">107&nbsp;957</td><td class="num">550&nbsp;389</td><td class="num">10&nbsp;245&nbsp;342</td></tr><tr><td>32</td><td>01/11/2027</td><td class="num">658&nbsp;346</td><td class="num">102&nbsp;453</td><td class="num">555&nbsp;893</td><td class="num">9&nbsp;689&nbsp;449</td></tr><tr><td>33</td><td>01/12/2027</td><td class="num">658&nbsp;346</td><td class="num">96&nbsp;894</td><td class="num">561&nbsp;452</td><td class="num">9&nbsp;127&nbsp;997</td></tr><tr><td>34</td><td>01/01/2028</td><td class="num">658&nbsp;346</td><td class="num">91&nbsp;280</td><td class="num">567&nbsp;066</td><td class="num">8&nbsp;560&nbsp;931</td></tr><tr><td>35</td><td>01/02/2028</td><td class="num">658&nbsp;346</td><td class="num">85&nbsp;609</td><td class="num">572&nbsp;737</td><td class="num">7&nbsp;988&nbsp;194</td></tr><tr><td>36</td><td>01/03/2028</td><td class="num">658&nbsp;346</td><td class="num">79&nbsp;882</td><td class="num">578&nbsp;464</td><td class="num">7&nbsp;409&nbsp;730</td></tr><tr><td>37</td><td>01/04/2028</td><td class="num">658&nbsp;346</td><td class="num">74&nbsp;097</td><td class="num">584&nbsp;249</td><td class="num">6&nbsp;825&nbsp;481</td></tr><tr><td>38</td><td>01/05/2028</td><td class="num">658&nbsp;346</td><td class="num">68&nbsp;255</td><td class="num">590&nbsp;091</td><td class="num">6&nbsp;235&nbsp;390</td></tr><tr><td>39</td><td>01/06/2028</td><td class="num">658&nbsp;346</td><td class="num">62&nbsp;354</td><td class="num">595&nbsp;992</td><td class="num">5&nbsp;639&nbsp;398</td></tr><tr><td>40</td><td>01/07/2028</td><td class="num">658&nbsp;346</td><td class="num">56&nbsp;394</td><td class="num">601&nbsp;952</td><td class="num">5&nbsp;037&nbsp;446</td></tr><tr><td>41</td><td>01/08/2028</td><td class="num">658&nbsp;346</td><td class="num">50&nbsp;374</td><td class="num">607&nbsp;972</td><td class="num">4&nbsp;429&nbsp;474</td></tr><tr><td>42</td><td>01/09/2028</td><td class="num">658&nbsp;346</td><td class="num">44&nbsp;295</td><td class="num">614&nbsp;051</td><td class="num">3&nbsp;815&nbsp;423</td></tr><tr><td>43</td><td>01/10/2028</td><td class="num">658&nbsp;346</td><td class="num">38&nbsp;154</td><td class="num">620&nbsp;192</td><td class="num">3&nbsp;195&nbsp;231</td></tr><tr><td>44</td><td>01/11/2028</td><td class="num">658&nbsp;346</td><td class="num">31&nbsp;952</td><td class="num">626&nbsp;394</td><td class="num">2&nbsp;568&nbsp;837</td></tr><tr><td>45</td><td>01/12/2028</td><td class="num">658&nbsp;346</td><td class="num">25&nbsp;688</td><td class="num">632&nbsp;658</td><td class="num">1&nbsp;936&nbsp;179</td></tr><tr><td>46</td><td>01/01/2029</td><td class="num">658&nbsp;346</td><td class="num">19&nbsp;362</td><td class="num">638&nbsp;984</td><td class="num">1&nbsp;297&nbsp;195</td></tr><tr><td>47</td><td>01/02/2029</td><td class="num">658&nbsp;346</td><td class="num">12&nbsp;972</td><td class="num">645&nbsp;374</td><td class="num">651&nbsp;821</td></tr><tr><td>48</td><td>01/03/2029</td><td class="num">658&nbsp;339</td><td class="num">6&nbsp;518</td><td class="num">651&nbsp;821</td><td class="num">0</td></tr></tbody></table></div></details></div>
+                    <div data-fin-if="dette=1"><div class="fin-emp" data-fin-emp="2"><div class="fin-emp-h"><span class="dc-badge auto">Dette existante</span><b>Prêt d’équipement BOA</b><span class="grow"></span><button class="btn btn-ghost btn-sm" type="button" data-fin-retirer data-fin-if="etat=brouillon admin=1|0">Retirer</button></div><p class="fin-emp-p">10&nbsp;000&nbsp;000&nbsp;FCFA · 9&nbsp;% l’an · 60&nbsp;mois · remboursé chaque mois · versé le 1er juillet 2023 · reste dû fin 2024&nbsp;: 7&nbsp;605&nbsp;630</p><div class="fin-kpis"><div><small>Mensualité</small><b>207&nbsp;584</b></div><div><small>Dernière échéance</small><b>207&nbsp;552</b></div><div><small>Total des intérêts</small><b>2&nbsp;455&nbsp;008</b></div><div><small>Total à rembourser</small><b>12&nbsp;455&nbsp;008</b></div></div><details class="fin-det"><summary>Voir mois par mois (60 échéances)</summary><div class="scroll-x fin-scroll" tabindex="0"><table class="fin-tbl"><thead><tr><th>N°</th><th>Date</th><th>À payer</th><th>dont intérêts</th><th>dont capital</th><th>Reste dû</th></tr></thead><tbody><tr><td>1</td><td>01/08/2023</td><td class="num">207&nbsp;584</td><td class="num">75&nbsp;000</td><td class="num">132&nbsp;584</td><td class="num">9&nbsp;867&nbsp;416</td></tr><tr><td>2</td><td>01/09/2023</td><td class="num">207&nbsp;584</td><td class="num">74&nbsp;006</td><td class="num">133&nbsp;578</td><td class="num">9&nbsp;733&nbsp;838</td></tr><tr><td>3</td><td>01/10/2023</td><td class="num">207&nbsp;584</td><td class="num">73&nbsp;004</td><td class="num">134&nbsp;580</td><td class="num">9&nbsp;599&nbsp;258</td></tr><tr><td>4</td><td>01/11/2023</td><td class="num">207&nbsp;584</td><td class="num">71&nbsp;994</td><td class="num">135&nbsp;590</td><td class="num">9&nbsp;463&nbsp;668</td></tr><tr><td>5</td><td>01/12/2023</td><td class="num">207&nbsp;584</td><td class="num">70&nbsp;978</td><td class="num">136&nbsp;606</td><td class="num">9&nbsp;327&nbsp;062</td></tr><tr><td>6</td><td>01/01/2024</td><td class="num">207&nbsp;584</td><td class="num">69&nbsp;953</td><td class="num">137&nbsp;631</td><td class="num">9&nbsp;189&nbsp;431</td></tr><tr><td>7</td><td>01/02/2024</td><td class="num">207&nbsp;584</td><td class="num">68&nbsp;921</td><td class="num">138&nbsp;663</td><td class="num">9&nbsp;050&nbsp;768</td></tr><tr><td>8</td><td>01/03/2024</td><td class="num">207&nbsp;584</td><td class="num">67&nbsp;881</td><td class="num">139&nbsp;703</td><td class="num">8&nbsp;911&nbsp;065</td></tr><tr><td>9</td><td>01/04/2024</td><td class="num">207&nbsp;584</td><td class="num">66&nbsp;833</td><td class="num">140&nbsp;751</td><td class="num">8&nbsp;770&nbsp;314</td></tr><tr><td>10</td><td>01/05/2024</td><td class="num">207&nbsp;584</td><td class="num">65&nbsp;777</td><td class="num">141&nbsp;807</td><td class="num">8&nbsp;628&nbsp;507</td></tr><tr><td>11</td><td>01/06/2024</td><td class="num">207&nbsp;584</td><td class="num">64&nbsp;714</td><td class="num">142&nbsp;870</td><td class="num">8&nbsp;485&nbsp;637</td></tr><tr><td>12</td><td>01/07/2024</td><td class="num">207&nbsp;584</td><td class="num">63&nbsp;642</td><td class="num">143&nbsp;942</td><td class="num">8&nbsp;341&nbsp;695</td></tr><tr><td>13</td><td>01/08/2024</td><td class="num">207&nbsp;584</td><td class="num">62&nbsp;563</td><td class="num">145&nbsp;021</td><td class="num">8&nbsp;196&nbsp;674</td></tr><tr><td>14</td><td>01/09/2024</td><td class="num">207&nbsp;584</td><td class="num">61&nbsp;475</td><td class="num">146&nbsp;109</td><td class="num">8&nbsp;050&nbsp;565</td></tr><tr><td>15</td><td>01/10/2024</td><td class="num">207&nbsp;584</td><td class="num">60&nbsp;379</td><td class="num">147&nbsp;205</td><td class="num">7&nbsp;903&nbsp;360</td></tr><tr><td>16</td><td>01/11/2024</td><td class="num">207&nbsp;584</td><td class="num">59&nbsp;275</td><td class="num">148&nbsp;309</td><td class="num">7&nbsp;755&nbsp;051</td></tr><tr><td>17</td><td>01/12/2024</td><td class="num">207&nbsp;584</td><td class="num">58&nbsp;163</td><td class="num">149&nbsp;421</td><td class="num">7&nbsp;605&nbsp;630</td></tr><tr><td>18</td><td>01/01/2025</td><td class="num">207&nbsp;584</td><td class="num">57&nbsp;042</td><td class="num">150&nbsp;542</td><td class="num">7&nbsp;455&nbsp;088</td></tr><tr><td>19</td><td>01/02/2025</td><td class="num">207&nbsp;584</td><td class="num">55&nbsp;913</td><td class="num">151&nbsp;671</td><td class="num">7&nbsp;303&nbsp;417</td></tr><tr><td>20</td><td>01/03/2025</td><td class="num">207&nbsp;584</td><td class="num">54&nbsp;776</td><td class="num">152&nbsp;808</td><td class="num">7&nbsp;150&nbsp;609</td></tr><tr><td>21</td><td>01/04/2025</td><td class="num">207&nbsp;584</td><td class="num">53&nbsp;630</td><td class="num">153&nbsp;954</td><td class="num">6&nbsp;996&nbsp;655</td></tr><tr><td>22</td><td>01/05/2025</td><td class="num">207&nbsp;584</td><td class="num">52&nbsp;475</td><td class="num">155&nbsp;109</td><td class="num">6&nbsp;841&nbsp;546</td></tr><tr><td>23</td><td>01/06/2025</td><td class="num">207&nbsp;584</td><td class="num">51&nbsp;312</td><td class="num">156&nbsp;272</td><td class="num">6&nbsp;685&nbsp;274</td></tr><tr><td>24</td><td>01/07/2025</td><td class="num">207&nbsp;584</td><td class="num">50&nbsp;140</td><td class="num">157&nbsp;444</td><td class="num">6&nbsp;527&nbsp;830</td></tr><tr><td>25</td><td>01/08/2025</td><td class="num">207&nbsp;584</td><td class="num">48&nbsp;959</td><td class="num">158&nbsp;625</td><td class="num">6&nbsp;369&nbsp;205</td></tr><tr><td>26</td><td>01/09/2025</td><td class="num">207&nbsp;584</td><td class="num">47&nbsp;769</td><td class="num">159&nbsp;815</td><td class="num">6&nbsp;209&nbsp;390</td></tr><tr><td>27</td><td>01/10/2025</td><td class="num">207&nbsp;584</td><td class="num">46&nbsp;570</td><td class="num">161&nbsp;014</td><td class="num">6&nbsp;048&nbsp;376</td></tr><tr><td>28</td><td>01/11/2025</td><td class="num">207&nbsp;584</td><td class="num">45&nbsp;363</td><td class="num">162&nbsp;221</td><td class="num">5&nbsp;886&nbsp;155</td></tr><tr><td>29</td><td>01/12/2025</td><td class="num">207&nbsp;584</td><td class="num">44&nbsp;146</td><td class="num">163&nbsp;438</td><td class="num">5&nbsp;722&nbsp;717</td></tr><tr><td>30</td><td>01/01/2026</td><td class="num">207&nbsp;584</td><td class="num">42&nbsp;920</td><td class="num">164&nbsp;664</td><td class="num">5&nbsp;558&nbsp;053</td></tr><tr><td>31</td><td>01/02/2026</td><td class="num">207&nbsp;584</td><td class="num">41&nbsp;685</td><td class="num">165&nbsp;899</td><td class="num">5&nbsp;392&nbsp;154</td></tr><tr><td>32</td><td>01/03/2026</td><td class="num">207&nbsp;584</td><td class="num">40&nbsp;441</td><td class="num">167&nbsp;143</td><td class="num">5&nbsp;225&nbsp;011</td></tr><tr><td>33</td><td>01/04/2026</td><td class="num">207&nbsp;584</td><td class="num">39&nbsp;188</td><td class="num">168&nbsp;396</td><td class="num">5&nbsp;056&nbsp;615</td></tr><tr><td>34</td><td>01/05/2026</td><td class="num">207&nbsp;584</td><td class="num">37&nbsp;925</td><td class="num">169&nbsp;659</td><td class="num">4&nbsp;886&nbsp;956</td></tr><tr><td>35</td><td>01/06/2026</td><td class="num">207&nbsp;584</td><td class="num">36&nbsp;652</td><td class="num">170&nbsp;932</td><td class="num">4&nbsp;716&nbsp;024</td></tr><tr><td>36</td><td>01/07/2026</td><td class="num">207&nbsp;584</td><td class="num">35&nbsp;370</td><td class="num">172&nbsp;214</td><td class="num">4&nbsp;543&nbsp;810</td></tr><tr><td>37</td><td>01/08/2026</td><td class="num">207&nbsp;584</td><td class="num">34&nbsp;079</td><td class="num">173&nbsp;505</td><td class="num">4&nbsp;370&nbsp;305</td></tr><tr><td>38</td><td>01/09/2026</td><td class="num">207&nbsp;584</td><td class="num">32&nbsp;777</td><td class="num">174&nbsp;807</td><td class="num">4&nbsp;195&nbsp;498</td></tr><tr><td>39</td><td>01/10/2026</td><td class="num">207&nbsp;584</td><td class="num">31&nbsp;466</td><td class="num">176&nbsp;118</td><td class="num">4&nbsp;019&nbsp;380</td></tr><tr><td>40</td><td>01/11/2026</td><td class="num">207&nbsp;584</td><td class="num">30&nbsp;145</td><td class="num">177&nbsp;439</td><td class="num">3&nbsp;841&nbsp;941</td></tr><tr><td>41</td><td>01/12/2026</td><td class="num">207&nbsp;584</td><td class="num">28&nbsp;815</td><td class="num">178&nbsp;769</td><td class="num">3&nbsp;663&nbsp;172</td></tr><tr><td>42</td><td>01/01/2027</td><td class="num">207&nbsp;584</td><td class="num">27&nbsp;474</td><td class="num">180&nbsp;110</td><td class="num">3&nbsp;483&nbsp;062</td></tr><tr><td>43</td><td>01/02/2027</td><td class="num">207&nbsp;584</td><td class="num">26&nbsp;123</td><td class="num">181&nbsp;461</td><td class="num">3&nbsp;301&nbsp;601</td></tr><tr><td>44</td><td>01/03/2027</td><td class="num">207&nbsp;584</td><td class="num">24&nbsp;762</td><td class="num">182&nbsp;822</td><td class="num">3&nbsp;118&nbsp;779</td></tr><tr><td>45</td><td>01/04/2027</td><td class="num">207&nbsp;584</td><td class="num">23&nbsp;391</td><td class="num">184&nbsp;193</td><td class="num">2&nbsp;934&nbsp;586</td></tr><tr><td>46</td><td>01/05/2027</td><td class="num">207&nbsp;584</td><td class="num">22&nbsp;009</td><td class="num">185&nbsp;575</td><td class="num">2&nbsp;749&nbsp;011</td></tr><tr><td>47</td><td>01/06/2027</td><td class="num">207&nbsp;584</td><td class="num">20&nbsp;618</td><td class="num">186&nbsp;966</td><td class="num">2&nbsp;562&nbsp;045</td></tr><tr><td>48</td><td>01/07/2027</td><td class="num">207&nbsp;584</td><td class="num">19&nbsp;215</td><td class="num">188&nbsp;369</td><td class="num">2&nbsp;373&nbsp;676</td></tr><tr><td>49</td><td>01/08/2027</td><td class="num">207&nbsp;584</td><td class="num">17&nbsp;803</td><td class="num">189&nbsp;781</td><td class="num">2&nbsp;183&nbsp;895</td></tr><tr><td>50</td><td>01/09/2027</td><td class="num">207&nbsp;584</td><td class="num">16&nbsp;379</td><td class="num">191&nbsp;205</td><td class="num">1&nbsp;992&nbsp;690</td></tr><tr><td>51</td><td>01/10/2027</td><td class="num">207&nbsp;584</td><td class="num">14&nbsp;945</td><td class="num">192&nbsp;639</td><td class="num">1&nbsp;800&nbsp;051</td></tr><tr><td>52</td><td>01/11/2027</td><td class="num">207&nbsp;584</td><td class="num">13&nbsp;500</td><td class="num">194&nbsp;084</td><td class="num">1&nbsp;605&nbsp;967</td></tr><tr><td>53</td><td>01/12/2027</td><td class="num">207&nbsp;584</td><td class="num">12&nbsp;045</td><td class="num">195&nbsp;539</td><td class="num">1&nbsp;410&nbsp;428</td></tr><tr><td>54</td><td>01/01/2028</td><td class="num">207&nbsp;584</td><td class="num">10&nbsp;578</td><td class="num">197&nbsp;006</td><td class="num">1&nbsp;213&nbsp;422</td></tr><tr><td>55</td><td>01/02/2028</td><td class="num">207&nbsp;584</td><td class="num">9&nbsp;101</td><td class="num">198&nbsp;483</td><td class="num">1&nbsp;014&nbsp;939</td></tr><tr><td>56</td><td>01/03/2028</td><td class="num">207&nbsp;584</td><td class="num">7&nbsp;612</td><td class="num">199&nbsp;972</td><td class="num">814&nbsp;967</td></tr><tr><td>57</td><td>01/04/2028</td><td class="num">207&nbsp;584</td><td class="num">6&nbsp;112</td><td class="num">201&nbsp;472</td><td class="num">613&nbsp;495</td></tr><tr><td>58</td><td>01/05/2028</td><td class="num">207&nbsp;584</td><td class="num">4&nbsp;601</td><td class="num">202&nbsp;983</td><td class="num">410&nbsp;512</td></tr><tr><td>59</td><td>01/06/2028</td><td class="num">207&nbsp;584</td><td class="num">3&nbsp;079</td><td class="num">204&nbsp;505</td><td class="num">206&nbsp;007</td></tr><tr><td>60</td><td>01/07/2028</td><td class="num">207&nbsp;552</td><td class="num">1&nbsp;545</td><td class="num">206&nbsp;007</td><td class="num">0</td></tr></tbody></table></div></details></div></div>
+                    <div class="fin-act" style="border-top:0;padding-top:0" data-fin-if="etat=brouillon dette=0">
+                      <button class="btn btn-ghost" type="button" data-fin-adddette><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg> Ajouter une dette existante</button>
+                      <span class="fin-sub" style="margin:0">Un clic&nbsp;: nous préparons la ligne, vous vérifiez.</span>
+                    </div>
+                  </div>
+
+                  <div class="fin-card">
+                    <h3>Ce que la banque va regarder</h3>
+                    <div data-fin-if="scen=0">
+                      <p class="fin-sub">Aucune projection n’est encore choisie, les trois repères ne peuvent pas être calculés.</p>
+                      <div class="fin-inc">
+                        <div class="fin-inc-row"><b>Couverture du service de la dette</b><span class="dc-badge fin-mute">Incalculable</span><span>Aucun scénario du prévisionnel n’est retenu pour ce dossier.</span></div>
+                        <div class="fin-inc-row"><b>Capacité d’endettement restante</b><span class="dc-badge fin-mute">Incalculable</span><span>Aucun scénario du prévisionnel n’est retenu pour ce dossier.</span></div>
+                        <div class="fin-inc-row"><b>Autonomie financière</b><span class="dc-badge fin-mute">Incalculable</span><span>Aucun scénario du prévisionnel n’est retenu pour ce dossier.</span></div>
+                      </div>
+                      <div class="fin-pick" data-fin-if="etat=brouillon">
+                        <div class="dc-field"><label for="finScen">Projection à présenter</label><select id="finScen"><option>Avec le camion (version 2)</option><option>Prudent (version 1)</option></select></div>
+                        <button class="btn btn-primary" type="button" data-fin-retenir>Retenir cette projection</button>
+                      </div>
+                    </div>
+                    <div data-fin-if="scen=1">
+                      <p class="fin-sub">Projection retenue&nbsp;: <b>Avec le camion</b> (version 2) · exercices 2025 à 2027. Passez la souris sur un nom ou un chiffre pour voir le calcul.</p>
+                      <div data-fin-if="dette=0"><div class="scroll-x"><table class="fin-ind"><thead><tr><th></th><th>2025</th><th>2026</th><th>2027</th></tr></thead><tbody><tr><th scope="row"><span class="fin-help" tabindex="0" title="(ce que l’activité dégage + intérêts des emprunts) ÷ (capital remboursé + intérêts des emprunts), sur l’exercice">Couverture du service de la dette<i aria-hidden="true">?</i></span><small>Les revenus couvrent-ils les remboursements&nbsp;?</small></th><td title="2025 : (7 200 485 + 2 099 515) ÷ (3 825 599 + 2 099 515) = 1,57"><b>1,57</b><span class="dc-badge ok">Solide</span></td><td title="2026 : (10 763 879 + 2 236 121) ÷ (5 664 031 + 2 236 121) = 1,65"><b>1,65</b><span class="dc-badge ok">Solide</span></td><td title="2027 : (12 582 221 + 1 517 779) ÷ (6 382 373 + 1 517 779) = 1,78"><b>1,78</b><span class="dc-badge ok">Solide</span></td></tr><tr><th scope="row"><span class="fin-help" tabindex="0" title="capitaux propres − dettes financières, à la clôture de l’exercice (les dettes financières ne dépassent pas les capitaux propres)">Capacité d’endettement restante<i aria-hidden="true">?</i></span><small>Combien le client peut encore emprunter (FCFA).</small></th><td title="2025 : 21 400 485 − 21 174 401 = 226 084"><b>226&nbsp;084</b><span class="dc-badge ok">Marge</span></td><td title="2026 : 26 964 364 − 15 510 370 = 11 453 994"><b>11&nbsp;453&nbsp;994</b><span class="dc-badge ok">Marge</span></td><td title="2027 : 34 346 585 − 9 127 997 = 25 218 588"><b>25&nbsp;218&nbsp;588</b><span class="dc-badge ok">Marge</span></td></tr><tr><th scope="row"><span class="fin-help" tabindex="0" title="capitaux propres ÷ (capitaux propres + dettes financières), à la clôture de l’exercice">Autonomie financière<i aria-hidden="true">?</i></span><small>La part de l’entreprise qui est financée par ses propres moyens.</small></th><td title="2025 : 21 400 485 ÷ (21 400 485 + 21 174 401) = 50,3 %"><b>50,3&nbsp;%</b><span class="dc-badge ok">Correcte</span></td><td title="2026 : 26 964 364 ÷ (26 964 364 + 15 510 370) = 63,5 %"><b>63,5&nbsp;%</b><span class="dc-badge ok">Correcte</span></td><td title="2027 : 34 346 585 ÷ (34 346 585 + 9 127 997) = 79,0 %"><b>79,0&nbsp;%</b><span class="dc-badge ok">Correcte</span></td></tr></tbody></table></div></div>
+                      <div data-fin-if="dette=1"><div class="scroll-x"><table class="fin-ind"><thead><tr><th></th><th>2025</th><th>2026</th><th>2027</th></tr></thead><tbody><tr><th scope="row"><span class="fin-help" tabindex="0" title="(ce que l’activité dégage + intérêts des emprunts) ÷ (capital remboursé + intérêts des emprunts), sur l’exercice">Couverture du service de la dette<i aria-hidden="true">?</i></span><small>Les revenus couvrent-ils les remboursements&nbsp;?</small></th><td title="2025 : (6 592 390 + 2 707 610) ÷ (5 708 512 + 2 707 610) = 1,11"><b>1,11</b><span class="dc-badge warn">Juste</span></td><td title="2026 : (10 332 416 + 2 667 584) ÷ (7 723 576 + 2 667 584) = 1,25"><b>1,25</b><span class="dc-badge ok">Solide</span></td><td title="2027 : (12 343 957 + 1 756 043) ÷ (8 635 117 + 1 756 043) = 1,36"><b>1,36</b><span class="dc-badge ok">Solide</span></td></tr><tr><th scope="row"><span class="fin-help" tabindex="0" title="capitaux propres − dettes financières, à la clôture de l’exercice (les dettes financières ne dépassent pas les capitaux propres)">Capacité d’endettement restante<i aria-hidden="true">?</i></span><small>Combien le client peut encore emprunter (FCFA).</small></th><td title="2025 : 20 792 390 − 26 897 118 = −6 104 728"><b>−6&nbsp;104&nbsp;728</b><span class="dc-badge fin-ko">Aucune marge</span></td><td title="2026 : 25 924 806 − 19 173 542 = 6 751 264"><b>6&nbsp;751&nbsp;264</b><span class="dc-badge ok">Marge</span></td><td title="2027 : 33 068 763 − 10 538 425 = 22 530 338"><b>22&nbsp;530&nbsp;338</b><span class="dc-badge ok">Marge</span></td></tr><tr><th scope="row"><span class="fin-help" tabindex="0" title="capitaux propres ÷ (capitaux propres + dettes financières), à la clôture de l’exercice">Autonomie financière<i aria-hidden="true">?</i></span><small>La part de l’entreprise qui est financée par ses propres moyens.</small></th><td title="2025 : 20 792 390 ÷ (20 792 390 + 26 897 118) = 43,6 %"><b>43,6&nbsp;%</b><span class="dc-badge ok">Correcte</span></td><td title="2026 : 25 924 806 ÷ (25 924 806 + 19 173 542) = 57,5 %"><b>57,5&nbsp;%</b><span class="dc-badge ok">Correcte</span></td><td title="2027 : 33 068 763 ÷ (33 068 763 + 10 538 425) = 75,8 %"><b>75,8&nbsp;%</b><span class="dc-badge ok">Correcte</span></td></tr></tbody></table></div></div>
+                      <p class="fin-sub" style="margin:0.7rem 0 0">Repères indicatifs&nbsp;: couverture à 1,20 ou plus, endettement sous les capitaux propres, autonomie à 33&nbsp;% ou plus. Ceux de la banque choisie s’afficheront ici dès qu’ils seront connus.</p>
+                      <details class="fin-plan-det" style="margin-top:0.8rem"><summary>Voir le plan de financement année par année</summary>
+                        <div data-fin-if="dette=0"><div class="scroll-x"><table class="fin-tbl fin-plan"><thead><tr><th></th><th>2025</th><th>2026</th><th>2027</th></tr></thead><tbody><tr class="sec"><th colspan="4">Ce que le client dépense</th></tr><tr class=""><th scope="row">Investissements</th><td class="num">26&nbsp;500&nbsp;000</td><td class="num">2&nbsp;000&nbsp;000</td><td class="num">2&nbsp;000&nbsp;000</td></tr><tr class=""><th scope="row">Capital remboursé</th><td class="num">3&nbsp;825&nbsp;599</td><td class="num">5&nbsp;664&nbsp;031</td><td class="num">6&nbsp;382&nbsp;373</td></tr><tr class=""><th scope="row">Hausse du besoin en fonds de roulement</th><td class="num">700&nbsp;000</td><td class="num">450&nbsp;000</td><td class="num">450&nbsp;000</td></tr><tr class="tot"><th scope="row">Total des dépenses</th><td class="num">31&nbsp;025&nbsp;599</td><td class="num">8&nbsp;114&nbsp;031</td><td class="num">8&nbsp;832&nbsp;373</td></tr><tr class="sec"><th colspan="4">Ce qui finance</th></tr><tr class=""><th scope="row">Ce que l’activité dégage (CAF)</th><td class="num">7&nbsp;200&nbsp;485</td><td class="num">10&nbsp;763&nbsp;879</td><td class="num">12&nbsp;582&nbsp;221</td></tr><tr class=""><th scope="row">Apports des associés</th><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr><tr class=""><th scope="row">Nouveaux emprunts</th><td class="num">25&nbsp;000&nbsp;000</td><td class="num">0</td><td class="num">0</td></tr><tr class="tot"><th scope="row">Total des ressources</th><td class="num">32&nbsp;200&nbsp;485</td><td class="num">10&nbsp;763&nbsp;879</td><td class="num">12&nbsp;582&nbsp;221</td></tr><tr class="tot"><th scope="row">Variation de trésorerie</th><td class="num">1&nbsp;174&nbsp;886</td><td class="num">2&nbsp;649&nbsp;848</td><td class="num">3&nbsp;749&nbsp;848</td></tr><tr class=""><th scope="row">Trésorerie au 1er janvier</th><td class="num">3&nbsp;200&nbsp;000</td><td class="num">4&nbsp;374&nbsp;886</td><td class="num">7&nbsp;024&nbsp;734</td></tr><tr class="tot"><th scope="row">Trésorerie au 31 décembre</th><td class="num">4&nbsp;374&nbsp;886</td><td class="num">7&nbsp;024&nbsp;734</td><td class="num">10&nbsp;774&nbsp;582</td></tr></tbody></table></div></div>
+                        <div data-fin-if="dette=1"><div class="scroll-x"><table class="fin-tbl fin-plan"><thead><tr><th></th><th>2025</th><th>2026</th><th>2027</th></tr></thead><tbody><tr class="sec"><th colspan="4">Ce que le client dépense</th></tr><tr class=""><th scope="row">Investissements</th><td class="num">26&nbsp;500&nbsp;000</td><td class="num">2&nbsp;000&nbsp;000</td><td class="num">2&nbsp;000&nbsp;000</td></tr><tr class=""><th scope="row">Capital remboursé</th><td class="num">5&nbsp;708&nbsp;512</td><td class="num">7&nbsp;723&nbsp;576</td><td class="num">8&nbsp;635&nbsp;117</td></tr><tr class=""><th scope="row">Hausse du besoin en fonds de roulement</th><td class="num">700&nbsp;000</td><td class="num">450&nbsp;000</td><td class="num">450&nbsp;000</td></tr><tr class="tot"><th scope="row">Total des dépenses</th><td class="num">32&nbsp;908&nbsp;512</td><td class="num">10&nbsp;173&nbsp;576</td><td class="num">11&nbsp;085&nbsp;117</td></tr><tr class="sec"><th colspan="4">Ce qui finance</th></tr><tr class=""><th scope="row">Ce que l’activité dégage (CAF)</th><td class="num">6&nbsp;592&nbsp;390</td><td class="num">10&nbsp;332&nbsp;416</td><td class="num">12&nbsp;343&nbsp;957</td></tr><tr class=""><th scope="row">Apports des associés</th><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr><tr class=""><th scope="row">Nouveaux emprunts</th><td class="num">25&nbsp;000&nbsp;000</td><td class="num">0</td><td class="num">0</td></tr><tr class="tot"><th scope="row">Total des ressources</th><td class="num">31&nbsp;592&nbsp;390</td><td class="num">10&nbsp;332&nbsp;416</td><td class="num">12&nbsp;343&nbsp;957</td></tr><tr class="tot"><th scope="row">Variation de trésorerie</th><td class="num">−1&nbsp;316&nbsp;122</td><td class="num">158&nbsp;840</td><td class="num">1&nbsp;258&nbsp;840</td></tr><tr class=""><th scope="row">Trésorerie au 1er janvier</th><td class="num">3&nbsp;200&nbsp;000</td><td class="num">1&nbsp;883&nbsp;878</td><td class="num">2&nbsp;042&nbsp;718</td></tr><tr class="tot"><th scope="row">Trésorerie au 31 décembre</th><td class="num">1&nbsp;883&nbsp;878</td><td class="num">2&nbsp;042&nbsp;718</td><td class="num">3&nbsp;301&nbsp;558</td></tr></tbody></table></div></div>
+                      </details>
+                    </div>
+                  </div>
+
+                  <div class="fin-card" data-fin-if="etat=accorde">
+                    <h3>Versions du dossier</h3>
+                    <p class="fin-sub">Un dossier remis ne se modifie plus&nbsp;: toute correction crée une nouvelle version. Les anciennes restent lisibles.</p>
+                    <div class="fin-ver"><b>Version 2</b><span class="dc-badge ok">Courante · accordée</span><span class="grow">2 emprunts · corrigée le 14/02/2025 par Awa Diallo</span></div>
+                    <div class="fin-ver"><b>Version 1</b><span class="dc-badge fin-mute">Remise le 10/02/2025</span><span class="grow">1 emprunt · le prêt demandé seul</span>
+                      <button class="btn btn-ghost btn-sm" type="button" data-fin-v1>Relire cette version</button></div>
+                    <div class="fin-notice" data-fin-v1box hidden style="margin-top:0.6rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span><b>Version 1, telle qu’elle a été remise.</b> Un seul emprunt&nbsp;: mensualité <b>658&nbsp;346</b>, intérêts <b>6&nbsp;600&nbsp;601</b>, couverture du service de la dette 1,57 en 2025, 1,65 en 2026, 1,78 en 2027.</span></div>
+                  </div>
+                </div>
+
+                <!-- ─── BANC D’ESSAI (équipe) ─── -->
+                <details class="fin-bench" data-note>
+                  <summary>Banc d’essai FE-140 · basculer les moments</summary>
+                  <div class="row">
+                    <button class="btn btn-ghost" type="button" data-fin-m="vide">1 · Liste vide</button>
+                    <button class="btn btn-ghost" type="button" data-fin-m="liste">2 · Liste de 2 dossiers</button>
+                    <button class="btn btn-ghost" type="button" data-fin-m="creation">3 · Création</button>
+                    <button class="btn btn-ghost" type="button" data-fin-m="brouillon">4 · Brouillon</button>
+                    <button class="btn btn-ghost" type="button" data-fin-m="pret">5 · Prêt</button>
+                    <button class="btn btn-ghost" type="button" data-fin-m="accorde">6 · Accordé</button>
+                    <button class="btn btn-ghost" type="button" data-fin-m="collab">7 · Collaborateur</button>
+                    <button class="btn btn-ghost" type="button" data-fin-m="nonmod">8 · Refus : plus modifiable</button>
+                    <button class="btn btn-ghost" type="button" data-fin-m="conflit">9 · Refus : modifié par un collègue</button>
+                  </div>
+                </details>
+
+                <div class="dc-note" data-note><b>Ce que valide cette maquette (FE-140).</b> L’onglet <b>Financement</b> de la fiche du dossier client&nbsp;: liste, création pré-remplie, emprunts avec échéancier replié, indicateurs de dette, états et droits. Routes servies&nbsp;: <code>/dossiers/{id}/financements</code> (STORY-1083) et <code>…/emprunts</code>, <code>…/indicateurs</code> (STORY-1084). L’onglet n’est visible que si le module <code>financement</code> est ouvert (<code>FINANCEMENT_NOT_ENTITLED</code> le masque). Un collaborateur prépare et consulte (<code>financement:dossier:preparer</code> / <code>consulter</code>)&nbsp;; <code>valider</code> est réservé à l’associé. <span class="code" data-note>FE-140 · STORY-1083 · STORY-1084</span></div>
+                <div class="dc-note" data-note><b>Valeur de référence, au franc.</b> 25&nbsp;000&nbsp;000 FCFA, 12&nbsp;%, 48&nbsp;mois ⇒ mensualité <b>658&nbsp;346</b>, dernière échéance <b>658&nbsp;339</b>, intérêts <b>6&nbsp;600&nbsp;601</b>, total <b>31&nbsp;600&nbsp;601</b>. Tableau mois par mois, indicateurs et plan de financement <b>générés par script</b> (rationnels exacts, demi vers le haut, la dernière échéance absorbe l’écart d’arrondi&nbsp;: STORY-1084 D-1084-3) puis <b>assertés</b>. Le JS ne connaît aucun montant.</div>
+                <div class="dc-note dc-gap" data-note><b>⚠️ Points ouverts.</b>
+                  ① <b>Le taux du prêt demandé</b> n’est pas un champ du dossier (<code>CreerFinancementDto</code> n’a ni taux ni mode)&nbsp;: la ligne d’emprunt le propose à 12&nbsp;%, d’où vient-il (taux de la banque au référentiel, STORY-1085)&nbsp;?
+                  ② <b>Les verdicts</b> (Solide / Juste / Insuffisant…) n’existent pas côté serveur&nbsp;: <code>indicateurs</code> rend la valeur, la formule et les sources ; les seuils viendront du référentiel bancaire (STORY-1085, AP-50). Les repères affichés ici sont indicatifs. <span class="code" data-note>écart ouvert · STORY-1085</span>
+                  ③ <b>Le scénario</b> «&nbsp;Avec le camion&nbsp;» et ses chiffres sont <b>générés pour la démo</b>&nbsp;: le prévisionnel d’Ets Kossi déjà dessiné (CA ≈ 17&nbsp;M) ne peut pas porter un prêt de 25&nbsp;M, la maquette ne le reprend donc pas.
+                  ④ <b>« Remis »</b> n’est pas proposé tant que rien n’est figé (<code>VERSION_FIGEE_ABSENTE</code>, STORY-1086)&nbsp;; la réponse de la banque (accordé) se joue sur le banc d’essai. <span class="code" data-note>écart ouvert · STORY-1086</span>
+                  ⑤ <b>Banque</b>&nbsp;: le dossier ne porte que son code (<code>banque.code</code>), le nom affiché viendra du référentiel (STORY-1085).</div>
+              </div>
               </div>
 
               <!-- ══════════════ SOUS-VUE 3 : ASSISTANT DE CRÉATION (FE-D01) ══════════════ -->
@@ -21089,6 +21371,160 @@
          On ouvre sur « aucun jeu d'hypothèses » : c'est la précondition de la
          story, et l'état de tout dossier qui vient de figer sa première liasse. */
       ouvrirMoment('sans-jeu');
+    })();
+
+
+    /* ===================== FE-140 · Onglet « Financement » du dossier client =====================
+       Le JS ne connaît AUCUN montant : tout vient du HTML généré. Il ne tient que l'état de l'écran
+       (vue, état du dossier, droits) et affiche/masque ce qui porte `data-fin-if`. */
+    (function () {
+      var open = document.querySelector('.dc-sub[data-dc="open"]');
+      if (!open) return;
+      var root = open.querySelector('[data-fin-root]');
+      var dossierPanel = open.querySelector('[data-dc-tabpanel="dossier"]');
+      var tabs = open.querySelectorAll('[data-dc-tab]');
+      if (!root || !dossierPanel || !tabs.length) return;
+
+      function afficherOnglet(nom) {
+        tabs.forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.dcTab === nom)); });
+        dossierPanel.hidden = nom !== 'dossier';
+        root.hidden = nom !== 'financement';
+      }
+      tabs.forEach(function (b) { b.addEventListener('click', function () { afficherOnglet(b.dataset.dcTab); }); });
+
+      var ETATS = {
+        brouillon: ['Brouillon', 'fin-mute'], pret: ['Prêt', 'info'], accorde: ['Accordé', 'ok'], abandonne: ['Abandonné', 'fin-mute']
+      };
+      var S = { vue: 'liste', vide: 1, etat: 'brouillon', scen: 0, dette: 0, admin: 1, banner: '' };
+
+      function estAdmin() {
+        var b = document.querySelector('#roleSeg [data-role][aria-selected="true"]');
+        return !b || b.dataset.role === 'admin';
+      }
+      function choisirRole(admin) {
+        if (estAdmin() === admin) return;
+        var b = document.querySelector('#roleSeg [data-role="' + (admin ? 'admin' : 'user') + '"]');
+        if (b) b.click();
+      }
+      function visible(el) {
+        return el.getAttribute('data-fin-if').split(/\s+/).every(function (t) {
+          var p = t.split('='); var vals = p[1].split('|');
+          return vals.indexOf(String(S[p[0]])) !== -1;
+        });
+      }
+      function appliquer() {
+        S.admin = estAdmin() ? 1 : 0;
+        root.querySelectorAll('[data-fin-if]').forEach(function (el) { el.classList.toggle('fin-off', !visible(el)); });
+        root.querySelectorAll('[data-fin-badge]').forEach(function (b) {
+          var e = ETATS[S.etat]; b.textContent = e[0]; b.className = 'dc-badge ' + e[1];
+        });
+        var ordre = ['brouillon', 'pret', 'remis', 'final'];
+        var courant = S.etat === 'accorde' ? 3 : (S.etat === 'pret' ? 1 : 0);
+        root.querySelectorAll('.fin-steps [data-st]').forEach(function (s) {
+          var i = ordre.indexOf(s.dataset.st);
+          s.className = i < courant ? 'done' : (i === courant ? 'now' : '');
+          if (s.dataset.st === 'final') s.textContent = S.etat === 'accorde' ? 'Accordé' : 'Réponse de la banque';
+        });
+        if (box && S.etat !== 'brouillon' && S.etat !== 'pret') box.hidden = true;
+      }
+
+      var MOMENTS = {
+        vide:      { vue: 'liste', vide: 1, etat: 'brouillon', scen: 0, dette: 0, banner: '', admin: true },
+        liste:     { vue: 'liste', vide: 0, etat: 'brouillon', scen: 0, dette: 0, banner: '', admin: true },
+        creation:  { vue: 'creation', vide: 1, etat: 'brouillon', scen: 0, dette: 0, banner: '', admin: true },
+        brouillon: { vue: 'detail', vide: 0, etat: 'brouillon', scen: 0, dette: 0, banner: '', admin: true },
+        pret:      { vue: 'detail', vide: 0, etat: 'pret', scen: 1, dette: 1, banner: '', admin: true },
+        accorde:   { vue: 'detail', vide: 0, etat: 'accorde', scen: 1, dette: 1, banner: '', admin: true },
+        collab:    { vue: 'detail', vide: 0, etat: 'brouillon', scen: 1, dette: 1, banner: '', admin: false },
+        nonmod:    { vue: 'detail', vide: 0, etat: 'pret', scen: 1, dette: 1, banner: 'nonmod', admin: false },
+        conflit:   { vue: 'detail', vide: 0, etat: 'brouillon', scen: 1, dette: 1, banner: 'conflit', admin: true }
+      };
+      var box = root.querySelector('[data-fin-motifbox]');
+      var txt = root.querySelector('#finMotifTxt');
+      var ok = root.querySelector('[data-fin-motif-ok]');
+      var lbl = root.querySelector('[data-fin-motif-label]');
+      var geste = '';
+      function fermerMotif() { box.hidden = true; txt.value = ''; ok.disabled = true; geste = ''; }
+      function moment(nom) {
+        var m = MOMENTS[nom]; if (!m) return;
+        Object.keys(m).forEach(function (k) { if (k !== 'admin') S[k] = m[k]; });
+        afficherOnglet('financement');
+        choisirRole(m.admin);
+        fermerMotif();
+        var v1 = root.querySelector('[data-fin-v1box]'); if (v1) v1.hidden = true;
+        appliquer();
+      }
+
+      root.querySelectorAll('[data-fin-m]').forEach(function (b) { b.addEventListener('click', function () { moment(b.dataset.finM); }); });
+      root.querySelectorAll('[data-fin-go]').forEach(function (b) {
+        b.addEventListener('click', function () { S.vue = b.dataset.finGo; S.banner = ''; fermerMotif(); appliquer(); });
+      });
+      root.querySelectorAll('[data-fin-open]').forEach(function (r) {
+        function ouvrir() { S.vue = 'detail'; appliquer(); }
+        r.addEventListener('click', ouvrir);
+        r.addEventListener('keydown', function (e) { if (e.key === 'Enter') ouvrir(); });
+      });
+
+      /* Création : la maquette ne calcule que le cas de référence. */
+      var champMontant = root.querySelector('#finMontant');
+      root.querySelector('[data-fin-save]').addEventListener('click', function () {
+        var chiffres = (champMontant.value || '').replace(/\D/g, '');
+        if (chiffres !== '25000000') {
+          notify('success', 'Demande enregistrée', 'Cette maquette ne calcule que le cas de référence (25 000 000 FCFA).');
+        } else {
+          notify('success', 'Demande enregistrée', 'Elle est en brouillon : ajoutez les emprunts, puis marquez-la comme prête.');
+        }
+        S.vue = 'detail'; S.vide = 0; S.etat = 'brouillon'; S.scen = 0; S.dette = 0; S.banner = '';
+        appliquer();
+      });
+
+      /* Emprunts */
+      root.querySelector('[data-fin-adddette]').addEventListener('click', function () {
+        S.dette = 1; appliquer();
+        notify('success', 'Dette existante ajoutée', 'Vérifiez la ligne : montant, taux et date viennent du dernier bilan.');
+      });
+      root.querySelectorAll('[data-fin-retirer]').forEach(function (b) {
+        b.addEventListener('click', function () { S.dette = 0; appliquer(); });
+      });
+      root.querySelector('[data-fin-retenir]').addEventListener('click', function () {
+        S.scen = 1; appliquer();
+        notify('success', 'Projection retenue', 'Les trois repères sont calculés sur ses trois exercices.');
+      });
+
+      /* États : le motif n'est demandé que pour revenir au brouillon ou abandonner. */
+      root.querySelectorAll('[data-fin-motif]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          geste = b.dataset.finMotif;
+          lbl.textContent = geste === 'abandon' ? 'Pourquoi abandonner cette demande ?' : 'Pourquoi revenir au brouillon ?';
+          box.hidden = false; txt.focus();
+        });
+      });
+      txt.addEventListener('input', function () { ok.disabled = txt.value.trim().length < 10; });
+      root.querySelector('[data-fin-motif-cancel]').addEventListener('click', fermerMotif);
+      ok.addEventListener('click', function () {
+        var motif = txt.value.trim(); var g = geste;
+        fermerMotif();
+        if (g === 'abandon') {
+          S.etat = 'abandonne';
+          root.querySelector('[data-fin-motif-out]').textContent = motif;
+          notify('success', 'Demande abandonnée', 'Le motif est gardé dans l’historique du dossier.');
+        } else {
+          S.etat = 'brouillon';
+          notify('success', 'Retour au brouillon', 'Vous pouvez de nouveau modifier les emprunts.');
+        }
+        appliquer();
+      });
+      root.querySelector('[data-fin-pret]').addEventListener('click', function () {
+        S.etat = 'pret'; appliquer();
+        notify('success', 'Dossier prêt', 'Prochaine étape : générer le dossier pour la banque.');
+      });
+      root.querySelectorAll('[data-fin-banner-off]').forEach(function (b) { b.addEventListener('click', function () { S.banner = ''; appliquer(); }); });
+      var v1 = root.querySelector('[data-fin-v1]');
+      if (v1) v1.addEventListener('click', function () { root.querySelector('[data-fin-v1box]').hidden = false; });
+
+      var roleSeg = document.getElementById('roleSeg');
+      if (roleSeg) roleSeg.addEventListener('click', function () { setTimeout(appliquer, 0); });
+      appliquer();
     })();
 
   })();
