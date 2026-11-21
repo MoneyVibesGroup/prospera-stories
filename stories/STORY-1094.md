@@ -1,6 +1,6 @@
 # STORY-1094 : Le plan comptable propre du cabinet — ses comptes et ses journaux, hérités par ses dossiers
 
-Status: ready-for-dev — **créée le 2026-11-18** à la demande de l'utilisateur. Non slottée : à placer au prochain plan.
+Status: done — **livrée le 2026-11-21** (comptabilite-service #13, `a98ec56` sur `dev` ; contrat annoncé stories #745). Créée le 2026-11-18 à la demande de l'utilisateur. Non slottée.
 
 **Service :** `prospera-comptabilite-service` (tenu par B au lot 4) · **Points :** 8
 **Suite :** STORY-1095 (le plan propre d'un client), STORY-1096 (import du plan de Sage), FE-148 (l'écran).
@@ -52,3 +52,24 @@ référentiel du dossier est refusé, et le refus nomme la racine la plus proche
 - **AC-4** : un collaborateur lit le modèle mais ne l'écrit pas (403 nommé).
 - **AC-5** : contrat publié et typé dans l'OpenAPI, annoncé dans « ⚠ Contrats » du journal du groupe qui tient le
   service, avant le code.
+
+---
+
+## Livraison (2026-11-21, groupe A)
+
+**Routes** (contrat dans le journal du groupe A, « ⚠ Contrats ») : `/api/v1/cabinet/plan-comptable/{comptes,journaux,actes}` (lecture : tout membre ; écriture : `TENANT_ADMIN`) et `GET /api/v1/dossiers/{d}/exercices/{e}/plan-comptable`.
+
+**Preuves** : unitaires 889 passés (Node 24, 60 suites), `test:socle` 273/273 (12 suites, dont 29 neufs), mutation 18/18 rouges sur l'assertion, lint, tsc, build ; gate de câblage `docker compose up` du service (grp-a) : healthy, routes neuves 401 sans jeton, 404 sur une route inconnue.
+
+**AC** : AC-1 (refus nommant la racine la plus proche : `details.racineLaPlusProche`), AC-2 (grand livre du dossier aux comptes propres égal, à la racine, à celui du dossier saisi sur les racines : socle), AC-3 (mouvementé : 409 à la suppression, désactivé : 422 `COMPTE_DESACTIVE` / 409 `JOURNAL_DESACTIVE`, lisible avec `?etat=tous`), AC-4 (403 `TENANT_ADMIN_REQUIS`), AC-5 (contrat annoncé avant le code).
+
+**Décisions** (prises par A, contestables) :
+- **D-1094-1** : le service ne portait pas le plan de comptes. Les numéros du plan publié de chaque référentiel sont une donnée du service (`plan-publie@1`, `src/plan-propre/plans-publies.json`), générée par `scripts/plan-publie/generer.mjs` depuis les paquets de `balance-service` (SN `syscohada-revise@2.3`, SMT `smt-togo@1.0`, SFD-BCEAO `sfd-bceao@2.0`, CIMA `cima-assurances@7.0`). Un nouveau paquet se rejoue par le script.
+- **D-1094-2** : la nature héritée de la racine est la **classe** et le **collectif** (catégorie de tiers). Le **sens** n'est pas servi : le plan publié n'en porte pas, on ne l'invente pas.
+- **D-1094-3** : l'écriture est réservée au rôle `TENANT_ADMIN` du jeton signé (décorateur `@AdministrateurDuCabinet`, 403 `TENANT_ADMIN_REQUIS`), **sans droit de tenant neuf** (aucune attribution à demander à auth-service).
+- **D-1094-4** : un compte propre porte **une racine par référentiel** dont le plan en a une (la plus longue qui le préfixe, strictement plus courte que lui). Il est refusé s'il n'en a dans aucun (`COMPTE_SANS_RACINE`) ou s'il est lui-même un compte du plan (`COMPTE_DU_REFERENTIEL`). Un dossier ne reçoit que les comptes dont la racine est dans le plan de son référentiel.
+- **D-1094-5** : aux écritures, `COMPTE_INCONNU` = la classe n'existe pas au plan du dossier ; `COMPTE_SANS_RACINE` = classe connue mais aucune racine ; `COMPTE_DESACTIVE`. **La classe 9** (engagements hors bilan, analytique), absente du plan publié mais connue de la clôture (« hors clôture »), **reste saisissable**. Un compte sans racine, accepté sans contrôle jusqu'ici, est donc refusé : seul effet visible pour les cabinets existants.
+- **D-1094-6** : la suppression existe pour ce qui n'a jamais été mouvementé (brouillard compris) ; l'acte d'audit reste. Le journal d'audit du modèle est une collection en ajout seul (`actes_du_modele`), chaque geste effectif avance la version du modèle ; un geste sans effet (même libellé, déjà désactivé) n'avance rien.
+- **D-1094-7** : un journal propre n'est pas dans le plan arrêté de l'exercice ; la saisie le résout chez le cabinet et le numérote (séries `series-v1` à son nom). Un plan de trésorerie (SMT) n'admet que les journaux propres de type `TRESORERIE`. Un journal désactivé reste numérotable pour contre-passer l'historique ; la **saisie** et la **validation d'un brouillard** exigent un journal actif.
+- **D-1094-8** : `MOTIF_JOURNAL` des écritures et le curseur du grand livre acceptent les chiffres (`BQ1`) : ajout seul, tout code d'avant reste valide.
+- **Ouvert** : le manifeste `comptabilite` gagne quatre routes de lecture ; la copie du catalogue est à regénérer (demande à B, journal de A).

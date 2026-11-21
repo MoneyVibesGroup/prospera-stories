@@ -41,6 +41,9 @@
 //   le seul `TENANT_ADMIN` (403 `TENANT_ADMIN_REQUIS`), sans droit de tenant neuf. Un compte ou un journal mouvementé se
 //   désactive, il ne se supprime pas. Les écritures (brouillard, validation) refusent un compte inconnu, sans racine ou
 //   désactivé (`COMPTE_INCONNU`, `COMPTE_SANS_RACINE`, `COMPTE_DESACTIVE`).
+// - Plan comptable propre d'un DOSSIER (STORY-1095) : s'ajoute au modèle du cabinet (jamais copié) ; ordre de lecture
+//   référentiel, cabinet, dossier (`origine`) ; un compte du modèle se MASQUE pour ce dossier seul (non mouvementé dans le
+//   dossier). Écriture : le `TENANT_ADMIN` ou le responsable du dossier ; dossier archivé : 409 `DOSSIER_ARCHIVE`.
 // - Grand livre (STORY-966) : calculé à la volée sur les seules écritures VALIDÉES (contre-passations comprises, jamais
 //   un brouillard), lu dans un instantané MongoDB ; par compte et par période (bornes inclusives, dans l'exercice).
 // - Balance (STORY-967) : dérivée du grand livre (mouvements hors à-nouveaux, soldes de clôture), équilibrée, refusée
@@ -186,6 +189,10 @@ export const MANIFESTE_COMPTABILITE = {
     'GET /api/v1/cabinet/plan-comptable/journaux', // STORY-1094 : les journaux propres du cabinet
     'GET /api/v1/cabinet/plan-comptable/actes', // STORY-1094 : le journal d'audit du plan propre
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/plan-comptable', // STORY-1094 : le plan servi au dossier
+    'GET /api/v1/dossiers/{dossierId}/plan-comptable/comptes', // STORY-1095 : les comptes propres du dossier
+    'GET /api/v1/dossiers/{dossierId}/plan-comptable/journaux', // STORY-1095 : les journaux propres du dossier
+    'GET /api/v1/dossiers/{dossierId}/plan-comptable/masques', // STORY-1095 : les comptes du modèle masqués au dossier
+    'GET /api/v1/dossiers/{dossierId}/plan-comptable/actes', // STORY-1095 : le journal du dossier
   ],
 
   // C13, point 7 (chemins vus par le service). Servis depuis STORY-975, sous l'identité du moteur seule : `import`
