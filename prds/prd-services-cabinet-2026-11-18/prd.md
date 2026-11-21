@@ -151,6 +151,16 @@ en avoir plusieurs.
 Toute autre transition est refusée (`409 TRANSITION_INTERDITE`, états de départ et d'arrivée en `details`).
 - Un dossier `REMIS` ne se modifie plus : une correction crée une nouvelle version (la précédente reste lisible).
 
+> **Amendé le 21/11 (parcours réel, maquette de FE-140 validée, PR #741) :**
+> - la **banque cible unique** devient **1 à 3 banques** par demande, chacune avec son suivi (FR-1c, FR-1e) ;
+> - le **texte libre des garanties** devient des garanties structurées (FR-1d) ;
+> - **`REMIS`, `ACCORDE` et `REFUSE` du dossier ne se posent plus à la main** : ils suivent le suivi de chaque banque (première
+>   remise ⇒ `REMIS` ; choix du client ⇒ `ACCORDE` ; toutes les banques refusent ⇒ `REFUSE`) ; la transition manuelle répond `409 TRANSITION_PAR_BANQUE` ;
+> - un état de plus : **`DECAISSE`** (final), après `ACCORDE` (FR-1e) ;
+> - `BROUILLON` → `PRET` exige aussi un projet complet (FR-1b) ;
+> - décisions de l'utilisateur (20-21/11), inscrites comme telles : **pas de consentement BIC** ; les pièces dépendent du **profil** de l'entreprise (société
+>   établie, jeune société) et de la **relation** avec chaque banque (déjà client à compte mouvementé, nouveau client).
+
 #### FR-2 : Les exigences de la banque, et ce qu'il manque
 
 Le dossier lit les **exigences de la banque cible** (FR-17) : pièces, nombre d'exercices historiques, ratios
@@ -160,6 +170,14 @@ Une banque inconnue prend les exigences « banque générique UEMOA ».
 - Une pièce déjà déposée dans le dossier client (statuts, RCCM, carte CFE…) est reconnue sans nouveau dépôt.
 - Les exercices historiques se lisent des états validés du bilan ; un exercice absent est « manquant » avec l'action proposée (importer la balance).
 - Passer `PRET` est refusé tant qu'une exigence marquée bloquante manque (`EXIGENCES_BANCAIRES_INCOMPLETES`, avec la liste).
+
+> **Amendé le 21/11 :** la liste dépend du **profil** et de la **relation avec chaque banque** (FR-17 amendé) ; six statuts (fournie, manquante
+> bloquante ou facultative, expirée selon la validité, sans objet avec motif, « déjà à la banque », « fournie par la banque ») ; pièces
+> conditionnelles (pro forma si matériel ; contrats ou lettres d'intention si le chiffre d'affaires d'une hypothèse est « à justifier » ;
+> plan de trésorerie mensuel si jeune société ; lettre d'affirmation du dirigeant toujours) ; **« demander au client les pièces
+> manquantes »** (message prêt, par banque) ; **« voir » chaque pièce**. **Toute action « déposer » est un vrai téléversement**
+> (sélecteur de fichier et glisser-déposer, types et taille nommés, refus nommés, progression et annulation) et **tout document généré,
+> comme tout fichier déposé, se voit dans l'application avant tout téléchargement** (exigence de l'utilisateur, 21/11).
 
 #### FR-3 : Le tableau d'amortissement de chaque emprunt
 
@@ -197,11 +215,67 @@ Formats : **PDF** (le dossier) et **Excel** (les tableaux).
 - Le document porte « préparé par <cabinet> » et la date ; aucun chiffre n'est recalculé après le figement.
 - Le cabinet remet le document lui-même (e-mail, papier) : **aucune transmission à la banque par Prospera** (D-SC-2).
 
+> **Amendé le 21/11 :** **un dossier par banque** (ses exigences, sa relation, son nom de fichier), avec une **synthèse d'une page** en tête
+> (qui, projet, garanties retenues, couverture centrale et prudente, points forts et points de vigilance **générés par des règles, sans IA**),
+> le **scénario prudent en annexe**, la **mention fixe de responsabilité du cabinet** en pied de chaque page, **PDF et Excel**, **aperçu
+> avant téléchargement**. Générer est permis avant `PRET` ; figer exige les exigences bloquantes remplies ; une modification après le
+> figement périme la version.
+
 #### FR-6 : Le prévisionnel et les scénarios du dossier
 
 Le dossier de financement **choisit** un jeu d'hypothèses du prévisionnel existant (EPIC-013) comme scénario retenu, et
 peut en comparer deux (prudent, central). Les emprunts de FR-3 s'y injectent. Rien n'est dupliqué : le prévisionnel
 reste celui du bilan.
+
+#### FR-1b : Le projet financé *(ajouté le 21/11)*
+
+Le dossier porte le **projet** : une ou plusieurs **factures pro forma** (matériel, fournisseur, numéro, date, validité, montants HT,
+TVA 18 %, TTC, fichier joint), des **frais annexes** facultatifs, la **date d'acquisition**, l'**apport** du client. Le **coût** est la
+somme des pro forma **TTC** (et des frais cochés) ; le **montant demandé** est le coût moins l'apport, calculé et modifiable. Le pro forma
+est **obligatoire et bloquant** pour un investissement ou un crédit-bail (un pro forma expiré bloque), sans objet pour un crédit de
+trésorerie. **Valeur de référence** : pro forma 31 250 000 TTC (HT 26 483 051 + TVA 4 766 949), apport 6 250 000 (20 %), demandé 25 000 000.
+Le prêt demandé est proposé d'office comme premier emprunt (FR-3). Le fichier du pro forma se **téléverse** et se **voit** (FR-2).
+
+#### FR-1c : Plusieurs banques, la relation, le profil *(ajouté le 21/11)*
+
+Une demande se remet à **une à trois banques** ; la banque inconnue prend la banque générique UEMOA. Pour chaque banque, la **relation** :
+déjà client à compte mouvementé, ou nouveau client (déduite de la comptabilité quand elle se voit, modifiable). Le **profil** de
+l'entreprise : société établie ou jeune société, déduit de sa date de création et du nombre d'exercices validés, modifiable avec motif.
+
+#### FR-1d : Les garanties saisies, la décote, la couverture retenue *(ajouté le 21/11)*
+
+Le cabinet **saisit** les garanties (hypothèque, gage de matériel, nantissement du fonds de commerce, caution, dépôt à terme, fonds de
+garantie, assurance avec délégation, autre) : garant ou bien, valeur déclarée (ou part du prêt couverte), **décote** de la banque (proposée
+selon le type, modifiable), valeur retenue, pièce justificative (téléversée, vue). Rien n'est prédéfini ni ajouté d'office. Deux
+couvertures : **déclarée** et **retenue** (la retenue compte). **Référence** : déclarée 275 %, retenue 197 % pour un prêt de 25 000 000.
+
+#### FR-1e : Le suivi banque par banque, les conditions, le décaissement *(ajouté le 21/11)*
+
+Chaque banque a son suivi : remise (date, interlocuteur), compléments demandés et fournis, passage en comité, **réponse** (accord, refus,
+contre-proposition) avec l'**offre détaillée** (montant, taux, durée, différé, frais, assurance, garanties exigées, conditions préalables).
+Le cabinet **compare** les offres sur le **coût total** (intérêts + frais + assurance) et le **coût pour 1 000 000 empruntés** ; le client
+**choisit**, les autres banques passent « non retenues ». Les **conditions préalables** de l'offre retenue se lèvent une à une (avec pièce) ;
+le **décaissement** reste bloqué tant qu'une condition est ouverte, puis se note (date, montant, première échéance).
+**Référence** : Orabank Togo 22 000 000 à 11,5 %, 48 mois, coût total 6 033 992 ; BOA Togo 20 000 000 à 12 %, 36 mois, coût total 4 394 306.
+
+#### FR-5b : Les documents générés du dossier *(ajouté le 21/11)*
+
+Prospera génère, **pré-remplis** avec les données du dossier : la **note de présentation** (société établie), le **plan d'affaires** (jeune
+société, avec un questionnaire de huit questions), la **lettre de demande**, la **lettre d'affirmation** du dirigeant, la **décision des
+associés**, l'**engagement de domiciliation**. Blocs « à compléter » avec compteur. Chaque document se **voit** dans l'application, se
+télécharge en **Word (modifiable)** et en **PDF** ; la version modifiée **se téléverse** et remplace la générée, **les deux restant dans
+l'historique** (date, auteur). Les textes proposés sont des **modèles remplis avec les données, sans IA** (l'option d'une aide par IA est
+à décider par l'utilisateur : PRD assistant IA, FR-IA07 et FR-IA09).
+
+#### FR-6b : Les aides à la décision et la trésorerie mensuelle *(ajouté le 21/11)*
+
+- **Hypothèses suggérées** depuis l'historique validé, avec leur source, et « créer la projection depuis l'historique ».
+- **Crédibilité** des hypothèses face à l'historique (repères vert, ambre, rouge ; des avertissements, rien ne bloque).
+- **Montant soutenable** : le plus grand prêt, au millier près, qui garde une couverture ≥ 1,20 chaque année et des dettes financières
+  ≤ capitaux propres la 1re année (référence : 20 492 000 pour une demande de 25 000 000).
+- **Simulation d'un différé**, sans rien enregistrer ; **scénario prudent** côte à côte (réutilise la comparaison du prévisionnel).
+- **Trésorerie mensuelle** de la 1re année (12 mois depuis la date d'acquisition), **exigée pour une jeune société**, dont le solde de
+  décembre égale la trésorerie du plan annuel au franc près (référence : 765 910 à l'ouverture, 2 772 076 en décembre).
 
 ### 4.2 L'archivage numérique et physique (module `ged` ouvert au cabinet, M07)
 
@@ -327,6 +401,10 @@ chacune les pièces exigées (bloquantes ou non), le nombre d'exercices, les rat
 financement garde la version lue à sa création.
 
 - Le contenu initial vient de la pratique bancaire connue [ASSUMPTION] et **doit être relu par une banque** avant la première vente.
+
+> **Amendé le 21/11 :** le référentiel porte aussi les **exigences par profil** (société établie, jeune société) **et par relation** (déjà client,
+> nouveau client), leurs **validités**, les **décotes par défaut des garanties**, et les **seuils et paramètres** (couverture 1,20, autonomie 33 %,
+> repères d'apport et de couverture, taux indicatif, assurance 0,30 %). Voir AP-50 amendée.
 
 #### FR-18 : Les modèles de lettre de mission
 
