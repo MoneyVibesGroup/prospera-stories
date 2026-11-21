@@ -1,0 +1,22 @@
+﻿Numéro de compte;Intitulé du compte;Type;Collectif
+401;Fournisseurs;Général;
+411;Clients;Général;
+521;Banques locales;Général;
+521100;BOA Lomé;Général;
+521400;Coris Bank Lomé;Général;
+521500;UTB Kara;Général;
+521600;;Général;
+516000;Terminal de paiement (TPE);Général;
+571200;Caisse Kara;Général;
+411ACCR;Clients Accra;Tiers;411
+411SOKO;Clients Sokodé;Tiers;411
+401KARA;Fournisseurs Kara;Tiers;401
+401IMPT;Fournisseurs import Chine;Tiers;401
+443100;TVA facturée sur ventes;Général;
+445100;TVA récupérable sur achats;Général;
+605100;Fournitures de bureau;Général;
+622100;Loyer entrepôt Lomé;Général;
+628100;Téléphone et internet;Général;
+631100;Frais bancaires BOA;Général;
+661200;Primes et gratifications;Général;
+706100;Prestations de transport;Général;
