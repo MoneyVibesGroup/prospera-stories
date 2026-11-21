@@ -1079,6 +1079,8 @@ reserved_ranges:
       d'une racine du référentiel (la liasse reste juste). Fiches écrites par A ; NON SLOTTÉES.
       ✅ STORY-1094 DONE (2026-11-21) : comptabilite-service #13 (`a98ec56` sur dev), contrat stories #745 ; unitaires 889, socle 273/273,
       mutation 18/18, gate de câblage vert ; décisions D-1094-1 → 8 dans la fiche.
+      ✅ STORY-1095 DONE (2026-11-21) : comptabilite-service #14 (`0d93c5d` sur dev), contrat stories #746 ; unitaires 910, socle 289/289,
+      mutation 10/10 + 3/3 au socle, gate de câblage vert ; décisions D-1095-1 → 7 dans la fiche.
   - range: "STORY-1097 → STORY-1099"
     status: "RÉSERVÉ"
     owner: "À placer au prochain plan — des factures aux écritures : 1097 facture → écriture proposée en partie double (achats et ventes, système normal, comptabilite-service) ; 1098 mémoire des choix du cabinet pour les écritures ; 1099 mémoire des choix pour les cahiers (balance-service). Écrans : FE-149, FE-150."
