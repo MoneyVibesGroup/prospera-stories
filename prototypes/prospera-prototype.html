@@ -23038,7 +23038,7 @@
         C.comptes.forEach(function (c) { items.push({ n: c.n, l: c.l, o: 'dossier', a: c.a }); });
         var nHer = herites.length, nPro = C.comptes.length, nRef = REFS.length, nMasq = C.masques.length;
         REFS.forEach(function (r) { items.push({ n: r.n, l: r.l, o: 'referentiel' }); });
-        var vues = [['ajouts', 'Ce que le cabinet et le client ajoutent', nHer + nPro], ['cabinet', 'Hérité du cabinet', nHer], ['dossier', 'Propre au client', nPro], ['referentiel', 'Référentiel', nRef]];
+        var vues = [['ajouts', 'Ce que le cabinet et le client ajoutent', nHer + nPro], ['cabinet', 'Du cabinet', nHer], ['dossier', 'Propre au client', nPro], ['referentiel', 'Référentiel', nRef]];
         var rows = items.filter(function (x) {
           var okv = S.vue === 'ajouts' ? x.o !== 'referentiel' : x.o === S.vue;
           return okv && (!q || (x.n + ' ' + x.l).toLowerCase().indexOf(q) !== -1);
@@ -23054,7 +23054,7 @@
           '<input type="search" data-plan-q="cli" placeholder="Chercher un compte : numéro ou libellé" aria-label="Chercher un compte" value="' + esc(S.q.cli) + '"></div>';
         h += '<div class="scroll-x"><table class="plan-tbl"><thead><tr><th>Numéro</th><th>Libellé</th><th>Origine</th><th>Rattaché à</th><th></th></tr></thead><tbody>' +
           (rows.length ? rows.map(function (x) {
-            var org = x.o === 'cabinet' ? '<span class="dc-badge info">Hérité du cabinet</span>' : x.o === 'dossier' ? '<span class="dc-badge ok">Propre au client</span>' : '<span class="dc-badge fin-mute">Référentiel</span>';
+            var org = x.o === 'cabinet' ? '<span class="dc-badge info">Du cabinet</span>' : x.o === 'dossier' ? '<span class="dc-badge ok">Propre au client</span>' : '<span class="dc-badge fin-mute">Référentiel</span>';
             var act = '';
             if (x.o === 'cabinet') {
               act = x.m ? '<span class="dc-badge warn">Masqué pour ce dossier</span><button class="btn btn-ghost btn-sm" type="button" data-plan-demasquer="' + esc(x.n) + '">Réafficher</button>'
@@ -23075,7 +23075,7 @@
         h += '<div class="scroll-x"><table class="plan-tbl"><thead><tr><th>Code</th><th>Libellé</th><th>Type</th><th>Origine</th><th></th></tr></thead><tbody>' +
           jh.concat(jp).map(function (j, i) {
             var propre = i >= jh.length;
-            return '<tr data-plan-jrow="' + esc(j.c) + '"><td class="plan-num">' + esc(j.c) + '</td><td>' + esc(j.l) + '</td><td>' + esc(TYPES[j.t]) + (j.cpt ? ' <span class="plan-root">· ' + esc(j.cpt) + '</span>' : '') + '</td><td>' + (propre ? '<span class="dc-badge ok">Propre au client</span>' : '<span class="dc-badge info">Hérité du cabinet</span>') + '</td><td class="plan-ra">' + (propre ? '<button class="btn btn-ghost btn-sm" type="button" data-plan-bascule="journal:' + esc(j.c) + '">' + (j.a ? 'Désactiver' : 'Réactiver') + '</button>' : '') + '</td></tr>';
+            return '<tr data-plan-jrow="' + esc(j.c) + '"><td class="plan-num">' + esc(j.c) + '</td><td>' + esc(j.l) + '</td><td>' + esc(TYPES[j.t]) + (j.cpt ? ' <span class="plan-root">· ' + esc(j.cpt) + '</span>' : '') + '</td><td>' + (propre ? '<span class="dc-badge ok">Propre au client</span>' : '<span class="dc-badge info">Du cabinet</span>') + '</td><td class="plan-ra">' + (propre ? '<button class="btn btn-ghost btn-sm" type="button" data-plan-bascule="journal:' + esc(j.c) + '">' + (j.a ? 'Désactiver' : 'Réactiver') + '</button>' : '') + '</td></tr>';
           }).join('') + '</tbody></table></div></div>';
         h += '<p class="plan-last" data-plan-last>' + (S.last && S.last.ctx === 'cli' ? 'Inscrit au journal du dossier : ' + esc(S.last.t) : 'Le plan du dossier s’ajoute au modèle du cabinet : il ne le remplace pas et ne le copie pas.') + '</p>';
         el.innerHTML = h; majAide(el);
