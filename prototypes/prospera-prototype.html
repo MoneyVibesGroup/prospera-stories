@@ -3437,6 +3437,51 @@
   .fin-tag.fac { background: var(--hover-surface); color: var(--muted-fg); }
   .fin-frais { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; margin-bottom: 0.4rem; }
   .fin-btns { display: inline-flex; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end; }
+  /* FE-140 : téléversement réel et aperçu des documents */
+  .fin-fmt { display: block; color: var(--muted-fg); font-size: 0.72rem; }
+  .fin-refus { display: block; color: var(--danger); font-size: 0.78rem; font-weight: 600; margin-top: 0.15rem; }
+  .fin-prog { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.3rem; font-size: 0.76rem; color: var(--muted-fg); width: 100%; }
+  .fin-prog .bar { display: block; height: 0.4rem; border-radius: 0.3rem; background: var(--border); overflow: hidden; }
+  .fin-prog .bar i { display: block; height: 100%; width: 0; background: var(--primary); transition: width 0.12s linear; }
+  [data-fin-drop].drop { outline: 2px dashed var(--primary); outline-offset: 2px; background: var(--hover-surface); border-radius: 0.5rem; }
+  .fin-cond-l { display: flex; gap: 0.3rem 0.8rem; align-items: center; flex-wrap: wrap; }
+  .fin-cond-l > small[data-fin-cond-file] { flex: 1 1 100%; color: var(--muted-fg); font-size: 0.76rem; padding-left: 1.6rem; }
+  .fin-gar-up { display: flex; gap: 0.2rem 0.6rem; align-items: center; flex-wrap: wrap; margin-top: 0.3rem; }
+  .fin-gar-up small { flex: 1 1 100%; }
+  .fin-ap { position: fixed; inset: 0; z-index: 95; background: rgb(0 0 0 / 0.55); display: grid; place-items: center; padding: 0.8rem; }
+  .fin-ap[hidden] { display: none !important; }
+  .fin-ap-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); width: min(60rem, 100%); max-height: 94vh; display: flex; flex-direction: column; box-shadow: var(--shadow-lg); }
+  .fin-ap-h { display: flex; justify-content: space-between; gap: 0.8rem; flex-wrap: wrap; align-items: center; padding: 0.7rem 1.1rem; border-bottom: 1px solid var(--border); }
+  .fin-ap-h > div:first-child { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+  .fin-ap-h small { color: var(--muted-fg); font-size: 0.76rem; }
+  .fin-ap-b { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .fin-ap-b a.btn { text-decoration: none; }
+  .fin-ap-c { overflow: auto; padding: 1.1rem; background: var(--content-bg); flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 1rem; }
+  .fin-ap-img { display: block; max-width: 100%; max-height: 70vh; margin: 0 auto; border: 1px solid var(--border-strong); border-radius: 0.4rem; background: #fff; }
+  .fin-ap-pdf { width: 100%; height: 70vh; border: 1px solid var(--border-strong); border-radius: 0.4rem; background: #fff; }
+  .fin-ap-fic { align-self: center; max-width: 30rem; width: 100%; padding: 1rem 1.2rem; border: 1px solid var(--border-strong); border-radius: 0.6rem; background: var(--card); font-size: 0.86rem; }
+  .fin-a4 { --foreground: #1c1917; --muted-fg: #57534e; --border: #e7e5e4; --border-strong: #d6d3d1; --card: #ffffff; --content-bg: #fafaf9; --hover-surface: #f5f5f4; --link: #c2410c; --success-soft: #d1fae5; --warning-soft: #fef3c7; --danger-soft: #fee2e2; color-scheme: light; background: #ffffff; color: #1c1917; width: min(44rem, 100%); margin: 0 auto; padding: 2rem 2.3rem; border: 1px solid var(--border-strong); box-shadow: var(--shadow-sm); font-size: 0.86rem; line-height: 1.55; }
+  .fin-a4-h { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; padding-bottom: 0.7rem; border-bottom: 2px solid #1c1917; margin-bottom: 1.1rem; }
+  .fin-a4-h small { display: block; color: var(--muted-fg); font-size: 0.74rem; }
+  .fin-a4-t { margin: 0 0 0.9rem; font-size: 1.15rem; }
+  .fin-a4 p { margin: 0.5rem 0; }
+  .fin-a4 p.r { text-align: right; color: var(--muted-fg); font-size: 0.8rem; }
+  .fin-a4 h4 { margin: 1rem 0 0.4rem; font-size: 0.95rem; }
+  .fin-a4 h5 { margin: 0.8rem 0 0.2rem; font-size: 0.84rem; }
+  .fin-a4 ol, .fin-a4 ul { margin: 0.4rem 0; padding-left: 1.3rem; }
+  .fin-a4 mark { background: var(--warning-soft); border: 1px solid #f5c04a; border-radius: 0.25rem; padding: 0 0.3rem; color: #1c1917; }
+  .fin-a4-sig { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2rem; font-size: 0.84rem; }
+  .fin-a4-sig span:last-child { min-width: 14rem; min-height: 4rem; }
+  .fin-a4-pg { text-align: right; color: var(--muted-fg); font-size: 0.72rem; margin-top: 0.6rem; }
+  .fin-xl { width: 100%; border-collapse: collapse; font-size: 0.82rem; background: #fff; color: #1c1917; }
+  .fin-xl th, .fin-xl td { border: 1px solid #d6d3d1; padding: 0.3rem 0.55rem; text-align: left; }
+  .fin-xl thead th, .fin-xl tbody th { background: #f5f5f4; color: #57534e; font-weight: 600; text-align: center; width: 2.2rem; }
+  .fin-xl thead th:not(:first-child) { text-align: left; width: auto; }
+  .fin-xl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .fin-xl-tabs { display: flex; gap: 0.3rem; margin-top: 0.5rem; font-size: 0.78rem; }
+  .fin-xl-tabs span { padding: 0.25rem 0.8rem; border: 1px solid #d6d3d1; border-top: 0; background: #fff; color: #1c1917; font-weight: 600; border-radius: 0 0 0.35rem 0.35rem; }
+  .fin-xlw { width: min(44rem, 100%); margin: 0 auto; background: #fff; border: 1px solid var(--border-strong); padding: 0.8rem; border-radius: 0.4rem; }
+  .fin-ap-pages { display: flex; flex-direction: column; gap: 1rem; }
   .fin-hist { margin: 0.2rem 0 0.6rem; padding-left: 1.1rem; font-size: 0.8rem; color: var(--muted-fg); }
   .fin-draft { font-style: italic; color: var(--muted-fg); font-size: 0.84rem; margin: 0.2rem 0 0.4rem; }
   .fin-fill-d { border: 2px solid #f5c04a; background: var(--warning-soft); border-radius: 0.6rem; padding: 0.6rem 0.8rem; margin-top: 0.8rem; }
@@ -5349,12 +5394,12 @@
   </div>
 
   <h4 class="fin-h4" data-fin-if="type=invest|bail">Factures pro forma du matériel <span class="fin-tag">Obligatoires</span></h4>
-  <div class="fin-files" data-fin-if="type=invest|bail">
-    <div class="fin-pf" data-pf data-ttc="31250000" data-fin-if="pf=ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg><div class="t"><b>Camion de livraison Toyota Dyna</b><small>CFAO Motors Togo · n° PF-2026-0142 du 05/02/2026</small><small>HT 26&nbsp;483&nbsp;051 + TVA 18&nbsp;% 4&nbsp;766&nbsp;949 = <b>TTC 31&nbsp;250&nbsp;000</b></small></div><div class="s"><span class="dc-badge ok">Valable jusqu’au 06/04/2026</span></div><button class="btn btn-ghost btn-sm" type="button" data-fin-act="info" data-msg="Le pro forma s’ouvre dans la visionneuse.">Ouvrir</button></div>
-    <div class="fin-pf" data-pf data-ttc="31250000" data-fin-if="pf=expire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg><div class="t"><b>Camion de livraison Toyota Dyna</b><small>CFAO Motors Togo · n° PF-2025-0987 du 05/11/2025</small><small>HT 26&nbsp;483&nbsp;051 + TVA 18&nbsp;% 4&nbsp;766&nbsp;949 = <b>TTC 31&nbsp;250&nbsp;000</b></small></div><div class="s"><span class="dc-badge warn">Expiré le 05/01/2026</span><button class="btn btn-primary btn-sm" type="button" data-fin-act="info" data-msg="Demande envoyée à CFAO Motors Togo : le nouveau pro forma se dépose ici.">Demander un pro forma à jour</button></div><button class="btn btn-ghost btn-sm" type="button" data-fin-act="info" data-msg="Le pro forma s’ouvre dans la visionneuse.">Ouvrir</button></div>
-    <div class="fin-pf" data-pf data-ttc="1180000" data-fin-if="pf2=1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg><div class="t"><b>Bâche et hayon</b><small>Carrosserie Moderne, Lomé · n° PF-2026-0031 du 03/02/2026</small><small>HT 1&nbsp;000&nbsp;000 + TVA 18&nbsp;% 180&nbsp;000 = <b>TTC 1&nbsp;180&nbsp;000</b></small></div><div class="s"><span class="dc-badge ok">Valable jusqu’au 05/05/2026</span></div><button class="btn btn-ghost btn-sm" type="button" data-fin-act="info" data-msg="Le pro forma s’ouvre dans la visionneuse.">Ouvrir</button></div>
+  <div class="fin-files" data-fin-drop="pf2" data-fin-if="type=invest|bail">
+    <div class="fin-pf" data-pf data-ttc="31250000" data-fin-if="pf=ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg><div class="t"><b>Camion de livraison Toyota Dyna</b><small>CFAO Motors Togo · n° PF-2026-0142 du 05/02/2026</small><small>HT 26&nbsp;483&nbsp;051 + TVA 18&nbsp;% 4&nbsp;766&nbsp;949 = <b>TTC 31&nbsp;250&nbsp;000</b></small><small data-fin-pf-file="pfnew" hidden></small></div><div class="s"><span class="dc-badge ok">Valable jusqu’au 06/04/2026</span></div><button class="btn btn-ghost btn-sm" type="button" data-fin-act="info" data-msg="Le pro forma s’ouvre dans la visionneuse.">Ouvrir</button></div>
+    <div class="fin-pf" data-pf data-ttc="31250000" data-fin-drop="pfnew" data-fin-if="pf=expire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg><div class="t"><b>Camion de livraison Toyota Dyna</b><small>CFAO Motors Togo · n° PF-2025-0987 du 05/11/2025</small><small>HT 26&nbsp;483&nbsp;051 + TVA 18&nbsp;% 4&nbsp;766&nbsp;949 = <b>TTC 31&nbsp;250&nbsp;000</b></small></div><div class="s"><span class="dc-badge warn">Expiré le 05/01/2026</span><button class="btn btn-primary btn-sm" type="button" data-fin-act="info" data-msg="Demande envoyée à CFAO Motors Togo : le nouveau pro forma se dépose ici.">Demander un pro forma à jour</button><button class="btn btn-ghost btn-sm" type="button" data-fin-upload="pfnew">Déposer le nouveau pro forma</button><input type="file" hidden class="fin-file-in" data-fin-up="pfnew" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" aria-label="Déposer le nouveau pro forma"><small class="fin-fmt">PDF, JPG, PNG, Word, Excel · 10 Mo max · ou glissez le fichier ici</small></div><button class="btn btn-ghost btn-sm" type="button" data-fin-act="info" data-msg="Le pro forma s’ouvre dans la visionneuse.">Ouvrir</button></div>
+    <div class="fin-pf" data-pf data-ttc="1180000" data-fin-if="pf2=1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg><div class="t"><b>Bâche et hayon</b><small>Carrosserie Moderne, Lomé · n° PF-2026-0031 du 03/02/2026</small><small>HT 1&nbsp;000&nbsp;000 + TVA 18&nbsp;% 180&nbsp;000 = <b>TTC 1&nbsp;180&nbsp;000</b></small><small data-fin-pf-file="pf2" hidden></small></div><div class="s"><span class="dc-badge ok">Valable jusqu’au 05/05/2026</span></div><button class="btn btn-ghost btn-sm" type="button" data-fin-act="info" data-msg="Le pro forma s’ouvre dans la visionneuse.">Ouvrir</button></div>
     <div class="fin-notice warn" data-fin-if="pf=expire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg><span><b>Le pro forma est expiré.</b> Une banque n’accepte pas un pro forma périmé : demandez-en un à jour au fournisseur.</span></div>
-    <button class="btn btn-ghost btn-sm" type="button" data-fin-add-pf data-fin-if="pf2=0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg> Ajouter un autre matériel ou fournisseur</button>
+    <button class="btn btn-ghost btn-sm" type="button" data-fin-add-pf data-fin-upload="pf2" data-fin-if="pf2=0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg> Déposer le pro forma d’un autre matériel ou fournisseur</button><input type="file" hidden class="fin-file-in" data-fin-up="pf2" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" aria-label="Déposer le pro forma d’un autre matériel ou fournisseur"><small class="fin-fmt" data-fin-if="pf2=0">PDF, JPG, PNG, Word, Excel · 10 Mo max · ou glissez le fichier ici</small>
     <p class="fin-sub" style="margin:0">Il faut un pro forma par matériel ou par fournisseur : la banque finance le montant TTC.</p>
   </div>
   <h4 class="fin-h4" data-fin-if="type=invest|bail">Frais annexes <span class="fin-tag fac">Facultatifs</span></h4>
@@ -5428,6 +5473,7 @@
     </div>
   </div>
   <div class="fin-card"><div data-fin-pcs></div></div>
+  <p class="dc-note" data-note><b>Téléversement et aperçu</b> : chaque « Déposer » ouvre le sélecteur de fichiers du poste et accepte le glisser-déposer sur la ligne ; le fichier choisi reste dans le navigateur, il n’est envoyé nulle part. <b>Valeurs de démonstration</b> : 10&nbsp;Mo au maximum ; PDF, JPG, PNG, Word (.doc, .docx) et Excel (.xls, .xlsx) ; progression simulée. <b>À venir</b> : envoi vers le stockage des documents, contrôle du type réel et de l’intégrité côté serveur, limites à confirmer. Tout document généré par Prospera (note, plan d’affaires, lettres, décision des associés, engagement de domiciliation, dossier PDF et Excel de chaque banque, synthèse) se <b>voit</b> dans l’application avant d’être téléchargé ; un fichier déposé s’affiche tel quel (image, PDF) ou en fiche (nom, taille, type).</p>
   <script type="application/json" id="finPiecesData">{"groupes": [{"k": "entreprise", "lib": "L’entreprise"}, {"k": "comptes", "lib": "Les comptes"}, {"k": "dirigeants", "lib": "Les dirigeants et cautions"}, {"k": "projet", "lib": "Le projet"}, {"k": "relation", "lib": "La relation avec la banque"}], "banques": {"BOA": "BOA Togo", "ORA": "Orabank Togo", "ECO": "Ecobank Togo"}, "regles": {"req": "à fournir", "deja": "déjà à la banque", "fournis": "fournis par la banque", "na": "sans objet"}, "motifs": {"deja": "Déjà détenue par la banque : rien à fournir", "fournis": "Fournis par la banque elle-même : rien à fournir", "na": "Sans objet pour une banque où le client est déjà connu"}, "rel0": {"BOA": "nouveau", "ORA": "deja", "ECO": "nouveau"}, "dates": {"pf": "09/02/2026", "demande": "12/02/2026"}, "pfExpire": {"src": "CFAO Motors Togo · PF-2025-0987 du 05/11/2025 : valable jusqu’au 05/01/2026, expiré"}, "pfTreso": {"src": "Sans objet : crédit de trésorerie, aucun matériel à acheter"}, "items": [{"k": "statuts", "g": "entreprise", "lib": "Statuts à jour", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "deja"}, "inc": {"st": "F", "src": "Déjà dans Prospera · déposés le 12/01/2024 (lecture automatique)", "act": null}, "comp": null}, {"k": "rccm", "g": "entreprise", "lib": "Extrait RCCM de moins de 3 mois", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "deja"}, "inc": {"st": "F", "src": "Déposé le 02/02/2026", "act": null}, "comp": null}, {"k": "nif", "g": "entreprise", "lib": "Carte d’immatriculation fiscale (NIF)", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "deja"}, "inc": {"st": "F", "src": "Déjà dans Prospera · NIF 1000745307 de la fiche du dossier", "act": null}, "comp": null}, {"k": "pv", "g": "entreprise", "lib": "Décision des associés autorisant l’emprunt et pouvoir du signataire", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "M", "src": "À faire signer par les associés", "act": ["generer", "Générer le projet de décision"]}, "comp": {"st": "F", "src": "Déposée signée le 10/02/2026", "act": null}}, {"k": "rf", "g": "entreprise", "lib": "Attestation de régularité fiscale (OTR)", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "M", "src": "Valable 3 mois : à demander à l’OTR", "act": ["depot", "Déposer"]}, "comp": {"st": "F", "src": "Déposée le 09/02/2026 · valable jusqu’au 09/05/2026", "act": null}}, {"k": "cnss", "g": "entreprise", "lib": "Attestation CNSS", "bloq": false, "profil": "tous", "banks": ["ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "E", "src": "Attestation du 18/10/2025, valable 3 mois : expirée depuis le 18/01/2026", "act": ["depot", "Remplacer"]}, "comp": {"st": "F", "src": "Remplacée le 10/02/2026 · valable jusqu’au 10/05/2026", "act": null}}, {"k": "ef25", "g": "comptes", "lib": "États financiers 2025", "bloq": true, "profil": "etabli", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "F", "src": "Déjà dans Prospera · exercice 2025 validé", "act": null}, "comp": null}, {"k": "ef24", "g": "comptes", "lib": "États financiers 2024", "bloq": true, "profil": "etabli", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "F", "src": "Déjà dans Prospera · exercice 2024 validé", "act": null}, "comp": null}, {"k": "ef23", "g": "comptes", "lib": "États financiers 2023", "bloq": true, "profil": "etabli", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "M", "src": "Absents de Prospera : à importer depuis le fichier du client", "act": ["importer", "Importer l’exercice 2023"]}, "comp": {"st": "F", "src": "Importés le 11/02/2026 (reprise de données)", "act": null}}, {"k": "dsf24", "g": "comptes", "lib": "Accusé de dépôt de la DSF 2024", "bloq": true, "profil": "etabli", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "F", "src": "Déposé le 28/04/2025 · accusé de l’OTR", "act": null}, "comp": null}, {"k": "dsf25", "g": "comptes", "lib": "Accusé de dépôt de la DSF 2025", "bloq": false, "profil": "etabli", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "S", "src": "Sans objet pour l’instant : le dépôt n’est pas encore échu (avant le 30 avril 2026)", "act": null}, "comp": null}, {"k": "cac", "g": "comptes", "lib": "Rapport du commissaire aux comptes", "bloq": false, "profil": "etabli", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "S", "src": "Sans objet : SARL sous les seuils qui imposent un commissaire aux comptes", "act": null}, "comp": null}, {"k": "ef_jeune", "g": "comptes", "lib": "États financiers des exercices clos", "bloq": false, "profil": "jeune", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "S", "src": "Sans objet : société créée en 2025, aucun exercice complet à présenter", "act": null}, "comp": null}, {"k": "bilan_o", "g": "comptes", "lib": "Bilan d’ouverture ou situation intermédiaire", "bloq": true, "profil": "jeune", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "M", "src": "À établir à partir de la balance d’ouverture", "act": ["generer", "Générer depuis Prospera"]}, "comp": {"st": "F", "src": "Généré le 10/02/2026 depuis la balance", "act": null}}, {"k": "releves", "g": "comptes", "lib": "Relevés bancaires des 12 derniers mois (compte principal, Orabank Togo)", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "fournis"}, "inc": {"st": "M", "src": "Seulement 6 mois sur 12 dans Prospera", "act": ["depot", "Déposer les mois manquants"]}, "comp": {"st": "F", "src": "12 mois déposés le 10/02/2026", "act": null}}, {"k": "dettes", "g": "comptes", "lib": "Tableau des dettes en cours", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "F", "src": "Repris des emprunts du dossier (étape « Les chiffres »)", "act": null}, "comp": null}, {"k": "cni", "g": "dirigeants", "lib": "Pièce d’identité du gérant (Komlan Kossi)", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "deja"}, "inc": {"st": "F", "src": "Déposée le 02/02/2026", "act": null}, "comp": null}, {"k": "domicile", "g": "dirigeants", "lib": "Justificatif de domicile du gérant", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "deja"}, "inc": {"st": "M", "src": "Facture d’eau ou d’électricité de moins de 3 mois", "act": ["depot", "Déposer"]}, "comp": {"st": "F", "src": "Déposé le 10/02/2026", "act": null}}, {"k": "patrimoine", "g": "dirigeants", "lib": "Déclaration de patrimoine de la caution", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "M", "src": "À faire remplir par Komlan Kossi, caution", "act": ["generer", "Générer le formulaire"]}, "comp": {"st": "F", "src": "Déposée signée le 11/02/2026", "act": null}}, {"k": "cv", "g": "dirigeants", "lib": "CV et expérience du promoteur", "bloq": true, "profil": "jeune", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "M", "src": "Parcours, secteur, réalisations : à rédiger avec le gérant", "act": ["generer", "Générer le modèle de CV"]}, "comp": {"st": "F", "src": "Déposé le 10/02/2026", "act": null}}, {"k": "lettre", "g": "projet", "lib": "Lettre de demande de crédit signée du gérant", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "M", "src": "Générée à partir du dossier : à faire signer", "act": ["generer", "Générer la lettre pré-remplie"]}, "comp": {"st": "F", "src": "Déposée signée le 12/02/2026", "act": null}}, {"k": "affirmation", "g": "projet", "lib": "Lettre d’affirmation du dirigeant", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "M", "src": "Le gérant confirme l’exactitude des informations remises à la banque : à faire signer", "act": ["generer", "Générer la lettre pré-remplie"]}, "comp": {"st": "F", "src": "Déposée signée le 12/02/2026", "act": null}}, {"k": "contrats", "g": "projet", "lib": "Contrats, bons de commande ou lettres d’intention des clients", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "M", "src": "Exigés parce que le chiffre d’affaires du camion est « À justifier » : aucun historique", "act": ["depot", "Déposer"]}, "comp": {"st": "F", "src": "3 lettres d’intention déposées le 11/02/2026", "act": null}}, {"k": "proforma", "g": "projet", "lib": "Factures pro forma du matériel à acheter", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "F", "src": "CFAO Motors Togo · PF-2026-0142 du 05/02/2026, valable jusqu’au 06/04/2026", "act": null}, "comp": null}, {"k": "note", "g": "projet", "lib": "Note de présentation du projet", "bloq": true, "profil": "etabli", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "M", "src": "Générée à partir du dossier : trois informations à compléter", "act": ["editeur", "Générer la note de présentation"]}, "comp": {"st": "F", "src": "Générée et validée le 03/02/2026 · courte, appuyée sur la projection « Avec le camion »", "act": null}}, {"k": "previsionnel", "g": "projet", "lib": "Prévisionnel : compte de résultat prévisionnel et plan de trésorerie", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "F", "src": "Déjà dans Prospera · projection « Avec le camion »", "act": null}, "comp": null}, {"k": "tresmens_e", "g": "projet", "lib": "Plan de trésorerie mensuel (12 premiers mois)", "bloq": false, "profil": "etabli", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "M", "src": "Facultatif pour une société établie : disponible dans Prospera, à joindre si la banque le demande", "act": ["generer", "Générer le plan mensuel"]}, "comp": {"st": "F", "src": "Déjà dans Prospera · avril 2026 à mars 2027", "act": null}}, {"k": "tresmens_j", "g": "projet", "lib": "Plan de trésorerie mensuel (12 premiers mois)", "bloq": true, "profil": "jeune", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "M", "src": "Exigé pour une première année d’activité : généré depuis le prévisionnel", "act": ["generer", "Générer le plan mensuel"]}, "comp": {"st": "F", "src": "Déjà dans Prospera · avril 2026 à mars 2027", "act": null}}, {"k": "plan_e", "g": "projet", "lib": "Plan d’affaires complet", "bloq": false, "profil": "etabli", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "S", "src": "Sans objet : société établie, l’historique suffit", "act": null}, "comp": null}, {"k": "plan_j", "g": "projet", "lib": "Plan d’affaires complet : marché, activité, équipe, prévisionnel sur 3 ans", "bloq": true, "profil": "jeune", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "req"}, "inc": {"st": "M", "src": "Le prévisionnel de Prospera l’alimente : un questionnaire court et trois informations à compléter", "act": ["editeur", "Générer le plan d’affaires"]}, "comp": {"st": "F", "src": "Généré et validé le 11/02/2026", "act": null}}, {"k": "kyc", "g": "relation", "lib": "Dossier d’ouverture de compte et connaissance client", "bloq": true, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "na"}, "inc": {"st": "M", "src": "Formulaires de la banque à faire signer par le gérant", "act": ["generer", "Préparer les formulaires"]}, "comp": {"st": "F", "src": "Déposés signés le 11/02/2026", "act": null}}, {"k": "domi", "g": "relation", "lib": "Engagement de domicilier les recettes", "bloq": false, "profil": "tous", "banks": ["BOA", "ORA", "ECO"], "rule": {"nouveau": "req", "deja": "na"}, "inc": {"st": "M", "src": "Souvent demandé comme condition à un nouveau client", "act": ["generer", "Générer la lettre d’engagement"]}, "comp": {"st": "F", "src": "Déposé signé le 11/02/2026", "act": null}}], "etats": {"2025": {"statut": "Validé", "date": "05/02/2026", "par": "Awa Diallo", "actif": [["Actif immobilisé net", "3&nbsp;750&nbsp;000"], ["Actif circulant", "1&nbsp;100&nbsp;000"], ["Trésorerie active", "850&nbsp;000"], ["Total actif", "5&nbsp;700&nbsp;000"]], "passif": [["Capitaux propres", "4&nbsp;350&nbsp;000"], ["Dettes financières", "700&nbsp;000"], ["Passif circulant", "650&nbsp;000"], ["Trésorerie passive", "0"], ["Total passif", "5&nbsp;700&nbsp;000"]], "cr": [["Chiffre d’affaires", "16&nbsp;000&nbsp;000"], ["Marge commerciale", "4&nbsp;350&nbsp;000"], ["Valeur ajoutée", "4&nbsp;120&nbsp;000"], ["Excédent brut d’exploitation", "1&nbsp;140&nbsp;000"], ["Résultat d’exploitation", "280&nbsp;000"], ["Résultat financier", "−175&nbsp;000"], ["Résultat des activités ordinaires", "105&nbsp;000"], ["Résultat hors activités ordinaires", "255&nbsp;000"], ["Résultat net", "200&nbsp;000"]]}, "2024": {"statut": "Validé", "date": "22/04/2025", "par": "Awa Diallo", "actif": [["Actif immobilisé net", "4&nbsp;130&nbsp;000"], ["Actif circulant", "1&nbsp;120&nbsp;000"], ["Trésorerie active", "800&nbsp;000"], ["Total actif", "6&nbsp;050&nbsp;000"]], "passif": [["Capitaux propres", "4&nbsp;180&nbsp;000"], ["Dettes financières", "900&nbsp;000"], ["Passif circulant", "870&nbsp;000"], ["Trésorerie passive", "100&nbsp;000"], ["Total passif", "6&nbsp;050&nbsp;000"]], "cr": [["Chiffre d’affaires", "16&nbsp;780&nbsp;000"], ["Marge commerciale", "4&nbsp;780&nbsp;000"], ["Valeur ajoutée", "4&nbsp;534&nbsp;000"], ["Excédent brut d’exploitation", "1&nbsp;814&nbsp;000"], ["Résultat d’exploitation", "1&nbsp;174&nbsp;000"], ["Résultat financier", "−140&nbsp;000"], ["Résultat des activités ordinaires", "1&nbsp;034&nbsp;000"], ["Résultat hors activités ordinaires", "0"], ["Résultat net", "800&nbsp;000"]]}}, "voir": {"statuts": ["statuts_kossi_2019.pdf", "12/01/2024", "Awa Diallo"], "rccm": ["extrait_rccm_kossi_2026.pdf", "02/02/2026", "Kofi Santos"], "nif": ["carte_nif_kossi.pdf", "12/01/2024", "Awa Diallo"], "pv": ["decision_associes_emprunt.pdf", "10/02/2026", "Kofi Santos"], "rf": ["attestation_regularite_fiscale_otr.pdf", "09/02/2026", "Kofi Santos"], "cnss": ["attestation_cnss.pdf", "10/02/2026", "Kofi Santos"], "ef23": ["etats_financiers_2023_import.xlsx", "11/02/2026", "Kofi Santos"], "dsf24": ["accuse_depot_dsf_2024.pdf", "28/04/2025", "Awa Diallo"], "dsf25": ["accuse_depot_dsf_2025.pdf", "—", "—"], "cac": ["rapport_cac.pdf", "—", "—"], "bilan_o": ["bilan_ouverture.pdf", "10/02/2026", "Prospera (généré)"], "releves": ["releves_orabank_12_mois.pdf", "10/02/2026", "Kofi Santos"], "dettes": ["tableau_des_dettes.pdf", "10/02/2026", "Prospera (repris des emprunts)"], "cni": ["cni_komlan_kossi.jpg", "02/02/2026", "Kofi Santos"], "domicile": ["justificatif_domicile_kossi.pdf", "10/02/2026", "Kofi Santos"], "patrimoine": ["declaration_patrimoine_kossi.pdf", "11/02/2026", "Kofi Santos"], "cv": ["cv_promoteur.pdf", "10/02/2026", "Kofi Santos"], "lettre": ["lettre_demande_credit_signee.pdf", "12/02/2026", "Awa Diallo"], "proforma": ["pro_forma_cfao_PF-2026-0142.pdf", "05/02/2026", "Kofi Santos"], "note": ["Note-presentation-Ets-Kossi-2026.docx", "03/02/2026", "Kofi Santos"], "previsionnel": ["Projection « Avec le camion » (version 2)", "—", "Prospera (Prévisionnel)"], "plan_j": ["Plan-affaires-Ets-Kossi-2026.docx", "11/02/2026", "Kofi Santos"], "kyc": ["formulaires_ouverture_compte.pdf", "11/02/2026", "Kofi Santos"], "domi": ["engagement_domiciliation.pdf", "11/02/2026", "Awa Diallo"], "tresmens_e": ["plan_tresorerie_mensuel_2026-2027.xlsx", "10/02/2026", "Prospera (généré)"], "tresmens_j": ["plan_tresorerie_mensuel_2026-2027.xlsx", "10/02/2026", "Prospera (généré)"], "affirmation": ["lettre_affirmation_gerant.pdf", "12/02/2026", "Awa Diallo"], "contrats": ["lettres_intention_clients.pdf", "11/02/2026", "Kofi Santos"]}, "attendu": {"etabli_mixte_incomplet": {"F": 10, "M": 13, "E": 1, "S": 3, "bloquantes": 11, "total": 27, "par_banque": {"BOA": 13, "ORA": 10, "ECO": 13}}, "etabli_mixte_complet": {"F": 24, "M": 0, "E": 0, "S": 3, "bloquantes": 0, "total": 27, "par_banque": {"BOA": 0, "ORA": 0, "ECO": 0}}, "jeune_mixte_incomplet": {"F": 7, "M": 14, "E": 1, "S": 1, "bloquantes": 13, "total": 23, "par_banque": {"BOA": 14, "ORA": 11, "ECO": 14}}, "etabli_nouveau_incomplet": {"F": 10, "M": 13, "E": 1, "S": 3, "bloquantes": 11, "total": 27, "par_banque": {"BOA": 13, "ORA": 14, "ECO": 13}}, "etabli_deja_incomplet": {"F": 6, "M": 9, "E": 1, "S": 11, "bloquantes": 8, "total": 27, "par_banque": {"BOA": 9, "ORA": 10, "ECO": 9}}, "etabli_pfexp_complet": {"F": 23, "M": 0, "E": 1, "S": 3, "bloquantes": 1, "total": 27, "par_banque": {"BOA": 1, "ORA": 1, "ECO": 1}}, "etabli_treso_incomplet": {"F": 9, "M": 13, "E": 1, "S": 4, "bloquantes": 11, "total": 27, "par_banque": {"BOA": 13, "ORA": 10, "ECO": 13}}}}</script>
   <p class="dc-note" data-note><b>Servi aujourd’hui</b> : rien (les exigences de pièces sont le sujet de STORY-1085). <b>À venir</b> : référentiel des exigences par banque ; statut de chaque pièce (fournie / manquante / expirée / sans objet), bloquante ou non, validité des attestations OTR et CNSS ; lien avec les pièces déjà dans Prospera (liasses, statuts, NIF, prévisionnel) ; « demander au client » (e-mail / WhatsApp) ; génération de la lettre de demande et des formulaires. <b>Deux axes à servir par le backend (nouvelle story)</b> : le <b>profil de l’entreprise</b> (établie / jeune, déduit de la date de création du dossier client et du nombre d’exercices validés, modifiable) et la <b>relation avec chaque banque</b> (déjà client à compte mouvementé / nouveau client ou compte récent) : ils font varier la liste, banque par banque. Un client déjà connu d’une banque n’a pas à lui refournir ses pièces d’identification ni ses relevés.</p>
 </div>
@@ -5515,7 +5561,7 @@
     <tr class="tot ret"><td colspan="2"><b>Total retenu par la banque</b></td><td></td><td></td><td class="num" data-gar-retenu>0</td><td class="num"><b data-gar-retenu-cov>0&nbsp;%</b></td><td colspan="2" class="fin-sm"><b>couverture retenue</b> : c’est elle qui compte</td></tr></tfoot></table></div>
   <div class="fin-notice" data-fin-gar-sugg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Suggestion&nbsp;: le camion financé peut servir de gage (valeur du pro forma 31&nbsp;250&nbsp;000).</span><button class="btn btn-ghost btn-sm" type="button" data-fin-gar-sugg-add>Ajouter</button></div>
   <div class="fin-act" style="border-top:0;padding-top:0.3rem"><button class="btn btn-ghost" type="button" data-fin-gar-new><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg> Ajouter une garantie</button></div>
-  <div class="fin-motif" data-fin-gar-form hidden>
+  <div class="fin-motif" data-fin-gar-form data-fin-drop="gar" hidden>
     <b data-fin-gar-form-titre>Nouvelle garantie</b>
     <div class="fin-form">
       <div class="dc-field"><label for="garType">Type de garantie</label><select id="garType" data-fin-gar-type><option value="hypotheque">Hypothèque</option><option value="gage">Gage ou nantissement de matériel</option><option value="fonds">Nantissement du fonds de commerce</option><option value="caution">Caution personnelle et solidaire</option><option value="dat">Dépôt à terme nanti</option><option value="fgar">Fonds de garantie</option><option value="assur">Assurance avec délégation</option><option value="autre">Autre</option></select></div>
@@ -5524,7 +5570,7 @@
       <div class="dc-field" data-gar-valeur><label for="garValeur">Valeur estimée (FCFA)</label><input id="garValeur" data-fin-gar-valeur inputmode="numeric"></div>
       <div class="dc-field" data-gar-pct hidden><label for="garPct">Part du prêt couverte (%)</label><input id="garPct" data-fin-gar-pct inputmode="numeric"></div>
       <div class="dc-field" data-gar-decote><label for="garDecote">Décote de la banque (%) <span class="dc-tag todo" data-gar-decote-aide>proposée selon le type</span></label><input id="garDecote" data-fin-gar-decote inputmode="numeric"></div>
-      <div class="dc-field"><label for="garPiece">Pièce justificative</label><input id="garPiece" data-fin-gar-piece></div>
+      <div class="dc-field"><label for="garPiece">Pièce justificative</label><input id="garPiece" data-fin-gar-piece><div class="fin-gar-up"><button class="btn btn-ghost btn-sm" type="button" data-fin-upload="gar">Déposer la pièce</button><input type="file" hidden class="fin-file-in" data-fin-up="gar" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" aria-label="Déposer la pièce justificative de la garantie"><small class="fin-fmt">PDF, JPG, PNG, Word, Excel · 10 Mo max · ou glissez le fichier sur ce formulaire</small><small class="fin-fmt" data-fin-gar-file hidden></small></div></div>
     </div>
     <div class="row"><button class="btn btn-primary btn-sm" type="button" data-fin-gar-save>Enregistrer la garantie</button>
       <button class="btn btn-ghost btn-sm" type="button" data-fin-gar-cancel>Annuler</button></div>
@@ -5540,9 +5586,9 @@
 <div class="fin-card" data-fin-if="vue=detail step=dossier">
   <h3>6 · Le dossier pour la banque</h3>
   <p class="fin-sub">Un dossier par banque, avec ses exigences : PDF pour la lecture, Excel pour le chargé d’affaires. Une fois figé, il ne change plus. Le dossier présente la projection retenue, et le scénario prudent en annexe.</p>
-  <div class="fin-dos"><div class="t"><b>BOA Togo</b><small>Dossier-Kossi-camion-BOA-v1.pdf · Dossier-Kossi-camion-BOA-v1.xlsx</small></div><div class="s"><span class="dc-badge fin-mute" data-fin-if="fige=0">À générer</span><span class="dc-badge warn" data-fin-if="fige=1">Généré · à relire</span><span data-fin-if="fige=2"><span class="dc-badge ok">Figé · version 1</span><small>le 13/02/2026 · empreinte 07616cb21b9815ac…</small></span></div><div class="a"><button class="btn btn-ghost btn-sm" type="button" data-fin-voir="syn:BOA">Synthèse</button> <button class="btn btn-ghost btn-sm" type="button" data-fin-if="fige=1|2" data-fin-relire>Relire</button></div></div>
-  <div class="fin-dos"><div class="t"><b>Orabank Togo</b><small>Dossier-Kossi-camion-Orabank-v1.pdf · Dossier-Kossi-camion-Orabank-v1.xlsx</small></div><div class="s"><span class="dc-badge fin-mute" data-fin-if="fige=0">À générer</span><span class="dc-badge warn" data-fin-if="fige=1">Généré · à relire</span><span data-fin-if="fige=2"><span class="dc-badge ok">Figé · version 1</span><small>le 13/02/2026 · empreinte 248f05adffcbbfb2…</small></span></div><div class="a"><button class="btn btn-ghost btn-sm" type="button" data-fin-voir="syn:ORA">Synthèse</button> <button class="btn btn-ghost btn-sm" type="button" data-fin-if="fige=1|2" data-fin-relire>Relire</button></div></div>
-  <div class="fin-dos"><div class="t"><b>Ecobank Togo</b><small>Dossier-Kossi-camion-Ecobank-generique-v1.pdf · Dossier-Kossi-camion-Ecobank-generique-v1.xlsx</small></div><div class="s"><span class="dc-badge fin-mute" data-fin-if="fige=0">À générer</span><span class="dc-badge warn" data-fin-if="fige=1">Généré · à relire</span><span data-fin-if="fige=2"><span class="dc-badge ok">Figé · version 1</span><small>le 13/02/2026 · empreinte 972ddc14338d566e…</small></span></div><div class="a"><button class="btn btn-ghost btn-sm" type="button" data-fin-voir="syn:ECO">Synthèse</button> <button class="btn btn-ghost btn-sm" type="button" data-fin-if="fige=1|2" data-fin-relire>Relire</button></div></div>
+  <div class="fin-dos"><div class="t"><b>BOA Togo</b><small>Dossier-Kossi-camion-BOA-v1.pdf · Dossier-Kossi-camion-BOA-v1.xlsx</small></div><div class="s"><span class="dc-badge fin-mute" data-fin-if="fige=0">À générer</span><span class="dc-badge warn" data-fin-if="fige=1">Généré · à relire</span><span data-fin-if="fige=2"><span class="dc-badge ok">Figé · version 1</span><small>le 13/02/2026 · empreinte 07616cb21b9815ac…</small></span></div><div class="a"><button class="btn btn-ghost btn-sm" type="button" data-fin-if="fige=1|2" data-fin-voir="pdf:BOA">Voir le PDF</button> <button class="btn btn-ghost btn-sm" type="button" data-fin-if="fige=1|2" data-fin-voir="xls:BOA">Voir l’Excel</button> <button class="btn btn-ghost btn-sm" type="button" data-fin-voir="syn:BOA">Synthèse</button> <button class="btn btn-ghost btn-sm" type="button" data-fin-if="fige=1|2" data-fin-relire>Relire</button></div></div>
+  <div class="fin-dos"><div class="t"><b>Orabank Togo</b><small>Dossier-Kossi-camion-Orabank-v1.pdf · Dossier-Kossi-camion-Orabank-v1.xlsx</small></div><div class="s"><span class="dc-badge fin-mute" data-fin-if="fige=0">À générer</span><span class="dc-badge warn" data-fin-if="fige=1">Généré · à relire</span><span data-fin-if="fige=2"><span class="dc-badge ok">Figé · version 1</span><small>le 13/02/2026 · empreinte 248f05adffcbbfb2…</small></span></div><div class="a"><button class="btn btn-ghost btn-sm" type="button" data-fin-if="fige=1|2" data-fin-voir="pdf:ORA">Voir le PDF</button> <button class="btn btn-ghost btn-sm" type="button" data-fin-if="fige=1|2" data-fin-voir="xls:ORA">Voir l’Excel</button> <button class="btn btn-ghost btn-sm" type="button" data-fin-voir="syn:ORA">Synthèse</button> <button class="btn btn-ghost btn-sm" type="button" data-fin-if="fige=1|2" data-fin-relire>Relire</button></div></div>
+  <div class="fin-dos"><div class="t"><b>Ecobank Togo</b><small>Dossier-Kossi-camion-Ecobank-generique-v1.pdf · Dossier-Kossi-camion-Ecobank-generique-v1.xlsx</small></div><div class="s"><span class="dc-badge fin-mute" data-fin-if="fige=0">À générer</span><span class="dc-badge warn" data-fin-if="fige=1">Généré · à relire</span><span data-fin-if="fige=2"><span class="dc-badge ok">Figé · version 1</span><small>le 13/02/2026 · empreinte 972ddc14338d566e…</small></span></div><div class="a"><button class="btn btn-ghost btn-sm" type="button" data-fin-if="fige=1|2" data-fin-voir="pdf:ECO">Voir le PDF</button> <button class="btn btn-ghost btn-sm" type="button" data-fin-if="fige=1|2" data-fin-voir="xls:ECO">Voir l’Excel</button> <button class="btn btn-ghost btn-sm" type="button" data-fin-voir="syn:ECO">Synthèse</button> <button class="btn btn-ghost btn-sm" type="button" data-fin-if="fige=1|2" data-fin-relire>Relire</button></div></div>
   <details class="fin-det" data-fin-relire-box><summary>Voir le contenu du dossier</summary>
     <p class="fin-sub" style="margin:0.4rem 0 0">Page 1 · Synthèse</p><div class="fin-syn"><h4>Synthèse du dossier de financement</h4><div class="fin-syn-g"><div><small>Qui</small><b>Ets Kossi Distribution</b><span>SARL, NIF 1000745307 · distribution · créée en mars 2019 (7 ans)</span><span><b>Relation avec la banque</b>&nbsp;: précisée dans la synthèse de chaque banque.</span></div><div><small>Le projet</small><b>Achat d’un camion de livraison</b><span>Coût 31&nbsp;250&nbsp;000 TTC · apport 6&nbsp;250&nbsp;000 (20&nbsp;%)</span><span>Montant demandé <b>25&nbsp;000&nbsp;000</b> FCFA · 48&nbsp;mois, sans différé</span></div><div><small>Les garanties</small><b>Couverture retenue 197&nbsp;%</b><span>Déclarée 275&nbsp;% · valeur retenue par la banque 49&nbsp;250&nbsp;000</span></div><div><small>La capacité à rembourser</small><b>Couverture de la dette : 1,56 (projection retenue) · 1,12 (prudent)</b><span>La plus basse sur 2026-2028</span><span>Autonomie financière 2026 : 37,7&nbsp;%</span></div></div><div class="fin-syn-l"><div><h5>Points forts</h5><ul><li>Couverture du service de la dette d’au moins 1,56 chaque année (projection retenue).</li><li>Apport de 20 % du coût du projet, dans le repère de 20 à 30 %.</li><li>Garanties retenues par la banque à 197 % du prêt.</li><li>Exercices 2024 et 2025 validés dans Prospera.</li><li>Trésorerie positive chaque année dans la projection retenue.</li></ul></div><div><h5>Points de vigilance</h5><ul><li>Chiffre d’affaires du camion à justifier : contrats joints.</li><li>Marge sur l’activité du camion à justifier.</li><li>Endettement supérieur aux capitaux propres en 2026 (capacité −8 653 352).</li><li>Dans le scénario prudent, la trésorerie devient négative en 2027.</li></ul></div></div><p class="fin-pied">Établi par Cabinet Diallo &amp; Associés sur la base des informations fournies par le client. Ne constitue pas une certification des comptes.</p></div>
     <ol class="fin-sommaire">
@@ -5572,7 +5618,7 @@
   <div class="fin-card">
     <h3>7 · Le suivi, banque par banque</h3>
     <p class="fin-sub">Chaque banque a son rythme : remise, compléments demandés, comité, puis réponse. Le client choisit une offre, les autres passent « non retenues ».</p>
-    <div class="fin-svs"><div class="fin-notice" data-fin-if="vue=detail step=suivi fige=0|1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span><b>Générez d’abord le dossier pour la banque.</b> Il se génère et se fige à l’étape précédente.</span><button class="btn btn-ghost btn-sm" type="button" data-fin-step="dossier">Aller au dossier</button></div><div class="fin-notice" data-fin-if="vue=detail step=suivi fige=2 etat=brouillon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span><b>Marquez le dossier comme prêt</b> pour pouvoir le remettre aux banques.</span><button class="btn btn-ghost btn-sm" type="button" data-fin-step="dossier">Aller au dossier</button></div><div class="fin-sv" data-fin-if="suivi=avant"><div class="fin-sv-h"><b>BOA Togo</b><span class="dc-badge fin-mute">À remettre</span></div><p class="fin-sv-p">Date de remise 16/02/2026 · interlocuteur Mme Ama Dogbé, chargée d’affaires PME.</p><div class="fin-sv-a"><button class="btn btn-primary btn-sm" type="button" data-fin-if="etat=pret|remis admin=1" data-fin-remettre>Marquer comme remis à BOA Togo</button></div></div><div class="fin-sv" data-fin-if="suivi=avant"><div class="fin-sv-h"><b>Orabank Togo</b><span class="dc-badge fin-mute">À remettre</span></div><p class="fin-sv-p">Date de remise 16/02/2026 · interlocuteur M. Kodjo Agbeko, chargé d’affaires PME.</p><div class="fin-sv-a"><button class="btn btn-primary btn-sm" type="button" data-fin-if="etat=pret|remis admin=1" data-fin-remettre>Marquer comme remis à Orabank Togo</button></div></div><div class="fin-sv" data-fin-if="suivi=avant"><div class="fin-sv-h"><b>Ecobank Togo</b><span class="dc-badge fin-mute">À remettre</span></div><p class="fin-sv-p">Date de remise à fixer · interlocuteur à préciser.</p><div class="fin-sv-a"><button class="btn btn-primary btn-sm" type="button" data-fin-if="etat=pret|remis admin=1" data-fin-remettre>Marquer comme remis à Ecobank Togo</button></div></div><div class="fin-sv" data-fin-if="suivi=remis"><div class="fin-sv-h"><b>BOA Togo</b><span class="dc-badge warn">Compléments demandés</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à Mme Ama Dogbé, chargée d’affaires PME</li><li class="comp"><b>Compléments demandés le 23/02/2026</b> : relevés bancaires des 12 derniers mois.<span data-fin-comp-etat> En attente du client.</span> <button class="btn btn-ghost btn-sm" type="button" data-fin-comp>Marquer comme fournis</button></li></ol></div><div class="fin-sv" data-fin-if="suivi=remis"><div class="fin-sv-h"><b>Orabank Togo</b><span class="dc-badge info">En examen</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à M. Kodjo Agbeko, chargé d’affaires PME</li><li>Dossier complet, <b>en cours d’examen</b> par la banque.</li></ol></div><div class="fin-sv" data-fin-if="suivi=remis"><div class="fin-sv-h"><b>Ecobank Togo</b><span class="dc-badge fin-mute">À remettre</span></div><p class="fin-sv-p">Date de remise à fixer · interlocuteur à préciser.</p><div class="fin-sv-a"><button class="btn btn-ghost btn-sm" type="button" data-fin-if="etat=pret|remis admin=1" data-fin-remettre>Marquer comme remis à Ecobank Togo</button></div></div><div class="fin-sv" data-fin-if="suivi=accord"><div class="fin-sv-h"><b>BOA Togo</b><span class="dc-badge info">En comité</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à Mme Ama Dogbé, chargée d’affaires PME</li><li>Compléments demandés le 23/02/2026 (relevés bancaires), <b>fournis le 26/02/2026</b>.</li><li><b>Passage en comité le 03/03/2026</b>, réponse attendue.</li></ol></div><div class="fin-sv" data-fin-if="suivi=accord"><div class="fin-sv-h"><b>Orabank Togo</b><span class="dc-badge ok">Accord</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à M. Kodjo Agbeko, chargé d’affaires PME</li><li><b>Accord le 10/03/2026</b></li></ol><div class="fin-offre"><div class="fin-kpis">
+    <div class="fin-svs"><div class="fin-notice" data-fin-if="vue=detail step=suivi fige=0|1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span><b>Générez d’abord le dossier pour la banque.</b> Il se génère et se fige à l’étape précédente.</span><button class="btn btn-ghost btn-sm" type="button" data-fin-step="dossier">Aller au dossier</button></div><div class="fin-notice" data-fin-if="vue=detail step=suivi fige=2 etat=brouillon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span><b>Marquez le dossier comme prêt</b> pour pouvoir le remettre aux banques.</span><button class="btn btn-ghost btn-sm" type="button" data-fin-step="dossier">Aller au dossier</button></div><div class="fin-sv" data-fin-if="suivi=avant"><div class="fin-sv-h"><b>BOA Togo</b><span class="dc-badge fin-mute">À remettre</span></div><p class="fin-sv-p">Date de remise 16/02/2026 · interlocuteur Mme Ama Dogbé, chargée d’affaires PME.</p><div class="fin-sv-a"><button class="btn btn-primary btn-sm" type="button" data-fin-if="etat=pret|remis admin=1" data-fin-remettre>Marquer comme remis à BOA Togo</button></div></div><div class="fin-sv" data-fin-if="suivi=avant"><div class="fin-sv-h"><b>Orabank Togo</b><span class="dc-badge fin-mute">À remettre</span></div><p class="fin-sv-p">Date de remise 16/02/2026 · interlocuteur M. Kodjo Agbeko, chargé d’affaires PME.</p><div class="fin-sv-a"><button class="btn btn-primary btn-sm" type="button" data-fin-if="etat=pret|remis admin=1" data-fin-remettre>Marquer comme remis à Orabank Togo</button></div></div><div class="fin-sv" data-fin-if="suivi=avant"><div class="fin-sv-h"><b>Ecobank Togo</b><span class="dc-badge fin-mute">À remettre</span></div><p class="fin-sv-p">Date de remise à fixer · interlocuteur à préciser.</p><div class="fin-sv-a"><button class="btn btn-primary btn-sm" type="button" data-fin-if="etat=pret|remis admin=1" data-fin-remettre>Marquer comme remis à Ecobank Togo</button></div></div><div class="fin-sv" data-fin-if="suivi=remis"><div class="fin-sv-h"><b>BOA Togo</b><span class="dc-badge warn">Compléments demandés</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à Mme Ama Dogbé, chargée d’affaires PME</li><li class="comp" data-fin-drop="comp:0"><b>Compléments demandés le 23/02/2026</b> : relevés bancaires des 12 derniers mois.<span data-fin-comp-etat> En attente du client.</span> <button class="btn btn-ghost btn-sm" type="button" data-fin-comp data-fin-upload="comp:0">Déposer le complément</button><input type="file" hidden class="fin-file-in" data-fin-up="comp:0" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" aria-label="Déposer le complément demandé"> <small class="fin-fmt">PDF, JPG, PNG, Word, Excel · 10 Mo max · ou glissez le fichier ici</small></li></ol></div><div class="fin-sv" data-fin-if="suivi=remis"><div class="fin-sv-h"><b>Orabank Togo</b><span class="dc-badge info">En examen</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à M. Kodjo Agbeko, chargé d’affaires PME</li><li>Dossier complet, <b>en cours d’examen</b> par la banque.</li></ol></div><div class="fin-sv" data-fin-if="suivi=remis"><div class="fin-sv-h"><b>Ecobank Togo</b><span class="dc-badge fin-mute">À remettre</span></div><p class="fin-sv-p">Date de remise à fixer · interlocuteur à préciser.</p><div class="fin-sv-a"><button class="btn btn-ghost btn-sm" type="button" data-fin-if="etat=pret|remis admin=1" data-fin-remettre>Marquer comme remis à Ecobank Togo</button></div></div><div class="fin-sv" data-fin-if="suivi=accord"><div class="fin-sv-h"><b>BOA Togo</b><span class="dc-badge info">En comité</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à Mme Ama Dogbé, chargée d’affaires PME</li><li>Compléments demandés le 23/02/2026 (relevés bancaires), <b>fournis le 26/02/2026</b>.</li><li><b>Passage en comité le 03/03/2026</b>, réponse attendue.</li></ol></div><div class="fin-sv" data-fin-if="suivi=accord"><div class="fin-sv-h"><b>Orabank Togo</b><span class="dc-badge ok">Accord</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à M. Kodjo Agbeko, chargé d’affaires PME</li><li><b>Accord le 10/03/2026</b></li></ol><div class="fin-offre"><div class="fin-kpis">
   <div><small>Montant accordé</small><b>22&nbsp;000&nbsp;000</b></div><div><small>Taux annuel</small><b>11,5&nbsp;%</b></div>
   <div><small>Durée</small><b>48&nbsp;mois</b></div><div><small>Différé</small><b>Aucun</b></div>
   <div><small>Frais de dossier</small><b>220&nbsp;000</b></div><div><small>Mensualité</small><b>573&nbsp;958</b></div></div>
@@ -5582,7 +5628,7 @@
   <div><small>Durée</small><b>48&nbsp;mois</b></div><div><small>Différé</small><b>Aucun</b></div>
   <div><small>Frais de dossier</small><b>220&nbsp;000</b></div><div><small>Mensualité</small><b>573&nbsp;958</b></div></div>
   <p class="fin-sv-p">Assurance emprunteur : décès-invalidité du gérant, avec délégation à la banque. Garanties exigées : gage du camion, caution du gérant, délégation des assurances.
-  La banque accorde <b>3&nbsp;000&nbsp;000</b> FCFA de moins que la demande : ce complément reste à financer par le client.</p></div><div class="fin-conds"><b>Conditions préalables au décaissement</b><label class="fin-chk"><input type="checkbox" data-fin-cond checked><span>Apport de 6&nbsp;250&nbsp;000 FCFA versé sur le compte</span></label><label class="fin-chk"><input type="checkbox" data-fin-cond checked><span>Gage du camion enregistré</span></label><label class="fin-chk"><input type="checkbox" data-fin-cond><span>Assurances souscrites (décès-invalidité, camion)</span></label></div><div class="fin-sv-a"><button class="btn btn-primary" type="button" data-fin-decaisser>Enregistrer le décaissement du 01/04/2026</button><span class="fin-sub" data-fin-cond-aide style="margin:0"></span></div></div><div class="fin-sv" data-fin-if="suivi=conditions|decaisse"><div class="fin-sv-h"><b>BOA Togo</b><span class="dc-badge fin-mute">Non retenue</span></div><p class="fin-sv-p">Le client a choisi une autre offre.</p></div><div class="fin-sv" data-fin-if="suivi=conditions|decaisse"><div class="fin-sv-h"><b>Ecobank Togo</b><span class="dc-badge fin-mute">Non retenue</span></div><p class="fin-sv-p">Le client a choisi une autre offre.</p></div><div class="fin-sv" data-fin-if="suivi=decaisse"><div class="fin-sv-h"><b>Orabank Togo</b><span class="dc-badge ok">Décaissé</span></div><ol class="fin-tl"><li><b>Accord le 10/03/2026</b> · offre retenue</li><li><b>Conditions préalables levées</b> : apport de 6&nbsp;250&nbsp;000 FCFA versé sur le compte · gage du camion enregistré · assurances souscrites (décès-invalidité, camion).</li><li><b>Décaissement le 01/04/2026</b> : 22&nbsp;000&nbsp;000 FCFA. Première échéance le 01/05/2026 : 573&nbsp;958.</li></ol></div><div class="fin-sv" data-fin-if="suivi=refus"><div class="fin-sv-h"><b>BOA Togo</b><span class="dc-badge fin-ko">Refus</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à Mme Ama Dogbé, chargée d’affaires PME</li><li><b>Refus le 12/03/2026</b> · motif : capacité de remboursement jugée insuffisante au regard des dettes en cours.</li></ol></div><div class="fin-sv" data-fin-if="suivi=refus"><div class="fin-sv-h"><b>Orabank Togo</b><span class="dc-badge warn">Contre-proposition</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à M. Kodjo Agbeko, chargé d’affaires PME</li><li><b>Contre-proposition le 12/03/2026</b></li></ol><div class="fin-kpis"><div><small>Montant proposé</small><b>20&nbsp;000&nbsp;000</b></div><div><small>Taux annuel</small><b>12&nbsp;%</b></div><div><small>Durée</small><b>36&nbsp;mois</b></div><div><small>Mensualité</small><b>664&nbsp;286</b></div></div><div class="fin-sv-a"><button class="btn btn-primary btn-sm" type="button" data-fin-if="admin=1" data-fin-act="info" data-msg="Contre-proposition acceptée : elle devient l’offre du client, ses conditions préalables s’ouvrent.">Accepter la contre-proposition</button><button class="btn btn-ghost btn-sm" type="button" data-fin-if="admin=1" data-fin-act="info" data-msg="Contre-proposition déclinée : le motif est gardé dans le suivi de la banque.">Décliner</button></div></div><div class="fin-sv" data-fin-if="suivi=refus"><div class="fin-sv-h"><b>Ecobank Togo</b><span class="dc-badge fin-mute">À remettre</span></div><p class="fin-sv-p">Date de remise à fixer · interlocuteur à préciser.</p><div class="fin-sv-a"><button class="btn btn-ghost btn-sm" type="button" data-fin-if="etat=pret|remis admin=1" data-fin-remettre>Marquer comme remis à Ecobank Togo</button></div></div><div data-fin-if="suivi=comparatif"><div class="fin-sv fin-cmpo"><div class="fin-sv-h"><b>Comparer les deux offres</b></div><div class="scroll-x"><table class="fin-tbl fin-plan"><thead><tr><th></th><th>Orabank Togo<br><span class="dc-badge ok">Accord</span></th><th>BOA Togo<br><span class="dc-badge warn">Contre-proposition</span></th></tr></thead><tbody><tr class=""><th scope="row">Montant</th><td class="num">22&nbsp;000&nbsp;000</td><td class="num">20&nbsp;000&nbsp;000</td></tr><tr class=""><th scope="row">Taux annuel</th><td class="num">11,5&nbsp;%</td><td class="num">12,0&nbsp;%</td></tr><tr class=""><th scope="row">Durée</th><td class="num">48&nbsp;mois</td><td class="num">36&nbsp;mois</td></tr><tr class=""><th scope="row">Mensualité</th><td class="num">573&nbsp;958</td><td class="num">664&nbsp;286</td></tr><tr class=""><th scope="row">Total des intérêts</th><td class="num">5&nbsp;549&nbsp;992</td><td class="num">3&nbsp;914&nbsp;306</td></tr><tr class=""><th scope="row">Frais de dossier</th><td class="num">220&nbsp;000</td><td class="num">300&nbsp;000</td></tr><tr class=""><th scope="row">Assurance estimée (0,30 % du montant par an)</th><td class="num">264&nbsp;000</td><td class="num">180&nbsp;000</td></tr><tr class="tot"><th scope="row">Coût total du crédit</th><td class="num">6&nbsp;033&nbsp;992</td><td class="num">4&nbsp;394&nbsp;306</td></tr><tr><th scope="row">Coût pour 1 000 000 FCFA empruntés</th><td class="num">274&nbsp;272</td><td class="num">219&nbsp;715 <span class="dc-badge ok">La moins chère</span></td></tr><tr class=""><th scope="row">Reste à financer par le client</th><td class="num">3&nbsp;000&nbsp;000</td><td class="num">5&nbsp;000&nbsp;000</td></tr><tr><th></th><td><button class="btn btn-primary btn-sm" type="button" data-fin-if="admin=1" data-fin-choisir>Le client choisit cette offre</button></td><td><button class="btn btn-ghost btn-sm" type="button" data-fin-if="admin=1" data-fin-choisir-boa>Le client choisit cette offre</button></td></tr></tbody></table></div><p class="fin-sv-p">Assurance estimée et frais de la contre-proposition : valeurs de démonstration. Le coût pour 1 000 000 empruntés compare ce qui n’a pas le même montant.</p></div></div><div class="fin-sv" data-fin-if="suivi=comparatif"><div class="fin-sv-h"><b>BOA Togo</b><span class="dc-badge warn">Contre-proposition</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à Mme Ama Dogbé, chargée d’affaires PME</li><li><b>Contre-proposition le 12/03/2026</b> : 20&nbsp;000&nbsp;000 FCFA à 12&nbsp;% sur 36&nbsp;mois.</li></ol></div><div class="fin-sv" data-fin-if="suivi=comparatif"><div class="fin-sv-h"><b>Orabank Togo</b><span class="dc-badge ok">Accord</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à M. Kodjo Agbeko, chargé d’affaires PME</li><li><b>Accord le 10/03/2026</b> : 22&nbsp;000&nbsp;000 FCFA à 11,5&nbsp;% sur 48&nbsp;mois.</li></ol></div><div class="fin-sv" data-fin-if="suivi=comparatif"><div class="fin-sv-h"><b>Ecobank Togo</b><span class="dc-badge fin-mute">À remettre</span></div><p class="fin-sv-p">Date de remise à fixer · interlocuteur à préciser.</p><div class="fin-sv-a"><button class="btn btn-ghost btn-sm" type="button" data-fin-if="etat=pret|remis admin=1" data-fin-remettre>Marquer comme remis à Ecobank Togo</button></div></div></div>
+  La banque accorde <b>3&nbsp;000&nbsp;000</b> FCFA de moins que la demande : ce complément reste à financer par le client.</p></div><div class="fin-conds"><b>Conditions préalables au décaissement</b><div class="fin-cond-l" data-fin-drop="cond:0"><label class="fin-chk"><input type="checkbox" data-fin-cond checked><span>Apport de 6&nbsp;250&nbsp;000 FCFA versé sur le compte</span></label><button class="btn btn-ghost btn-sm" type="button" data-fin-upload="cond:0">Déposer la pièce</button><input type="file" hidden class="fin-file-in" data-fin-up="cond:0" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" aria-label="Déposer la pièce de la condition"><small data-fin-cond-file hidden></small></div><div class="fin-cond-l" data-fin-drop="cond:1"><label class="fin-chk"><input type="checkbox" data-fin-cond checked><span>Gage du camion enregistré</span></label><button class="btn btn-ghost btn-sm" type="button" data-fin-upload="cond:1">Déposer la pièce</button><input type="file" hidden class="fin-file-in" data-fin-up="cond:1" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" aria-label="Déposer la pièce de la condition"><small data-fin-cond-file hidden></small></div><div class="fin-cond-l" data-fin-drop="cond:2"><label class="fin-chk"><input type="checkbox" data-fin-cond><span>Assurances souscrites (décès-invalidité, camion)</span></label><button class="btn btn-ghost btn-sm" type="button" data-fin-upload="cond:2">Déposer la pièce</button><input type="file" hidden class="fin-file-in" data-fin-up="cond:2" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" aria-label="Déposer la pièce de la condition"><small data-fin-cond-file hidden></small><small class="fin-fmt" style="flex:1 1 100%">Pièce de chaque condition : PDF, JPG, PNG, Word, Excel · 10 Mo max · ou glissez-la sur la ligne</small></div></div><div class="fin-sv-a"><button class="btn btn-primary" type="button" data-fin-decaisser>Enregistrer le décaissement du 01/04/2026</button><span class="fin-sub" data-fin-cond-aide style="margin:0"></span></div></div><div class="fin-sv" data-fin-if="suivi=conditions|decaisse"><div class="fin-sv-h"><b>BOA Togo</b><span class="dc-badge fin-mute">Non retenue</span></div><p class="fin-sv-p">Le client a choisi une autre offre.</p></div><div class="fin-sv" data-fin-if="suivi=conditions|decaisse"><div class="fin-sv-h"><b>Ecobank Togo</b><span class="dc-badge fin-mute">Non retenue</span></div><p class="fin-sv-p">Le client a choisi une autre offre.</p></div><div class="fin-sv" data-fin-if="suivi=decaisse"><div class="fin-sv-h"><b>Orabank Togo</b><span class="dc-badge ok">Décaissé</span></div><ol class="fin-tl"><li><b>Accord le 10/03/2026</b> · offre retenue</li><li><b>Conditions préalables levées</b> : apport de 6&nbsp;250&nbsp;000 FCFA versé sur le compte · gage du camion enregistré · assurances souscrites (décès-invalidité, camion).</li><li><b>Décaissement le 01/04/2026</b> : 22&nbsp;000&nbsp;000 FCFA. Première échéance le 01/05/2026 : 573&nbsp;958.</li></ol></div><div class="fin-sv" data-fin-if="suivi=refus"><div class="fin-sv-h"><b>BOA Togo</b><span class="dc-badge fin-ko">Refus</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à Mme Ama Dogbé, chargée d’affaires PME</li><li><b>Refus le 12/03/2026</b> · motif : capacité de remboursement jugée insuffisante au regard des dettes en cours.</li></ol></div><div class="fin-sv" data-fin-if="suivi=refus"><div class="fin-sv-h"><b>Orabank Togo</b><span class="dc-badge warn">Contre-proposition</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à M. Kodjo Agbeko, chargé d’affaires PME</li><li><b>Contre-proposition le 12/03/2026</b></li></ol><div class="fin-kpis"><div><small>Montant proposé</small><b>20&nbsp;000&nbsp;000</b></div><div><small>Taux annuel</small><b>12&nbsp;%</b></div><div><small>Durée</small><b>36&nbsp;mois</b></div><div><small>Mensualité</small><b>664&nbsp;286</b></div></div><div class="fin-sv-a"><button class="btn btn-primary btn-sm" type="button" data-fin-if="admin=1" data-fin-act="info" data-msg="Contre-proposition acceptée : elle devient l’offre du client, ses conditions préalables s’ouvrent.">Accepter la contre-proposition</button><button class="btn btn-ghost btn-sm" type="button" data-fin-if="admin=1" data-fin-act="info" data-msg="Contre-proposition déclinée : le motif est gardé dans le suivi de la banque.">Décliner</button></div></div><div class="fin-sv" data-fin-if="suivi=refus"><div class="fin-sv-h"><b>Ecobank Togo</b><span class="dc-badge fin-mute">À remettre</span></div><p class="fin-sv-p">Date de remise à fixer · interlocuteur à préciser.</p><div class="fin-sv-a"><button class="btn btn-ghost btn-sm" type="button" data-fin-if="etat=pret|remis admin=1" data-fin-remettre>Marquer comme remis à Ecobank Togo</button></div></div><div data-fin-if="suivi=comparatif"><div class="fin-sv fin-cmpo"><div class="fin-sv-h"><b>Comparer les deux offres</b></div><div class="scroll-x"><table class="fin-tbl fin-plan"><thead><tr><th></th><th>Orabank Togo<br><span class="dc-badge ok">Accord</span></th><th>BOA Togo<br><span class="dc-badge warn">Contre-proposition</span></th></tr></thead><tbody><tr class=""><th scope="row">Montant</th><td class="num">22&nbsp;000&nbsp;000</td><td class="num">20&nbsp;000&nbsp;000</td></tr><tr class=""><th scope="row">Taux annuel</th><td class="num">11,5&nbsp;%</td><td class="num">12,0&nbsp;%</td></tr><tr class=""><th scope="row">Durée</th><td class="num">48&nbsp;mois</td><td class="num">36&nbsp;mois</td></tr><tr class=""><th scope="row">Mensualité</th><td class="num">573&nbsp;958</td><td class="num">664&nbsp;286</td></tr><tr class=""><th scope="row">Total des intérêts</th><td class="num">5&nbsp;549&nbsp;992</td><td class="num">3&nbsp;914&nbsp;306</td></tr><tr class=""><th scope="row">Frais de dossier</th><td class="num">220&nbsp;000</td><td class="num">300&nbsp;000</td></tr><tr class=""><th scope="row">Assurance estimée (0,30 % du montant par an)</th><td class="num">264&nbsp;000</td><td class="num">180&nbsp;000</td></tr><tr class="tot"><th scope="row">Coût total du crédit</th><td class="num">6&nbsp;033&nbsp;992</td><td class="num">4&nbsp;394&nbsp;306</td></tr><tr><th scope="row">Coût pour 1 000 000 FCFA empruntés</th><td class="num">274&nbsp;272</td><td class="num">219&nbsp;715 <span class="dc-badge ok">La moins chère</span></td></tr><tr class=""><th scope="row">Reste à financer par le client</th><td class="num">3&nbsp;000&nbsp;000</td><td class="num">5&nbsp;000&nbsp;000</td></tr><tr><th></th><td><button class="btn btn-primary btn-sm" type="button" data-fin-if="admin=1" data-fin-choisir>Le client choisit cette offre</button></td><td><button class="btn btn-ghost btn-sm" type="button" data-fin-if="admin=1" data-fin-choisir-boa>Le client choisit cette offre</button></td></tr></tbody></table></div><p class="fin-sv-p">Assurance estimée et frais de la contre-proposition : valeurs de démonstration. Le coût pour 1 000 000 empruntés compare ce qui n’a pas le même montant.</p></div></div><div class="fin-sv" data-fin-if="suivi=comparatif"><div class="fin-sv-h"><b>BOA Togo</b><span class="dc-badge warn">Contre-proposition</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à Mme Ama Dogbé, chargée d’affaires PME</li><li><b>Contre-proposition le 12/03/2026</b> : 20&nbsp;000&nbsp;000 FCFA à 12&nbsp;% sur 36&nbsp;mois.</li></ol></div><div class="fin-sv" data-fin-if="suivi=comparatif"><div class="fin-sv-h"><b>Orabank Togo</b><span class="dc-badge ok">Accord</span></div><ol class="fin-tl"><li><b>Remis le 16/02/2026</b> à M. Kodjo Agbeko, chargé d’affaires PME</li><li><b>Accord le 10/03/2026</b> : 22&nbsp;000&nbsp;000 FCFA à 11,5&nbsp;% sur 48&nbsp;mois.</li></ol></div><div class="fin-sv" data-fin-if="suivi=comparatif"><div class="fin-sv-h"><b>Ecobank Togo</b><span class="dc-badge fin-mute">À remettre</span></div><p class="fin-sv-p">Date de remise à fixer · interlocuteur à préciser.</p><div class="fin-sv-a"><button class="btn btn-ghost btn-sm" type="button" data-fin-if="etat=pret|remis admin=1" data-fin-remettre>Marquer comme remis à Ecobank Togo</button></div></div></div>
     <p class="dc-note" data-note><b>Servi aujourd’hui</b> : un seul parcours de dossier (<code>BROUILLON → PRET → REMIS → ACCORDE | REFUSE | ABANDONNE</code>, <code>dateRemise</code>, <code>accord</code> = montant, taux, durée). <b>À venir</b> : suivi par banque (remis le, interlocuteur, compléments demandés et réponses, passage en comité), réponse accord / refus / contre-proposition, offre détaillée (différé, frais de dossier, assurance, garanties exigées, conditions préalables), levée des conditions, décaissement (date, montant), « non retenue ». Noms des interlocuteurs et montants de l’offre : <b>valeurs de démonstration</b>.</p>
   </div>
 </div>
@@ -5594,13 +5640,20 @@
                     <div data-fin-modal-body></div></div>
                 </div>
 
+                <!-- ─── APERÇU D’UN DOCUMENT (généré par Prospera ou déposé par l’utilisateur) ─── -->
+                <div class="fin-ap" data-fin-ap hidden role="dialog" aria-modal="true" aria-label="Aperçu du document">
+                  <div class="fin-ap-box"><div class="fin-ap-h"><div><b data-fin-ap-titre></b><small data-fin-ap-sous></small></div><div class="fin-ap-b" data-fin-ap-btns></div></div>
+                    <div class="fin-ap-c" data-fin-ap-body></div></div>
+                </div>
+
                 <!-- ─── ÉDITEUR DE DOCUMENT ─── -->
 
                 <div class="fin-doc" data-fin-doc hidden role="dialog" aria-modal="true" aria-label="Éditeur de document">
                   <div class="fin-doc-box">
                     <div class="fin-doc-h"><div><b data-fin-if="profil=etabli">Note de présentation du projet</b><b data-fin-if="profil=jeune">Plan d’affaires</b>
                         <span class="dc-badge warn" data-fin-doc-compteur>3 informations à compléter</span></div>
-                      <div class="fin-doc-b"><button class="btn btn-ghost btn-sm" type="button" data-fin-doc-dl="word">Télécharger en Word (modifiable)</button>
+                      <div class="fin-doc-b"><button class="btn btn-ghost btn-sm" type="button" data-fin-doc-voir>Voir l’aperçu</button>
+                        <button class="btn btn-ghost btn-sm" type="button" data-fin-doc-dl="word">Télécharger en Word (modifiable)</button>
                         <button class="btn btn-ghost btn-sm" type="button" data-fin-doc-dl="pdf">Télécharger en PDF</button>
                         <button class="btn btn-ghost btn-sm" type="button" data-fin-doc-close>Fermer</button></div></div>
                     <div class="fin-doc-g">
@@ -21813,6 +21866,127 @@
         if (st === 'S') return 'Sans objet';
         return (st === 'M' ? 'Manquante' : 'Expirée') + ' · ' + (bloq ? 'bloque la demande' : 'facultative');
       }
+      /* ── Téléversement (démonstration) : le fichier choisi reste dans le navigateur, il n'est envoyé nulle part.
+         Valeurs de démonstration : 10 Mo et les formats ci-dessous (voir la note de conception). ── */
+      var UP_MAX = 10 * 1024 * 1024, UP_EXT = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx'];
+      var UP_ACCEPT = '.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx', UP_HINT = 'PDF, JPG, PNG, Word, Excel · 10 Mo max';
+      S.refus = {}; S.pfFile = {};
+      var garFile = null;
+      function upExt(n) { var m = /\.([^.]+)$/.exec(n || ''); return m ? m[1].toLowerCase() : ''; }
+      function upControle(f) {
+        if (UP_EXT.indexOf(upExt(f.name)) === -1) return 'Format non accepté : déposez un PDF, une image, un Word ou un Excel.';
+        if (f.size > UP_MAX) return 'Ce fichier dépasse 10 Mo.';
+        return '';
+      }
+      function upTaille(n) { return n >= 1048576 ? (Math.round(n / 104857.6) / 10).toString().replace('.', ',') + ' Mo' : Math.max(1, Math.round(n / 1024)) + ' Ko'; }
+      function upDate() { var d = new Date(); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); }
+      function upInfo(f) { return { name: f.name, taille: upTaille(f.size), type: f.type || '', ext: upExt(f.name), url: URL.createObjectURL(f), date: upDate(), who: estAdmin() ? 'Awa Diallo' : 'Kofi Santos' }; }
+      function upBtn(kind, lib, extra) {
+        return '<button class="btn btn-ghost btn-sm" type="button" data-fin-upload="' + kind + '"' + (extra ? ' ' + extra : '') + '>' + esc(lib) + '</button>' +
+          '<input type="file" hidden class="fin-file-in" data-fin-up="' + kind + '" accept="' + UP_ACCEPT + '" aria-label="' + esc(lib) + '">';
+      }
+      function upRefus(zone, msg) {
+        var old = zone.querySelector('.fin-refus'); if (old) old.remove();
+        var s = document.createElement('small'); s.className = 'fin-refus'; s.setAttribute('role', 'alert'); s.textContent = msg; zone.appendChild(s);
+        notify('error', 'Fichier refusé', msg);
+      }
+      function upEnvoi(f, zone, ko, ok) {
+        if (zone.querySelector('.fin-prog')) return;
+        var err = upControle(f);
+        if (err) { ko(err); return; }
+        var old = zone.querySelector('.fin-refus'); if (old) old.remove();
+        var bar = document.createElement('div'); bar.className = 'fin-prog'; bar.setAttribute('role', 'progressbar'); bar.setAttribute('aria-label', 'Envoi de ' + f.name);
+        bar.innerHTML = '<span></span><span class="bar"><i></i></span>'; bar.firstChild.textContent = 'Envoi de ' + f.name + '…';
+        zone.appendChild(bar);
+        var i = bar.querySelector('i'), p = 0;
+        var t = setInterval(function () {
+          p += 25; i.style.width = p + '%';
+          if (p >= 100) { clearInterval(t); setTimeout(function () { bar.remove(); ok(upInfo(f)); }, 120); }
+        }, 120);
+      }
+      function routeUp(kind, f, zone) {
+        var p = kind.split(':'), k = p[1];
+        if (p[0] === 'piece' || p[0] === 'redepot') {
+          var row = root.querySelector('[data-pc="' + k + '"]'), z = (row && row.querySelector('.t')) || zone;
+          upEnvoi(f, z, function (err) { S.refus[k] = err; notify('error', 'Fichier refusé', err); appliquer(); }, function (inf) {
+            delete S.refus[k];
+            var dep = 'le ' + inf.date + ' par ' + inf.who + ' · ' + inf.name + ' (' + inf.taille + ')';
+            if (p[0] === 'redepot') {
+              var prev = S.over[k], h = (prev && prev.hist) ? prev.hist.slice() : ['Version générée par Prospera le ' + DATA.dates.demande];
+              h.push('Version modifiée déposée ' + dep + ' : elle remplace la version générée');
+              S.over[k] = { st: 'F', src: 'Version modifiée déposée ' + dep + ' · remplace la version générée (les deux restent dans l’historique)', act: null, hist: h, doc: 1, file: inf };
+              appliquer(); notify('success', 'Version modifiée déposée', inf.name + ' remplace la version générée ; les deux restent dans l’historique.');
+            } else {
+              if (k === 'proforma' && S.pf === 'expire') S.pf = 'ok';
+              S.over[k] = { st: 'F', src: 'Déposé ' + dep, act: null, file: inf };
+              appliquer(); notify('success', 'Pièce ajoutée', inf.name + ' passe en « Fournie » pour les banques concernées.');
+            }
+          });
+        } else if (p[0] === 'pf2' || p[0] === 'pfnew') {
+          if (p[0] === 'pf2' && S.pf2) { notify('error', 'Pro forma', 'Un deuxième pro forma est déjà au dossier.'); return; }
+          upEnvoi(f, zone, function (err) { upRefus(zone, err); }, function (inf) {
+            if (p[0] === 'pf2') {
+              S.pf2 = 1; S.pfFile.pf2 = inf; appliquer();
+              notify('success', 'Pro forma ajouté', inf.name + ' : le coût du projet et le montant demandé sont recalculés.');
+            } else {
+              S.pf = 'ok'; S.pfFile.pfnew = inf;
+              S.over.proforma = { st: 'F', src: 'Déposé le ' + inf.date + ' par ' + inf.who + ' · ' + inf.name + ' (' + inf.taille + ')', act: null, file: inf };
+              appliquer(); notify('success', 'Pro forma à jour', inf.name + ' remplace le pro forma expiré.');
+            }
+          });
+        } else if (p[0] === 'gar') {
+          var zg = garForm.querySelector('.fin-gar-up');
+          upEnvoi(f, zg, function (err) { upRefus(zg, err); }, function (inf) {
+            garFile = inf; fPiece.value = inf.name; majGarFile();
+            notify('success', 'Pièce jointe', inf.name + ' sera rattachée à la garantie.');
+          });
+        } else if (p[0] === 'cond') {
+          var cl = root.querySelectorAll('.fin-cond-l')[parseInt(k, 10)]; if (!cl) return;
+          upEnvoi(f, cl, function (err) { upRefus(cl, err); }, function (inf) {
+            cl.querySelector('[data-fin-cond]').checked = true;
+            var s = cl.querySelector('[data-fin-cond-file]'); s.hidden = false;
+            s.textContent = 'Pièce déposée le ' + inf.date + ' par ' + inf.who + ' · ' + inf.name + ' (' + inf.taille + ')';
+            conditionsMaj(); notify('success', 'Condition levée', inf.name + ' est jointe à la condition.');
+          });
+        } else if (p[0] === 'comp') {
+          var li = root.querySelectorAll('[data-fin-comp]')[parseInt(k, 10)]; if (!li) return; li = li.closest('li');
+          upEnvoi(f, li, function (err) { upRefus(li, err); }, function (inf) {
+            li.querySelector('[data-fin-comp-etat]').textContent = ' Fournis : ' + inf.name + ' (' + inf.taille + ') · la banque en est informée.';
+            li.querySelectorAll('[data-fin-comp], .fin-fmt').forEach(function (b) { b.hidden = true; });
+            notify('success', 'Complément déposé', inf.name + ' est transmis à la banque.');
+          });
+        }
+      }
+      function majGarFile() {
+        var s = root.querySelector('[data-fin-gar-file]'); if (!s) return;
+        s.textContent = garFile ? 'Fichier joint : ' + garFile.name + ' (' + garFile.taille + ')' : '';
+        s.hidden = !garFile;
+      }
+      root.addEventListener('change', function (ev) {
+        var inp = ev.target.closest && ev.target.closest('[data-fin-up]'); if (!inp) return;
+        var f = inp.files && inp.files[0]; if (!f) return;
+        var kind = inp.dataset.finUp, zone = inp.parentNode;
+        inp.value = '';
+        routeUp(kind, f, zone);
+      });
+      ['dragenter', 'dragover'].forEach(function (nom) {
+        root.addEventListener(nom, function (ev) {
+          var z = ev.target.closest && ev.target.closest('[data-fin-drop]');
+          if (!z || !ev.dataTransfer || [].indexOf.call(ev.dataTransfer.types || [], 'Files') === -1) return;
+          ev.preventDefault(); z.classList.add('drop');
+        });
+      });
+      root.addEventListener('dragleave', function (ev) {
+        var z = ev.target.closest && ev.target.closest('[data-fin-drop]');
+        if (z && !z.contains(ev.relatedTarget)) z.classList.remove('drop');
+      });
+      root.addEventListener('drop', function (ev) {
+        var z = ev.target.closest && ev.target.closest('[data-fin-drop]'); if (!z) return;
+        ev.preventDefault(); z.classList.remove('drop');
+        var f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+        if (f) routeUp(z.dataset.finDrop, f, z);
+      });
+
       function rendrePieces() {
         var banque = S.bank || 'all';
         var tous = { M: 0, E: 0 }; var pill = { BOA: 0, ORA: 0, ECO: 0 };
@@ -21844,15 +22018,30 @@
             if ((st === 'M' || st === 'E') && bq(it)) c.bloq++;
             if (it.k === 'contrats' && !S.scen && (st === 'M' || st === 'E')) src = 'Facultatifs tant qu’aucune hypothèse de chiffre d’affaires n’est à justifier';
             if (S.asked && (st === 'M' || st === 'E') && !S.over[it.k]) src += ' · demandée au client le ' + DATA.dates.demande;
-            var btn = '';
+            var btn = '', upk = '';
+            var voirBtn = '<button class="btn btn-ghost btn-sm" type="button" data-fin-voir="' + it.k + '">Voir</button>';
             if (st === 'F') {
-              btn = '<button class="btn btn-ghost btn-sm" type="button" data-fin-voir="' + it.k + '">Voir</button>';
-              if (it.k === 'note' || it.k === 'plan_j') btn = '<span class="fin-btns">' + btn + ' <button class="btn btn-ghost btn-sm" type="button" data-fin-dl-row="' + it.k + '">Télécharger (Word)</button> <button class="btn btn-ghost btn-sm" type="button" data-fin-redepot="' + it.k + '">Déposer la version modifiée</button></span>';
+              btn = voirBtn;
+              if (it.k === 'note' || it.k === 'plan_j') {
+                upk = 'redepot:' + it.k;
+                btn = '<span class="fin-btns">' + btn + ' <button class="btn btn-ghost btn-sm" type="button" data-fin-dl-row="' + it.k + '">Télécharger (Word)</button> ' + upBtn(upk, 'Déposer la version modifiée', 'data-fin-redepot="' + it.k + '"') + '</span>';
+              }
             }
-            else if (act && (st === 'M' || st === 'E')) btn = '<button class="btn btn-ghost btn-sm" type="button" data-fin-act="' + act[0] + '">' + esc(act[1]) + '</button>';
-            lignes += '<div class="fin-pc' + (st === 'S' ? ' sans' : '') + '" data-pc="' + it.k + '" data-st="' + st + '" data-bloq="' + (bq(it) ? 1 : 0) + '">' +
+            else if (act && (st === 'M' || st === 'E')) {
+              var b1 = '';
+              if (act[0] === 'depot' && it.k !== 'proforma') { upk = 'piece:' + it.k; b1 = upBtn(upk, act[1], 'data-fin-act="depot"'); }
+              else {
+                b1 = '<button class="btn btn-ghost btn-sm" type="button" data-fin-act="' + act[0] + '">' + esc(act[1]) + '</button>';
+                if (it.k === 'proforma' && act[0] === 'depot') { upk = 'piece:proforma'; b1 += ' ' + upBtn(upk, 'Déposer le nouveau pro forma'); }
+              }
+              var voirPre = (DOCS[it.k] && it.k !== 'note' && it.k !== 'plan_j') ? voirBtn + ' ' : '';
+              btn = (voirPre || it.k === 'proforma') ? '<span class="fin-btns">' + voirPre + b1 + '</span>' : b1;
+            }
+            var hint = upk ? '<small class="fin-fmt">' + UP_HINT + (st === 'F' ? '' : ' · ou glissez le fichier ici') + '</small>' : '';
+            var refus = S.refus[it.k] ? '<small class="fin-refus" role="alert">' + esc(S.refus[it.k]) + '</small>' : '';
+            lignes += '<div class="fin-pc' + (st === 'S' ? ' sans' : '') + '" data-pc="' + it.k + '" data-st="' + st + '" data-bloq="' + (bq(it) ? 1 : 0) + '"' + (upk ? ' data-fin-drop="' + upk + '"' : '') + '>' +
               '<span class="dc-badge ' + cls + '">' + badge + '</span>' +
-              '<div class="t"><b>' + esc(it.lib) + '</b><small>' + esc(src) + '</small>' + extra + '</div>' + btn + '</div>';
+              '<div class="t"><b>' + esc(it.lib) + '</b><small>' + esc(src) + '</small>' + extra + hint + refus + '</div>' + btn + '</div>';
           });
           if (lignes) html += '<div class="fin-pg"><h4>' + g.lib + '</h4>' + lignes + '</div>';
         });
@@ -21881,7 +22070,7 @@
         return '<table class="fin-tbl fin-plan"><thead><tr><th>' + titre + '</th><th>FCFA</th></tr></thead><tbody>' +
           lignes.map(function (l, i) { return '<tr' + (i === lignes.length - 1 && /Total|net/i.test(l[0]) ? ' class="tot"' : '') + '><th scope="row">' + esc(l[0]) + '</th><td class="num">' + l[1] + '</td></tr>'; }).join('') + '</tbody></table>';
       }
-      function voir(k) {
+      function voirAncien(k) {
         var titre, corps;
         if (k.indexOf('syn:') === 0) {
           titre = 'Synthèse du dossier · ' + DATA.banques[k.slice(4)];
@@ -21904,6 +22093,174 @@
         root.querySelector('[data-fin-modal-titre]').textContent = titre;
         root.querySelector('[data-fin-modal-body]').innerHTML = corps;
         modal.hidden = false;
+      }
+      /* ── Aperçu dans l'application : ce que Prospera génère se VOIT avant d'être téléchargé ;
+         un fichier déposé par l'utilisateur s'affiche tel quel (image, PDF) ou en fiche (autres formats). ── */
+      var ap = root.querySelector('[data-fin-ap]');
+      var A4_PIED = 'Établi par Cabinet Diallo &amp; Associés sur la base des informations fournies par le client. Ne constitue pas une certification des comptes.';
+      function apOuvrir(titre, sous, btns, corps) {
+        ap.querySelector('[data-fin-ap-titre]').textContent = titre;
+        ap.querySelector('[data-fin-ap-sous]').textContent = sous || '';
+        ap.querySelector('[data-fin-ap-btns]').innerHTML = btns + '<button class="btn btn-ghost btn-sm" type="button" data-fin-ap-close>Fermer</button>';
+        var b = ap.querySelector('[data-fin-ap-body]'); b.innerHTML = corps; b.scrollTop = 0;
+        ap.hidden = false; ap.querySelector('[data-fin-ap-close]').focus();
+      }
+      function dlBtn(lib, nom) { return '<button class="btn btn-ghost btn-sm" type="button" data-fin-ap-dl="' + esc(nom) + '">' + esc(lib) + '</button> '; }
+      ap.addEventListener('click', function (ev) {
+        if (ev.target === ap || ev.target.closest('[data-fin-ap-close]')) { ap.hidden = true; return; }
+        var d = ev.target.closest('[data-fin-ap-dl]');
+        if (d) notify('success', 'Téléchargement', d.dataset.finApDl + ' téléchargé.');
+      });
+      document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !ap.hidden) ap.hidden = true; });
+      function a4(titre, corps, pg) {
+        return '<article class="fin-a4"><header class="fin-a4-h"><div><b>Cabinet Diallo &amp; Associés</b><small>Cabinet d’expertise comptable</small></div><small>Lomé, le ' + DATA.dates.demande + '</small></header>' +
+          '<h3 class="fin-a4-t">' + titre + '</h3>' + corps + '<p class="fin-pied">' + A4_PIED + '</p>' + (pg ? '<div class="fin-a4-pg">' + pg + '</div>' : '') + '</article>';
+      }
+      function ddv(sel, lib) {
+        var r = '';
+        root.querySelectorAll(sel + ' dt').forEach(function (t) { if (t.textContent.trim() === lib) r = t.nextElementSibling.textContent.trim(); });
+        return r;
+      }
+      function rx(t, r) { var x = r.exec(t || ''); return x ? x[1].trim() : ''; }
+      function ctx() {
+        var pret = ddv('#fd3', 'Prêt demandé'), som = [].map.call(root.querySelectorAll('.fin-sommaire li'), function (l) { return l.textContent; });
+        var dir = ddv('#fd1', 'Dirigeant');
+        return {
+          raison: ddv('#fd1', 'Raison sociale'), forme: ddv('#fd1', 'Forme'), nif: ddv('#fd1', 'NIF'), rccm: ddv('#fd1', 'RCCM'), creation: ddv('#fd1', 'Création'),
+          dirigeant: dir, nom: dir.split(',')[0],
+          objet: root.querySelector('[data-fin-objet]').textContent.trim(), pf: ddv('#fd3', 'Pro forma').split(' : ')[0],
+          cout: iCout.value, apport: iApport.value, montant: iMontant.value, pct: lblPct.textContent.trim(),
+          duree: rx(pret, /(\d+)\s*mois/), mens: rx(pret, /mensualité ([\d\s]+)/), inter: rx(pret, /intérêts ([\d\s]+)/), derniere: rx(som[2], /dernière échéance ([\d\s]+)/),
+          gar: S.gar.map(function (g) { return gType(g.type).lib + ' (' + g.desc + ')'; }),
+          cov: root.querySelector('[data-gar-retenu-cov]').textContent.trim(),
+          patrimoine: rx(root.querySelector('[data-fin-if="vue=detail step=garanties"]').textContent, /patrimoine déclaré du gérant \(([\d\s]+)\)/)
+        };
+      }
+      function identite(c) {
+        return '<dl class="fin-dl"><dt>Raison sociale</dt><dd>' + esc(c.raison) + '</dd><dt>Forme</dt><dd>' + esc(c.forme) + '</dd><dt>Création</dt><dd>' + esc(c.creation) + '</dd><dt>NIF</dt><dd>' + esc(c.nif) + '</dd><dt>RCCM</dt><dd>' + esc(c.rccm) + '</dd><dt>Dirigeant</dt><dd>' + esc(c.dirigeant) + '</dd></dl>';
+      }
+      function pretTxt(c) { return '<b>' + esc(c.montant) + ' FCFA</b> sur ' + esc(c.duree) + ' mois'; }
+      function garTxt(c) { return c.gar.length ? 'Le crédit serait garanti par : ' + c.gar.map(esc).join(' ; ') + '. La couverture retenue par la banque est de ' + esc(c.cov) + ' du prêt.' : 'Les garanties proposées sont détaillées à l’étape correspondante du dossier.'; }
+      function sig(qui) { return '<div class="fin-a4-sig"><span>Fait à Lomé, le ' + DATA.dates.demande + '</span><span>' + esc(qui) + '<br><i>Signature :</i></span></div>'; }
+      var GENVU = { note: 1, plan_j: 1, bilan_o: 1, tresmens_e: 1, tresmens_j: 1 };
+      var DOCS = {
+        lettre: { titre: 'Lettre de demande de crédit', nom: 'Lettre-demande-credit-Ets-Kossi-2026', ext: 'pdf', corps: function (c) {
+          return '<p class="r">' + esc(c.raison) + '<br>NIF ' + esc(c.nif) + ' · RCCM ' + esc(c.rccm) + '<br>Représentée par ' + esc(c.dirigeant) + '</p>' +
+            '<p>À l’attention de la banque destinataire</p><p><b>Objet : demande de crédit de ' + esc(c.montant) + ' FCFA, ' + esc(c.objet.charAt(0).toLowerCase() + c.objet.slice(1)) + '</b></p><p>Madame, Monsieur,</p>' +
+            '<p>' + esc(c.raison) + ', ' + esc(c.forme) + ' créée le ' + esc(c.creation) + ', a l’honneur de solliciter auprès de votre établissement un crédit de ' + pretTxt(c) + ' pour financer ce projet (pro forma ' + esc(c.pf) + ').</p>' +
+            '<p>Le coût du projet est de ' + esc(c.cout) + ' FCFA TTC. L’entreprise apporte ' + esc(c.apport) + ' FCFA (' + esc(c.pct) + '). La mensualité estimée est de ' + esc(c.mens) + ' FCFA.</p>' +
+            '<p>' + garTxt(c) + '</p><p>Nous restons à votre disposition pour tout complément d’information et vous prions d’agréer, Madame, Monsieur, l’expression de nos salutations distinguées.</p>' + sig(c.dirigeant);
+        } },
+        affirmation: { titre: 'Lettre d’affirmation du dirigeant', nom: 'Lettre-affirmation-Ets-Kossi-2026', ext: 'pdf', corps: function (c) {
+          return '<p>Je soussigné, ' + esc(c.dirigeant) + ' de ' + esc(c.raison) + ' (NIF ' + esc(c.nif) + '), affirme à l’attention de la banque, à l’appui de la demande de crédit de ' + pretTxt(c) + ' :</p>' +
+            '<ol><li>que les informations et documents remis pour l’instruction du dossier sont exacts et complets, à ma connaissance ;</li><li>que l’entreprise est à jour de ses déclarations et paiements fiscaux et sociaux, attestations de l’OTR et de la CNSS à l’appui ;</li><li>que tous les engagements financiers de l’entreprise figurent dans le tableau des dettes en cours joint au dossier ;</li><li>que l’entreprise ne fait l’objet d’aucune procédure collective ni d’aucun litige susceptible d’affecter sa capacité de remboursement ;</li><li>que le crédit sera employé exclusivement à l’objet décrit : ' + esc(c.objet.charAt(0).toLowerCase() + c.objet.slice(1)) + '.</li></ol>' +
+            '<p>Je m’engage à informer la banque sans délai de tout changement important de situation.</p>' + sig(c.nom + ', gérant');
+        } },
+        pv: { titre: 'Décision collective des associés', nom: 'Decision-associes-emprunt-Ets-Kossi-2026', ext: 'pdf', corps: function (c) {
+          return '<p><b>' + esc(c.raison) + '</b>, ' + esc(c.forme) + ' (NIF ' + esc(c.nif) + ', RCCM ' + esc(c.rccm) + ').</p>' +
+            '<p>Les associés, après avoir pris connaissance du projet « ' + esc(c.objet) + ' », décident :</p>' +
+            '<ol><li>d’autoriser la société à contracter auprès d’une banque un crédit de ' + pretTxt(c) + ', pour un projet d’un coût de ' + esc(c.cout) + ' FCFA TTC, dont ' + esc(c.apport) + ' FCFA d’apport de la société ;</li>' +
+            '<li>d’autoriser la constitution des garanties demandées par la banque' + (c.gar.length ? ' : ' + c.gar.map(esc).join(' ; ') : '') + ' ;</li>' +
+            '<li>de donner tout pouvoir à ' + esc(c.dirigeant) + ' pour signer le contrat de prêt, les actes de garantie et tout document nécessaire.</li></ol>' +
+            '<p>Les associés (nom et signature) :</p>' + sig('Les associés');
+        } },
+        domi: { titre: 'Engagement de domicilier les recettes', nom: 'Engagement-domiciliation-Ets-Kossi-2026', ext: 'pdf', corps: function (c) {
+          return '<p>Je soussigné, ' + esc(c.dirigeant) + ' de ' + esc(c.raison) + ' (NIF ' + esc(c.nif) + '), m’engage, pour toute la durée du crédit de ' + pretTxt(c) + ' demandé pour ' + esc(c.objet.charAt(0).toLowerCase() + c.objet.slice(1)) + ' :</p>' +
+            '<ol><li>à domicilier les recettes de l’entreprise sur le compte ouvert auprès de la banque qui accordera le crédit ;</li><li>à ne pas transférer ces recettes vers un autre établissement sans l’accord écrit de la banque ;</li><li>à lui communiquer, à sa demande, les relevés et justificatifs de ces mouvements.</li></ol>' + sig(c.nom + ', gérant');
+        } },
+        patrimoine: { titre: 'Déclaration de patrimoine de la caution', nom: 'Declaration-patrimoine-Komlan-Kossi', ext: 'pdf', corps: function (c) {
+          return '<p>Caution : <b>' + esc(c.nom) + '</b>, gérant de ' + esc(c.raison) + (c.patrimoine ? '. Patrimoine déclaré à ce jour : <b>' + esc(c.patrimoine) + ' FCFA</b>.' : '.') + '</p>' +
+            '<table class="fin-tbl fin-plan"><thead><tr><th>Nature</th><th>Description</th><th>Valeur estimée (FCFA)</th></tr></thead><tbody><tr><th scope="row">Biens immobiliers</th><td><mark>À compléter</mark></td><td class="num">—</td></tr><tr><th scope="row">Véhicules et matériels</th><td><mark>À compléter</mark></td><td class="num">—</td></tr><tr><th scope="row">Épargne et placements</th><td><mark>À compléter</mark></td><td class="num">—</td></tr><tr><th scope="row">Dettes et engagements personnels</th><td><mark>À compléter</mark></td><td class="num">—</td></tr></tbody></table>' +
+            '<p>Je certifie l’exactitude de cette déclaration.</p>' + sig(c.nom);
+        } },
+        cv: { titre: 'Modèle de CV du promoteur', nom: 'Modele-CV-Komlan-Kossi', ext: 'docx', corps: function (c) {
+          return '<dl class="fin-dl"><dt>Nom</dt><dd>' + esc(c.nom) + '</dd><dt>Fonction</dt><dd>' + esc(c.dirigeant.split(',')[1] ? c.dirigeant.split(',')[1].trim() : '') + ' de ' + esc(c.raison) + '</dd><dt>Depuis</dt><dd>' + esc(c.creation) + '</dd></dl>' +
+            '<h4>Parcours et formation</h4><p><mark>À compléter avec le gérant</mark></p><h4>Expérience dans l’activité</h4><p><mark>À compléter avec le gérant</mark></p><h4>Réalisations</h4><p><mark>À compléter avec le gérant</mark></p>';
+        } },
+        kyc: { titre: 'Dossier d’ouverture de compte et connaissance client', nom: 'Formulaires-connaissance-client-Ets-Kossi', ext: 'pdf', corps: function (c) {
+          return '<h4>Identité de l’entreprise</h4>' + identite(c) + '<h4>Activité et objet du crédit</h4><p>' + esc(c.objet) + ' · crédit de ' + pretTxt(c) + '.</p><h4>Origine des fonds et mouvements attendus</h4><p><mark>À compléter avec le gérant</mark></p>' + sig(c.nom + ', gérant');
+        } },
+        bilan_o: { titre: 'Bilan d’ouverture', nom: 'Bilan-ouverture-Ets-Kossi', ext: 'pdf', corps: function (c) {
+          return identite(c) + '<p>Bilan d’ouverture de la société, généré depuis la balance saisie dans Prospera, joint au dossier de financement en l’absence d’exercice clos.</p>';
+        } },
+        tresmens: { titre: 'Plan de trésorerie mensuel', nom: 'Plan-tresorerie-mensuel-Ets-Kossi-2026-2027', ext: 'xlsx', corps: function (c) {
+          var t = root.querySelector('table.fin-mens');
+          return '<p>Douze premiers mois d’activité, de avril 2026 à mars 2027, repris du prévisionnel.</p><div class="scroll-x">' + (t ? t.outerHTML : '') + '</div>';
+        } },
+        note: { titre: 'Note de présentation du projet', ext: 'docx', corps: function (c, edition) { return docCorps(edition); } },
+        plan_j: { titre: 'Plan d’affaires', ext: 'docx', corps: function (c, edition) { return docCorps(edition); } }
+      };
+      DOCS.tresmens_e = DOCS.tresmens; DOCS.tresmens_j = DOCS.tresmens;
+      function docCorps(edition) {
+        var out = '';
+        doc.querySelectorAll('.fin-doc-c section').forEach(function (s) {
+          var cl = s.cloneNode(true), origs = s.querySelectorAll('[data-fin-doc-fill]'), cls = cl.querySelectorAll('[data-fin-doc-fill]');
+          cl.querySelectorAll('.fin-off').forEach(function (n) { n.remove(); });
+          cls.forEach(function (n, i) {
+            var o = origs[i], v = o.querySelector('[data-fin-doc-ta]').value.trim();
+            if (!v && !edition) v = draftTexte(o);
+            var rep = document.createElement('div');
+            rep.innerHTML = '<h5>' + esc(o.querySelector('h5').firstChild.textContent.trim()) + '</h5>' + (v ? '<p>' + esc(v) + '</p>' : '<p><mark>À compléter</mark></p>');
+            n.replaceWith(rep);
+          });
+          cl.removeAttribute('id'); out += cl.outerHTML;
+        });
+        return out;
+      }
+      function apercuDoc(k, edition) {
+        var d = DOCS[k], c = ctx(), nomF = function (e) { return (k === 'note' || k === 'plan_j') ? nomDoc(k, e) : d.nom + '.' + e; }, btns = '';
+        if (k === 'note' || k === 'plan_j') btns = dlBtn('Télécharger en Word (modifiable)', nomF('docx')) + dlBtn('Télécharger en PDF', nomF('pdf'));
+        else btns = dlBtn(d.ext === 'xlsx' ? 'Télécharger l’Excel' : d.ext === 'docx' ? 'Télécharger en Word' : 'Télécharger en PDF', nomF(d.ext));
+        var titre = (k === 'note' || k === 'plan_j') ? (k === 'plan_j' ? 'Plan d’affaires' : 'Note de présentation du projet') : d.titre;
+        apOuvrir(titre, 'Aperçu · généré par Prospera, rien n’est encore téléchargé', btns, '<div class="fin-ap-pages">' + a4(esc(titre), d.corps(c, edition)) + '</div>');
+      }
+      function dosRow(b) {
+        return [].filter.call(root.querySelectorAll('.fin-dos'), function (r) { return r.querySelector('b').textContent.trim() === DATA.banques[b]; })[0];
+      }
+      function synCorps(b) {
+        var t = document.createElement('div'); t.innerHTML = SYN[b];
+        var h = t.querySelector('h4'); if (h) h.remove();
+        var p = t.querySelector('.fin-pied'); if (p) p.remove();
+        return t.innerHTML;
+      }
+      function apSyn(b) {
+        apOuvrir('Synthèse du dossier · ' + DATA.banques[b], 'Une page, en tête du dossier de la banque', dlBtn('Télécharger en PDF', 'Synthese-Kossi-camion-' + b + '-v1.pdf'),
+          '<div class="fin-ap-pages">' + a4('Synthèse du dossier de financement · ' + esc(DATA.banques[b]), synCorps(b)) + '</div>');
+      }
+      function apPdf(b) {
+        var c = ctx(), row = dosRow(b), noms = row.querySelector('small').textContent.split(' · ');
+        var fige = row.querySelector('[data-fin-if="fige=2"]');
+        var etat = S.fige === 2 && fige ? fige.querySelector('.dc-badge').textContent.trim() + ' ' + fige.querySelector('small').textContent.trim() :'Dossier généré : à relire avant d’être figé.';
+        var som = root.querySelector('.fin-sommaire');
+        apOuvrir(noms[0], DATA.banques[b] + ' · ' + etat, dlBtn('Télécharger le PDF', noms[0]) + dlBtn('Télécharger l’Excel', noms[1]),
+          '<div class="fin-ap-pages">' + a4('Dossier de financement · ' + esc(DATA.banques[b]), '<p>' + esc(c.raison) + ' · ' + esc(c.objet) + '</p><p><small>' + esc(etat) + '</small></p>' + synCorps(b), 'Page 1') +
+          a4('Contenu du dossier', '<ol>' + (som ? som.innerHTML : '') + '</ol>', 'Page 2') + '</div>');
+      }
+      function apXls(b) {
+        var c = ctx(), row = dosRow(b), noms = row.querySelector('small').textContent.split(' · ');
+        var l = [['Raison sociale', c.raison], ['NIF', c.nif], ['Banque destinataire', DATA.banques[b]], ['Objet du prêt', c.objet], ['Coût du projet TTC (FCFA)', c.cout], ['Apport du client (FCFA)', c.apport],
+          ['Montant demandé (FCFA)', c.montant], ['Durée (mois)', c.duree], ['Mensualité (FCFA)', c.mens], ['Dernière échéance (FCFA)', c.derniere], ['Total des intérêts (FCFA)', c.inter], ['Couverture retenue des garanties', c.cov]];
+        var tb = l.map(function (r, i) { return '<tr><th scope="row">' + (i + 2) + '</th><td>' + esc(r[0]) + '</td><td' + (/^[\d\s]+$/.test(r[1]) ? ' class="num"' : '') + '>' + esc(r[1]) + '</td></tr>'; }).join('');
+        apOuvrir(noms[1], DATA.banques[b] + ' · aperçu de la feuille « Synthèse »', dlBtn('Télécharger l’Excel', noms[1]) + dlBtn('Télécharger le PDF', noms[0]),
+          '<div class="fin-xlw"><div class="scroll-x"><table class="fin-xl"><thead><tr><th></th><th>A</th><th>B</th></tr></thead><tbody><tr><th scope="row">1</th><td><b>Dossier de financement</b></td><td><b>' + esc(DATA.banques[b]) + '</b></td></tr>' + tb + '</tbody></table></div><div class="fin-xl-tabs"><span>Synthèse</span></div></div>');
+      }
+      function apFichier(f, hist) {
+        var corps, ext = f.ext, img = ['jpg', 'jpeg', 'png'].indexOf(ext) !== -1;
+        if (img) corps = '<img class="fin-ap-img" src="' + f.url + '" alt="' + esc(f.name) + '">';
+        else if (ext === 'pdf') corps = '<object class="fin-ap-pdf" data="' + f.url + '" type="application/pdf" aria-label="' + esc(f.name) + '"><div class="fin-ap-fic"><b>' + esc(f.name) + '</b><p class="fin-sub">Ce navigateur n’affiche pas le PDF ici : téléchargez-le pour le lire.</p></div></object>';
+        else corps = '<div class="fin-ap-fic"><b>' + esc(f.name) + '</b><dl class="fin-dl" style="margin-top:0.6rem"><dt>Taille</dt><dd>' + esc(f.taille) + '</dd><dt>Type</dt><dd>' + esc(f.type || ext.toUpperCase()) + '</dd><dt>Déposé</dt><dd>le ' + esc(f.date) + ' par ' + esc(f.who) + '</dd></dl><p class="fin-sub">Pas d’aperçu pour ce type de fichier : téléchargez-le pour l’ouvrir.</p></div>';
+        var histo = hist ? '<div class="fin-ap-fic"><b>Historique des versions</b><ul class="fin-hist">' + hist.map(function (h) { return '<li>' + esc(h) + '</li>'; }).join('') + '</ul></div>' : '';
+        apOuvrir(f.name, f.taille + ' · déposé le ' + f.date + ' par ' + f.who, '<a class="btn btn-ghost btn-sm" href="' + f.url + '" download="' + esc(f.name) + '">Télécharger</a> ', '<div class="fin-ap-pages">' + corps + histo + '</div>');
+      }
+      function voir(k) {
+        if (k.indexOf('syn:') === 0) return apSyn(k.slice(4));
+        if (k.indexOf('pdf:') === 0) return apPdf(k.slice(4));
+        if (k.indexOf('xls:') === 0) return apXls(k.slice(4));
+        var o0 = S.over[k];
+        if (o0 && o0.file) return apFichier(o0.file, o0.hist);
+        var row0 = root.querySelector('[data-pc="' + k + '"]'), st0 = row0 ? row0.dataset.st : '';
+        if (DOCS[k] && ((o0 && (o0.gen || o0.doc)) || GENVU[k] || st0 === 'M' || st0 === 'E')) return apercuDoc(k, false);
+        return voirAncien(k);
       }
       modal.addEventListener('click', function (ev) {
         if (ev.target === modal || ev.target.closest('[data-fin-modal-close]')) { modal.hidden = true; return; }
@@ -21961,7 +22318,7 @@
           html += '<tr data-gar data-val="' + (assur ? 0 : g.valeur) + '"><td><b>' + esc(t.lib) + '</b><small class="fin-sm">' + esc(g.desc) + (g.pct ? ' · ' + g.pct + ' % du prêt' : '') + '</small></td>' +
             '<td>' + esc(g.garant) + '</td><td class="num">' + (assur ? '—' : fmt(g.valeur)) + '</td>' +
             '<td class="num">' + (assur ? '—' : '<input class="fin-dec" type="text" inputmode="numeric" data-gar-dec="' + i + '" value="' + (g.decote || 0) + '" aria-label="Décote en pour cent"> %') + '</td>' +
-            '<td class="num">' + (assur ? '—' : fmt(r)) + '</td><td class="num">' + (assur ? 'ne s’ajoute pas' : Math.round(r / GD.montant * 100) + ' %') + '</td><td>' + esc(g.piece) + '</td>' +
+            '<td class="num">' + (assur ? '—' : fmt(r)) + '</td><td class="num">' + (assur ? 'ne s’ajoute pas' : Math.round(r / GD.montant * 100) + ' %') + '</td><td>' + esc(g.piece) + (g.file ? ' <button class="btn btn-ghost btn-sm" type="button" data-gar-voir="' + i + '">Voir</button>' : '') + '</td>' +
             '<td><button class="btn btn-ghost btn-sm" type="button" data-gar-edit="' + i + '">Modifier</button> <button class="btn btn-ghost btn-sm" type="button" data-gar-del="' + i + '">Retirer</button></td></tr>';
         });
         garBody.innerHTML = html;
@@ -21986,6 +22343,7 @@
         fGarant.value = g ? g.garant : ''; fDesc.value = g ? g.desc : '';
         fValeur.value = g && !g.pct ? fmt(g.valeur) : ''; fPct.value = g && g.pct ? g.pct : '';
         fPiece.value = g ? g.piece : gType(fType.value).piece;
+        garFile = g && g.file ? g.file : null; majGarFile();
         fDec.value = g ? (g.decote || 0) : gType(fType.value).decote;
         garForm.hidden = false; fDesc.focus();
       }
@@ -21996,6 +22354,7 @@
         var t = gType(fType.value);
         if (!fDesc.value.trim() && !fGarant.value.trim()) { fDesc.focus(); return; }
         var g = { type: t.k, desc: fDesc.value.trim() || t.lib, garant: fGarant.value.trim(), piece: fPiece.value.trim(), valeur: 0, decote: t.kind === 'assurance' ? 0 : Math.min(100, chiffres(fDec.value)) };
+        if (garFile) g.file = garFile;
         if (t.kind === 'valeur') g.valeur = chiffres(fValeur.value);
         if (t.kind === 'pct') { g.pct = Math.min(100, chiffres(fPct.value)); g.valeur = Math.round(g.pct * GD.montant / 100); }
         if (garEdit >= 0) S.gar[garEdit] = g; else S.gar.push(g);
@@ -22003,6 +22362,7 @@
         notify('success', 'Garantie enregistrée', 'La couverture retenue par la banque est recalculée.');
       });
       garBody.addEventListener('click', function (ev) {
+        var gv = ev.target.closest('[data-gar-voir]'); if (gv) { apFichier(S.gar[parseInt(gv.dataset.garVoir, 10)].file); return; }
         var e = ev.target.closest('[data-gar-edit]'), d = ev.target.closest('[data-gar-del]');
         if (e) ouvrirForm(parseInt(e.dataset.garEdit, 10));
         if (d) { S.gar.splice(parseInt(d.dataset.garDel, 10), 1); garRender(); }
@@ -22069,6 +22429,10 @@
         if (lib) lib.textContent = 'Étape ' + (S.prog + 1) + ' · ' + STEP_LIB[STEPS[S.prog]];
         if (box && S.etat !== 'brouillon' && S.etat !== 'pret') box.hidden = true;
         garRender();
+        root.querySelectorAll('[data-fin-pf-file]').forEach(function (e) {
+          var f = S.pfFile[e.dataset.finPfFile]; e.hidden = !f;
+          e.textContent = f ? 'Fichier déposé : ' + f.name + ' (' + f.taille + ') · le ' + f.date + ' par ' + f.who : '';
+        });
       }
 
       var MOMENTS = {
@@ -22126,7 +22490,8 @@
         var m = MOMENTS[nom]; if (!m) return;
         var vide = S.vide;
         Object.keys(BASE).forEach(function (k) { S[k] = BASE[k]; });
-        S.vide = 0; S.over = {}; modal.hidden = true;
+        S.vide = 0; S.over = {}; S.refus = {}; S.pfFile = {}; modal.hidden = true; ap.hidden = true;
+        root.querySelectorAll('[data-fin-cond-file]').forEach(function (e) { e.hidden = true; e.textContent = ''; });
         Object.keys(m).forEach(function (k) { if (['askOpen', 'gar', 'voir', 'frais', 'doc'].indexOf(k) === -1) S[k] = m[k]; });
         S.gar = m.gar ? JSON.parse(JSON.stringify(GD.preset)) : []; garForm.hidden = true;
         S.tmProfil = null; doc.hidden = true;
@@ -22188,6 +22553,7 @@
         var acc = ev.target.closest('[data-fin-doc-accept]');
         if (acc) { var f = acc.closest('[data-fin-doc-fill]'); f.querySelector('[data-fin-doc-ta]').value = draftTexte(f); docMaj(); return; }
         if (ev.target.closest('[data-fin-doc-close]')) { doc.hidden = true; return; }
+        if (ev.target.closest('[data-fin-doc-voir]')) { apercuDoc(docCle(), true); return; }
         var dl = ev.target.closest('[data-fin-doc-dl]');
         if (dl) { notify('success', 'Téléchargement', nomDoc(docCle(), dl.dataset.finDocDl === 'word' ? 'docx' : 'pdf') + ' téléchargé' + (dl.dataset.finDocDl === 'word' ? ' : modifiable dans Word.' : '.')); return; }
         var nv = ev.target.closest('[data-fin-doc-nav]');
@@ -22254,7 +22620,6 @@
         notify('success', 'Projet enregistré', 'Le coût et le montant demandé sont à jour.');
       });
       root.querySelector('[data-fin-type]').addEventListener('change', function (e) { S.type = e.target.value; appliquer(); });
-      root.querySelector('[data-fin-add-pf]').addEventListener('click', function () { S.pf2 = 1; appliquer(); notify('success', 'Pro forma ajouté', 'Le coût du projet et le montant demandé sont recalculés.'); });
       iApport.addEventListener('input', recalcProjet);
       root.querySelectorAll('[data-fin-frais-cb]').forEach(function (c) { c.addEventListener('change', recalcProjet); });
       iCout.addEventListener('input', recalcProjet);
@@ -22263,16 +22628,10 @@
 
       // pièces et gestes à effet immédiat (délégation : la liste est reconstruite à chaque changement)
       root.addEventListener('click', function (ev) {
+        var up = ev.target.closest('[data-fin-upload]');
+        if (up) { var fi = root.querySelector('input[data-fin-up="' + up.dataset.finUpload + '"]'); if (fi) fi.click(); return; }
         var dl = ev.target.closest('[data-fin-dl-row]');
         if (dl) { notify('success', 'Téléchargement', nomDoc(dl.dataset.finDlRow, 'docx') + ' téléchargé : modifiable dans Word.'); return; }
-        var rd = ev.target.closest('[data-fin-redepot]');
-        if (rd) {
-          var kk = rd.dataset.finRedepot, who = estAdmin() ? 'Awa Diallo' : 'Kofi Santos', prev = S.over[kk];
-          var h = (prev && prev.hist) ? prev.hist.slice() : ['Version générée par Prospera le ' + DATA.dates.demande];
-          h.push('Version modifiée déposée à l’instant par ' + who + ' : elle remplace la version générée');
-          S.over[kk] = { st: 'F', src: 'Version modifiée déposée à l’instant par ' + who + ' · remplace la version générée (les deux restent dans l’historique)', act: null, hist: h, doc: 1 };
-          appliquer(); notify('success', 'Version modifiée déposée', 'Elle remplace la version générée ; les deux restent dans l’historique.'); return;
-        }
         var vb = ev.target.closest('[data-fin-voir]'); if (vb) { voir(vb.dataset.finVoir); return; }
         var tb = ev.target.closest('[data-fin-bk-tab]'); if (tb) { S.bank = tb.dataset.finBkTab; appliquer(); return; }
         var b = ev.target.closest('[data-fin-act]'); if (!b) return;
@@ -22327,9 +22686,6 @@
       // suivi
       root.querySelectorAll('[data-fin-remettre]').forEach(function (b) { b.addEventListener('click', function () {
         S.suivi = 'remis'; S.etat = 'remis'; appliquer(); notify('success', 'Remise enregistrée', 'Date et interlocuteur sont gardés dans le suivi de la banque.');
-      }); });
-      root.querySelectorAll('[data-fin-comp]').forEach(function (b) { b.addEventListener('click', function () {
-        b.hidden = true; b.parentNode.querySelector('[data-fin-comp-etat]').textContent = ' Fournis : la banque en est informée.';
       }); });
       root.querySelectorAll('[data-fin-choisir]').forEach(function (b) { b.addEventListener('click', function () {
         S.suivi = 'conditions'; S.etat = 'accorde'; appliquer(); setCond(0);
