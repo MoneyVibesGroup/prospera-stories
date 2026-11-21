@@ -5,6 +5,58 @@
 
 ## État
 
+### Le parcours réel du dossier de financement (2026-11-21) — fiches écrites, PR de docs à présenter à l'utilisateur
+
+- **Source** : la maquette de FE-140, **validée par l'utilisateur le 21/11** (PR #741, « identique à ce qui se passe dans la vraie
+  vie pour un expert-comptable »). Chaque bloc de la maquette dit en note ce que le backend sert (1083, 1084) et ce qui vient.
+  Ces notes sont devenues des stories.
+- **Décisions de l'utilisateur (20-21/11), inscrites comme telles dans les fiches** : pas de consentement BIC ; pièces selon le
+  **profil** (société établie, jeune société) et la **relation** avec chaque banque (déjà client à compte mouvementé, nouveau
+  client) ; pro forma **obligatoire et bloquant** pour un matériel, **TTC** ; garanties **saisies** par le cabinet ; plan de
+  trésorerie mensuel **exigé** pour une jeune société ; plan d'affaires et note **pré-remplis, en Word, redéposés** ; textes
+  **sans IA** (option IA à décider par l'utilisateur : PRD assistant IA, FR-IA07 et FR-IA09) ; **partout où c'est déposer, un
+  vrai téléversement ; tout fichier déposé ou généré se voit dans l'application avant tout téléchargement** (21/11).
+- **Écrit (docs seulement, aucun code)** : STORY-1104 → 1111 (`stories/`), FE-152 → 157 (`frontend-stories/`) ; amendées « le 21/11 » :
+  STORY-1085 et 1086 (**elles n'avaient pas de fiche : l'amendement est dans leur bloc de `epics-services-cabinet-2026-11-18.md`**),
+  AP-50 (idem), FE-140 (portée), FE-142 (redécoupée, 5 → 3 pts), PRD §4.1 (FR-1b, 1c, 1d, 1e, 5b, 6b, amendements de FR-1, FR-2,
+  FR-5, FR-17) ; table de couverture des épics.
+- **Ids** : STORY-1104 → 1111 et FE-152 → 157 vérifiés libres sur toutes les branches distantes et dans les PR ouvertes (#730 tient
+  1101 → 1102). `story_id_high_water_mark` : **STORY-1111**. Non slottées.
+- **Le contrat commun du dépôt et de l'aperçu** (STORY-1104, D-1104-9) : un seul chemin pour tout fichier (`POST …/documents`,
+  `GET …/apercu`, `GET …/fichier`), réutilisé par 1085, 1086, 1106, 1107, 1108, 1109, 1110. **Rien n'est livré** : il faut d'abord la demande
+  à C ci-dessous.
+- **Écarts avec la maquette, à corriger au prochain passage sur le prototype** : (1) « +150 % du CA 2025 » doit se lire « 150 % du CA
+  2025 » (24 000 000 sur 16 000 000) ; (2) les brouillons chiffrés du projet (24 000 000 / 32 000 000 / 34 000 000 ; 55 % ; 3 000 000 /
+  4 200 000 / 4 400 000) sont des valeurs de démonstration : le serveur n'invente aucun chiffre (STORY-1111, D-1111-1) ; (3) deux
+  jeux de chiffres coexistent dans les tableaux de la maquette (couverture 1,92 / 1,62 / 1,65 pour la projection « Avec le camion
+  (version 2) » déjà dessinée, 1,76 / 1,56 / 1,65 pour celle créée depuis l'historique) : **la référence des stories est le second**.
+- **Nommé, sans fiche, pour plus tard** : le **lien de dépôt** envoyé au client pour qu'il téléverse lui-même ses pièces ; la **mission
+  facturable du montage de dossier** (module missions, EPIC-268) ; la **lecture OCR du pro forma** ; les **alertes d'expiration** des
+  pièces (pro forma, attestations OTR et CNSS) ; les documents à générer que la maquette montre et que 1109 ne couvre pas (déclaration
+  de patrimoine de la caution, modèle de CV du promoteur, formulaires d'ouverture de compte et de connaissance client de la banque,
+  bilan d'ouverture d'une jeune société) ; l'**enregistrement de l'emprunt décaissé** comme dette existante des dossiers suivants.
+- **Ordre de réalisation proposé** (dépendances : AP-50 avant 1085 ; 1104 avant 1106, 1110 et 1111 ; 1105 avant 1107 ; 1085 avant 1086) :
+
+  | # | Story | Points | Dépend de | Écran qui la sert |
+  |:--:|---|:--:|---|---|
+  | 1 | AP-50 amendée (référentiel étendu) | 8 (+3) | — | console |
+  | 2 | STORY-1104 le projet financé et le contrat des documents | 5 | demande à C (dépôt, aperçu) | FE-152 |
+  | 3 | STORY-1105 plusieurs banques, relation, profil | 5 | 1083 | FE-152 |
+  | 4 | STORY-1106 les garanties | 5 | 1104 | FE-154 |
+  | 5 | STORY-1110 la trésorerie mensuelle | 5 | 1104, 1084 | FE-157 |
+  | 6 | STORY-1111 les aides à la décision | 13 | 1104, 1084, 071 | FE-157 |
+  | 7 | STORY-1085 amendée (exigences par profil et relation) | 8 (+3) | AP-50, 1104, 1105 ; lit 1109, 1110, 1111 | FE-153 |
+  | 8 | STORY-1109 les documents générés | 13 | 1104, 1105, 1106, 1110, 1111 ; demande à C (rendu) | FE-156 |
+  | 9 | STORY-1086 amendée (un dossier par banque, synthèse) | 13 (+5) | 1085, 1106, 1109, 1110, 1111 | FE-142 (3 pts) |
+  | 10 | STORY-1107 le suivi banque par banque | 8 | 1105, 1086 | FE-155 |
+  | 11 | STORY-1108 conditions et décaissement | 3 | 1107 | FE-155 |
+
+  Écrans : FE-140 (5, liste et chiffres) d'abord ; FE-152 (5) après 1104 et 1105 ; FE-154 (3) après 1106 ; FE-157 (8) après 1110 et 1111 ;
+  FE-153 (8) après 1085 ; FE-156 (8) après 1109 ; FE-142 (3) après 1086 ; FE-155 (8) après 1108.
+  **Points écrits ou ajoutés ce 21/11 : 106** (8 stories neuves 57 + 6 écrans neufs 40 + amendements : AP-50 +3, 1085 +3, 1086 +5,
+  FE-142 −2). **Reste à construire pour le parcours complet : 134** (backend 86 : 57 neuves + AP-50 8 + 1085 8 + 1086 13 ; écrans 48 :
+  40 neufs + FE-140 5 + FE-142 3). Estimation de A, à relire au prochain plan.
+
 ### Lot 4 (ordre validé le 2026-11-18) — en attente du plan
 
 - **Réponses de l'utilisateur (2026-11-18)** à l'analyse des journaux des lots 1 à 3 :
@@ -513,7 +565,27 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   (`bilan-service`, `read-models/guards/lecture-seule.ts` ; même patron dans balance) : les `POST …/dry-run` sont
   refusés en `403 ABONNEMENT_EXPIRE` alors qu'ils n'écrivent rien. Vu par le relevé du front (FE-069 A10).
 
+- **→ C (2026-11-21) : `document-service` pour le dossier de financement** (STORY-1104 D-1104-9 et STORY-1109 D-1109-7), sans urgence
+  avant que le lot soit slotté :
+  1. un **dépôt rattaché au dossier client** (multipart, flux, `POST /dossiers/{dossierId}/pieces` à prolonger) avec types PDF, JPG,
+     PNG, DOCX, XLSX et **20 Mo** au plus (à confirmer), refus nommés (`FORMAT_NON_ACCEPTE`, `FICHIER_TROP_VOLUMINEUX`,
+     `FICHIER_ILLISIBLE`), aucun fichier à moitié rangé si l'envoi est coupé ;
+  2. un **aperçu** : PDF et images tels quels, **DOCX et XLSX convertis en PDF**, URL signée de courte durée ;
+  3. un **rendu** DOCX et PDF d'un contenu structuré (sections, blocs, tableaux) pour les documents générés.
+  Aucun id de story n'est réservé par A : C le prend dans sa plage.
+
 ## Questions à l'utilisateur ou au PO
+
+- **Parcours réel du dossier de financement (2026-11-21), avec le choix retenu par défaut** (aucune ne bloque l'écriture des fiches) :
+  1. **Types de fichier et taille** : PDF, JPG, PNG, DOCX, XLSX, **20 Mo** par fichier (D-1104-9). Défaut : ceux-là.
+  2. **Brouillons chiffrés du projet** (CA du camion, marge, charges) : la maquette en montre ; le serveur n'invente aucun chiffre et
+     les tire d'un « modèle de projet » du référentiel AP-50 quand il existe (D-1111-1). Défaut : saisie par le cabinet, sinon rien.
+  3. **Ordre générer, figer, marquer prêt** (celui de la maquette) : il amende l'AC-5 de 1086 (« générer exige `PRET` ») ; figer
+     exige les exigences bloquantes remplies, et une modification après le figement périme la version (1086, AC-7). Défaut : l'ordre de la maquette.
+  4. **Valeurs de démonstration à faire confirmer par une banque avant la première vente** : taux indicatif 12 %, assurance 0,30 % par
+     an, décotes par défaut (30, 40, 50, 0, 28 %), repères d'apport et de couverture, seuils de crédibilité. Défaut : celles des fiches.
+  5. **Les documents que la maquette montre et que 1109 ne couvre pas** (déclaration de patrimoine, modèle de CV, formulaires de la
+     banque, bilan d'ouverture) : fiches maintenant ou plus tard ? Défaut : plus tard (nommés).
 
 - **Réponses du 2026-11-18** : voir « État », lot 4 (D-923-1 renversée ; D-928-3 remplacée par STORY-1082 ; D-926-2,
   D-926-6 et la lecture du fichier déposé de 300 confirmées). **Restent retenues par défaut, sans réponse** : D-923-2,
