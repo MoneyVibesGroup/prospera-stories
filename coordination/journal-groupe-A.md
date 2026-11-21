@@ -5,10 +5,11 @@
 
 ## État
 
-### Le plan comptable propre (2026-11-21) — STORY-1094 ✅, STORY-1095 en cours
+### Le plan comptable propre (2026-11-21) — STORY-1094 ✅, STORY-1095 ✅
 
 - ✅ **STORY-1094 DONE (21/11)** : comptabilite-service **#13** (`a98ec56` sur `dev`), contrat stories **#745**. Unitaires 889/889 (Node 24), `test:socle` 273/273 (29 neufs), mutation 18/18, gate de câblage grp-a vert (healthy, routes neuves 401), verrou Docker rendu. Décisions D-1094-1 → 8 dans la fiche (plan publié = donnée générée ; `TENANT_ADMIN` sans droit neuf ; classe 9 saisissable ; `BQ1` accepté par les écritures). Demande à B : recopier le manifeste au catalogue.
-- **Suite : STORY-1095** (le plan propre d'un client), même service, contrat annoncé ci-dessous ; STORY-1096 (import Sage) reste à faire.
+- ✅ **STORY-1095 DONE (21/11)** : comptabilite-service **#14** (`0d93c5d` sur `dev`), contrat stories **#746**. Unitaires 910 (Node 24), `test:socle` 289/289 (16 neufs), mutation 10/10 (+3 au socle), gate de câblage grp-a vert, verrou rendu. Décisions D-1095-1 → 7 dans la fiche (responsable lu chez dossier-service ; `@AutoriseParLeService` ; famille du dossier ; archivé en lecture seule ; masque réservé aux comptes du modèle).
+- **Suite** : STORY-1096 (import du plan de Sage 100, aperçu puis enregistrement) — dépend d'un vrai export fourni par l'utilisateur pour AC-4 ; FE-148 (l'écran) est dessiné par une autre session.
 
 ### Le parcours réel du dossier de financement (2026-11-21) — fiches écrites, PR de docs à présenter à l'utilisateur
 
