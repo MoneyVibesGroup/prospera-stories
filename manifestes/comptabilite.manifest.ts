@@ -34,6 +34,13 @@
 //   à lettrer, `comptabilite:dossier:consulter` (STORY-969, aucun droit neuf). Clore et rouvrir un exercice exigent
 //   `comptabilite:exercice:cloturer` (à `CAB_ASSOCIE` seul) ; lire l'état de clôture et la centralisation,
 //   `comptabilite:dossier:consulter` (STORY-970, aucun droit neuf).
+// - Plan comptable PROPRE du cabinet (STORY-1094) : le cabinet définit SES comptes (subdivisions d'une racine du plan
+//   publié : `521100` sous `521`, jamais un compte sans racine) et SES journaux (`ACHATS`, `VENTES`, `TRESORERIE`, `OD`),
+//   au niveau de l'organisation (`/api/v1/cabinet/plan-comptable/...`) ; ils sont proposés dans tous les dossiers dont le
+//   référentiel porte leur racine (`GET .../exercices/{exerciceId}/plan-comptable`). Lecture : tout membre. Écriture :
+//   le seul `TENANT_ADMIN` (403 `TENANT_ADMIN_REQUIS`), sans droit de tenant neuf. Un compte ou un journal mouvementé se
+//   désactive, il ne se supprime pas. Les écritures (brouillard, validation) refusent un compte inconnu, sans racine ou
+//   désactivé (`COMPTE_INCONNU`, `COMPTE_SANS_RACINE`, `COMPTE_DESACTIVE`).
 // - Grand livre (STORY-966) : calculé à la volée sur les seules écritures VALIDÉES (contre-passations comprises, jamais
 //   un brouillard), lu dans un instantané MongoDB ; par compte et par période (bornes inclusives, dans l'exercice).
 // - Balance (STORY-967) : dérivée du grand livre (mouvements hors à-nouveaux, soldes de clôture), équilibrée, refusée
@@ -175,6 +182,10 @@ export const MANIFESTE_COMPTABILITE = {
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/lettrages/{lettrageId}', // STORY-969 : un lettrage
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/cloture', // STORY-970 : l'état de clôture, l'historique
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/centralisation', // STORY-970 : par journal et par mois
+    'GET /api/v1/cabinet/plan-comptable/comptes', // STORY-1094 : les comptes propres du cabinet
+    'GET /api/v1/cabinet/plan-comptable/journaux', // STORY-1094 : les journaux propres du cabinet
+    'GET /api/v1/cabinet/plan-comptable/actes', // STORY-1094 : le journal d'audit du plan propre
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/plan-comptable', // STORY-1094 : le plan servi au dossier
   ],
 
   // C13, point 7 (chemins vus par le service). Servis depuis STORY-975, sous l'identité du moteur seule : `import`
