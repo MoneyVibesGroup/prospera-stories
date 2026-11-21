@@ -1081,6 +1081,8 @@ reserved_ranges:
       mutation 18/18, gate de câblage vert ; décisions D-1094-1 → 8 dans la fiche.
       ✅ STORY-1095 DONE (2026-11-21) : comptabilite-service #14 (`0d93c5d` sur dev), contrat stories #746 ; unitaires 910, socle 289/289,
       mutation 10/10 + 3/3 au socle, gate de câblage vert ; décisions D-1095-1 → 7 dans la fiche.
+      ✅ STORY-1096 DONE (2026-11-21, AC-4 à rejouer sur un export réel) : comptabilite-service #15 (`2f358dc` sur dev), contrat stories #749 ;
+      unitaires 938, socle 308/308, mutation 10/10 + 5/5 au socle, gate de câblage vert ; décisions D-1096-1 → 8 dans la fiche.
   - range: "STORY-1097 → STORY-1099"
     status: "RÉSERVÉ"
     owner: "À placer au prochain plan — des factures aux écritures : 1097 facture → écriture proposée en partie double (achats et ventes, système normal, comptabilite-service) ; 1098 mémoire des choix du cabinet pour les écritures ; 1099 mémoire des choix pour les cahiers (balance-service). Écrans : FE-149, FE-150."

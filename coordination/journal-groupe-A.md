@@ -5,10 +5,10 @@
 
 ## État
 
-### Le plan comptable propre (2026-11-21) — STORY-1094 ✅, STORY-1095 ✅
+### Le plan comptable propre (2026-11-21) — STORY-1094 ✅, 1095 ✅, 1096 ✅
 
 - ✅ **STORY-1094 DONE (21/11)** : comptabilite-service **#13** (`a98ec56` sur `dev`), contrat stories **#745**. Unitaires 889/889 (Node 24), `test:socle` 273/273 (29 neufs), mutation 18/18, gate de câblage grp-a vert (healthy, routes neuves 401), verrou Docker rendu. Décisions D-1094-1 → 8 dans la fiche (plan publié = donnée générée ; `TENANT_ADMIN` sans droit neuf ; classe 9 saisissable ; `BQ1` accepté par les écritures). Demande à B : recopier le manifeste au catalogue.
-- **STORY-1096 en cours (21/11)** : contrat annoncé ci-dessous ; décisions FE-148 n° 4 (collectifs non recréés) et n° 5 (AC-4 « à rejouer sur un export réel ») inscrites dans la fiche (D-1096-1, 2).
+- ✅ **STORY-1096 DONE (21/11), AC-4 à rejouer sur un export réel** : comptabilite-service **#15** (`2f358dc` sur `dev`), contrat stories **#749**. Unitaires 938, `test:socle` 308/308 (19 neufs), mutation 10/10 + 5/5 au socle, gate de câblage grp-a vert, verrou rendu. Décisions D-1096-1 → 8 dans la fiche (collectifs non recréés ; un compte du plan est « déjà connu » ; aperçu puis enregistrement par version et empreinte ; un acte `PLAN_IMPORTE`). **Reste à l'utilisateur** : fournir un vrai export Sage 100 anonymisé pour rejouer l'AC-4 (surtout les mots des journaux et l'encodage). FE-148 (l'écran) peut brancher les trois stories.
 - ✅ **STORY-1095 DONE (21/11)** : comptabilite-service **#14** (`0d93c5d` sur `dev`), contrat stories **#746**. Unitaires 910 (Node 24), `test:socle` 289/289 (16 neufs), mutation 10/10 (+3 au socle), gate de câblage grp-a vert, verrou rendu. Décisions D-1095-1 → 7 dans la fiche (responsable lu chez dossier-service ; `@AutoriseParLeService` ; famille du dossier ; archivé en lecture seule ; masque réservé aux comptes du modèle).
 - **Suite** : STORY-1096 (import du plan de Sage 100, aperçu puis enregistrement) — dépend d'un vrai export fourni par l'utilisateur pour AC-4 ; FE-148 (l'écran) est dessiné par une autre session.
 
