@@ -23384,7 +23384,7 @@
         if (e !== 'csv') { info.demo = true; info.texte = D.sample; return appercu(info); }
         f.arrayBuffer().then(function (buf) {
           var txt = new TextDecoder('utf-8').decode(buf);
-          if (txt.indexOf('�') !== -1) txt = new TextDecoder('windows-1252').decode(buf);
+          if (txt.indexOf('\uFFFD') !== -1) txt = new TextDecoder('windows-1252').decode(buf);
           info.texte = txt; appercu(info);
         }, function () { refuserFichier('Ce fichier n’a pas pu être lu. Réexportez-le depuis Sage 100.'); });
       }
