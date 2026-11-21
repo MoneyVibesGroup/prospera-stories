@@ -1077,6 +1077,8 @@ reserved_ranges:
       Demande de l'utilisateur du 2026-11-18 (« pour la comptabilité propre, il peut le faire en fonction du cabinet,
       par client aussi, ou bien importer celui de Sage »). Règle retenue par A : un compte propre est une SUBDIVISION
       d'une racine du référentiel (la liasse reste juste). Fiches écrites par A ; NON SLOTTÉES.
+      ✅ STORY-1094 DONE (2026-11-21) : comptabilite-service #13 (`a98ec56` sur dev), contrat stories #745 ; unitaires 889, socle 273/273,
+      mutation 18/18, gate de câblage vert ; décisions D-1094-1 → 8 dans la fiche.
   - range: "STORY-1097 → STORY-1099"
     status: "RÉSERVÉ"
     owner: "À placer au prochain plan — des factures aux écritures : 1097 facture → écriture proposée en partie double (achats et ventes, système normal, comptabilite-service) ; 1098 mémoire des choix du cabinet pour les écritures ; 1099 mémoire des choix pour les cahiers (balance-service). Écrans : FE-149, FE-150."

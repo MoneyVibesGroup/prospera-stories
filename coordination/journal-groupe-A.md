@@ -5,6 +5,11 @@
 
 ## État
 
+### Le plan comptable propre (2026-11-21) — STORY-1094 ✅, STORY-1095 en cours
+
+- ✅ **STORY-1094 DONE (21/11)** : comptabilite-service **#13** (`a98ec56` sur `dev`), contrat stories **#745**. Unitaires 889/889 (Node 24), `test:socle` 273/273 (29 neufs), mutation 18/18, gate de câblage grp-a vert (healthy, routes neuves 401), verrou Docker rendu. Décisions D-1094-1 → 8 dans la fiche (plan publié = donnée générée ; `TENANT_ADMIN` sans droit neuf ; classe 9 saisissable ; `BQ1` accepté par les écritures). Demande à B : recopier le manifeste au catalogue.
+- **Suite : STORY-1095** (le plan propre d'un client), même service, contrat annoncé ci-dessous ; STORY-1096 (import Sage) reste à faire.
+
 ### Le parcours réel du dossier de financement (2026-11-21) — fiches écrites, PR de docs à présenter à l'utilisateur
 
 - **Source** : la maquette de FE-140, **validée par l'utilisateur le 21/11** (PR #741, « identique à ce qui se passe dans la vraie
@@ -547,6 +552,13 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## ⚠ Contrats
 
+- **2026-11-21 (STORY-1095), AVANT la fusion du code** : `prospera-comptabilite-service` ajoute le **plan propre d'un dossier**, qui **s'ajoute** au modèle du cabinet (jamais copié). **Ajouts seuls**.
+  - **Routes** sous `/api/v1/dossiers/{dossierId}/plan-comptable` : `GET /comptes`, `POST /comptes` `{ numero, libelle }` → 201, `PATCH /comptes/{numero}` `{ libelle }`, `POST /comptes/{numero}/desactivation`, `DELETE /comptes/{numero}` → 204 ; mêmes gestes pour `/journaux` (`{ code, libelle, type, compteDeTresorerie? }`) ; **masquer** un compte du modèle du cabinet pour ce dossier seul : `GET /masques`, `POST /masques` `{ numero }` → 201 (rejouable), `DELETE /masques/{numero}` → 204 ; `GET /actes` : le **journal du dossier** (acte, objet, auteur, date, version du plan du dossier). Les racines d'un compte du dossier se calculent sur les référentiels de la famille du dossier (SYSCOHADA : SN et SMT).
+  - **Droits** : lecture : tout membre dont la portée couvre le dossier (contributeurs compris) ; écriture : le `TENANT_ADMIN` du cabinet **ou le responsable du dossier** (`responsableUserId` lu chez dossier-service), sinon 403 `RESPONSABLE_OU_ADMINISTRATEUR_REQUIS` ; dossier archivé : 409 `DOSSIER_ARCHIVE` (écriture seulement). Aucun droit de tenant neuf.
+  - **Plan servi** (`GET …/exercices/{e}/plan-comptable`, ajout) : ordre référentiel, puis cabinet, puis dossier ; `origine` reçoit la valeur **`DOSSIER`** ; chaque compte porte `masque` (booléen) ; un compte masqué n'est plus servi par défaut (`?etat=tous` le rend avec `masque: true`).
+  - **Refus nommés** : 409 `COMPTE_DU_MODELE_DU_CABINET` / `JOURNAL_DU_MODELE_DU_CABINET` (`details` : l'élément existant et son libellé), 409 `COMPTE_DEJA_DU_DOSSIER` / `JOURNAL_DEJA_DU_DOSSIER`, 404 `COMPTE_DU_DOSSIER_INTROUVABLE` / `JOURNAL_DU_DOSSIER_INTROUVABLE`, 409 `COMPTE_MOUVEMENTE` / `JOURNAL_MOUVEMENTE` (dans ce dossier), 409 `MASQUE_REFUSE_COMPTE_MOUVEMENTE`, 422 `COMPTE_MASQUE` à la saisie. Côté cabinet : créer un compte ou un journal que l'un de ses dossiers porte déjà rend 409 `COMPTE_DEJA_AU_DOSSIER` / `JOURNAL_DEJA_AU_DOSSIER`.
+  - **Données** : collections `comptes_du_dossier`, `journaux_du_dossier`, `masques_du_dossier`, `plans_du_dossier` (version), `actes_du_dossier` (ajout seul), au plan d'effacement C13.
+  - **Manifeste** : quatre routes de lecture ajoutées à `routesLectureSeule` (comptes, journaux, masques et actes du dossier).
 - **2026-11-21 (STORY-1094), AVANT la fusion du code** : `prospera-comptabilite-service` (tenu par B, codé par A sur demande de l'utilisateur) ajoute le **plan comptable propre du cabinet**. **Ajouts seuls**, aucun renommage ; manifeste `comptabilite` 0.1.0 inchangé en version (4 routes de lecture ajoutées à `routesLectureSeule`, aucun droit de tenant neuf).
   - **Routes du cabinet** (organisation du jeton, jamais du chemin), sous `/api/v1/cabinet/plan-comptable` : `GET /comptes` (`?referentiel=SN|SMT|SFD-BCEAO|CIMA`, `?etat=actifs|tous`, défaut `actifs`), `POST /comptes` `{ numero, libelle }` → 201, `PATCH /comptes/{numero}` `{ libelle }`, `POST /comptes/{numero}/desactivation`, `DELETE /comptes/{numero}` → 204 ; mêmes quatre gestes pour `/journaux` (`{ code, libelle, type: ACHATS|VENTES|TRESORERIE|OD, compteDeTresorerie? }`, `PATCH` : `{ libelle, compteDeTresorerie? }`), et `GET /actes` (le journal d'audit : acte, objet, auteur, date, version du modèle). Lecture : tout membre du cabinet (portée de la garde du module). **Écriture : le seul rôle `TENANT_ADMIN`** (403 `TENANT_ADMIN_REQUIS`) ; aucun droit `comptabilite:*` neuf (D-1094-3).
   - **Vue** `CompteDuCabinet` : `{ numero, libelle, classe, racines: { <referentiel>: <racine> }, collectif: { <referentiel>: <categorie> }, actif, creeLe, creePar, modifieLe, modifiePar, version }` ; la nature (classe, collectif) est **héritée** de la racine, jamais saisie ; `sens` n'est pas servi (le plan publié n'en porte pas, D-1094-2). `JournalDuCabinet` : `{ code, libelle, type, compteDeTresorerie?, actif, … }`. Le modèle porte une **version** (`versionDuModele`) qui avance à chaque écriture.
