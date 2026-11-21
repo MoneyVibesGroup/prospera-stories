@@ -149,6 +149,13 @@
   - Tickets laissés à B : liasse rouverte relue avec `version` null ; projection des remboursements non plafonnés.
   - Le prototype cabinet a une NOUVELLE adresse (`claude.ai/artifact/9iBJj5jTd1552uNPpZDJiL`) ; la console reste `7rbu7npMzRV9QE45CZsjJZ`.
   - Suite : revue UX du prototype (interrupteur « Notes de conception » d'abord), puis lot 5 (FE-140).
+- **2026-11-21 — Financement : maquette refaite et validée, stories écrites ; lot 5 revu.**
+  - Maquette du dossier de prêt, parcours réel UEMOA en 7 étapes : validée (#741), téléversement réel et aperçus (#743).
+  - Stories : STORY-1104 → 1111, FE-152 → 157 ; 1085, 1086, AP-50, FE-140, FE-142 amendées ; PRD FR-1b → 6b (#742). Reste 134 pts.
+  - Réponses de l'utilisateur : fichiers PDF/JPG/PNG/Word/Excel (+ CSV) 20 Mo ; chiffres du projet saisis par le cabinet ;
+    générer → figer → prêt ; valeurs de démonstration configurables par banque (AP-50) ; autres documents plus tard.
+  - Consigne : « le financement après ; progresser sur le projet ». **Lot 5 revu** (`PLAN-LOT-5-2026-11-20.md`) : le plan
+    comptable propre de bout en bout, STORY-1094 → 1096 + FE-148 (maquette d'abord), 29 pts ; remplaçante FE-147.
 - **Ticket ouvert pour le groupe qui tient bilan-service** : `tickets/TICKET-BACKEND-projection-remboursements-non-plafonnes.md`.
 - ⏰ **À REPRENDRE EN FIN DE CHANTIER (consigne de l'utilisateur, 2026-11-19)** : `revue-ux-prototype-cabinet-2026-11-19.md`.
   Le prototype est utilisable sur le fond, mais pas facile : trop d'écrit, notes de conception mêlées à l'écran, jargon
