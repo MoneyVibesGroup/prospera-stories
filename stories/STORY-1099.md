@@ -1,9 +1,65 @@
 # STORY-1099 : La mémoire des choix dans les cahiers — la pièce suivante du même fournisseur reprend la catégorie déjà choisie
 
-Status: ready-for-dev — **créée le 2026-11-18** à la demande de l'utilisateur. Non slottée : à placer au prochain plan.
+Status: in-progress — **créée le 2026-11-18** à la demande de l'utilisateur. **Prise le 2026-11-23** par la session
+du groupe C (après STORY-1097 et 1098, livrées), contrat annoncé ci-dessous avant le code.
 
 **Service :** `prospera-balance-service` (cahiers, tenu par B au lot 4) · **Points :** 5
 **Pendant pour les écritures :** STORY-1098 · **Écran :** FE-150
+
+---
+
+## Contrat annoncé avant le code (2026-11-23)
+
+**Ajouts seuls** dans `prospera-balance-service` : aucun champ ni aucune route renommés ; aucun événement ; manifeste
+`balance` **inchangé** (les lectures des cahiers n'y sont pas déclarées, celles-ci non plus).
+
+### Ce qui est mémorisé, et quand
+
+- **Clé** d'une ligne : `NIF` (le NIF lu sur la pièce) ; sinon `NOM` (le fournisseur ou le tiers lu, normalisé : sans
+  accents, casse, ponctuation ni espace) ; sinon `LIBELLE` (le libellé retenu, normalisé). Par **cahier** (`RECETTES`
+  ou `DEPENSES`).
+- **Choix** : en dépenses, la **catégorie** (`categorieId` et son libellé) et le `compteCharge` **seulement s'il
+  s'écarte** de celui de la catégorie, avec le `motifSurcharge` saisi s'il y en a un ; en recettes (le cahier de
+  recettes n'a pas de catégorie), le `compteProduit`.
+- **Provenance** : `{ lotId, pieceId, ligneId, pieceRef?, choisiLe, choisiPar }`.
+- **Apprendre** : à l'application d'un lot (`POST …/pieces/ocr/{lotId}/appliquer`), chaque ligne **créée** au cahier
+  apprend, au **dossier** et au **cabinet** (la ligne de cahier est écrite par le geste du comptable : il n'y a pas
+  d'étape de brouillard). Une ligne rejetée n'apprend rien. Un nouveau choix pour la même clé remplace l'ancien.
+
+### Ce qui est suggéré
+
+- **Lecture d'un lot** (`GET …/pieces/ocr/{lotId}`) : chaque ligne pré-proposée reçoit un champ **facultatif**
+  `suggestion: { categorieId?, categorieLibelle?, compteCharge?, compteProduit?, source: { origine, memoireId,
+  pieceRef?, choisiLe, choisiPar } }`, `origine` ∈ `MEMOIRE_DOSSIER` | `MEMOIRE_CABINET`. Mémoire du dossier d'abord,
+  puis celle du cabinet ; sans mémoire, pas de `suggestion` (on ne devine pas). Rien n'est appliqué sans geste
+  (NFR-A05 inchangé).
+- **Catégories par dossier** (STORY-236) : la mémoire du cabinet ne garde que le **libellé** de la catégorie ; elle
+  suggère, dans un autre dossier, la catégorie **active** de même libellé (normalisé), sinon rien. Une catégorie
+  désactivée ou supprimée n'est jamais reproposée.
+- **Saisie à la main** : `GET /api/v1/dossiers/{dossierId}/cahiers/memoire-des-choix/suggestion?cahier=DEPENSES|RECETTES
+  &nif=&fournisseur=&libelle=` → `{ suggestion: … | null }`, mêmes règles.
+
+### Consulter et oublier
+
+| Geste | Route (sous `/api/v1`) | Rôle |
+|---|---|---|
+| La mémoire d'un dossier | `GET /dossiers/{dossierId}/cahiers/memoire-des-choix` | membre du cabinet (portée du dossier) |
+| Oublier au dossier | `DELETE /dossiers/{dossierId}/cahiers/memoire-des-choix/{memoireId}` → 204 | membre du cabinet (portée du dossier) |
+| La mémoire du cabinet | `GET /cahiers/memoire-des-choix` | membre du cabinet |
+| Oublier au cabinet | `DELETE /cahiers/memoire-des-choix/{memoireId}` → 204 | `TENANT_ADMIN` |
+| Le journal des oublis | `GET /cahiers/memoire-des-choix/actes` | membre du cabinet |
+
+Refus : 404 `MEMOIRE_INTROUVABLE` (autre dossier, autre cabinet compris). Chaque oubli écrit un acte
+`MEMOIRE_OUBLIEE` en ajout seul (AC-4). Collections neuves : `memoires_des_choix_cahiers`,
+`actes_memoire_cahiers`, cloisonnées par `orgId` (et `dossierId` au dossier), à l'effacement C13 du service.
+
+### Décisions prises au contrat (contestables)
+
+- **D-1099-1** : le cahier apprend au dossier ET au cabinet à l'application (pas d'étape de validation dans un cahier).
+- **D-1099-2** : la mémoire du cabinet relie une catégorie par son libellé, faute d'identifiant commun entre dossiers.
+- **D-1099-3** : en recettes, la mémoire porte le compte de produit (pas de catégorie de recettes).
+- **D-1099-4** : la saisie à la main reçoit sa suggestion par une route de lecture ; elle n'apprend pas (seule
+  l'application d'un lot apprend, comme le dit la fiche).
 
 ---
 

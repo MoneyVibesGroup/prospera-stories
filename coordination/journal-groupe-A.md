@@ -24,7 +24,8 @@ tout changement du manifeste `comptabilite` signalé à la session A, qui le rec
   sont pas A ; 88 muet) ; l'utilisateur a autorisé de prendre le verrou sur un poste libre ; rendu après le gate.
   **Catalogue** : l'utilisateur a demandé à la session C de recopier elle-même le manifeste 0.4.0 au catalogue cette
   fois (la 0.3.0 n'y a jamais été semée : on passe de 0.2.0 à 0.4.0).
-- ⏭ **Suite : STORY-1099** (mémoire des choix dans les cahiers, `balance-service`), contrat annoncé avant le code.
+- 🟡 **STORY-1099** (mémoire des choix dans les cahiers, `balance-service`) : contrat annoncé le 23/11 (« ⚠ Contrats »
+  et la fiche). Code sur la branche `MNV-1099`.
 - ⚠️ STORY-1101 n'est pas encore sur `main` : sa fiche est dans la PR #730, ouverte. Il faudra la fusionner avant
   d'y arriver.
 
@@ -583,6 +584,11 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 - **← B (2026-11-16) : `/moi/droits` servi pour A-919** — **close** : STORY-919 fusionnée (fiscal #51).
 
 ## ⚠ Contrats
+
+- **2026-11-23 (STORY-1099, session du groupe C), AVANT le code** : `prospera-balance-service` ajoute **la mémoire des choix dans les cahiers**. **Ajouts seuls** ; aucun événement ; manifeste `balance` inchangé. Détail : `stories/STORY-1099.md`.
+  - **Lecture d'un lot OCR** : chaque ligne pré-proposée gagne un champ **facultatif** `suggestion` (`categorieId`, `categorieLibelle`, `compteCharge`, `compteProduit`, `source` : `MEMOIRE_DOSSIER` | `MEMOIRE_CABINET`). **→ D (FE-150)** : types à régénérer ; un client qui ignore le champ ne change rien.
+  - **Routes neuves** : `GET /api/v1/dossiers/{dossierId}/cahiers/memoire-des-choix` (+ `/suggestion`), `DELETE …/{memoireId}` ; `GET /api/v1/cahiers/memoire-des-choix`, `DELETE …/{memoireId}` (`TENANT_ADMIN`), `GET /api/v1/cahiers/memoire-des-choix/actes`. Refus 404 `MEMOIRE_INTROUVABLE`.
+  - **Apprentissage** à l'application d'un lot (`…/appliquer`), au dossier et au cabinet ; collections `memoires_des_choix_cahiers`, `actes_memoire_cahiers`.
 
 - **2026-11-23 (STORY-1098, session du groupe C), AVANT le code** : `prospera-comptabilite-service` ajoute **la mémoire des choix du cabinet**. **Ajouts seuls** ; aucun droit neuf ; aucun événement. Détail : `stories/STORY-1098.md`, « Contrat annoncé avant le code ».
   - **Mémoire** à deux étages, clé `NIF` puis `NOM` puis `LIBELLE`, toujours sous l'organisation du jeton : le **dossier** apprend à l'inscription d'une facture (1097), le **cabinet** à la validation de l'écriture ; un brouillard abandonné désapprend. La proposition de 1097 la lit (dossier, puis cabinet, puis compte par défaut du tiers), avec la source `MEMOIRE_DOSSIER` | `MEMOIRE_CABINET`.
