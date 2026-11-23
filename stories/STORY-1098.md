@@ -1,7 +1,8 @@
 # STORY-1098 : La mémoire des choix du cabinet — la facture suivante du même fournisseur reprend l'écriture déjà faite
 
-Status: in-progress — **créée le 2026-11-18** à la demande de l'utilisateur. **Prise le 2026-11-23** par la session
-du groupe C (après STORY-1097, livrée : comptabilite-service #17), contrat annoncé ci-dessous avant le code.
+Status: done — **créée le 2026-11-18** à la demande de l'utilisateur. **Prise le 2026-11-23** par la session du
+groupe C (après STORY-1097), contrat annoncé avant le code (#755). **Livrée le 2026-11-23** : comptabilite-service
+**#18** (`6e4132b` sur `dev`). Voir « Livraison » ci-dessous.
 
 **Service :** `prospera-comptabilite-service` (tenu par B au lot 4) · **Points :** 8 · **Dépend de :** STORY-1097
 **Pendant pour les cahiers :** STORY-1099 · **Écran :** FE-150
@@ -77,6 +78,28 @@ elle, dans la même transaction.
   dans un autre.
 - **D-1098-4** : oublier une mémoire du cabinet est réservé au `TENANT_ADMIN` (elle sert tous les dossiers, comme le
   modèle du plan propre, D-1094-3) ; celle d'un dossier, à qui peut saisir.
+
+### Livraison (2026-11-23)
+
+- **Code** : comptabilite-service #18, fusionnée sur `dev` (`6e4132b`) : module `src/memoire/` (schéma, clé, service,
+  routes), branchements dans la validation et l'abandon des écritures (dans leurs transactions) et dans les factures
+  (suggestions à la lecture, apprentissage à l'inscription), manifeste **0.4.0**.
+- **Preuves** : unitaires sous Node 24 **1001 passés, 3 ignorés** (66 suites) ; mutation **5/5** (mémoire avant le
+  compte par défaut, tiers corrigé prioritaire, tiers mémorisé à l'achat seulement, NIF d'abord, repli sur le
+  libellé) ; `test:socle` **331/331** (suite neuve `memoire.socle-spec.ts` : AC-1 → AC-7, abandon qui désapprend et
+  rend la pièce inscriptible, oubli journalisé, oubli du cabinet réservé à l'administrateur, deux cabinets qui suivent
+  le même NIF) ; gate de câblage `grp-c` : service `healthy`, deux contrôleurs montés, cinq routes neuves en 401,
+  OpenAPI publiée. Verrou Docker pris avec l'accord de l'utilisateur (session A injoignable), rendu.
+
+### Décisions prises au code
+
+- **D-1098-5** : la clé et le choix appris sont gardés **sur la pièce du lot** (`inscription.apprentissage`) : la
+  validation y lit ce qui remonte au cabinet, et l'abandon les efface avec l'inscription. Une mémoire du dossier
+  remplacée entre-temps n'empêche donc pas son écriture validée de remonter.
+- **D-1098-6** : la TVA `FACTUREE` (vente) est mémorisée mais ne se repropose pas comme traitement : elle est fixée par
+  le sens.
+- **D-1098-7** : le tiers mémorisé n'est proposé que si ni le NIF ni le nom ne retrouvent le tiers, jamais sur un tiers
+  ambigu, jamais à la place d'un tiers corrigé, et seulement s'il est encore un tiers du dossier de la bonne catégorie.
 
 ---
 

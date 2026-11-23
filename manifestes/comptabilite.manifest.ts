@@ -95,7 +95,8 @@ export const MANIFESTE_COMPTABILITE = {
   // 0.2.0 (2026-11-23, FE-148) : les huit routes de lecture du plan comptable propre (STORY-1094, 1095). Une version
   // publiée ne change pas (STORY-934) : la 0.1.0 semée sans elles reste ce qu'elle était.
   // 0.3.0 (2026-11-23, STORY-1097) : les deux routes de lecture des lots de factures (factures/lots, factures/lots/{lotId}).
-  version: '0.3.0',
+  // 0.4.0 (2026-11-23, STORY-1098) : les trois routes de lecture de la mémoire des choix.
+  version: '0.4.0',
 
   // La comptabilité est une source : elle n'a besoin d'aucun autre module pour enregistrer. La balance qu'elle
   // publie (STORY-967) est ingérée par `balance` si `balance` est installé (origine `comptabilite` du hub, A-921).
@@ -198,6 +199,9 @@ export const MANIFESTE_COMPTABILITE = {
     'GET /api/v1/dossiers/{dossierId}/plan-comptable/actes', // STORY-1095 : le journal du dossier
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/factures/lots', // STORY-1097 : les lots de factures
     'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/factures/lots/{lotId}', // STORY-1097 : un lot et ses propositions
+    'GET /api/v1/dossiers/{dossierId}/memoire-des-choix', // STORY-1098 : la mémoire des choix du dossier
+    'GET /api/v1/cabinet/memoire-des-choix', // STORY-1098 : la mémoire des choix du cabinet
+    'GET /api/v1/cabinet/memoire-des-choix/actes', // STORY-1098 : le journal des oublis
   ],
 
   // C13, point 7 (chemins vus par le service). Servis depuis STORY-975, sous l'identité du moteur seule : `import`
