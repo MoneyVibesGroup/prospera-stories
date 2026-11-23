@@ -1,9 +1,82 @@
 # STORY-1098 : La mémoire des choix du cabinet — la facture suivante du même fournisseur reprend l'écriture déjà faite
 
-Status: ready-for-dev — **créée le 2026-11-18** à la demande de l'utilisateur. Non slottée : à placer au prochain plan.
+Status: in-progress — **créée le 2026-11-18** à la demande de l'utilisateur. **Prise le 2026-11-23** par la session
+du groupe C (après STORY-1097, livrée : comptabilite-service #17), contrat annoncé ci-dessous avant le code.
 
 **Service :** `prospera-comptabilite-service` (tenu par B au lot 4) · **Points :** 8 · **Dépend de :** STORY-1097
 **Pendant pour les cahiers :** STORY-1099 · **Écran :** FE-150
+
+---
+
+## Contrat annoncé avant le code (2026-11-23)
+
+**Ajouts seuls** dans `prospera-comptabilite-service` ; aucun droit de tenant neuf ; aucun événement Kafka.
+
+### La clé, le choix, la provenance
+
+- **Clé** d'une facture : `{ type, valeur }`, dans cet ordre : `NIF` (le NIF lu, majuscules et chiffres) ; sinon `NOM`
+  (le fournisseur lu, normalisé : sans accents, casse, ponctuation ni espace) ; sinon `LIBELLE` (le libellé corrigé par
+  le comptable, normalisé). Sans aucun des trois, rien n'est appris. À la vente, l'OCR ne lit que l'émetteur (la société
+  du client du cabinet) : la clé est donc celle de **ses ventes** (D-1098-1).
+- **Choix** retenu : `compte` (charge ou produit), `tva` (`RECUPERABLE` | `NON_RECUPERABLE` | `FACTUREE`),
+  `compteDeTva`, `journal`, et, au niveau du dossier et à l'achat seulement, `tiersId`.
+- **Provenance** : `{ numeroFacture?, pieceId, lotId, ecritureId, choisiLe, choisiPar }`.
+
+### Deux étages, toujours cloisonnés par l'organisation du jeton
+
+| Étage | Clé d'unicité | Apprend quand | Oublie quand |
+|---|---|---|---|
+| **Dossier** | cabinet, dossier, sens, clé | la facture est **inscrite** au brouillard (STORY-1097) | le brouillard né d'elle est **abandonné**, ou l'oubli est demandé |
+| **Cabinet** | cabinet, référentiel, sens, clé | l'écriture née de la facture est **validée** (seuls les choix validés remontent) | l'oubli est demandé |
+
+Un nouveau choix pour la même clé **remplace** l'ancien (la dernière décision fait foi). Aucune mémoire « plateforme » :
+la clé contient toujours `organisationId` ; un autre cabinet ne lit jamais rien (AC-6, AC-7).
+
+### La proposition (STORY-1097) lit la mémoire
+
+Ordre : mémoire du **dossier**, puis mémoire du **cabinet** (même référentiel), puis compte par défaut du tiers, puis
+rien. La source dit d'où vient la valeur : `{ origine: "MEMOIRE_DOSSIER" | "MEMOIRE_CABINET", memoireId, pieceRef,
+choisiLe, choisiPar }`. La mémoire propose `compte`, `tva`, `journal` et, au dossier, le tiers (quand ni le NIF ni le nom
+ne le retrouvent). Un compte mémorisé désactivé, masqué ou absent du référentiel du dossier est **écarté et dit**
+(`COMPTE_A_CHOISIR`, `details.ecarte`, déjà servi par 1097) ; un journal mémorisé qui n'est plus admis cède la place au
+journal du plan.
+
+### Routes (sous `/api/v1`)
+
+| Geste | Route | Droit |
+|---|---|---|
+| Consulter la mémoire d'un dossier | `GET /dossiers/{dossierId}/memoire-des-choix` | tout membre dont la portée couvre le dossier |
+| Oublier une mémoire du dossier | `DELETE /dossiers/{dossierId}/memoire-des-choix/{memoireId}` → 204 | `comptabilite:ecriture:saisir` |
+| Consulter la mémoire du cabinet | `GET /cabinet/memoire-des-choix` (`?referentiel=`) | tout membre du cabinet |
+| Oublier une mémoire du cabinet | `DELETE /cabinet/memoire-des-choix/{memoireId}` → 204 | `TENANT_ADMIN` (403 `TENANT_ADMIN_REQUIS`) |
+| Le journal des oublis | `GET /cabinet/memoire-des-choix/actes` | tout membre du cabinet |
+
+Vue : `{ memoireId, niveau, dossierId?, referentiel, sens, cle: { type, valeur }, choix, provenance }`. Refus : 404
+`MEMOIRE_INTROUVABLE` (autre dossier, autre cabinet compris), 400 `IDENTIFIANT_MALFORME`. Chaque oubli écrit un acte
+`MEMOIRE_OUBLIEE` (`motif` : `GESTE` ou `ABANDON`, la mémoire oubliée, l'auteur, la date), en ajout seul (AC-4).
+
+### Correction de STORY-1097, prise ici
+
+Un brouillard né d'une facture puis **abandonné** rendait la pièce « inscrite » pour toujours. Désormais l'abandon
+retire l'inscription de la pièce dans son lot (elle redevient inscriptible) et oublie la mémoire du dossier apprise par
+elle, dans la même transaction.
+
+### Données et manifeste
+
+- Collections neuves `memoires_des_choix` et `actes_de_la_memoire` (ajout seul), au plan d'effacement C13.
+- Manifeste `comptabilite` **0.4.0** : trois routes de lecture ajoutées à `routesLectureSeule`. **→ session A : à
+  recopier au catalogue après la fusion du code.**
+
+### Décisions prises au contrat (contestables)
+
+- **D-1098-1** : à la vente, la clé est l'émetteur (la société du client) : la mémoire propose le compte de produit, la
+  TVA et le journal de ses ventes, jamais le client (non lu, à choisir).
+- **D-1098-2** : la mémoire du dossier apprend à l'**inscription** (« ce que le client rentre qui compte ») ; celle du
+  cabinet à la **validation** de l'écriture ; un brouillard abandonné désapprend.
+- **D-1098-3** : le tiers n'est mémorisé qu'au dossier : un tiers appartient à un dossier (D-968-1), il n'a pas de sens
+  dans un autre.
+- **D-1098-4** : oublier une mémoire du cabinet est réservé au `TENANT_ADMIN` (elle sert tous les dossiers, comme le
+  modèle du plan propre, D-1094-3) ; celle d'un dossier, à qui peut saisir.
 
 ---
 
