@@ -4,6 +4,25 @@
 
 ## État
 
+### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
+
+Session du groupe C sur le poste principal : `moneyvibes-apps-dc`. Elle a ouvert, sur consigne de l'utilisateur du 23/11,
+STORY-1097 et 1098 (notées au journal de A, où l'utilisateur les avait demandées) ; à partir du lot 6, **ce journal-ci
+porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour avec le lot 6, vu que tu es le groupe C »).
+
+- ✅ **Avant tout** (§4) : le manifeste `comptabilite` **0.4.0** est recopié au catalogue (catalogue #65, `eb495b5`,
+  et son correctif #66, `acfb751`, qui retire 74 `index.ts` du générateur de barrels entrés par erreur ; rien d'autre
+  n'avait changé).
+- ✅ STORY-1097 (comptabilite #17) et ✅ STORY-1098 (comptabilite #18), livrées le 23/11 (journal de A pour le détail).
+- **Ordre du lot 6 de C** (les dépendances de la fiche de 1100 — 1087, 1088 — passent devant elle) :
+  1. 🟡 **STORY-1099** la mémoire des choix dans les cahiers (balance) : contrat #758 fusionné, code en cours (`MNV-1099`) ;
+  2. **STORY-1087** la GED s'ouvre au cabinet (document-service) ; Q-SC-5 (quota) : choix par défaut écrit dans la fiche ;
+  3. **STORY-1088** l'original papier, et retrouver une pièce (document-service) ;
+  4. **STORY-1100** les archives apprennent la façon de classer du cabinet, et reçoivent les factures comptabilisées ;
+  5. **STORY-1101** les déclarations face à la liasse (fiscal) — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
+  6. **STORY-315** puis **316** le calendrier fiscal (fiscal) — fiches écrites juste avant.
+- **Docker** : verrou du poste principal (`MoneyVibes_Apps\.verrou-docker`) partagé avec A ; aucune pile de C ne tourne.
+
 - **2026-11-14** : journal ouvert, lot pas encore commencé.
 - **2026-11-15** : lot ouvert. **Machine** : le poste principal (Windows), le même que la session qui a tenu le lot de
   A et tient maintenant celui de B. Le lot de A (le plus lourd en Docker) est terminé ; C préfixe ses piles `grp-c`,
@@ -131,7 +150,11 @@
 
 ## Dépôts tenus
 
-`prospera-assurance-service` (« Rebase and merge » seul depuis le 2026-11-15 ; il acceptait encore les commits de
+**Lot 6 (D-L6-1 → 3)** : `prospera-comptabilite-service`, `prospera-balance-service` (cahiers),
+`document-service`, **`prospera-fiscal-service`** (repris de A pour ce lot). L'assurance (`prospera-sinistres-service`,
+`prospera-assurance-service`) passe à D (passation ci-dessous).
+
+Jusqu'au lot 4 : `prospera-assurance-service` (« Rebase and merge » seul depuis le 2026-11-15 ; il acceptait encore les commits de
 fusion), `prospera-ocr-service` (`document-service`), et les trois dépôts neufs :
 `prospera-sinistres-service` (**`main` et `dev` posées le 2026-11-15**, « Rebase and merge » seul), `prospera-liaison-assureur-service` (**`main` et `dev` posées par STORY-984**, « Rebase and merge » seul),
 `prospera-assureur-fictif` (**`main` et `dev` posées par STORY-986**, « Rebase and merge » seul). Dans
@@ -139,6 +162,14 @@ fusion), `prospera-ocr-service` (`document-service`), et les trois dépôts neuf
 seulement.
 
 ## Passations
+
+- **→ D (2026-11-23, lot 6, D-L6-3) : `prospera-sinistres-service` et `prospera-assurance-service`** — derniers commits
+  de C sur `dev` : sinistres **`ea1a111`** (STORY-1016), assurance **`8dc3285`** (STORY-1016). C n'y touche plus pendant
+  le lot 6. À reprendre par D (plan §6) : `sinistres` lit `provision.changed@1` (D-1016-10), publie
+  `sinistres.evaluation.arretee@1` (D-1013-9), lever une alerte bloquante (D-1013-10), la mission d'expertise (FR-61).
+  Pièges à lire avant : client Kafka de Confluent (`admin.createTopics` avant `subscribe`, `metadataMaxAge: 10_000`),
+  Node 24 pour les tests, « ⚠ Contrats » et « Pièges rencontrés » ci-dessous. `prospera-liaison-assureur-service` n'est
+  pas nommé par le plan : C le garde, et le cède à D sur simple demande ici.
 
 - **→ D (2026-11-17) : `prospera-assureur-fictif`** — dernier commit de C sur `dev` : `78ad10c` (STORY-987) ; D l'a
   constatée au rituel de 1046 et tient le dépôt depuis. C continue de jouer ses parcours contre le LC fictif (STORY-1002
