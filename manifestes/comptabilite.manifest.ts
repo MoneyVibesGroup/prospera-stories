@@ -92,7 +92,9 @@
 
 export const MANIFESTE_COMPTABILITE = {
   code: 'comptabilite',
-  version: '0.1.0',
+  // 0.2.0 (2026-11-23, FE-148) : les huit routes de lecture du plan comptable propre (STORY-1094, 1095). Une version
+  // publiée ne change pas (STORY-934) : la 0.1.0 semée sans elles reste ce qu'elle était.
+  version: '0.2.0',
 
   // La comptabilité est une source : elle n'a besoin d'aucun autre module pour enregistrer. La balance qu'elle
   // publie (STORY-967) est ingérée par `balance` si `balance` est installé (origine `comptabilite` du hub, A-921).
