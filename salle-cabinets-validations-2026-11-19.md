@@ -59,6 +59,12 @@ dossiers » (Mary).
 
 ## La grille proposée (2026-11-19) — proposition de A, NON DÉCIDÉE
 
+> ⛔ **REMPLACÉE le 2026-11-23 par la grille donnée par l'utilisateur** (ajout à la fusion, le 23/11) : 5 modules
+> (Atelier de balance ; Bilan et états financiers ; Conseil fiscal ; Déclaration fiscale ; Dossier de financement) à
+> **500 000 FCFA par module et par an** ; pack des 5 à **2 000 000 FCFA par an** ; inclus 5 collaborateurs et 15
+> dossiers clients ; collaborateur en plus 50 000 / an ; dossier en plus 100 000 / an. La grille ci-dessous est
+> gardée comme trace de la discussion du 19/11, **pas comme prix**.
+
 > Demande de l'utilisateur : « détaille-moi les prix », puis « note cela quelque part, je vais revenir chercher
 > l'information ». Rien n'est arbitré. Les prix des options n'ont pas été discutés en salle.
 
