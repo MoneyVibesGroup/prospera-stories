@@ -1,0 +1,188 @@
+{
+  "_meta": {
+    "artefact": "controles-balance-ohada",
+    "zoneComptable": "OHADA",
+    "pays": [],
+    "devisePresentation": null,
+    "normeSource": "Acte uniforme OHADA relatif au droit des sociétés commerciales et du GIE (AUSCGIE révisé, 2014) ; SYSCOHADA révisé (AUDCIF 2017) ; normes ISA 240 / 250 / 570",
+    "source": "Pack de 25 livres comptables (analysé le 2026-11-23, voir analyse-pack-25-livres-2026-11-23.md) : Livre 22 « Guide pratique d'application — Audit et commissariat aux comptes » (articles AUSCGIE cités en verbatim, relus à la source), Livre 03, Livre 11, Livre 12. Les articles AUSCGIE 150-156, 350, 371-373, 438-442, 664-669 ont été relus dans le livre 22 ; ils ne sont pas encore recoupés avec le JO OHADA.",
+    "statut": "amorce",
+    "miseEnGarde": "Catalogue de contrôles PROPOSÉS, pas encore codés. Chaque contrôle désigne ses entrées en codes de postes SYSCOHADA révisé (GUIDEF Togo) pour être lisible ; une implémentation dans bilan-service doit les désigner par MARQUEURS du paquet (invariant P7 de analyse.regles.ts), jamais par code de poste. Les délais légaux sont ceux de l'AUSCGIE : à recouper avec le texte officiel avant de les afficher comme échéances opposables.",
+    "usage": "Alertes au cabinet calculées depuis la balance / la liasse / la fiche du dossier ; signaux d'anomalie pour l'IA (assistant-service) ; argument « dossier de prêt bancaire » (un banquier regarde d'abord les capitaux propres et la trésorerie).",
+    "dejaDansLeProduit": "bilan-service calcule 19 indicateurs (STORY-552, analyse.types.ts : POIDS_CAPITAUX_PROPRES, ENDETTEMENT, CAPACITE_REMBOURSEMENT, LIQUIDITE_*, BFR, FRNG, TRESORERIE_NETTE, DSO/DIO/DPO…) jugés contre des seuils sectoriels NAEMA. La DSF Togo porte ses propres contrôles de cohérence (Actif = Passif, articulation RNC/CA). AUCUN des contrôles ci-dessous n'existe : ce sont des VERDICTS JURIDIQUES ou des CONTRÔLES D'INTÉGRITÉ, pas des ratios."
+  },
+  "controles": [
+    {
+      "code": "CP_INFERIEURS_MOITIE_CAPITAL",
+      "famille": "ALERTE_JURIDIQUE",
+      "libelle": "Capitaux propres devenus inférieurs à la moitié du capital social",
+      "entree": "liasse (Bilan passif, colonne N) + forme juridique du dossier (dossier-service, enum FormeJuridique)",
+      "formule": "capitauxPropres = CA + CB + CD + CE + CF + CG + CH + CJ (hors CL subventions d'investissement et CM provisions réglementées) ; alerte si capitauxPropres < CA / 2",
+      "choixParDefaut": "La variante SANS CL ni CM est retenue : elle donne des capitaux propres plus bas, donc l'alerte se déclenche plus tôt. Pour une alerte au cabinet, un faux positif expliqué coûte moins qu'une situation légale manquée. Afficher aussi la variante « CP total » (poste CP) à côté.",
+      "questionExpert": "Quelle définition des capitaux propres la doctrine OHADA retient-elle pour l'art. 664 / 371 : avec ou sans subventions d'investissement et provisions réglementées ?",
+      "applicabilite": {
+        "SA": {
+          "articles": ["AUSCGIE 664", "665", "666", "667", "668", "669"],
+          "obligation": "Le conseil d'administration (ou l'administrateur général) convoque l'assemblée générale extraordinaire dans les 4 mois qui suivent l'approbation des comptes ayant fait apparaître la perte, pour décider de la dissolution anticipée.",
+          "echeances": [
+            { "quoi": "Convocation de l'AGE", "delai": { "valeur": 4, "unite": "mois", "pointDeDepart": "approbation des comptes de l'exercice déficitaire" }, "article": "664" },
+            { "quoi": "Reconstitution des capitaux propres à hauteur de la moitié du capital, ou réduction du capital d'au moins les pertes non imputées sur les réserves", "delai": { "valeur": null, "unite": null, "pointDeDepart": "au plus tard à la clôture du deuxième exercice suivant celui de la constatation des pertes" }, "article": "665" },
+            { "quoi": "Dépôt de la décision de l'AGE au greffe, inscription au RCCM et publication dans un journal d'annonces légales", "delai": null, "article": "666" }
+          ],
+          "sanction": "Tout intéressé peut demander la dissolution en justice (art. 667) ; le juge peut accorder au plus 6 mois pour régulariser (art. 668).",
+          "exclusion": "Non applicable aux sociétés en redressement judiciaire ou en liquidation des biens (art. 669)."
+        },
+        "SARL": {
+          "articles": ["AUSCGIE 371", "372", "373"],
+          "obligation": "Le gérant (ou le commissaire aux comptes) consulte les associés sur la dissolution anticipée dans les 4 mois qui suivent l'approbation des comptes ayant fait apparaître la perte.",
+          "echeances": [
+            { "quoi": "Consultation des associés", "delai": { "valeur": 4, "unite": "mois", "pointDeDepart": "approbation des comptes de l'exercice déficitaire" }, "article": "371" },
+            { "quoi": "Reconstitution des capitaux propres à hauteur de la moitié du capital, ou réduction du capital (sans descendre sous le capital légal)", "delai": { "valeur": 2, "unite": "ans", "pointDeDepart": "date de clôture de l'exercice déficitaire" }, "article": "372" }
+          ],
+          "sanction": "Tout intéressé peut demander la dissolution en justice (art. 373) ; l'action s'éteint si la cause a cessé au jour où le juge statue."
+        },
+        "SUARL": { "renvoi": "SARL", "aVerifier": "La SARL unipersonnelle suit les articles de la SARL : à confirmer." },
+        "SAS": { "renvoi": "SA", "aVerifier": "Le livre 22 ne cite pas l'article de la SAS (Livre 4-2 AUSCGIE, art. 853-1 et suivants). Renvoi aux règles de la SA à confirmer." },
+        "EI": { "nonApplicable": "Pas de capital social." },
+        "AUTRE": { "nonApplicable": "Forme non déterminée : afficher le constat chiffré sans échéance." }
+      },
+      "message": "Les capitaux propres ({cp}) sont inférieurs à la moitié du capital ({demiCapital}). La loi impose une décision des associés dans les 4 mois qui suivent l'approbation des comptes.",
+      "brancherDans": "bilan-service, à côté de l'analyse financière (STORY-552) ; l'échéance peut alimenter le calendrier fiscal / les rappels du cabinet.",
+      "source": "Livre 22, p. 98-100 (articles AUSCGIE reproduits en verbatim)"
+    },
+    {
+      "code": "CAPITAUX_PROPRES_NEGATIFS",
+      "famille": "SIGNAL_CONTINUITE",
+      "libelle": "Capitaux propres négatifs",
+      "entree": "liasse (Bilan passif, N)",
+      "formule": "CA + CB + CD + CE + CF + CG + CH + CJ < 0",
+      "message": "Les capitaux propres sont négatifs : l'entreprise doit plus qu'elle ne possède. Un banquier refusera le prêt en l'état ; un commissaire aux comptes peut déclencher la procédure d'alerte.",
+      "lien": "Cas extrême de CP_INFERIEURS_MOITIE_CAPITAL ; signal de continuité d'exploitation (ISA 570).",
+      "source": "Livre 22 (ISA 570, questionnaire de continuité d'exploitation) ; règle de lecture générale"
+    },
+    {
+      "code": "SIGNAUX_CONTINUITE_EXPLOITATION",
+      "famille": "SIGNAL_CONTINUITE",
+      "libelle": "Faisceau de signaux qui peuvent déclencher la procédure d'alerte du commissaire aux comptes",
+      "entree": "liasse N et N-1 + indicateurs STORY-552",
+      "formule": "Compter les signaux présents : résultat net (XI) négatif deux exercices de suite ; trésorerie nette (BT − DT) négative en N et N-1 ; capitaux propres négatifs ; FRNG négatif ; dettes fiscales et sociales (DK) en hausse de plus de 50 % alors que le chiffre d'affaires (XB) baisse.",
+      "choixParDefaut": "Afficher les signaux un par un, sans score ni verdict « continuité compromise » : ce jugement appartient au commissaire aux comptes. Les seuils (deux exercices, +50 %) sont des choix de départ, à régler.",
+      "procedureAlerte": {
+        "articles": ["AUSCGIE 150", "151", "152", "153", "155", "156"],
+        "autresQueSA": "Le CAC demande des explications au gérant (art. 150) ; le gérant répond sous 15 jours, faute de quoi le CAC informe la juridiction compétente (art. 151) ; rapport spécial, communication aux associés sous 8 jours sur demande, convocation possible de l'assemblée en urgence (art. 152).",
+        "SA_SAS": "Demande d'explications au président (art. 153) ; à défaut de réponse satisfaisante, invitation à faire délibérer le conseil, envoyée dans les 15 jours ; le président convoque le conseil dans les 15 jours, pour une délibération dans le mois ; extrait du procès-verbal au CAC et à la juridiction dans le mois (art. 155) ; le CAC peut reprendre la procédure dans les 6 mois (art. 156)."
+      },
+      "usage": "Pour le cabinet : préparer le client AVANT que le CAC ou le banquier pose la question.",
+      "source": "Livre 22, p. 97-99"
+    },
+    {
+      "code": "CONVENTIONS_REGLEMENTEES_A_DECLARER",
+      "famille": "ALERTE_JURIDIQUE",
+      "libelle": "Opérations avec dirigeants ou associés à 10 % et plus : conventions à faire autoriser et à signaler au CAC",
+      "entree": "fiche du dossier (dirigeants, actionnaires et leurs pourcentages) + comptes de tiers (comptes courants d'associés 462, fournisseurs et clients liés) — exige le grand livre ou les comptes de tiers, PAS seulement la balance",
+      "formule": "Lister les tiers dont l'identité recoupe un dirigeant, un actionnaire ≥ 10 % ou une société qu'ils dirigent ou possèdent ; sommer les flux de l'exercice.",
+      "obligations": {
+        "SA": "Autorisation préalable du conseil (art. 438) ; avis au CAC dans le mois de la conclusion ; conventions antérieures poursuivies : CAC informé dans le mois de la clôture ; rapport spécial du CAC déposé au siège au moins 15 jours avant l'AGO (art. 440, 442). Délibération sans rapport spécial : nulle.",
+        "SARL": "Rapport du gérant (ou du CAC) à l'assemblée (art. 350 et suivants) ; délibération sans ce rapport : nulle."
+      },
+      "brancherDans": "comptabilite-service (EPIC-111 → 120, comptes de tiers) ; dossier-service porte déjà les dirigeants (dirigeants-requis.util.ts), pas encore les actionnaires avec pourcentage.",
+      "source": "Livre 22, p. 87-89"
+    },
+    {
+      "code": "IDENTITE_FRNG_BFR_TRESORERIE",
+      "famille": "INTEGRITE",
+      "libelle": "Fonds de roulement = besoin en fonds de roulement + trésorerie nette",
+      "entree": "indicateurs FRNG, BFR, TRESORERIE_NETTE déjà calculés par bilan-service",
+      "formule": "|FRNG − (BFR + TRESORERIE_NETTE)| ≤ tolérance d'arrondi",
+      "message": "Écart de {ecart} : un compte n'est rangé dans aucune masse (ou dans deux). Vérifier la table de passage avant de lire les ratios.",
+      "pourquoi": "Identité comptable : si elle ne tombe pas juste, ce n'est pas l'entreprise qui va mal, c'est le rangement des comptes. Contrôle gratuit qui protège tous les ratios.",
+      "source": "Livre 12 (TAFIRE, modèle 1998 : contrôle « variation du FdR = variation du BFG + variation de trésorerie »), repris sur les masses du bilan révisé"
+    },
+    {
+      "code": "TFT_TRESORERIE_CLOTURE_EGALE_BILAN",
+      "famille": "INTEGRITE",
+      "libelle": "La trésorerie de clôture du TFT égale la trésorerie du bilan",
+      "entree": "liasse (TFT et Bilan)",
+      "formule": "ZH = BT − DT (N) et ZA = BT − DT (N-1)",
+      "aVerifier": "Contrôle probablement déjà présent parmi les contrôles de cohérence de la DSF Togo : vérifier avant de le coder.",
+      "source": "Livre 12 (contrôle D du TAFIRE), transposé au TFT révisé"
+    },
+    {
+      "code": "CAISSE_CREDITRICE",
+      "famille": "INTEGRITE",
+      "libelle": "Solde créditeur d'un compte de caisse",
+      "entree": "balance",
+      "formule": "solde(57*) < 0 pour au moins un compte",
+      "message": "La caisse {compte} affiche un solde créditeur de {montant} : on ne peut pas sortir plus d'espèces qu'il n'y en a. Recettes non saisies, ou dépenses saisies deux fois.",
+      "pourquoi": "Signal classique de recettes non enregistrées : c'est aussi l'un des premiers points que regarde un vérificateur fiscal.",
+      "source": "Livre 11 (contrôles de caisse et écarts 658/758) ; règle de lecture générale"
+    },
+    {
+      "code": "AMORTISSEMENTS_SUPERIEURS_AU_BRUT",
+      "famille": "INTEGRITE",
+      "libelle": "Amortissements cumulés supérieurs à la valeur brute",
+      "entree": "balance",
+      "formule": "Pour chaque préfixe d'immobilisation 2x (hors 28, 29) : solde(28x correspondant) > solde(2x)",
+      "message": "Les amortissements de {rubrique} dépassent la valeur d'achat : dotation en trop, ou immobilisation sortie sans solder ses amortissements.",
+      "source": "Règle comptable générale (Livres 06 et 11 : mécanique d'amortissement et de cession) — pas un article"
+    },
+    {
+      "code": "ECART_CONVERSION_SANS_PROVISION",
+      "famille": "INTEGRITE",
+      "libelle": "Perte latente de change sans provision",
+      "entree": "balance",
+      "formule": "solde(478*) > 0 et solde(4991) + solde(4997) = 0",
+      "message": "Un écart de conversion actif de {montant} (perte de change latente) figure au bilan sans provision pour risque : le SYSCOHADA révisé impose de provisionner la perte latente.",
+      "source": "Livre 11, p. 5-6 (écarts de conversion et provision pour perte de change) ; voir ecritures-cloture-syscohada-revise.json"
+    },
+    {
+      "code": "HAO_RECURRENT",
+      "famille": "QUALITE_CLASSEMENT",
+      "libelle": "Un même compte « hors activités ordinaires » mouvementé deux exercices de suite",
+      "entree": "balances N et N-1",
+      "formule": "Comptes 81* à 88* (hors 89 impôt) non nuls en N ET en N-1 avec le même compte à 3 chiffres",
+      "message": "Le compte {compte} (HAO) revient chaque année : une charge ou un produit qui se répète relève sans doute des activités ordinaires (classes 6/7). À revoir.",
+      "pourquoi": "Classer en HAO une charge récurrente embellit le résultat des activités ordinaires (XG), que lisent le banquier et le fisc.",
+      "source": "Livre 03 (chapitres sur la classe 8)"
+    },
+    {
+      "code": "COMPTES_DE_LIAISON_NON_SOLDES",
+      "famille": "INTEGRITE",
+      "libelle": "Comptes de liaison entre établissements non soldés une fois agrégés",
+      "entree": "balance agrégée de plusieurs établissements (cas distributeur multi-points de vente)",
+      "formule": "Σ solde(18*) ≠ 0 sur la balance agrégée",
+      "message": "Les comptes de liaison entre établissements ne se compensent pas ({montant}) : une opération inter-sites n'est saisie que d'un côté.",
+      "source": "Livre 03 (comptes divisionnaires et de liaison)"
+    },
+    {
+      "code": "SIGNAUX_FRAUDE_ISA_240",
+      "famille": "SIGNAL_ANOMALIE",
+      "libelle": "Écritures à risque de fraude au sens de la norme ISA 240",
+      "entree": "grand livre (comptabilite-service) — impossible depuis la seule balance",
+      "signaux": [
+        "écritures manuelles passées en fin de période ou après la clôture",
+        "écritures sur des comptes rarement utilisés, ou par un utilisateur qui ne les passe pas d'habitude",
+        "montants ronds ou juste sous un seuil d'autorisation",
+        "chiffre d'affaires : la norme pose une présomption de risque de fraude sur la comptabilisation des produits",
+        "estimations (provisions, dépréciations) révisées dans le sens du résultat d'un exercice à l'autre",
+        "corrélations inhabituelles en procédures analytiques"
+      ],
+      "signauxNonConformite_ISA_250": [
+        "paiements en espèces inhabituels",
+        "commissions ou honoraires excessifs",
+        "paiements vers des pays à fiscalité privilégiée",
+        "achats à des prix sensiblement différents du marché"
+      ],
+      "brancherDans": "IA d'anomalie de comptabilite-service / assistant-service (EPIC-111 → 120). Signaler, jamais conclure : la qualification de fraude n'appartient pas au logiciel.",
+      "source": "Livre 22, ISA 240 § 11-24 (p. 18-25) et ISA 250 (p. 26)"
+    }
+  ],
+  "referencesUtiles": {
+    "mandatCAC": "SA : 2 exercices si nommé dans les statuts ou par l'AG constitutive, 6 exercices si nommé par l'AGO (AUSCGIE 704) ; SA faisant appel public à l'épargne : au moins 2 CAC et 2 suppléants (702). Livre 22, p. 10.",
+    "sondageISA530": "L'échantillonnage statistique n'est pas obligatoire ; un traitement automatisé autorise l'examen à 100 % de la population. Argument produit : un logiciel peut contrôler toutes les écritures au lieu d'un échantillon. Livre 22, p. 65-66 et 78.",
+    "nonTrouveDansLePack": [
+      "seuils de désignation obligatoire d'un CAC dans une SARL ou une SAS (critères de total de bilan, chiffre d'affaires, effectif)",
+      "pourcentages de référence du seuil de signification (ISA 320)"
+    ]
+  }
+}

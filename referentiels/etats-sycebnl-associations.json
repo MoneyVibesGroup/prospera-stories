@@ -1,0 +1,2946 @@
+{
+  "_meta": {
+    "artefact": "etats-sycebnl-associations",
+    "zoneComptable": "OHADA",
+    "pays": [],
+    "devisePresentation": null,
+    "normeSource": "Acte uniforme SYCEBNL, JO OHADA numero special du 22 fevrier 2023, annexe partie 4 chapitre 2",
+    "statut": "amorce",
+    "miseEnGarde": "Document scanne lu en image (aucun texte extractible) : libelles, codes et comptes transcrits visuellement, a RELIRE contre le JO avant packaging. Les formules de totaux du bilan sont DEDUITES (non imprimees). Le chapitre 2 ne contient de tableaux de correspondance que pour le bilan et le compte de resultat (p.395-396) ; aucun pour le tableau des flux de tresorerie. Aucun code ni compte n'a ete pris dans le projet ONEC de 2021 ni de memoire.",
+    "source": {
+      "fichier": "SYSCEBNL.pdf (Journal officiel OHADA, numero special du 22 fevrier 2023)",
+      "pages": {
+        "sommaire": "339",
+        "principesGeneraux": "341-344",
+        "chapitre2": "345-396",
+        "bilan": "346",
+        "compteDeResultat": "347",
+        "tableauFluxTresorerie": "348",
+        "ficheRecapitulativeNotes": "349",
+        "notes": "350-394",
+        "tableauCorrespondanceBilan": "395",
+        "tableauCorrespondanceCompteDeResultat": "396"
+      }
+    },
+    "date": "2026-11-23"
+  },
+  "principesGeneraux": {
+    "pages": "341-344 (chapitre 1) ; 345 (ouverture du chapitre 2)",
+    "composition": "Associations et ordres professionnels : Bilan, Compte de resultat, Tableau des flux de tresorerie, Notes annexes (p.341 et 345). Projets de developpement et entites assimilees : Bilan, Compte de resultat, Etat des depenses et des ressources, Notes (p.341) ; le chapitre 3 (p.397) liste pour eux Tableau emplois ressources, Tableau d'execution budgetaire, Tableau de reconciliation de tresorerie, Bilan, Compte d'exploitation, Notes (hors perimetre ; liste differente de celle de p.341). Chapitre 4 (p.433) : Systeme minimal de tresorerie (hors perimetre).",
+    "objectif": "Informations utiles sur le patrimoine, la situation financiere, la performance et les variations de la situation de tresorerie (p.341).",
+    "indissociabilite": "Les etats financiers forment un tout indissociable et donnent une image fidele du patrimoine, de la situation financiere et du resultat (p.341).",
+    "petitesEntites": "Les petites entites remplissant les criteres de l'article 6 de l'Acte uniforme peuvent tenir une comptabilite simplifiee de tresorerie (Systeme minimal de tresorerie) : fait generateur = encaissement/decaissement ; tableau recapitulatif des dettes et creances extra-comptable en fin d'exercice (p.341).",
+    "comparatif": "Pour chaque poste et rubrique, les chiffres de l'exercice precedent doivent etre mentionnes : colonnes N et N-1 (bilan actif : brut, amortissements/depreciations, net N, net N-1) (p.342, 346-348).",
+    "codification": "Chaque rubrique comprend un ou plusieurs comptes et est identifiee par un code alphabetique (AA, AB, AG...) (p.342).",
+    "compensation": "La compensation entre postes d'actif et de passif ou entre charges et produits n'est pas admise sauf disposition normative (p.342).",
+    "rubriquesNonChiffrees": "Les rubriques et postes non chiffres ne doivent pas etre presentes (p.342) ; idem pour les lignes de notes non chiffrees (p.349).",
+    "modificationDePresentation": "Toute modification de presentation ou de methode d'evaluation doit etre signalee dans les Notes annexes (p.342).",
+    "bilan": "Actif : actif immobilise, actif circulant, tresorerie-actif, ecart de conversion-actif ; passif : ressources stables, passif circulant, tresorerie-passif, ecart de conversion-passif. Logique : Ressources propres = Actif - passif externe (p.342).",
+    "compteDeResultat": "Liste des produits et charges classes par nature, faisant apparaitre l'excedent ou le deficit (p.342).",
+    "tableauFluxTresorerie": "Etat specifique aux associations et ordres professionnels ; trois categories (operationnels, investissement, financement = fonds propres + fonds etrangers) ; methode DIRECTE pour les flux operationnels ; variation = somme des trois flux ; tresorerie nette fin = debut + variation = tresorerie actif N - tresorerie passif N (p.342-343).",
+    "notesAnnexes": "Font partie integrante des etats ; declaration explicite de conformite a l'Acte uniforme relatif au droit comptable et a l'information financiere et au SYCEBNL obligatoire ; etats declares conformes seulement si toutes les dispositions sont respectees ; reference croisee de chaque element de synthese vers les notes ; les modeles de notes non documentes ne doivent pas etre joints (contenu ameliorable) (p.344 et 349) ; fiche recapitulative A (applicable) / N/A (p.349) ; Note 34 obligatoire au-dela de 250 personnes benevoles comprises (p.393).",
+    "devise": "Aucune regle de devise ou d'arrondi dans les pages 341-344. Seul indice : la Note 33 est libellee 'EN MILLIERS DE FRANCS' (p.392) ; colonnes 'Exercice au 31/12/N' (bilan, CR) et ZA 'au 1er janvier' (TFT) : exercice calque sur l'annee civile, non dit expressement.",
+    "delais": "Aucun delai d'etablissement, d'approbation ou de depot dans les pages 339-396 (la Note 3 demande seulement la date d'arret des etats et l'organe ayant autorise la publication).",
+    "pagesSansContenu": "Page 340 blanche ; page 339 = sommaire de la partie 4."
+  },
+  "postes": [
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AA",
+      "libelle": "IMMOBILISATIONS DESTINEES A LA VENTE PROVENANT DE DONS ET LEGS NON ENCORE RECUES ET USUFRUIT TEMPORAIRE",
+      "ref": "5",
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "AB+AC",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AB",
+      "libelle": "Immobilisations incorporelles",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AC",
+      "libelle": "Immobilisations corporelles et financieres",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AD",
+      "libelle": "IMMOBILISATIONS INCORPORELLES",
+      "ref": "5",
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "AE+AF+AG",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AE",
+      "libelle": "Brevets, licences, logiciels et droits similaires",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AF",
+      "libelle": "Autres immobilisations incorporelles",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AG",
+      "libelle": "Avances et acomptes verses sur immobilisations incorporelles",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AH",
+      "libelle": "IMMOBILISATIONS CORPORELLES",
+      "ref": "5",
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "AI+AJ+AK+AL+AM+AN",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AI",
+      "libelle": "Terrains",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AJ",
+      "libelle": "Batiments",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AK",
+      "libelle": "Amenagements, agencements et installations",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AL",
+      "libelle": "Materiel, mobilier et actifs biologiques",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AM",
+      "libelle": "Materiel de transport",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AN",
+      "libelle": "Avances et acomptes verses sur immobilisations corporelles",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AO",
+      "libelle": "IMMOBILISATIONS FINANCIERES",
+      "ref": "6",
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "AX+AY",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AX",
+      "libelle": "Titres de participation",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AY",
+      "libelle": "Autres immobilisations financieres",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "AZ",
+      "libelle": "TOTAL ACTIF IMMOBILISE (libelle en bandeau sombre, lu partiellement)",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "AA+AD+AH+AO",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "BA",
+      "libelle": "Actif circulant HAO",
+      "ref": "7",
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "BB",
+      "libelle": "Stocks et encours",
+      "ref": "8",
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "BC",
+      "libelle": "Fournisseurs debiteurs",
+      "ref": "19",
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "BD",
+      "libelle": "Adherents, Clients-usagers",
+      "ref": "9",
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "BE",
+      "libelle": "Autres creances",
+      "ref": "10",
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "BT",
+      "libelle": "TOTAL ACTIF CIRCULANT (libelle en bandeau sombre, lu partiellement)",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "BA+BB+BC+BD+BE",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "BU",
+      "libelle": "Titres de placement",
+      "ref": "11",
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "BV",
+      "libelle": "Valeurs a encaisser",
+      "ref": "12",
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "BW",
+      "libelle": "Banques, etablissements financiers, caisses et assimiles",
+      "ref": "13",
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "BX",
+      "libelle": "TOTAL TRESORERIE-ACTIF (libelle en bandeau sombre, lu partiellement)",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "BU+BV+BW",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "BY",
+      "libelle": "Ecart de conversion-Actif",
+      "ref": "14",
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "BZ",
+      "libelle": "TOTAL GENERAL",
+      "ref": null,
+      "nature": "brut/amort_deprec/net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "AZ+BT+BX+BY",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CA",
+      "libelle": "Dotation non consomptible sans droit repris",
+      "ref": "15",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CB",
+      "libelle": "Dotation non consomptible avec droit repris",
+      "ref": "15",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CC",
+      "libelle": "Droit d'entree",
+      "ref": "15",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CD",
+      "libelle": "Dotation consomptible",
+      "ref": "15",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CE",
+      "libelle": "Ecarts de reevaluation",
+      "ref": "5F",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CF",
+      "libelle": "Reserves",
+      "ref": "16",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CG",
+      "libelle": "Report a nouveau (+ ou -)",
+      "ref": "16",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CH",
+      "libelle": "Resultat net de l'exercice (excedent + ou deficit -)",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CI",
+      "libelle": "Subventions d'investissement",
+      "ref": "17A",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CJ",
+      "libelle": "Provisions reglementees",
+      "ref": "17A",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CK",
+      "libelle": "TOTAL FONDS PROPRES ET ASSIMILES",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "CA+CB+CC+CD+CE+CF+CG+CH+CI+CJ",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CW",
+      "libelle": "Fonds affectes et provenant de dons et legs d'immobilisations",
+      "ref": "17B",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CX",
+      "libelle": "Fonds reportes",
+      "ref": "17B",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CY",
+      "libelle": "TOTAL FONDS AFFECTES ET REPORTES",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "CW+CX",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CZ",
+      "libelle": "TOTAL RESSOURCES PROPRES ET ASSIMILEES",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "CK+CY",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DA",
+      "libelle": "Emprunts et dettes financieres",
+      "ref": "18A",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DB",
+      "libelle": "Dettes de location- acquisition",
+      "ref": "18A",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DC",
+      "libelle": "Provisions pour risques et charges",
+      "ref": "18A",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DD",
+      "libelle": "TOTAL DETTES FINANCIERES ET RESSOURCES ASSIMILEES",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "DA+DB+DC",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DE",
+      "libelle": "TOTAL RESSOURCES STABLES (libelle en bandeau sombre, lu partiellement)",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "CZ+DD",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DF",
+      "libelle": "Dettes circulantes HAO",
+      "ref": "7",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DG",
+      "libelle": "Adherents, clients-usagers crediteurs",
+      "ref": "9",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DH",
+      "libelle": "Fournisseurs",
+      "ref": "19",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DI",
+      "libelle": "Autres dettes",
+      "ref": "20 & 21",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DV",
+      "libelle": "TOTAL PASSIF CIRCULANT (libelle en bandeau sombre, lu partiellement)",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "DF+DG+DH+DI",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DW",
+      "libelle": "Banques, etablissements financiers et credits de tresorerie",
+      "ref": "22",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DX",
+      "libelle": "TOTAL TRESORERIE-PASSIF (libelle en bandeau sombre, lu partiellement)",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "DW",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DY",
+      "libelle": "Ecart de conversion-Passif",
+      "ref": "14",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "DZ",
+      "libelle": "TOTAL GENERAL",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "DE+DV+DX+DY",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RA",
+      "libelle": "Cotisations",
+      "ref": "23",
+      "signe": "+",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RB",
+      "libelle": "Dotations consomptibles transferees au compte de resultat",
+      "ref": "23",
+      "signe": "+",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RC",
+      "libelle": "Revenus lies a la generosite",
+      "ref": "23",
+      "signe": "+",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RD",
+      "libelle": "Ventes de marchandises",
+      "ref": "23",
+      "signe": "+",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RE",
+      "libelle": "Ventes de services et produits finis",
+      "ref": "23",
+      "signe": "+",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RF",
+      "libelle": "Subventions d'exploitation",
+      "ref": "23",
+      "signe": "+",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RG",
+      "libelle": "Autres produits et transferts de charges",
+      "ref": "23",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RH",
+      "libelle": "Reprises de provisions, depreciations, subventions et autres reprises",
+      "ref": "5D&30",
+      "signe": "+",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "XA",
+      "libelle": "REVENUS DES ACTIVITES ORDINAIRES (Somme RA a RG)",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "RA+RB+RC+RD+RE+RF+RG",
+      "formuleImprimee": true
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TA",
+      "libelle": "Achats de biens et services lies a l'activite",
+      "ref": "24",
+      "signe": "-",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TB",
+      "libelle": "Variation de stocks des achats de biens et services lies a l'activite",
+      "ref": "8",
+      "signe": "+/-",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TC",
+      "libelle": "Achats de marchandises et matieres premieres",
+      "ref": "24",
+      "signe": "-",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TD",
+      "libelle": "Autres achats",
+      "ref": "24",
+      "signe": "-",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TE",
+      "libelle": "Variation de stocks de marchandises, de matieres premieres et autres",
+      "ref": "8",
+      "signe": "+/-",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TF",
+      "libelle": "Transports",
+      "ref": "25",
+      "signe": "-",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TG",
+      "libelle": "Services exterieurs",
+      "ref": "26",
+      "signe": "-",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TH",
+      "libelle": "Impots et taxes",
+      "ref": "27",
+      "signe": "-",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TI",
+      "libelle": "Autres charges",
+      "ref": "28",
+      "signe": "-",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TJ",
+      "libelle": "Charges de personnel",
+      "ref": "29",
+      "signe": "-",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TK",
+      "libelle": "Frais financiers et charges assimilees",
+      "ref": "31",
+      "signe": "-",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TL",
+      "libelle": "Dotations aux amortissements, aux provisions, aux depreciations et autres",
+      "ref": "5D&30",
+      "signe": "-",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "XB",
+      "libelle": "CHARGES DES ACTIVITES ORDINAIRES (Somme TA a TL)",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "TA+TB+TC+TD+TE+TF+TG+TH+TI+TJ+TK+TL",
+      "formuleImprimee": true
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "XC",
+      "libelle": "RESULTAT DES ACTIVITES ORDINAIRES (XA - XB)",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "XA-XB",
+      "formuleImprimee": true
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TM",
+      "libelle": "Produits H.A.O.",
+      "ref": "32",
+      "signe": "+",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "TN",
+      "libelle": "Charges H.A.O.",
+      "ref": "32",
+      "signe": "-",
+      "nature": "net N + net N-1",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "XD",
+      "libelle": "RESULTAT H.A.O. (TM - TN)",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "TM-TN",
+      "formuleImprimee": true
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "XE",
+      "libelle": "RESULTAT NET DE L'EXERCICE (+excedent, -deficit) (XC+XD)",
+      "ref": null,
+      "nature": "net N + net N-1",
+      "estTotal": true,
+      "formuleTotal": "XC+XD",
+      "formuleImprimee": true
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "ZA",
+      "libelle": "Tresorerie nette au 1er janvier (Tresorerie actif N-1 - Tresorerie passif N-1)",
+      "ref": null,
+      "nature": "N + N-1",
+      "estTotal": true,
+      "formuleTotal": "Tresorerie actif N-1 - Tresorerie passif N-1",
+      "formuleImprimee": true,
+      "lettre": "A"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FA",
+      "libelle": "Encaissement des cotisations",
+      "ref": null,
+      "signe": "+",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant des activites operationnelles"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FB",
+      "libelle": "Encaissement des subventions d'exploitation et d'equilibre",
+      "ref": null,
+      "signe": "+",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant des activites operationnelles"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FC",
+      "libelle": "Encaissement des revenus lies a la generosite",
+      "ref": null,
+      "signe": "+",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant des activites operationnelles"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FD",
+      "libelle": "Encaissement des revenus des manifestations",
+      "ref": null,
+      "signe": "+",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant des activites operationnelles"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FE",
+      "libelle": "Encaissement des autres revenus",
+      "ref": null,
+      "signe": "+",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant des activites operationnelles"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FF",
+      "libelle": "Decaissement des sommes versees aux fournisseurs (1) [(1) a l'exclusion des fournisseurs d'investissements]",
+      "ref": null,
+      "signe": "-",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant des activites operationnelles"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FG",
+      "libelle": "Decaissement des sommes versees au personnel",
+      "ref": null,
+      "signe": "-",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant des activites operationnelles"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FH",
+      "libelle": "Autres decaissements",
+      "ref": null,
+      "signe": "-",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant des activites operationnelles"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "ZB",
+      "libelle": "Flux de tresorerie provenant des activites operationnelles (somme FA a FH)",
+      "ref": null,
+      "nature": "N + N-1",
+      "estTotal": true,
+      "formuleTotal": "FA+FB+FC+FD+FE+FF+FG+FH",
+      "formuleImprimee": true,
+      "lettre": "B"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FI",
+      "libelle": "Decaissements lies aux acquisitions d'immobilisations incorporelles et corporelles",
+      "ref": null,
+      "signe": "-",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant des activites d'investissements"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FJ",
+      "libelle": "Decaissements lies aux acquisitions d'immobilisations financieres",
+      "ref": null,
+      "signe": "-",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant des activites d'investissements"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FK",
+      "libelle": "Encaissements lies aux cessions d'immobilisations incorporelles et corporelles",
+      "ref": null,
+      "signe": "+",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant des activites d'investissements"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FL",
+      "libelle": "Encaissements lies aux cessions d'immobilisations financieres",
+      "ref": null,
+      "signe": "+",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant des activites d'investissements"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "ZC",
+      "libelle": "Flux de tresorerie provenant des activites d'investissement (somme FI a FL)",
+      "ref": null,
+      "nature": "N + N-1",
+      "estTotal": true,
+      "formuleTotal": "FI+FJ+FK+FL",
+      "formuleImprimee": true,
+      "lettre": "C"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FM",
+      "libelle": "Encaissement des dotations et autres fonds propres",
+      "ref": null,
+      "signe": "+",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant du financement par les fonds propres"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FN",
+      "libelle": "Subventions d'investissement recues",
+      "ref": null,
+      "signe": "+",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant du financement par les fonds propres"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FO",
+      "libelle": "Decaissement des dotations et autres fonds propres",
+      "ref": null,
+      "signe": "-",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Flux de tresorerie provenant du financement par les fonds propres"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "ZD",
+      "libelle": "Flux de tresorerie provenant des fonds propres (somme FM a FO)",
+      "ref": null,
+      "nature": "N + N-1",
+      "estTotal": true,
+      "formuleTotal": "FM+FN+FO",
+      "formuleImprimee": true,
+      "lettre": "D"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FP",
+      "libelle": "Encaissement provenant des emprunts et des autres dettes financieres",
+      "ref": null,
+      "signe": "+",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Tresorerie provenant du financement par les fonds etrangers"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "FQ",
+      "libelle": "Remboursements des emprunts et autres dettes financieres",
+      "ref": null,
+      "signe": "-",
+      "nature": "N + N-1",
+      "estTotal": false,
+      "formuleTotal": null,
+      "rubrique": "Tresorerie provenant du financement par les fonds etrangers"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "ZE",
+      "libelle": "Tresorerie provenant des fonds etrangers (somme FP a FQ)",
+      "ref": null,
+      "nature": "N + N-1",
+      "estTotal": true,
+      "formuleTotal": "FP+FQ",
+      "formuleImprimee": true,
+      "lettre": "E"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": null,
+      "libelle": "Flux de tresorerie provenant des activites de financement (D+E)",
+      "ref": null,
+      "nature": "N + N-1",
+      "estTotal": true,
+      "formuleTotal": "ZD+ZE",
+      "formuleImprimee": false,
+      "lettre": null,
+      "codeImprime": false
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "ZF",
+      "libelle": "VARIATION DE LA TRESORERIE NETTE DE LA PERIODE (B+C+D+E)",
+      "ref": null,
+      "nature": "N + N-1",
+      "estTotal": true,
+      "formuleTotal": "ZB+ZC+ZD+ZE",
+      "formuleImprimee": true,
+      "lettre": "G"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "code": "ZG",
+      "libelle": "Tresorerie nette au 31 Decembre (G+A)",
+      "ref": null,
+      "nature": "N + N-1",
+      "estTotal": true,
+      "formuleTotal": "ZF+ZA",
+      "formuleImprimee": true,
+      "lettre": "H"
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YA",
+      "libelle": "Personnel propre - 1. Cadres superieurs",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YB",
+      "libelle": "Personnel propre - 2. Techniciens superieurs et cadres moyens",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YC",
+      "libelle": "Personnel propre - 3. Techniciens, agents de maitrise et ouvriers qualifies",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YD",
+      "libelle": "Personnel propre - 4. Employes, manoeuvres, ouvriers et apprentis",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YE",
+      "libelle": "Personnel propre - TOTAL (1)",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": true,
+      "formuleTotal": "YA+YB+YC+YD",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YF",
+      "libelle": "Personnel propre - Permanents",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YG",
+      "libelle": "Personnel propre - Saisonniers",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YH",
+      "libelle": "Personnel exterieur et benevole - 1. Cadres superieurs",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YI",
+      "libelle": "Personnel exterieur et benevole - 2. Techniciens superieurs et cadres moyens",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YJ",
+      "libelle": "Personnel exterieur et benevole - 3. Techniciens, agents de maitrise et ouvriers qualifies",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YK",
+      "libelle": "Personnel exterieur et benevole - 4. Employes, manoeuvres, ouvriers et apprentis",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YL",
+      "libelle": "Personnel exterieur et benevole - TOTAL (2)",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": true,
+      "formuleTotal": "YH+YI+YJ+YK",
+      "formuleImprimee": false
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YM",
+      "libelle": "Personnel exterieur et benevole - Permanents",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YN",
+      "libelle": "Personnel exterieur et benevole - Saisonniers",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": false,
+      "formuleTotal": null
+    },
+    {
+      "etat": "NOTE_29B",
+      "code": "YO",
+      "libelle": "TOTAL (1 + 2)",
+      "ref": "29B",
+      "nature": "effectifs (M/F par zone) + masse salariale",
+      "estTotal": true,
+      "formuleTotal": "YE+YL",
+      "formuleImprimee": false
+    }
+  ],
+  "tableDePassage": [
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AA",
+      "libelle": "Immobilisations destinees a la vente (en-tete)",
+      "comptes": null,
+      "exclusions": [],
+      "comptesAmortDeprec": null,
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "en-tete sans compte (cellule vide au JO) ; somme de AB et AC deduite"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AB",
+      "libelle": "Immobilisations incorporelles",
+      "comptes": [
+        "201"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "280",
+        "2901"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AC",
+      "libelle": "Immobilisations corporelles et financieres",
+      "comptes": [
+        "202",
+        "203",
+        "204",
+        "205"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "2902"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AD",
+      "libelle": "IMMOBILISATIONS INCORPORELLES (en-tete)",
+      "comptes": null,
+      "exclusions": [],
+      "comptesAmortDeprec": null,
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "en-tete sans compte"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AE",
+      "libelle": "Brevets, licences, logiciels et droits similaires",
+      "comptes": [
+        "212",
+        "213",
+        "214",
+        "2193"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "2812",
+        "2813",
+        "2814",
+        "2912",
+        "2913",
+        "2914",
+        "2919"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec ; 2919p = 'partie' du compte 2919 (suffixe p imprime)",
+      "partiels": [
+        "2919"
+      ]
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AF",
+      "libelle": "Autres immobilisations incorporelles",
+      "comptes": [
+        "218",
+        "2198"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "2818",
+        "2918",
+        "2919"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec ; 2919p = 'partie' (suffixe p imprime)",
+      "partiels": [
+        "2919"
+      ]
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AG",
+      "libelle": "Avances et acomptes verses sur immobilisations incorporelles",
+      "comptes": [
+        "251"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": null,
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec",
+      "precisions": "cellule amort/deprec imprimee '2 ?1' : un caractere illisible (voir illisible)"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AH",
+      "libelle": "IMMOBILISATIONS CORPORELLES (en-tete)",
+      "comptes": null,
+      "exclusions": [],
+      "comptesAmortDeprec": null,
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "en-tete sans compte"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AI",
+      "libelle": "Terrains",
+      "comptes": [
+        "22"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "282",
+        "292"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AJ",
+      "libelle": "Batiments",
+      "comptes": [
+        "231",
+        "232",
+        "233",
+        "2391",
+        "2392",
+        "2393",
+        "2396"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "2831",
+        "2832",
+        "2833",
+        "2931",
+        "2932",
+        "2933",
+        "2939"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec ; 2939p = 'partie' (suffixe p imprime)",
+      "partiels": [
+        "2939"
+      ]
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AK",
+      "libelle": "Amenagements, agencements et installations",
+      "comptes": [
+        "234",
+        "235",
+        "238",
+        "2394",
+        "2395",
+        "2398"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "2834",
+        "2835",
+        "2838",
+        "2934",
+        "2935",
+        "2938",
+        "2939"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec ; 2939p = 'partie' (suffixe p imprime)",
+      "partiels": [
+        "2939"
+      ]
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AL",
+      "libelle": "Materiel, mobilier et actifs biologiques",
+      "comptes": [
+        "24"
+      ],
+      "exclusions": [
+        "245",
+        "2495"
+      ],
+      "comptesAmortDeprec": [
+        "284",
+        "294",
+        "2949"
+      ],
+      "exclusionsAmortDeprec": [
+        "2845",
+        "2945",
+        "2949"
+      ],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec ; imprime : '284 (sauf 2845), 294 (sauf 2945, 2949), 2949p' (2949p = partie de 2949)",
+      "partiels": [
+        "2949"
+      ]
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AM",
+      "libelle": "Materiel de transport",
+      "comptes": [
+        "245",
+        "2495"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "2845",
+        "2945",
+        "2949"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec ; 2949p = 'partie' (suffixe p imprime)",
+      "partiels": [
+        "2949"
+      ]
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AN",
+      "libelle": "Avances et acomptes verses sur immobilisations corporelles",
+      "comptes": [
+        "252"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "2952"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AO",
+      "libelle": "IMMOBILISATIONS FINANCIERES (en-tete)",
+      "comptes": null,
+      "exclusions": [],
+      "comptesAmortDeprec": null,
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "en-tete sans compte"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AX",
+      "libelle": "Titres de participation",
+      "comptes": [
+        "26"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "296"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "AY",
+      "libelle": "Autres immobilisations financieres",
+      "comptes": [
+        "27"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "297"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "BA",
+      "libelle": "Actif circulant HAO",
+      "comptes": [
+        "485",
+        "4865"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "498"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "BB",
+      "libelle": "Stocks et encours",
+      "comptes": [
+        "31",
+        "32",
+        "33",
+        "34",
+        "36",
+        "37",
+        "38"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "39"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "BC",
+      "libelle": "Fournisseurs debiteurs",
+      "comptes": [
+        "409"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "490"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "BD",
+      "libelle": "Adherents, clients-usagers",
+      "comptes": [
+        "41"
+      ],
+      "exclusions": [
+        "419"
+      ],
+      "comptesAmortDeprec": [
+        "491"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec ; '41 (sauf 419)'"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "BE",
+      "libelle": "Autres creances",
+      "comptes": [
+        "42",
+        "43",
+        "44",
+        "45",
+        "47"
+      ],
+      "exclusions": [
+        "478"
+      ],
+      "comptesAmortDeprec": [
+        "492",
+        "493",
+        "494",
+        "497"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": "soldes debiteurs",
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec ; brut = 'Soldes debiteurs : 42, 43, 44, 45, 47 (sauf 478)'"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "BU",
+      "libelle": "Titres de placement",
+      "comptes": [
+        "50"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "590"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "BV",
+      "libelle": "Valeurs a encaisser",
+      "comptes": [
+        "51"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "591"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "BW",
+      "libelle": "Banques, etablissements financiers, caisses et assimiles",
+      "comptes": [
+        "52",
+        "53",
+        "55",
+        "57"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": [
+        "592",
+        "593",
+        "595"
+      ],
+      "exclusionsAmortDeprec": [],
+      "sens": "soldes debiteurs",
+      "regle": "colonne BRUT = comptes de la colonne 'Brut' ; colonne Amort/deprec = comptes de la colonne 'Amortissements/depreciations' ; NET = brut - amort/deprec ; brut = 'Soldes debiteurs : 52, 53, 55, 57'"
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "BY",
+      "libelle": "Ecart de conversion-Actif",
+      "comptes": [
+        "478"
+      ],
+      "exclusions": [],
+      "comptesAmortDeprec": null,
+      "exclusionsAmortDeprec": [],
+      "sens": null,
+      "regle": "colonne brut seule"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CA",
+      "libelle": "Dotation non consomptible sans droit repris",
+      "comptes": [
+        "101"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CB",
+      "libelle": "Dotation non consomptible avec droit repris",
+      "comptes": [
+        "102"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CC",
+      "libelle": "Droit d'entree",
+      "comptes": [
+        "103"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CD",
+      "libelle": "Dotation consomptible",
+      "comptes": [
+        "104"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CE",
+      "libelle": "Ecarts de reevaluation",
+      "comptes": [
+        "106"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CF",
+      "libelle": "Reserves",
+      "comptes": [
+        "11"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CG",
+      "libelle": "Report a nouveau (+ ou -)",
+      "comptes": [
+        "12"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "signeImprime": "+ ou -",
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes' ; '(+ ou -)' imprime dans le libelle"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CH",
+      "libelle": "Resultat net de l'exercice (excedent + ou deficit -)",
+      "comptes": [
+        "131",
+        "139"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes' ; imprime '13 (131 ou 139)'",
+      "precisions": "13 (131 ou 139)"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CI",
+      "libelle": "Subventions d'investissement",
+      "comptes": [
+        "14"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CJ",
+      "libelle": "Provisions reglementees",
+      "comptes": [
+        "15"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CK",
+      "libelle": "TOTAL FONDS PROPRES ET ASSIMILES (total)",
+      "comptes": null,
+      "exclusions": [],
+      "sens": null,
+      "regle": "total sans compte"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CW",
+      "libelle": "Fonds affectes et provenant de dons et legs d'immobilisations",
+      "comptes": [
+        "16"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CX",
+      "libelle": "Fonds reportes",
+      "comptes": [
+        "17"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CY",
+      "libelle": "TOTAL FONDS AFFECTES ET REPORTES (total)",
+      "comptes": null,
+      "exclusions": [],
+      "sens": null,
+      "regle": "total sans compte"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CZ",
+      "libelle": "TOTAL RESSOURCES PROPRES ET ASSIMILEES (total)",
+      "comptes": null,
+      "exclusions": [],
+      "sens": null,
+      "regle": "total sans compte"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "DA",
+      "libelle": "Emprunts et dettes financieres",
+      "comptes": [
+        "181",
+        "182",
+        "183",
+        "185",
+        "186",
+        "188"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "DB",
+      "libelle": "Dettes de location-acquisition",
+      "comptes": [
+        "187"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "DC",
+      "libelle": "Provisions pour risques et charges",
+      "comptes": [
+        "19"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "DD",
+      "libelle": "TOTAL DETTES FINANCIERES ET RESSOURCES ASSIMILEES (total)",
+      "comptes": null,
+      "exclusions": [],
+      "sens": null,
+      "regle": "total sans compte"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "DF",
+      "libelle": "Dettes circulantes HAO",
+      "comptes": [
+        "481",
+        "484",
+        "4861",
+        "488",
+        "4998"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "DG",
+      "libelle": "Adherents, clients-usagers crediteurs",
+      "comptes": [
+        "419"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "DH",
+      "libelle": "Fournisseurs",
+      "comptes": [
+        "40"
+      ],
+      "exclusions": [
+        "409"
+      ],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes' ; '40 (sauf 409)'"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "DI",
+      "libelle": "Autres dettes",
+      "comptes": [
+        "42",
+        "43",
+        "44",
+        "45",
+        "47",
+        "499",
+        "599"
+      ],
+      "exclusions": [
+        "479",
+        "4998"
+      ],
+      "sens": "soldes crediteurs",
+      "regle": "imprime : 'Soldes crediteurs : 42, 43, 44, 45, 47 (sauf 479), 499 (sauf 4998), 599' (portee de 'Soldes crediteurs' sur 499 et 599 ambigue au JO)"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "DW",
+      "libelle": "Banques, etablissements financiers et credits de tresorerie",
+      "comptes": [
+        "56",
+        "52",
+        "53"
+      ],
+      "exclusions": [],
+      "sens": "56 ; puis soldes crediteurs de 52, 53",
+      "regle": "imprime : '56, Solde crediteurs : 52, 53,' (virgule finale : liste peut-etre tronquee, voir illisible)"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "DY",
+      "libelle": "Ecart de conversion-Passif",
+      "comptes": [
+        "479"
+      ],
+      "exclusions": [],
+      "sens": null,
+      "regle": "colonne 'Numeros de comptes a incorporer dans les postes'"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RA",
+      "libelle": "Cotisations",
+      "comptes": [
+        "701"
+      ],
+      "exclusions": [],
+      "sens": "produit",
+      "signeImprime": "+",
+      "regle": "signe imprime dans la colonne '+/-' ; produit"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RB",
+      "libelle": "Dotations consomptibles transferees au compte de resultat",
+      "comptes": [
+        "703"
+      ],
+      "exclusions": [],
+      "sens": "produit",
+      "signeImprime": "+",
+      "regle": "signe imprime dans la colonne '+/-' ; produit"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RC",
+      "libelle": "Revenus lies a la generosite",
+      "comptes": [
+        "704"
+      ],
+      "exclusions": [],
+      "sens": "produit",
+      "signeImprime": "+",
+      "regle": "signe imprime dans la colonne '+/-' ; produit"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RD",
+      "libelle": "Ventes de marchandises",
+      "comptes": [
+        "7051"
+      ],
+      "exclusions": [],
+      "sens": "produit",
+      "signeImprime": "+",
+      "regle": "signe imprime dans la colonne '+/-' ; produit"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RE",
+      "libelle": "Ventes de services et produits finis",
+      "comptes": [
+        "7052",
+        "7053"
+      ],
+      "exclusions": [],
+      "sens": "produit",
+      "signeImprime": "+",
+      "regle": "signe imprime dans la colonne '+/-' ; produit"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RF",
+      "libelle": "Subventions d'exploitation",
+      "comptes": [
+        "71"
+      ],
+      "exclusions": [],
+      "sens": "produit",
+      "signeImprime": "+",
+      "regle": "signe imprime dans la colonne '+/-' ; produit"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RG",
+      "libelle": "Autres produits et transferts de charges",
+      "comptes": [
+        "706",
+        "707",
+        "708",
+        "72",
+        "73",
+        "75",
+        "77",
+        "78"
+      ],
+      "exclusions": [],
+      "sens": "produit",
+      "signeImprime": "",
+      "regle": "aucun signe imprime dans la colonne ; '73 (+/-)' imprime",
+      "precisions": "706, 707, 708, 72, 73 (+/-), 75, 77, 78"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RH",
+      "libelle": "Reprises de provisions, depreciations, subventions et autres reprises",
+      "comptes": [
+        "79"
+      ],
+      "exclusions": [],
+      "sens": "produit",
+      "signeImprime": "+",
+      "regle": "signe imprime dans la colonne '+/-' ; produit"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "XA",
+      "libelle": "REVENUS DES ACTIVITES ORDINAIRES (total)",
+      "comptes": null,
+      "exclusions": [],
+      "sens": null,
+      "regle": "total sans compte"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TA",
+      "libelle": "Achats de biens et services lies a l'activite",
+      "comptes": [
+        "601"
+      ],
+      "exclusions": [],
+      "sens": "charge",
+      "signeImprime": "-",
+      "regle": "signe imprime dans la colonne '+/-' ; charge"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TB",
+      "libelle": "Variation de stocks des achats de biens et services lies a l'activite",
+      "comptes": [
+        "6031"
+      ],
+      "exclusions": [],
+      "sens": "charge (variation de stock)",
+      "signeImprime": "+/-",
+      "regle": "signe imprime dans la colonne '+/-' ; charge"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TC",
+      "libelle": "Achats de marchandises et matieres premieres",
+      "comptes": [
+        "602"
+      ],
+      "exclusions": [],
+      "sens": "charge",
+      "signeImprime": "-",
+      "regle": "signe imprime dans la colonne '+/-' ; charge"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TD",
+      "libelle": "Autres achats",
+      "comptes": [
+        "604",
+        "605",
+        "606",
+        "608"
+      ],
+      "exclusions": [],
+      "sens": "charge",
+      "signeImprime": "-",
+      "regle": "signe imprime dans la colonne '+/-' ; charge"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TE",
+      "libelle": "Variation de stocks de marchandises, de matieres premieres et autres",
+      "comptes": [
+        "6032",
+        "6033",
+        "6034",
+        "6035"
+      ],
+      "exclusions": [],
+      "sens": "charge (variation de stock)",
+      "signeImprime": "+/-",
+      "regle": "signe imprime dans la colonne '+/-' ; charge"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TF",
+      "libelle": "Transports",
+      "comptes": [
+        "61"
+      ],
+      "exclusions": [],
+      "sens": "charge",
+      "signeImprime": "-",
+      "regle": "signe imprime dans la colonne '+/-' ; charge"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TG",
+      "libelle": "Services exterieurs",
+      "comptes": [
+        "62",
+        "63"
+      ],
+      "exclusions": [],
+      "sens": "charge",
+      "signeImprime": "-",
+      "regle": "signe imprime dans la colonne '+/-' ; charge"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TH",
+      "libelle": "Impots et taxes",
+      "comptes": [
+        "64"
+      ],
+      "exclusions": [],
+      "sens": "charge",
+      "signeImprime": "-",
+      "regle": "signe imprime dans la colonne '+/-' ; charge"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TI",
+      "libelle": "Autres charges",
+      "comptes": [
+        "65"
+      ],
+      "exclusions": [],
+      "sens": "charge",
+      "signeImprime": "-",
+      "regle": "signe imprime dans la colonne '+/-' ; charge"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TJ",
+      "libelle": "Charges de personnel",
+      "comptes": [
+        "66"
+      ],
+      "exclusions": [],
+      "sens": "charge",
+      "signeImprime": "-",
+      "regle": "signe imprime dans la colonne '+/-' ; charge"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TK",
+      "libelle": "Frais financiers et charges assimilees",
+      "comptes": [
+        "67"
+      ],
+      "exclusions": [],
+      "sens": "charge",
+      "signeImprime": "-",
+      "regle": "signe imprime dans la colonne '+/-' ; charge"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TL",
+      "libelle": "Dotations aux amortissements, aux provisions, aux depreciations et autres",
+      "comptes": [
+        "68",
+        "69"
+      ],
+      "exclusions": [],
+      "sens": "charge",
+      "signeImprime": "-",
+      "regle": "signe imprime dans la colonne '+/-' ; charge"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "XB",
+      "libelle": "CHARGES DES ACTIVITES ORDINAIRES (total)",
+      "comptes": null,
+      "exclusions": [],
+      "sens": null,
+      "regle": "total sans compte"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "XC",
+      "libelle": "RESULTAT DES ACTIVITES ORDINAIRES (total)",
+      "comptes": null,
+      "exclusions": [],
+      "sens": null,
+      "regle": "total sans compte"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TM",
+      "libelle": "Produits H.A.O.",
+      "comptes": [
+        "82",
+        "84",
+        "86",
+        "88"
+      ],
+      "exclusions": [],
+      "sens": "produit",
+      "signeImprime": "+",
+      "regle": "signe imprime dans la colonne '+/-' ; produit"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "TN",
+      "libelle": "Charges H.A.O.",
+      "comptes": [
+        "81",
+        "83",
+        "85",
+        "87"
+      ],
+      "exclusions": [],
+      "sens": "charge",
+      "signeImprime": "-",
+      "regle": "signe imprime dans la colonne '+/-' ; charge ; '(+/-)' imprime apres 87",
+      "precisions": "81, 83, 85, 87 (+/-)"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "XD",
+      "libelle": "RESULTAT H.A.O. (total)",
+      "comptes": null,
+      "exclusions": [],
+      "sens": null,
+      "regle": "total sans compte"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "XE",
+      "libelle": "RESULTAT NET DE L'EXERCICE (total)",
+      "comptes": null,
+      "exclusions": [],
+      "sens": null,
+      "regle": "total sans compte"
+    },
+    {
+      "etat": "FLUX_TRESORERIE",
+      "poste": null,
+      "libelle": "Tableau des flux de tresorerie (tous postes)",
+      "comptes": null,
+      "regle": "le JO ne donne PAS de tableau de correspondance comptes -> postes pour le TFT (methode directe ; encaissements N = revenus N + creances N-1 - creances N ; decaissements N = achats N + dettes N-1 - dettes N, p.343)"
+    }
+  ],
+  "controles": {
+    "imprimees": [
+      {
+        "id": "TFT-1",
+        "egalite": "Tresorerie nette en fin de periode = Tresorerie nette en debut de periode + variation de la tresorerie de la periode",
+        "page": 343,
+        "postes": "ZG = ZA + ZF"
+      },
+      {
+        "id": "TFT-2",
+        "egalite": "Tresorerie nette en fin de periode = Tresorerie actif N - Tresorerie passif N",
+        "page": "343 et 348",
+        "postes": "ZG = BX(N) - DX(N) ; repete en 'Controle : Tresorerie actif N - Tresorerie passif N' sous ZG"
+      },
+      {
+        "id": "TFT-3",
+        "egalite": "Variation de tresorerie de l'exercice = flux operationnels + investissement + financement",
+        "page": "343 et 348",
+        "postes": "ZF = ZB + ZC + ZD + ZE (libelle de ZF imprime '(B+C+D+E)')"
+      },
+      {
+        "id": "TFT-4",
+        "egalite": "Tresorerie nette au 1er janvier = Tresorerie actif N-1 - Tresorerie passif N-1",
+        "page": 348,
+        "postes": "ZA = BX(N-1) - DX(N-1)"
+      },
+      {
+        "id": "TFT-5",
+        "egalite": "Sous-totaux : ZB = somme FA a FH ; ZC = somme FI a FL ; ZD = somme FM a FO ; ZE = somme FP a FQ ; flux de financement = D+E",
+        "page": 348,
+        "postes": "ZB, ZC, ZD, ZE"
+      },
+      {
+        "id": "TFT-6",
+        "egalite": "Encaissements de l'exercice N = Revenus (N) + Creances (N-1) - Creances (N) ; Decaissements N = Achats (N) + Dettes (N-1) - Dettes (N)",
+        "page": 343,
+        "postes": "methode directe, flux operationnels"
+      },
+      {
+        "id": "BIL-1",
+        "egalite": "Ressources propres = Actif - passif externe (logique de presentation du bilan)",
+        "page": 342,
+        "postes": "formulation textuelle, sans codes"
+      },
+      {
+        "id": "CR-1",
+        "egalite": "XA = Somme RA a RG",
+        "page": 347,
+        "postes": "XA = RA+RB+RC+RD+RE+RF+RG"
+      },
+      {
+        "id": "CR-2",
+        "egalite": "XB = Somme TA a TL",
+        "page": 347,
+        "postes": "XB = TA+...+TL"
+      },
+      {
+        "id": "CR-3",
+        "egalite": "XC = XA - XB",
+        "page": 347,
+        "postes": "XC = XA - XB"
+      },
+      {
+        "id": "CR-4",
+        "egalite": "XD = TM - TN",
+        "page": 347,
+        "postes": "XD = TM - TN"
+      },
+      {
+        "id": "CR-5",
+        "egalite": "XE = XC + XD",
+        "page": 347,
+        "postes": "XE = XC + XD"
+      },
+      {
+        "id": "N33-1",
+        "egalite": "Note 33 : Tresorerie nette = (Tresorerie-actif) - (Tresorerie-passif) ; Tresorerie nette (5) = (1) - (4) ; BFG (4) = BF exploitation (2) + BF HAO (3) ; ressources stables = fonds propres et assimiles + dettes financieres et ressources assimilees ; Fonds de roulement (1) = ressources stables - actif immobilise",
+        "page": 392,
+        "postes": "indicateurs de la note 33"
+      },
+      {
+        "id": "N33-2",
+        "egalite": "Note 33 (a) : CAFG = Resultat net + Dotations aux amortissements, depreciations, provisions et autres - Reprises d'amortissements, de depreciations, provisions et autres + valeurs comptables des cessions d'immobilisations - Produits des cessions d'immobilisations",
+        "page": 392,
+        "postes": "note 33"
+      },
+      {
+        "id": "N33-3",
+        "egalite": "Note 33 : Ratio de liquidite generale = (Creances + Tresorerie-actif) / Passif circulant ; creances = Fournisseurs avances versees + Adherents + Autres creances",
+        "page": 392,
+        "postes": "note 33"
+      },
+      {
+        "id": "N5-1",
+        "egalite": "Notes 5A/5B/5C : D = A + B - C ; notes 5D/5E : E = A + B - C - D ; note 5F : D = A + B - C ; note 5G : C = A - B et E = D - C",
+        "page": "354-360",
+        "postes": "notes immobilisations"
+      },
+      {
+        "id": "N35-1",
+        "egalite": "Note 35 : Realisation (4) = Decaissement (2) + Engagement (3) ; Credit disponible (5) = Budget (1) - Realisation (4) ; Execution budget % = 4/1",
+        "page": 394,
+        "postes": "note 35"
+      }
+    ],
+    "deduitesNonImprimees": [
+      {
+        "id": "BIL-2",
+        "egalite": "Total general actif = Total general passif (BZ = DZ)",
+        "note": "Les deux lignes TOTAL GENERAL sont imprimees mais aucune egalite BZ = DZ n'est ecrite ; deduite de la logique du bilan (p.342)"
+      },
+      {
+        "id": "BIL-3",
+        "egalite": "Resultat net du bilan (CH, comptes 131/139) = Resultat net du compte de resultat (XE)",
+        "note": "Aucune egalite imprimee ; deduite (meme intitule 'Resultat net de l'exercice (excedent + ou deficit -)')"
+      }
+    ]
+  },
+  "notes": [
+    {
+      "note": "1",
+      "titre": "Dettes garanties par des suretes reelles, engagements financiers et contributions volontaires en nature",
+      "partie": "1. Informations generales",
+      "page": 350,
+      "contenu": "Dettes ventilees avec suretes (hypotheques, nantissements, gages) ; engagements financiers (avals, cautions, effets escomptes) ; contributions volontaires en nature (dons, secours, mises a disposition, prestations, benevolat) en ressources et emplois a la valeur actuelle"
+    },
+    {
+      "note": "2",
+      "titre": "Informations obligatoires",
+      "partie": "1. Informations generales",
+      "page": 351,
+      "contenu": "A identite/organisation (creation, effectifs, benevoles, revenus) ; B declaration de conformite et faits marquants ; C regles, methodes, derogations ; D informations complementaires bilan/CR/TFT"
+    },
+    {
+      "note": "3",
+      "titre": "Evenements posterieurs a la cloture de l'exercice",
+      "partie": "1. Informations generales",
+      "page": 352,
+      "contenu": "Date d'arret des etats financiers, organe autorisant la publication ; evenements avec ajustement, sans ajustement, remettant en cause la continuite d'exploitation"
+    },
+    {
+      "note": "4",
+      "titre": "Changements de methodes comptables, d'estimations et corrections d'erreurs",
+      "partie": "1. Informations generales",
+      "page": 353,
+      "contenu": "A changements de reglementation ou de methode (retrospectif/prospectif) ; B changements d'estimations ; C corrections d'erreurs"
+    },
+    {
+      "note": "5A",
+      "titre": "Dons et legs d'immobilisations non recus destines a la vente et usufruit temporaire",
+      "partie": "2. Notes sur le bilan",
+      "page": 354,
+      "contenu": "Mouvements bruts (ouverture, acquisitions/apports, virements, reevaluation, cessions, cloture) : usufruit, brevets, autres incorporelles, corporelles, financieres"
+    },
+    {
+      "note": "5B",
+      "titre": "Immobilisations brutes",
+      "partie": "2. Notes sur le bilan",
+      "page": 355,
+      "contenu": "Mouvements des valeurs brutes par rubrique (dont immeubles de placement, avances et acomptes)"
+    },
+    {
+      "note": "5C",
+      "titre": "Biens pris en location - acquisition",
+      "partie": "2. Notes sur le bilan",
+      "page": 356,
+      "contenu": "Mouvements des biens en location-acquisition (nature du contrat i/m/a) : terrains, batiments, materiel, transport"
+    },
+    {
+      "note": "5D",
+      "titre": "Dons et legs d'immobilisations non recus destines a la vente et usufruit temporaire (amortissements et depreciations)",
+      "partie": "2. Notes sur le bilan",
+      "page": 357,
+      "contenu": "Amortissements/depreciations cumules sur ces dons et legs (usufruit, brevets..., terrains, batiments, materiel)"
+    },
+    {
+      "note": "5E",
+      "titre": "Immobilisations : Amortissements",
+      "partie": "2. Notes sur le bilan",
+      "page": 358,
+      "contenu": "Ouverture, dotations, diminutions (sorties, reprises), virements, cumul a la cloture ; modes et taux"
+    },
+    {
+      "note": "5F",
+      "titre": "Immobilisations : Depreciations",
+      "partie": "2. Notes sur le bilan",
+      "page": 359,
+      "contenu": "Ouverture, dotations, reprises, cumul a la cloture"
+    },
+    {
+      "note": "5G",
+      "titre": "Immobilisations : Plus-values et moins-values de cession",
+      "partie": "2. Notes sur le bilan",
+      "page": 360,
+      "contenu": "Brut, amortissements, VNC, prix de cession, plus ou moins-value par rubrique"
+    },
+    {
+      "note": "5H",
+      "titre": "Informations sur les reevaluations effectuees par l'entite",
+      "partie": "2. Notes sur le bilan",
+      "page": 361,
+      "contenu": "Nature/date, elements reevalues (cout historique, montant reevalue, ecart), methode, traitement fiscal, ecart incorpore a la dotation"
+    },
+    {
+      "note": "6",
+      "titre": "Immobilisations financieres",
+      "partie": "2. Notes sur le bilan",
+      "page": 362,
+      "contenu": "Titres de participation, prets, creances, depots... N/N-1, variation, echeances ; depreciations"
+    },
+    {
+      "note": "7",
+      "titre": "Actif circulant et dettes circulantes HAO",
+      "partie": "2. Notes sur le bilan",
+      "page": 363,
+      "contenu": "Creances HAO (cessions, dons et legs recus, autres) et dettes circulantes HAO (fournisseurs d'investissements, dons et legs, autres), N/N-1"
+    },
+    {
+      "note": "8",
+      "titre": "Stocks et encours",
+      "partie": "2. Notes sur le bilan",
+      "page": 364,
+      "contenu": "Stocks par nature (biens et services lies a l'activite, marchandises, dons en nature, produits finis, HAO), variation, depreciations"
+    },
+    {
+      "note": "9",
+      "titre": "Adherents, clients-usagers",
+      "partie": "2. Notes sur le bilan",
+      "page": 365,
+      "contenu": "Creances adherents/clients-usagers (impayes, litigieuses, produits a recevoir), depreciations, avances recues, echeances"
+    },
+    {
+      "note": "10",
+      "titre": "Autres creances",
+      "partie": "2. Notes sur le bilan",
+      "page": 366,
+      "contenu": "Personnel, organismes sociaux, Etat, fondateurs, bailleurs, debiteurs divers, depreciations, echeances"
+    },
+    {
+      "note": "11",
+      "titre": "Titres de placement",
+      "partie": "2. Notes sur le bilan",
+      "page": 367,
+      "contenu": "Titres de tresor, actions, obligations, bons, interets courus ; depreciations"
+    },
+    {
+      "note": "12",
+      "titre": "Valeurs a encaisser",
+      "partie": "2. Notes sur le bilan",
+      "page": 368,
+      "contenu": "Cheques, cartes de credit a encaisser, autres ; depreciations"
+    },
+    {
+      "note": "13",
+      "titre": "Disponibilites",
+      "partie": "2. Notes sur le bilan",
+      "page": 369,
+      "contenu": "Banques (locales, region, DAT, postales), autres etablissements financiers, monnaie electronique, caisse ; NB banques interets courus en negatif si compte principal debiteur"
+    },
+    {
+      "note": "14",
+      "titre": "Ecarts de conversion",
+      "partie": "2. Notes sur le bilan",
+      "page": 370,
+      "contenu": "Ecarts de conversion actif et passif : devises, montant, cours, variation"
+    },
+    {
+      "note": "15",
+      "titre": "Dotation",
+      "partie": "2. Notes sur le bilan",
+      "page": 371,
+      "contenu": "Liste nominative des membres (nationalite, montant, avec/sans droit de reprise) : dotation non consomptible, droit d'entree, dotation consomptible"
+    },
+    {
+      "note": "16",
+      "titre": "Reserves",
+      "partie": "2. Notes sur le bilan",
+      "page": 372,
+      "contenu": "Reserves statutaires/contractuelles, autres reserves, report a nouveau (N/N-1)"
+    },
+    {
+      "note": "17A",
+      "titre": "Subventions et provisions reglementees",
+      "partie": "2. Notes sur le bilan",
+      "page": 373,
+      "contenu": "Subventions d'investissement par financeur (Etat, region, communes, organismes prives/internationaux...) et provisions reglementees ; regime fiscal, echeances"
+    },
+    {
+      "note": "17B",
+      "titre": "Fonds affectes et reportes",
+      "partie": "2. Notes sur le bilan",
+      "page": 374,
+      "contenu": "Fonds affectes (investissements, projet specifique, dons et legs d'immobilisations) et fonds reportes (dons/legs non encore recus destines a la vente, usufruit temporaire, autres)"
+    },
+    {
+      "note": "18A",
+      "titre": "Dettes financieres et ressources assimilees",
+      "partie": "2. Notes sur le bilan",
+      "page": 375,
+      "contenu": "Emprunts et dettes financieres, dettes de location-acquisition, provisions pour risques et charges (litiges, retraite...), echeances"
+    },
+    {
+      "note": "18B",
+      "titre": "Actifs et passifs eventuels",
+      "partie": "2. Notes sur le bilan",
+      "page": 376,
+      "contenu": "Actif et passif eventuels (litiges...) N/N-1, caracteristiques et horizon"
+    },
+    {
+      "note": "19",
+      "titre": "Fournisseurs d'exploitation",
+      "partie": "2. Notes sur le bilan",
+      "page": 377,
+      "contenu": "Fournisseurs (en compte, reserve de propriete, retenue de garantie, effets, FNP) et fournisseurs debiteurs (avances, sous-traitants)"
+    },
+    {
+      "note": "20",
+      "titre": "Dettes fiscales et sociales",
+      "partie": "2. Notes sur le bilan",
+      "page": 378,
+      "contenu": "Dettes sociales (personnel, CSS, retraite, mutuelle...) et fiscales (TVA, impots retenus...) avec echeances"
+    },
+    {
+      "note": "21",
+      "titre": "Autres dettes et provisions pour risques et charges a court terme",
+      "partie": "2. Notes sur le bilan",
+      "page": 379,
+      "contenu": "Fonds d'administration des projets (bailleurs, Etat), crediteurs divers, dons en nature courants non consommes ; renvoi note 30 pour provisions a court terme"
+    },
+    {
+      "note": "22",
+      "titre": "Banques, credit d'escompte et de tresorerie",
+      "partie": "2. Notes sur le bilan",
+      "page": 380,
+      "contenu": "Banques locales/region, interets courus, credit de tresorerie ; conditions du credit"
+    },
+    {
+      "note": "23",
+      "titre": "Revenus et autres produits",
+      "partie": "3. Notes sur le compte de resultat",
+      "page": 381,
+      "contenu": "Cotisations, quote-part de dotation consomptible, generosite, ventes, manifestations, autres revenus, subventions d'exploitation, autres produits"
+    },
+    {
+      "note": "24",
+      "titre": "Achats",
+      "partie": "3. Notes sur le compte de resultat",
+      "page": 382,
+      "contenu": "Achats de biens et services lies a l'activite, marchandises et matieres premieres (Etat partie/region/hors region), autres achats (energie, fournitures, emballages...)"
+    },
+    {
+      "note": "25",
+      "titre": "Transports",
+      "partie": "3. Notes sur le compte de resultat",
+      "page": 383,
+      "contenu": "Transports sur ventes, pour compte de tiers, du personnel, plis, voyages et deplacements, administratifs"
+    },
+    {
+      "note": "26",
+      "titre": "Services exterieurs",
+      "partie": "3. Notes sur le compte de resultat",
+      "page": 384,
+      "contenu": "Sous-traitance, locations, entretien, assurances, publicite, telecoms, frais bancaires, formation, cotisations, recherche de fonds, personnel exterieur..."
+    },
+    {
+      "note": "27",
+      "titre": "Impots et taxes",
+      "partie": "3. Notes sur le compte de resultat",
+      "page": 385,
+      "contenu": "Impots directs/indirects, enregistrement, penalites et amendes fiscales, autres, degrevements (signe -)"
+    },
+    {
+      "note": "28",
+      "titre": "Autres charges",
+      "partie": "3. Notes sur le compte de resultat",
+      "page": 386,
+      "contenu": "Pertes sur creances adherents/clients, subventions versees, dons en nature courants a distribuer, penalites penales, autres, depreciations et provisions a court terme d'exploitation"
+    },
+    {
+      "note": "29A",
+      "titre": "Charges de personnel",
+      "partie": "3. Notes sur le compte de resultat",
+      "page": 387,
+      "contenu": "Remunerations directes (national/non national), indemnites, charges sociales, habillement, personnel exterieur, degrevements (signe -)"
+    },
+    {
+      "note": "29B",
+      "titre": "Effectif, masse salariale et personnel exterieur",
+      "partie": "3. Notes sur le compte de resultat",
+      "page": 388,
+      "contenu": "Effectifs et masse salariale par qualification (codes YA a YO), sexe et zone ; personnel propre, exterieur et benevole"
+    },
+    {
+      "note": "30",
+      "titre": "Dotations et charges pour provisions et depreciations",
+      "partie": "3. Notes sur le compte de resultat",
+      "page": 389,
+      "contenu": "Mouvements de provisions : dotations (exploitation/financieres/HAO), reprises, cloture ; depreciations par nature, dotation de fonds affectes non consommes"
+    },
+    {
+      "note": "31",
+      "titre": "Charges et revenus financiers",
+      "partie": "3. Notes sur le compte de resultat",
+      "page": 390,
+      "contenu": "Frais financiers (interets, escomptes, pertes de change, provisions) et revenus financiers (interets de prets, placements, gains de change, reprises)"
+    },
+    {
+      "note": "32",
+      "titre": "Autres charges et produits HAO",
+      "partie": "3. Notes sur le compte de resultat",
+      "page": 391,
+      "contenu": "Charges HAO (compte 831, dons en nature 832, pertes sur creances, abandons, dotations) et produits HAO (841, contributions volontaires en nature 842, numeraire, transferts, reprises, subventions d'equilibre)"
+    },
+    {
+      "note": "33",
+      "titre": "Fiche de synthese des principaux indicateurs financiers",
+      "partie": "4. Autres informations",
+      "page": 392,
+      "contenu": "Soldes intermediaires (resultats, CAFG, ratio de cotisations, utilisation des dons), structure financiere (FR, BFR, BFG, tresorerie nette + controle), liquidite, variation de tresorerie ; en milliers de francs"
+    },
+    {
+      "note": "34",
+      "titre": "Liste des informations sociales, environnementales et societales",
+      "partie": "4. Autres informations",
+      "page": 393,
+      "contenu": "Liste narrative (emploi, relations sociales, sante, formation, egalite, environnement, engagements societaux) ; obligatoire au-dela de 250 personnes y compris benevoles"
+    },
+    {
+      "note": "35",
+      "titre": "Tableau d'execution budgetaire",
+      "partie": "4. Autres informations",
+      "page": 394,
+      "contenu": "Code, libelle, budget, decaissement, engagement, realisation (4=2+3), credit disponible (5=1-4), execution % (4/1) selon la nomenclature budgetaire du projet"
+    }
+  ],
+  "differencesAvecSyscohada": [
+    {
+      "theme": "Capital et fonds propres",
+      "ebnl": "Pas de capital : Dotation non consomptible sans/avec droit de reprise (CA/CB), Droit d'entree (CC), Dotation consomptible (CD, reprise au resultat via RB/compte 703), puis ecarts de reevaluation, reserves, report, resultat, subventions d'investissement, provisions reglementees (total CK)"
+    },
+    {
+      "theme": "Fonds affectes et reportes",
+      "ebnl": "Bloc propre CW (fonds affectes et provenant de dons et legs d'immobilisations, compte 16) et CX (fonds reportes, compte 17) = CY ; CK + CY = CZ 'Ressources propres et assimilees'"
+    },
+    {
+      "theme": "Actif : dons et legs a recevoir",
+      "ebnl": "Rubrique AA (AB, AC) : immobilisations destinees a la vente provenant de dons et legs non encore recus et usufruit temporaire (comptes 201 a 205), en tete de l'actif immobilise"
+    },
+    {
+      "theme": "Tiers",
+      "ebnl": "Adherents, clients-usagers (BD, compte 41) et crediteurs (DG, 419) ; fonds d'administration des projets / bailleurs (note 21)"
+    },
+    {
+      "theme": "Bilan : ressources stables",
+      "ebnl": "DE = ressources propres et assimilees (CZ) + dettes financieres et ressources assimilees (DD) ; provisions pour risques et charges (DC, compte 19) classees dans les dettes financieres"
+    },
+    {
+      "theme": "Compte de resultat : produits propres aux EBNL",
+      "ebnl": "RA Cotisations (701), RB Dotations consomptibles transferees (703), RC Revenus lies a la generosite (704), RD/RE ventes (7051 ; 7052-7053), RF subventions d'exploitation (71)"
+    },
+    {
+      "theme": "Compte de resultat : pas de soldes intermediaires",
+      "ebnl": "Pas de marge, valeur ajoutee ou EBE imprimes ; XC = XA - XB ; XE = XC + XD ; la note 33 reconstitue CAFG et soldes de gestion"
+    },
+    {
+      "theme": "Compte de resultat : financier et impot",
+      "ebnl": "Frais financiers (TK, 67) dans les charges des activites ordinaires ; produits financiers (77) dans RG ; aucune ligne de resultat financier ni d'impot sur le resultat au tableau imprime (comparaison avec SYSCOHADA a confirmer)"
+    },
+    {
+      "theme": "HAO",
+      "ebnl": "TM/TN : classe 8 incluant dons en nature (832), contributions volontaires en nature (842), subventions d'equilibre (note 32)"
+    },
+    {
+      "theme": "Contributions volontaires en nature",
+      "ebnl": "Presentees en note 1 (ressources/emplois, valeur actuelle) et en note 32 (842)"
+    },
+    {
+      "theme": "Tableau des flux de tresorerie",
+      "ebnl": "Methode directe obligatoire pour les operationnels ; postes FA-FQ propres aux EBNL (cotisations, generosite, manifestations ; financement par fonds propres : dotations, subventions d'investissement) ; aucune table de correspondance au JO"
+    },
+    {
+      "theme": "Notes annexes",
+      "ebnl": "45 notes ; propres aux EBNL : 5A/5D (dons et legs), 15 (dotation), 17B (fonds affectes et reportes), 29B (benevoles), 33 (indicateurs), 34 (RSE si > 250 personnes), 35 (execution budgetaire)"
+    }
+  ],
+  "illisible": [
+    {
+      "page": 346,
+      "element": "Libelles des totaux en bandeau sombre : AZ, BT, BX (actif) et DE, DV, DX (passif) ; BZ/DZ 'TOTAL GENERAL' lisibles",
+      "traitement": "libelles reconstitues (TOTAL ACTIF IMMOBILISE, ACTIF CIRCULANT, TRESORERIE-ACTIF, RESSOURCES STABLES, PASSIF CIRCULANT, TRESORERIE-PASSIF) et marques 'lu partiellement'"
+    },
+    {
+      "page": 346,
+      "element": "Aucune formule de total imprimee pour AA, AD, AH, AO, AZ, BT, BX, BZ, CK, CY, CZ, DD, DE, DV, DX, DZ",
+      "traitement": "formules DEDUITES, formuleImprimee=false ; a valider"
+    },
+    {
+      "page": 346,
+      "element": "Codes CW et DW imprimes en deux lignes ('C / W', 'D / W')",
+      "traitement": "lus CW et DW (coherent avec la table p.395)"
+    },
+    {
+      "page": 395,
+      "element": "AG, colonne amortissements/depreciations : cellule '2 ?1' (un caractere illisible)",
+      "traitement": "comptesAmortDeprec = null ; par analogie avec AN (2952) ce serait 2951, NON retenu"
+    },
+    {
+      "page": 395,
+      "element": "DW : cellule '56, Solde crediteurs : 52, 53,' avec virgule finale",
+      "traitement": "lu : 56 + soldes crediteurs 52, 53 ; liste possiblement tronquee"
+    },
+    {
+      "page": 395,
+      "element": "DI : portee de 'Soldes crediteurs' sur '499 (sauf 4998), 599' ambigue",
+      "traitement": "consigne dans regle"
+    },
+    {
+      "page": 348,
+      "element": "Ligne 'Flux de tresorerie provenant des activites de financement (D+E)' sans code ni lettre (la lettre F manque, G suit)",
+      "traitement": "code null, codeImprime=false"
+    },
+    {
+      "page": 348,
+      "element": "Textes en bandeau sombre ZA, ZB, ZC, ZF, ZG partiellement ecrases",
+      "traitement": "libelles lus, lettres A a H retenues"
+    },
+    {
+      "page": "347 et 396",
+      "element": "XA imprime 'Somme RA a RG' : RH (reprises, compte 79) n'y figure pas alors que RH est un produit",
+      "traitement": "formule conservee a l'identique ; voir alertes"
+    },
+    {
+      "page": 396,
+      "element": "'(+/-)' apres 73 (RG) et apres 87 (TN) : portee exacte non precisee",
+      "traitement": "conserve dans precisions"
+    },
+    {
+      "page": "350-394",
+      "element": "Les notes sont des modeles vierges : aucune ne donne de comptes ni de valeurs",
+      "traitement": "contenu resume en une ligne par note"
+    }
+  ],
+  "alertes": [
+    "XA = 'Somme RA a RG' tel qu'imprime exclut RH (reprises, compte 79) alors que RH est un produit du compte de resultat : omission d'impression probable, a trancher (formule conservee a l'identique) ; XC = XA - XB en depend",
+    "Le JO ne fournit de table de correspondance que pour le bilan et le compte de resultat (p.395-396) : aucune pour le tableau des flux de tresorerie ni pour les totaux/en-tetes ; les formules de totaux du bilan sont deduites (formuleImprimee=false)",
+    "Aucun delai d'etablissement/approbation/depot dans les pages lues (339-396)",
+    "Relecture du 2026-11-23 sur l'image de la p. 395 : le JO suffixe certains comptes d'amortissement et de dépréciation par « p » (pour partie) — 2919p (AE, AF), 2939p (AJ, AK), 2949p (AL, AM). L'extraction a perdu ce suffixe : ces comptes ne s'imputent que POUR PARTIE au poste. Le libellé « 284 (sauf 2845), 294 (sauf 2945, 2949), 2949p » de AL se lit : 2949 exclu en entier, puis réintégré pour partie. À reprendre avant tout packaging. Les libellés de ce fichier ont perdu leurs accents."
+  ],
+  "couverture": {
+    "BILAN_ACTIF": {
+      "postesDetail": 22,
+      "avecComptes": 22,
+      "sansComptes": []
+    },
+    "BILAN_PASSIF": {
+      "postesDetail": 21,
+      "avecComptes": 21,
+      "sansComptes": []
+    },
+    "COMPTE_RESULTAT": {
+      "postesDetail": 22,
+      "avecComptes": 22,
+      "sansComptes": []
+    },
+    "FLUX_TRESORERIE": {
+      "postesDetail": 17,
+      "avecComptes": 0,
+      "sansComptes": "tous (pas de table de correspondance au JO)"
+    }
+  }
+}

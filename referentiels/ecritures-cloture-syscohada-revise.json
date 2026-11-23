@@ -1,0 +1,2314 @@
+{
+  "_meta": {
+    "artefact": "ecritures-cloture-syscohada-revise",
+    "zoneComptable": "OHADA",
+    "pays": [],
+    "devisePresentation": null,
+    "normeSource": "SYSCOHADA révisé (AUDCIF 2017)",
+    "source": "Livre 11 « Travaux de fin d'exercice » du pack de 25 livres comptables — séminaire sur l'appropriation du SYSCOHADA révisé, Conseil permanent de la comptabilité au Congo (CPCC), Kinshasa, septembre 2017 (35 p.)",
+    "statut": "amorce",
+    "miseEnGarde": "Exemples issus de la RDC : les coefficients dégressifs, les taux d'amortissement, la TVA à 16 %, l'impôt sur les bénéfices et le prorata en mois ne sont PAS togolais (voir specificitesNonTogolaises). Les comptes sont ceux écrits par le livre, qui contient des incohérences (voir erreursDuLivre) ; à recouper avec plan-comptable-syscohada.json du même dossier, qui ne descend pas aux comptes à 4-6 chiffres (4781, 4991, 6914, 24111…). Les comptes marqués « hors livre — à confirmer » ne figurent pas dans le livre.",
+    "usage": "Catalogue de règles génériques (sans montant) et de cas chiffrés réutilisables comme jeux de tests du futur comptabilite-service (journaux, contre-passation, clôture, piste d'audit). Chaque jeu d'écritures attendues doit être équilibré ; verifie=false signale un chiffre du livre que le recalcul ne confirme pas. Les montants sont dans la monnaie de l'exemple (CDF)."
+  },
+  "regles": [
+    {
+      "code": "STK-INTERM-ANNULATION",
+      "domaine": "stocks-inventaire-intermittent",
+      "libelle": "Annulation du stock initial",
+      "quand": "À l'inventaire, en inventaire intermittent : les mouvements ne sont constatés qu'à l'inventaire.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "603",
+          "libelle": "Variations des stocks de biens achetés (stock initial)"
+        },
+        {
+          "sens": "C",
+          "compte": "31/32/33/38",
+          "libelle": "Comptes de stocks concernés (marchandises, matières, autres approvisionnements, stocks en cours de route)"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Pour les produits : débit 734/735/736/737 (variations des stocks de produits), crédit 34/35/36/37. Ce n'est pas une contre-passation à l'ouverture : l'annulation se passe à la clôture.",
+      "source": "p.3",
+      "variantes": [
+        {
+          "condition": "Stocks de produits (biens et services produits)",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "734/735/736/737",
+              "libelle": "Variations des stocks de produits"
+            },
+            {
+              "sens": "C",
+              "compte": "34/35/36/37",
+              "libelle": "Comptes de stocks de produits concernés"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "STK-INTERM-STOCK-FINAL",
+      "domaine": "stocks-inventaire-intermittent",
+      "libelle": "Constatation du stock final",
+      "quand": "À l'inventaire, après l'annulation du stock initial.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "31/32/33/38",
+          "libelle": "Comptes de stocks concernés"
+        },
+        {
+          "sens": "C",
+          "compte": "603",
+          "libelle": "Variations des stocks de biens achetés (stock final)"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Les produits et services en cours à la clôture passent par la même écriture que le stock final (34/35 contre 73x).",
+      "source": "p.3",
+      "variantes": [
+        {
+          "condition": "Stocks de produits",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "34/35/36/37",
+              "libelle": "Comptes de stocks de produits concernés"
+            },
+            {
+              "sens": "C",
+              "compte": "734/735/736/737",
+              "libelle": "Variations des stocks de produits"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "STK-ECART-PLUS",
+      "domaine": "stocks-ecarts-inventaire",
+      "libelle": "Écart d'inventaire en plus (boni)",
+      "quand": "Inventaire physique supérieur au stock comptable, après analyse de l'origine de l'écart.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "31/32/33",
+          "libelle": "Comptes de stocks concernés"
+        },
+        {
+          "sens": "C",
+          "compte": "603",
+          "libelle": "Variations des stocks de biens achetés"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Le livre cite 31/32/33 et 36/37 (pas 38). Avant l'écriture, analyser l'origine de l'écart (le livre l'exige).",
+      "source": "p.4",
+      "variantes": [
+        {
+          "condition": "Stocks de produits",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "36/37",
+              "libelle": "Comptes de stocks de produits"
+            },
+            {
+              "sens": "C",
+              "compte": "736/737",
+              "libelle": "Variations des stocks de biens et de services produits"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "STK-ECART-MOINS",
+      "domaine": "stocks-ecarts-inventaire",
+      "libelle": "Écart d'inventaire en moins (mali)",
+      "quand": "Inventaire physique inférieur au stock comptable.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "603",
+          "libelle": "Variations des stocks de biens achetés"
+        },
+        {
+          "sens": "C",
+          "compte": "31/32/33",
+          "libelle": "Comptes de stocks concernés"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Même réserve : analyser l'écart (vol, casse, erreur) avant d'aligner la comptabilité sur l'inventaire.",
+      "source": "p.4",
+      "variantes": [
+        {
+          "condition": "Stocks de produits",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "736/737",
+              "libelle": "Variations des stocks de biens et de services produits"
+            },
+            {
+              "sens": "C",
+              "compte": "36/37",
+              "libelle": "Comptes de stocks de produits"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "TRESO-CAISSE-ECART",
+      "domaine": "tresorerie-caisse",
+      "libelle": "Écart de caisse constaté au comptage (billetage)",
+      "quand": "À la clôture, après comptage et procès-verbal ; le solde comptable s'aligne sur le PV, l'écart justifié, la contrepartie est le compte de différence.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "658",
+          "libelle": "Charges diverses — différence en moins (si caisse réelle < caisse comptable)"
+        },
+        {
+          "sens": "C",
+          "compte": "57",
+          "libelle": "Caisse"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Le livre ne donne que le principe (658 si en moins, 758 si en plus) et aucun schéma d'écriture : sens des lignes déduit, mais le compte exact de caisse (571…) est hors livre.",
+      "source": "p.7",
+      "variantes": [
+        {
+          "condition": "Différence en plus",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "57",
+              "libelle": "Caisse"
+            },
+            {
+              "sens": "C",
+              "compte": "758",
+              "libelle": "Produits divers — différence en plus"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "TRESO-RAPPROCHEMENT-BANCAIRE",
+      "domaine": "tresorerie-banque",
+      "libelle": "État de rapprochement bancaire (52/53) — régularisation",
+      "quand": "À la clôture : confrontation du compte 52 ou 53 de la comptabilité et du relevé de la banque/établissement financier.",
+      "ecritures": [],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Le livre ne donne pas d'écriture type : régulariser soit en comptabilisant les opérations en retard, soit en annulant celles comptabilisées en avance. L'état doit montrer : solde comptable, encaissements et dépenses comptabilisés non encore passés en banque, encaissements et dépenses relevés par la banque et non comptabilisés, solde du relevé. Séparation des tâches recommandée (la personne qui manipule les chèques ne fait pas le rapprochement). Aucun cas chiffré dans le livre.",
+      "source": "p.7-8"
+    },
+    {
+      "code": "DEV-REGLEMENT-COMMERCIAL",
+      "domaine": "devises",
+      "libelle": "Perte ou gain de change réalisé sur créance/dette commerciale",
+      "quand": "À la date d'encaissement ou de règlement (différence entre valeur de règlement et valeur d'origine).",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "52",
+          "libelle": "Banques (valeur de règlement)"
+        },
+        {
+          "sens": "D",
+          "compte": "656",
+          "libelle": "Pertes de change sur créances et dettes commerciales (si perte)"
+        },
+        {
+          "sens": "C",
+          "compte": "411",
+          "libelle": "Clients (valeur d'origine)"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Gain : crédit 756 (Gains de change sur créances et dettes commerciales). Le résultat de change est en résultat d'exploitation pour les opérations commerciales, financier pour les autres.",
+      "source": "p.5-6",
+      "variantes": [
+        {
+          "condition": "Gain de change",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "52",
+              "libelle": "Banques"
+            },
+            {
+              "sens": "C",
+              "compte": "411",
+              "libelle": "Clients"
+            },
+            {
+              "sens": "C",
+              "compte": "756",
+              "libelle": "Gains de change sur créances et dettes commerciales"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "DEV-REGLEMENT-FINANCIER",
+      "domaine": "devises",
+      "libelle": "Perte ou gain de change réalisé sur créance/dette financière",
+      "quand": "À la date de règlement d'une créance ou dette financière en devises.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "52",
+          "libelle": "Banques (valeur de règlement)"
+        },
+        {
+          "sens": "D",
+          "compte": "676",
+          "libelle": "Pertes de change sur créances et dettes financières (si perte)"
+        },
+        {
+          "sens": "C",
+          "compte": "462",
+          "libelle": "Associés, comptes courants (valeur d'origine)"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "financier",
+      "piegesOuNuances": "Le livre ne cite que 676 (dans l'exemple LOKO). Le compte 776 (gains) n'est pas dans le livre : hors livre — à confirmer.",
+      "source": "p.6 (676) ; 776 : hors livre — à confirmer",
+      "variantes": [
+        {
+          "condition": "Gain de change (776 : hors livre — à confirmer)",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "52",
+              "libelle": "Banques"
+            },
+            {
+              "sens": "C",
+              "compte": "462",
+              "libelle": "Associés, comptes courants"
+            },
+            {
+              "sens": "C",
+              "compte": "776",
+              "libelle": "Gains de change financiers"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "DEV-ECART-CONVERSION-ACTIF",
+      "domaine": "devises",
+      "libelle": "Écart de conversion-actif à l'inventaire (perte latente sur créance)",
+      "quand": "Au 31/12 : créance en devises convertie au cours de clôture inférieur au cours d'origine. La créance est réévaluée au crédit de son compte de tiers.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "4781",
+          "libelle": "Diminution des créances d'exploitation (écart de conversion-actif)"
+        },
+        {
+          "sens": "C",
+          "compte": "411",
+          "libelle": "Clients (créance diminuée)"
+        }
+      ],
+      "contrePasseALOuverture": true,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Créance financière : 4782 (Diminution des créances financières) / 462 ou autre tiers financier. Les comptes 4783 (augmentation des dettes d'exploitation) et 4784 (augmentation des dettes financières) ne sont pas dans le livre : hors livre — à confirmer. Contre-passation à l'ouverture : le livre ne le dit pas pour les écarts de conversion (seulement pour les régularisations charges/produits) : hors livre — à confirmer.",
+      "source": "p.7 ; 4783/4784 et contre-passation : hors livre — à confirmer",
+      "variantes": [
+        {
+          "condition": "Créance financière",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "4782",
+              "libelle": "Diminution des créances financières"
+            },
+            {
+              "sens": "C",
+              "compte": "462",
+              "libelle": "Associés, comptes courants"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "DEV-ECART-CONVERSION-PASSIF",
+      "domaine": "devises",
+      "libelle": "Écart de conversion-passif (gain latent) — hors livre",
+      "quand": "Au 31/12 : créance en devises dont le cours de clôture est supérieur au cours d'origine, ou dette dont le cours a baissé.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "411",
+          "libelle": "Clients (créance augmentée)"
+        },
+        {
+          "sens": "C",
+          "compte": "479",
+          "libelle": "Écart de conversion-passif"
+        }
+      ],
+      "contrePasseALOuverture": true,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Le livre mentionne seulement « comptes 478 ou 479 » pour l'indexation (p.6) mais ne donne aucun exemple 479. Sous-comptes 4791-4794 : hors livre — à confirmer. Un gain latent n'est pas un produit : l'écart reste au bilan.",
+      "source": "hors livre — à confirmer"
+    },
+    {
+      "code": "DEV-PROVISION-PERTE-CHANGE-EXPLOITATION",
+      "domaine": "devises",
+      "libelle": "Provision pour perte de change probable — opérations d'exploitation",
+      "quand": "Au 31/12, en face de l'écart de conversion-actif d'une créance commerciale (ou d'une dette en cas d'augmentation).",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "6591",
+          "libelle": "Charges pour provisions sur risques à court terme"
+        },
+        {
+          "sens": "C",
+          "compte": "4991",
+          "libelle": "Provisions pour risques à court terme sur opérations d'exploitation"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Charge décaissable à court terme : n'entre pas dans les « dotations » (69). Reprise : le tableau synoptique p.16 donne 4991//4997;599 débités contre 759//779 ; le sous-compte exact (7591) est hors livre — à confirmer.",
+      "source": "p.5-6 et 16"
+    },
+    {
+      "code": "DEV-PROVISION-PERTE-CHANGE-FINANCIERE",
+      "domaine": "devises",
+      "libelle": "Provision pour perte de change probable — opérations financières",
+      "quand": "Au 31/12, pour une créance ou dette financière à court terme logée dans les comptes de tiers.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "6791",
+          "libelle": "Charges pour provisions sur risques financiers"
+        },
+        {
+          "sens": "C",
+          "compte": "4997",
+          "libelle": "Provisions pour risques à court terme sur opérations financières"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "financier",
+      "piegesOuNuances": "Charge à caractère financier. Pour un risque à plus d'un an : dotation (697) et compte 19, pas 4997.",
+      "source": "p.5-6"
+    },
+    {
+      "code": "DEV-INDEXATION",
+      "domaine": "devises",
+      "libelle": "Créances et dettes indexées",
+      "quand": "À l'inventaire, converties sur la base de la valeur de l'index à la clôture.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "478",
+          "libelle": "Écart de conversion-actif (perte latente)"
+        },
+        {
+          "sens": "C",
+          "compte": "411/401/462…",
+          "libelle": "Compte de tiers concerné"
+        }
+      ],
+      "contrePasseALOuverture": true,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Le livre ne fait que renvoyer : même comptes et mêmes conditions que les créances/dettes en devises (478 ou 479). La valeur d'entrée ne tient pas compte de l'index. Aucun exemple chiffré. Contre-passation : hors livre — à confirmer.",
+      "source": "p.6"
+    },
+    {
+      "code": "DEP-IMMO-CREATION",
+      "domaine": "depreciations",
+      "libelle": "Dépréciation d'immobilisation (constatée par une dotation)",
+      "quand": "À la clôture, si la VNC est supérieure à la valeur actuelle et que la perte ne peut raisonnablement s'inscrire en amortissement (caractère définitif/non amortissable).",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "6914",
+          "libelle": "Dotations pour dépréciations des immobilisations corporelles"
+        },
+        {
+          "sens": "C",
+          "compte": "29",
+          "libelle": "Dépréciations des immobilisations"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Dépréciation = VNC − valeur actuelle (le livre écrit à l'envers « valeur actuelle − valeur d'entrée » p.10 : signe négatif, à lire en valeur absolue). Valeur actuelle = coût actuel si continuité d'usage, sinon prix de revente net. Écart « significatif » seulement. Obligatoire même en l'absence de bénéfice (art. 46).",
+      "source": "p.8-10",
+      "variantes": [
+        {
+          "condition": "Perte HAO",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "853",
+              "libelle": "Dotations aux dépréciations HAO"
+            },
+            {
+              "sens": "C",
+              "compte": "29",
+              "libelle": "Dépréciations des immobilisations"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "DEP-IMMO-REEVALUEE",
+      "domaine": "depreciations",
+      "libelle": "Perte de valeur d'une immobilisation réévaluée : imputation sur l'écart de réévaluation",
+      "quand": "Perte de valeur sur un bien précédemment réévalué : la perte s'impute d'abord sur l'écart de réévaluation (1062) à hauteur de cet écart, le solde en dotation.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "1062",
+          "libelle": "Écarts de réévaluation libre (à hauteur de l'écart disponible)"
+        },
+        {
+          "sens": "D",
+          "compte": "6914",
+          "libelle": "Dotations pour dépréciations des immobilisations corporelles (solde)"
+        },
+        {
+          "sens": "C",
+          "compte": "2931",
+          "libelle": "Dépréciations des bâtiments (compte 29x du bien)"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Le débit de 1062 est limité à l'écart de réévaluation propre à ce bien (6 M dans le livre).",
+      "source": "p.11"
+    },
+    {
+      "code": "DEP-IMMO-REPRISE",
+      "domaine": "depreciations",
+      "libelle": "Reprise de dépréciation d'immobilisation",
+      "quand": "Diminution du risque ou sortie du bien du patrimoine.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "29",
+          "libelle": "Dépréciations des immobilisations"
+        },
+        {
+          "sens": "C",
+          "compte": "79",
+          "libelle": "Reprises de provisions, de dépréciations et autres (sous-compte exploitation)"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Augmentation du risque : même écriture qu'à la création, pour le complément seulement.",
+      "source": "p.10",
+      "variantes": [
+        {
+          "condition": "Reprise HAO",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "29",
+              "libelle": "Dépréciations des immobilisations"
+            },
+            {
+              "sens": "C",
+              "compte": "863",
+              "libelle": "Reprises de dépréciations HAO"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "DEP-STOCK-CREATION",
+      "domaine": "depreciations",
+      "libelle": "Dépréciation de stock",
+      "quand": "Valeur réelle à l'inventaire inférieure à la valeur comptable (coût d'achat ou de production) : baisse de cours, mévente, obsolescence, endommagement, hausse des coûts d'achèvement/de vente.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "6593",
+          "libelle": "Charges pour dépréciations des stocks"
+        },
+        {
+          "sens": "C",
+          "compte": "39",
+          "libelle": "Dépréciations des stocks"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Valeur d'inventaire = valeur nette de réalisation (prix de vente − frais de vente). Si contrat de vente ferme, utiliser le prix du contrat. Charge décaissable à court terme, hors « dotations ».",
+      "source": "p.11-12",
+      "variantes": [
+        {
+          "condition": "Charge HAO",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "839",
+              "libelle": "Charges provisionnées HAO"
+            },
+            {
+              "sens": "C",
+              "compte": "39",
+              "libelle": "Dépréciations des stocks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "DEP-STOCK-REPRISE",
+      "domaine": "depreciations",
+      "libelle": "Reprise de dépréciation de stock",
+      "quand": "Annulation partielle ou totale de la dépréciation antérieure, puis nouvelle dépréciation du complément si besoin.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "39",
+          "libelle": "Dépréciations des stocks"
+        },
+        {
+          "sens": "C",
+          "compte": "7593",
+          "libelle": "Reprises des charges pour dépréciations"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Ancien et nouveau montant se comparent à chaque clôture : ce n'est pas une contre-passation à l'ouverture.",
+      "source": "p.11",
+      "variantes": [
+        {
+          "condition": "Reprise HAO",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "39",
+              "libelle": "Dépréciations des stocks"
+            },
+            {
+              "sens": "C",
+              "compte": "849",
+              "libelle": "Reprises de charges pour dépréciations et provisions pour risques à court terme HAO"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "DEP-CREANCE-RECLASSEMENT",
+      "domaine": "depreciations",
+      "libelle": "Reclassement du client en douteux ou litigieux",
+      "quand": "Avant de constituer la dépréciation de la créance.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "416",
+          "libelle": "Clients douteux ou litigieux"
+        },
+        {
+          "sens": "C",
+          "compte": "411",
+          "libelle": "Clients"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Le montant reclassé est le TTC de la créance (hors livre — à confirmer : le livre ne précise pas).",
+      "source": "p.12-13"
+    },
+    {
+      "code": "DEP-CREANCE-CREATION",
+      "domaine": "depreciations",
+      "libelle": "Dépréciation de créance cliente",
+      "quand": "À la clôture, pour la perte probable sur un client douteux.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "659",
+          "libelle": "Charges pour dépréciations (risques d'exploitation)"
+        },
+        {
+          "sens": "C",
+          "compte": "491",
+          "libelle": "Dépréciations des comptes clients"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Sauf 499 (provisions pour risques à court terme) : cf. tableau synoptique p.16.",
+      "source": "p.13",
+      "variantes": [
+        {
+          "condition": "Charge HAO",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "839",
+              "libelle": "Charges pour dépréciations HAO"
+            },
+            {
+              "sens": "C",
+              "compte": "491",
+              "libelle": "Dépréciations des comptes clients"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "DEP-CREANCE-REPRISE",
+      "domaine": "depreciations",
+      "libelle": "Reprise de dépréciation de créance",
+      "quand": "Diminution du risque.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "491",
+          "libelle": "Dépréciations des comptes clients (le livre écrit 492)"
+        },
+        {
+          "sens": "C",
+          "compte": "759",
+          "libelle": "Reprises des charges pour dépréciations"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Incohérence du livre : création au crédit de 491, reprise au débit de 492. Corrigé ici en 491 — voir erreursDuLivre (ERR-04).",
+      "source": "p.13",
+      "variantes": [
+        {
+          "condition": "Reprise HAO",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "491",
+              "libelle": "Dépréciations des comptes clients"
+            },
+            {
+              "sens": "C",
+              "compte": "849",
+              "libelle": "Reprises de charges pour dépréciations et provisions HAO"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "DEP-CREANCE-IRRECOUVRABLE",
+      "domaine": "depreciations",
+      "libelle": "Créance devenue totalement irrécouvrable",
+      "quand": "Quand la perte devient certaine.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "651",
+          "libelle": "Pertes sur créances clients"
+        },
+        {
+          "sens": "C",
+          "compte": "416",
+          "libelle": "Clients douteux ou litigieux"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Le livre n'écrit pas la reprise de la dépréciation correspondante (Dr 491 / Cr 7591) ni le traitement de la TVA : à compléter hors livre — à confirmer.",
+      "source": "p.13"
+    },
+    {
+      "code": "DEP-TRESO-CREATION",
+      "domaine": "depreciations",
+      "libelle": "Dépréciation de trésorerie (titres de placement, etc.)",
+      "quand": "À la clôture, pour une perte de valeur d'un élément de trésorerie-actif.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "679",
+          "libelle": "Charges pour dépréciations financières"
+        },
+        {
+          "sens": "C",
+          "compte": "593",
+          "libelle": "Dépréciations et provisions pour risque à court terme (trésorerie)"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "financier",
+      "piegesOuNuances": "Sauf 599. Le livre écrit 593 à la création et 594 à la reprise : voir erreursDuLivre (ERR-05).",
+      "source": "p.14",
+      "variantes": [
+        {
+          "condition": "Charge HAO",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "839",
+              "libelle": "Charges pour dépréciations HAO"
+            },
+            {
+              "sens": "C",
+              "compte": "593",
+              "libelle": "Dépréciations (trésorerie)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "DEP-TRESO-REPRISE",
+      "domaine": "depreciations",
+      "libelle": "Reprise de dépréciation de trésorerie",
+      "quand": "Diminution du risque.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "593",
+          "libelle": "Dépréciations (trésorerie) — le livre écrit 594"
+        },
+        {
+          "sens": "C",
+          "compte": "779",
+          "libelle": "Reprises de charges pour dépréciations"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "financier",
+      "piegesOuNuances": "Compte débité 593 par cohérence avec la création ; le livre écrit 594.",
+      "source": "p.14",
+      "variantes": [
+        {
+          "condition": "Reprise HAO",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "593",
+              "libelle": "Dépréciations (trésorerie)"
+            },
+            {
+              "sens": "C",
+              "compte": "849",
+              "libelle": "Reprises de charges pour dépréciations HAO"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "PROV-RISQUES-LONG-TERME",
+      "domaine": "provisions-risques",
+      "libelle": "Provision pour risques et charges à plus d'un an (financières)",
+      "quand": "À la clôture, pour un risque ou une charge probable dont l'échéance dépasse un an.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "69",
+          "libelle": "Dotations aux provisions et aux dépréciations (697 pour financières)"
+        },
+        {
+          "sens": "C",
+          "compte": "19",
+          "libelle": "Provisions financières pour risques et charges"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Une provision est un passif externe d'échéance ou de montant incertain. Moins d'un an : charge pour provisions à court terme (659/679) contre 499/4991/4997/599, hors « dotations ». Litiges : demander à l'avocat la liste des litiges et l'estimation des amendes et dommages-intérêts (p.3).",
+      "source": "p.14-16",
+      "variantes": [
+        {
+          "condition": "HAO",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "85",
+              "libelle": "Dotations HAO"
+            },
+            {
+              "sens": "C",
+              "compte": "15/19",
+              "libelle": "Provisions réglementées ou financières"
+            }
+          ]
+        },
+        {
+          "condition": "Risque à court terme HAO",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "83",
+              "libelle": "Charges HAO"
+            },
+            {
+              "sens": "C",
+              "compte": "499",
+              "libelle": "Provisions pour risques à court terme"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "PROV-RISQUES-REPRISE",
+      "domaine": "provisions-risques",
+      "libelle": "Reprise de provision pour risques et charges",
+      "quand": "Risque disparu ou diminué.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "19",
+          "libelle": "Provisions financières pour risques et charges"
+        },
+        {
+          "sens": "C",
+          "compte": "79",
+          "libelle": "Reprises de provisions, de dépréciations et autres"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Provisions à court terme : 4991/4997/599 débités, 759/779 crédités (tableau synoptique). HAO : 15/19 → 86 et 499/599 → 84.",
+      "source": "p.16"
+    },
+    {
+      "code": "PROV-REGLEMENTEE-DOTATION",
+      "domaine": "provisions-reglementees",
+      "libelle": "Dotation aux provisions réglementées",
+      "quand": "À la clôture, en application d'une disposition fiscale ou réglementaire (gisements miniers, hausse de prix, investissement, amortissements dérogatoires).",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "851",
+          "libelle": "Dotations aux provisions réglementées"
+        },
+        {
+          "sens": "C",
+          "compte": "15",
+          "libelle": "Provisions réglementées et fonds assimilés"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "HAO",
+      "piegesOuNuances": "Ni risque ni charge : constituées « uniquement en application de dispositions fiscales ». Le livre cite les amortissements dérogatoires mais ne donne pas d'écriture dédiée : même mécanisme 851/15 (sous-compte non précisé : hors livre — à confirmer).",
+      "source": "p.15"
+    },
+    {
+      "code": "PROV-REGLEMENTEE-REPRISE",
+      "domaine": "provisions-reglementees",
+      "libelle": "Reprise de provisions réglementées",
+      "quand": "Diminution du risque ou fin du dispositif.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "15",
+          "libelle": "Provisions réglementées et fonds assimilés"
+        },
+        {
+          "sens": "C",
+          "compte": "861",
+          "libelle": "Reprises de provisions réglementées"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "HAO",
+      "piegesOuNuances": "Augmentation : même écriture qu'à la création pour le complément.",
+      "source": "p.15"
+    },
+    {
+      "code": "AMORT-DOTATION",
+      "domaine": "amortissements",
+      "libelle": "Dotation aux amortissements de l'exercice (toute méthode)",
+      "quand": "À la clôture, pour chaque immobilisation amortissable.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "681",
+          "libelle": "Dotations aux amortissements d'exploitation"
+        },
+        {
+          "sens": "C",
+          "compte": "28",
+          "libelle": "Amortissements"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Le livre écrit « 68/85 » au débit : 68 (681) en activité ordinaire, 85 (851) en HAO. Linéaire : annuité = (Vo − Vr)/n. Dégressif : annuité = base × taux linéaire × coefficient, base = Vo la première année puis la VNC. Bascule en linéaire quand l'annuité dégressive est inférieure à VNC/(années restantes). Prorata temporis : voir AMORT-PRORATA.",
+      "source": "p.16-19",
+      "variantes": [
+        {
+          "condition": "HAO",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "85",
+              "libelle": "Dotations aux amortissements HAO"
+            },
+            {
+              "sens": "C",
+              "compte": "28",
+              "libelle": "Amortissements"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "AMORT-PRORATA",
+      "domaine": "amortissements",
+      "libelle": "Prorata temporis de la première annuité (et de la dernière)",
+      "quand": "Mise en service ou cession en cours d'exercice.",
+      "ecritures": [],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Formule du livre (RDC) : Prorata = Ba × t × d / 1200, d en MOIS, compté à partir du premier jour du mois de mise en service jusqu'au 31/12, ou du 1/1 jusqu'à la cession. L'exemple composants du livre compte en jours (162/360 puis 198/360) : deux conventions différentes, voir ERR-03. Contrôle recalculé du moteur : le livre dit que le nombre d'annuités qui deviennent linéaires = partie entière de (durée / coefficient). Simulation interne sur (4;2) (5;2,5) (6;2,5) (7;3) (8;3) (10;3) (15;3) (19;3) : conforme si, en cas d'égalité des deux annuités, on bascule (≥).",
+      "source": "p.17-18"
+    },
+    {
+      "code": "AMORT-COMPOSANTS",
+      "domaine": "amortissements",
+      "libelle": "Amortissement par composants",
+      "quand": "Bien dont un élément (ex. moteur) a une durée d'utilisation différente : il est décomposé en immobilisations distinctes.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "24111",
+          "libelle": "Matériel industriel — structure"
+        },
+        {
+          "sens": "D",
+          "compte": "24112",
+          "libelle": "Matériel industriel — composant"
+        },
+        {
+          "sens": "C",
+          "compte": "481",
+          "libelle": "Fournisseurs d'investissements"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Dotation : 681 au débit, crédit des sous-comptes 284111 (structure) et 284112 (composant). Les deux composants partagent le même prorata de première année.",
+      "source": "p.20-21"
+    },
+    {
+      "code": "AMORT-REPRISE",
+      "domaine": "amortissements",
+      "libelle": "Reprise d'amortissement (réajustement)",
+      "quand": "Correction d'un excès d'amortissement.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "28",
+          "libelle": "Amortissements"
+        },
+        {
+          "sens": "C",
+          "compte": "798",
+          "libelle": "Reprises d'amortissements"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "HAO : crédit 862.",
+      "source": "p.19",
+      "variantes": [
+        {
+          "condition": "HAO",
+          "ecritures": [
+            {
+              "sens": "D",
+              "compte": "28",
+              "libelle": "Amortissements"
+            },
+            {
+              "sens": "C",
+              "compte": "862",
+              "libelle": "Reprises d'amortissements HAO"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "REEVALUATION-IMMO",
+      "domaine": "amortissements",
+      "libelle": "Réévaluation des immobilisations (corporelles et financières)",
+      "quand": "Exception au coût historique : substitution de la VNC par une valeur réévaluée.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "2...",
+          "libelle": "Immobilisation concernée (augmentation de la valeur brute)"
+        },
+        {
+          "sens": "C",
+          "compte": "28",
+          "libelle": "Amortissements (ajustement du cumul)"
+        },
+        {
+          "sens": "C",
+          "compte": "106",
+          "libelle": "Écarts de réévaluation"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Innovation du SYSCOHADA révisé : la réévaluation ne porte plus que sur les immobilisations corporelles et financières. L'écriture peut se passer en deux temps. Le livre ne donne aucun chiffre.",
+      "source": "p.21 et 27"
+    },
+    {
+      "code": "CESSION-HAO-SORTIE",
+      "domaine": "cessions",
+      "libelle": "Sortie d'immobilisation — cession non récurrente (HAO)",
+      "quand": "Vente, échange, mise au rebut ou destruction d'un bien hors activité ordinaire : sortie pour la valeur nette.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "28",
+          "libelle": "Amortissements (cumul)"
+        },
+        {
+          "sens": "D",
+          "compte": "81",
+          "libelle": "Valeurs comptables des cessions d'immobilisations (VNC)"
+        },
+        {
+          "sens": "C",
+          "compte": "2...",
+          "libelle": "Compte de la classe 2 concerné (valeur d'origine)"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "HAO",
+      "piegesOuNuances": "Le livre ne traite pas la dépréciation éventuelle du bien : reprise à passer aussi (cf. DEP-IMMO-REPRISE). Amortissement à compléter jusqu'au jour de la cession (prorata).",
+      "source": "p.21"
+    },
+    {
+      "code": "CESSION-HAO-PRIX",
+      "domaine": "cessions",
+      "libelle": "Prix de cession HAO (ou indemnité d'assurance)",
+      "quand": "À la vente. L'indemnité d'assurance d'un bien détruit est assimilée au prix de cession.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "485",
+          "libelle": "Créances sur cessions d'immobilisations"
+        },
+        {
+          "sens": "C",
+          "compte": "82",
+          "libelle": "Produits des cessions d'immobilisations"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "HAO",
+      "piegesOuNuances": "Plus ou moins-value = 82 − 81, déterminée au résultat HAO (pas d'écriture séparée).",
+      "source": "p.22"
+    },
+    {
+      "code": "CESSION-COURANTE-SORTIE",
+      "domaine": "cessions",
+      "libelle": "Sortie d'immobilisation — cession courante (activité ordinaire)",
+      "quand": "Cession dans le cours normal de l'activité.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "28",
+          "libelle": "Amortissements (cumul)"
+        },
+        {
+          "sens": "D",
+          "compte": "654",
+          "libelle": "Valeurs comptables des cessions courantes d'immobilisations (VNC)"
+        },
+        {
+          "sens": "C",
+          "compte": "2...",
+          "libelle": "Compte de la classe 2 concerné"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Même schéma que HAO, comptes 654/754/414.",
+      "source": "p.22"
+    },
+    {
+      "code": "CESSION-COURANTE-PRIX",
+      "domaine": "cessions",
+      "libelle": "Prix de cession courante (ou indemnité d'assurance)",
+      "quand": "À la vente ou à l'encaissement de l'indemnité d'assurance.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "414",
+          "libelle": "Créances sur cessions d'immobilisations courantes"
+        },
+        {
+          "sens": "C",
+          "compte": "754",
+          "libelle": "Produits des cessions courantes d'immobilisations"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "TVA sur cession : non traitée par le livre.",
+      "source": "p.22"
+    },
+    {
+      "code": "REGUL-CHARGE-A-PAYER",
+      "domaine": "regularisations",
+      "libelle": "Charges à payer (factures non parvenues)",
+      "quand": "Charge certaine de l'exercice dont la pièce n'est pas parvenue à la clôture.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "6...",
+          "libelle": "Compte de charge concerné"
+        },
+        {
+          "sens": "C",
+          "compte": "408",
+          "libelle": "Fournisseurs, factures non parvenues"
+        }
+      ],
+      "contrePasseALOuverture": true,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Personnel : 428 ; organismes sociaux : 438 ; État : 448. Si TVA récupérable : débit 445 en plus (exemple du livre). « Toutes les écritures de régularisation sont contre-passées au début de l'exercice suivant. »",
+      "source": "p.23-24"
+    },
+    {
+      "code": "REGUL-RRR-ACCORDES",
+      "domaine": "regularisations",
+      "libelle": "Rabais, remises, ristournes à accorder",
+      "quand": "Fin d'exercice, avoir client pas encore établi.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "70",
+          "libelle": "Ventes (compte de rabais)"
+        },
+        {
+          "sens": "C",
+          "compte": "4198",
+          "libelle": "Rabais, remises, ristournes et autres avoirs à accorder"
+        }
+      ],
+      "contrePasseALOuverture": true,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Le livre écrit « 70 » sans le sous-compte (709 est le compte usuel — hors livre).",
+      "source": "p.23"
+    },
+    {
+      "code": "REGUL-INTERETS-COURUS-CHARGES",
+      "domaine": "regularisations",
+      "libelle": "Intérêts courus sur emprunts et dettes",
+      "quand": "Intérêts payables à terme échu, calculés sur le capital restant dû depuis le dernier remboursement.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "67",
+          "libelle": "Frais financiers et charges assimilées"
+        },
+        {
+          "sens": "C",
+          "compte": "166",
+          "libelle": "Intérêts courus sur emprunts et dettes assimilées"
+        }
+      ],
+      "contrePasseALOuverture": true,
+      "classement": "financier",
+      "piegesOuNuances": "Contreparties selon la dette : 176 (location-acquisition), 183 (participations), 4086 (fournisseurs), 566 (crédits de trésorerie).",
+      "source": "p.24"
+    },
+    {
+      "code": "REGUL-CHARGE-CONSTATEE-AVANCE",
+      "domaine": "regularisations",
+      "libelle": "Charges constatées d'avance",
+      "quand": "Charge comptabilisée dans l'exercice mais relative en tout ou partie à l'exercice suivant : retrancher, HORS TAXES.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "476",
+          "libelle": "Charges constatées d'avance"
+        },
+        {
+          "sens": "C",
+          "compte": "6...",
+          "libelle": "Compte de charge concerné"
+        }
+      ],
+      "contrePasseALOuverture": true,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Montant hors taxes uniquement.",
+      "source": "p.24-25"
+    },
+    {
+      "code": "REGUL-PRODUIT-A-RECEVOIR",
+      "domaine": "regularisations",
+      "libelle": "Produits à recevoir (factures à établir)",
+      "quand": "Produit acquis de l'exercice mais non encore facturé.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "418",
+          "libelle": "Clients, produits à recevoir (factures à établir)"
+        },
+        {
+          "sens": "C",
+          "compte": "7...",
+          "libelle": "Compte de produit concerné"
+        },
+        {
+          "sens": "C",
+          "compte": "443",
+          "libelle": "État, TVA facturée"
+        }
+      ],
+      "contrePasseALOuverture": true,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Autres tiers : 428/438/448 au débit. Le livre inclut la TVA dans l'exemple (232 000 = 200 000 + 32 000).",
+      "source": "p.25"
+    },
+    {
+      "code": "REGUL-RRR-OBTENIR",
+      "domaine": "regularisations",
+      "libelle": "Rabais, remises, ristournes à obtenir",
+      "quand": "Avoir fournisseur non encore parvenu à la clôture.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "4098",
+          "libelle": "Rabais, remises, ristournes et autres avoirs à obtenir"
+        },
+        {
+          "sens": "C",
+          "compte": "60...",
+          "libelle": "Achats et variations de stocks"
+        }
+      ],
+      "contrePasseALOuverture": true,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Aucune nuance supplémentaire dans le livre.",
+      "source": "p.25"
+    },
+    {
+      "code": "REGUL-INTERETS-COURUS-PRODUITS",
+      "domaine": "regularisations",
+      "libelle": "Intérêts courus sur prêts et créances",
+      "quand": "Intérêts à recevoir à terme échu : calcul sur le capital non remboursé depuis le dernier paiement d'intérêts.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "276",
+          "libelle": "Intérêts courus sur autres immobilisations financières"
+        },
+        {
+          "sens": "C",
+          "compte": "77",
+          "libelle": "Revenus financiers et produits assimilés"
+        }
+      ],
+      "contrePasseALOuverture": true,
+      "classement": "financier",
+      "piegesOuNuances": "Autres comptes débités selon la créance : 4186 (clients), 506 (titres de placement), 526 (banques), 536 (établissements financiers).",
+      "source": "p.26"
+    },
+    {
+      "code": "REGUL-PRODUIT-CONSTATE-AVANCE",
+      "domaine": "regularisations",
+      "libelle": "Produits constatés d'avance",
+      "quand": "Produit comptabilisé dans l'exercice dont une part concerne l'exercice suivant : débiter le produit, HORS TAXES.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "7...",
+          "libelle": "Compte de produit concerné"
+        },
+        {
+          "sens": "C",
+          "compte": "477",
+          "libelle": "Produits constatés d'avance"
+        }
+      ],
+      "contrePasseALOuverture": true,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Montant hors taxes ; la TVA facturée n'est pas régularisée.",
+      "source": "p.26-27"
+    },
+    {
+      "code": "CONTREPASSATION-OUVERTURE",
+      "domaine": "regularisations",
+      "libelle": "Contre-passation à l'ouverture de l'exercice suivant",
+      "quand": "Premier jour de l'exercice N+1, pour toutes les écritures de régularisation (charges/produits à payer, à recevoir, constatés d'avance, intérêts courus).",
+      "ecritures": [],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Écriture miroir (sens inversés, mêmes comptes et montants) de chaque régularisation. Les provisions, dépréciations et amortissements ne sont PAS contre-passés : ils se rajustent à la clôture suivante.",
+      "source": "p.23"
+    },
+    {
+      "code": "SUBV-REPRISE-RESULTAT",
+      "domaine": "subventions",
+      "libelle": "Transfert en résultat de la quote-part de subvention d'investissement",
+      "quand": "À la clôture, pour la quote-part de la subvention rapportée au résultat.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "14",
+          "libelle": "Subventions d'investissement"
+        },
+        {
+          "sens": "C",
+          "compte": "799",
+          "libelle": "Reprises de subventions d'investissement"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Quote-part = dotation aux amortissements du bien subventionné ; ou, pour un bien non amortissable, montant déterminé par la durée d'inaliénabilité du contrat, à défaut un dixième de la subvention. Innovation : 799 remplace 865.",
+      "source": "p.27"
+    },
+    {
+      "code": "SIG-DETERMINATION-RESULTAT",
+      "domaine": "resultat-sig",
+      "libelle": "Soldes intermédiaires de gestion et détermination du résultat net",
+      "quand": "Après les écritures d'inventaire, pour boucler les comptes de gestion.",
+      "ecritures": [
+        {
+          "sens": "D",
+          "compte": "701",
+          "libelle": "Ventes de marchandises"
+        },
+        {
+          "sens": "C",
+          "compte": "132",
+          "libelle": "Marge commerciale"
+        },
+        {
+          "sens": "D",
+          "compte": "132",
+          "libelle": "Marge commerciale"
+        },
+        {
+          "sens": "C",
+          "compte": "601",
+          "libelle": "Achats de marchandises (et 6031 variations de stocks)"
+        },
+        {
+          "sens": "D",
+          "compte": "132",
+          "libelle": "Marge commerciale (si positive)"
+        },
+        {
+          "sens": "C",
+          "compte": "133",
+          "libelle": "Valeur ajoutée"
+        },
+        {
+          "sens": "D",
+          "compte": "133",
+          "libelle": "Valeur ajoutée"
+        },
+        {
+          "sens": "C",
+          "compte": "134",
+          "libelle": "Excédent brut d'exploitation (après charges 60 à 65)"
+        },
+        {
+          "sens": "D",
+          "compte": "134",
+          "libelle": "Excédent brut d'exploitation"
+        },
+        {
+          "sens": "C",
+          "compte": "135",
+          "libelle": "Résultat d'exploitation (après 66 et 681/691 ; plus reprises 791/798/799)"
+        },
+        {
+          "sens": "D",
+          "compte": "135",
+          "libelle": "Résultat d'exploitation"
+        },
+        {
+          "sens": "C",
+          "compte": "137",
+          "libelle": "Résultat des activités ordinaires"
+        },
+        {
+          "sens": "D",
+          "compte": "136",
+          "libelle": "Résultat financier"
+        },
+        {
+          "sens": "C",
+          "compte": "137",
+          "libelle": "Résultat des activités ordinaires"
+        },
+        {
+          "sens": "D",
+          "compte": "138",
+          "libelle": "Résultat hors activités ordinaires"
+        },
+        {
+          "sens": "C",
+          "compte": "139",
+          "libelle": "Résultat net de l'exercice"
+        },
+        {
+          "sens": "D",
+          "compte": "89",
+          "libelle": "Impôts sur le résultat"
+        },
+        {
+          "sens": "C",
+          "compte": "441",
+          "libelle": "État, impôt sur les bénéfices"
+        }
+      ],
+      "contrePasseALOuverture": false,
+      "classement": "activite-ordinaire",
+      "piegesOuNuances": "Huit soldes intermédiaires pour le système normal : marge commerciale, valeur ajoutée, EBE, résultat d'exploitation, résultat financier, RAO, RHAO, résultat net. Les sens (débit/crédit) dépendent du signe de chaque solde et la numérotation des comptes 131-139 telle qu'imprimée est incohérente : liste indicative, à ne pas utiliser telle quelle (voir ERR-10). Aucun cas chiffré.",
+      "source": "p.28-31"
+    }
+  ],
+  "casDeTest": [
+    {
+      "code": "CDT-DEV-01",
+      "regle": "DEV-REGLEMENT-COMMERCIAL",
+      "titre": "Encaissement du client LONGO : perte de change réalisée",
+      "donnees": {
+        "devise": "USD",
+        "monnaie": "CDF",
+        "creance_usd": 2000,
+        "cours_vente": 1500,
+        "date_vente": "2018-10-15",
+        "cours_encaissement": 1400,
+        "date_encaissement": "2018-10-31"
+      },
+      "ecrituresAttendues": [
+        [
+          {
+            "sens": "D",
+            "compte": "52",
+            "libelle": "Banques",
+            "montant": 2800000
+          },
+          {
+            "sens": "D",
+            "compte": "656",
+            "libelle": "Pertes de change sur créances et dettes commerciales",
+            "montant": 200000
+          },
+          {
+            "sens": "C",
+            "compte": "411",
+            "libelle": "Client LONGO",
+            "montant": 3000000
+          }
+        ]
+      ],
+      "resultatAttendu": {
+        "valeur_origine": 3000000,
+        "valeur_reglement": 2800000,
+        "perte_de_change": 200000
+      },
+      "verifie": true,
+      "source": "p.6"
+    },
+    {
+      "code": "CDT-DEV-02",
+      "regle": "DEV-REGLEMENT-FINANCIER",
+      "titre": "Remboursement du compte courant de l'associé LOKO : perte de change financière",
+      "donnees": {
+        "devise": "USD",
+        "monnaie": "CDF",
+        "creance_usd": 10000,
+        "cours_origine": 1450,
+        "date_origine": "2018-10-13",
+        "cours_reglement": 1400,
+        "date_reglement": "2018-10-31"
+      },
+      "ecrituresAttendues": [
+        [
+          {
+            "sens": "D",
+            "compte": "52",
+            "libelle": "Banques",
+            "montant": 14000000
+          },
+          {
+            "sens": "D",
+            "compte": "676",
+            "libelle": "Pertes de change sur créances et dettes financières",
+            "montant": 500000
+          },
+          {
+            "sens": "C",
+            "compte": "462",
+            "libelle": "Compte courant associé LOKO",
+            "montant": 14500000
+          }
+        ]
+      ],
+      "resultatAttendu": {
+        "valeur_origine": 14500000,
+        "valeur_reglement": 14000000,
+        "perte_de_change": 500000
+      },
+      "verifie": true,
+      "source": "p.6"
+    },
+    {
+      "code": "CDT-DEV-03",
+      "regle": "DEV-ECART-CONVERSION-ACTIF",
+      "titre": "Inventaire au 31/12/2018 : écarts de conversion-actif puis provisions pour perte de change",
+      "donnees": {
+        "client_longo": {
+          "usd": 2000,
+          "cours_origine": 1500,
+          "note": "le livre donne la vente au 15/12/2018 ici et au 15/10/2018 dans l'exemple précédent"
+        },
+        "associe_loko": {
+          "usd": 10000,
+          "cours_origine": 1450,
+          "date": "2018-10-13"
+        },
+        "cours_31_12": 1400
+      },
+      "ecrituresAttendues": [
+        [
+          {
+            "sens": "D",
+            "compte": "4781",
+            "libelle": "Diminution des créances d'exploitation",
+            "montant": 200000
+          },
+          {
+            "sens": "D",
+            "compte": "4782",
+            "libelle": "Diminution des créances financières",
+            "montant": 500000
+          },
+          {
+            "sens": "C",
+            "compte": "411",
+            "libelle": "Client LONGO",
+            "montant": 200000
+          },
+          {
+            "sens": "C",
+            "compte": "462",
+            "libelle": "Compte courant associé LOKO",
+            "montant": 500000
+          }
+        ],
+        [
+          {
+            "sens": "D",
+            "compte": "659",
+            "libelle": "Charges pour provisions sur risques à court terme",
+            "montant": 200000
+          },
+          {
+            "sens": "D",
+            "compte": "679",
+            "libelle": "Charges pour provisions sur risques financiers",
+            "montant": 500000
+          },
+          {
+            "sens": "C",
+            "compte": "4991",
+            "libelle": "Provisions pour risques à court terme sur opérations d'exploitation",
+            "montant": 200000
+          },
+          {
+            "sens": "C",
+            "compte": "4997",
+            "libelle": "Provisions pour risques à court terme sur opérations financières",
+            "montant": 500000
+          }
+        ]
+      ],
+      "resultatAttendu": {
+        "perte_latente_exploitation": 200000,
+        "perte_latente_financiere": 500000,
+        "provision_totale": 700000
+      },
+      "verifie": true,
+      "source": "p.7",
+      "notes": "Les créances restent au bilan au cours de clôture ; l'écart de conversion-actif est une rubrique de bilan ; seule la provision touche le résultat."
+    },
+    {
+      "code": "CDT-DEP-01",
+      "regle": "DEP-IMMO-REEVALUEE",
+      "titre": "Bâtiment industriel réévalué : perte de valeur 15 M imputée sur l'écart de réévaluation",
+      "donnees": {
+        "perte_de_valeur": 15000000,
+        "valeur_comptable_reevaluee": 100000000,
+        "ecart_de_reevaluation": 6000000
+      },
+      "ecrituresAttendues": [
+        [
+          {
+            "sens": "D",
+            "compte": "1062",
+            "libelle": "Écarts de réévaluation libre",
+            "montant": 6000000
+          },
+          {
+            "sens": "D",
+            "compte": "6914",
+            "libelle": "Dotations pour dépréciations des immobilisations corporelles",
+            "montant": 9000000
+          },
+          {
+            "sens": "C",
+            "compte": "2931",
+            "libelle": "Dépréciations des bâtiments industriels",
+            "montant": 15000000
+          }
+        ]
+      ],
+      "resultatAttendu": {
+        "imputation_ecart_reevaluation": 6000000,
+        "charge_exercice": 9000000,
+        "depreciation": 15000000,
+        "vnc_apres": 85000000
+      },
+      "verifie": true,
+      "source": "p.11"
+    },
+    {
+      "code": "CDT-DEP-02",
+      "regle": "DEP-STOCK-CREATION",
+      "titre": "DEFLO SA : lot de marchandises sous contrat de vente ferme",
+      "donnees": {
+        "prix_achat_ttc": 116000000,
+        "tva": 0.16,
+        "transport_ht": 100000,
+        "commission_achat_ht": 25000,
+        "manutention_ht": 15000,
+        "commission_vente_ht": 150000,
+        "prix_contrat_vente": 100200000,
+        "prix_vente_probable_cloture": 100175000,
+        "devise": "CDF"
+      },
+      "ecrituresAttendues": [
+        [
+          {
+            "sens": "D",
+            "compte": "6593",
+            "libelle": "Charges pour dépréciations de stocks",
+            "montant": 90000
+          },
+          {
+            "sens": "C",
+            "compte": "391",
+            "libelle": "Dépréciations des stocks de marchandises",
+            "montant": 90000
+          }
+        ]
+      ],
+      "resultatAttendu": {
+        "prix_achat_ht": 100000000,
+        "cout_achat": 100140000,
+        "valeur_nette_de_negociation": 100050000,
+        "depreciation": 90000
+      },
+      "verifie": true,
+      "source": "p.12",
+      "notes": "Le contrat ferme impose le prix du contrat (100 200 000), pas le prix probable de clôture. Voir ERR-01 pour la phrase inversée du livre."
+    },
+    {
+      "code": "CDT-DEP-02B",
+      "regle": "DEP-STOCK-CREATION",
+      "titre": "DEFLO SA : même lot sans contrat ferme (variante citée par le livre)",
+      "donnees": {
+        "cout_achat": 100140000,
+        "prix_vente_probable_cloture": 100175000,
+        "commission_vente_ht": 150000
+      },
+      "ecrituresAttendues": [
+        [
+          {
+            "sens": "D",
+            "compte": "6593",
+            "libelle": "Charges pour dépréciations de stocks",
+            "montant": 115000
+          },
+          {
+            "sens": "C",
+            "compte": "391",
+            "libelle": "Dépréciations des stocks de marchandises",
+            "montant": 115000
+          }
+        ]
+      ],
+      "resultatAttendu": {
+        "valeur_nette_de_negociation": 100025000,
+        "depreciation": 115000
+      },
+      "verifie": true,
+      "source": "p.12",
+      "notes": "Le livre donne le montant mais ne détaille pas l'écriture ; reconstituée à l'identique de CDT-DEP-02."
+    },
+    {
+      "code": "CDT-AMORT-01",
+      "regle": "AMORT-DOTATION",
+      "titre": "Machine industrielle 1,4 M, valeur résiduelle 400 000, 10 ans, mise en service le 02/04/2018",
+      "donnees": {
+        "valeur_origine_ht": 1400000,
+        "valeur_residuelle": 400000,
+        "duree_ans": 10,
+        "mise_en_service": "2018-04-02",
+        "cloture": "2018-12-31"
+      },
+      "ecrituresAttendues": [
+        [
+          {
+            "sens": "D",
+            "compte": "24111",
+            "libelle": "Matériel industriel",
+            "montant": 1400000
+          },
+          {
+            "sens": "C",
+            "compte": "481",
+            "libelle": "Fournisseur d'investissement NZEKE",
+            "montant": 1400000
+          }
+        ],
+        [
+          {
+            "sens": "D",
+            "compte": "681",
+            "libelle": "Dotations aux amortissements d'exploitation",
+            "montant": 100000
+          },
+          {
+            "sens": "C",
+            "compte": "284111",
+            "libelle": "Amortissements — matériel industriel",
+            "montant": 100000
+          }
+        ]
+      ],
+      "resultatAttendu": {
+        "base_amortissable": 1000000,
+        "annuite_pleine": 100000,
+        "dotation_2018_selon_le_livre": 100000
+      },
+      "verifie": false,
+      "source": "p.19-20",
+      "ecart": "Le livre passe l'annuité pleine (100 000) alors que la mise en service est le 02/04/2018 et que le même livre exige le prorata temporis (p.17). Par sa propre règle (à partir du premier jour du mois de mise en service, avril → 9 mois) : 100 000 × 9/12 = 75 000. En base 360 jours depuis le 02/04 : environ 74 722. La dotation de 100 000 n'est exacte que pour une année pleine. Voir ERR-02.",
+      "ecrituresRecalculees": [
+        [
+          {
+            "sens": "D",
+            "compte": "681",
+            "libelle": "Dotations aux amortissements d'exploitation",
+            "montant": 75000
+          },
+          {
+            "sens": "C",
+            "compte": "284111",
+            "libelle": "Amortissements — matériel industriel",
+            "montant": 75000
+          }
+        ]
+      ]
+    },
+    {
+      "code": "CDT-AMORT-02",
+      "regle": "AMORT-COMPOSANTS",
+      "titre": "Machine-outil MATANGWA 75 M, mise en service le 18/07/2018, moteur (40 %) à changer au bout de 5 ans",
+      "donnees": {
+        "valeur_ht": 75000000,
+        "part_moteur": 0.4,
+        "duree_machine_ans": 10,
+        "duree_moteur_ans": 5,
+        "jours_premiere_annee": 162,
+        "base_jours": 360
+      },
+      "ecrituresAttendues": [
+        [
+          {
+            "sens": "D",
+            "compte": "24111",
+            "libelle": "Matériel industriel — structure",
+            "montant": 45000000
+          },
+          {
+            "sens": "D",
+            "compte": "24112",
+            "libelle": "Matériel industriel — composant",
+            "montant": 30000000
+          },
+          {
+            "sens": "C",
+            "compte": "481",
+            "libelle": "Fournisseur d'investissement NZEKE",
+            "montant": 75000000
+          }
+        ],
+        [
+          {
+            "sens": "D",
+            "compte": "681",
+            "libelle": "Dotations aux amortissements d'exploitation",
+            "montant": 4725000
+          },
+          {
+            "sens": "C",
+            "compte": "284111",
+            "libelle": "Amortissements — structure",
+            "montant": 2025000
+          },
+          {
+            "sens": "C",
+            "compte": "284112",
+            "libelle": "Amortissements — composant",
+            "montant": 2700000
+          }
+        ]
+      ],
+      "resultatAttendu": {
+        "dotation_structure_2018": 2025000,
+        "dotation_composant_2018": 2700000,
+        "dotation_totale_2018": 4725000,
+        "jours_derniere_annee": 198
+      },
+      "verifie": true,
+      "source": "p.20-21",
+      "notes": "Vérifié avec 162/360 : 45 000 000 × 10 % × 162/360 = 2 025 000 ; 30 000 000 × 20 % × 162/360 = 2 700 000. Convention de comptage des jours à confirmer (voir ERR-03)."
+    },
+    {
+      "code": "CDT-REGUL-01",
+      "regle": "REGUL-CHARGE-A-PAYER",
+      "titre": "Marchandises livrées le 25/12/2017, facturées le 20/01/2018 : facture non parvenue",
+      "donnees": {
+        "montant_ht": 100000,
+        "tva": 0.16,
+        "devise": "CDF",
+        "livraison": "2017-12-25",
+        "facture": "2018-01-20"
+      },
+      "ecrituresAttendues": [
+        [
+          {
+            "sens": "D",
+            "compte": "601",
+            "libelle": "Achats de marchandises",
+            "montant": 100000
+          },
+          {
+            "sens": "D",
+            "compte": "445",
+            "libelle": "État, TVA récupérable",
+            "montant": 16000
+          },
+          {
+            "sens": "C",
+            "compte": "408",
+            "libelle": "Fournisseurs, factures non parvenues",
+            "montant": 116000
+          }
+        ]
+      ],
+      "resultatAttendu": {
+        "total_ttc": 116000
+      },
+      "verifie": true,
+      "source": "p.24"
+    },
+    {
+      "code": "CDT-REGUL-02",
+      "regle": "REGUL-CHARGE-CONSTATEE-AVANCE",
+      "titre": "Assurance automobile 1,5 M HT pour 01/10/2017 → 30/09/2018, clôture 31/12/2017",
+      "donnees": {
+        "prime_ht": 1500000,
+        "tva": 0.16,
+        "periode": [
+          "2017-10-01",
+          "2018-09-30"
+        ],
+        "mois_ecoules": 3,
+        "mois_restants": 9
+      },
+      "ecrituresAttendues": [
+        [
+          {
+            "sens": "D",
+            "compte": "625",
+            "libelle": "Assurances",
+            "montant": 1500000
+          },
+          {
+            "sens": "D",
+            "compte": "445",
+            "libelle": "État, TVA récupérable",
+            "montant": 240000
+          },
+          {
+            "sens": "C",
+            "compte": "401",
+            "libelle": "Fournisseur SONAS",
+            "montant": 1740000
+          }
+        ],
+        [
+          {
+            "sens": "D",
+            "compte": "476",
+            "libelle": "Charges constatées d'avance",
+            "montant": 1125000
+          },
+          {
+            "sens": "C",
+            "compte": "625",
+            "libelle": "Assurances",
+            "montant": 1125000
+          }
+        ]
+      ],
+      "resultatAttendu": {
+        "charge_exercice_2017": 375000,
+        "charges_constatees_d_avance": 1125000
+      },
+      "verifie": true,
+      "source": "p.24-25",
+      "notes": "La première écriture est la facturation d'origine ; la seconde est la régularisation au 31/12 (à contre-passer le 01/01/2018)."
+    },
+    {
+      "code": "CDT-REGUL-03",
+      "regle": "REGUL-PRODUIT-A-RECEVOIR",
+      "titre": "Marchandises vendues le 28/12/2017, facturées le 21/01/2018 : facture à établir",
+      "donnees": {
+        "montant_ht": 200000,
+        "tva": 0.16,
+        "livraison": "2017-12-28",
+        "facture": "2018-01-21",
+        "note": "le livre écrit « 200.0000 » (coquille)"
+      },
+      "ecrituresAttendues": [
+        [
+          {
+            "sens": "D",
+            "compte": "418",
+            "libelle": "Clients, factures à établir",
+            "montant": 232000
+          },
+          {
+            "sens": "C",
+            "compte": "701",
+            "libelle": "Ventes de marchandises",
+            "montant": 200000
+          },
+          {
+            "sens": "C",
+            "compte": "443",
+            "libelle": "État, TVA facturée",
+            "montant": 32000
+          }
+        ]
+      ],
+      "resultatAttendu": {
+        "total_ttc": 232000
+      },
+      "verifie": true,
+      "source": "p.25"
+    },
+    {
+      "code": "CDT-REGUL-04",
+      "regle": "REGUL-PRODUIT-CONSTATE-AVANCE",
+      "titre": "Contrat de gardiennage 500 000 HT du 01/12/2017 au 31/03/2018 : produit constaté d'avance",
+      "donnees": {
+        "montant_ht": 500000,
+        "tva": 0.16,
+        "periode": [
+          "2017-12-01",
+          "2018-03-31"
+        ],
+        "mois_total": 4,
+        "mois_exercice": 1,
+        "mois_suivants": 3
+      },
+      "ecrituresAttendues": [
+        [
+          {
+            "sens": "D",
+            "compte": "411",
+            "libelle": "Clients W",
+            "montant": 580000
+          },
+          {
+            "sens": "C",
+            "compte": "7061",
+            "libelle": "Services vendus",
+            "montant": 500000
+          },
+          {
+            "sens": "C",
+            "compte": "443",
+            "libelle": "État, TVA facturée",
+            "montant": 80000
+          }
+        ],
+        [
+          {
+            "sens": "D",
+            "compte": "7061",
+            "libelle": "Services vendus",
+            "montant": 375000
+          },
+          {
+            "sens": "C",
+            "compte": "477",
+            "libelle": "Produits constatés d'avance",
+            "montant": 375000
+          }
+        ]
+      ],
+      "resultatAttendu": {
+        "produit_exercice_2017": 125000,
+        "produits_constates_d_avance": 375000
+      },
+      "verifie": true,
+      "source": "p.26",
+      "notes": "La première écriture est la facturation de décembre ; la seconde est la régularisation au 31/12 (à contre-passer le 01/01/2018)."
+    },
+    {
+      "code": "CDT-REGUL-05",
+      "regle": "REGUL-PRODUIT-CONSTATE-AVANCE",
+      "titre": "Contrat de télésurveillance 200 000 HT du 01/12 au 31/01/2018 : produit constaté d'avance",
+      "donnees": {
+        "montant_ht": 200000,
+        "tva": 0.16,
+        "periode": [
+          "2017-12-01",
+          "2018-01-31"
+        ],
+        "mois_total": 2,
+        "mois_exercice": 1,
+        "mois_suivants": 1
+      },
+      "ecrituresAttendues": [
+        [
+          {
+            "sens": "D",
+            "compte": "411",
+            "libelle": "Clients Z",
+            "montant": 232000
+          },
+          {
+            "sens": "C",
+            "compte": "7062",
+            "libelle": "Services vendus",
+            "montant": 200000
+          },
+          {
+            "sens": "C",
+            "compte": "443",
+            "libelle": "État, TVA facturée",
+            "montant": 32000
+          }
+        ],
+        [
+          {
+            "sens": "D",
+            "compte": "7062",
+            "libelle": "Services vendus",
+            "montant": 100000
+          },
+          {
+            "sens": "C",
+            "compte": "477",
+            "libelle": "Produits constatés d'avance",
+            "montant": 100000
+          }
+        ]
+      ],
+      "resultatAttendu": {
+        "produit_exercice_2017": 100000,
+        "produits_constates_d_avance": 100000
+      },
+      "verifie": true,
+      "source": "p.27",
+      "notes": "Table du livre mal extraite : la répartition 232 000 / 200 000 / 32 000 / 100 000 est reconstituée et recalculée ; énoncé avec « 01/12/N » pour 2017 (coquille)."
+    }
+  ],
+  "erreursDuLivre": [
+    {
+      "code": "ERR-01",
+      "ou": "p.12 — application n°2 (dépréciation de stock DEFLO)",
+      "texte": "« la valeur d'entrée est inférieure à la valeur nette de négociation »",
+      "probleme": "Le raisonnement est inverse : 100 050 000 (valeur nette de négociation) est inférieure à 100 140 000 (coût d'achat). La dépréciation est justifiée parce que la valeur nette de réalisation est inférieure à la valeur d'entrée. Le calcul (90 000) est juste.",
+      "gravite": "libellé"
+    },
+    {
+      "code": "ERR-02",
+      "ou": "p.19-20 — amortissement, application n°1 (valeur résiduelle)",
+      "texte": "Mise en service le 02/04/2018, dotation 2018 = 100 000 (annuité pleine)",
+      "probleme": "Le prorata temporis du livre (p.17) n'est pas appliqué : 75 000 (9/12) ou environ 74 722 (jours). Ne pas utiliser 100 000 comme attendu d'un test de première année.",
+      "gravite": "calcul"
+    },
+    {
+      "code": "ERR-03",
+      "ou": "p.17 vs p.20-21 — prorata temporis",
+      "texte": "Formule Ba × t × d / 1200 (d en mois, à partir du premier jour du mois) ; l'exemple composants utilise 162 jours sur 360",
+      "probleme": "Deux conventions incompatibles : en mois à partir du 1er juillet, 6 mois ⇒ 2 250 000 + 3 000 000 = 5 250 000 ; en jours depuis le 18/07 (162 j, début exclu, mois de 30 jours ; 163 en comptant le 18) ⇒ 4 725 000. Le moteur doit rendre la convention paramétrable.",
+      "gravite": "ambiguite"
+    },
+    {
+      "code": "ERR-04",
+      "ou": "p.13 — dépréciation des créances",
+      "texte": "Création au crédit de 491 ; reprise au débit de 492",
+      "probleme": "Compte différent entre constitution et reprise (492 est un autre compte de tiers). Corrigé en 491 dans la règle DEP-CREANCE-REPRISE.",
+      "gravite": "compte"
+    },
+    {
+      "code": "ERR-05",
+      "ou": "p.14 — dépréciation de trésorerie",
+      "texte": "Création au crédit de 593 ; reprise au débit de 594 ; notes de bas de page « sauf 599 » sans objet clair",
+      "probleme": "Même incohérence de compte. Le plan du dossier ne descend pas jusqu'à ces sous-comptes : à vérifier.",
+      "gravite": "compte"
+    },
+    {
+      "code": "ERR-06",
+      "ou": "p.18 — amortissement dégressif",
+      "texte": "Applicable aux biens « dont la durée est supérieure à quatre ans et inférieure à vingt ans », alors que le tableau des coefficients commence à « 4 ans : 2 »",
+      "probleme": "La borne « supérieure à 4 ans » exclut la durée de 4 ans que le tableau prévoit. Par ailleurs, la règle du livre (nombre d'annuités linéaires = partie entière de durée/coefficient) vérifiée par simulation n'est exacte que si on bascule dès l'égalité des deux annuités.",
+      "gravite": "ambiguite"
+    },
+    {
+      "code": "ERR-07",
+      "ou": "p.5-6 et 7 — devises",
+      "texte": "Dates et cours incohérents entre l'exemple de paiement et l'exemple d'inventaire",
+      "probleme": "La vente LONGO est au 15/10/2018 puis au 15/12/2018 ; le cours de clôture est écrit « 1400 USD » (c'est 1 USD = 1 400 CDF) ; le prêt LOKO « remboursable dans deux mois » depuis le 13/10 est échu au 31/12. Les libellés des comptes 4991/4997/659/679 sont intervertis par l'extraction du tableau p.7. Le paragraphe sur les gains et pertes de change est imprimé deux fois (p.5).",
+      "gravite": "ambiguite"
+    },
+    {
+      "code": "ERR-08",
+      "ou": "p.24 — intérêts courus sur dettes",
+      "texte": "4086 « Intérêts courus sur fournisseurs, factures non parvenues »",
+      "probleme": "Mélange : les factures non parvenues sont au 408 (4081) ; 4086 serait les intérêts courus. À confirmer au plan complet.",
+      "gravite": "libellé"
+    },
+    {
+      "code": "ERR-09",
+      "ou": "p.25-27 — énoncés d'applications",
+      "texte": "« 200.0000 CDF HT », « Contrat de gardiennage mensuel » pour un contrat de 4 mois, « 01/12/N » pour 2017",
+      "probleme": "Coquilles ; les montants du livre ne sont retenus que lorsque le recalcul les confirme (232 000, 375 000, 100 000).",
+      "gravite": "coquille"
+    },
+    {
+      "code": "ERR-10",
+      "ou": "p.28-30 — détermination du résultat net",
+      "texte": "Schéma de comptabilisation des soldes intermédiaires (comptes 131 à 139, 87, 89)",
+      "probleme": "Table très mal extraite et numérotation douteuse (les mêmes numéros servent à plusieurs soldes). Ne pas en tirer de cas de test ; aucun chiffre n'est donné.",
+      "gravite": "ambiguite"
+    },
+    {
+      "code": "ERR-11",
+      "ou": "p.10 — formule de dépréciation",
+      "texte": "« Dépréciation = Valeur actuelle − valeur d'entrée »",
+      "probleme": "Donne un montant négatif ; la dépréciation est à comptabiliser en valeur absolue (même formule inversée pour les immobilisations : VNC − valeur actuelle).",
+      "gravite": "signe"
+    },
+    {
+      "code": "OMI-01",
+      "ou": "p.13 — créance irrécouvrable",
+      "texte": "Seul 651/416 est donné",
+      "probleme": "Omission : reprise de la dépréciation constituée et traitement de la TVA. Non complété (hors livre).",
+      "gravite": "omission"
+    }
+  ],
+  "specificitesNonTogolaises": [
+    {
+      "code": "RDC-01",
+      "sujet": "Coefficients de l'amortissement dégressif",
+      "texte": "4 ans : 2 ; 5 à 6 ans : 2,5 ; plus de 6 ans : 3 (administration fiscale congolaise). Les coefficients togolais sont à reprendre du CGI du dossier, ne pas réutiliser ceux-ci.",
+      "portee": "fiscal-RDC"
+    },
+    {
+      "code": "RDC-02",
+      "sujet": "Taux d'amortissement usuels admis",
+      "texte": "Immeubles bâtis 2 à 5 % ; matériel et outillage 10 % ; roulant 20 à 25 % ; mobilier 10 % ; agencements 10 % ; ordinateurs 25 %.",
+      "portee": "fiscal-RDC"
+    },
+    {
+      "code": "RDC-03",
+      "sujet": "Amortissement exceptionnel",
+      "texte": "Industries exportatrices (export ≥ 20 % du chiffre d'affaires) : première annuité de 60 % du prix de revient, puis dégressif sur la valeur nette, sans prorata.",
+      "portee": "fiscal-RDC"
+    },
+    {
+      "code": "RDC-04",
+      "sujet": "Prorata temporis",
+      "texte": "Formule Ba × t × d / 1200 en mois, à partir du premier jour du mois de mise en service.",
+      "portee": "fiscal-RDC"
+    },
+    {
+      "code": "RDC-05",
+      "sujet": "TVA 16 %",
+      "texte": "Tous les exemples chiffrés utilisent 16 % (RDC). Le taux togolais est à lire dans le paquet fiscal du dossier.",
+      "portee": "fiscal-RDC"
+    },
+    {
+      "code": "RDC-06",
+      "sujet": "Devises et monnaie",
+      "texte": "Exemples en CDF et en USD (cours 1 400 à 1 500). Aucune parité fixe comme le franc CFA à l'euro.",
+      "portee": "monnaie"
+    },
+    {
+      "code": "RDC-07",
+      "sujet": "Résultat fiscal et impôt (IBP)",
+      "texte": "35 % du bénéfice (droit commun), 30 % (code minier), minimum 1/100 du chiffre d'affaires, plancher 750 000 CDF (moyennes) et 2 500 000 CDF (grandes entreprises) ; petites entreprises 1 % (vente) ou 2 % (services) du chiffre d'affaires ; micro-entreprises 50 000 CDF. Liste des réintégrations et déductions du Code des impôts congolais (ICR).",
+      "portee": "fiscal-RDC"
+    },
+    {
+      "code": "RDC-08",
+      "sujet": "Dépenses non admises, revenus déjà imposés",
+      "texte": "Frais du siège à l'étranger, amendes, tantièmes, déduction de 10 % pour frais généraux sur les revenus déjà imposés ; cédules congolaises.",
+      "portee": "fiscal-RDC"
+    },
+    {
+      "code": "RDC-09",
+      "sujet": "Organisation du séminaire",
+      "texte": "Conseil permanent de la comptabilité au Congo : processus d'inventaire en huit étapes (balance avant inventaire, inventaire extra-comptable, circularisation) valable en OHADA mais présenté sans référence togolaise.",
+      "portee": "pedagogique"
+    }
+  ]
+}

@@ -1,0 +1,990 @@
+{
+  "_meta": {
+    "artefact": "sycebnl-amorce",
+    "zoneComptable": "OHADA",
+    "pays": [],
+    "devisePresentation": null,
+    "normeSource": "Acte uniforme relatif au Système comptable des entités à but non lucratif (SYCEBNL), adopté le 22 décembre 2022, publié au JO OHADA le 22 février 2023, applicable à compter du 1er janvier 2024 (art. 28) ; texte officiel : JO OHADA, numéro spécial du 22 février 2023 (SYSCEBNL.pdf)",
+    "sources": [
+      {
+        "source": "Journal officiel OHADA, numéro spécial du 22 février 2023 (SYSCEBNL.pdf, 438 p. scannées)",
+        "nature": "TEXTE OFFICIEL — articles dans acte-sycebnl-articles.json, états dans etats-sycebnl-associations.json et etats-sycebnl-projets-smt.json",
+        "lu": "2026-11-23, en image"
+      },
+      {
+        "source": "Acte uniforme, articles 1 à 28, et plan de comptes tels que reproduits par https://plan-comptable-ohada.com/sycebnl/",
+        "nature": "site non officiel, reproduction partielle de l'Acte (certains articles abrégés)",
+        "lu": "2026-11-23"
+      },
+      {
+        "source": "Guide d'application SYCEBNL (SYCEBNL-GUIDE-D-APPLICATION.pdf, 37 p., document Word d'avril 2023, auteur non indiqué)",
+        "nature": "22 cas pratiques corrigés + tableaux de correspondance des états des projets ; déposé par l'utilisateur",
+        "lu": "2026-11-23, en entier"
+      },
+      {
+        "source": "Livre 20 du pack de 25 livres comptables (cours de A. Fall, IPP, 2023)",
+        "nature": "cours, 49 diapositives",
+        "lu": "2026-11-23, en entier"
+      }
+    ],
+    "statut": "amorce",
+    "miseEnGarde": "Cadrage, mécanismes et jeux de tests, PAS un paquet de référentiel. Le texte officiel est désormais extrait à part (acte-sycebnl-articles.json, etats-sycebnl-associations.json, etats-sycebnl-projets-smt.json) et prime sur ce fichier en cas d'écart. Le plan de comptes complet est dans plan-comptable-sycebnl.json.",
+    "usage": "Cadrage du vertical ONG (cadrage-ong-sycebnl-2026-11-23.md) ; base de la future story de référentiel sycebnl@1.0 ; jeux de tests pour la comptabilité générale."
+  },
+  "acte": {
+    "dates": {
+      "adoption": "2022-12-22",
+      "publicationJO": "2023-02-22",
+      "applicableDepuis": "2024-01-01",
+      "source": "https://plan-comptable-ohada.com/sycebnl/acte-uniforme.html#article-28 et page d'accueil du site",
+      "remarque": "L'art. 28 prévoit une publication dans les 60 jours de l'adoption ; les dates du site donnent 62 jours. Le cours du livre 20 situe l'adoption à la 53e session du Conseil des ministres."
+    },
+    "exclusionDuSyscohada": "AUDCIF art. 5 : établissements de crédit, microfinance, marché financier, assurance et réassurance, sécurité et prévoyance sociales, entités à but non lucratif sont hors SYSCOHADA (livre 20, p. 4).",
+    "definition": "Art. 2 : organisation poursuivant un but désintéressé, dont les ressources générées servent au fonctionnement et à la réalisation de l'objet social. Deux familles : associations et ordres professionnels (avec fondations, organisations religieuses et toute entité de droit ou de fait assimilée) ; entités qui gèrent des projets de développement financés par des bailleurs bilatéraux, multilatéraux, privés ou étatiques.",
+    "articlesUtiles": {
+      "art4_etats": "voir etatsFinanciers",
+      "art5_6_systemes": "voir systemes",
+      "art7_9_11": "Le compte d'exploitation et le tableau emplois-ressources des projets retiennent les charges « sans amortissement ni dépréciation ». L'art. 7 impose par ailleurs, en général, de procéder à tous amortissements : contradiction apparente, levée par la famille d'entité (associations : amortissement ; projets : non).",
+      "art14": "Livre d'inventaire.",
+      "art16": "Rapport d'activité exigé (point 3), en plus des états financiers.",
+      "art17_registreDesDonateurs": "Registre tenu pour tous les dons, donations et legs : date ; personne physique (nom, prénoms, domicile, adresse électronique) ou morale (dénomination, immatriculation, NIF, siège, adresse électronique) ; montant ; mode de libération (espèces, chèque, virement, nature). Écritures signées par le représentant légal ; tenue électronique admise.",
+      "art18": "Registre vérifié par l'auditeur, ou déclaration des dirigeants.",
+      "art19_auditeurObligatoire": {
+        "regle": "Désignation obligatoire d'un auditeur si l'un des critères est atteint à la clôture",
+        "criteres": {
+          "totalBilanSuperieurA_XOF": 100000000,
+          "ressourcesAnnuellesSuperieuresA_XOF": 200000000,
+          "effectifPermanentSuperieurA": 20
+        }
+      }
+    },
+    "sourceArticles": "https://plan-comptable-ohada.com/sycebnl/acte-uniforme.html"
+  },
+  "systemes": {
+    "article": "Art. 6 (https://plan-comptable-ohada.com/sycebnl/acte-uniforme.html#article-6), repris par le livre 20, p. 18",
+    "valeurs": [
+      "SYSTEME_NORMAL",
+      "SYSTEME_MINIMAL_DE_TRESORERIE"
+    ],
+    "regle": "Les petites entités sont assujetties, sauf option, au SMT : celles dont CHACUNE des ressources annuelles est inférieure ou égale à 30 000 000 FCFA.",
+    "seuilsParRessource_XOF": {
+      "subventions": 30000000,
+      "cotisationsEtAutresRevenus": 30000000,
+      "donsEtOuLegs": 30000000,
+      "ressourcesDuProjetDeDeveloppement": 30000000,
+      "autresRessources": 30000000
+    },
+    "basculeVersSN": "Si l'une des ressources dépasse son seuil, ou si, « de manière cumulée sur deux exercices », les ressources dépassent 30 M, l'entité relève du Système normal.",
+    "ambiguite": "Le cumul sur deux exercices ne dit ni s'il porte sur chaque ressource ou sur le total, ni s'il s'agit de deux exercices consécutifs. Choix par défaut proposé : basculer si une ressource dépasse 30 M sur l'exercice, OU si le total des ressources dépasse 30 M deux exercices de suite ; afficher la règle appliquée et la laisser contester.",
+    "differenceAvecLeSyscohada": "Le SYSCOHADA mesure la taille au chiffre d'affaires ; le SYCEBNL par type de ressource. La règle de bascule de Prospera ne se réutilise pas telle quelle."
+  },
+  "etatsFinanciers": {
+    "ASSOCIATION": {
+      "etats": [
+        "bilan",
+        "compte de résultat",
+        "tableau des flux de trésorerie",
+        "notes annexes"
+      ],
+      "amortissement": true
+    },
+    "PROJET_DE_DEVELOPPEMENT": {
+      "etats": [
+        "tableau emplois-ressources",
+        "tableau d'exécution budgétaire",
+        "tableau de réconciliation de trésorerie",
+        "bilan",
+        "compte d'exploitation",
+        "notes annexes"
+      ],
+      "amortissement": false
+    },
+    "SMT": {
+      "etats": [
+        "bilan",
+        "compte de résultat",
+        "notes 1 à 5 (dont la note 4 : journal unique de trésorerie)"
+      ]
+    },
+    "source": "https://plan-comptable-ohada.com/sycebnl/acte-uniforme.html#article-4 ; https://plan-comptable-ohada.com/sycebnl/etats-financiers/. Le livre 20 (p. 17) oubliait le tableau emplois-ressources et le tableau d'exécution budgétaire des projets.",
+    "notesAssociations": [
+      "1 Dettes garanties, engagements (et contributions volontaires en nature)",
+      "2 Informations obligatoires",
+      "3 Événements postérieurs à la clôture",
+      "4 Changements, estimations et erreurs",
+      "5A-5H Immobilisations (incorporelles, corporelles, location-acquisition, dons et legs, amortissements, dépréciations, cessions, réévaluations)",
+      "6 Immobilisations financières",
+      "7 Actif et dettes circulants HAO",
+      "8 Stocks et encours",
+      "9 Adhérents et clients-usagers",
+      "10 Autres créances",
+      "11 Titres de placement",
+      "12 Valeurs à encaisser",
+      "13 Disponibilités",
+      "14 Écarts de conversion",
+      "15 Dotation",
+      "16 Réserves",
+      "17A Subventions et provisions réglementées",
+      "17B Fonds affectés et reportés",
+      "18A Dettes financières",
+      "18B Actifs et passifs éventuels",
+      "19 Fournisseurs d'exploitation",
+      "20 Dettes fiscales et sociales",
+      "21 Autres dettes et provisions à court terme",
+      "22 Banques et crédits de trésorerie",
+      "23 Revenus et autres produits",
+      "24 Achats",
+      "25 Transports",
+      "26 Services extérieurs",
+      "27 Impôts et taxes",
+      "28 Autres charges",
+      "29A Charges de personnel",
+      "29B Effectifs",
+      "30 Dotations, provisions et dépréciations",
+      "31 Charges et revenus financiers",
+      "32 Autres charges et produits HAO",
+      "33 Principaux indicateurs financiers",
+      "34 Informations sociales et environnementales",
+      "35 Tableau d'exécution budgétaire"
+    ],
+    "notesProjets": [
+      "1 Informations obligatoires",
+      "2 Informations spécifiques",
+      "3A Immobilisations brutes",
+      "3B Biens pris en location-acquisition",
+      "4 Actif et dettes circulants HAO",
+      "5 Stocks et encours",
+      "6 Clients-usagers et autres créances",
+      "7 Disponibilités",
+      "8 Écarts de conversion",
+      "9 Fonds du bailleur",
+      "10 Subventions",
+      "11 Dettes financières",
+      "12 Dettes fournisseurs, fiscales et sociales",
+      "13 Banques et crédits de trésorerie",
+      "14 Revenus et autres produits",
+      "15 Achats",
+      "16 Transports",
+      "17 Services extérieurs",
+      "18 Impôts et taxes",
+      "19 Autres charges",
+      "20A Charges de personnel",
+      "20B Effectifs",
+      "21 Charges et revenus financiers",
+      "22 Dotations et charges pour provisions",
+      "23 Autres charges et produits HAO",
+      "24 Tableau d'exécution budgétaire"
+    ],
+    "sourceNotes": "https://plan-comptable-ohada.com/sycebnl/etats-financiers/ (liste seulement, pas les modèles)"
+  },
+  "tableauEmploisRessources": {
+    "famille": "PROJET_DE_DEVELOPPEMENT",
+    "pourquoi": "C'est l'état que lit le bailleur, et il se calcule ENTIÈREMENT depuis les balances N et N-1 : il entre dans la mécanique actuelle de Prospera (balance → postes) sans comptabilité générale.",
+    "postes": [
+      {
+        "code": "FA",
+        "libelle": "Fonds reçus, bailleurs",
+        "formule": "mouvement crédit N des comptes 161, 162, 462 (un sous-compte par bailleur s'il y en a plusieurs)"
+      },
+      {
+        "code": "FB",
+        "libelle": "Fonds reçus, bailleurs (autre bailleur)",
+        "formule": "mouvement crédit N des comptes 161, 162, 462 du bailleur suivant"
+      },
+      {
+        "code": "FC",
+        "libelle": "Fonds de contrepartie État",
+        "formule": "mouvement crédit N des comptes 163, 463"
+      },
+      {
+        "code": "FD",
+        "libelle": "Autres fonds reçus",
+        "formule": "mouvement crédit N des comptes 164, 464, 707, 77"
+      },
+      {
+        "code": "GR",
+        "libelle": "I. RESSOURCES",
+        "formule": "FA + FB + FC + FD",
+        "total": true
+      },
+      {
+        "code": "FE",
+        "libelle": "Immobilisations incorporelles",
+        "formule": "mouvement débit N du compte 21, ajusté (a)"
+      },
+      {
+        "code": "FF",
+        "libelle": "Terrains",
+        "formule": "mouvement débit N du compte 22, ajusté (a)"
+      },
+      {
+        "code": "FG",
+        "libelle": "Bâtiments",
+        "formule": "mouvement débit N des comptes 231, 232, 233, 2391, 2392, 2393, 2396, ajusté (a)"
+      },
+      {
+        "code": "FH",
+        "libelle": "Aménagements, agencements et installations",
+        "formule": "mouvement débit N des comptes 234, 235, 238, 2394, 2395, 2398, ajusté (a)"
+      },
+      {
+        "code": "FI",
+        "libelle": "Matériel, mobilier et actifs biologiques",
+        "formule": "mouvement débit N du compte 24 sauf 245 et 2495, ajusté (a)"
+      },
+      {
+        "code": "FJ",
+        "libelle": "Matériel de transport",
+        "formule": "mouvement débit N des comptes 245 et 2495, ajusté (a)"
+      },
+      {
+        "code": "FK",
+        "libelle": "Avances et acomptes sur immobilisations",
+        "formule": "mouvement débit N du compte 25"
+      },
+      {
+        "code": "FL",
+        "libelle": "Immobilisations financières",
+        "formule": "mouvement débit N des comptes 26, 27, ajusté (b)"
+      },
+      {
+        "code": "GS",
+        "libelle": "A. TOTAL DES IMMOBILISATIONS",
+        "formule": "FE à FL",
+        "total": true
+      },
+      {
+        "code": "FM",
+        "libelle": "Achats de biens et services",
+        "formule": "mouvement débit N du compte 60, ajusté (c)"
+      },
+      {
+        "code": "FN",
+        "libelle": "Transports",
+        "formule": "mouvement débit N du compte 61, ajusté (c)"
+      },
+      {
+        "code": "FO",
+        "libelle": "Services extérieurs",
+        "formule": "mouvement débit N des comptes 62, 63, ajusté (c)"
+      },
+      {
+        "code": "FP",
+        "libelle": "Impôts et taxes",
+        "formule": "mouvement débit N du compte 64, ajusté (d)"
+      },
+      {
+        "code": "FQ",
+        "libelle": "Autres charges",
+        "formule": "mouvement débit N du compte 65, ajusté (e)"
+      },
+      {
+        "code": "FR",
+        "libelle": "Charges de personnel",
+        "formule": "mouvement débit N du compte 66, ajusté (f)"
+      },
+      {
+        "code": "FS",
+        "libelle": "Charges financières",
+        "formule": "mouvement débit N du compte 67, ajusté (g)"
+      },
+      {
+        "code": "FT",
+        "libelle": "Avances sur charges (à justifier)",
+        "formule": "solde débiteur N des comptes 4091, 4093"
+      },
+      {
+        "code": "GT",
+        "libelle": "B. TOTAL DES CHARGES DE FONCTIONNEMENT",
+        "formule": "FM à FT",
+        "total": true
+      },
+      {
+        "code": "GU",
+        "libelle": "II. EMPLOIS (A + B)",
+        "formule": "GS + GT",
+        "total": true
+      },
+      {
+        "code": "GV",
+        "libelle": "III. EXCÉDENT / DÉFICIT DES FONDS REÇUS SUR LES EMPLOIS",
+        "formule": "GR − GU",
+        "total": true
+      },
+      {
+        "code": "FU",
+        "libelle": "Fonds bailleur en début d'exercice",
+        "formule": "solde débiteur N-1 des comptes 51, 52, 53, 55, 57 (fonds bailleurs)"
+      },
+      {
+        "code": "FV",
+        "libelle": "Fonds de contrepartie État en début d'exercice",
+        "formule": "solde débiteur N-1 des comptes 51, 52, 53, 55, 57 (fonds État)"
+      },
+      {
+        "code": "FW",
+        "libelle": "Autres fonds en début d'exercice",
+        "formule": "solde débiteur N-1 des comptes 51, 52, 53, 55, 57 (autres fonds)"
+      },
+      {
+        "code": "GW",
+        "libelle": "IV. FONDS DISPONIBLES EN DÉBUT D'EXERCICE",
+        "formule": "FU + FV + FW",
+        "total": true
+      },
+      {
+        "code": "GX",
+        "libelle": "V. MONTANT NET DE L'ENCAISSE DISPONIBLE",
+        "formule": "GV + GW",
+        "total": true
+      },
+      {
+        "code": "FX",
+        "libelle": "Fonds bailleur en fin d'exercice",
+        "formule": "solde débiteur N des comptes 51, 52, 53, 55, 57 (fonds bailleurs)"
+      },
+      {
+        "code": "FY",
+        "libelle": "Fonds de contrepartie État en fin d'exercice",
+        "formule": "solde débiteur N des comptes 51, 52, 53, 55, 57 (fonds État)"
+      },
+      {
+        "code": "FZ",
+        "libelle": "Autres fonds en fin d'exercice",
+        "formule": "solde débiteur N des comptes 51, 52, 53, 55, 57 (autres fonds)"
+      },
+      {
+        "code": "GY",
+        "libelle": "VI. FONDS DISPONIBLES EN FIN D'EXERCICE",
+        "formule": "FX + FY + FZ",
+        "total": true
+      },
+      {
+        "code": "GZ",
+        "libelle": "VII. CONTRÔLE : TOTAL V = TOTAL VI",
+        "formule": "GX − GY = 0",
+        "controle": true
+      }
+    ],
+    "ajustements": {
+      "a": "+ solde créditeur N-1 − solde créditeur N du compte 481 concerné (sauf 4813) ; ignorer les virements de compte à compte qui ne sont pas des acquisitions décaissées",
+      "b": "+ solde débiteur N-1 − solde débiteur N du compte 4813 ; ignorer le mouvement débit du 276 (intérêts courus) et les virements de compte à compte",
+      "c": "variation des dettes fournisseurs d'exploitation sur le compte 401 concerné ; ignorer la variation de stocks (603) et les achats transférés en immobilisations (livraison à soi-même)",
+      "d": "variation des dettes fiscales (compte 44)",
+      "e": "variation des dettes de tiers rattachées au 65 ; ignorer les transferts en immobilisations et les comptes 49",
+      "f": "variation des comptes 42 et 43 ; ignorer les charges de personnel transférées en immobilisations",
+      "g": "déduire le mouvement crédit du 166 ; ignorer les transferts en immobilisations et les comptes 49"
+    },
+    "limite": "Les fonds bailleur / État / autres en trésorerie (FU à FZ) supposent que les comptes de trésorerie sont séparés par origine de fonds (sous-comptes 52x par bailleur). Sans cette séparation, seul le total est calculable.",
+    "aVerifier": "Le guide écrit « +Solde débiteur N-1 du compte 401 » pour les dettes fournisseurs (c) et « solde débiteur » pour 44 (d) : les dettes sont normalement créditrices. À relire sur le texte officiel avant de coder le signe. Le bilan du JO traite les dettes (40, 42, 43, 44, 47) en SOLDES CRÉDITEURS : le « solde débiteur » du guide pour 401 et 44 contredit cette convention.",
+    "source": "Guide d'application SYCEBNL (SYCEBNL-GUIDE-D-APPLICATION.pdf, 37 p., document Word d'avril 2023, auteur non indiqué), p. 34-35 (Application 21)",
+    "confirmationJO": "Les 35 codes (FA→FZ, GR→GZ) et leur ordre sont IDENTIQUES au JO (p. 397 et suivantes). Le JO ne donne en revanche AUCUNE correspondance de comptes ni aucun ajustement pour ce tableau : les formules et ajustements (a) à (g) ci-dessus viennent du seul guide d'application et restent à confirmer. Le compte 166 cité en (g) n'existe pas dans le plan publié."
+  },
+  "tableauExecutionBudgetaire": {
+    "colonnes": [
+      {
+        "n": 1,
+        "libelle": "Budget de l'exercice",
+        "formule": "budget du projet, ligne par ligne de la nomenclature budgétaire"
+      },
+      {
+        "n": 2,
+        "libelle": "Décaissement",
+        "formule": "immobilisations : mouvement débit N des comptes 2 hors virements internes + (solde créditeur N-1 − solde créditeur N du 481) ; charges : mouvement débit N des comptes 6 et 8 + (solde créditeur N-1 − solde créditeur N du 40 sauf 409) + (solde débiteur N − solde débiteur N-1 du 409)"
+      },
+      {
+        "n": 3,
+        "libelle": "Engagement",
+        "formule": "solde créditeur N des fournisseurs (40, 481) + bons de commande et contrats signés de l'exercice non exécutés"
+      },
+      {
+        "n": 4,
+        "libelle": "Réalisation",
+        "formule": "2 + 3"
+      },
+      {
+        "n": 5,
+        "libelle": "Crédit disponible",
+        "formule": "1 − 4"
+      },
+      {
+        "n": 6,
+        "libelle": "Exécution du budget (%)",
+        "formule": "4 / 1"
+      }
+    ],
+    "prerequis": "Un plan de comptes conçu sur la nomenclature budgétaire du projet, et la saisie du budget ; les engagements hors comptabilité (bons de commande, contrats) sont une donnée à part.",
+    "source": "Guide d'application SYCEBNL (SYCEBNL-GUIDE-D-APPLICATION.pdf, 37 p., document Word d'avril 2023, auteur non indiqué), p. 36 (Application 22) ; c'est aussi la note 35 des associations et la note 24 des projets"
+  },
+  "mecanismes": {
+    "neutralisationDesCharges": "Les charges financées par des fonds dédiés n'affectent pas le résultat : chaque charge est compensée par un produit de transfert (702 quote-part de fonds d'administration transférés pour les projets ; 703 quote-part de dotation consomptible) ou par une reprise de fonds (7923 dons et legs d'immobilisations, 7925 fonds affectés à un projet, 7961 usufruit temporaire, 7962 legs destinés à la vente, 799 subventions d'investissement).",
+    "fondsNonConsommes": "Projets : en fin d'exercice, les fonds d'investissement non consommés passent de 162 à 165, extournés au 1er janvier.",
+    "pasDAmortissementDansLesProjets": "Projets : aucune dotation aux amortissements, car « l'approche financière de l'amortissement qui consiste à reconstituer les capitaux investis » ne convient pas (guide, p. 20 ; Acte art. 7, 9, 11). Associations : amortissement normal, compensé par la reprise du fonds qui a financé le bien.",
+    "fondsReportes": "Usufruit temporaire (171) amorti sur la durée de la donation ; legs non encore reçus destinés à la vente (172) non amortis mais dépréciables ; par simplification le SYCEBNL recommande de ne pas déprécier et d'informer en note 5D.",
+    "contributionsVolontairesEnNature": "Classe 9 : emplois 900 secours en nature, 901 mises à disposition gratuites de biens, 902 prestations en nature, 904 personnel bénévole ; contreparties 910 dons en nature, 911 prestations en nature, 914 bénévolat. Comptabilisées si leur poids est significatif et si elles sont valorisables ; une pièce par contribution (date, nature, personne, mode d'évaluation) ; ni trésorerie ni résultat ; information en note 1.",
+    "suiviParBailleur": "Le guide (p. 18) propose de suffixer le numéro de compte par un identifiant de bailleur ou de sous-projet (ex. 245125 et 625225 pour le bailleur 25, 245142 et 625242 pour le bailleur 42) ; dans ce cas les états financiers COMBINÉS sont obligatoires. Le plan publié prévoit aussi des comptes distincts par origine : 462 bailleurs, 463 État, 464 autres organismes ; 162, 163, 164 pour les fonds d'investissement ; note 9 « Fonds du bailleur ».",
+    "subventionsPluriannuelles": "Part des exercices suivants en 477 produits constatés d'avance, reprise exercice par exercice (guide, Application 16).",
+    "restitutionDeSubvention": "Quote-part à rembourser : débit 14 (ou 71), crédit 4739 subventions à reverser (guide, Application 19)."
+  },
+  "casDeTest": [
+    {
+      "code": "APP01_DOTATIONS_A_LA_CONSTITUTION",
+      "donnees": "Apports définitifs en nature (mobilier 15 M, informatique 8 M, automobile 10 M) et en espèces 5 M pour les premières charges ; apports provisoires avec droit de reprise (mobilier 30 M, espèces 1 M, chèque 3 M). Statuts prévoyant souscription puis libération. Fonds de fonctionnement tous consommés dans l'exercice.",
+      "ecrituresAttendues": [
+        {
+          "libelle": "Souscription des apports définitifs",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "4511",
+              "montant": 33000000
+            },
+            {
+              "sens": "D",
+              "compte": "4512",
+              "montant": 5000000
+            },
+            {
+              "sens": "C",
+              "compte": "1015",
+              "montant": 33000000,
+              "libelle": "Dotation non consomptible sans droit de reprise, en nature"
+            },
+            {
+              "sens": "C",
+              "compte": "1041",
+              "montant": 5000000,
+              "libelle": "Dotation consomptible"
+            }
+          ]
+        },
+        {
+          "libelle": "Libération des apports définitifs",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "2442",
+              "montant": 8000000
+            },
+            {
+              "sens": "D",
+              "compte": "2441",
+              "montant": 15000000
+            },
+            {
+              "sens": "D",
+              "compte": "2451",
+              "montant": 10000000
+            },
+            {
+              "sens": "D",
+              "compte": "571",
+              "montant": 5000000
+            },
+            {
+              "sens": "C",
+              "compte": "4511",
+              "montant": 33000000
+            },
+            {
+              "sens": "C",
+              "compte": "4512",
+              "montant": 5000000
+            }
+          ]
+        },
+        {
+          "libelle": "Souscription des apports provisoires",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "4511",
+              "montant": 30000000
+            },
+            {
+              "sens": "D",
+              "compte": "4512",
+              "montant": 4000000
+            },
+            {
+              "sens": "C",
+              "compte": "1025",
+              "montant": 30000000,
+              "libelle": "Dotation non consomptible avec droit de reprise, en nature"
+            },
+            {
+              "sens": "C",
+              "compte": "1021",
+              "montant": 4000000,
+              "libelle": "Dotation non consomptible avec droit de reprise, en numéraire"
+            }
+          ]
+        },
+        {
+          "libelle": "Libération des apports provisoires",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "2441",
+              "montant": 30000000
+            },
+            {
+              "sens": "D",
+              "compte": "52",
+              "montant": 3000000
+            },
+            {
+              "sens": "D",
+              "compte": "57",
+              "montant": 1000000
+            },
+            {
+              "sens": "C",
+              "compte": "4511",
+              "montant": 30000000
+            },
+            {
+              "sens": "C",
+              "compte": "4512",
+              "montant": 4000000
+            }
+          ]
+        },
+        {
+          "libelle": "Clôture : neutraliser les charges couvertes par la dotation consomptible",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "1049",
+              "montant": 5000000,
+              "libelle": "Dotation consomptible inscrite au compte de résultat"
+            },
+            {
+              "sens": "C",
+              "compte": "703",
+              "montant": 5000000,
+              "libelle": "Quote-part de dotation consomptible transférée"
+            }
+          ]
+        }
+      ],
+      "enseignement": "Apport définitif = dotation non consomptible (101x) ; apport à reprendre = dotation avec droit de reprise (102x) ; argent pour les charges = dotation consomptible (104x), reprise en produit (703) à mesure des charges. Sans phase de souscription dans les statuts, on passe directement l'écriture de réalisation.",
+      "source": "Guide d'application, p. 5-7 (Application 1) ; le livre 20 (p. 44-47) traite le même énoncé sans la partie provisoire et avec une coquille (330 000 000)"
+    },
+    {
+      "code": "APP02_DROIT_D_ENTREE_DEPOT_COTISATION",
+      "donnees": "Appel global de 50 M aux nouveaux membres : 15 % dépôt restituable sous 48 mois, 10 % cotisation, solde droit d'entrée. Statuts permettant le recouvrement forcé (donc créance constatée à l'appel).",
+      "ecrituresAttendues": [
+        {
+          "libelle": "Appel",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "411",
+              "montant": 50000000
+            },
+            {
+              "sens": "C",
+              "compte": "103",
+              "montant": 37500000,
+              "libelle": "Droit d'entrée"
+            },
+            {
+              "sens": "C",
+              "compte": "1851",
+              "montant": 7500000,
+              "libelle": "Dépôts reçus"
+            },
+            {
+              "sens": "C",
+              "compte": "701",
+              "montant": 5000000,
+              "libelle": "Cotisations des adhérents"
+            }
+          ]
+        },
+        {
+          "libelle": "Encaissement",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "52",
+              "montant": 50000000
+            },
+            {
+              "sens": "C",
+              "compte": "411",
+              "montant": 50000000
+            }
+          ]
+        }
+      ],
+      "enseignement": "La cotisation n'est constatée en créance (411) que si l'entité peut en exiger le paiement ; sinon, produit à l'encaissement.",
+      "source": "Guide d'application, p. 8 (Application 2)"
+    },
+    {
+      "code": "APP04_FONDS_AFFECTES_NON_CONSOMMES",
+      "donnees": "Donation BAD de 45 M affectée à un projet d'hydraulique ; un tiers consommé en N, le reste en N+1.",
+      "ecrituresAttendues": [
+        {
+          "libelle": "Réception",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "52",
+              "montant": 45000000
+            },
+            {
+              "sens": "C",
+              "compte": "165",
+              "montant": 45000000,
+              "libelle": "Fonds affectés à un projet spécifique"
+            }
+          ]
+        },
+        {
+          "libelle": "Clôture N : reprise du tiers consommé",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "165",
+              "montant": 15000000
+            },
+            {
+              "sens": "C",
+              "compte": "7925",
+              "montant": 15000000,
+              "libelle": "Reprises de fonds affectés à un projet spécifique"
+            }
+          ]
+        },
+        {
+          "libelle": "Clôture N+1 : reprise du reste",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "165",
+              "montant": 30000000
+            },
+            {
+              "sens": "C",
+              "compte": "7925",
+              "montant": 30000000
+            }
+          ]
+        }
+      ],
+      "enseignement": "Un fonds affecté n'est pas un produit à la réception : il passe en produit (7925) au rythme des dépenses qu'il finance. Le solde de 165 = argent reçu et pas encore dépensé, à suivre par bailleur.",
+      "source": "Guide d'application, p. 11 (Application 4)"
+    },
+    {
+      "code": "APP05_LEGS_D_IMMOBILISATIONS",
+      "donnees": "Legs accepté le 1er avril : bâtiment 400 M (30 ans), mobilier 25 M (10 ans), informatique 10 M (2 ans), automobile 12 M (3 ans), dettes successorales 25 M, obligation d'entretenir la tombe estimée à 12,5 M.",
+      "ecrituresAttendues": [
+        {
+          "libelle": "Réception du legs",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "2313",
+              "montant": 400000000
+            },
+            {
+              "sens": "D",
+              "compte": "2442",
+              "montant": 10000000
+            },
+            {
+              "sens": "D",
+              "compte": "2441",
+              "montant": 25000000
+            },
+            {
+              "sens": "D",
+              "compte": "2451",
+              "montant": 12000000
+            },
+            {
+              "sens": "C",
+              "compte": "4861",
+              "montant": 25000000,
+              "libelle": "Dettes des dons et legs d'immobilisations"
+            },
+            {
+              "sens": "C",
+              "compte": "167",
+              "montant": 422000000,
+              "libelle": "Fonds provenant de dons et legs d'immobilisations"
+            }
+          ]
+        },
+        {
+          "libelle": "Provision pour l'obligation",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "1679",
+              "montant": 12500000,
+              "libelle": "Engagements auprès du donateur"
+            },
+            {
+              "sens": "C",
+              "compte": "192",
+              "montant": 12500000,
+              "libelle": "Provisions pour charges sur legs et dons (compte cité par le guide, absent du plan publié)"
+            }
+          ]
+        },
+        {
+          "libelle": "Amortissements N (9 mois)",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "6813",
+              "montant": 18625000
+            },
+            {
+              "sens": "C",
+              "compte": "28313",
+              "montant": 10000000
+            },
+            {
+              "sens": "C",
+              "compte": "28442",
+              "montant": 3750000
+            },
+            {
+              "sens": "C",
+              "compte": "28444",
+              "montant": 1875000
+            },
+            {
+              "sens": "C",
+              "compte": "28451",
+              "montant": 3000000
+            }
+          ]
+        },
+        {
+          "libelle": "Reprise des fonds au rythme des amortissements",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "167",
+              "montant": 18625000
+            },
+            {
+              "sens": "C",
+              "compte": "7923",
+              "montant": 18625000,
+              "libelle": "Reprises de fonds affectés provenant de dons et legs d'immobilisations"
+            }
+          ]
+        }
+      ],
+      "enseignement": "Les biens reçus en legs s'amortissent, et le fonds 167 se reprend en produit (7923) du même montant : le résultat n'est pas touché par l'amortissement d'un bien reçu gratuitement.",
+      "anomalie": "Les comptes 28442 et 28444 du guide ne correspondent pas aux comptes d'immobilisation 2442 (informatique) et 2441 (mobilier) : à recouper avec le plan de la classe 2.",
+      "source": "Guide d'application, p. 12-13 (Application 5)"
+    },
+    {
+      "code": "APP08_PROJET_DE_DEVELOPPEMENT",
+      "donnees": "Banque mondiale : 150 M décaissés le 5 janvier N, estimés à 80 % investissement / 20 % fonctionnement. Investissements N : 112 M. Fonctionnement N : 28 M (dont salaires 8,5 M, charges sociales 255 000, taxes sur salaires 170 000). N+1 : prestations de 10 M payées sur le solde ; clé définitive du bailleur : 112 M investissement, 38 M administration.",
+      "ecrituresAttendues": [
+        {
+          "libelle": "Décaissement du bailleur",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "52",
+              "montant": 150000000
+            },
+            {
+              "sens": "C",
+              "compte": "162",
+              "montant": 120000000,
+              "libelle": "Fonds affectés aux investissements"
+            },
+            {
+              "sens": "C",
+              "compte": "462",
+              "montant": 30000000,
+              "libelle": "Bailleurs, fonds d'administration"
+            }
+          ]
+        },
+        {
+          "libelle": "Acquisitions",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "2234",
+              "montant": 10000000
+            },
+            {
+              "sens": "D",
+              "compte": "2318",
+              "montant": 50000000
+            },
+            {
+              "sens": "D",
+              "compte": "2442",
+              "montant": 5000000
+            },
+            {
+              "sens": "D",
+              "compte": "2441",
+              "montant": 12000000
+            },
+            {
+              "sens": "D",
+              "compte": "2451",
+              "montant": 35000000
+            },
+            {
+              "sens": "C",
+              "compte": "4812",
+              "montant": 112000000
+            }
+          ]
+        },
+        {
+          "libelle": "Neutralisation des charges de fonctionnement N",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "462",
+              "montant": 28000000
+            },
+            {
+              "sens": "C",
+              "compte": "702",
+              "montant": 28000000,
+              "libelle": "Quote-part de fonds d'administration transférés"
+            }
+          ]
+        },
+        {
+          "libelle": "Clôture N : fonds d'investissement non consommés (pas d'amortissement)",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "162",
+              "montant": 8000000
+            },
+            {
+              "sens": "C",
+              "compte": "165",
+              "montant": 8000000
+            }
+          ]
+        },
+        {
+          "libelle": "1er janvier N+1 : extourne",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "165",
+              "montant": 8000000
+            },
+            {
+              "sens": "C",
+              "compte": "162",
+              "montant": 8000000
+            }
+          ]
+        },
+        {
+          "libelle": "N+1 : neutralisation des prestations",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "462",
+              "montant": 10000000
+            },
+            {
+              "sens": "C",
+              "compte": "702",
+              "montant": 10000000
+            }
+          ]
+        },
+        {
+          "libelle": "N+1 : affectation définitive selon le bailleur",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "162",
+              "montant": 8000000
+            },
+            {
+              "sens": "C",
+              "compte": "462",
+              "montant": 8000000
+            }
+          ]
+        }
+      ],
+      "enseignement": "Dans un projet, chaque charge est neutralisée par un produit (702) au moment où elle est engagée : le résultat du projet est nul par construction. Les immobilisations ne s'amortissent pas. Ce qui compte est l'emploi des fonds du bailleur, d'où le tableau emplois-ressources.",
+      "anomalieDuGuide": "Dans l'écriture des acquisitions, le guide inverse mobilier (5 M dans l'énoncé) et informatique (12 M) sur les comptes 2442 / 2441. Le total de 112 M est juste ; les montants ci-dessus reprennent le guide tel quel.",
+      "source": "Guide d'application, p. 18-21 (Application 8)"
+    },
+    {
+      "code": "APP20_CONTRIBUTIONS_VOLONTAIRES_EN_NATURE",
+      "donnees": "Fournitures de bureau reçues gratuitement 450 000 ; 450 bénévoles × 18,5 h = 8 325 heures, valorisées au SMIG horaire de 346.",
+      "ecrituresAttendues": [
+        {
+          "libelle": "Mise à disposition gratuite de biens",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "901",
+              "montant": 450000
+            },
+            {
+              "sens": "C",
+              "compte": "910",
+              "montant": 450000
+            }
+          ]
+        },
+        {
+          "libelle": "Bénévolat",
+          "lignes": [
+            {
+              "sens": "D",
+              "compte": "904",
+              "montant": 2880450
+            },
+            {
+              "sens": "C",
+              "compte": "914",
+              "montant": 2880450
+            }
+          ]
+        }
+      ],
+      "enseignement": "La classe 9 enregistre les contributions en nature sans toucher le résultat ni la trésorerie ; elles s'affichent dans la Note 1. Le bénévolat sans compétence particulière se valorise au SMIG horaire du pays.",
+      "anomalieDuGuide": "Le tableau de la Note 1 du guide affiche 2 864 880 pour le bénévolat (total 3 314 880) au lieu de 8 325 × 346 = 2 880 450 (total 3 330 450).",
+      "pourLeTogo": "Le taux de 346 n'est pas celui du Togo : utiliser le SMIG horaire togolais en vigueur (paquet fiscal / paie).",
+      "source": "Guide d'application, p. 33 (Application 20)"
+    }
+  ],
+  "ecartsEntreSources": [
+    "Livre 20 : « 46 Fonds d'administration ». Plan publié : 46 est la tête de classe « Bailleurs, fonds d'administration » ; le compte est 462 (bailleurs), 463 (État), 464 (autres).",
+    "Guide (App. 5) : compte 192 « Provisions pour charges sur legs et dons ». Absent du plan publié (191, 194, 196, 198 seulement).",
+    "Guide (App. 18) et site : 4751 « Mécènes » ; le plan publié n'a que 475 « Générosités financières à recevoir » (et 4571 Mécènes en classe 4).",
+    "Guide (App. 10) : 8311 « Charges sur dons et legs » et 8421 « Dons en nature HAO vendus ». Plan publié : 8311 = Dons en nature HAO non affectés, 8411 = Dons en nature HAO vendus, 842 = Contributions volontaires en nature.",
+    "Guide (App. 11) : 70410, 70430, 70441, 70442 (dons, deniers du culte, quête, dîmes). Plan publié : 7041 Dons, 7043 Deniers du culte, 7044 Zakat, dîme, quête et assimilées.",
+    "Guide (App. 20) : total du bénévolat 2 864 880 au lieu de 2 880 450.",
+    "Guide (App. 8) : mobilier et informatique inversés sur 2441 / 2442.",
+    "Livre 20 : présente les états des projets sans le tableau emplois-ressources ni le tableau d'exécution budgétaire.",
+    "Acte, art. 7 : « procéder à tous amortissements » contre art. 7, 9, 11 « sans amortissement » pour les projets."
+  ],
+  "absentDesSources": [
+    "modèles d'états ligne par ligne des associations (codes de postes du bilan, du compte de résultat, du TFT) et leur table de passage",
+    "modèles du tableau de réconciliation de trésorerie et du compte d'exploitation des projets",
+    "texte officiel du JO OHADA (toutes les sources sont secondaires)",
+    "régime fiscal des associations et ONG au Togo",
+    "obligations de dépôt et de publication des comptes d'une ONG au Togo"
+  ]
+}

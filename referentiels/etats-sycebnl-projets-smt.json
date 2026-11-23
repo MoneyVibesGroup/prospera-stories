@@ -1,0 +1,2195 @@
+{
+  "_meta": {
+    "artefact": "etats-sycebnl-projets-smt",
+    "zoneComptable": "OHADA",
+    "pays": [],
+    "devisePresentation": null,
+    "normeSource": "Acte uniforme SYCEBNL, JO OHADA numéro spécial du 22 février 2023, annexe partie 4 chapitres 3 et 4",
+    "statut": "amorce",
+    "miseEnGarde": "Extraction faite en lisant les pages scannées en image (rendu 110 à 300 dpi) ; rien n'est tiré de mémoire, du guide d'application ni du projet ONEC de 2021. Les codes en bande sombre du TER (GV à GZ) sont dégradés à l'impression. Aucune table de correspondance comptes -> postes n'existe dans les p.397-438 pour le TER, le tableau d'exécution budgétaire, le tableau de réconciliation et les états du SMT : tableDePassage vaut null pour ces états. À valider contre le texte intégral avant tout usage réglementaire.",
+    "source": {
+      "fichier": "SYCEBNL.pdf (Journal officiel OHADA, numéro spécial du 22 février 2023)",
+      "pages": "397-438",
+      "partie": "Partie 4 Présentation des états financiers ; chapitre 3 (p.397-432), chapitre 4 (p.433-438)",
+      "paginationPdfEgaleJournal": true,
+      "pagesLuesEnImage": 42,
+      "inventaireDesPages": {
+        "397": "chapitre 3, liste des états",
+        "398": "TER",
+        "399": "tableau d'exécution budgétaire",
+        "400": "tableau de réconciliation de trésorerie",
+        "401": "bilan",
+        "402": "compte d'exploitation",
+        "403": "fiche récapitulative des notes",
+        "404-429": "notes 1 à 24",
+        "430": "table de correspondance du bilan",
+        "431": "table de correspondance du compte d'exploitation",
+        "432": "page blanche",
+        "433": "chapitre 4 SMT, liste des états",
+        "434": "bilan SMT",
+        "435": "compte de résultat SMT et fiche des notes SMT",
+        "436": "notes SMT 1, 2, 3",
+        "437": "note SMT 4",
+        "438": "note SMT 5"
+      }
+    }
+  },
+  "projets": {
+    "etats": [
+      {
+        "nom": "Tableau emplois ressources",
+        "pages": [
+          398
+        ],
+        "colonnes": [
+          "SOLDE CUMULE DEBUT EXERCICE N",
+          "EXERCICE N",
+          "SOLDE CUMULE FIN EXERCICE N"
+        ],
+        "postes": [
+          {
+            "code": "FA",
+            "libelle": "Fonds reçus, Bailleurs ....",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FB",
+            "libelle": "Fonds reçus, Bailleurs ....",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FC",
+            "libelle": "Fonds contrepartie Etat",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FD",
+            "libelle": "Autres fonds reçus",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "GR",
+            "libelle": "I. RESSOURCES",
+            "estTotal": true,
+            "formuleTotal": null,
+            "lisibilite": "code lu (bande sombre)"
+          },
+          {
+            "code": "FE",
+            "libelle": "Immobilisations incorporelles",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FF",
+            "libelle": "Terrains",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FG",
+            "libelle": "Bâtiments",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FH",
+            "libelle": "Aménagements, agencements et installations",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FI",
+            "libelle": "Matériel, mobilier et actifs biologiques",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FJ",
+            "libelle": "Matériel de transport",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FK",
+            "libelle": "Avances et acomptes sur immobilisations",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FL",
+            "libelle": "Immobilisations financières",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "GS",
+            "libelle": "A- TOTAL DES IMMOBILISATIONS",
+            "estTotal": true,
+            "formuleTotal": null,
+            "lisibilite": "code lu (bande sombre)"
+          },
+          {
+            "code": "FM",
+            "libelle": "Achats de biens et services",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FN",
+            "libelle": "Transports",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FO",
+            "libelle": "Services extérieurs",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FP",
+            "libelle": "Impôts et taxes",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FQ",
+            "libelle": "Autres charges",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FR",
+            "libelle": "Charges de personnel",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FS",
+            "libelle": "Charges financières",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FT",
+            "libelle": "Avances sur charges (à justifier)",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "GT",
+            "libelle": "B- TOTAL DES CHARGES DE FONCTIONNEMENT",
+            "estTotal": true,
+            "formuleTotal": null,
+            "lisibilite": "code lu (bande sombre)"
+          },
+          {
+            "code": "GU",
+            "libelle": "II. EMPLOIS (A+B)",
+            "estTotal": true,
+            "formuleTotal": "A+B (imprimé « A/B » flou : lu A+B)",
+            "lisibilite": "code lu ; signe de la formule flou"
+          },
+          {
+            "code": "GV",
+            "libelle": "III. EXCEDENT /DEFICIT DES FONDS RECUS SUR LES EMPLOIS (I-II)",
+            "estTotal": true,
+            "formuleTotal": "I-II",
+            "lisibilite": "code dégradé (lu « G\\ ») : GV déduit de la suite GU, GW"
+          },
+          {
+            "code": "FU",
+            "libelle": "Fonds Bailleur en début exercice N",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FV",
+            "libelle": "Fonds de contrepartie Etat en début exercice N",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FW",
+            "libelle": "Autres fonds en début exercice N",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "GW",
+            "libelle": "IV. FONDS DISPONIBLE EN DEBUT EXERCICE",
+            "estTotal": true,
+            "formuleTotal": null,
+            "lisibilite": "code dégradé (rogné) : lu GW"
+          },
+          {
+            "code": "GX",
+            "libelle": "V. MONTANT NET DE L'ENCAISSE DISPONIBLE (III+IV)",
+            "estTotal": true,
+            "formuleTotal": "III+IV",
+            "lisibilite": "code dégradé : lu GX"
+          },
+          {
+            "code": "FX",
+            "libelle": "Fonds Bailleur en fin exercice N",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FY",
+            "libelle": "Fonds de contrepartie Etat en fin exercice N",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "FZ",
+            "libelle": "Autres fonds en fin exercice N",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "GY",
+            "libelle": "VI. FONDS DISPONIBLE EN FIN EXERCICE",
+            "estTotal": true,
+            "formuleTotal": null,
+            "lisibilite": "code dégradé : lu GY"
+          },
+          {
+            "code": "GZ",
+            "libelle": "VII. CONTRÔLE : TOTAL V = TOTAL VI",
+            "estTotal": true,
+            "formuleTotal": "TOTAL V = TOTAL VI",
+            "lisibilite": "code dégradé : lu GZ"
+          }
+        ],
+        "tableDePassage": null,
+        "remarqueTableDePassage": "Aucune table de correspondance comptes -> postes n'est imprimée pour ce tableau dans les p. 397-438 (seuls le Bilan p.430 et le Compte d'exploitation p.431 en ont une). Les formules et ajustements du guide ne sont donc pas confirmés par le JO. Le JO ne donne que les libellés, les codes et les égalités des lignes de total."
+      },
+      {
+        "nom": "Tableau d'exécution budgétaire (Tableau suivi exécution budget)",
+        "pages": [
+          399,
+          429
+        ],
+        "colonnes": [
+          {
+            "n": null,
+            "libelle": "Code"
+          },
+          {
+            "n": null,
+            "libelle": "Libellé"
+          },
+          {
+            "n": 1,
+            "libelle": "Budget de l'exercice"
+          },
+          {
+            "n": 2,
+            "libelle": "Décaissement"
+          },
+          {
+            "n": 3,
+            "libelle": "Engagement"
+          },
+          {
+            "n": "4=2+3",
+            "libelle": "Réalisation"
+          },
+          {
+            "n": "5=1-4",
+            "libelle": "Crédit Disponible"
+          },
+          {
+            "n": "4/1",
+            "libelle": "Exécution budget (%)"
+          }
+        ],
+        "postes": [
+          {
+            "code": null,
+            "libelle": "TOTAL",
+            "estTotal": true,
+            "formuleTotal": null
+          }
+        ],
+        "tableDePassage": null,
+        "remarqueTableDePassage": "Lignes libres : « Remplir, code et libellé, suivant la nomenclature budgétaire du projet ». Le JO n'imprime aucune correspondance comptes -> colonnes 1, 2, 3 ; seules les colonnes 4, 5 et 6 ont une égalité imprimée. Le même tableau est repris en Note 24 (p.429). La ligne TOTAL n'a pas de code."
+      },
+      {
+        "nom": "Tableau de réconciliation de trésorerie",
+        "pages": [
+          400
+        ],
+        "colonnes": [
+          "LIBELLE",
+          "(lettre)",
+          "MONTANT"
+        ],
+        "postes": [
+          {
+            "code": "A",
+            "libelle": "TRESORERIE EN DEBUT EXERCICE N",
+            "estTotal": true,
+            "formuleTotal": null
+          },
+          {
+            "code": "B",
+            "libelle": "FONDS RECUS DES BAILLEURS AU COURS DE L'EXERCICE N",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "C",
+            "libelle": "INTERETS RECUS AU COURS DE L'EXERCICE N",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "D",
+            "libelle": "AUTRES FONDS REÇUS AU COURS DE L'EXERCICE N",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "E",
+            "libelle": "VIREMENTS SUR COMPTES OPERATIONNELS",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "F",
+            "libelle": "DEPENSES DE L'EXERCICE N",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "G",
+            "libelle": "TRESORERIE EN FIN D'EXERCICE N (A+B+C+D-E-F)",
+            "estTotal": true,
+            "formuleTotal": "A+B+C+D-E-F"
+          },
+          {
+            "code": "H",
+            "libelle": "PAIEMENTS EN INSTANCE",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "I",
+            "libelle": "TRESORERIE NET DES PAIEMENTS EN INSTANCE (G-H)",
+            "estTotal": true,
+            "formuleTotal": "G-H"
+          }
+        ],
+        "tableDePassage": null,
+        "remarqueTableDePassage": "Aucune correspondance comptes imprimée. Des lignes vides (détail libre) sont intercalées entre les lettres B, C, D, E, F et H."
+      },
+      {
+        "nom": "Bilan",
+        "pages": [
+          401,
+          430
+        ],
+        "colonnes": [
+          "REF",
+          "ACTIF",
+          "Note",
+          "EXERCICE AU 31/12/N",
+          "EXERCICE AU 31/12/N-1",
+          "REF",
+          "PASSIF",
+          "Note",
+          "EXERCICE AU 31/12/N",
+          "EXERCICE AU 31/12/N-1"
+        ],
+        "postes": [
+          {
+            "code": "AA",
+            "libelle": "Immobilisations incorporelles",
+            "note": 2,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "AB",
+            "libelle": "Terrains et bâtiments",
+            "note": 2,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "AC",
+            "libelle": "Aménagements, agencements et installations",
+            "note": 2,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "AD",
+            "libelle": "Matériel, mobilier et actifs biologiques",
+            "note": 2,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "AE",
+            "libelle": "Matériel de transport",
+            "note": 2,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "AF",
+            "libelle": "Avances et acomptes versés sur immobilisations",
+            "note": 2,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "AG",
+            "libelle": "Dépôts et cautionnements",
+            "note": 2,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "AH",
+            "libelle": "Autres immobilisations corporelles et financières",
+            "note": 2,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "AZ",
+            "libelle": "TOTAL ACTIF IMMOBILISE",
+            "estTotal": true,
+            "formuleTotal": null,
+            "lisibilite": "bande sombre dégradée en p.401 ; libellé lu « TOTAL ACTIF IMMOBILISE »",
+            "cote": "actif"
+          },
+          {
+            "code": "BA",
+            "libelle": "Actif circulant HAO",
+            "note": 3,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "BB",
+            "libelle": "Stocks et encours",
+            "note": 4,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "BC",
+            "libelle": "Fournisseurs débiteurs",
+            "note": 5,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "BD",
+            "libelle": "Clients-usagers",
+            "note": 5,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "BE",
+            "libelle": "Autres créances",
+            "note": 5,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "BF",
+            "libelle": "TOTAL ACTIF CIRCULANT",
+            "estTotal": true,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "BV",
+            "libelle": "Valeurs à encaisser",
+            "note": 6,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "BW",
+            "libelle": "Banques, établissements financiers, caisses et assimilés",
+            "note": 6,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "BX",
+            "libelle": "TOTAL TRESORERIE ACTIF",
+            "estTotal": true,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "BY",
+            "libelle": "Ecart de conversion-Actif",
+            "note": 7,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "BZ",
+            "libelle": "TOTAL GENERAL",
+            "estTotal": true,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "CA",
+            "libelle": "Fonds affectés aux investissements",
+            "note": 8,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "CB",
+            "libelle": "Report à nouveau (+ ou -)",
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "CC",
+            "libelle": "Solde des opérations de l'exercice",
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "CD",
+            "libelle": "Subventions d'investissement",
+            "note": 9,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "CZ",
+            "libelle": "TOTAL RESSOURCES PROPRES ET ASSIMILEES",
+            "estTotal": true,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "DA",
+            "libelle": "Emprunts et dettes assimilées",
+            "note": 10,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "DB",
+            "libelle": "Provisions pour risques et charges",
+            "note": 10,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "DC",
+            "libelle": "TOTAL DETTES FINANCIERES ET RESSOURCES ASSIMILEES",
+            "estTotal": true,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "DD",
+            "libelle": "TOTAL RESSOURCES STABLES",
+            "estTotal": true,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "DE",
+            "libelle": "Dettes circulantes HAO",
+            "note": 3,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "DF",
+            "libelle": "Fonds d'administration",
+            "note": 8,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "DG",
+            "libelle": "Fournisseurs",
+            "note": 11,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "DH",
+            "libelle": "Autres dettes",
+            "note": 11,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "DI",
+            "libelle": "Provisions pour risques et charges à court terme",
+            "note": 20,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "DJ",
+            "libelle": "TOTAL PASSIF CIRCULANT",
+            "estTotal": true,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "DW",
+            "libelle": "Banques, établissements financiers et crédits de trésorerie",
+            "note": 12,
+            "estTotal": false,
+            "formuleTotal": null,
+            "lisibilite": "libellé rogné en bout de cellule en p.401 (« trésorerie » sans e final) ; complété d'après p.430",
+            "cote": "passif"
+          },
+          {
+            "code": "DX",
+            "libelle": "TOTAL TRESORERIE PASSIF",
+            "estTotal": true,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "DY",
+            "libelle": "Ecart de conversion-Passif",
+            "note": 7,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "DZ",
+            "libelle": "TOTAL GENERAL",
+            "estTotal": true,
+            "formuleTotal": null,
+            "cote": "passif"
+          }
+        ],
+        "tableDePassage": [
+          {
+            "code": "AA",
+            "comptes": [
+              "21"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "21",
+            "ajustements": null
+          },
+          {
+            "code": "AB",
+            "comptes": [
+              "22",
+              "231",
+              "232",
+              "233",
+              "2391",
+              "2392",
+              "2393",
+              "2396"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "22, 231, 232, 233, 2391, 2392, 2393,2396",
+            "ajustements": null
+          },
+          {
+            "code": "AC",
+            "comptes": [
+              "234",
+              "235",
+              "238",
+              "2394",
+              "2395",
+              "2398"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "234, 235, 238, 2394, 2395, 2398",
+            "ajustements": null
+          },
+          {
+            "code": "AD",
+            "comptes": [
+              "24"
+            ],
+            "exclusions": [
+              "245",
+              "2495"
+            ],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "24 (sauf 245 et 2495)",
+            "ajustements": null
+          },
+          {
+            "code": "AE",
+            "comptes": [
+              "245",
+              "2495"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "245, 2495",
+            "ajustements": null
+          },
+          {
+            "code": "AF",
+            "comptes": [
+              "25"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "25",
+            "ajustements": null
+          },
+          {
+            "code": "AG",
+            "comptes": [
+              "275"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "275",
+            "ajustements": null
+          },
+          {
+            "code": "AH",
+            "comptes": [
+              "26",
+              "27"
+            ],
+            "exclusions": [
+              "275"
+            ],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "26, 27 (sauf 275)",
+            "ajustements": null
+          },
+          {
+            "code": "BA",
+            "comptes": [
+              "485"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "485",
+            "ajustements": null
+          },
+          {
+            "code": "BB",
+            "comptes": [
+              "31",
+              "32",
+              "33",
+              "34",
+              "36",
+              "37",
+              "38"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "31, 32, 33, 34, 36, 37, 38",
+            "ajustements": null
+          },
+          {
+            "code": "BC",
+            "comptes": [
+              "409"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "409",
+            "ajustements": null
+          },
+          {
+            "code": "BD",
+            "comptes": [
+              "41"
+            ],
+            "exclusions": [
+              "411",
+              "419"
+            ],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "41 (sauf 411 et 419)",
+            "ajustements": null
+          },
+          {
+            "code": "BE",
+            "comptes": [
+              "42",
+              "43",
+              "44",
+              "47"
+            ],
+            "exclusions": [
+              "478"
+            ],
+            "regle": "soldes débiteurs",
+            "signe": null,
+            "texteImprime": "Soldes débiteurs : 42, 43, 44, 47 (sauf 478)",
+            "ajustements": null
+          },
+          {
+            "code": "BV",
+            "comptes": [
+              "51"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "51",
+            "ajustements": null
+          },
+          {
+            "code": "BW",
+            "comptes": [
+              "52",
+              "53",
+              "55",
+              "57"
+            ],
+            "exclusions": [],
+            "regle": "soldes débiteurs",
+            "signe": null,
+            "texteImprime": "Soldes débiteurs : 52, 53, 55, 57",
+            "ajustements": null
+          },
+          {
+            "code": "BY",
+            "comptes": [
+              "478"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "478",
+            "ajustements": null
+          },
+          {
+            "code": "CA",
+            "comptes": [
+              "16"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "16",
+            "ajustements": null
+          },
+          {
+            "code": "CB",
+            "comptes": [
+              "12"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "12",
+            "ajustements": null
+          },
+          {
+            "code": "CC",
+            "comptes": [
+              "13"
+            ],
+            "exclusions": [],
+            "regle": "excédent + ou déficit - ; imprimé « 13 (131 ou 139) »",
+            "signe": null,
+            "texteImprime": "13 (131 ou 139)",
+            "ajustements": null
+          },
+          {
+            "code": "CD",
+            "comptes": [
+              "14"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "14",
+            "ajustements": null
+          },
+          {
+            "code": "DA",
+            "comptes": [
+              "18"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "18",
+            "ajustements": null
+          },
+          {
+            "code": "DB",
+            "comptes": [
+              "19"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "19",
+            "ajustements": null
+          },
+          {
+            "code": "DE",
+            "comptes": [
+              "481",
+              "484",
+              "4998"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "481, 484, 4998",
+            "ajustements": null
+          },
+          {
+            "code": "DF",
+            "comptes": [
+              "46"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "46",
+            "ajustements": null
+          },
+          {
+            "code": "DG",
+            "comptes": [
+              "40"
+            ],
+            "exclusions": [
+              "409"
+            ],
+            "regle": "imprimé « 40 (409) » ; l'exclusion du 409 est une interprétation (le 409 est à l'actif en BC)",
+            "signe": null,
+            "texteImprime": "40 (409)",
+            "ajustements": null
+          },
+          {
+            "code": "DH",
+            "comptes": [
+              "419",
+              "42",
+              "43",
+              "44",
+              "47",
+              "499",
+              "599"
+            ],
+            "exclusions": [
+              "479",
+              "4998"
+            ],
+            "regle": "419 sans précision de sens ; soldes créditeurs : 42, 43, 44, 47 (sauf 479) ; 499 (sauf 4998) ; 599",
+            "signe": null,
+            "texteImprime": "419, Soldes créditeurs : 42, 43, 44,-47 (sauf 479), 499 (sauf 4998),599",
+            "ajustements": null
+          },
+          {
+            "code": "DW",
+            "comptes": [
+              "56",
+              "52",
+              "53"
+            ],
+            "exclusions": [],
+            "regle": "56 ; soldes créditeurs 52, 53",
+            "signe": null,
+            "texteImprime": "56, Soldes créditeurs 52, 53",
+            "ajustements": null
+          },
+          {
+            "code": "DY",
+            "comptes": [
+              "479"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": null,
+            "texteImprime": "479",
+            "ajustements": null
+          }
+        ],
+        "remarqueTableDePassage": "Table « TABLEAU DE CORRESPONDANCE - BILAN » p.430. Aucune ligne pour DI (Provisions pour risques et charges à court terme, note 20) : la ligne en regard est vide. Les postes totaux (AZ, BF, BX, BZ, CZ, DC, DD, DJ, DX, DZ) n'ont ni compte ni formule imprimés. BV n'a pas de poste passif en regard."
+      },
+      {
+        "nom": "Compte d'exploitation",
+        "pages": [
+          402,
+          431
+        ],
+        "colonnes": [
+          "REF",
+          "LIBELLES",
+          "NOTE",
+          "EXERCICE AU 31/12/N NET",
+          "EXERCICE AU 31/12/N-1 NET"
+        ],
+        "postes": [
+          {
+            "code": "RA",
+            "libelle": "Fonds d'administration consommés",
+            "note": 8,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 1
+          },
+          {
+            "code": "RB",
+            "libelle": "Ventes de marchandises, produits finis et prestations de services",
+            "note": 13,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 2
+          },
+          {
+            "code": "RD",
+            "libelle": "Autres produits et transferts de charges",
+            "note": 13,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 3
+          },
+          {
+            "code": "RE",
+            "libelle": "Reprises de provisions",
+            "note": 21,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 4
+          },
+          {
+            "code": "XA",
+            "libelle": "REVENUS (Somme RA à RE)",
+            "estTotal": true,
+            "formuleTotal": "Somme RA à RE (p.402) ; « Somme RA à RD » (p.431)",
+            "ordre": 5
+          },
+          {
+            "code": "TA",
+            "libelle": "Achats de biens, marchandises, matières premières et fournitures liées",
+            "note": 14,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 6
+          },
+          {
+            "code": "TB",
+            "libelle": "Autres achats",
+            "note": 14,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 7
+          },
+          {
+            "code": "TC",
+            "libelle": "Variation de stocks de biens, marchandises, matières et fournitures et autres",
+            "note": 4,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 8
+          },
+          {
+            "code": "TD",
+            "libelle": "Transports",
+            "note": 15,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 9
+          },
+          {
+            "code": "TG",
+            "libelle": "Services extérieurs",
+            "note": 16,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 10
+          },
+          {
+            "code": "TH",
+            "libelle": "Impôts et taxes",
+            "note": 17,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 11
+          },
+          {
+            "code": "TI",
+            "libelle": "Autres charges",
+            "note": 18,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 12
+          },
+          {
+            "code": "TJ",
+            "libelle": "Charges de personnel",
+            "note": 19,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 13
+          },
+          {
+            "code": "TK",
+            "libelle": "Frais financiers et charges assimilées",
+            "note": 20,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 14
+          },
+          {
+            "code": "TJ",
+            "libelle": "Dotations aux provisions",
+            "note": 21,
+            "estTotal": false,
+            "formuleTotal": null,
+            "codeImprimeEnDouble": true,
+            "ordre": 15
+          },
+          {
+            "code": "TK",
+            "libelle": "Produits H.A.O.",
+            "note": 22,
+            "estTotal": false,
+            "formuleTotal": null,
+            "codeImprimeEnDouble": true,
+            "ordre": 16
+          },
+          {
+            "code": "TL",
+            "libelle": "Charges H.A.O.",
+            "note": 22,
+            "estTotal": false,
+            "formuleTotal": null,
+            "ordre": 17
+          },
+          {
+            "code": "XB",
+            "libelle": "CHARGES DE FONCTIONNEMENT (Somme TA à TL)",
+            "estTotal": true,
+            "formuleTotal": "Somme TA à TL",
+            "ordre": 18
+          },
+          {
+            "code": "XC",
+            "libelle": "SOLDE DES OPERATIONS DE L'EXERCICE : XA-XB",
+            "estTotal": true,
+            "formuleTotal": "XA-XB (p.431 : « +excédent, -déficit »)",
+            "ordre": 19
+          }
+        ],
+        "tableDePassage": [
+          {
+            "code": "RA",
+            "comptes": [
+              "702"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "+",
+            "texteImprime": "+ 702",
+            "ajustements": null
+          },
+          {
+            "code": "RB",
+            "comptes": [
+              "705"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "+",
+            "texteImprime": "+ 705",
+            "ajustements": null
+          },
+          {
+            "code": "RC",
+            "comptes": [
+              "71"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "+",
+            "texteImprime": "+ 71",
+            "ajustements": null
+          },
+          {
+            "code": "RD",
+            "comptes": [
+              "707",
+              "72",
+              "73",
+              "75",
+              "77",
+              "78"
+            ],
+            "exclusions": [],
+            "regle": "73 (+/-) ; pas de signe imprimé dans la colonne signe",
+            "signe": null,
+            "texteImprime": "707, 72, 73 (+/-), 75, 77, 78",
+            "ajustements": null
+          },
+          {
+            "code": "RE",
+            "comptes": [
+              "79"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "+",
+            "texteImprime": "+ 79",
+            "ajustements": null
+          },
+          {
+            "code": "TA",
+            "comptes": [
+              "601",
+              "602"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "-",
+            "texteImprime": "- 601, 602",
+            "ajustements": null
+          },
+          {
+            "code": "TB",
+            "comptes": [
+              "604",
+              "605",
+              "606",
+              "608"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "-",
+            "texteImprime": "- 604, 605, 606, 608",
+            "ajustements": null
+          },
+          {
+            "code": "TC",
+            "comptes": [
+              "603"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "+/-",
+            "texteImprime": "+/- 603",
+            "ajustements": null
+          },
+          {
+            "code": "TD",
+            "comptes": [
+              "61"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "-",
+            "texteImprime": "- 61",
+            "ajustements": null
+          },
+          {
+            "code": "TG",
+            "comptes": [
+              "62",
+              "63"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "-",
+            "texteImprime": "- 62, 63",
+            "ajustements": null
+          },
+          {
+            "code": "TH",
+            "comptes": [
+              "64"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "-",
+            "texteImprime": "- 64",
+            "ajustements": null
+          },
+          {
+            "code": "TI",
+            "comptes": [
+              "65"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "-",
+            "texteImprime": "- 65",
+            "ajustements": null
+          },
+          {
+            "code": "TJ",
+            "comptes": [
+              "66"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "-",
+            "texteImprime": "- 66 (Charges de personnel)",
+            "ajustements": null
+          },
+          {
+            "code": "TK",
+            "comptes": [
+              "67"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "-",
+            "texteImprime": "- 67 (Frais financiers et charges assimilées)",
+            "ajustements": null
+          },
+          {
+            "code": "TJ",
+            "comptes": [
+              "69"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "-",
+            "texteImprime": "- 69 (Dotations aux provisions ; code TJ imprimé en double)",
+            "ajustements": null
+          },
+          {
+            "code": "TK",
+            "comptes": [
+              "82",
+              "84",
+              "86",
+              "88"
+            ],
+            "exclusions": [],
+            "regle": null,
+            "signe": "+",
+            "texteImprime": "+ 82, 84, 86, 88 (Produits H.A.O. ; code TK imprimé en double)",
+            "ajustements": null
+          },
+          {
+            "code": "TL",
+            "comptes": [
+              "81",
+              "83",
+              "85",
+              "87"
+            ],
+            "exclusions": [],
+            "regle": "87 (+/)",
+            "signe": "-",
+            "texteImprime": "- 81, 83, 85, 87 (+/)",
+            "ajustements": null
+          }
+        ],
+        "remarqueTableDePassage": "Table « TABLEAU DE CORRESPONDANCE - COMPTE D'EXPLOITATION » p.431. Elle comporte RC « Subventions d'exploitation » (+ 71), absent du compte d'exploitation p.402 (qui passe de RB à RD) ; elle intitule RA « Fonds d'administration » (p.402 : « Fonds d'administration consommés »). Les codes TJ et TK sont imprimés deux fois (p.402 et p.431). Signes = colonne signe imprimée (+ produit, - charge)."
+      }
+    ],
+    "notes": {
+      "fiche": {
+        "pages": [
+          403
+        ],
+        "structure": "Partie 1 Informations générales (note 1) ; Partie 2 Notes sur le TER, le tableau d'exécution budgétaire et le tableau de réconciliation (note 2) ; Partie 3 Notes sur le Bilan (3A à 13) ; Partie 4 Notes sur le Compte d'exploitation (14 à 24) ; colonnes A applicable / N/A non applicable",
+        "regles": [
+          "Les notes non documentées ne doivent pas être jointes aux états financiers (1)",
+          "Dans une note, les lignes non chiffrées doivent être supprimées (exemple : note 16 sous-traitance générale)",
+          "Entité sans stocks : cocher N/A (l'exemple imprimé dit « NOTE6 » alors que les stocks sont la Note 5 dans la fiche)"
+        ]
+      },
+      "liste": [
+        {
+          "numero": "1",
+          "titre": "INFORMATIONS OBLIGATOIRES",
+          "contenu": "Zones libres : A identité et organisation (date de début, nature du projet, effectifs, ressources affectées) ; B déclaration de conformité au SYCEBNL et faits marquants ; C règles, méthodes et dérogations ; D informations complémentaires relatives au bilan et au compte d'exploitation.",
+          "pages": [
+            404
+          ]
+        },
+        {
+          "numero": "2",
+          "titre": "INFORMATIONS SPECIFIQUES",
+          "contenu": "Zones libres de commentaire : A Tableau emplois ressources, B Tableau d'exécution budgétaire, C Tableau de réconciliation de trésorerie ; faits marquants et écarts budget/réalisation.",
+          "pages": [
+            405
+          ]
+        },
+        {
+          "numero": "3A",
+          "titre": "IMMOBILISATIONS BRUTES",
+          "contenu": "Mouvements par rubrique : A montant brut à l'ouverture ; B augmentations (acquisitions-apports-créations, virements de poste à poste, réévaluation) ; C diminutions (cessions-scissions-hors service, virements de poste à poste) ; D = A+B-C montant brut à la clôture ; rubriques incorporelles, corporelles (terrains, bâtiments hors/avec immeuble de placement, aménagements, matériel, transport, avances), financières (dépôts et cautionnements, autres), total général.",
+          "pages": [
+            406
+          ]
+        },
+        {
+          "numero": "3B",
+          "titre": "BIENS PRIS EN LOCATION-ACQUISITION",
+          "contenu": "Même grille (A, B, C, D = A+B-C) par terrains, bâtiments, matériel mobilier, matériel de transport, avec nature du contrat I (crédit-bail immobilier), M (crédit-bail mobilier), A (autres contrats).",
+          "pages": [
+            407
+          ]
+        },
+        {
+          "numero": "4",
+          "titre": "ACTIF CIRCULANT ET DETTES CIRCULANTES HAO",
+          "contenu": "Actif circulant HAO (créances sur cessions d'immobilisations, autres créances HAO, dépréciations) et dettes circulantes HAO (fournisseurs d'investissements, autres dettes hors activités ordinaires) ; année n, n-1, variation valeur et %.",
+          "pages": [
+            408
+          ]
+        },
+        {
+          "numero": "5",
+          "titre": "STOCKS ET ENCOURS",
+          "contenu": "Biens liés à l'activité (marchandises, matières premières et fournitures liées, autres approvisionnements), produits en cours, services en cours, produits finis, intermédiaires, stocks HAO, stocks en cours de route ; total, dépréciations, total net.",
+          "pages": [
+            409
+          ]
+        },
+        {
+          "numero": "6",
+          "titre": "CLIENTS-USAGERS ET AUTRES CREANCES",
+          "contenu": "Fournisseurs débiteurs, clients-usagers, personnel, organismes sociaux, Etat et collectivités publiques, autres débiteurs divers ; total brut, dépréciations ; ventilation à un an au plus, plus d'un an et deux ans au plus, plus de deux ans.",
+          "pages": [
+            410
+          ]
+        },
+        {
+          "numero": "7",
+          "titre": "DISPONIBILITES",
+          "contenu": "Valeurs à encaisser (chèques, cartes de crédit, autres) ; banques et caisses (banques locales, autres Etats de la région, dépôts à terme, autres banques, intérêts courus, banques postales, autres établissements financiers, monnaie électronique, caisse) ; dépréciations ; NB : banques et établissements financiers intérêts courus figurent en négatif si le compte principal est débiteur.",
+          "pages": [
+            411
+          ]
+        },
+        {
+          "numero": "8",
+          "titre": "ECARTS DE CONVERSION",
+          "contenu": "Détail des écarts de conversion actif et passif : devises, montant en devises, cours UML année d'acquisition, cours UML au 31/12, variation valeur et %.",
+          "pages": [
+            412
+          ]
+        },
+        {
+          "numero": "9",
+          "titre": "FONDS DU BAILLEUR",
+          "contenu": "Par bailleur ou sous-projet : date des décaissements, montant décaissé, montant consommé, solde restant ; fonds d'investissement et fonds d'administration ; le consommé de l'exercice au titre des fonds d'administration est le solde du compte 702 Quote-part de fonds d'administration transférés.",
+          "pages": [
+            413
+          ]
+        },
+        {
+          "numero": "10",
+          "titre": "SUBVENTIONS",
+          "contenu": "Par origine : Etat, région, département, communes et collectivités décentralisées, entités publiques ou mixtes, entités et organismes privés, organismes internationaux, autres ; année n, n-1, variation, échéances.",
+          "pages": [
+            414
+          ]
+        },
+        {
+          "numero": "11",
+          "titre": "DETTES FINANCIERES ET RESSOURCES ASSIMILEES",
+          "contenu": "Emprunts et dettes auprès des établissements de crédit, avances reçues de l'Etat, dépôts et cautionnements reçus, intérêts courus, autres ; dettes de location-acquisition ; provisions financières pour risques et charges (litiges, pertes de change, pensions, amendes et pénalités, autres) ; échéances.",
+          "pages": [
+            415
+          ]
+        },
+        {
+          "numero": "12",
+          "titre": "DETTES FOURNISSEURS ET ASSIMILEES, DETTES FISCALES ET SOCIALES",
+          "contenu": "Fournisseurs, clients-usagers créditeurs ; dettes sociales (personnel, congés, charges sociales, caisse de sécurité sociale, retraite, mutuelle, assurance retraite, autres) ; dettes fiscales (impôts sur les bénéfices, autres impôts et taxes, TVA, impôts retenus à la source, autres dettes Etat) ; échéances.",
+          "pages": [
+            416
+          ]
+        },
+        {
+          "numero": "13",
+          "titre": "BANQUES, CREDIT D'ESCOMPTE ET DE TRESORERIE",
+          "contenu": "Escomptes de crédit de campagne et ordinaires ; banques locales, autres Etats région, autres banques, intérêts courus, crédit de trésorerie ; total général.",
+          "pages": [
+            417
+          ]
+        },
+        {
+          "numero": "14",
+          "titre": "REVENUS ET AUTRES PRODUITS",
+          "contenu": "Ventes de marchandises, de produits fabriqués, de travaux et services, produits accessoires, production immobilisée, subventions d'exploitation, autres produits et transferts de charges d'exploitation ; total.",
+          "pages": [
+            418
+          ]
+        },
+        {
+          "numero": "15",
+          "titre": "ACHATS",
+          "contenu": "Achats de biens et services liés à l'activité : marchandises, matières premières et fournitures, consommables, combustibles, entretien, fournitures, eau, électricité, énergies, études et prestations, emballages, frais sur achats, remises obtenues ; total.",
+          "pages": [
+            419
+          ]
+        },
+        {
+          "numero": "16",
+          "titre": "TRANSPORTS",
+          "contenu": "Transports sur ventes, pour le compte de tiers, du personnel, de plis, voyages et déplacements, transports administratifs ; total.",
+          "pages": [
+            420
+          ]
+        },
+        {
+          "numero": "17",
+          "titre": "SERVICES EXTERIEURS",
+          "contenu": "Sous-traitance générale, locations, redevances de location-acquisition, entretien, assurances, études, publicité, télécommunications, frais bancaires, intermédiaires et conseils, formation, redevances, cotisations, personnel extérieur, autres charges externes ; total.",
+          "pages": [
+            421
+          ]
+        },
+        {
+          "numero": "18",
+          "titre": "IMPOTS ET TAXES",
+          "contenu": "Impôts et taxes directs et indirects, droits d'enregistrement, pénalités et amendes fiscales, autres, dégrèvements et annulations (solde créditeur précédé de -) ; total.",
+          "pages": [
+            422
+          ]
+        },
+        {
+          "numero": "19",
+          "titre": "AUTRES CHARGES",
+          "contenu": "Pertes sur créances, sur autres débiteurs, perte de change sur créances, pénalités et amendes pénales, dons et mécénat, autres charges diverses, charges pour provisions à court terme d'exploitation ; total.",
+          "pages": [
+            423
+          ]
+        },
+        {
+          "numero": "20A",
+          "titre": "CHARGES DE PERSONNEL",
+          "contenu": "Rémunérations directes (personnel national, non national), indemnités forfaitaires, charges sociales (national, non national), rémunération transférée de personnel extérieur, autres charges sociales, dégrèvements (solde créditeur précédé de -) ; total.",
+          "pages": [
+            424
+          ]
+        },
+        {
+          "numero": "20B",
+          "titre": "EFFECTIFS, MASSE SALARIALE ET PERSONNEL EXTERIEUR",
+          "contenu": "Postes YA à YG (personnel propre, 4 qualifications, total YE, permanents YF, saisonniers YG) et YH à YO (personnel extérieur et bénévole, total YL, permanents YM, saisonniers YN, total YO = 1+2) ; effectifs et masse salariale par M/F et origine (nationaux, autres Etats de la région, hors région) ; colonne facturation à l'entité.",
+          "pages": [
+            425
+          ]
+        },
+        {
+          "numero": "21",
+          "titre": "CHARGES ET REVENUS FINANCIERS",
+          "contenu": "Frais financiers (intérêts des emprunts, des loyers de location-acquisition, escomptes accordés, autres intérêts, pertes de change, pertes sur cessions de titres, charges pour provisions financières) et revenus financiers (intérêts de prêts, revenus de participations, escomptes obtenus, revenus de placement, gains de change, gains sur cessions de titres, transferts de charges financières, reprises) ; total.",
+          "pages": [
+            426
+          ]
+        },
+        {
+          "numero": "22",
+          "titre": "DOTATIONS ET CHARGES POUR PROVISIONS",
+          "contenu": "Pas de tableau imprimé : commentaire seul (indiquer les événements et circonstances qui ont conduit à la constitution et à la reprise de la provision).",
+          "pages": [
+            427
+          ]
+        },
+        {
+          "numero": "23",
+          "titre": "AUTRES CHARGES ET PRODUITS HAO",
+          "contenu": "Charges HAO constatées (compte 831), dons en nature (compte 832), pertes sur créances HAO, abandons de créances consentis, charges pour provisions HAO ; produits HAO constatés (compte 841), contributions volontaires en nature (compte 842) et en numéraire, transferts de charges HAO, reprises, subventions d'équilibre ; totaux.",
+          "pages": [
+            428
+          ]
+        },
+        {
+          "numero": "24",
+          "titre": "TABLEAU D'EXECUTION BUDGETAIRE",
+          "contenu": "Reprise du tableau d'exécution budgétaire (budget, décaissement, engagement, réalisation 4=2+3, crédit disponible 5=1-4, exécution 4/1) selon la nomenclature budgétaire du projet.",
+          "pages": [
+            429
+          ]
+        }
+      ]
+    },
+    "ecartsAvecLeGuide": {
+      "constat": "Le JO (p.398) n'imprime que la maquette du tableau emplois ressources : codes, libellés et les égalités des lignes GU, GV, GX, GZ. Il ne donne ni comptes, ni mouvements/soldes, ni ajustements (a) à (g) : tout ce que le guide écrit sur les comptes est NON CONFIRMÉ par le JO.",
+      "codes": {
+        "dansGuideSeulement": [],
+        "dansJoSeulement": [],
+        "communs": 35,
+        "memeOrdre": true,
+        "verdict": "mêmes codes FA à FZ et GR à GZ, même ordre d'impression"
+      },
+      "libelles": [
+        "FB : le guide écrit « Fonds reçus, bailleurs (autre bailleur) » ; le JO imprime « Fonds reçus, Bailleurs .... » (même libellé que FA, pointillés à compléter)",
+        "GW et GY : le JO écrit « FONDS DISPONIBLE » au singulier ; le guide « FONDS DISPONIBLES »",
+        "FU à FZ : le JO écrit « en début exercice N » / « en fin exercice N » ; différences de casse et d'apostrophe sans portée",
+        "Colonnes : le JO a trois colonnes (SOLDE CUMULE DEBUT EXERCICE N, EXERCICE N, SOLDE CUMULE FIN EXERCICE N) ; le guide ne décrit aucune colonne",
+        "GZ : même contrôle V = VI ; le guide l'exprime GX − GY = 0",
+        "GU : le JO imprime « II. EMPLOIS (A+B) » (signe flou), le guide « GS + GT »",
+        "GR : le JO imprime « I. RESSOURCES » sans formule ; le guide « FA + FB + FC + FD »"
+      ],
+      "comptes": {
+        "constat": "Aucun compte n'est imprimé pour le TER. Seuls des recoupements indirects avec la table du Bilan (p.430) et du Compte d'exploitation (p.431) sont possibles.",
+        "recoupements": [
+          "Trésorerie FU à FZ : le guide retient les soldes débiteurs des 51, 52, 53, 55, 57 ; le Bilan JO met 51 en BV (valeurs à encaisser) et « Soldes débiteurs : 52, 53, 55, 57 » en BW : concordant",
+          "FE : compte 21 = AA du Bilan JO ; FK : compte 25 = AF du Bilan JO",
+          "FF et FG : le guide sépare Terrains (22) et Bâtiments (231, 232, 233, 2391, 2392, 2393, 2396) ; le Bilan JO les regroupe en AB « Terrains et bâtiments » avec les mêmes racines : concordant",
+          "FH : le guide (234, 235, 238, 2394, 2395, 2398) correspond exactement à AC du Bilan JO",
+          "FI et FJ : le guide (24 sauf 245 et 2495 ; 245 et 2495) correspond à AD et AE du Bilan JO",
+          "FL : le guide prend 26 et 27 ; le Bilan JO isole 275 (dépôts et cautionnements) en AG et met 26, 27 sauf 275 en AH : cohérent (AG + AH)",
+          "FT : le guide prend les soldes débiteurs 4091, 4093 ; le Bilan JO met tout le 409 en BC (fournisseurs débiteurs)",
+          "FM à FS : racines 60 à 67 du guide ; le Compte d'exploitation JO emploie les mêmes (601-602 TA, 604-608 TB, 603 TC, 61 TD, 62-63 TG, 64 TH, 65 TI, 66 TJ, 67 TK) : concordantes",
+          "FA à FD : le guide cite 161, 162, 462, 163, 463, 164, 464, 707, 77 ; le JO met 16 en CA (fonds affectés aux investissements), 18 en DA, 46 en DF (fonds d'administration), 707 et 77 en RD, 702 en RA : aucune preuve que les fonds reçus passent par ces comptes"
+        ],
+        "comptesDuGuideAbsentsDuPlanSycebnl": [
+          "166"
+        ],
+        "methodeExtractionComptes": "racines à 2-4 chiffres lues par expression régulière dans formule et ajustements du guide, comparées par préfixe à plan-comptable-sycebnl.json"
+      },
+      "signesDesDettes": {
+        "question": "Le guide écrit « solde débiteur » pour les dettes 401 (ajustement c) et 44 (d) : que dit le JO ?",
+        "reponse": "Le JO n'imprime aucun signe ni ajustement pour le TER, donc il ne tranche pas pour le TER. Au Bilan (p.430) il est sans ambiguïté : les dettes sont des soldes CREDITEURS (DH : « Soldes créditeurs : 42, 43, 44, 47 (sauf 479) » ; DW : « Soldes créditeurs 52, 53 ») et les créances des soldes DEBITEURS (BE : « Soldes débiteurs : 42, 43, 44, 47 (sauf 478) »). Le « solde débiteur » du guide pour 401 et 44 est contraire à cette convention : à coder créditeur, sauf confirmation contraire."
+      },
+      "ajustementsDuGuide": "Les ajustements (a) à (g) du guide (481 sauf 4813, 4813, 401, 44, 42/43, 166, ignorer virements et transferts en immobilisations, comptes 49) n'ont aucun équivalent imprimé : NON CONFIRMES. Le Bilan JO place 481, 484, 4998 en DE (dettes circulantes HAO) et 485 en BA, ce qui va dans le sens du traitement du 481 comme dette d'investissement.",
+      "tableauExecutionBudgetaire": "Le guide décrit les six colonnes comme le JO (budget, décaissement, engagement, réalisation = 2+3, crédit disponible = 1-4, exécution = 4/1) : concordant. Les formules des colonnes 2 et 3 du guide (mouvements des comptes 2, 6, 8, 481, 40, 409, bons de commande) n'ont aucun équivalent imprimé. Le guide cite la note 24 des projets : confirmée (Note 24 = Tableau d'exécution budgétaire, p.429).",
+      "tableauReconciliationTresorerie": "Absent des clés tableauEmploisRessources et tableauExecutionBudgetaire de sycebnl-amorce.json : aucun poste de comparaison."
+    }
+  },
+  "smt": {
+    "pages": [
+      433,
+      434,
+      435,
+      436,
+      437,
+      438
+    ],
+    "perimetre": "États financiers annuels du Système Minimal de Trésorerie, pour les entités soumises à une comptabilité de trésorerie : le Bilan, le Compte de résultat, les Notes annexes (p.433).",
+    "etats": [
+      {
+        "nom": "Bilan (SMT)",
+        "pages": [
+          434
+        ],
+        "colonnes": [
+          "REF",
+          "ACTIF",
+          "NOTE",
+          "MONTANT EXERCICE N",
+          "MONTANT EXERCICE N-1",
+          "REF",
+          "PASSIF",
+          "NOTE",
+          "MONTANT EXERCICE N",
+          "MONTANT EXERCICE N-1"
+        ],
+        "postes": [
+          {
+            "code": "GA",
+            "libelle": "Immobilisations (1)",
+            "note": 1,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "GB",
+            "libelle": "Stocks",
+            "note": 2,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "GC",
+            "libelle": "Adhérents, clients-usagers et autres débiteurs",
+            "note": 3,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "GD",
+            "libelle": "Caisse",
+            "note": 4,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "GE",
+            "libelle": "Banque (en + ou en -)",
+            "note": 4,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "GZ",
+            "libelle": "Total actif",
+            "estTotal": true,
+            "formuleTotal": null,
+            "cote": "actif"
+          },
+          {
+            "code": "HA",
+            "libelle": "Dotations",
+            "note": "(5)",
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "HB",
+            "libelle": "Résultat net de l'exercice (en + ou en -)",
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "HC",
+            "libelle": "Autres fonds propres",
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "HD",
+            "libelle": "Fournisseurs et autres créditeurs",
+            "note": 3,
+            "estTotal": false,
+            "formuleTotal": null,
+            "cote": "passif"
+          },
+          {
+            "code": "HZ",
+            "libelle": "Total passif",
+            "estTotal": true,
+            "formuleTotal": null,
+            "cote": "passif"
+          }
+        ],
+        "pieds": [
+          "(1) A faire figurer sur l'état de situation si elles correspondent à des montants significatifs."
+        ],
+        "tableDePassage": null,
+        "remarqueTableDePassage": "Aucune table de correspondance comptes -> postes dans les p. 433-438 ; pas de plan de comptes SMT imprimé. La seule correspondance imprimée est le renvoi de note de chaque poste (colonne NOTE)."
+      },
+      {
+        "nom": "Compte de résultat (SMT)",
+        "pages": [
+          435
+        ],
+        "colonnes": [
+          "REF",
+          "LIBELLES",
+          "NOTE",
+          "MONTANT EXERCICE N",
+          "MONTANT EXERCICE N-1"
+        ],
+        "postes": [
+          {
+            "code": "KA",
+            "libelle": "Revenus encaissés",
+            "note": 4,
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "KB",
+            "libelle": "Autres recettes sur activités",
+            "note": 4,
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "KX",
+            "libelle": "TOTAL DES REVENUS ENCAISSES (A)",
+            "estTotal": true,
+            "formuleTotal": null
+          },
+          {
+            "code": "JA",
+            "libelle": "Dépenses sur achats",
+            "note": 4,
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "JB",
+            "libelle": "Dépenses sur loyers",
+            "note": 4,
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "JC",
+            "libelle": "Dépenses sur salaires",
+            "note": 4,
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "JD",
+            "libelle": "Dépenses sur impôts et taxes",
+            "note": 4,
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "JE",
+            "libelle": "Charges d'intérêts",
+            "note": 4,
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "JF",
+            "libelle": "Autres dépenses sur activités",
+            "note": 4,
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "JX",
+            "libelle": "TOTAL DEPENSES SUR CHARGES (B)",
+            "estTotal": true,
+            "formuleTotal": null
+          },
+          {
+            "code": "KZ",
+            "libelle": "SOLDE: Excédent (+) ou insuffisance (-) de recettes (C = A-B)",
+            "estTotal": true,
+            "formuleTotal": "C = A-B"
+          },
+          {
+            "code": "VA",
+            "libelle": "+ Variations des stocks sur les achats [N - (N-1)]",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "VB",
+            "libelle": "+Variation des créances [N - (N-1)]",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "VC",
+            "libelle": "- Variation des dettes d'exploitation [N - (N-1)]",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "JG",
+            "libelle": "DOTATIONS AUX AMORTISSEMENTS",
+            "estTotal": false,
+            "formuleTotal": null
+          },
+          {
+            "code": "KZC",
+            "libelle": "RESULTAT NET DE L'EXERCICE",
+            "estTotal": true,
+            "formuleTotal": null
+          }
+        ],
+        "tableDePassage": null,
+        "remarqueTableDePassage": "Aucune correspondance comptes imprimée. KA, KB, JA à JF renvoient à la Note 4 (journal unique de trésorerie). VA, VB, VC, JG portent les signes imprimés dans leur libellé (+, +, -) ; aucune formule imprimée pour KZC. Le journal unique n'a pas de colonne loyers alors que JB « Dépenses sur loyers » existe."
+      }
+    ],
+    "notes": {
+      "ficheRecapitulative": {
+        "pages": [
+          435
+        ],
+        "structure": "Partie 1 Notes sur le bilan : Note 1, Note 2, Note 3, Note 5 ; Partie 2 Notes sur compte de résultat : Note 4 (Journal unique de trésorerie)"
+      },
+      "liste": [
+        {
+          "numero": "1",
+          "titre": "Tableau d'acquisition et de suivi du matériel, du mobilier et autres immobilisations",
+          "contenu": "Colonnes : Date, Désignation, Montant, Date d'acquisition, Durée d'utilité, Date de sortie, Prix de cession. Renvoyé par GA. La fiche p.435 l'intitule « Tableau d'acquisition et de suivi du matériel, du mobilier et des cautions ».",
+          "pages": [
+            435,
+            436
+          ]
+        },
+        {
+          "numero": "2",
+          "titre": "Etat des stocks",
+          "contenu": "Colonnes : Référence, Désignation, Quantité, Prix unitaire, Montant ; lignes VALEUR DU STOCK FINAL et VALEUR DU STOCK INITIAL. Renvoyé par GB.",
+          "pages": [
+            435,
+            436
+          ]
+        },
+        {
+          "numero": "3",
+          "titre": "Etat des créances et des dettes non échues",
+          "contenu": "Deux tableaux : créances (Date, nom des clients-usagers et autres débiteurs, montant au 31 décembre N, montant au 1er janvier N, variation valeur et %, TOTAL DES CREANCES) et dettes (nom des fournisseurs et autres créditeurs, mêmes colonnes, TOTAL DES DETTES). Renvoyé par GC et HD.",
+          "pages": [
+            435,
+            436
+          ]
+        },
+        {
+          "numero": "4",
+          "titre": "Journal unique de trésorerie",
+          "contenu": "Dates, Libellés, Recettes, Dépenses, Solde ; ventilation recettes : Cotisations, Subventions, Autres ; ventilation dépenses : Matériel Mobilier et autres, Achats de biens liés à l'activité, Autres achats, Transport, Services extérieurs, Salaires, Autres ; lignes Report à nouveau et Solde à reporter. NB : un journal par banque et un pour la caisse ; colonnes à compléter au besoin (ex. Charges d'intérêts) ; regroupement mensuel possible. Renvoyé par GD, GE, KA, KB, JA à JF.",
+          "pages": [
+            435,
+            437
+          ]
+        },
+        {
+          "numero": "5",
+          "titre": "Dotation",
+          "contenu": "Nom et prénoms des membres, nationalité, montant, précision avec ou sans droit d'entrée ; sections Dotation non consomptible, Droit d'entrée, Dotation consomptible ; TOTAL. Renvoyé par HA.",
+          "pages": [
+            435,
+            438
+          ]
+        }
+      ]
+    },
+    "controles": [
+      "KZ : C = A-B, soit KX (A) moins JX (B)",
+      "GZ Total actif et HZ Total passif : égalité implicite du bilan, aucune égalité écrite",
+      "Renvois : GC et HD à la Note 3, GD et GE à la Note 4 (bilan), HA à la Note (5)"
+    ]
+  },
+  "controles": [
+    {
+      "etat": "Tableau emplois ressources",
+      "pages": [
+        398
+      ],
+      "egalites": [
+        "GU = A+B (II. EMPLOIS = A- TOTAL DES IMMOBILISATIONS + B- TOTAL DES CHARGES DE FONCTIONNEMENT) ; signe flou à l'impression",
+        "GV = I-II (III. EXCEDENT/DEFICIT DES FONDS RECUS SUR LES EMPLOIS)",
+        "GX = III+IV (V. MONTANT NET DE L'ENCAISSE DISPONIBLE)",
+        "GZ : TOTAL V = TOTAL VI (VII. CONTRÔLE) ; V = GX, VI = GY"
+      ]
+    },
+    {
+      "etat": "Tableau d'exécution budgétaire",
+      "pages": [
+        399,
+        429
+      ],
+      "egalites": [
+        "colonne 4 Réalisation = 2+3",
+        "colonne 5 Crédit disponible = 1-4",
+        "colonne Exécution budget (%) = 4/1"
+      ]
+    },
+    {
+      "etat": "Tableau de réconciliation de trésorerie",
+      "pages": [
+        400
+      ],
+      "egalites": [
+        "G = A+B+C+D-E-F",
+        "I = G-H"
+      ]
+    },
+    {
+      "etat": "Bilan",
+      "pages": [
+        401,
+        430
+      ],
+      "egalites": [
+        "TOTAL GENERAL actif (BZ) et TOTAL GENERAL passif (DZ) : égalité implicite, aucune formule imprimée",
+        "CC : excédent (+) ou déficit (-), comptes « 13 (131 ou 139) »"
+      ]
+    },
+    {
+      "etat": "Compte d'exploitation",
+      "pages": [
+        402,
+        431
+      ],
+      "egalites": [
+        "XA = Somme RA à RE (p.402) ; « Somme RA à RD » (p.431)",
+        "XB = Somme TA à TL",
+        "XC = XA-XB (+excédent, -déficit)"
+      ]
+    },
+    {
+      "etat": "Note 3A",
+      "pages": [
+        406
+      ],
+      "egalites": [
+        "D = A+B-C (montant brut à la clôture)"
+      ]
+    },
+    {
+      "etat": "Note 3B",
+      "pages": [
+        407
+      ],
+      "egalites": [
+        "D = A+B-C"
+      ]
+    },
+    {
+      "etat": "Note 20B",
+      "pages": [
+        425
+      ],
+      "egalites": [
+        "YO = TOTAL (1 + 2), personnel propre + personnel extérieur et bénévole"
+      ]
+    },
+    {
+      "etat": "SMT compte de résultat",
+      "pages": [
+        435
+      ],
+      "egalites": [
+        "KZ : C = A-B"
+      ]
+    }
+  ],
+  "illisible": [
+    {
+      "page": 398,
+      "element": "codes des bandes sombres GV, GW, GX, GY, GZ (texte blanc sur gris, rogné ou dégradé)",
+      "traitement": "GR, GS, GT, GU lus ; GV à GZ déduits de la suite alphabétique (marqués lisibilite)"
+    },
+    {
+      "page": 398,
+      "element": "GU « II. EMPLOIS (A/B) » : signe entre A et B flou",
+      "traitement": "lu « + » ; non certain"
+    },
+    {
+      "page": 401,
+      "element": "libellés des bandes sombres de totaux du Bilan (AZ, BF, BX, BZ, DD, DJ, DX, DZ) dégradés",
+      "traitement": "codes lus ; libellés lus avec p.430"
+    },
+    {
+      "page": 401,
+      "element": "DW : fin de libellé rogné",
+      "traitement": "complété d'après p.430"
+    },
+    {
+      "page": 402,
+      "element": "XC : mot partiellement masqué par une tache",
+      "traitement": "complété d'après p.431"
+    },
+    {
+      "page": 430,
+      "element": "DH : « 44,-47 » (tiret après la virgule)",
+      "traitement": "lu 44 et 47 ; l'hypothèse « 44 à 47 » n'est pas retenue"
+    },
+    {
+      "page": 430,
+      "element": "DG : « 40 (409) » parenthèse non explicitée",
+      "traitement": "conservé tel quel ; exclusion du 409 notée comme interprétation"
+    },
+    {
+      "page": 406,
+      "element": "en-tête « Acquisitions / Apports / Créations » partiellement masqué",
+      "traitement": "complété par cohérence avec la note 3B"
+    },
+    {
+      "page": 407,
+      "element": "bord gauche du tableau note 3B rogné (« UBRIQUES », « :rains », « itiments »)",
+      "traitement": "lus Rubriques, Terrains, Bâtiments"
+    },
+    {
+      "page": 436,
+      "element": "titre de la Note 1 SMT : mot masqué entre « d'acquisition » et « de suivi »",
+      "traitement": "complété d'après la fiche p.435"
+    },
+    {
+      "page": 437,
+      "element": "Note 4 SMT : tableau rogné au bord droit, colonnes possiblement non imprimées",
+      "traitement": "colonnes lues jusqu'à « Autres » dépenses"
+    },
+    {
+      "page": 432,
+      "element": "page blanche",
+      "traitement": "aucun contenu"
+    },
+    {
+      "page": null,
+      "element": "correspondance comptes -> postes du TER, du tableau d'exécution budgétaire, du tableau de réconciliation et des états du SMT : introuvable dans p.397-438",
+      "traitement": "tableDePassage = null ; non cherchée ailleurs dans le JO (hors périmètre confié)"
+    }
+  ],
+  "alertes": [
+    "code TJ imprimé 2 fois dans l'état « Compte d'exploitation » (conservé tel qu'imprimé, non corrigé)",
+    "code TK imprimé 2 fois dans l'état « Compte d'exploitation » (conservé tel qu'imprimé, non corrigé)",
+    "incohérence JO : Compte d'exploitation : codes TJ et TK imprimés deux fois (TJ Charges de personnel / TJ Dotations aux provisions ; TK Frais financiers / TK Produits H.A.O.), identiques en p.402 et p.431",
+    "incohérence JO : Compte d'exploitation p.402 : pas de RC (Subventions d'exploitation), alors que la table de correspondance p.431 en a un (71) ; XA « Somme RA à RE » p.402 contre « Somme RA à RD » p.431",
+    "incohérence JO : Colonne Note du Compte d'exploitation décalée d'un rang par rapport à la fiche récapitulative : RB et RD renvoient à 13 (fiche : 14), TA et TB à 14 (fiche : 15 Achats), TD 15 (fiche : 16), TG 16 (fiche : 17), TH 17 (fiche : 18), TI 18 (fiche : 19), TJ 19 (fiche : 20A), TK 20 (fiche : 21), TJ dotations 21 (fiche : 22), HAO 22 (fiche : 23) ; RA renvoie à 8 (fiche : 9 Fonds du bailleur)",
+    "incohérence JO : Colonne Note du Bilan décalée de la même façon : AA à AH 2 (fiche : 3A/3B), BA 3 (fiche : 4), BB 4 (fiche : 5), BC à BE 5 (fiche : 6), BV et BW 6 (fiche : 7), BY et DY 7 (fiche : 8), CA et DF 8 (fiche : 9), CD 9 (fiche : 10), DA et DB 10 (fiche : 11), DG et DH 11 (fiche : 12), DW 12 (fiche : 13), DI 20 (la note 20 de la fiche est 20A/20B charges de personnel)",
+    "incohérence JO : Bilan : aucune ligne de la table de correspondance p.430 pour DI",
+    "incohérence JO : Fiche récapitulative p.403 : l'exemple N/A cite « NOTE6 » pour une entité sans stocks, alors que les stocks sont la Note 5"
+  ]
+}
