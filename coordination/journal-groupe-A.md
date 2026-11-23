@@ -18,7 +18,8 @@ tout changement du manifeste `comptabilite` signalé à la session A, qui le rec
   de câblage sur `grp-c` vert (healthy, routes neuves 401, OpenAPI), verrou Docker rendu (pris à A le 23/11 après
   FE-148). Manifeste `comptabilite` **0.3.0** (2 routes de lecture), dans les deux copies : **→ A, recopie au
   catalogue** (ci-dessous). Décisions D-1097-1 → 14 dans la fiche.
-- ⏭ **Suite : STORY-1098** (mémoire des choix, même service), contrat annoncé avant le code.
+- 🟡 **STORY-1098** (mémoire des choix, comptabilite-service) : contrat annoncé le 23/11 (« ⚠ Contrats » et la fiche).
+  Code sur la branche `MNV-1098`.
 - ⚠️ STORY-1101 n'est pas encore sur `main` : sa fiche est dans la PR #730, ouverte. Il faudra la fusionner avant
   d'y arriver.
 
@@ -576,6 +577,12 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 - **← B (2026-11-16) : `/moi/droits` servi pour A-919** — **close** : STORY-919 fusionnée (fiscal #51).
 
 ## ⚠ Contrats
+
+- **2026-11-23 (STORY-1098, session du groupe C), AVANT le code** : `prospera-comptabilite-service` ajoute **la mémoire des choix du cabinet**. **Ajouts seuls** ; aucun droit neuf ; aucun événement. Détail : `stories/STORY-1098.md`, « Contrat annoncé avant le code ».
+  - **Mémoire** à deux étages, clé `NIF` puis `NOM` puis `LIBELLE`, toujours sous l'organisation du jeton : le **dossier** apprend à l'inscription d'une facture (1097), le **cabinet** à la validation de l'écriture ; un brouillard abandonné désapprend. La proposition de 1097 la lit (dossier, puis cabinet, puis compte par défaut du tiers), avec la source `MEMOIRE_DOSSIER` | `MEMOIRE_CABINET`.
+  - **Routes** : `GET /api/v1/dossiers/{dossierId}/memoire-des-choix`, `DELETE …/memoire-des-choix/{memoireId}` (saisir) ; `GET /api/v1/cabinet/memoire-des-choix`, `DELETE …/{memoireId}` (`TENANT_ADMIN`), `GET /api/v1/cabinet/memoire-des-choix/actes`. Refus 404 `MEMOIRE_INTROUVABLE`. Acte `MEMOIRE_OUBLIEE` en ajout seul.
+  - **Correction de 1097** : l'abandon d'un brouillard né d'une facture rend la pièce de nouveau inscriptible.
+  - **Données** : `memoires_des_choix`, `actes_de_la_memoire` au plan C13. **Manifeste** `comptabilite` **0.4.0** (3 routes de lecture) : **→ session A**, recopie au catalogue après la fusion du code.
 
 - **2026-11-23 (FE-148, session A) : le manifeste `comptabilite` passe de 0.1.0 à 0.2.0.** Il avait gagné les 8 routes de lecture du plan comptable propre (STORY-1094, 1095) en restant en 0.1.0 ; or une version publiée ne change pas (STORY-934) : le semis du catalogue ignore une copie différente pour une version déjà semée. Changé à l'identique dans `manifestes/comptabilite.manifest.ts` (ici), `src/module.manifest.ts` de comptabilite-service (branche `MNV-1095-manifeste-0.2.0`) et la copie du catalogue (`copies.json`, catalogue #64, recopiée depuis `c00c5bb`). **Règle pour la suite** : toute route ajoutée au manifeste monte sa version ; les 2 routes de STORY-1097 iront en **0.3.0** (convenu avec la session C).
 - **2026-11-23 (STORY-1097, session du groupe C), AVANT le code** : `prospera-comptabilite-service` ajoute **des factures à l'écriture proposée** (achats et ventes, système normal). **Ajouts seuls** ; aucun droit neuf ; aucun événement neuf. Détail complet : `stories/STORY-1097.md`, « Contrat annoncé avant le code ».
