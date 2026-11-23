@@ -1,9 +1,129 @@
 # STORY-1097 : De la facture à l'écriture proposée — achats et ventes en partie double, pour le système normal
 
-Status: ready-for-dev — **créée le 2026-11-18** à la demande de l'utilisateur. Non slottée : à placer au prochain plan.
+Status: in-progress — **créée le 2026-11-18** à la demande de l'utilisateur. **Prise le 2026-11-23** par la session
+du groupe C (consigne de l'utilisateur : 1097, puis 1098, 1099, 1101), contrat annoncé ci-dessous avant le code.
 
 **Services :** `prospera-comptabilite-service` (tenu par B au lot 4) ; lecture de `document-service` (pièces extraites)
 **Points :** 13 · **Suite :** STORY-1098 (mémoire des choix), FE-149 (l'écran)
+
+---
+
+## Contrat annoncé avant le code (2026-11-23)
+
+**Ajouts seuls** dans `prospera-comptabilite-service` : aucune route, aucun champ ni aucun topic renommé ; aucun droit
+neuf ; aucun événement Kafka neuf. Montants : entiers en francs (unité mineure XOF ou XAF, D-962-3).
+
+### Routes, sous `/api/v1/dossiers/{dossierId}/exercices/{exerciceId}/factures/lots`
+
+| Geste | Route | Droit |
+|---|---|---|
+| Déposer un lot | `POST /` (multipart) | `comptabilite:ecriture:saisir` |
+| Les lots de l'exercice | `GET /` | tout membre dont la portée couvre le dossier |
+| Un lot, ses lectures et ses propositions | `GET /{lotId}` | idem |
+| Inscrire au brouillard les pièces retenues | `POST /{lotId}/inscrire` | `comptabilite:ecriture:saisir` |
+
+**Déposer** — `multipart/form-data` : `fichiers` (1 à 50 ; PDF, JPEG ou PNG ; 10 Mo chacun), `sens` (`ACHAT` |
+`VENTE`, exigé), `avoir` (booléen, défaut `false` : un lot d'avoirs), `devise` (`XOF` | `XAF`, défaut `XOF`). Chaque
+fichier part chez `document-service` (`POST /api/v1/piece-extractions`, type `FACTURE`, `correlationId` = `lotId`,
+`pieceId` = SHA-256 du fichier, `dossierId`), **avec le jeton du membre**. Réponse **202** : la vue du lot. Un fichier
+présent deux fois dans le lot n'est déposé qu'une fois (`fichiersIgnores[] { nom, raison: MEME_FICHIER }`) ; un dépôt
+refusé par `document-service` laisse la pièce `DEPOT_ECHOUE`, les autres continuent. **Le dépôt n'écrit aucune
+écriture** (AC-1).
+
+**Lire un lot** — `GET /{lotId}` lit les pièces chez `document-service` (`GET /dossiers/{d}/pieces?correlationId=<lotId>`,
+jeton du membre) et **recalcule** la proposition à chaque lecture (règles pures, rien de proposé n'est stocké) :
+
+```
+{ lotId, dossierId, exerciceId, sens, avoir, devise, creeLe, creePar,
+  compteurs: { pieces, enLecture, lues, illisibles, deposEchoues, inscriptibles, inscrites },
+  pieces: [{
+    pieceId, nomOrigine, statut,               // EN_LECTURE | LUE | ILLISIBLE | DEPOT_ECHOUE | INSCRITE
+    urlConsultation?,                          // celle de document-service
+    lecture?: { date?, fournisseur?, nifEmetteur?, numeroFacture?, montantHT?, montantTVA?, montantTTC? },
+                                               // { valeur, confiance } tels que lus, jamais recalculés
+    proposition?: {
+      dateEcriture?, libelle, avoir,
+      journal?: { code, source },
+      tiers?: { tiersId, code, nom, source },  // source.origine : NIF | NOM
+      tiersACreer?: { nom, nif?, categorie },  // jamais créé par la comptabilité
+      compte?: { numero, source },             // source.origine : COMPTE_PAR_DEFAUT_DU_TIERS (1098 : MEMOIRE_*)
+      tva: { traitement: RECUPERABLE | NON_RECUPERABLE, compte?, source },
+      lignes: [{ role: CHARGE | PRODUIT | TVA | TIERS, compte?, debit, credit, tiersId?, reference?, libelle }],
+      totalDebit, totalCredit, equilibree
+    },
+    signaux: [{ code, gravite: BLOQUANT | AVERTISSEMENT | INFO, message, details }],
+    inscriptible,                              // aucun signal BLOQUANT
+    inscription?: { ecritureId, numeroProvisoire, inscriteLe, inscritePar, decision: ACCEPTEE | MODIFIEE }
+  }] }
+```
+
+**L'écriture proposée** suit les tableaux ci-dessus (achat : charge HT au débit, TVA récupérable au débit, fournisseur
+TTC au crédit ; vente : client TTC au débit, produit HT et TVA facturée au crédit ; un avoir inverse les sens). La
+ligne du tiers porte le `tiersId` et la `reference` = numéro de facture (le lettrage de STORY-969 la rapproche). TVA
+non récupérable : la TVA s'ajoute à la charge, sans ligne de TVA. TVA nulle ou absente : pas de ligne de TVA.
+
+**Signaux** (codes stables) : `LECTURE_EN_COURS`, `LECTURE_ECHOUEE`, `DEPOT_ECHOUE`, `DATE_ABSENTE`, `MONTANT_ABSENT`,
+`MONTANT_NON_ENTIER`, `ECART_HT_TVA_TTC` (`details` : HT, TVA, TTC, écart ; rien n'est recalculé), `TVA_ABSENTE`
+(avertissement), `TIERS_A_CREER`, `TIERS_A_CHOISIR`, `TIERS_AMBIGU` (`details.candidats`), `COMPTE_A_CHOISIR`,
+`JOURNAL_A_CHOISIR`, `DOUBLON_PROBABLE` (avertissement ; `details` : l'écriture ou la pièce du lot), `AVOIR_RECONNU`
+(info), `TVA_NON_RECUPERABLE` (info), `IMMOBILISATION` (info : la mise au registre reste un geste à part),
+`DATE_HORS_EXERCICE`, `EXERCICE_CLOS`, `EXERCICE_INDETERMINE`, `AUTRE_EXERCICE` (la date désigne un autre exercice
+ouvert : déposer la facture là), `DEVISE_ETRANGERE`. Tous bloquants, sauf ceux marqués avertissement ou info.
+
+**Inscrire** — corps `{ pieces: [{ pieceId, corrections? }] }` (1 à 100) ; `corrections` (toutes facultatives) :
+`dateEcriture`, `numeroFacture`, `montantHT`, `montantTVA`, `montantTTC`, `tiersId`, `compte`, `journal`, `tva`
+(`RECUPERABLE` | `NON_RECUPERABLE`), `compteDeTva`, `avoir`, `libelle`, `devise`. **Ce qui est appliqué = ce qui a été
+relu** : une correction prime sur la lecture. Chaque pièce retenue passe par la saisie existante (`ECRITURE_SAISIE`,
+mêmes contrôles : exercice ouvert, journal admis, comptes admis du plan propre, tiers du collectif, pièce justificative
+vérifiée chez `document-service`) et devient **un brouillard**. Rien n'est validé. Réponse **200**
+`{ resultats: [{ pieceId, statut: INSCRITE, ecritureId, numeroProvisoire } | { pieceId, statut: REFUSEE, refus: { code,
+message, details } }] }`. Refus par pièce : `PIECE_INCONNUE_DU_LOT`, `DEJA_INSCRITE` (`details.ecritureId`),
+`PIECE_NON_INSCRIPTIBLE` (`details.signaux`), `INSCRIPTION_EN_COURS`, et tout refus de la saisie. Piste : la
+proposition est citée (`origine: REGLE`, `capacite: comptabilite/facture-vers-ecriture@1`, `propositionId` =
+`<lotId>:<pieceId>`, décision `ACCEPTEE` sans correction, `MODIFIEE` sinon).
+
+**Refus du lot** : 409 `FACTURES_RESERVEES_AU_SYSTEME_NORMAL` (`details.referentiel` ; `details.renvoi: "cahiers"` pour
+un exercice au SMT, AC-6), plus ceux de la saisie (`EXERCICE_CLOS`, `EXERCICE_NON_OUVERT`, `EXERCICE_TENU_AUX_CAHIERS`,
+`REFERENTIEL_NON_DECIDE`) ; 400 `FICHIER_ABSENT`, `SENS_REQUIS` ; 422 `LOT_TROP_GRAND` (plus de 50 fichiers),
+`FICHIER_TROP_VOLUMINEUX`, `FORMAT_NON_PRIS_EN_CHARGE` ; 404 `LOT_INTROUVABLE` (autre dossier, autre exercice, autre
+cabinet : AC-7) ; 503 `DOCUMENTS_INDISPONIBLES` à la lecture d'un lot.
+
+### Tiers (ajout seul à `POST /api/v1/dossiers/{dossierId}/tiers` et à la vue du tiers)
+
+Deux champs **facultatifs**, fixés à la création comme le reste du tiers (D-968-4) : `nif` (1 à 30 majuscules ou
+chiffres) et `compteParDefaut` (un compte du plan, hors collectif). La proposition retrouve le tiers **du dossier** (donc
+du cabinet, AC-9) par son NIF, puis par son nom normalisé (casse, accents, ponctuation et espaces retirés), dans la
+catégorie du sens (fournisseur à l'achat, client à la vente).
+
+### Données
+
+- `comptes-de-facturation@1` (`src/factures/comptes-de-facturation.json`), donnée du service comme `comptes-d-ecart@1` :
+  pour **SN** seul, le compte de TVA récupérable (4452), celui de TVA facturée (443), les collectifs du fournisseur
+  (401) et du client (411), et les racines à TVA non récupérable (liste vide, à valider par un expert). Validée au
+  démarrage contre le plan publié et `comptes-collectifs@1`.
+- Collection neuve `lots_de_factures` (lot, pièces, inscriptions), au plan d'effacement C13.
+- Manifeste `comptabilite` : deux routes de lecture ajoutées à `routesLectureSeule` (`GET …/factures/lots`,
+  `GET …/factures/lots/{lotId}`). **À recopier au catalogue par la session A.**
+
+### Décisions prises au contrat (contestables)
+
+- **D-1097-1** : le lot appartient à un exercice (la route est sous l'exercice) ; la date de chaque facture est
+  contrôlée contre lui, et une date hors exercice est qualifiée (clos, absent, autre exercice ouvert) en lisant les
+  exercices du dossier chez `dossier-service`.
+- **D-1097-2** : la lecture se fait par HTTP chez `document-service`, pas par Kafka : la proposition est recalculée à
+  chaque lecture ; seule l'inscription est stockée.
+- **D-1097-3** : à la vente, l'OCR ne lit que l'émetteur (le cabinet du client lui-même) : le client est **à choisir**
+  (`TIERS_A_CHOISIR`). Une demande à `document-service` (lire le destinataire) est nommée pour plus tard.
+- **D-1097-4** : l'avoir est déclaré au dépôt ou à la correction ; il est « reconnu » quand un champ lu contient le mot
+  AVOIR (`document-service` ne publie pas le texte brut de la pièce).
+- **D-1097-5** : l'OCR ne lit pas la devise : celle du lot fait foi ; une correction dans une autre devise est
+  `DEVISE_ETRANGERE`, bloquant (la conversion relève de la story des devises).
+- **D-1097-6** : un montant lu avec des décimales est `MONTANT_NON_ENTIER` (le franc n'a pas de décimale) ; le
+  comptable corrige.
+- **D-1097-7** : un tiers inconnu n'est jamais créé par l'inscription : l'écran le crée par la route des tiers (geste
+  de validation), puis inscrit avec son `tiersId`.
+- **D-1097-8** : l'inscription est faite pièce par pièce, une écriture par transaction, avec un résultat par pièce ; une
+  pièce est réservée le temps de son inscription, pour qu'un double clic ne crée pas deux écritures.
 
 ---
 

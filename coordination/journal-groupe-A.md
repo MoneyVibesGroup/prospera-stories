@@ -5,6 +5,17 @@
 
 ## État
 
+### Des factures aux écritures, et la liasse face aux déclarations (2026-11-23) — session du groupe C
+
+Consigne de l'utilisateur du 23/11 à la session du groupe C (`moneyvibes-apps-dc`) : coder **STORY-1097, puis 1098, puis
+1099, puis 1101**, une à la fois ; contrat annoncé avant le code ; PR fusionnées (`gh pr merge --rebase`, code sur `dev`,
+docs sur `main`) avant la suivante ; noté ici. Ne pas toucher `prospera-frontend-expert-comptable` ni
+`platform-catalog-service` (tenus par la session A) ; verrou Docker demandé à la session A et rendu dès le gate fini ;
+tout changement du manifeste `comptabilite` signalé à la session A, qui le recopie au catalogue.
+
+- 🟡 **STORY-1097** (comptabilite-service) : contrat annoncé le 23/11 (« ⚠ Contrats » ci-dessous et la fiche). Code
+  sur la branche `MNV-1097`. ⚠️ STORY-1101 n'est pas encore sur `main` : sa fiche est dans la PR #730, ouverte.
+
 ### Le plan comptable propre (2026-11-21) — STORY-1094 ✅, 1095 ✅, 1096 ✅
 
 - ✅ **STORY-1094 DONE (21/11)** : comptabilite-service **#13** (`a98ec56` sur `dev`), contrat stories **#745**. Unitaires 889/889 (Node 24), `test:socle` 273/273 (29 neufs), mutation 18/18, gate de câblage grp-a vert (healthy, routes neuves 401), verrou Docker rendu. Décisions D-1094-1 → 8 dans la fiche (plan publié = donnée générée ; `TENANT_ADMIN` sans droit neuf ; classe 9 saisissable ; `BQ1` accepté par les écritures). Demande à B : recopier le manifeste au catalogue.
@@ -553,6 +564,13 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 - **← B (2026-11-16) : `/moi/droits` servi pour A-919** — **close** : STORY-919 fusionnée (fiscal #51).
 
 ## ⚠ Contrats
+
+- **2026-11-23 (STORY-1097, session du groupe C), AVANT le code** : `prospera-comptabilite-service` ajoute **des factures à l'écriture proposée** (achats et ventes, système normal). **Ajouts seuls** ; aucun droit neuf ; aucun événement neuf. Détail complet : `stories/STORY-1097.md`, « Contrat annoncé avant le code ».
+  - **Routes** sous `/api/v1/dossiers/{dossierId}/exercices/{exerciceId}/factures/lots` : `POST /` (multipart `fichiers` 1 à 50, PDF/JPEG/PNG 10 Mo, `sens` ACHAT|VENTE, `avoir`, `devise` ; 202 ; chaque fichier déposé chez `document-service` en type `FACTURE`, `correlationId` = lot, jeton du membre ; **aucune écriture**), `GET /`, `GET /{lotId}` (lecture des pièces chez `document-service`, proposition recalculée, signaux nommés), `POST /{lotId}/inscrire` (`{ pieces: [{ pieceId, corrections? }] }` ⇒ un brouillard par pièce par la saisie existante, résultat par pièce). Saisie et inscription : `comptabilite:ecriture:saisir` ; lectures : tout membre dont la portée couvre le dossier.
+  - **Refus** : 409 `FACTURES_RESERVEES_AU_SYSTEME_NORMAL` (`details.renvoi: "cahiers"` au SMT), 404 `LOT_INTROUVABLE`, 422 `LOT_TROP_GRAND`, `FICHIER_TROP_VOLUMINEUX`, `FORMAT_NON_PRIS_EN_CHARGE`, 400 `FICHIER_ABSENT`, `SENS_REQUIS`, 503 `DOCUMENTS_INDISPONIBLES` ; par pièce : `PIECE_INCONNUE_DU_LOT`, `DEJA_INSCRITE`, `PIECE_NON_INSCRIPTIBLE`, `INSCRIPTION_EN_COURS` et les refus de la saisie.
+  - **Tiers** : `POST /api/v1/dossiers/{dossierId}/tiers` accepte deux champs facultatifs, `nif` et `compteParDefaut`, servis par la vue du tiers.
+  - **Données** : `comptes-de-facturation@1` (SN : 4452, 443, 401, 411) ; collection `lots_de_factures` au plan d'effacement C13.
+  - **Manifeste** : `routesLectureSeule` reçoit `GET …/factures/lots` et `GET …/factures/lots/{lotId}`. **→ session A** : à recopier au catalogue (`copies.json`) après la fusion du code.
 
 - **2026-11-21 (STORY-1096), AVANT la fusion du code** : `prospera-comptabilite-service` ajoute l'**import du plan comptable de Sage 100**, en deux temps (aperçu, puis enregistrement). **Ajouts seuls** ; aucun droit neuf ; manifeste inchangé (routes d'écriture).
   - **Routes** : `POST /api/v1/cabinet/plan-comptable/import` (cible : le modèle du cabinet ; `TENANT_ADMIN`) et `POST /api/v1/dossiers/{dossierId}/plan-comptable/import` (cible : le plan du dossier ; `TENANT_ADMIN` ou responsable du dossier ; dossier archivé : 409 `DOSSIER_ARCHIVE`). Corps `multipart/form-data` : `fichier` (CSV ou XLSX, 5 Mo au plus), `journaux` (facultatif, second fichier), `profil` et `profilJournaux` (facultatifs, JSON `{ numero, libelle, type, collectif, separateur }` / `{ code, libelle, type, compte }` : les NOMS d'en-tête des colonnes). Requête : `dryRun` (défaut `true` : l'aperçu n'écrit rien) ; `dryRun=false` exige `versionDuPlan` et `empreinteApercu` rendus par l'aperçu.
