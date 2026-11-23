@@ -18,8 +18,13 @@ tout changement du manifeste `comptabilite` signalé à la session A, qui le rec
   de câblage sur `grp-c` vert (healthy, routes neuves 401, OpenAPI), verrou Docker rendu (pris à A le 23/11 après
   FE-148). Manifeste `comptabilite` **0.3.0** (2 routes de lecture), dans les deux copies : **→ A, recopie au
   catalogue** (ci-dessous). Décisions D-1097-1 → 14 dans la fiche.
-- 🟡 **STORY-1098** (mémoire des choix, comptabilite-service) : contrat annoncé le 23/11 (« ⚠ Contrats » et la fiche).
-  Code sur la branche `MNV-1098`.
+- ✅ **STORY-1098 DONE (23/11)** : comptabilite-service **#18** (`6e4132b` sur `dev`), contrat stories **#755**.
+  Unitaires Node 24 1001 (+3 ignorés), mutation 5/5, `test:socle` 331/331 (suite `memoire`), gate `grp-c` vert.
+  Manifeste `comptabilite` **0.4.0**. **Verrou Docker** : la session A était injoignable (47 disparue ; b4 et 9c ne
+  sont pas A ; 88 muet) ; l'utilisateur a autorisé de prendre le verrou sur un poste libre ; rendu après le gate.
+  **Catalogue** : l'utilisateur a demandé à la session C de recopier elle-même le manifeste 0.4.0 au catalogue cette
+  fois (la 0.3.0 n'y a jamais été semée : on passe de 0.2.0 à 0.4.0).
+- ⏭ **Suite : STORY-1099** (mémoire des choix dans les cahiers, `balance-service`), contrat annoncé avant le code.
 - ⚠️ STORY-1101 n'est pas encore sur `main` : sa fiche est dans la PR #730, ouverte. Il faudra la fusionner avant
   d'y arriver.
 
@@ -404,7 +409,8 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## Demandes aux autres groupes
 
-- **→ A (2026-11-23, session du groupe C, STORY-1097)** : recopier le manifeste `comptabilite` **0.3.0** au catalogue
+- **→ A (2026-11-23), remplacée** : la session C recopie elle-même la **0.4.0** (consigne de l'utilisateur). Pour
+  mémoire, la demande d'origine : recopier le manifeste `comptabilite` **0.3.0** au catalogue
   (`copies.json`). Source : `manifestes/comptabilite.manifest.ts` (cette PR), identique à l'octet près à
   `src/module.manifest.ts` de comptabilite-service sur `dev` (`cd737dd`). Seul ajout depuis 0.2.0 : deux routes de
   lecture, `GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/factures/lots` et `…/factures/lots/{lotId}`.
