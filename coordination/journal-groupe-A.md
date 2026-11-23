@@ -13,8 +13,14 @@ docs sur `main`) avant la suivante ; noté ici. Ne pas toucher `prospera-fronten
 `platform-catalog-service` (tenus par la session A) ; verrou Docker demandé à la session A et rendu dès le gate fini ;
 tout changement du manifeste `comptabilite` signalé à la session A, qui le recopie au catalogue.
 
-- 🟡 **STORY-1097** (comptabilite-service) : contrat annoncé le 23/11 (« ⚠ Contrats » ci-dessous et la fiche). Code
-  sur la branche `MNV-1097`. ⚠️ STORY-1101 n'est pas encore sur `main` : sa fiche est dans la PR #730, ouverte.
+- ✅ **STORY-1097 DONE (23/11)** : comptabilite-service **#17** (`cd737dd` sur `dev`), contrat stories **#751**.
+  Unitaires Node 24 994 (+3 ignorés), mutation 10/10 sur les règles, `test:socle` 319 verts (suite `factures`), gate
+  de câblage sur `grp-c` vert (healthy, routes neuves 401, OpenAPI), verrou Docker rendu (pris à A le 23/11 après
+  FE-148). Manifeste `comptabilite` **0.3.0** (2 routes de lecture), dans les deux copies : **→ A, recopie au
+  catalogue** (ci-dessous). Décisions D-1097-1 → 14 dans la fiche.
+- ⏭ **Suite : STORY-1098** (mémoire des choix, même service), contrat annoncé avant le code.
+- ⚠️ STORY-1101 n'est pas encore sur `main` : sa fiche est dans la PR #730, ouverte. Il faudra la fusionner avant
+  d'y arriver.
 
 ### Le plan comptable propre (2026-11-21 → 23) — STORY-1094 ✅, 1095 ✅, 1096 ✅, FE-148 ✅
 
@@ -397,6 +403,11 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-23, session du groupe C, STORY-1097)** : recopier le manifeste `comptabilite` **0.3.0** au catalogue
+  (`copies.json`). Source : `manifestes/comptabilite.manifest.ts` (cette PR), identique à l'octet près à
+  `src/module.manifest.ts` de comptabilite-service sur `dev` (`cd737dd`). Seul ajout depuis 0.2.0 : deux routes de
+  lecture, `GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/factures/lots` et `…/factures/lots/{lotId}`.
+
 - **→ B (2026-11-21) : recopier le manifeste `comptabilite` dans le catalogue** — STORY-1094 ajoute quatre routes de lecture à `routesLectureSeule` de `manifestes/comptabilite.manifest.ts` (stories, `main`) et à la copie du service ; `copies.json` du catalogue est à regénérer (`manifestes:garde`) à la prochaine passe. Version du manifeste inchangée. — **ouverte**
 - **→ B (2026-11-19) : relais du BFF `admin-panel-service` pour la console** (tri du bloc C d'AP-54, prospera-stories #732).
   La console ne peut afficher ces fonctions que si le BFF les relaie :
@@ -728,6 +739,19 @@ octets de `balance-service` du tag déployé.
 `RETIRED` tant que des exercices y sont rattachés : le catalogue cesse alors de la servir et de l'octroyer.
 
 ## Pièges rencontrés
+
+- **(STORY-1097, groupe C)** Jest résout `./x` vers `x.json` AVANT `x.ts` (`moduleFileExtensions: js, json, ts`) :
+  une donnée `comptes-de-facturation.json` à côté de `comptes-de-facturation.ts` rend un module VIDE en test (tsc ne
+  voit rien). Nommer la donnée autrement (`…-declares.json`).
+- **(STORY-1097)** Deux jobs Docker lourds en même temps (unitaires dans un conteneur, `test:socle` dans un autre) font
+  rougir les tests de CONCURRENCE du socle (503 des doublures à 800 ms : clôture, grand livre, numérotation). Rejoués
+  seuls : verts. Ne jamais les lancer ensemble.
+- **(STORY-1097)** Dans les suites du socle, `jeton(...)` fabrique un jeton NEUF à chaque appel : pour comparer le
+  jeton relayé à document-service, garder celui qu'on a envoyé.
+- **(STORY-1097)** `module.manifest.spec.ts` compare au checkout LOCAL `MoneyVibes_Apps/prospera-stories`, souvent sur
+  une autre branche : comparer plutôt à `git show origin/main:manifestes/comptabilite.manifest.ts`.
+- **(STORY-1097)** Le générateur de barrels de l'IDE recrée `src/index.ts` et `src/<module>/index.ts` à chaque fichier
+  neuf : les retirer avant chaque `tsc`, test et commit (`git status --short`).
 
 - **Gate front sur la vraie pile (FE-069, 18/11)** :
   - les courriels de l'IdP passent par `notification-service` : sans lui, le courriel de vérification n'arrive jamais
