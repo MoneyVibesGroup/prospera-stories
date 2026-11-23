@@ -1,7 +1,8 @@
 # STORY-1097 : De la facture à l'écriture proposée — achats et ventes en partie double, pour le système normal
 
-Status: in-progress — **créée le 2026-11-18** à la demande de l'utilisateur. **Prise le 2026-11-23** par la session
-du groupe C (consigne de l'utilisateur : 1097, puis 1098, 1099, 1101), contrat annoncé ci-dessous avant le code.
+Status: done — **créée le 2026-11-18** à la demande de l'utilisateur. **Prise le 2026-11-23** par la session du
+groupe C (consigne de l'utilisateur : 1097, puis 1098, 1099, 1101), contrat annoncé avant le code (#751). **Livrée le
+2026-11-23** : comptabilite-service **#17** (`cd737dd` sur `dev`). Voir « Livraison » ci-dessous.
 
 **Services :** `prospera-comptabilite-service` (tenu par B au lot 4) ; lecture de `document-service` (pièces extraites)
 **Points :** 13 · **Suite :** STORY-1098 (mémoire des choix), FE-149 (l'écran)
@@ -124,6 +125,35 @@ catégorie du sens (fournisseur à l'achat, client à la vente).
   de validation), puis inscrit avec son `tiersId`.
 - **D-1097-8** : l'inscription est faite pièce par pièce, une écriture par transaction, avec un résultat par pièce ; une
   pièce est réservée le temps de son inscription, pour qu'un double clic ne crée pas deux écritures.
+
+### Livraison (2026-11-23)
+
+- **Code** : comptabilite-service #17, fusionnée sur `dev` (`cd737dd`) : module `src/factures/` (règles pures,
+  adaptateurs HTTP, service, contrôleur), tiers (`nif`, `compteParDefaut`), manifeste **0.3.0**.
+- **Preuves** : unitaires sous Node 24 (étage `verification`) **994 passés, 3 ignorés**, 65 suites ; mutation **10/10**
+  sur les règles (écart, avoir, compte écarté, TVA sur la charge, client à la vente, inscriptible, décimales, borne de
+  fin d'exercice, NIF, correction), chacune rouge sur une assertion ; `test:socle` **319 verts** (suite neuve
+  `factures.socle-spec.ts` : AC-1, 2, 4, 5, 6, 7, 9, inscription, `DEJA_INSCRITE`, `MODIFIEE`, doublon) ; gate de
+  câblage sur la pile `grp-c` : service `healthy`, `FacturesController` monté, quatre routes neuves en 401 sans
+  jeton, OpenAPI publiée (trois chemins, `LotDeFacturesDto`, `nif` des tiers : AC-8). Verrou Docker rendu.
+- **AC-10** : les factures sont déposées chez `document-service` dans le dossier, avec le jeton du membre du cabinet :
+  elles sont aux pièces de ce dossier, de ce cabinet. Leur classement au fonds d'archives relève de STORY-1100.
+
+### Écarts au contrat, décidés au code
+
+- **D-1097-9** : la donnée s'appelle `comptes-de-facturation-declares.json` (et non `comptes-de-facturation.json`) :
+  jest résout `./comptes-de-facturation` vers le `.json` du même nom avant le `.ts` (`moduleFileExtensions`).
+- **D-1097-10** : `FORMAT_NON_PRIS_EN_CHARGE` est un **415** (le code existait déjà avec ce statut, STORY-1096). Un
+  fichier de plus de 11 Mo, ou plus de 51 fichiers, est coupé par multer (**413**) avant tout traitement.
+- **D-1097-11** : à la vente, `tva.traitement` vaut **`FACTUREE`** (la TVA facturée n'est ni récupérable ni non
+  récupérable).
+- **D-1097-12** : un `tiersId` corrigé qui n'est pas un tiers du dossier dans la catégorie du sens rend
+  `TIERS_A_CHOISIR` (`details.raison: HORS_DU_DOSSIER_OU_DE_LA_CATEGORIE`) : aucun code neuf.
+- **D-1097-13** : les deux lectures n'exigent aucun droit (comme les lectures d'écritures, D-958-9) : la portée du
+  dossier suffit.
+- **D-1097-14** : le compte suggéré (mémoire ou compte par défaut du tiers) est contrôlé contre le plan du dossier ; un
+  compte désactivé, masqué ou sans racine est écarté et dit (`COMPTE_A_CHOISIR`, `details.ecarte`, `details.raison`).
+  Un compte corrigé par le comptable n'est pas contrôlé à la lecture : la saisie le refuse nommément.
 
 ---
 

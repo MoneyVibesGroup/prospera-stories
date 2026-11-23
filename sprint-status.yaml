@@ -1092,6 +1092,9 @@ reserved_ranges:
       Demandes de l'utilisateur du 2026-11-18 : que les factures d'un client au système normal deviennent des écritures
       proposées (601 + 4452 / 401, 411 / 7xx + 443), et que le système rappelle en premier le choix déjà fait par le
       cabinet pour le même fournisseur ou le même libellé. Règles explicables, jamais d'écriture sans relecture. NON SLOTTÉES.
+      ✅ 2026-11-23 : STORY-1097 DONE (session du groupe C) — comptabilite-service #17 (`cd737dd` sur dev), contrat #751 ;
+      unitaires Node 24 994, mutation 10/10, test:socle 319 verts, gate grp-c vert ; manifeste comptabilite 0.3.0 ;
+      décisions D-1097-1 → 14 dans la fiche. Suite : STORY-1098, puis 1099, puis 1101.
   - range: "STORY-1100"
     status: "RÉSERVÉ"
     owner: "À placer au prochain plan — les archives du client apprennent la façon de classer du cabinet, et reçoivent les factures comptabilisées (document-service, module ged). Écran : FE-151."
