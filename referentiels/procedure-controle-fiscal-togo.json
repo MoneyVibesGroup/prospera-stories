@@ -1,0 +1,2597 @@
+{
+  "_meta": {
+    "artefact": "procedure-controle-fiscal",
+    "pays": "TG",
+    "paysLibelle": "Togo",
+    "annee": 2026,
+    "source": "Livre des procédures fiscales (LPF) togolais, édition OTR 2025 (corpus-complet-cgi-lpf-togo.json, texte verbatim, titre IV « Contrôle de l'impôt » art. 201-337 et titre VI « Contentieux de l'impôt » art. 355-430, + art. 481-486 et 515-530 pour la mise en recouvrement, le sursis et le contentieux du recouvrement). Trame de plan : Livre 18 « Contrôle et contentieux fiscal » du pack de 25 livres (cours de droit congolais) — STRUCTURE SEULEMENT, aucun délai congolais repris.",
+    "statut": "amorce — à valider par un expert ; base légale consolidée jusqu'à la LF 2023, confirmer la LF en vigueur",
+    "usage": "module « défense en contrôle fiscal » : machine à états avec échéances, alertes au cabinet, checklist de régularité de la procédure. Chaque valeur chiffrée porte sa source {livre, article, page} ; la clé extraitDans signale un article logé dans le texte extrait d'un article voisin (voir alertes).",
+    "conventionsDeDelais": {
+      "texte": "Le délai court à partir du lendemain de la date indiquée par le cachet postal (apposé dans un jour ouvrable suivant la réception par la poste d'une lettre recommandée) ou de la date d'accusé de réception ; si le dernier jour est non ouvrable, l'échéance est reportée au premier jour ouvrable.",
+      "source": [
+        {
+          "livre": "LPF",
+          "article": "Art. 5",
+          "page": 213
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 3",
+          "page": 213
+        }
+      ]
+    },
+    "noteDelais": "Les délais sont exprimés dans l'unité du texte (jours, mois, ans). Le LPF ne précise pas « jours calendaires » ou « ouvrables » dans les articles retenus : à confirmer pour chaque alerte."
+  },
+  "formesDeControle": [
+    {
+      "code": "VERIF_COMPTABILITE",
+      "libelle": "Vérification approfondie de comptabilité (vérification sur place)",
+      "ou": "sur place",
+      "dureeMaximale": {
+        "valeurs": [
+          {
+            "regime": "système minimal de trésorerie",
+            "valeur": 3,
+            "unite": "mois"
+          },
+          {
+            "regime": "système normal (hors direction des grandes entreprises)",
+            "valeur": 6,
+            "unite": "mois"
+          },
+          {
+            "regime": "direction des grandes entreprises",
+            "valeur": 9,
+            "unite": "mois"
+          }
+        ],
+        "sanction": "nullité des impositions",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 233",
+            "page": 286
+          }
+        ]
+      },
+      "conditions": "Avis de vérification + charte du contribuable vérifié envoyés/remis au moins 7 jours avant l'intervention ; mention du droit à un conseil ; débat contradictoire de clôture avec procès-verbal. Peut se faire même sans déclaration. Examen sur place des livres ; emport au bureau seulement avec autorisation écrite du contribuable.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 209",
+          "page": 278
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 227",
+          "page": 285
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 228",
+          "page": 285
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 233",
+          "page": 286
+        }
+      ]
+    },
+    {
+      "code": "VERIF_PONCTUELLE",
+      "libelle": "Vérification ponctuelle (certains éléments particuliers des déclarations)",
+      "ou": "sur place",
+      "dureeMaximale": null,
+      "conditions": "Porte sur certains éléments particuliers des déclarations. Délai de réponse du contribuable à la notification de redressement ramené à 22 jours (contrôle ponctuel). Le texte ne fixe pas de durée propre ni ne dit si l'avis de 7 jours de l'art. 227 s'y applique (l'art. 227 vise la vérification de comptabilité et la vérification approfondie de situation fiscale d'ensemble).",
+      "delaiReponseNotification": {
+        "valeur": 22,
+        "unite": "jours",
+        "pointDeDepart": "réception de la notification de redressement",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 205",
+            "page": 277
+          }
+        ]
+      },
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 209",
+          "page": 278
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 205",
+          "page": 277
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 227",
+          "page": 285
+        }
+      ]
+    },
+    {
+      "code": "VERIF_SITUATION_FISCALE_ENSEMBLE",
+      "libelle": "Vérification approfondie de situation fiscale personnelle d'ensemble (personne physique, impôt sur le revenu)",
+      "ou": "sur place",
+      "dureeMaximale": null,
+      "conditions": "Mêmes garanties d'avis (7 jours) et de charte que la vérification de comptabilité. Résultats à communiquer même sans redressement. Une fois la vérification faite, plus de redressement pour la même période et le même impôt, sauf éléments incomplets ou inexacts fournis par le contribuable. Saisine possible de la CAR.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 209",
+          "page": 278
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 227",
+          "page": 285
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 229",
+          "page": 286
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 230",
+          "page": 286
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 356",
+          "page": 319,
+          "extraitDans": "Art. 355"
+        }
+      ]
+    },
+    {
+      "code": "CONTROLE_BUREAU",
+      "libelle": "Contrôle au bureau (contrôle sur pièces)",
+      "ou": "bureau (chez le vérificateur)",
+      "dureeMaximale": null,
+      "conditions": "Contrôle des déclarations et des documents détenus par l'administration, conduit par un vérificateur dans son bureau ; PAS de droit à information préalable du contribuable. Donne lieu à une notification de redressement ; explications à fournir dans 22 jours avant la notification définitive et l'avis de mise en recouvrement. Motifs cités (liste « notamment ») : CA TVA différent du CA de l'impôt sur le revenu, déclarations différentes des paiements, dépenses non déductibles déduites, factures non déclarées. Le contrôle sur pièces peut redresser dans le délai de reprise sans nouvelle investigation sur place.",
+      "delaiExplications": {
+        "valeur": 22,
+        "unite": "jours",
+        "pointDeDepart": "réception de la notification de redressement (art. 205 : 22 jours en contrôle sur pièces)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 210",
+            "page": 278
+          },
+          {
+            "livre": "LPF",
+            "article": "Art. 205",
+            "page": 277
+          }
+        ]
+      },
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 210",
+          "page": 278
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 205",
+          "page": 277
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 231",
+          "page": 286
+        }
+      ]
+    },
+    {
+      "code": "CONTROLE_INOPINE",
+      "libelle": "Contrôle inopiné",
+      "ou": "sur place",
+      "dureeMaximale": null,
+      "conditions": "Avis de vérification remis en main propre (ou au bureau avec accusé de réception) AU DÉBUT de l'intervention. Le jour de la remise : constat matériel seulement (documents disponibles, modalités d'exercice, effectif présent, stocks, encaisse, relevé des prix), sans examen critique de la comptabilité ; procès-verbal en double exemplaire signé. L'examen critique ne peut intervenir qu'après 8 jours.",
+      "delaiAvantExamenCritique": {
+        "valeur": 8,
+        "unite": "jours",
+        "pointDeDepart": "date de la première intervention",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 211",
+            "page": 279
+          }
+        ]
+      },
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 211",
+          "page": 279
+        }
+      ]
+    },
+    {
+      "code": "DROIT_COMMUNICATION",
+      "libelle": "Droit de communication (auprès de tiers)",
+      "ou": "par correspondance ou sur place",
+      "dureeMaximale": null,
+      "conditions": "Avis de passage au plus tard à la première intervention, précisant la nature des documents. Ne peut entraîner d'impositions supplémentaires qu'après la procédure de redressement contradictoire (professions non commerciales). Délai de 7 jours si échange de renseignements par correspondance ; 15 jours pour les informations demandées à des tiers ; conservation des livres et pièces 10 ans.",
+      "delais": [
+        {
+          "valeur": 7,
+          "unite": "jours",
+          "pointDeDepart": "réception de l'avis de passage ou de la lettre (échange de renseignements, par correspondance)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 258",
+              "page": 295
+            }
+          ]
+        },
+        {
+          "valeur": 15,
+          "unite": "jours",
+          "pointDeDepart": "demande écrite de l'agent autorisé (tiers)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 203",
+              "page": 277
+            }
+          ]
+        },
+        {
+          "valeur": 10,
+          "unite": "ans",
+          "pointDeDepart": "date de la dernière opération mentionnée sur les livres, ou date d'établissement des pièces (conservation)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 261",
+              "page": 295
+            }
+          ]
+        }
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 258",
+          "page": 295
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 203",
+          "page": 277
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 261",
+          "page": 295
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 265",
+          "page": 296
+        }
+      ]
+    },
+    {
+      "code": "DROIT_ENQUETE",
+      "libelle": "Droit d'enquête (manquements aux règles de facturation TVA)",
+      "ou": "sur place ou sur convocation",
+      "dureeMaximale": null,
+      "conditions": "Procédure distincte du contrôle de l'impôt, inopinée ; accès de 7 h à 18 h. Avis d'enquête signé du Commissaire des impôts remis à la première intervention. Procès-verbal dans les 8 jours de la dernière intervention ; observations de l'assujetti dans 15 jours.",
+      "delais": [
+        {
+          "valeur": 8,
+          "unite": "jours",
+          "pointDeDepart": "dernière intervention sur place ou dernière convocation (délai d'établissement du procès-verbal)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 313",
+              "page": 310
+            }
+          ]
+        },
+        {
+          "valeur": 15,
+          "unite": "jours",
+          "pointDeDepart": "procès-verbal (observations de l'assujetti)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 313",
+              "page": 310
+            }
+          ]
+        }
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 310",
+          "page": 310
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 311",
+          "page": 310
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 312",
+          "page": 310
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 313",
+          "page": 310
+        }
+      ]
+    },
+    {
+      "code": "VISITE_SAISIE",
+      "libelle": "Droit de visite, d'investigation et de saisie",
+      "ou": "sur place",
+      "dureeMaximale": null,
+      "conditions": "Visite sur ordre signé du Commissaire des impôts, avec officier de police judiciaire ; l'ordre doit indiquer sommairement les motifs du soupçon de fraude sous peine de nullité ; locaux exclusivement d'habitation : ordonnance judiciaire préalable. Investigations et saisies sur simple carte professionnelle en cas de présomption de manoeuvres frauduleuses.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 223",
+          "page": 282
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 224",
+          "page": 283
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 225",
+          "page": 283
+        }
+      ]
+    },
+    {
+      "code": "COMPTABILITE_INFORMATISEE",
+      "libelle": "Contrôle de comptabilité informatisée (modalité de la vérification)",
+      "ou": "sur place ou sur copie",
+      "dureeMaximale": null,
+      "conditions": "Dès la prise de contact, l'entreprise a 14 jours maximum pour remettre une copie du fichier des écritures aux normes de l'arrêté. Le contribuable choisit par écrit entre (a) vérification sur son matériel, (b) traitements faits par lui, (c) copies remises à l'administration dans les 7 jours suivant son choix écrit.",
+      "delais": [
+        {
+          "valeur": 14,
+          "unite": "jours",
+          "pointDeDepart": "prise de contact (remise de la copie du fichier des écritures)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 216",
+              "page": 280
+            }
+          ]
+        },
+        {
+          "valeur": 7,
+          "unite": "jours",
+          "pointDeDepart": "formalisation écrite du choix (option c : remise des copies)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 216",
+              "page": 280
+            }
+          ]
+        }
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 216",
+          "page": 280
+        }
+      ]
+    }
+  ],
+  "garantiesDuContribuable": [
+    {
+      "code": "AVIS_PREALABLE",
+      "libelle": "Avis de vérification préalable et charte du contribuable vérifié",
+      "delai": {
+        "valeur": 7,
+        "unite": "jours",
+        "pointDeDepart": "au moins 7 jours avant l'intervention sur place",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 227",
+            "page": 285
+          }
+        ]
+      },
+      "prorogation": {
+        "valeur": 8,
+        "unite": "jours",
+        "pointDeDepart": "maximum, accordée sur demande du contribuable formulée avant l'expiration du délai de 7 jours",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 227",
+            "page": 285
+          }
+        ]
+      },
+      "regle": "Vérification de comptabilité ou vérification approfondie de situation fiscale d'ensemble d'une personne physique : avis + charte envoyés ou remis. Dérogation au délai possible « dans des situations laissées à l'appréciation de l'administration ». Si l'administration ne peut contrôler à la date fixée, elle doit informer du report et indiquer la nouvelle date. Les dispositions de la charte sont opposables à l'administration.",
+      "sanctionSiNonRespectee": "Pas de nullité expressément prévue pour le non-respect du délai de 7 jours ou l'absence de charte dans le texte lu ; la nullité n'est expresse que pour l'omission de la mention du droit à un conseil (garantie suivante). À faire confirmer (jurisprudence).",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 227",
+          "page": 285
+        }
+      ]
+    },
+    {
+      "code": "MENTIONS_OBLIGATOIRES",
+      "libelle": "Mentions de l'avis de vérification",
+      "regle": "L'avis doit préciser les années et impôts, droits et taxes vérifiés (sauf mention du caractère général) ; mentionner expressément la faculté de se faire assister par un conseil de son choix.",
+      "sanctionSiNonRespectee": "Nullité de la procédure pour absence de la mention du droit à un conseil (« sous peine de nullité de la procédure »). Pour les années/impôts, le texte ne prévoit pas de sanction expresse.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 227",
+          "page": 285
+        }
+      ]
+    },
+    {
+      "code": "DROIT_A_UN_CONSEIL",
+      "libelle": "Droit de se faire assister par un conseil de son choix",
+      "regle": "Prévu dans l'avis de vérification ; le conseil est invité à contresigner le procès-verbal de carence ; devant la CAR le contribuable peut se faire assister d'un conseil ou représenter par un mandataire habilité. Mandat enregistré exigé, sauf avocat inscrit au barreau.",
+      "sanctionSiNonRespectee": "Nullité de la procédure si l'avis omet la mention (art. 227).",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 227",
+          "page": 285
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 228",
+          "page": 285
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 360",
+          "page": 322,
+          "extraitDans": "Art. 359"
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 6",
+          "page": 214
+        }
+      ]
+    },
+    {
+      "code": "CHARTE_CONTRIBUABLE",
+      "libelle": "Charte du contribuable vérifié",
+      "regle": "Existe : remise avec l'avis de vérification ; ses dispositions sont opposables à l'administration. Son contenu n'est pas reproduit dans le LPF lu.",
+      "sanctionSiNonRespectee": "Non précisée dans le texte lu.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 227",
+          "page": 285
+        }
+      ]
+    },
+    {
+      "code": "DEBAT_CONTRADICTOIRE",
+      "libelle": "Débat oral et contradictoire de clôture",
+      "regle": "La vérification sur place est close par un débat contradictoire sanctionné par un procès-verbal signé du contribuable et du vérificateur, indiquant le déroulement, les erreurs constatées et les documents non présentés. Le contribuable a en outre le droit d'être entendu pendant toute la vérification sur place jusqu'à la réponse aux observations.",
+      "sanctionSiNonRespectee": "Pas de nullité expresse dans le texte lu. À l'inverse, la carence constatée au PV rend les pièces non présentées irrecevables (ensuite, y compris en phase contentieuse) sauf impossibilité prouvée de les produire.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 228",
+          "page": 285
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 205",
+          "page": 277
+        }
+      ]
+    },
+    {
+      "code": "LIMITATION_DUREE",
+      "libelle": "Limitation de la durée de la vérification sur place des livres",
+      "regle": "3 mois (SMT), 6 mois (système normal), 9 mois (direction des grandes entreprises), prorogés des délais d'obtention des relevés de compte non produits et du temps des autorités étrangères. Non opposable à l'administration pour l'instruction des observations ou requêtes postérieures, ni en cas de manoeuvres frauduleuses ou poursuites pénales.",
+      "delaiParRegime": [
+        {
+          "regime": "SMT",
+          "valeur": 3,
+          "unite": "mois"
+        },
+        {
+          "regime": "système normal",
+          "valeur": 6,
+          "unite": "mois"
+        },
+        {
+          "regime": "DGE",
+          "valeur": 9,
+          "unite": "mois"
+        }
+      ],
+      "sanctionSiNonRespectee": "Nullité des impositions.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 233",
+          "page": 286
+        }
+      ]
+    },
+    {
+      "code": "NON_RENOUVELLEMENT",
+      "libelle": "Interdiction de renouveler une vérification",
+      "regle": "Vérification de comptabilité achevée : pas de nouvelle vérification des écritures pour les mêmes impôts et la même période. Vérification approfondie de situation fiscale d'ensemble : plus de redressement pour la même période et le même impôt. Exceptions : vérification limitée à des opérations déterminées ; éléments incomplets ou inexacts fournis par le contribuable ; manoeuvres frauduleuses ou dissimulation (autorisation du Commissaire des impôts) dans le délai de répétition ; redressements sur pièces dans le délai de reprise sans investigation sur place ; incidence de périodes prescrites sur une période non prescrite.",
+      "sanctionSiNonRespectee": "Non précisée expressément (règle d'irrecevabilité du redressement).",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 230",
+          "page": 286
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 231",
+          "page": 286
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 232",
+          "page": 286
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 337",
+          "page": 315
+        }
+      ]
+    },
+    {
+      "code": "COMMUNICATION_RESULTATS",
+      "libelle": "Communication des résultats, même sans redressement",
+      "regle": "Après vérification de comptabilité ou vérification approfondie de situation fiscale d'ensemble, l'administration doit porter les résultats à la connaissance du contribuable.",
+      "sanctionSiNonRespectee": "Non précisée.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 229",
+          "page": 286
+        }
+      ]
+    },
+    {
+      "code": "NOTIFICATION_MOTIVEE",
+      "libelle": "Notification de redressement motivée et réponse motivée",
+      "regle": "La notification doit être motivée de façon à permettre d'accepter ou de présenter des observations ; le rejet des observations doit être motivé. Désaccord constaté par écrit.",
+      "sanctionSiNonRespectee": "Non précisée expressément ; la motivation est une condition de la procédure contradictoire.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 236",
+          "page": 288
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 205",
+          "page": 277
+        }
+      ]
+    },
+    {
+      "code": "INTERPRETATION_ADMINISTRATIVE",
+      "libelle": "Opposabilité de l'interprétation admise ou publiée par l'administration",
+      "regle": "Pas de rehaussement si le redevable de bonne foi a appliqué une interprétation formellement admise ou publiée (instructions, circulaires) non rapportée à la date des opérations.",
+      "sanctionSiNonRespectee": "Rehaussement exclu.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 257",
+          "page": 294
+        }
+      ]
+    },
+    {
+      "code": "CONSERVATION_DES_PIECES",
+      "libelle": "Conservation des documents (utile à la défense)",
+      "regle": "Livres, registres, documents et pièces conservés 10 ans à compter de la dernière opération mentionnée ou de l'établissement des pièces.",
+      "delai": {
+        "valeur": 10,
+        "unite": "ans",
+        "pointDeDepart": "dernière opération mentionnée / établissement de la pièce",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 261",
+            "page": 295
+          }
+        ]
+      },
+      "sanctionSiNonRespectee": "Non précisée ici ; l'absence de pièces peut conduire à une rectification d'office (art. 249).",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 261",
+          "page": 295
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 249",
+          "page": 292
+        }
+      ]
+    }
+  ],
+  "etapes": [
+    {
+      "code": "AVIS_VERIFICATION_RECU",
+      "libelle": "Réception de l'avis de vérification (+ charte du contribuable vérifié)",
+      "declencheur": "Envoi ou remise de l'avis par l'administration",
+      "delai": {
+        "valeur": 7,
+        "unite": "jours",
+        "pointDeDepart": "réception de l'avis : intervention sur place au plus tôt 7 jours après (prorogation maximum de 8 jours sur demande avant expiration)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 227",
+            "page": 285
+          }
+        ]
+      },
+      "actionAttendueDuCabinet": "Contrôler la checklist de l'avis (années/impôts, mention du droit à un conseil, charte jointe) ; demander une prorogation avant l'échéance si besoin ; réunir les livres et documents (formats électronique et papier) et un local adapté ; obtenir le mandat du conseil.",
+      "effetDuSilence": "Sans objet (pas de réponse exigée). Une prorogation doit être demandée AVANT l'expiration du délai.",
+      "etapeSuivante": [
+        "VERIFICATION_SUR_PLACE"
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 227",
+          "page": 285
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 228",
+          "page": 285
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 5",
+          "page": 213
+        }
+      ],
+      "variantes": [
+        {
+          "code": "INOPINE_PREMIERE_INTERVENTION",
+          "condition": "contrôle inopiné : avis remis au début de l'intervention",
+          "delai": {
+            "valeur": 8,
+            "unite": "jours",
+            "pointDeDepart": "première intervention : examen critique de la comptabilité interdit avant ce délai",
+            "source": [
+              {
+                "livre": "LPF",
+                "article": "Art. 211",
+                "page": 279
+              }
+            ]
+          },
+          "articles": [
+            {
+              "livre": "LPF",
+              "article": "Art. 211",
+              "page": 279
+            }
+          ]
+        },
+        {
+          "code": "CONTROLE_BUREAU",
+          "condition": "contrôle au bureau : pas d'avis préalable",
+          "etapeSuivante": [
+            "NOTIFICATION_REDRESSEMENT"
+          ],
+          "articles": [
+            {
+              "livre": "LPF",
+              "article": "Art. 210",
+              "page": 278
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "VERIFICATION_SUR_PLACE",
+      "libelle": "Vérification sur place en cours",
+      "declencheur": "Première intervention des vérificateurs",
+      "delai": {
+        "valeur": 3,
+        "unite": "mois",
+        "pointDeDepart": "durée maximale 3 mois (SMT) / 6 mois (système normal) / 9 mois (DGE) ; sous peine de nullité des impositions ; point de départ non écrit dans le texte — début des opérations sur place retenu par prudence, à valider",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 233",
+            "page": 286
+          }
+        ]
+      },
+      "actionAttendueDuCabinet": "Chronométrer la durée de présence (alerte avant 3/6/9 mois selon le régime) ; assister à toutes les interventions ; fournir les pièces demandées ; comptabilité informatisée : copie du fichier sous 14 jours, choix écrit de l'option (7 jours pour l'option c) ; constater tout dépassement de durée.",
+      "effetDuSilence": "Défaut de présentation de la comptabilité : constaté par PV 14 jours après la prise de contact ; peut ouvrir la rectification d'office (art. 249).",
+      "etapeSuivante": [
+        "DEBAT_CONTRADICTOIRE_PV"
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 233",
+          "page": 286
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 228",
+          "page": 285
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 216",
+          "page": 280
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 249",
+          "page": 292
+        }
+      ],
+      "alertesPourLeCabinet": [
+        {
+          "seuil": 14,
+          "unite": "jours",
+          "objet": "procès-verbal de carence possible 14 jours après la prise de contact",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 228",
+              "page": 285
+            }
+          ]
+        }
+      ],
+      "delaiParRegime": [
+        {
+          "valeur": 3,
+          "unite": "mois",
+          "pointDeDepart": "SMT",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 233",
+              "page": 286
+            }
+          ]
+        },
+        {
+          "valeur": 6,
+          "unite": "mois",
+          "pointDeDepart": "système normal hors DGE",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 233",
+              "page": 286
+            }
+          ]
+        },
+        {
+          "valeur": 9,
+          "unite": "mois",
+          "pointDeDepart": "direction des grandes entreprises",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 233",
+              "page": 286
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "DEBAT_CONTRADICTOIRE_PV",
+      "libelle": "Débat contradictoire de clôture et procès-verbal",
+      "declencheur": "Fin des opérations sur place",
+      "delai": {
+        "valeur": null,
+        "unite": null,
+        "pointDeDepart": "Le LPF ne fixe pas de délai pour tenir le débat de clôture (voir nonTrouveDansLeCorpus)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 228",
+            "page": 285
+          }
+        ]
+      },
+      "actionAttendueDuCabinet": "Préparer la défense point par point ; produire tous les documents manquants AVANT le PV (carence = irrecevabilité des pièces, même au contentieux, sauf impossibilité prouvée) ; relire et ne signer qu'un PV exact ; faire consigner le refus de signer au besoin.",
+      "effetDuSilence": "Sans objet. Pièces non présentées rejetées dès la notification initiale.",
+      "etapeSuivante": [
+        "NOTIFICATION_REDRESSEMENT"
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 228",
+          "page": 285
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 205",
+          "page": 277
+        }
+      ]
+    },
+    {
+      "code": "NOTIFICATION_REDRESSEMENT",
+      "libelle": "Notification de redressements reçue (procédure contradictoire)",
+      "declencheur": "Envoi de la notification motivée par l'administration",
+      "delai": {
+        "valeur": 45,
+        "unite": "jours",
+        "pointDeDepart": "réception de la notification (22 jours en contrôle ponctuel, partiel et sur pièces)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 205",
+            "page": 277
+          }
+        ]
+      },
+      "actionAttendueDuCabinet": "Vérifier la motivation ; répondre par écrit avant l'échéance avec preuves complémentaires ; ou accepter ; ou préparer la saisine de la CAR. Droit d'être entendu pendant la vérification sur place jusqu'à la réponse aux observations. Régularisation particulière (art. 238-bis) à examiner pour les petites entreprises.",
+      "effetDuSilence": "Si le contribuable n'a pas réagi dans le délai : la notification de redressement devient définitive à son égard ; l'impôt est calculé sur la base fixée par l'administration.",
+      "etapeSuivante": [
+        "REPONSE_ADMINISTRATION"
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 205",
+          "page": 277
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 236",
+          "page": 288
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 238",
+          "page": 288
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 238-bis",
+          "page": 288,
+          "extraitDans": "Art. 238"
+        }
+      ],
+      "delaiAlternatif": {
+        "valeur": 22,
+        "unite": "jours",
+        "pointDeDepart": "réception de la notification (contrôle ponctuel, partiel, sur pièces)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 205",
+            "page": 277
+          },
+          {
+            "livre": "LPF",
+            "article": "Art. 210",
+            "page": 278
+          }
+        ]
+      }
+    },
+    {
+      "code": "REPONSE_ADMINISTRATION",
+      "libelle": "Réponse de l'administration aux observations",
+      "declencheur": "Réception des observations du contribuable",
+      "delai": {
+        "valeur": 45,
+        "unite": "jours",
+        "pointDeDepart": "délai égal à celui imparti au contribuable (45 j ; 22 j en contrôle ponctuel/partiel/sur pièces), à compter de la réception des observations",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 205",
+            "page": 277
+          }
+        ]
+      },
+      "actionAttendueDuCabinet": "Suivre l'échéance côté administration ; la réponse doit confirmer ou infirmer (en tout ou partie) ou notifier l'acceptation, de façon motivée. En cas de rejet, préparer la saisine de la CAR.",
+      "effetDuSilence": "Le texte ne prévoit pas d'acceptation tacite des observations du contribuable : la notification devient définitive quand l'administration informe que les observations sont non fondées. Si l'administration ne répond pas dans le délai, le LPF lu ne dit pas expressément que le redressement est abandonné — à faire valider.",
+      "etapeSuivante": [
+        "NOTIFICATION_DEFINITIVE"
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 205",
+          "page": 277
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 236",
+          "page": 288
+        }
+      ]
+    },
+    {
+      "code": "NOTIFICATION_DEFINITIVE",
+      "libelle": "Notification de redressement définitive",
+      "declencheur": "Rejet total ou partiel des observations, ou silence du contribuable",
+      "delai": {
+        "valeur": 30,
+        "unite": "jours",
+        "pointDeDepart": "saisine de la CAR : 30 jours à compter de la réception de la réponse aux observations ou de la notification définitive",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 360",
+            "page": 322,
+            "extraitDans": "Art. 359"
+          }
+        ]
+      },
+      "actionAttendueDuCabinet": "Décider : saisir la CAR (30 jours, suspend la mise en recouvrement) ou attendre l'avis de mise en recouvrement puis réclamer. La notification devient définitive : (1) silence du contribuable, (2) administration jugeant les observations non fondées, (3) contribuable entendu puis observations non fondées.",
+      "effetDuSilence": "Absence de saisine de la CAR dans les 30 jours : AMR établi 30 jours après la notification définitive.",
+      "etapeSuivante": [
+        "SAISINE_CAR",
+        "AVIS_MISE_EN_RECOUVREMENT"
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 205",
+          "page": 277
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 237",
+          "page": 288
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 238",
+          "page": 288
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 360",
+          "page": 322,
+          "extraitDans": "Art. 359"
+        }
+      ]
+    },
+    {
+      "code": "SAISINE_CAR",
+      "libelle": "Saisine de la Commission administrative des recours (CAR)",
+      "declencheur": "Désaccord sur le résultat d'une vérification sur place (comptabilité) ou vérification approfondie de situation d'ensemble",
+      "delai": {
+        "valeur": 2,
+        "unite": "mois",
+        "pointDeDepart": "saisine de la CAR : avis rendu dans les 2 mois ; contribuable avisé 15 jours avant la réunion, 10 jours pour consulter le rapport ; saisine dans les 30 jours (suspend la mise en recouvrement)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 362",
+            "page": 323,
+            "extraitDans": "Art. 361"
+          },
+          {
+            "livre": "LPF",
+            "article": "Art. 360",
+            "page": 322,
+            "extraitDans": "Art. 359"
+          }
+        ]
+      },
+      "actionAttendueDuCabinet": "Saisir par simple lettre au président de la CAR avec la copie de la notification définitive et les pièces ; informer l'autre partie le jour suivant ; consulter le rapport sous 10 jours ; déposer des observations écrites ; se faire assister d'un conseil. Alerte J-30, puis J-15 avant réunion.",
+      "effetDuSilence": "Si la CAR ne rend pas d'avis dans les 2 mois : l'administration poursuit et met en recouvrement ; le contribuable peut saisir de plein droit la juridiction compétente ; il conserve le droit de contester après l'avis de mise en recouvrement.",
+      "etapeSuivante": [
+        "AVIS_MISE_EN_RECOUVREMENT"
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 237",
+          "page": 288
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 356",
+          "page": 319,
+          "extraitDans": "Art. 355"
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 360",
+          "page": 322,
+          "extraitDans": "Art. 359"
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 362",
+          "page": 323,
+          "extraitDans": "Art. 361"
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 363",
+          "page": 323
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 364",
+          "page": 324
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 365",
+          "page": 324
+        }
+      ],
+      "delaisComplementaires": [
+        {
+          "valeur": 15,
+          "unite": "jours",
+          "pointDeDepart": "avis de convocation avant la réunion de la CAR",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 360",
+              "page": 322,
+              "extraitDans": "Art. 359"
+            }
+          ]
+        },
+        {
+          "valeur": 10,
+          "unite": "jours",
+          "pointDeDepart": "pour prendre connaissance du rapport et de ses annexes au secrétariat",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 360",
+              "page": 322,
+              "extraitDans": "Art. 359"
+            }
+          ]
+        },
+        {
+          "valeur": 1,
+          "unite": "jour",
+          "pointDeDepart": "information de la partie adverse par la partie qui saisit la CAR",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 237",
+              "page": 288
+            }
+          ]
+        },
+        {
+          "valeur": 1,
+          "unite": "mois",
+          "pointDeDepart": "expertise externe ordonnée par la CAR (interrompt le délai de décision)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 360",
+              "page": 322,
+              "extraitDans": "Art. 359"
+            }
+          ]
+        }
+      ],
+      "effets": "L'avis de la CAR ne s'impose pas aux parties ; sa notification n'interrompt pas la prescription ; si la base retenue est conforme à l'avis de la CAR la charge de la preuve incombe au contribuable, sinon à l'administration ; l'administration qui ne notifie pas les bases retenues après l'avis encourt la nullité des impositions sur les points tranchés."
+    },
+    {
+      "code": "AVIS_MISE_EN_RECOUVREMENT",
+      "libelle": "Avis de mise en recouvrement (AMR)",
+      "declencheur": "Notification définitive ou avis de la CAR ou silence du contribuable",
+      "delai": {
+        "valeur": 30,
+        "unite": "jours",
+        "pointDeDepart": "notification de redressement définitive : établissement de l'AMR 30 jours après",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 238",
+            "page": 288
+          }
+        ]
+      },
+      "actionAttendueDuCabinet": "Vérifier le contenu de l'AMR (éléments de calcul, droits et pénalités) ; payer sous 15 jours ou demander le sursis dans la réclamation ; surveiller la mise en demeure (8 jours, +3 % de frais de poursuite).",
+      "effetDuSilence": "Non-paiement : mise en demeure de payer sous 8 jours, majorée de 3 %.",
+      "etapeSuivante": [
+        "RECLAMATION_PREALABLE"
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 238",
+          "page": 288
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 481",
+          "page": 348
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 482",
+          "page": 348
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 485",
+          "page": 348
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 486",
+          "page": 349
+        }
+      ],
+      "delaisComplementaires": [
+        {
+          "valeur": 15,
+          "unite": "jours",
+          "pointDeDepart": "réception de l'AMR (délai pour se libérer de la dette)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 481",
+              "page": 348
+            }
+          ]
+        },
+        {
+          "valeur": 8,
+          "unite": "jours",
+          "pointDeDepart": "remise de la mise en demeure (sommation de payer)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 486",
+              "page": 349
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "RECLAMATION_PREALABLE",
+      "libelle": "Réclamation contentieuse devant le Commissaire des impôts",
+      "declencheur": "Réception de l'AMR (ou paiement, ou événement motivant la réclamation)",
+      "delai": {
+        "valeur": null,
+        "unite": "date",
+        "pointDeDepart": "au plus tard le 31 décembre de l'année suivant celle de la notification de l'AMR (ou du versement, ou de l'événement)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 374",
+            "page": 326
+          }
+        ]
+      },
+      "actionAttendueDuCabinet": "Rédiger la réclamation (art. 376 : individuelle, toutes impositions, moyens, signée, NIF, pièces) ; demander le sursis de paiement et constituer les garanties ; obtenir le récépissé. Si redressement : délai égal à celui de l'administration.",
+      "effetDuSilence": "Silence du Commissaire pendant 2 mois (+1 mois s'il prolonge) : le contribuable peut saisir directement le tribunal.",
+      "etapeSuivante": [
+        "SAISINE_JURIDICTION"
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 367",
+          "page": 325,
+          "extraitDans": "Art. 366"
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 374",
+          "page": 326
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 375",
+          "page": 327
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 376",
+          "page": 327
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 377",
+          "page": 327
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 519",
+          "page": 355
+        }
+      ],
+      "delaiReponseAdministration": {
+        "valeur": 2,
+        "unite": "mois",
+        "pointDeDepart": "dépôt de la réclamation (prolongeable d'1 mois supplémentaire)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 367",
+            "page": 325,
+            "extraitDans": "Art. 366"
+          }
+        ]
+      }
+    },
+    {
+      "code": "SAISINE_JURIDICTION",
+      "libelle": "Saisine de la juridiction compétente",
+      "declencheur": "Décision de rejet de la réclamation (ou silence)",
+      "delai": {
+        "valeur": 2,
+        "unite": "mois",
+        "pointDeDepart": "réception de la décision sur la réclamation ; ou 6 mois à compter de la présentation de la réclamation si aucune décision reçue",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 381",
+            "page": 328
+          }
+        ]
+      },
+      "actionAttendueDuCabinet": "Impôts directs et TVA : requête à la Cour d'appel (chambre administrative, premier et dernier ressort) ; enregistrement/timbre : tribunal de première instance (pourvoi en cassation seul). Ne contester que les impositions visées dans la réclamation. Alerte J-30 et J-7.",
+      "effetDuSilence": "Le défaut de décision de l'administration n'empêche pas l'action après 6 mois (délai de saisine ouvert).",
+      "etapeSuivante": [],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 380",
+          "page": 328
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 381",
+          "page": 328
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 383",
+          "page": 328
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 400",
+          "page": 331
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 401",
+          "page": 332
+        }
+      ],
+      "delaiAlternatif": {
+        "valeur": 6,
+        "unite": "mois",
+        "pointDeDepart": "présentation de la réclamation (aucune décision reçue)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 381",
+            "page": 328
+          }
+        ]
+      }
+    }
+  ],
+  "etapesTaxationOffice": [
+    {
+      "code": "MISE_EN_DEMEURE_TO",
+      "libelle": "Mise en demeure avant taxation d'office (défaut de déclaration)",
+      "declencheur": "Déclaration non déposée dans les délais légaux",
+      "delai": {
+        "valeur": 15,
+        "unite": "jours",
+        "pointDeDepart": "notification de la mise en demeure",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 244",
+            "page": 291
+          }
+        ]
+      },
+      "actionAttendueDuCabinet": "Régulariser la déclaration dans les 15 jours.",
+      "effetDuSilence": "Application de la procédure de taxation d'office.",
+      "etapeSuivante": [
+        "NOTIFICATION_BASES_TO"
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 243",
+          "page": 291
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 244",
+          "page": 291
+        }
+      ]
+    },
+    {
+      "code": "NOTIFICATION_BASES_TO",
+      "libelle": "Notification de la base de taxation d'office",
+      "declencheur": "Absence de régularisation / défaut de réponse aux demandes d'éclaircissements",
+      "delai": {
+        "valeur": 15,
+        "unite": "jours",
+        "pointDeDepart": "notification de la base de taxation",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 247",
+            "page": 291
+          }
+        ]
+      },
+      "actionAttendueDuCabinet": "Présenter des observations dans les 15 jours ; préparer la preuve comptable (charge de la preuve sur le contribuable).",
+      "effetDuSilence": "Mise en recouvrement possible 15 jours au moins après la notification des bases.",
+      "etapeSuivante": [
+        "AVIS_MISE_EN_RECOUVREMENT"
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 247",
+          "page": 291
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 251",
+          "page": 292
+        }
+      ],
+      "delaisComplementaires": [
+        {
+          "valeur": 15,
+          "unite": "jours",
+          "pointDeDepart": "notification des bases : délai minimal avant mise en recouvrement (notification interruptive de prescription)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 251",
+              "page": 292
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "taxationOffice": {
+    "casOuverture": [
+      {
+        "cas": "Défaut de déclaration dans les délais légaux : IRPP, IS, taxes sur le chiffre d'affaires, retenues sur salaires, tous autres impôts (taxation d'office, sous réserve de la régularisation après mise en demeure)",
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 243",
+            "page": 291
+          }
+        ]
+      },
+      {
+        "cas": "Mise en demeure restée sans régularisation dans les 15 jours",
+        "delai": {
+          "valeur": 15,
+          "unite": "jours",
+          "pointDeDepart": "notification de la mise en demeure",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 244",
+              "page": 291
+            }
+          ]
+        },
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 244",
+            "page": 291
+          }
+        ]
+      },
+      {
+        "cas": "Pas de mise en demeure : changements fréquents de séjour / locaux d'emprunt ou meublés ; transfert du domicile fiscal à l'étranger sans déclaration ; contrôle impossible du fait du contribuable ou de tiers",
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 245",
+            "page": 291
+          }
+        ]
+      },
+      {
+        "cas": "Abstention de répondre aux demandes d'éclaircissements ou de justifications",
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 246",
+            "page": 291
+          }
+        ]
+      },
+      {
+        "cas": "Non-désignation d'un représentant au Togo dans les 90 jours de la demande (non-résidents)",
+        "delai": {
+          "valeur": 90,
+          "unite": "jours",
+          "pointDeDepart": "demande de l'administration",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 248",
+              "page": 291
+            }
+          ]
+        },
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 248",
+            "page": 291
+          }
+        ]
+      },
+      {
+        "cas": "Rectification/évaluation d'office : défaut de présentation de la comptabilité ; erreurs, omissions ou inexactitudes graves et répétées ; absence de pièces justificatives privant la comptabilité de valeur probante ; contrôle impossible du fait du contribuable ou de tiers",
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 249",
+            "page": 292
+          }
+        ]
+      }
+    ],
+    "decisionRectificationOffice": {
+      "texte": "En vérification générale de comptabilité, la décision de rectification d'office pour erreurs graves/répétées ou absence de pièces est prise et signifiée par le Directeur des impôts du service gestionnaire, qui vise la notification mentionnant les bases.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 250",
+          "page": 292
+        }
+      ]
+    },
+    "consequences": {
+      "procedureContradictoireInapplicable": "La procédure de redressement contradictoire n'est pas applicable en cas de taxation, rectification ou évaluation d'office des bases initiales.",
+      "chargeDeLaPreuve": "Imposition établie d'office : la charge de la preuve incombe au contribuable qui demande la décharge ou la réduction ; il doit fournir les éléments comptables permettant d'apprécier le bénéfice (ou les opérations) que l'entreprise peut normalement réaliser.",
+      "droitDeReclamation": "Le contribuable conserve le droit de réclamation contentieuse.",
+      "recouvrementAccelere": "Dès réception de l'AMR, le receveur peut prendre des sûretés sur les biens et avoirs et bloquer les comptes (procédure accélérée).",
+      "notificationDesBases": {
+        "valeur": 15,
+        "unite": "jours",
+        "pointDeDepart": "notification de la base ; 15 jours d'observations ; mise en recouvrement au plus tôt 15 jours après la notification",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 247",
+            "page": 291
+          },
+          {
+            "livre": "LPF",
+            "article": "Art. 251",
+            "page": 292
+          }
+        ]
+      }
+    },
+    "articles": [
+      {
+        "livre": "LPF",
+        "article": "Art. 235",
+        "page": 288
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 243",
+        "page": 291
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 244",
+        "page": 291
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 245",
+        "page": 291
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 246",
+        "page": 291
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 247",
+        "page": 291
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 248",
+        "page": 291
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 249",
+        "page": 292
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 250",
+        "page": 292
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 251",
+        "page": 292
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 252",
+        "page": 292
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 369",
+        "page": 325
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 370",
+        "page": 326
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 371",
+        "page": 326
+      },
+      {
+        "livre": "LPF",
+        "article": "Art. 514",
+        "page": 354
+      }
+    ]
+  },
+  "prescription": {
+    "droitCommun": [
+      {
+        "impots": "IR, IS, retenues à la source sur capitaux mobiliers, prélèvements sur produits de placement à revenu fixe, acomptes/retenues annexes, patente, taxe foncière",
+        "delai": {
+          "valeur": 3,
+          "unite": "ans",
+          "pointDeDepart": "fin de la 3e année qui suit celle au titre de laquelle l'imposition est due",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 316",
+              "page": 312
+            }
+          ]
+        },
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 316",
+            "page": 312
+          }
+        ]
+      },
+      {
+        "impots": "Taxes sur le chiffre d'affaires (aussi taxe sur spectacles, jeux de hasard, conventions d'assurances)",
+        "delai": {
+          "valeur": 3,
+          "unite": "ans",
+          "pointDeDepart": "fin de la 3e année suivant celle de l'exigibilité de la taxe (art. 191 CGI)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 321",
+              "page": 313
+            },
+            {
+              "livre": "LPF",
+              "article": "Art. 322",
+              "page": 313
+            },
+            {
+              "livre": "LPF",
+              "article": "Art. 332",
+              "page": 314
+            }
+          ]
+        },
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 321",
+            "page": 313
+          },
+          {
+            "livre": "LPF",
+            "article": "Art. 322",
+            "page": 313
+          },
+          {
+            "livre": "LPF",
+            "article": "Art. 332",
+            "page": 314
+          }
+        ]
+      },
+      {
+        "impots": "Enregistrement, timbre et taxes assimilées",
+        "delai": {
+          "valeur": 3,
+          "unite": "ans",
+          "pointDeDepart": "expiration de la 3e année suivant celle de l'enregistrement de l'acte ou du dépôt de la déclaration (opposable si l'exigibilité est suffisamment révélée)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 325",
+              "page": 313
+            }
+          ]
+        },
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 325",
+            "page": 313
+          }
+        ]
+      },
+      {
+        "impots": "Autres droits, taxes, redevances, soultes et impositions indirectes",
+        "delai": {
+          "valeur": 1,
+          "unite": "an",
+          "pointDeDepart": "expiration de la 1re année suivant celle du fait générateur",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 324",
+              "page": 313
+            }
+          ]
+        },
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 324",
+            "page": 313
+          }
+        ]
+      }
+    ],
+    "casProlonges": [
+      {
+        "cas": "Agissements frauduleux découverts, notifiés au contribuable ou plainte déposée : contrôles et rehaussements pour 3 années au-delà du délai ordinaire ; notification visée par le Commissaire des impôts ; applicable aux auteurs, complices et bénéficiaires. Recouvrement de la période excédentaire suspendu sous garanties jusqu'à la décision pénale ; caduc en cas de non-lieu ou relaxe.",
+        "prolongation": {
+          "valeur": 3,
+          "unite": "ans",
+          "pointDeDepart": "au-delà du délai ordinaire (années excédant)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 334",
+              "page": 315
+            }
+          ]
+        },
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 334",
+            "page": 315
+          },
+          {
+            "livre": "LPF",
+            "article": "Art. 519",
+            "page": 355
+          },
+          {
+            "livre": "LPF",
+            "article": "Art. 523",
+            "page": 356
+          }
+        ]
+      },
+      {
+        "cas": "Instance devant les tribunaux répressifs ou réclamation contentieuse révélant des omissions ou insuffisances : réparation jusqu'à la fin de l'année suivant celle de la décision qui a clos l'instance",
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 317",
+            "page": 312
+          }
+        ]
+      },
+      {
+        "cas": "Erreur sur la nature de l'impôt ou le lieu d'imposition : réparation jusqu'à la fin de l'année suivant celle de la décision de décharge",
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 318",
+            "page": 312
+          }
+        ]
+      },
+      {
+        "cas": "Ouverture de succession : impôt sur le revenu non établi pour l'année du décès ou l'une des 4 années antérieures, jusqu'à la fin de la 2e année suivant l'année de la déclaration de succession (ou du paiement des droits)",
+        "delai": {
+          "valeur": 2,
+          "unite": "ans",
+          "pointDeDepart": "année de la déclaration de succession / du paiement des droits de mutation",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 319",
+              "page": 312
+            }
+          ]
+        },
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 319",
+            "page": 312
+          }
+        ]
+      },
+      {
+        "cas": "Vérification de périodes prescrites mais incidentes sur une période non prescrite : possible, mais aucune imposition ne peut être établie pour les périodes prescrites",
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 337",
+            "page": 315
+          }
+        ]
+      }
+    ],
+    "interruption": {
+      "actesInterruptifs": [
+        "Notification d'une proposition de redressement (art. 336)",
+        "Déclaration ou notification d'un procès-verbal (art. 336)",
+        "Acte comportant reconnaissance du contribuable (art. 336)",
+        "Autres actes interruptifs de droit commun (art. 336)",
+        "Notification des bases d'une imposition d'office (art. 251)",
+        "Demande du contribuable de ne pas imputer le supplément de taxes sur le chiffre d'affaires, à hauteur des bases notifiées (art. 253)"
+      ],
+      "nonInterruptifs": [
+        "L'avis de vérification n'est pas interruptif (art. 336)",
+        "La notification de l'avis de la CAR n'est pas interruptive : l'AMR doit intervenir avant l'expiration du nouveau délai de reprise courant depuis la notification de redressement (art. 364)"
+      ],
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 336",
+          "page": 315
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 251",
+          "page": 292
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 253",
+          "page": 293
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 364",
+          "page": 324
+        }
+      ]
+    },
+    "effet": {
+      "texte": "La prescription éteint l'obligation par le seul écoulement du délai ; elle peut être invoquée à tout moment de la procédure contentieuse mais ne peut être soulevée d'office par le juge.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 314",
+          "page": 312
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 315",
+          "page": 312
+        }
+      ]
+    },
+    "prescriptionDesAmendes": [
+      {
+        "cas": "Amendes liées à l'assiette et au paiement : même délai que les droits simples",
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 335",
+            "page": 315
+          }
+        ]
+      },
+      {
+        "cas": "Autres amendes fiscales : fin de la 4e année suivant celle de l'infraction",
+        "delai": {
+          "valeur": 4,
+          "unite": "ans",
+          "pointDeDepart": "fin de la 4e année suivant celle au cours de laquelle les infractions ont été commises",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 335",
+              "page": 315
+            }
+          ]
+        },
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 335",
+            "page": 315
+          }
+        ]
+      }
+    ],
+    "prescriptionDuRecouvrement": {
+      "delai": {
+        "valeur": 4,
+        "unite": "ans",
+        "pointDeDepart": "date de mise en recouvrement ; interrompue par poursuites, citation, reconnaissance ; suspendue par la réclamation suspensive de paiement",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 515",
+            "page": 354
+          }
+        ]
+      },
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 515",
+          "page": 354
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 516",
+          "page": 355
+        }
+      ]
+    }
+  },
+  "contentieux": {
+    "reclamationPrealable": {
+      "obligatoire": "Oui : le contribuable qui conteste doit d'abord adresser une réclamation au service dont dépend le lieu d'imposition, après réception de l'AMR.",
+      "delaiDepot": {
+        "valeur": null,
+        "unite": "date",
+        "pointDeDepart": "au plus tard le 31 décembre de l'année suivant : la notification de l'AMR ; le versement ; la réalisation de l'événement ; la réception d'un nouveau bulletin ; l'année des retenues ; la connaissance de cotisations à tort ou en double emploi ; la durée de vacance (taxe foncière)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 374",
+            "page": 326
+          }
+        ]
+      },
+      "delaiEnCasDeReprise": {
+        "texte": "Contribuable faisant l'objet d'une reprise/redressement : délai égal à celui de l'administration.",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 375",
+            "page": 327
+          }
+        ]
+      },
+      "forme": [
+        "individuelle (sauf imposition collective / membres de sociétés de personnes)",
+        "mentionner toutes les impositions contestées",
+        "exposé sommaire des moyens et conclusions pour chaque imposition",
+        "adressée au Commissaire des impôts, en français, datée, signature manuscrite, NIF, boîte postale, contact téléphonique",
+        "pièces justificatives : AMR ou bulletin, notifications provisoire et définitive de redressements, quittance ou attestation de versement/retenue",
+        "mandat régulier pour autrui (sauf avocat inscrit) ; domicile élu au Togo si non-résident",
+        "sans droit de timbre ; récépissé délivré"
+      ],
+      "sanctionFormes": "Irrecevabilité (art. 376) ; régularisation possible à tout moment par production de l'une des pièces ; vices de forme couvrables dans la requête à la Cour d'appel sauf défaut de signature de la réclamation initiale (art. 383).",
+      "autorite": "Commissaire des impôts du lieu d'imposition ; réclamation transmise au service compétent si mal adressée (date d'enregistrement = réception par le service incompétent).",
+      "delaiReponse": {
+        "valeur": 2,
+        "unite": "mois",
+        "pointDeDepart": "réclamation (prolongeable d'1 mois supplémentaire par le Commissaire ou un agent désigné, avec information du contribuable)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 367",
+            "page": 325,
+            "extraitDans": "Art. 366"
+          }
+        ]
+      },
+      "effetDuSilence": "Pas de décision dans ce délai : le contribuable peut saisir directement le tribunal compétent.",
+      "motivation": "Rejet total ou partiel : décision motivée.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 366",
+          "page": 325
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 367",
+          "page": 325,
+          "extraitDans": "Art. 366"
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 368",
+          "page": 325
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 374",
+          "page": 326
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 375",
+          "page": 327
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 376",
+          "page": 327
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 377",
+          "page": 327
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 378",
+          "page": 327
+        }
+      ]
+    },
+    "sursisDePaiement": {
+      "demande": "Dans la réclamation : fixer le montant ou les bases du dégrèvement espéré et constituer des garanties.",
+      "garanties": {
+        "minimum": {
+          "valeur": 25,
+          "unite": "pourcent",
+          "pointDeDepart": "des impositions contestées (garanties à constituer)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 523",
+              "page": 356
+            }
+          ]
+        },
+        "natureEtConditions": "fixées par décret (non reproduit)",
+        "articles": [
+          {
+            "livre": "LPF",
+            "article": "Art. 519",
+            "page": 355
+          },
+          {
+            "livre": "LPF",
+            "article": "Art. 523",
+            "page": 356
+          },
+          {
+            "livre": "LPF",
+            "article": "Art. 524",
+            "page": 356
+          }
+        ]
+      },
+      "defautDeGaranties": "Mesures conservatoires jusqu'à la saisie incluse ; pas de vente avant décision définitive sur la réclamation.",
+      "refusDesGaranties": {
+        "recours": {
+          "valeur": 8,
+          "unite": "jours",
+          "pointDeDepart": "réception de la lettre recommandée du receveur : demande écrite à la Cour d'appel (impôts directs, taxes sur le chiffre d'affaires, enregistrement)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 521",
+              "page": 355
+            }
+          ]
+        },
+        "consignation": {
+          "valeur": 25,
+          "unite": "pourcent",
+          "pointDeDepart": "(un quart) des impôts contestés, consigné auprès du receveur en compte d'attente",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 521",
+              "page": 355
+            }
+          ]
+        },
+        "decisionDuJuge": {
+          "valeur": 1,
+          "unite": "mois",
+          "pointDeDepart": "saisine du juge",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 521",
+              "page": 355
+            }
+          ]
+        }
+      },
+      "paiementPartielSpontane": "Pour la fraction contestée, amendes, pénalités et droits supplémentaires ne sont demandés qu'après décision définitive.",
+      "risques": {
+        "majorationRetardAbusif": {
+          "valeur": 1,
+          "unite": "pourcent",
+          "pointDeDepart": "par mois entier écoulé entre l'enregistrement de la demande au greffe et le jugement ou le paiement (plafond de la majoration pour retard abusif)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 522",
+              "page": 355
+            }
+          ]
+        },
+        "interetsMoratoires": {
+          "valeur": 3,
+          "unite": "ans",
+          "pointDeDepart": "intérêts au taux de l'intérêt légal sur les cotisations maintenues après sursis : courent du 1er jour du 13e mois suivant la date limite de paiement, pendant 3 ans maximum",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 416",
+              "page": 334
+            }
+          ]
+        }
+      },
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 519",
+          "page": 355
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 520",
+          "page": 355
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 521",
+          "page": 355
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 522",
+          "page": 355
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 523",
+          "page": 356
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 524",
+          "page": 356
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 416",
+          "page": 334
+        }
+      ]
+    },
+    "commissionAdministrativeDesRecours": {
+      "competence": "Questions de fait : redressements après vérification sur place de comptabilité ou vérification approfondie de situation d'ensemble ; désaccord sur le bénéfice ou le CA réel ; valeurs locatives ; insuffisances de prix en enregistrement ; abus de droit (restitution du véritable caractère d'une opération).",
+      "saisine": {
+        "valeur": 30,
+        "unite": "jours",
+        "pointDeDepart": "réception de la réponse aux observations ou de la notification définitive ; lettre simple au président ; saisine possible par l'administration",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 360",
+            "page": 322,
+            "extraitDans": "Art. 359"
+          }
+        ]
+      },
+      "effetSaisine": "Suspend la mise en recouvrement des impositions établies (saisine dans le délai).",
+      "delaiAvis": {
+        "valeur": 2,
+        "unite": "mois",
+        "pointDeDepart": "saisine de la CAR",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 362",
+            "page": 323,
+            "extraitDans": "Art. 361"
+          }
+        ]
+      },
+      "convocation": {
+        "valeur": 15,
+        "unite": "jours",
+        "pointDeDepart": "avant la réunion de la CAR (10 jours pour consulter le rapport)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 360",
+            "page": 322,
+            "extraitDans": "Art. 359"
+          }
+        ]
+      },
+      "quorum": "Au moins 5 membres présents, y compris le président.",
+      "valeurDeLAvis": "Ne s'impose pas aux parties ; saisine de plein droit de la juridiction si la CAR n'a pas statué dans les délais ; charge de la preuve selon la conformité de la base retenue à l'avis.",
+      "nullites": "Nullité des impositions sur les points tranchés si l'administration ne notifie pas les bases retenues après l'avis ; objections sur la compétence, la composition, le déroulement ou la motivation de l'avis non constitutives de nullité.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 356",
+          "page": 319,
+          "extraitDans": "Art. 355"
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 357",
+          "page": 321
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 358",
+          "page": 322
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 359",
+          "page": 322
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 360",
+          "page": 322,
+          "extraitDans": "Art. 359"
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 361",
+          "page": 323
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 362",
+          "page": 323,
+          "extraitDans": "Art. 361"
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 363",
+          "page": 323
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 364",
+          "page": 324
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 365",
+          "page": 324
+        }
+      ]
+    },
+    "recoursJuridictionnel": {
+      "impotsDirectsEtTVA": "Cours d'appel siégeant en chambres administratives, premier et dernier ressort ; affaires d'impôts sur les revenus jugées en séance non publique ; défense de l'administration par ses agents ou un avocat.",
+      "enregistrementTimbre": "Tribunaux de première instance en chambres civiles ; jugements sans appel sauf pourvoi en cassation ; assignation ; instruction par mémoires ; explications orales ; avocat facultatif.",
+      "delaiDeSaisine": {
+        "valeur": 2,
+        "unite": "mois",
+        "pointDeDepart": "réception de la décision de l'administration sur la réclamation",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 381",
+            "page": 328
+          }
+        ]
+      },
+      "delaiSiPasDeDecision": {
+        "valeur": 6,
+        "unite": "mois",
+        "pointDeDepart": "présentation de la réclamation",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 381",
+            "page": 328
+          }
+        ]
+      },
+      "delaiReponseAdministration": {
+        "valeur": 2,
+        "unite": "mois",
+        "pointDeDepart": "présentation de l'instance (le président peut accorder 1 mois de plus) ; sinon réputée avoir acquiescé aux faits exposés dans les recours",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 386",
+            "page": 329
+          }
+        ]
+      },
+      "limiteDesMoyens": "Le demandeur ne peut contester que les impositions visées dans sa réclamation ; conclusions nouvelles possibles dans la limite du dégrèvement sollicité, explicitement formulées.",
+      "delaisExpertise": [
+        {
+          "valeur": 8,
+          "unite": "jours",
+          "pointDeDepart": "notification invitant à désigner un expert",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 390",
+              "page": 330
+            }
+          ]
+        },
+        {
+          "valeur": 10,
+          "unite": "jours",
+          "pointDeDepart": "jours francs avant le début des opérations d'expertise",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 392",
+              "page": 330
+            }
+          ]
+        },
+        {
+          "valeur": 2,
+          "unite": "mois",
+          "pointDeDepart": "notification du dépôt du rapport (conclusions en enregistrement, tribunal de première instance)",
+          "source": [
+            {
+              "livre": "LPF",
+              "article": "Art. 403",
+              "page": 332
+            }
+          ]
+        }
+      ],
+      "chargeDeLaPreuve": "Imposition d'office : contribuable ; base conforme à l'avis de la CAR : contribuable, sinon administration ; pénalités : mauvaise foi et manoeuvres à prouver par l'administration ; preuve de l'administration par tous moyens sauf serment.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 380",
+          "page": 328
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 381",
+          "page": 328
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 382",
+          "page": 328,
+          "extraitDans": "Art. 381"
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 383",
+          "page": 328
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 386",
+          "page": 329
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 390",
+          "page": 330
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 392",
+          "page": 330
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 400",
+          "page": 331
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 401",
+          "page": 332
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 403",
+          "page": 332
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 369",
+          "page": 325
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 371",
+          "page": 326
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 373",
+          "page": 326
+        }
+      ]
+    },
+    "contentieuxDuRecouvrement": {
+      "principe": "Contestations ne portant que sur la forme de l'acte ou l'existence/le montant/l'exigibilité de la dette (pas sur l'assiette), à adresser au receveur qui exerce les poursuites.",
+      "delaiDemande": {
+        "valeur": 2,
+        "unite": "mois",
+        "pointDeDepart": "notification de l'acte (vice de forme) ou premier acte permettant d'invoquer le motif ; sous peine de nullité",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 527",
+            "page": 356
+          }
+        ]
+      },
+      "delaiReponseReceveur": {
+        "valeur": 2,
+        "unite": "mois",
+        "pointDeDepart": "dépôt de la demande",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 528",
+            "page": 356
+          }
+        ]
+      },
+      "delaiSaisineTribunal": {
+        "valeur": 2,
+        "unite": "mois",
+        "pointDeDepart": "notification de la décision du receveur ou expiration du délai de 2 mois (forclusion)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 528",
+            "page": 356
+          }
+        ]
+      },
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 525",
+          "page": 356
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 526",
+          "page": 356
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 527",
+          "page": 356
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 528",
+          "page": 356
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 529",
+          "page": 357
+        }
+      ]
+    },
+    "remisesEtTransactions": {
+      "objet": "Remises ou transactions à titre gracieux sur amendes et majorations ; remises d'impôts directs en cas de gêne ; interdiction de remise sur enregistrement, timbre, taxes sur le chiffre d'affaires.",
+      "delaiAcceptation": {
+        "valeur": 15,
+        "unite": "jours",
+        "pointDeDepart": "réception de la proposition de remise ou de modération (acceptation ou refus)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 422",
+            "page": 336
+          }
+        ]
+      },
+      "competence": "Commissaire des impôts jusqu'au seuil ci-dessous par cote, exercice ou affaire ; Commissaire général au-delà ; recours seulement sur faits nouveaux.",
+      "seuil": {
+        "valeur": 200000000,
+        "unite": "FCFA",
+        "pointDeDepart": "par cote, exercice ou affaire",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 423",
+            "page": 336
+          }
+        ]
+      },
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 419",
+          "page": 336
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 420",
+          "page": 336
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 421",
+          "page": 336
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 422",
+          "page": 336
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 423",
+          "page": 336
+        },
+        {
+          "livre": "LPF",
+          "article": "Art. 424",
+          "page": 336
+        }
+      ]
+    },
+    "abusDeDroit": {
+      "regle": "Actes dissimulant la portée véritable d'un contrat inopposables à l'administration ; si elle s'abstient de prendre l'avis de la CAR ou ne s'y range pas, elle doit prouver le bien-fondé du redressement.",
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 241",
+          "page": 290
+        }
+      ]
+    },
+    "degrevementDOffice": {
+      "delai": {
+        "valeur": 3,
+        "unite": "ans",
+        "pointDeDepart": "31 décembre de la 3e année suivant celle de la fin du délai de réclamation (ou de la notification de la décision en cas d'instance)",
+        "source": [
+          {
+            "livre": "LPF",
+            "article": "Art. 418",
+            "page": 335
+          }
+        ]
+      },
+      "articles": [
+        {
+          "livre": "LPF",
+          "article": "Art. 418",
+          "page": 335
+        }
+      ]
+    }
+  },
+  "ecartsAvecLaTrameCongolaise": [
+    "Réponse du contribuable à la notification : la trame congolaise retient 30 jours et le silence vaut acceptation. Togo : 45 jours (22 jours en contrôle ponctuel, partiel, sur pièces) à compter de la réception ; l'absence de réaction rend la notification définitive à l'égard du contribuable et l'impôt est calculé sur la base de l'administration (art. 205, 238). Ne pas coder 30 jours ni « acceptation tacite ».",
+    "Délai de l'administration : Togo = délai ÉGAL à celui du contribuable, à compter de la réception des observations (art. 205).",
+    "Avis de vérification : Togo = avis ET charte du contribuable vérifié au moins 7 jours avant l'intervention, prorogation de 8 jours maximum sur demande (art. 227) ; le contrôle inopiné est expressément prévu, examen critique différé de 8 jours (art. 211). Ne pas reprendre les délais d'avis de la trame.",
+    "Durées de vérification : la trame congolaise prévoit des plafonds différents (3 mois, 1 an, 15 jours ouvrables pour le ponctuel). Togo : 3 mois SMT, 6 mois système normal, 9 mois DGE, sous peine de nullité des impositions (art. 233) ; aucune durée trouvée pour la vérification ponctuelle ni pour la vérification personnelle d'ensemble.",
+    "Instance d'avis : Togo = Commission administrative des recours (CAR), saisie dans les 30 jours, avis en 2 mois, saisine suspensive du recouvrement, saisine de plein droit du juge en cas de carence (art. 360, 362, 363).",
+    "Visite : Togo = ordre signé du Commissaire des impôts avec officier de police judiciaire ; ordonnance judiciaire seulement pour les locaux exclusivement d'habitation (art. 223, 225). Ne pas transposer l'autorisation du juge des libertés de la trame.",
+    "Non-renouvellement : mêmes principes qu'au livre 18 (art. 230-232), plus redressement sur pièces dans le délai de reprise sans nouvelle investigation sur place (art. 231) et vérification de périodes prescrites ayant une incidence sur une période non prescrite (art. 337).",
+    "Délai de reprise : Togo = 3 ans (IR, IS, TVA, enregistrement), 1 an pour les autres impositions indirectes, +3 ans en cas d'agissements frauduleux notifiés ou de plainte (art. 316, 321, 324, 325, 334).",
+    "Juridictions : réclamation au Commissaire des impôts, puis Cour d'appel en chambre administrative (impôts directs, TVA, premier et dernier ressort) ou tribunal de première instance (enregistrement, timbre) (art. 380). Ne pas transposer les juridictions congolaises.",
+    "Réclamation : Togo = au plus tard le 31 décembre de l'année suivant celle de l'AMR (art. 374) ; décision du Commissaire en 2 mois (+1) ; silence = accès direct au tribunal (art. 367).",
+    "Taxation d'office : Togo prévoit une mise en demeure de 15 jours (art. 244) et 15 jours d'observations sur la base notifiée (art. 247)."
+  ],
+  "nonTrouveDansLeCorpus": [
+    "Durée maximale de la vérification ponctuelle, du contrôle au bureau et de la vérification approfondie de situation fiscale personnelle d'ensemble (art. 233 ne vise que la vérification sur place des livres et documents comptables).",
+    "Contenu de la charte du contribuable vérifié (seulement mentionnée à l'art. 227).",
+    "Définition légale distincte du « contrôle partiel » et du « contrôle sur pièces » (cités aux art. 205 et 231 mais non définis ; contrôle au bureau défini à l'art. 210).",
+    "Délai maximum entre la fin de la vérification et l'envoi de la notification de redressement ; délai pour tenir le débat de clôture.",
+    "Sanction expresse (nullité) du non-respect du délai de 7 jours de l'avis ou de l'absence de charte (seule la mention du conseil est sanctionnée de nullité, art. 227).",
+    "Base de calcul en jours calendaires ou ouvrables des délais en jours (non précisée).",
+    "Activité occulte / dissimulée comme cas de prolongation de prescription : aucune occurrence ; seul l'art. 334 (agissements frauduleux, +3 ans) a été trouvé.",
+    "Délai de pourvoi en cassation en matière d'enregistrement ; délai d'appel (la Cour d'appel statue en premier et dernier ressort pour les impôts directs/TVA).",
+    "Décret fixant la nature et les conditions des garanties du sursis de paiement (art. 524) ; arrêté sur la CAR (art. 357) ; arrêtés sur les tests informatiques (art. 216) : non reproduits.",
+    "Conséquence expresse d'un défaut de réponse de l'administration après les observations du contribuable (acceptation tacite non prévue).",
+    "Pénalités de contrôle (art. 113-117) : non détaillées dans cette amorce (voir procedures-fiscales-togo.json)."
+  ],
+  "alertes": [
+    "Plusieurs articles sont logés dans le texte extrait de l'article précédent (découpage automatique défaillant) : Art. 356 dans le record Art. 355 ; Art. 360 dans Art. 359 ; Art. 362 dans Art. 361 ; Art. 367 dans Art. 366 ; Art. 382 dans Art. 381 ; Art. 238-bis dans Art. 238 ; Art. 58 bis dans Art. 58. La clé extraitDans des références le signale ; la page citée est celle du record hôte (pour Art. 356, la page imprimée est 320).",
+    "Art. 206 : abrogé. Les numéros de page imprimés (« 213 », « 214 », …) et des notes de bas de page de lois de finances sont insérés dans le corps du texte par l'extraction.",
+    "Art. 205 : le texte mêle plusieurs règles (délai du contribuable, délai de l'administration, droit d'être entendu, caractère définitif) sans alinéas ; lecture à valider, notamment la phrase « Ces faits sont interruptifs des délais de réponse de l'Administration fiscale ».",
+    "Art. 233 : la durée est exprimée par régime (SMT, normal, DGE) ; le point de départ du délai n'est pas écrit — à valider.",
+    "Art. 360 : ponctuation ambiguë ; lecture retenue : 15 jours d'avis de convocation, 10 jours pour consulter le rapport, 30 jours pour saisir la CAR.",
+    "Art. 380 mentionne l'ordonnance n° 78-35 du 7 septembre 1978 sur l'organisation judiciaire (non reproduite) : la compétence des Cours d'appel est à vérifier au regard de l'organisation judiciaire en vigueur.",
+    "Art. 416 : « 3 ans » est la durée maximale des intérêts moratoires, pas un délai de procédure.",
+    "Base légale : texte consolidé jusqu'à la LF 2023 (renvois en bas de page aux LF 2020, 2021, 2023) ; vérifier toute LF ultérieure."
+  ]
+}

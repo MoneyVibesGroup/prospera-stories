@@ -83,7 +83,16 @@
 | F9 | ⬜ **Code CIMA** (Conférence Interafricaine des Marchés d'Assurances) | Plan comptable assurance + provisions techniques + cadre de la **TCA** (taux 20/3/6 % déjà extraits) |
 | F10 | ⬜ **Liasse / états réglementaires assurance (CIMA)** | Gabarit de sortie du vertical assurance |
 
-### F.4 Autres sectoriels (selon dossiers du cabinet)
+### F.4 Vertical ONG et associations (SYCEBNL) — ajouté le 2026-11-23
+Cadrage : `../cadrage-ong-sycebnl-2026-11-23.md` ; amorce tirée d'un cours : `sycebnl-amorce.json`.
+| # | Document | Levier |
+|---|---|---|
+| F11 | ✅ **Acte uniforme SYCEBNL + annexe** — JO OHADA numéro spécial du 22/02/2023 (`SYSCEBNL.pdf`), + guide d'application (37 p.) + projet de 2021 | **Obtenu le 2026-11-23** et extrait : `acte-sycebnl-articles.json`, `etats-sycebnl-associations.json`, `etats-sycebnl-projets-smt.json`, `plan-comptable-sycebnl.json`, `sycebnl-amorce.json` |
+| F12 | 🔵 **États financiers réels d'une ONG ou d'un projet financé** | Tester la table de passage, comme la balance Sage d'ETS RELAXED pour le SYSCOHADA |
+| F13 | 🔵 **Rapport financier type exigé par un bailleur** (UE, AFD, USAID, Banque mondiale…) | Cadrer le rapport d'emploi des fonds par bailleur, le vrai besoin des ONG |
+| F14 | ⬜ **Régime fiscal des associations et ONG au Togo** (CGI, conventions d'établissement) | Paquet fiscal propre aux EBNL |
+
+### F.5 Autres sectoriels (selon dossiers du cabinet)
 - ⬜ **Code minier** / **Code pétrolier** / **Code de l'électricité** togolais → régimes fiscaux dérogatoires.
 - ⬜ **Annexes tarifaires enregistrement & timbre** (détail des tarifs, complément du corpus).
 
@@ -125,7 +134,7 @@ On réutilise **le même pipeline d'extraction** que celui appliqué au Togo. Le
 | # | Document | Rôle |
 |---|---|---|
 | H1 | ⬜ **Acte uniforme OHADA relatif au droit comptable (AUDCIF / SYSCOHADA révisé 2017)** | Plan de comptes + états **Système Normal & SMT** — socle comptable de **tous** les pays OHADA |
-| H2 | ⬜ **Acte uniforme sur les sociétés commerciales et le GIE (AUSCGIE)** | Formes juridiques, structuration société (parser Statuts) |
+| H2 | ⬜ **Acte uniforme sur les sociétés commerciales et le GIE (AUSCGIE)** | Formes juridiques, structuration société (parser Statuts) ; **recouper les articles 150-156, 350, 371-373, 438-442, 664-669** repris dans `controles-balance-ohada.json` depuis le livre 22 du pack (2026-11-23) ; seuils de désignation d'un CAC en SARL et SAS (absents du pack) |
 | H3 | ⬜ **Actes uniformes complémentaires** (recouvrement & voies d'exécution, sûretés, procédures collectives) | Selon modules (recouvrement, garanties) |
 
 ### H.2 Matrice — documents à importer **par pays OHADA (les 17)**
