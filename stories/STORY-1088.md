@@ -1,6 +1,7 @@
 # STORY-1088 : L'original papier, et retrouver une pièce — où dort chaque original, et une pièce en une minute
 
-Status: in-progress — **écrite le 2026-11-24** par la session du groupe C juste avant de la coder (lot 6, n° 3 de C),
+Status: done — **livrée le 2026-11-24** : document-service **#31** (`9d0cfd3` sur `dev`) ; voir « Livraison ».
+Écrite le 2026-11-24 par la session du groupe C juste avant de la coder (lot 6, n° 3 de C),
 depuis le bloc de `epics-services-cabinet-2026-11-18.md` (EPIC-267, lot G1), le PRD des services du cabinet (FR-10,
 FR-11 ; reprend FR-170, FR-171 du PRD assurance) et la salle des cabinets du 19/11 (V9).
 
@@ -86,6 +87,37 @@ l'exercice ou de la mission). **Aucune destruction** : aucune route, aucune mét
 - Dépendances neuves : `pdf-lib` et `qrcode` (pur JavaScript ; le code QR est dessiné en carrés dans le PDF).
 - Manifeste `ged` **1.2.0** : les routes de lecture neuves (`receptions`, `boites`, `sorties`, `recolements`,
   bordereaux, étiquettes, `recherche`). **→ B** : copie au catalogue après la fusion.
+
+### Livraison (2026-11-24)
+
+- **Code** : document-service #31, `9d0cfd3` sur `dev` : `src/modules/ged/cabinet/physique*.ts`, `depot-physique.ts`,
+  `pdf-physique.ts` ; dépendances `pdf-lib` 1.17.1 et `qrcode` 1.5.4 ; manifeste `ged` **1.2.0**
+  (`prospera-stories@4d244e4`, #814). Codée par la sous-session de 1087.
+- **Preuves** : unitaires sous Node 24 **1122** (102 suites) ; e2e de la GED **17/17** ; mutation **6/6** (cote unique,
+  tolérance du retard, écart `MANQUANTE`, écart `SORTIE_NON_RENTREE`, texte sensible jamais cherché, restitution d'une
+  boîte sortie refusée) ; les PDF commencent par `%PDF-` et portent la cote, le QR porte `{ boite, cote }` ; gate `grp-c` :
+  `document-service` `healthy`, routes papier en 401 sans jeton, index uniques créés (`un_numero_de_reception`,
+  `une_cote_par_cabinet`, `un_original_par_piece`, `un_numero_de_restitution`).
+- **Variable neuve** : `GED_RETARD_TOLERANCE_JOURS` (0 par défaut).
+
+### Écarts au contrat, décidés au code
+
+- **D-1088-5** : une sixième collection, `ged_originaux` (pièce → boîte, emplacement), porte le lien entre la copie et
+  l'original : il se déplace sans réécrire la pièce.
+- **D-1088-6** : **pas d'index texte** : le texte lu des pièces du cabinet est chiffré au repos (1087, AC-6) ; la
+  recherche libre le déchiffre en mémoire, pour 500 pièces au plus par requête, et ne lit jamais celui d'une nature
+  sensible. Une recherche sur un très gros fonds demandera un index chiffrable (nommé pour plus tard).
+- **D-1088-7** : `conservation.jusquau` prend la fin d'exercice au **31/12 de l'année de l'exercice** (aucune date
+  d'exercice n'est stockée dans la GED) et la fin de mission à la fin de la période du fonds ; une pièce annuelle sans
+  exercice n'a pas de `jusquau`.
+- **D-1088-8** : sortir une pièce exige que son original soit relié à la boîte (409 `PIECE_HORS_BOITE`) ; la boîte
+  reste `EN_PLACE`, mais elle ne sort pas entière et ne se restitue pas tant que la pièce est dehors.
+- **D-1088-9** : un récolement n'attend pas les boîtes `RESTITUEE` ; `GET /sorties` rend les sorties en cours, en
+  retard ou non, dans la portée des fonds.
+- **D-1088-10** : l'étiquette d'une boîte sans cote rend 409 `COTE_ABSENTE` ; le texte des PDF est en WinAnsi (un
+  caractère hors Latin-1 devient `?`).
+- **D-1088-11** : la création d'une réception et de ses boîtes n'est pas transactionnelle, et deux sorties concurrentes
+  d'une même pièce ne sont pas verrouillées (la sortie d'une boîte entière l'est). Nommé pour un lot suivant.
 
 ### Décisions prises au contrat (contestables)
 
