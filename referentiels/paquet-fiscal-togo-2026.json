@@ -38,7 +38,42 @@
       { "de": 20000001, "a": null, "taux": 0.35, "libelle": "plus de 20 000 000" }
     ],
     "correctionAmorce": "L'amorce indiquait a tort une tranche haute a 30% : le maximum reel est 35% au-dela de 20 000 000 FCFA.",
-    "source": "Art. 74 CGI (barème IRPP). S'applique aussi aux rémunérations de gérants/associés Art. 75 et pensions/rentes Art. 76."
+    "source": "Art. 74 CGI (barème IRPP). S'applique aussi aux rémunérations de gérants/associés Art. 75 et pensions/rentes Art. 76.",
+    "traitementsSalaires": {
+      "source": "Art. 26, 72, 73 et 74 CGI (OTR 2025 ; LF 2023, loi n° 2022-022), relus dans le texte le 2026-11-24",
+      "deductionsDuBrut": [
+        { "code": "retraiteObligatoire", "libelle": "retenues de l'employeur pour pensions ou retraites d'un regime obligatoire (CNSS pensions, part salariale 4 %)", "limite": { "tauxDuBrut": 0.06 }, "article": "Art. 26, 1°" },
+        { "code": "cotisationsSocialesEtMaladie", "libelle": "cotisations salariales aux assurances sociales et assurances maladie obligatoires (dont AMU, part salariale 5 %)", "limite": null, "article": "Art. 26, 2°" },
+        { "code": "retenuesAvantagesEnNature", "libelle": "retenues de l'employeur en representation de tout ou partie des avantages en nature concedes", "limite": null, "article": "Art. 26, 3°" }
+      ],
+      "deductionForfaitaire": {
+        "taux": 0.28,
+        "fractionAnnuelleMax": 10000000,
+        "base": "revenu brut apres defalcation des retenues et cotisations des 1°, 2° et 3° de l'article 26",
+        "article": "Art. 26, dernier alinea"
+      },
+      "autresDeductions": {
+        "articles": "Art. 26, 4° a 9° (frais non couverts, interets d'emprunt du logement principal, interets d'apport en capital, rentes et pensions alimentaires, retraite volontaire dans la limite de 6 %, primes d'assurance vie dans la limite de 200 000 + 30 000 par enfant, 6 enfants au plus)",
+        "statut": "declarees, a saisir sur justificatif ; leur cumul avec la deduction forfaitaire de 28 % est a confirmer par un fiscaliste avant tout calcul"
+      },
+      "chargesDeFamille": {
+        "montantParPersonneParMois": 10000,
+        "personnesMax": 6,
+        "appreciation": "situation au 1er janvier de l'annee d'imposition ; une augmentation en cours d'annee est prise en compte dans la declaration qui suit",
+        "personnesACharge": "conjoint(s) sans ressources ; enfants de moins de 21 ans ou infirmes ; jusqu'a 25 ans en etudes ou apprentissage ; enfants recueillis ; ascendants ou collateraux invalides vivant sous le toit du contribuable",
+        "champ": "revenus d'emplois de l'article 25 seulement",
+        "article": "Art. 72 et 73"
+      },
+      "arrondiBase": "revenu net annuel imposable arrondi au millier de francs inferieur (Art. 74)",
+      "ordreDeCalcul": [
+        "1. brut imposable (Art. 25)",
+        "2. moins les retenues des 1° (retraite, dans la limite de 6 % du brut), 2° (cotisations sociales et maladie, dont AMU) et 3° de l'article 26",
+        "3. moins 28 % du resultat, sur la fraction annuelle n'excedant pas 10 000 000",
+        "4. moins les charges de famille : 10 000 par personne et par mois, 6 personnes au plus (Art. 72-73)",
+        "5. arrondi au millier inferieur, puis bareme de l'article 74",
+        "6. impot arrondi a la dizaine inferieure"
+      ]
+    }
   },
   "minimumForfaitairePerception": {
     "code": "MFP",
@@ -298,10 +333,17 @@
       "tauxEmployeur": 0.05,
       "tauxSalarie": 0.05,
       "tauxTotal": 0.10,
-      "note": "cotisation distincte des trois branches historiques de la CNSS"
+      "note": "cotisation distincte des trois branches historiques de la CNSS",
+      "collecte": {
+        "source": "decret n° 2023-097/PR",
+        "CNSS": "travailleurs salaries relevant du Code du travail (prive et parapublic), titulaires de pensions du regime general, travailleurs independants, ministres de culte, secteurs informel et agricole",
+        "INAM": "fonctionnaires, agents de l'Etat, des collectivites territoriales et des etablissements publics, membres des institutions publiques, pensionnes civils et militaires",
+        "versement": "aupres de la CNSS au plus tard le 15 du mois suivant"
+      },
+      "deductibiliteIRPP": "la part salariale (5 %) se deduit du brut avant l'IRPP (Art. 26, 2° CGI) : voir irpp.traitementsSalaires"
     },
     "deductibiliteFiscale": "part patronale deductible du resultat fiscal comme charge de personnel",
-    "aCompleter": "relecture experte des textes cites (loi 2011-006, decret 2012-038/PR, arrete 3790/MFPTDS/DGT, decret 2023-096/PR) ; organisme collecteur de l'AMU et sort de la part salariale de l'AMU dans la base de l'IRPP ; affiliation et cotisations des gerants"
+    "aCompleter": "relecture experte des textes cites (loi 2011-006, decret 2012-038/PR, arrete 3790/MFPTDS/DGT, decret 2023-096/PR) ; texte du decret n° 2023-097/PR (collecte de l'AMU) ; affiliation et cotisations des gerants"
   },
   "autresImpotsTaxes": {
     "presentsDansCGI": [
