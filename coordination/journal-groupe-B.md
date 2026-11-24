@@ -120,7 +120,25 @@
     emprunts − remboursements, sans plafond ; `DETTES_FINANCIERES_NEGATIVES` y est né), la liasse à **STORY-065**
     (`consulter` ne lisait la version que d'un jeu `VALIDE`, `cb8aa33` ; recopié par STORY-449). Commits
     `MNV-483(bilan): …` et `MNV-065(bilan): …`, une PR de code par ticket, une PR de docs qui ferme les deux.
-    Contrat annoncé avant la fusion (« ⚠ Contrats »). En cours.
+    Contrat annoncé avant la fusion (« ⚠ Contrats »). **Servie**, ci-dessous.
+  8. ~~Correctifs de STORY-483 et de STORY-065~~ (tickets de A, placés **avant 1103** ; aucun identifiant neuf) :
+     **bilan #184** (`d98b7c4` sur `dev`, branche `MNV-483-remboursements`) et **bilan #185** (`7b53ff5`, branche
+     `MNV-065-rouverte`) ; annonce avant la fusion : stories #802. Deux PR de code, une par ticket : deux défauts
+     indépendants, deux stories d'origine, et la seconde se relit sans la première. Tickets fermés.
+     - **Projection (STORY-483, D-483-8 → 10)** : le remboursement retenu vaut `min(saisi, encours restant)` (base +
+       emprunts nouveaux − déjà remboursé), et la réponse le dit (`avertissements`, `REMBOURSEMENT_PLAFONNE` avec
+       l'exercice et l'excédent non remboursé) ; c'est le flux qui est plafonné (équilibre, identité de somme constante
+       et articulation mensuelle intacts). Pas de plafond quand l'encours n'est pas connu (base non ancrée, ventilation
+       indéterminée) ni sur le chemin du dossier de financement (échéanciers de 1084 ; leur échéancier ne change pas).
+       Jeu du ticket : dette 100 000, 0, 0 ; `DETTES_FINANCIERES_NEGATIVES` ne sort plus. Comparaison
+       (`REMBOURSEMENTS_PLAFONNES`), export (métadonnée), modèle 1.13.0 → **1.14.0**.
+     - **Liasse (STORY-065, D-065-1 → 3)** : `version` = la dernière version figée sur `GET …/etats/{id}`,
+       `recalculer` et `complements` (même source que `rouvrir`) ; la liste la porte aussi (une agrégation) ;
+       l'analyse et la consultation gardent la version **servie** (lue sur `origine`). Test valider → rouvrir → lire.
+     - Node 25 : projection, spec du ticket 14/14, e2e 717/717 et export 14/14, mutations 11/11 ; liasse, e2e
+       valider → rouvrir → lire, mutations 8/8 ; suite unitaire complète : les 15 rouges connues (binding, chemins
+       Windows) ; garde des noms de schéma vert ; OpenAPI 579 → 581 schémas, 98 chemins identiques.
+     **Sans Docker** (aucun module, dépendance ni Dockerfile ne change) : verrou non pris.
   3. ~~Correctif de STORY-1084~~ (ticket de A pour FE-140, placé **avant 1112** par la session de groupe, §1.1 ; aucun
      identifiant neuf) : **bilan #183** (`2364abc` sur `dev`, branche `MNV-1084-schema`) ; annonce avant la fusion :
      stories #783. La classe de la dette devient `ValeurIndicateurDetteDto` (D-1084-16) ; **garde neuf** sur le
@@ -747,6 +765,15 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-24, correctifs de STORY-483 et de STORY-065) : régénérer `bilan.ts`, puis retirer le contournement de
+  FE-034** — ouverte. `npm run gen:api -- bilan` dans le front du cabinet. (1) **FE-034** :
+  `versionQuiFaitFoi` (`src/features/bilan/lib/validation.ts`) peut lire `jeu.version` seul — `GET …/etats/{id}` rend
+  désormais la dernière version figée sur une liasse rouverte — et retirer son repli sur la plus haute de
+  `GET …/versions` ; la liste `GET …/etats` porte aussi `version` (« Rouverte — la version n reste la seule qui fasse
+  foi » dès l'annuaire, et pas de « Supprimer » sur un brouillon qui a des versions). (2) **Prévisionnel** : champ
+  facultatif `avertissements` (`AvertissementProjectionDto`) sur la projection annuelle et mensuelle, `message`
+  affichable tel quel ; la comparaison peut porter `REMBOURSEMENTS_PLAFONNES` ; `modeleVersion` vaut `1.14.0`.
+
 - **→ A (2026-11-24, correctif de STORY-1084) : régénérer `bilan.ts` et retirer `ValeurIndicateurDette` de FE-140** —
   ouverte. bilan #183 (`2364abc` sur `dev`) : `npm run gen:api -- bilan` dans le front du cabinet ;
   `IndicateurDetteDto.valeurs` y devient `ValeurIndicateurDetteDto[]` (`rang`, `exercice`, `statut`, `valeur`,
@@ -1071,6 +1098,10 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
+- **← A (24/11) : servis par bilan #184 et #185** (`d98b7c4` et `7b53ff5` sur `dev` ; correctifs de STORY-483 et de
+  STORY-065, annonce stories #802) — les deux résultats faux de `bilan-service` visibles à la démo du 15/01 :
+  `TICKET-BACKEND-projection-remboursements-non-plafonnes.md` (remboursements plafonnés à l'encours, avertissement
+  nommé) et `TICKET-BACKEND-liasse-rouverte-version-null.md` (version de la liasse rouverte), **fermés**. Voir « → A ».
 - **← D (24/11) : (1) et (2) servis par auth #49, catalogue #71 ; (3) placé après le lot 6** (STORY-1066 de D ;
   suite de STORY-979, annonce : stories #789). (1) `facturation:avoir:valider` au catalogue de tenant d'auth, hors du
   jeton, au **`DIST_DAF` seul**, libellé « Valider un avoir au-delà du seuil » (`b49d8ab` sur `dev`) ; servi par
@@ -1286,7 +1317,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 ## ⚠ Contrats
 
 - **2026-11-24, correctifs de STORY-483 et de STORY-065 (lot 6, tickets de A avant la démo du 15/01) — annoncés
-  AVANT la fusion du code** (`prospera-bilan-service`, branches `MNV-483-remboursements` et `MNV-065-rouverte` ;
+  AVANT la fusion du code** — **fusionnés** : bilan #184 (`d98b7c4`) et #185 (`7b53ff5`) ; document OpenAPI 579 →
+  581 schémas (deux ajoutés, aucun retiré), 98 chemins identiques, aucun champ requis ajouté (`prospera-bilan-service`, branches `MNV-483-remboursements` et `MNV-065-rouverte` ;
   tickets `TICKET-BACKEND-projection-remboursements-non-plafonnes.md` et `TICKET-BACKEND-liasse-rouverte-version-null.md` ;
   fiches `stories/STORY-483.md` et `stories/STORY-065.md`, « Correctif du 2026-11-24 »). **Ajouts facultatifs
   seulement** : aucune route, aucun champ existant ne change de nom ni de type, aucun appelant actuel n'est cassé.
@@ -2701,6 +2733,20 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Le fixture non typé de `test/bilan-export.e2e-spec.ts` a mordu une deuxième fois** (correctif de STORY-483) : son
+  commentaire « angle mort connu » le dit depuis STORY-482 — `ProjectionService` y est mocké par un littéral, donc un
+  champ que l'export lit en plus (`avertissements`) passe `tsc` et rend **500** à l'exécution. Tout champ neuf lu par
+  l'export ⇒ l'ajouter à ce littéral, et lancer cette e2e (les e2e de projection ne la couvrent pas).
+- **Un worktree de `bilan-service` sort ses 75 JSON en CRLF** : les référentiels refusent leur empreinte
+  (`ReferentielIntegrityError`) et 64 tests rougissent sans rapport avec le code. Les supprimer puis
+  `git -c core.autocrlf=false checkout -- <fichiers>` ; le `node_modules` se partage par une jonction
+  (`New-Item -ItemType Junction`, depuis PowerShell : `mklink` par Git Bash refuse l'option).
+- **Un test qui affirme « le snapshot n'est même pas lu »** (STORY-449, AC-3) gardait le défaut de STORY-065 en même
+  temps que son intention (la liasse d'un brouillon est calculée) : il a été réécrit pour garder l'intention seule.
+- **Changer le sens d'un champ du service, c'est relire tous ses lecteurs** : `consulter()` a trois appelants hors du
+  contrôleur ; l'analyse et la consultation lisaient `version` comme « version servie » (correct par accident, tant
+  que le défaut existait). Ils lisent désormais `origine` (D-065-3).
 
 - **Une doublure « fidèle à l'octet » sans Docker** (STORY-1114) : les corps de l'amont se produisent par **son propre
   code** (ts-node sur le checkout d'auth à `origin/dev`, `transpileOnly`, son `tsconfig` : même émission des champs ;

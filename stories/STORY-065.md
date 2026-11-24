@@ -133,3 +133,35 @@ Le snapshot fige la liasse **et** ses entrées (soldes + référentiel + checksu
 - **Isolation** : versions d'un jeu inexistant / autre org → **404**.
 
 **Actual Effort :** ~5 pts (conforme).
+
+---
+
+## Correctif du 2026-11-24 (ticket de A, FE-034, démo du 15/01)
+
+`tickets/TICKET-BACKEND-liasse-rouverte-version-null.md` : après `POST …/etats/{id}/rouvrir`, la réponse porte la
+dernière version figée, mais `GET …/etats/{id}` sur le même jeu rendait `version: null`. L'écran de FE-034 y lisait
+« aucune version figée » (« Brouillon » au lieu de « Rouverte — la version 1 reste la seule qui fasse foi ») et
+proposait de supprimer un brouillon qui avait des versions. Le défaut est né ici (`cb8aa33` : `consulter` ne lisait le
+dernier snapshot que d'un jeu `VALIDE`), STORY-449 l'a recopié dans `liasseServie` et l'a nommé sans le ficher.
+Correctif de cette story, sans identifiant neuf : **bilan #185** (`7b53ff5` sur `dev`, branche
+`MNV-065-rouverte`) ; annonce avant la fusion : stories #802. Groupe B (bilan est à B depuis le lot 4).
+
+- **D-065-1 — `version` est la dernière version figée sur toutes les routes qui rendent un jeu**, comme le DTO le
+  documente depuis cette story (« null si jamais validé ») et comme `rouvrir` le rend : `GET …/etats/{id}`,
+  `POST …/recalculer` et `PUT …/complements` lisaient `null` sur tout brouillon, même rouvert. Même source que
+  `rouvrir` (`snapshots.dernier`), donc la réouverture et les lectures qui la suivent disent le même numéro. `null` ne
+  se lit plus que « jamais validé ». `origine` reste ce qui dit d'où sort la liasse (`CALCUL` sur un brouillon rouvert).
+- **D-065-2 — La liste dit la même chose** : `GET …/etats` gagne `version` (facultatif, nullable, même sens), lu en
+  **une** agrégation pour toute la liste (`dernieresVersionsPar`, celle de STORY-465), jamais une lecture par jeu.
+  `GET …/versions` était déjà juste : sa plus haute version est ce `version`.
+- **D-065-3 — Les deux autres lecteurs de `consulter` gardent leur sens** : `source.version` de l'analyse (« la
+  version figée lue ; null pour un brouillon ») et `vue.version` de la consultation (la version affichée) se lisaient
+  sur `version` ; ils se lisent désormais sur `origine` (`SNAPSHOT` ⇒ la version, sinon `null`), sans quoi un
+  brouillon rouvert aurait été annoncé comme la version 1 avec des chiffres calculés. L'export le faisait déjà
+  (STORY-449). Contrat de ces deux routes inchangé.
+- **Preuves** (Node 25, sans Docker : aucun module, dépendance ni Dockerfile ne change) : e2e valider → rouvrir → lire (rouvrir, consulter, recalculer, la liste et l'historique : version 1 ; avant la
+  validation : `null` partout) ; `jeu-etats`, `consultation`, `analyse` 30 suites (rouges connues seules) ; suite
+  unitaire complète 348 suites, les 15 rouges connues ; e2e `bilan-jeu-etats`, `bilan-consultation`, `openapi-contract`,
+  `bilan-export` verts (e2e complète sous charge : 40/44, les quatre rouges préexistantes ou vertes seules) ; document
+  OpenAPI : `JeuEtatsSommaireDto.version` ajouté, 581 schémas, 98 chemins identiques ; **mutations 8/8** rouges sur
+  l'assertion (consultation, recalcul, compléments, liste, DTO de liste, analyse, consultation, e2e) ; `tsc`, lint.
