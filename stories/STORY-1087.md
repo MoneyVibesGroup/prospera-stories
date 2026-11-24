@@ -1,6 +1,7 @@
 # STORY-1087 : La GED s'ouvre au cabinet — le fonds d'archives d'un client, numérisé par lots, contrôlé et versé
 
-Status: in-progress — **écrite le 2026-11-24** par la session du groupe C juste avant de la coder (lot 6,
+Status: done — **livrée le 2026-11-24** : document-service **#30** (`1db0a8f` sur `dev`) ; voir « Livraison ».
+Écrite le 2026-11-24 par la session du groupe C juste avant de la coder (lot 6,
 `PLAN-LOT-6-2026-11-23.md` §4, n° 2 de C), depuis le bloc de `epics-services-cabinet-2026-11-18.md` (EPIC-267, lot
 G1) et le PRD des services du cabinet (FR-7 → FR-9, §2.3, D-SC-4 → 6).
 
@@ -144,6 +145,43 @@ Sources : [mémoire « Procédé d'organisation du dossier client »](https://ww
 [rapport de l'Assemblée nationale sur son amendement](https://assemblee-nationale.tg/wp-content/uploads/2023/07/Transaction-electro-Rapport.pdf),
 [valeur probante, NF Z42-013 et NF Z42-026](https://www.solutions-numeriques.com/dossiers/larchivage-a-vocation-probatoire),
 [restitution en fin de mission](https://lawinsider.com/fr/contracts/aKNIuiKl7mS).
+
+### Livraison (2026-11-24)
+
+- **Code** : document-service (`prospera-ocr-service`) #30, `1db0a8f` sur `dev` : `src/modules/ged/cabinet/` (contrôleur,
+  service, dépôts, droits, dossiers clients, pièces déposées), `ged-ponts/`, `parametres/ged-cabinet-2026.1.json`
+  (empreinte `ba14fe40…`), manifeste `ged` **1.1.0** (copie de `prospera-stories@a86e461`, #773).
+- **Preuves** : unitaires sous Node 24 **1100** (101 suites) ; e2e de la GED **16/16** (assurance inchangée, lecture,
+  cabinet : `test/ged-cabinet.e2e-spec.ts`) ; mutation **8/8** (portée, sensible, chiffrement, domaine par défaut,
+  droit exigé, quota non bloquant, isolation assurance et cabinet, unicité du code) ; gate `grp-c` : `document-service`
+  `healthy` avec Mongo, Kafka, MinIO, Redis ; 20 chemins du cabinet à l'OpenAPI, tous en 401 sans jeton ; index créés
+  (`un_numero_d_archivage_cabinet`, `un_code_de_fonds_par_cabinet`, `une_nature_par_code`, `pieces_du_fonds`).
+- **Variables neuves** : `GED_CLE_CABINET` (32 octets en base64 ; sans elle, 503 au cabinet), `GED_QUOTA_CABINET_OCTETS`
+  (20 Go), `AUTH_SERVICE_URL`, `AUTH_SERVICE_DELAI_MS`.
+
+### Écarts au contrat, décidés au code
+
+- **D-1087-6** : le circuit du cabinet a **ses propres routes** sous `/api/v1/ged/cabinet` (pièces, lots, indexation,
+  contrôle, versement, scellé, vérification, lecture, contenu) au lieu des routes de l'assurance avec `domaine:
+  CABINET`. Les routes de l'assurance restent à `roleExerce` et ne voient que les sinistres (une pièce ou un lot du
+  cabinet y rend 404). C'est la garde la plus sûre de l'AC-1.
+- **D-1087-7** : les fonds du cabinet ont leur collection, `ged_fonds_cabinet` : l'index unique
+  `un_versement_par_dossier` de `ged_fonds` interdirait plusieurs fonds par client. Le code d'un fonds est réservé dans
+  `ged_codes_de_fonds` (unique par cabinet, course comprise).
+- **D-1087-8** : les pièces sensibles sont **omises** des listes (pièces du fonds, suivi d'un lot, bordereau, avec le
+  compteur `lignesMasquees`) pour qui n'a pas `ged:sensible:consulter`, et rendent 404 en lecture directe ; le
+  bordereau archivé et le scellé restent complets.
+- **D-1087-9** : une pièce reprise naît en nature `AUTRE`, à indexer ensuite ; une référence inconnue ou d'un autre
+  dossier rend 404 `REFERENCE_INCONNUE` sans rien copier. Les pièces déposées n'ayant pas d'empreinte à l'origine, la
+  liste `pieces-du-dossier` relit leurs octets pour la calculer (500 pièces au plus).
+- **D-1087-10** : `POST …/pieces/{id}/indexation` accepte aussi la `nature` (corriger la nature d'une pièce reçue).
+- **D-1087-11** : formats et taille de l'assurance (JPEG, PNG, WEBP, PDF ; 8 Mo). La lecture du texte se lit
+  (`GET …/lecture`) ; ni relance ni saisie à la main au cabinet pour l'instant.
+- **D-1087-12** : les droits sont lus à chaque requête, sans cache. Un fonds s'ouvre sur un dossier actif ; un dépôt dans
+  un dossier archivé ensuite n'est pas bloqué.
+- **D-1087-13** : `PIECE_MEDICALE` est rangée en `ANNUEL/SOCIAL`, `PIECE_IDENTITE` et `AUTRE` en `PERMANENT/JURIDIQUE`.
+- **D-1087-14** : sans `kyc-service`, un MinIO neuf n'a pas le bucket `kyc-documents` et la santé du service tombe
+  (constaté au gate, préexistant) : la pile de recette doit le créer.
 
 ### Décisions prises au contrat (contestables)
 

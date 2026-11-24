@@ -1041,6 +1041,8 @@ reserved_ranges:
       Porteurs proposés : bilan-service, prospera-cabinet-service, prospera-paie-service → A ; document-service → C.
       Dépôts prospera-cabinet-service et prospera-paie-service à créer par l utilisateur avant M1 et P1. Fiches
       écrites juste avant de coder. NON SLOTTÉES.
+      ✅ 2026-11-24 : STORY-1087 DONE (groupe C, lot 6) — document-service #30 (`1db0a8f` sur dev), fiche #768 et #771,
+      manifeste ged 1.1.0 (#773) ; unitaires Node 24 1100, e2e GED 16/16, gate grp-c vert ; D-1087-1 → 14 dans la fiche.
   - range: "STORY-1083"
     status: "RÉSERVÉ"
     owner: "Groupe B, lot 4 (reçue de A) — le dossier de financement existe : module financement (M49) dans bilan-service, garde FINANCEMENT_NOT_ENTITLED par l état publié, droits financement:dossier:preparer/valider/consulter lus par /moi/droits et attribués dans auth (CAB_ASSOCIE les trois, CAB_COLLABORATEUR préparer et consulter), états de FR-1, versions d un dossier remis, piste d audit (bilan, auth)"
