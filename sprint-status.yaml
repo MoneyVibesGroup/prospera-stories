@@ -590,7 +590,11 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1068.md"
     reserved_on: "2026-11-24"
     note: >
-      En cours le 2026-11-24 — annonce « ⚠ Contrats » avant le code (cette PR) ; prospera-sinistres-service#29 ouverte.
+      🏁 DONE le 2026-11-24 — prospera-sinistres-service#29 (dev 2a8f9f1, ddcf52a) ; annonce « ⚠ Contrats » avant le code
+      (docs #796, main 53f9e2a ; aucun schéma ni manifeste ne change). Consommateur sinistres-service.provision ; read-model
+      sinistres_provisions_en_vigueur (plus haute séquence) ; GET …/dossiers/{id} provision et montants.provision
+      (EN_VIGUEUR, SANS_MOUVEMENT, NON_INSTALLE, NON_LISIBLE) ; assurance voisin suivi. Node 24 : 1328 unitaires sur
+      MongoDB réel, 33 e2e ; mutations 12/12 et 4/4. Pile grp-d (sinistres + assurance) 27/27, rejouée depuis origin/dev.
       Lot D, n° 4 du lot 6, première story d'assurance de D (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-215 ; FR-76, FR-188 ;
       reste de C, D-1016-10 ; passation de C constatée, D-L6-3). « Fini quand » fixé par la fiche (D-1068-1). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
