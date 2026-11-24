@@ -1,7 +1,8 @@
 # STORY-1099 : La mémoire des choix dans les cahiers — la pièce suivante du même fournisseur reprend la catégorie déjà choisie
 
-Status: in-progress — **créée le 2026-11-18** à la demande de l'utilisateur. **Prise le 2026-11-23** par la session
-du groupe C (après STORY-1097 et 1098, livrées), contrat annoncé ci-dessous avant le code.
+Status: done — **créée le 2026-11-18** à la demande de l'utilisateur. **Prise le 2026-11-23** par la session du
+groupe C, contrat annoncé avant le code (#758). **Livrée le 2026-11-24** : balance-service **#160** (`0ff2402` sur
+`dev`). Voir « Livraison » ci-dessous.
 
 **Service :** `prospera-balance-service` (cahiers, tenu par B au lot 4) · **Points :** 5
 **Pendant pour les écritures :** STORY-1098 · **Écran :** FE-150
@@ -60,6 +61,30 @@ Refus : 404 `MEMOIRE_INTROUVABLE` (autre dossier, autre cabinet compris). Chaque
 - **D-1099-3** : en recettes, la mémoire porte le compte de produit (pas de catégorie de recettes).
 - **D-1099-4** : la saisie à la main reçoit sa suggestion par une route de lecture ; elle n'apprend pas (seule
   l'application d'un lot apprend, comme le dit la fiche).
+
+### Livraison (2026-11-24)
+
+- **Code** : balance-service #160, fusionnée sur `dev` (`0ff2402`) : module `src/modules/cahiers/memoire/` (schéma,
+  règles pures, service, deux contrôleurs), apprentissage et suggestions dans `PiecesOcrService`, champ `suggestion`
+  au DTO et au présentateur, deux collections au plan d'effacement C13. Manifeste `balance` inchangé.
+- **Preuves** : unitaires sous Node 24 (étage `verification`) **5555 passés, 12 ignorés** (284 suites) ; intégration
+  sur un **vrai MongoDB** **10/10** (`memoire-cahiers.mongo.spec.ts`, jouée avec `MONGODB_URI_TEST` : AC-1, AC-2 par
+  libellé de catégorie, AC-4, AC-5, AC-6, catégorie désactivée jamais reproposée, remplacement) ; e2e OCR et contrat
+  OpenAPI **253/253** ; mutation **5/5** (dont l'alignement des lignes créées sur les pièces retenues, qu'un premier
+  test ne voyait pas) ; gate de câblage `grp-c` : `balance-service` `healthy`, deux contrôleurs montés, six routes
+  neuves en 401, `suggestion` publié à l'OpenAPI. Verrou Docker pris à la session A (FE-140), rendu.
+
+### Écarts au contrat, décidés au code
+
+- **D-1099-5** : les routes de la mémoire **du cabinet** (`GET /cahiers/memoire-des-choix`, `…/actes`, `DELETE …`)
+  sont sous **`@PorteeDuCabinet()`** (STORY-694) : réservées au `TENANT_ADMIN`, un collaborateur reçoit 404. La
+  mémoire du cabinet est apprise dans tous ses dossiers, et sa provenance (lot, pièce, ligne) en dirait trop à un
+  collaborateur hors de leur portefeuille. Le contrat les ouvrait à tout membre. Les **suggestions**, elles, restent
+  servies à tout membre du dossier (elles ne montrent que la catégorie du dossier et la date du choix).
+- **D-1099-6** : deux catégories actives de même libellé normalisé dans le dossier rendent la suggestion du cabinet
+  ambiguë : rien n'est suggéré.
+- **D-1099-7** : une mémoire qui échoue (base injoignable) n'annule pas l'application du lot : les lignes sont écrites,
+  l'échec se dit au journal du service.
 
 ---
 

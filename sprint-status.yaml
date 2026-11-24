@@ -1106,6 +1106,9 @@ reserved_ranges:
       décisions D-1097-1 → 14 dans la fiche. Suite : STORY-1098, puis 1099, puis 1101.
       ✅ 2026-11-23 : STORY-1098 DONE — comptabilite-service #18 (`6e4132b` sur dev), contrat #755 ; unitaires Node 24
       1001, mutation 5/5, test:socle 331/331, gate grp-c vert ; manifeste comptabilite 0.4.0 ; D-1098-1 → 7 dans la fiche.
+      ✅ 2026-11-24 : STORY-1099 DONE — balance-service #160 (`0ff2402` sur dev), contrat #758 ; unitaires Node 24 5555,
+      intégration Mongo 10/10, e2e 253/253, mutation 5/5, gate grp-c vert ; D-1099-1 → 7 dans la fiche (cabinet sous
+      @PorteeDuCabinet()).
   - range: "STORY-1100"
     status: "RÉSERVÉ"
     owner: "À placer au prochain plan — les archives du client apprennent la façon de classer du cabinet, et reçoivent les factures comptabilisées (document-service, module ged). Écran : FE-151."
