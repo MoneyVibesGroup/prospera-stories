@@ -685,6 +685,11 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   4. Retirer « Activer un vertical » de la fiche (remplacé par l'offre) et garder « + Octroyer » jusqu'à la fusion de 1080 ? Défaut : oui.
   5. Mots courts des métiers (Cabinet, Distributeur, Microfinance, Assurance) au lieu des libellés du service ? Défaut : oui, table de l'écran ; « Plateforme » n'est pas proposé au changement.
   6. Les autres écrans (tableau de bord, assistant) gardent Distribution/Finance jusqu'à AP-58 ? Défaut : oui.
+- ✅ **2026-11-24 — Les trois maquettes sont VALIDÉES par l'utilisateur**, avec les six réponses par défaut retenues : AP-57 et
+  AP-59 d'abord, puis AP-55 une fois corrigée sa visibilité (Artifact version 2). Dans la version 1, la section était au fond de
+  la fiche, sous le KYC. Elle est maintenant sous l'identité de la fiche, et « Installer l'offre » est une action de ligne de
+  l'annuaire, du menu ⋮ et de l'écran Essais. PR #34 fusionnée. Code : AP-55 après STORY-1080, AP-57 après 1112, AP-59 après
+  1114, toutes trois du groupe B.
 
 ## Questions à l'utilisateur ou au PO
 
