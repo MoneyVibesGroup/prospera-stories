@@ -1366,6 +1366,23 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-24, STORY-1115 (lot 6, n° 6) — le second espace dans le profil de recette, annoncé AVANT la fusion**
+  (`prospera-recette`, branche `MNV-1115` ; fiche `stories/STORY-1115.md`, D-1115-1 → 11). Aucun service, aucune
+  route, aucun topic ne change. Ce qui change pour qui **lance** la pile de recette :
+  - `docker-compose.recette.yml` : quatre services **neufs, levés à la demande** (`profiles: ['recette']`, comme la
+    comptabilité) : `kafka-essai`, `redis-essai` (sans port publié, sans volume), `auth-essai`
+    (`127.0.0.1:3021`, base `auth_essai`, `INSTANCE_ESPACE=ESSAI`) et `catalogue-essai` (`127.0.0.1:3023`, base
+    `catalog_essai`). La pile de base reste à cinq services.
+  - `auth-service` : `JWT_SIGNING_KEY_PEM` et `JWT_SIGNING_KID`, interpolées de `RECETTE_CLE_COMMUNE_PEM` et
+    `RECETTE_CLE_COMMUNE_KID`, **vides par défaut** (auth tire alors sa clé, comme aujourd'hui). Le paquet de
+    recette les tire une fois dans `prospera-recette/.recette/` (non versionné) : l'identité de l'opérateur commune
+    aux deux espaces (D-1113-2, choix par défaut gardé). ⚠️ Sur des volumes conservés, auth garde la clé de son
+    premier démarrage.
+  - `admin-panel` (BFF) : `CATALOG_ESSAI_SERVICE_URL` et `AUTH_ESSAI_SERVICE_URL` vers l'essai de la pile : les
+    routes d'essai du BFF (`/admin/essais`, `/admin/sorties-essai`, la lecture des membres de l'essai) vont à
+    `catalogue-essai` et `auth-essai` ; les autres ne changent pas.
+  - Recette neuve `essai-mise-en-service` (dans `npm run recette`, sautée en `RECETTE_ESPACE=ESSAI`).
+
 - **2026-11-24, STORY-1103 (lot 6, n° 5) — renvoyer un dossier KYC pour correction, annoncé AVANT le code (AC-1)**
   (`prospera-kyc-service` et `prospera-admin-panel-service`, branches `MNV-1103` ; fiche `stories/STORY-1103.md`,
   D-1103-1 → 10). **Ajouts seuls** : aucune route, aucun champ, aucun topic existant ne change de nom ni de type ; le
