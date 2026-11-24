@@ -1200,13 +1200,14 @@ reserved_ranges:
       Demande de l'utilisateur du 2026-11-18 (« côté archive, c'est important aussi d'avoir cela ») ; cloisonnement
       par cabinet exigé, comme pour STORY-1097 → 1099 (amendées le même jour). NON SLOTTÉE.
   - range: "STORY-1103"
-    status: "RÉSERVÉ"
-    owner: "À placer au prochain plan — renvoyer un dossier KYC pour correction : motif facultatif sur la marque d'une pièce, acte request-correction, kyc.correction.requested@1, e-mail au cabinet (kyc-service, BFF admin-panel, service des e-mails KYC). Écran : AP-62."
+    status: "in-progress"
+    owner: "Groupe B, lot 6, n° 5 — renvoyer un dossier KYC pour correction : motif facultatif sur la marque d'une pièce, POST /admin/kyc/:orgId/request-correction (UNDER_REVIEW → PENDING_DOCUMENTS), kyc.correction.requested@1 au registre, relais du BFF (prospera-kyc-service, prospera-admin-panel-service). Écran : AP-62. L'e-mail au cabinet est demandé à D (D-1103-1)."
     source_doc: "prospera-stories/stories/STORY-1103.md"
     reserved_on: "2026-11-20"
     note: >
       Constat de A en dessinant la maquette d'AP-38 (2026-11-19) : le renvoi pour correction part sans motif, sans
-      événement, et ne prévient pas le cabinet. Recommandation de A suivie par l'utilisateur. NON SLOTTÉE.
+      événement, et ne prévient pas le cabinet. Recommandation de A suivie par l'utilisateur. Placée au lot 6 de B, n° 5
+      (PLAN-LOT-6-2026-11-23.md §5). 2026-11-24 : décisions D-1103-1 → 10 et contrat annoncés avant le code. NON SLOTTÉE.
   - range: "STORY-1104"
     status: "RÉSERVÉ"
     owner: "À placer au prochain plan — le projet financé : pro forma (TTC, validité, pièce), frais annexes, apport, montant demandé calculé, prêt demandé proposé d'office, et le contrat des documents du dossier (dépôt réel, aperçu, historique) ; bilan-service, document-service pour le stockage (demande à C). Écran : FE-152."

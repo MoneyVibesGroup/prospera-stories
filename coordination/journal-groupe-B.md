@@ -106,10 +106,14 @@
      Node 25 : BFF 700/700, e2e 278/278 ; mutations 13/13. **Preuve sans Docker** : e2e avec le vrai client d'auth en
      HTTP contre une doublure qui rend les corps **produits par le code d'auth** `origin/dev` `b49d8ab` (filtre
      d'erreurs, services, DTO ; fixtures `test/fixtures/auth-metier/`) ; verrou non pris.
-  - **Suivante : STORY-1103** (renvoyer un dossier KYC pour correction, le cabinet est prévenu ; fiche écrite ;
-    `kyc-service` et BFF ; Docker : non ; fini quand `kyc.correction.requested@1` est publié et AP-62 débloquée).
-    **`kyc-service` est neuf pour B** : lire d'abord ses pièges dans `journal-groupe-A.md` et constater ici le dernier
-    commit de `dev` avant d'y toucher.
+  - **En cours : STORY-1103** (renvoyer un dossier KYC pour correction, le cabinet est prévenu ; `kyc-service` et
+    BFF ; Docker : non ; fini quand `kyc.correction.requested@1` est publié et AP-62 débloquée). **`kyc-service`
+    constaté le 24/11** : `origin/dev` = **`d4932c6`** (STORY-910, A) ; le checkout du poste était sur `dev`, un commit
+    derrière (`de5e6d1`), propre : branche `MNV-1103` partie d'`origin/dev`, `npm ci --ignore-scripts` (Node 25). Pièges
+    de kyc relevés dans le journal de A : aucun propre au service, ceux du socle valent (client de Confluent sous
+    Node 24, `index.ts` de l'éditeur, `git -c core.autocrlf=false archive`). Décisions D-1103-1 → 10 et contrat dans
+    la fiche, **annoncés avant le code** (« ⚠ Contrats » ci-dessous). **L'e-mail n'est pas dans un dépôt de B**
+    (D-1103-1) : demande à D ci-dessous.
   - **Reçue le 24/11, hors des lignes du plan : → B de A** (journal de A, fin du « Lot 6 ») — deux résultats faux de
     `bilan-service` visibles à la démo du 15/01 : la projection qui rembourse plus que la dette
     (`TICKET-BACKEND-projection-remboursements-non-plafonnes.md`, accepté par l'utilisateur le 19/11) et la liasse
@@ -765,6 +769,26 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ D (2026-11-24, STORY-1103) : consommer `kyc.correction.requested@1` pour prévenir le cabinet** — ouverte.
+  B publie l'événement (`kyc-service`, schéma `contrat/schemas/kyc.correction.requested.json`, contrat dans « ⚠
+  Contrats » et dans `stories/STORY-1103.md`) ; l'e-mail est hors des dépôts de B (D-1103-1).
+  - **Ce qui existe** : les trois e-mails KYC partent de `prospera-expert-comptable` (consommateur de
+    `kyc.status.changed`, STORY-021 ; `KycEventsProjectionService` enfile un job, le worker appelle la route directe de
+    notification depuis STORY-590), avec les modèles système `kyc-dossier-recu`, `kyc-dossier-approuve`,
+    `kyc-dossier-a-corriger` de `prospera-notification-service` (`catalogue-socle.ts`, `CLES_MESSAGES_KYC`).
+  - **Ce qui est demandé** : (1) dans notification, un modèle pour le renvoi (recommandé :
+    `kyc-dossier-renvoi-correction`, variables `texte` et `lien` ; le corps = le mot de l'opérateur et une ligne par
+    pièce renvoyée, **déjà composés par kyc dans `texte`**, puis le lien vers l'espace du cabinet) ; (2) le
+    consommateur de `kyc.correction.requested` : recommandé au même endroit que les trois autres
+    (`prospera-expert-comptable`, même patron, une demande par administrateur du cabinet, clé d'idempotence =
+    `eventId`). `prospera-expert-comptable` n'est tenu par personne (plan maître §2) : question à l'utilisateur
+    ci-dessous, **choix par défaut : D le porte avec le modèle**. (3) La preuve de l'AC-5 : l'e-mail lu dans mailhog,
+    dans la recette.
+  - **Charge utile** : `orgId`, `demandeLe`, `demandePar`, `message?`, `pieces[]` (`documentId`, `type`, `libelle`,
+    `version`, `motifRenvoi?`), `texte` (jamais vide) ; aucune adresse (comme `kyc.status.changed`).
+  - **À placer par D** (aucune urgence de démo : la console renvoie et le cabinet lit les motifs dans son statut sans
+    l'e-mail).
+
 - **→ A (2026-11-24, correctifs de STORY-483 et de STORY-065) : régénérer `bilan.ts`, puis retirer le contournement de
   FE-034** — ouverte. `npm run gen:api -- bilan` dans le front du cabinet. (1) **FE-034** :
   `versionQuiFaitFoi` (`src/features/bilan/lib/validation.ts`) peut lire `jeu.version` seul — `GET …/etats/{id}` rend
@@ -1315,6 +1339,36 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-24, STORY-1103 (lot 6, n° 5) — renvoyer un dossier KYC pour correction, annoncé AVANT le code (AC-1)**
+  (`prospera-kyc-service` et `prospera-admin-panel-service`, branches `MNV-1103` ; fiche `stories/STORY-1103.md`,
+  D-1103-1 → 10). **Ajouts seuls** : aucune route, aucun champ, aucun topic existant ne change de nom ni de type ; le
+  rejet global ne change pas (`reason` obligatoire, 1 000 au plus).
+  - **kyc** : corps **facultatif** `{ motif? }` (500 au plus, rogné, vide ⇒ absent) sur `POST
+    /admin/kyc/:orgId/documents/:documentId/reject` ; **`POST /admin/kyc/:orgId/request-correction`** (`kyc:reject`,
+    `If-Match` obligatoire, corps facultatif `{ message? }`, 1 000 au plus) → `AdminKycReviewItemDto` ; refus 404, 428
+    `PRECONDITION_REQUISE`, 409 `KYC_DECISION_CONFLIT` (`details`), **409 `RENVOI_SANS_PIECE_A_CORRIGER`**, 400.
+    Champs neufs facultatifs : `motifRenvoi` (pièce, cabinet et console), `correctionDemandeeLe` (détail admin et
+    `GET /kyc/status`), chronologie : type **`RENVOI_CORRECTION`**, `message?`, `texte?`, `piecesRenvoyees?`.
+  - **Machine à états** : arc neuf **`UNDER_REVIEW → PENDING_DOCUMENTS`**, publié sur **`kyc.status.changed`**
+    (`reviewedBy` présent). Les consommateurs relus n'ouvrent leur garde que sur `APPROVED` : aucun ne change. Le
+    dossier ne repasse en revue que lorsque toutes les pièces renvoyées sont remplacées (journal `RESOUMISSION`).
+  - **Topic neuf `kyc.correction.requested` v1** (clé `orgId`, outbox, une fois par renvoi, même transaction) :
+    `schemaVersion`, `eventId`, `occurredAt`, `orgId`, `demandeLe`, `demandePar`, `message?`, `pieces[]` (≥ 1 ;
+    `documentId`, `type` `RCCM` | `CFE`, `libelle`, `version`, `motifRenvoi?`), `texte`. Modèle fermé ; schéma au
+    dépôt (`contrat/schemas/`), sujet `kyc.correction.requested-value`, BACKWARD. Consommateur : demandé à D
+    (« Demandes »).
+  - **BFF, OpenAPI** (A génère ses types depuis lui) : corps facultatif `RejeterPieceKycRequestDto { motif? }` sur
+    `POST /api/v1/admin/orgs/{orgId}/kyc/documents/{documentId}/reject` ; **`POST
+    /api/v1/admin/orgs/{orgId}/kyc/request-correction`** (`kyc:reject`, `If-Match` relayé,
+    `DemanderCorrectionKycRequestDto { message? }`) → `KycDecisionResultDto` ; refus par leur code (409
+    `RENVOI_SANS_PIECE_A_CORRIGER`, 409 `KYC_DECISION_CONFLIT` avec `details`, 428, 400, 403, 404, 503). Détail du
+    dossier : `KycDocumentDto` gagne `reviewStatus`, `reviewedAt?` (servis depuis STORY-128, jamais publiés) et
+    `motifRenvoi?` ; `KycDetailDto` gagne `correctionDemandeeLe?` ; `KycEvenementDossierDto` gagne le type
+    `RENVOI_CORRECTION`, `message?`, `texte?`, `piecesRenvoyees?` (`KycPieceRenvoyeeDto`) ; `KycDocumentReviewDto`
+    gagne `motifRenvoi?`.
+  - **Pour A (AP-62)** : types à régénérer depuis l'OpenAPI du BFF ; l'aperçu « Ce que lira le cabinet » est le
+    `texte` que kyc compose (D-1103-5) ; un dossier renvoyé sort de la file `UNDER_REVIEW`.
 
 - **2026-11-24, correctifs de STORY-483 et de STORY-065 (lot 6, tickets de A avant la démo du 15/01) — annoncés
   AVANT la fusion du code** — **fusionnés** : bilan #184 (`d98b7c4`) et #185 (`7b53ff5`) ; document OpenAPI 579 →
@@ -2689,6 +2743,11 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   requis ajouté, un type changé ou une propriété retirée sont refusés (`npm run schemas:compatibilite`, code 1).
 
 ## Questions à l'utilisateur ou au PO
+
+- **STORY-1103, D-1103-1 — qui touche `prospera-expert-comptable` pour l'e-mail du renvoi ?** (ouverte) Le dépôt
+  n'est tenu par personne (plan maître §2) ; il porte le consommateur des trois e-mails KYC (STORY-021, STORY-590), et
+  les textes sont chez D (notification). **Choix retenu par défaut : D**, qui reçoit la demande du modèle, porte aussi
+  le consommateur dans `prospera-expert-comptable` (même patron que les trois autres e-mails).
 
 - **STORY-1113, D-1113-2 — l'opérateur de la console dans les deux espaces** (question à l'architecte, ouverte) : la
   console relaie le jeton de l'opérateur vers l'essai ET le réel ; il faut donc que les services des deux espaces
