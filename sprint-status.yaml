@@ -7659,7 +7659,7 @@ sprints:
         epic: "EPIC-031"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
+        status: "in_progress"  # 2026-11-24 : session A, lot 6 (n° 8, dernière fiscale de A) : fiche stories/STORY-328.md et contrat annoncé avant le code. Anomalies CALCULÉES à la lecture (BASE_PROVISOIRE, ECART_SANS_MOTIF, DECLARE_ABSENT_AU_DEPOT, CALCULE_A_SAISIR), seule la levée s'écrit (motif exigé, journalisée) ; couture signalerAnomalie pour 326 et 1101 ; aucun droit neuf. Le dépôt fiscal repasse à C à la fusion.
         assigned_to: null
       - story_id: "STORY-329"
         title: "Restitution du chemin d'un montant et historique complet"
