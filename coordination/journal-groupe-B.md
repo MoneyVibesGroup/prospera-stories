@@ -1142,6 +1142,31 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-24, correctif de STORY-1084 (lot 6, ticket de A pour FE-140) — quatre noms de schéma de l'OpenAPI de
+  bilan, annoncés AVANT la fusion du code** (`prospera-bilan-service`, branche `MNV-1084-schema` ; ticket
+  `tickets/TICKET-BACKEND-financement-schema-valeur-indicateur.md`). **Le contrat servi ne change pas** : aucune
+  route, aucun champ, aucune valeur rendue ; ce n'est pas un `@2`. Ce qui change, c'est le **document OpenAPI**
+  (`GET /api/docs-json`) : Swagger range les schémas par nom de classe et ne gardait qu'une classe par nom, si bien que
+  trois références publiaient la forme d'une autre classe. Le garde neuf les a trouvées toutes (voir « Pièges »).
+  - **`IndicateurDetteDto.valeurs`** (`GET /dossiers/{dossierId}/financements/{financementId}/indicateurs`) →
+    schéma neuf **`ValeurIndicateurDetteDto`** `{ rang, exercice, statut, valeur, motif }` (tous requis ; `exercice`,
+    `valeur` et `motif` nullables). Il pointait `ValeurIndicateurDto`, la forme de l'analyse (STORY-552), qui garde
+    son nom et ses champs.
+  - **`ComparatifDto.exercice`** (états consolidés, STORY-548) → schéma neuf **`ExerciceCompareConsolideDto`**
+    `{ exerciceId, libelle, debut?, fin? }`. Il pointait `ExerciceCompareDto`, celui de la comparaison d'exercices
+    (STORY-430), qui garde son nom et ses champs.
+  - **`ProjectionMensuelleResponseDto.articulation`** (projection mensuelle) → schéma neuf
+    **`ArticulationMensuelleDto`** `{ ecartArticulation, articule }`. Il pointait `ControleArticulationDto`, celui des
+    contrôles de cohérence (STORY-401), qui garde son nom et ses champs.
+  - `VersionCompareeDto.referentiel` (comparaison de versions figées) : la classe locale `ReferentielRefDto` (mêmes
+    champs `code`, `version`) est remplacée par la commune ; **le document ne change pas** (Swagger gardait déjà la
+    commune).
+  - Document : 576 → 579 schémas, trois ajoutés, aucun retiré ; trois schémas modifiés (la seule référence
+    ci-dessus) ; les 98 chemins identiques à l'octet.
+  - **Pour A** : régénérer `bilan.ts` (`npm run gen:api -- bilan`) dans le front du cabinet ; les trois noms neufs
+    apparaissent, les trois références deviennent justes. Aucun code du front ne nomme ces quatre schémas hors des
+    types générés (vérifié en lecture le 24/11) ; retirer `ValeurIndicateurDette` écrit à la main dans FE-140.
+
 - **2026-11-24, STORY-979 (lot 6) — huit droits neufs au catalogue de tenant d'auth, hors du jeton, et le rôle
   `CAB_ARCHIVISTE`, annoncés AVANT la fusion du code** (`prospera-auth-service` et
   `prospera-platform-catalog-service`, branches `MNV-979` ; fiche `stories/STORY-979.md`, D-979-1 → 9). Tout est
