@@ -106,14 +106,28 @@
      Node 25 : BFF 700/700, e2e 278/278 ; mutations 13/13. **Preuve sans Docker** : e2e avec le vrai client d'auth en
      HTTP contre une doublure qui rend les corps **produits par le code d'auth** `origin/dev` `b49d8ab` (filtre
      d'erreurs, services, DTO ; fixtures `test/fixtures/auth-metier/`) ; verrou non pris.
-  - **En cours : STORY-1103** (renvoyer un dossier KYC pour correction, le cabinet est prévenu ; `kyc-service` et
-    BFF ; Docker : non ; fini quand `kyc.correction.requested@1` est publié et AP-62 débloquée). **`kyc-service`
-    constaté le 24/11** : `origin/dev` = **`d4932c6`** (STORY-910, A) ; le checkout du poste était sur `dev`, un commit
-    derrière (`de5e6d1`), propre : branche `MNV-1103` partie d'`origin/dev`, `npm ci --ignore-scripts` (Node 25). Pièges
-    de kyc relevés dans le journal de A : aucun propre au service, ceux du socle valent (client de Confluent sous
-    Node 24, `index.ts` de l'éditeur, `git -c core.autocrlf=false archive`). Décisions D-1103-1 → 10 et contrat dans
-    la fiche, **annoncés avant le code** (« ⚠ Contrats » ci-dessous). **L'e-mail n'est pas dans un dépôt de B**
-    (D-1103-1) : demande à D ci-dessous.
+  9. ~~STORY-1103~~ : **kyc #29** (`9cef9cb` sur `dev`), **admin-panel #42** (`c451b17`) ; contrat annoncé **avant le
+     code** (stories #805, AC-1). **`kyc.correction.requested@1` publié** (outbox, schéma
+     `contrat/schemas/kyc.correction.requested.json`, BACKWARD) ; **AP-62 débloquée** (« Réponses » : → A).
+     - **`kyc-service` constaté le 24/11** : `origin/dev` = **`d4932c6`** (STORY-910, A) ; le checkout du poste était
+       sur `dev`, un commit derrière (`de5e6d1`), propre ; branche `MNV-1103` partie d'`origin/dev`, `npm ci
+       --ignore-scripts` (Node 25). Aucun piège propre à kyc dans le journal de A ; ceux du socle valent.
+     - kyc : motif facultatif sur la marque d'une pièce (`motifRenvoi`, rendu au cabinet et à la console) ; `POST
+       /admin/kyc/:orgId/request-correction` (`UNDER_REVIEW → PENDING_DOCUMENTS`, journal `RENVOI_CORRECTION`,
+       `kyc.status.changed` + `kyc.correction.requested` dans une transaction ; 409 `RENVOI_SANS_PIECE_A_CORRIGER`
+       refusé avant toute écriture) ; retour en revue quand toutes les pièces renvoyées sont remplacées (D-1103-2) ;
+       texte du cabinet composé par kyc (D-1103-5) ; script du registre par `fetch`, sans dépendance neuve (D-1103-6).
+     - BFF : corps facultatif de la marque, route `…/kyc/request-correction`, champs neufs du détail publiés (dont
+       `reviewStatus`/`reviewedAt` de la pièce, servis depuis 128 et jamais publiés).
+     - **L'e-mail au cabinet n'est pas dans un dépôt de B** (D-1103-1) : `prospera-expert-comptable` (tenu par
+       personne) consomme les événements KYC et demande les messages à `prospera-notification-service` (D). Demande
+       à D ouverte, D prévenu par message le 24/11 ; **l'AC-5 (mailhog) reste ouvert** avec elle.
+     Node 25 : kyc unitaires 521 passés (4 suites rouges connues : binding natif, identiques sur `dev`), e2e 121/121 ;
+     BFF 711/711, e2e 294/294 (doublure HTTP de kyc aux corps produits par le code de kyc de la story) ; mutations
+     16/16 (kyc) et 8/8 (BFF) ; schéma validé contre l'événement produit (ajv) ; script du registre éprouvé contre un
+     faux registre. **Sans Docker** (aucun module, dépendance ni Dockerfile ne change) : verrou non pris.
+  - **Suivante : STORY-1115** (la recette « essayer, puis mettre en service » ; `prospera-recette` ; recette complète
+    sur pile neuve ; fiche à écrire juste avant de coder, identifiant réservé par le plan §8).
   - **Reçue le 24/11, hors des lignes du plan : → B de A** (journal de A, fin du « Lot 6 ») — deux résultats faux de
     `bilan-service` visibles à la démo du 15/01 : la projection qui rembourse plus que la dette
     (`TICKET-BACKEND-projection-remboursements-non-plafonnes.md`, accepté par l'utilisateur le 19/11) et la liasse
@@ -1150,6 +1164,18 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   le métier changé ; 409 `VERTICAL_ROLES_INCOMPATIBLES` avec `details.roles`, les rôles à réattribuer d'abord ; 404
   organisation inconnue). Preuve : appel réel au BFF contre une doublure HTTP aux corps produits par le code d'auth
   (fiche STORY-1114, « Preuves ») ; le gate réel d'AP-59 sera le premier contre un vrai auth.
+- **→ A (2026-11-24) : AP-62 débloquée par STORY-1103** (kyc #29 `9cef9cb`, BFF #42 `c451b17`) : types à régénérer
+  depuis l'OpenAPI du BFF. Routes : `POST /api/v1/admin/orgs/{orgId}/kyc/documents/{documentId}/reject` avec le corps
+  facultatif `{ motif? }` (500 au plus ; la réponse porte `motifRenvoi`) ; **`POST
+  /api/v1/admin/orgs/{orgId}/kyc/request-correction`** (`kyc:reject`, `If-Match` = l'`etag` du détail, `{ message? }`
+  1 000 au plus) → `{ orgId, status: PENDING_DOCUMENTS }` ; refus 409 `RENVOI_SANS_PIECE_A_CORRIGER` (aucune pièce
+  marquée à corriger), 409 `KYC_DECISION_CONFLIT` avec `details` (comme `reject` ; la décision gagnante peut être un
+  renvoi, `verdict: PENDING_DOCUMENTS`), 428, 400. Détail (`GET /api/v1/admin/orgs/{orgId}`, bloc `kyc`) : chaque
+  pièce porte `reviewStatus`, `reviewedAt?`, `motifRenvoi?` ; le dossier `correctionDemandeeLe?` ; la chronologie
+  l'entrée `RENVOI_CORRECTION` avec `message?`, `texte` (ce que le cabinet a lu) et `piecesRenvoyees`. Le texte composé
+  suit la règle de la maquette (le mot, puis `— <libellé> : <motif>`), plus `— <libellé>` pour une pièce sans motif.
+  Preuve : appel réel au BFF (vrai client de kyc en HTTP) contre une doublure aux corps produits par le code de kyc de
+  la story (`test/fixtures/kyc-renvoi/`) ; le gate réel d'AP-62 sera le premier contre un vrai kyc.
 - **← A (2026-11-19, tri du bloc C d'AP-54) : relayer `mises-en-service`, `sorties-essai`, `naissances` (AP-56)** —
   **servie par STORY-1113** (catalogue #72, BFF #40). La naissance est relayée seule, au réel, avec l'identité de
   l'essai ; la mise en service reprend les membres de l'essai ; `POST /sorties-essai/{org}/verifier` n'est pas relayée
@@ -1369,6 +1395,11 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
     gagne `motifRenvoi?`.
   - **Pour A (AP-62)** : types à régénérer depuis l'OpenAPI du BFF ; l'aperçu « Ce que lira le cabinet » est le
     `texte` que kyc compose (D-1103-5) ; un dossier renvoyé sort de la file `UNDER_REVIEW`.
+  - **Fusionné le 24/11** : kyc #29 (`9cef9cb` sur `dev`), BFF #42 (`c451b17`), **sans écart au contrat annoncé**.
+    Deux précisions de comportement : le refus `RENVOI_SANS_PIECE_A_CORRIGER` est rendu **avant toute écriture** ; un
+    dossier déjà sorti de revue **et** sans pièce rejetée reçoit le refus commun (409 `KYC_DECISION_CONFLIT`, qui
+    nomme la décision gagnante), pas `RENVOI_SANS_PIECE_A_CORRIGER`. Schémas neufs au document du BFF :
+    `KycPieceRenvoyeeDto`, `RejeterPieceKycRequestDto`, `DemanderCorrectionKycRequestDto`.
 
 - **2026-11-24, correctifs de STORY-483 et de STORY-065 (lot 6, tickets de A avant la démo du 15/01) — annoncés
   AVANT la fusion du code** — **fusionnés** : bilan #184 (`d98b7c4`) et #185 (`7b53ff5`) ; document OpenAPI 579 →
@@ -2792,6 +2823,21 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Les doubles en mémoire des e2e de kyc n'annulent pas la transaction** (STORY-1103) : `withTransaction` y exécute
+  la fonction, sans rollback. Un refus levé APRÈS une écriture y laisse l'écriture (la capture des corps l'a montré :
+  le dossier sortait de revue sur un 409). En vrai MongoDB la transaction l'annule, mais un refus métier se vérifie
+  **avant** d'écrire, comme la précondition d'ETag — c'est ce qu'a retenu le renvoi.
+- **`process.exit()` juste après un `fetch` plante Node 25 sous Windows** (assertion libuv `UV_HANDLE_CLOSING`, code
+  de sortie 127 au lieu de 0) : un script CLI qui parle HTTP pose `process.exitCode` et laisse la boucle se vider.
+- **`git stash -u` puis `pop` ressort les fichiers neufs en CRLF** (`core.autocrlf=true`) : un script de
+  remplacement qui cherche des `\n` ne trouve plus son ancre. Lire le fichier, ou détecter la fin de ligne.
+- **Une mutation qui retire le seul usage d'un nom ne compile plus** (TS6133, variable ou import inutilisé ; `if
+  (false)` : code inaccessible) : la suite « échoue » sans qu'aucune assertion ne morde. Muter en gardant l'usage
+  (`… && Date.now() < 0`), et lire la ligne `Test suite failed to run` avant de compter une mutation tuée.
+- **Le BFF publiait moins que ce qu'il relayait** : `reviewStatus` et `reviewedAt` d'une pièce traversaient depuis
+  STORY-128 sans figurer dans l'OpenAPI, donc sans exister pour la console. Relire la classe projetée quand on ajoute un
+  champ à côté.
 
 - **Le fixture non typé de `test/bilan-export.e2e-spec.ts` a mordu une deuxième fois** (correctif de STORY-483) : son
   commentaire « angle mort connu » le dit depuis STORY-482 — `ProjectionService` y est mocké par un littéral, donc un
