@@ -5,13 +5,30 @@
 
 ## État
 
-### Lot 6 du groupe A (2026-11-24) — FE-140 ✅
+### Lot 6 du groupe A (2026-11-24) — FE-140 ✅, FE-149 ✅
+
+- ✅ **FE-149 DONE (24/11)** : prospera-frontend-expert-comptable **#59** (`620b9bd` + `47f190c` sur `dev`), docs (cette PR). Atelier › Factures : déposer (vrai téléversement, « Voir » avant l'envoi), relire (champs modifiables, **écriture éditable dans son tableau**, **aperçu `POST …/apercu` à chaque modification après 400 ms**, aucun recalcul local), inscrire au brouillard, brouillard et journaux, valider avec confirmation, renvoi SMT. Preuves : tsc, eslint, vitest, build, e2e simulés 3/3 (+ suite 288/289, le rouge est `atelier-saisie`, regex d'URL antérieure), **gate réel vert** (deux vraies images lues par l'OCR, Q-209 ligne à ligne, déséquilibre dit par le serveur, validation AC-000001/2, étanchéité, zéro CORS) sur comptabilite construit depuis `origin/dev` **`979ed53`** ; **gate FE-069 rejoué vert**. Autres services de la pile : images `grp-a` existantes (écart écrit dans la fiche). Décisions D-149-1 à 6 dans la fiche. **Pile `down -v`, verrou rendu, session C prévenue.**
+- **Écart nommé (D-149-1)** : comptabilite refuse tout dépôt tant que l'exercice n'est pas ouvert à la comptabilité (`EXERCICE_NON_OUVERT`) ; le choix de la tenue (JOURNAL ou CAHIERS, définitif) n'a aucun écran : le gate l'ouvre par l'API. **Story à écrire : « Choisir la tenue de l'exercice »** (maquette d'abord).
+- **Suite** : **FE-150** quand STORY-1099 sera fusionnée sur `dev`, sinon **FE-141**.
 
 - ✅ **FE-140 DONE (24/11)** : prospera-frontend-expert-comptable **#58** (`eb542a3` sur `dev`), docs (cette PR). L'onglet « Financement » (module ouvert), la liste, la création pré-remplie (objet + montant), l'étape « Les chiffres » (emprunts, échéancier, indicateurs de dette), les états et droits, les versions, les refus de 1083/1084 dits en métier ; les six autres étapes grisées « bientôt » (D-140-1). Preuves : vitest 1 768 verts, e2e simulés, **gate réel vert sur `grp-a`** (financement 1/1, FE-069 1/1) ; valeur de référence lue au franc (658 346 / 658 339 / 6 600 601). Décisions D-140-1 à 8 dans la fiche.
 - **Écart backend → B (24/11) — ouverte** : `ValeurIndicateurDto` existe deux fois dans bilan-service, l'OpenAPI des indicateurs de dette est faux ; `tickets/TICKET-BACKEND-financement-schema-valeur-indicateur.md`. Aucun correctif fait par A.
 - **Constats pour la suite** : (1) aucune route ne liste les banques : FE-152 attend STORY-1105 / AP-50 (D-140-2) ; (2) « Remis » ne sait pas s'il y a un dossier figé avant STORY-1086 : à masquer dans FE-142 (D-140-4) ; (3) `bilan.ts` committé avait dérivé du service (régénération large, tsc vert).
 - **Suite** : **FE-149** (les factures deviennent des écritures) quand sa maquette sera validée ; puis FE-150, FE-141, AP-55, AP-57, AP-59.
 - **Docker** : pile `grp-a` construite à partir des images du 19/11 (`up --no-build`) car le poste était saturé (9 `npm ci` en parallèle : >1 h, fetchs à 600 s) ; ces images contiennent 1083/1084 (bilan et auth postérieurs aux commits du 18/11) ; `down -v` fait, verrou rendu, session C prévenue.
+
+### Pièges du 24/11 (FE-149)
+
+- **`npm ci` échoue** (« Missing: @emnapi/core@1.11.3 from lock file ») : le verrou du front est désynchronisé depuis #56. `npm install --no-save` installe sans toucher au verrou (aucune jonction, un seul `node_modules`).
+- **`.env.local` sans `NEXT_PUBLIC_COMPTABILITE_URL`** : la valeur est inlinée au build ; sans elle, tout appel à comptabilite échoue en « Le geste n'a pas abouti » sans autre trace. Rebâtir après l'avoir posée.
+- **L'IdP doit stamper `comptabilite-service` dans l'`aud`** (`AUTH_AUDIENCE` de l'auth-service) ; le compose racine ne le fait pas : surcouche `gate-fe149.yml`. Le service se branche sur le Kafka RACINE (l'état publié du module y arrive).
+- **L'exercice doit être ouvert à la comptabilité** (`POST …/exercices/{e}/ouverture {tenue}`) avant tout dépôt : sinon 404 `EXERCICE_NON_OUVERT`. La sonde `GET …/lots` répond 200 avant.
+- **Tesseract ne lit pas un PDF** : le gate rend de vraies factures en PNG dans le navigateur (texte au format du parseur : `FACTURE N°`, `FOURNISSEUR :`, `NIF :`, `DATE DE FACTURE :`, `MONTANT HT :`, `TVA (18%) :`, `TOTAL TTC :`). L'OCR a lu les deux factures sans erreur.
+- **Deux gates à la suite** épuisent les 5 connexions par minute de l'IdP : attendre 100 s entre les deux.
+- **Une classe de schéma homonyme** (`PropositionDto` du lettrage et des factures) a été disambiguée côté service : la génération de types donne bien celle des factures.
+- **Testing Library replie les espaces fines insécables** des montants : comparer avec `/117\s000/`.
+- **Docker Desktop** : `docker_data.vhdx` resté attaché après un compactage ⇒ « unable to start » (geste de l'utilisateur, administrateur).
+- **Poste** : un seul `npm install`, un seul build d'image ; `vitest` en parallèle d'un build donne des délais de 5 s (rejouer les fichiers seuls).
 
 ### Pièges du 24/11 (FE-140)
 
@@ -565,7 +582,7 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 - **→ B (2026-11-17) : le jeu du cabinet est dans `jeux-demonstration/cabinet-demo-togo/`** — ~~à faire par B~~ **servie par B (2026-11-17)** : plateforme #26 (`dev` `3407408`), étiquette `jeu-cabinet-v1` posée sur `e958bd6`. A a ajouté ce dossier (données seules, plateforme #25, `dev` `e958bd6`), sur la phrase du README « les jeux des verticales viennent de leurs propriétaires ». (1) La ligne du tableau « Qui écrit dans quel dossier » : `jeux-demonstration/cabinet-demo-togo/` → groupe A. (2) **L'étiquette `jeu-cabinet-v1`** : `generateur.source` du `jeu.json` la nomme (`prospera-plateforme@jeu-cabinet-v1:jeux-demonstration/cabinet-demo-togo/generateur/generer.mjs`) ; je n'en crée pas dans votre dépôt (D l'a fait pour `jeu-assurance-v1` ; si vous préférez qu'A le fasse, le dire ici). (3) Pour le catalogue : le dossier du jeu porte aussi `generateur/` (le vérificateur l'ignore) ; à `JEUX_DEMONSTRATION_DIR`, copier le dossier entier ou seulement `jeu.json` et `balance/`. Le jeu seul se rejoue : `node jeux-demonstration/cabinet-demo-togo/generateur/generer.mjs <dossier>` (même graine, mêmes empreintes). Les routes C13 de balance et de bilan viennent en STORY-928.
 
-- **→ C (24/11) : édition libre des lignes d'une écriture de facture** (FE-149, validée par l'utilisateur) : voir la section « Lot 6 » ci-dessus et le ticket `TICKET-BACKEND-comptabilite-ecriture-de-facture-modifiable-ligne-a-ligne` — ouverte.
+- **→ C (24/11) : édition libre des lignes d'une écriture de facture** (FE-149, validée par l'utilisateur) : voir la section « Lot 6 » ci-dessus et le ticket `TICKET-BACKEND-comptabilite-ecriture-de-facture-modifiable-ligne-a-ligne` — ~~ouverte~~ **servie par comptabilite #19 (`979ed53`)** : `corrections.lignes`, `ECRITURE_DESEQUILIBREE`, `POST …/apercu`, branchés par FE-149 (#59) ; ticket clos.
 
 ## Réponses aux demandes reçues
 

@@ -1,3 +1,5 @@
+> ✅ **CLOS le 2026-11-24** : servi par comptabilite-service **#19** (`979ed53`) : `corrections.lignes`, `ECRITURE_DESEQUILIBREE`, `POST …/factures/lots/{lotId}/apercu` ; branché par FE-149 (#59), gate réel vert.
+
 # Ticket backend — l'écriture proposée d'une facture ne se corrige que par ses montants, son compte et son tiers : pas ligne à ligne
 
 **Ouvert le :** 2026-11-24 · **Par :** FE-149 (retour de l'utilisateur à la validation de la maquette)
