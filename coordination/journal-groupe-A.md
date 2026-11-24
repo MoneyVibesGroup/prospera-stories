@@ -703,7 +703,10 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## Lot 6 (2026-11-24)
 
-- **2026-11-24 — STORY-323 en cours** (n° 5 de A, chaîne fiscale 323 → 320 → 322 → 328). Fiche écrite et contrat annoncé (ci-dessus, « ⚠ Contrats ») avant le code. Code : `prospera-fiscal-service`, branche `MNV-323`. Le manifeste du module est `declarations`, pas `fiscalite` : aucun droit neuf, donc rien à recopier au catalogue (pas de demande à B).
+- ✅ **STORY-323 DONE (24/11)** : prospera-fiscal-service **#54** (`cb672c5` sur `dev`), docs (cette PR) ; contrat annoncé avant le code (#775). `POST /api/v1/obligations/{id}/transition`, onze états strictement séquentiels, droit selon la cible (`preparer` / `valider` / `deposer`, aucun droit neuf : manifeste `declarations` et catalogue d'auth inchangés), visa de l'associé (nom copié de `identity_users`, date) exigé pour « À déposer », refus de droit journalisé, comparaison-échange, état et audit dans la même transaction. `depots` (538) inchangé ; correspondance écrite dans `etatDuCycleSelonLeDepot`. Preuves : suite entière sur Node 24 (175 suites, 2 433 tests), `test:conformite` 12/12 (70 tests) sur `mongo:7` en jeu de répliques, e2e `obligations` 41/41, 8 mutations rouges sur l'assertion, `docker compose up` sain et routes neuves en 401. Tracker : 323 `done` ; 333 et 334 NON réalignées (ce qui reste est nommé en commentaire : liaison de l'obligation au dépôt, retour en arrière). Version du tracker (7.2.0) inchangée : aucune entrée de la ligne ne l'a bougée depuis août.
+- **Docker** : verrou pris puis rendu (pile `grp-a`, `down -v`, fichier supprimé). Gate sans auth-service : sain, 401 sur les routes neuves ; surcouche `ports: !reset []` sur minio (9001 pris) ; build depuis `git archive` du commit, volumes `mongo/` de l'archive (LF).
+- **Suite : STORY-320** (bases fiscales alimentées par la balance validée, blocage motivé V3). Point d'ancrage : la prise en charge `A_PREPARER → EN_PREPARATION` ; le calendrier d'un dossier se lit déjà avec `blocage` (563) ; ne rien ressaisir.
+- *(ancien suivi)* **2026-11-24 — STORY-323 en cours** (n° 5 de A, chaîne fiscale 323 → 320 → 322 → 328). Fiche écrite et contrat annoncé (ci-dessus, « ⚠ Contrats ») avant le code. Code : `prospera-fiscal-service`, branche `MNV-323`. Le manifeste du module est `declarations`, pas `fiscalite` : aucun droit neuf, donc rien à recopier au catalogue (pas de demande à B).
 
 - **2026-11-24 — Maquettes de la console AP-57, AP-55, AP-59 publiées, EN ATTENTE DE VALIDATION.** Prototype console
   (`frontend-admin-panel/docs/mockups/ap-02-organisations.html`), PR **#34** (`lot6-maquettes-console`, non fusionnée).
@@ -877,6 +880,8 @@ octets de `balance-service` du tag déployé.
 `RETIRED` tant que des exercices y sont rattachés : le catalogue cesse alors de la servir et de l'octroyer.
 
 ## Pièges rencontrés
+
+- **STORY-323 (fiscal)** : (1) le manifeste du module est `declarations`, pas `fiscalite` ; (2) `domain/` ne peut pas importer `common/rbac` (garde de pureté) : les droits vivent en `application/` ; (3) un `ajouter(session)` du journal d'audit non transactionnel passe un test « l'audit échoue ⇒ l'état est annulé » ; il faut écrire l'audit PUIS échouer, pour voir qu'il est annulé avec l'état ; (4) sur Node 25 les suites qui chargent le client Kafka échouent (`Cannot find module 'bindings'`) : jouer la suite entière dans l'étage `verification` (Node 24) ; (5) le worktree CRLF casse les `assets/*.json` et `test/fixtures/*.json` hachés et les scripts `mongo/` (conteneur Mongo « $'\r' command not found ») : les réécrire en LF (un `rm mongo/*` est refusé par le poste) ; (6) `heredoc` Python : les `\n` et les antiquotes se perdent, écrire le script dans un fichier ; (7) un worktree se branche sur `node_modules` du checkout principal par une jonction (même `package-lock.json`).
 
 - **(STORY-1097, groupe C)** Jest résout `./x` vers `x.json` AVANT `x.ts` (`moduleFileExtensions: js, json, ts`) :
   une donnée `comptes-de-facturation.json` à côté de `comptes-de-facturation.ts` rend un module VIDE en test (tsc ne
