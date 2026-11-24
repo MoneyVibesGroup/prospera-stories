@@ -174,9 +174,13 @@ compte d'une ligne (celle du tiers comprise), un débit ou un crédit, ajouter o
   charge ou de produit, le traitement de la TVA et le journal **s'ils sont corrigés ou proposés** ; les lignes libres
   ne s'apprennent pas.
 - **Aperçu** : `POST …/factures/lots/{lotId}/apercu` — même corps que `inscrire`, **aucune écriture** : rend le lot
-  réévalué avec ces corrections (signaux levés ou levés, `inscriptible`), pour que l'écran montre ce que le serveur
+  réévalué avec ces corrections (signaux levés ou maintenus, `inscriptible`), pour que l'écran montre ce que le serveur
   acceptera avant d'inscrire. Droit : `comptabilite:ecriture:saisir`. `inscrire` réévalue déjà ainsi (le point 4 du
   ticket est confirmé : une correction qui tombe juste lève le signal).
+
+**Livré le 2026-11-24** : comptabilite-service **#19** (`979ed53` sur `dev`), avec l'amendement ci-dessous.
+`test:socle` 333/333 (cas neuf : aperçu sans écriture, puis lignes libres inscrites telles quelles ; lignes
+déséquilibrées ⇒ `ECRITURE_DESEQUILIBREE`), unitaires Node 24 1006/1006, mutation 2/2 compilables, gate `grp-c` vert.
 
 ### Amendement du 2026-11-24 — la mémoire du cabinet réservée à l'administrateur (suite de STORY-1098)
 

@@ -20,9 +20,12 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
      contrat : la mémoire du cabinet est réservée à l'administrateur (D-1099-5, STORY-694) ;
   2. 🟡 **STORY-1087** la GED s'ouvre au cabinet (document-service) : fiche écrite et contrat annoncé le 24/11
      (`stories/STORY-1087.md`) ; Q-SC-5 : 20 Go par cabinet, en alerte seulement (D-1087-5) ;
-  - 🟡 **Ticket #762** (A, FE-149 : l'écriture de facture modifiable ligne à ligne) et la mémoire du cabinet de 1098
-     réservée à l'administrateur : contrat #767, code poussé (`MNV-1098-cabinet-admin`, `aa7c703`), preuve de bout en
-     bout en attente du verrou Docker ;
+  - ✅ **Ticket #762** (A, FE-149 : l'écriture de facture modifiable ligne à ligne) et la mémoire du cabinet de 1098
+     réservée à l'administrateur : **comptabilite #19** (`979ed53` sur `dev`), contrat #767 ; test:socle 333/333,
+     unitaires Node 24 1006/1006 ; verrou cédé par A, rendu ;
+  - **24/11, consigne de l'utilisateur relayée par A** : A prend `prospera-fiscal-service` pour 323, 320, 322, 328 et le
+     rend à C à la fusion de 328 (passation au journal de A). C prend **326** avant 1101. Ordre de C : 1087, 1088, 1100,
+     puis, à la reprise du fiscal, 326, 1101, 315, 316 ;
   3. **STORY-1088** l'original papier, et retrouver une pièce (document-service) ;
   4. **STORY-1100** les archives apprennent la façon de classer du cabinet, et reçoivent les factures comptabilisées ;
   5. **STORY-1101** les déclarations face à la liasse (fiscal) — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
@@ -241,7 +244,8 @@ seulement.
 
 ## Réponses aux demandes reçues
 
-- **← A (24/11) : l'écriture de facture modifiable ligne à ligne** (ticket #762, FE-149) — **prise** : contrat annoncé
+- **← A (24/11) : l'écriture de facture modifiable ligne à ligne** (ticket #762, FE-149) — **close** : livrée par
+  comptabilite #19 (`979ed53`). Prise le 24/11 : contrat annoncé
   le 24/11 dans `stories/STORY-1097.md` (« Amendement du 2026-11-24 ») ; `corrections.lignes`, signal
   `ECRITURE_DESEQUILIBREE`, route d'aperçu `POST …/apercu`. Codée avant STORY-1087.
 
