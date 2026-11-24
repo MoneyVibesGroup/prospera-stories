@@ -1,6 +1,6 @@
 # STORY-1069 : `sinistres.evaluation.arretee@1` publié — l'évaluation arrêtée part au contrat, dans la transaction de l'arrêt
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-207 (instruire le dossier) et EPIC-212 (l'échange avec le logiciel de la compagnie, pour le consommateur) ;
 FR-75 (une évaluation arrêtée n'est jamais recalculée ; les cinq montants), FR-73 (le montant arrêté est au franc) ·
@@ -90,6 +90,50 @@ nommé par la spine, l'ordre des faits de l'arrêt. Aucune route, aucun manifest
 - [x] Rituel : plan, règles, journaux de A, B, C, D (aucune demande neuve à D) ; fiches 1013, 1015, 1016, 1068 ; spine
   AD-16, annexe C (C-14).
 - [x] Code : `prospera-plateforme` `MNV-1069` (681c9a0) ; `prospera-sinistres-service` `MNV-1069`.
-- [ ] Preuves sans Docker (Node 25), annonce fusionnée avant le code.
-- [ ] Sous le verrou : Node 24, Karapace, pile `grp-d`.
-- [ ] PR de code fusionnées ; rejeu sur `origin/dev` ; PR de docs finale.
+- [x] Preuves sans Docker (Node 25) : 1166 unitaires, lint, `tsc`, mutations 10/10 ; annonce fusionnée avant le code
+  (#800, `main` 4aabfd2).
+- [x] Sous le verrou (pris à 12:13) : Node 24 (plateforme et sinistres), Karapace, pile `grp-d` 28/28.
+- [x] PR de code fusionnées (plateforme #38, sinistres #30) ; rejeu sur `origin/dev` ; PR de docs finale.
+
+## Ce qui a été livré
+
+**2026-11-24** — trois PR fusionnées en « Rebase and merge » :
+
+- prospera-stories **#800** (`main` 4aabfd2) : la fiche, l'entrée du tracker et l'annonce « ⚠ Contrats », **avant le code**.
+- prospera-plateforme **#38** (`dev` **9560b44**) : `contrats/assurance/sinistres/evaluation.arretee.schema.json` (fermé),
+  cinq champs ordinaires de `sinistres` au registre `classification-sante` (`arreteeLe`, `franchiseRetenue`, `rang`,
+  `tableDeVetusteVersion`, `tableVersion`), `test/faits-evaluation.test.ts` (Ajv strict), README.
+- prospera-sinistres-service **#30** (`dev` **a2671c6**, **a5fae87**) : `faitDEvaluation` (`dossiers/faits.ts`), la
+  publication dans le crochet `faits` de `arreterLEvaluation` (avant la proposition de 1016), le topic dans
+  `TOPICS_PUBLIES`, `deviseDeLEvaluation` ; copie à l'octet du schéma (`contrat/schemas/`, empreinte `5fb113b6…`, origine
+  `prospera-plateforme@9560b44`, les quatre autres blobs inchangés) ; tests de 1013 et 1016 mis à jour (l'arrêt publie
+  deux ou trois faits) ; recette versionnée `scripts/recette/1069/` (pile avec Karapace, pilote, validation au schéma du
+  registre, mutations).
+
+## Preuves
+
+- **Node 25** (poste, sans Docker) : sinistres 1166 unitaires verts, seules les 5 attendues rougissent (`app.module`,
+  `app-cablage` : client Kafka natif) ; lint des fichiers touchés, `tsc --noEmit` ; **mutations 10/10** sur l'assertion
+  (fait non publié, version d'avant, ordre inversé, rang figé, repère au lieu du montant, motif qui voyage, franchise,
+  table, auteur, survenance). Plateforme : contrats d'assurance 121/121, `classification-sante` 29/29, `tsc` ; mutation
+  du registre (retirer `rang` de `sinistres`) : `CHAMP_NON_CLASSE`, rouge.
+- **Node 24** : plateforme (export d'`origin/dev` 9560b44, `node:24-slim`) 121/121, `tsc` 0, 29/29. Sinistres (étage
+  `verification`, image depuis `git -c core.autocrlf=false archive`) : lint 0 ; **1336 unitaires (67 suites) sur MongoDB
+  et Redis réels** — au premier passage 1328/1336 : 8 délais de crochet de 5 s sous charge (portée, relances 999), aucun
+  sur un test de la story ; rejoués : portée verte seule, `dossiers.service.spec` 244/244 (`-w 1`, `--testTimeout=20000`)
+  ; 33/33 e2e ; build ; **mutations MongoDB 3/3** (fait non publié, version d'avant, ordre inversé).
+- **Pile `grp-d`** (sinistres de la branche, assurance d'`origin/dev` `8dc3285`, Kafka, Karapace, MongoDB, Redis) :
+  `docker compose up` sain ; **pilote 28/28** : cinq sujets enregistrés, `sinistres.evaluation.arretee-value` neuf (v1,
+  égal au fichier, BACKWARD) ; témoins : un champ obligatoire de plus INCOMPATIBLE, un facultatif compatible ; garde
+  `classification-sante` sur le registre vivant : 5 sujets, 0 refus ; arrêt 558 000 : un fait à la version 4 (celle du
+  `dossier.changed`), tables 2026.1, franchise 62 000 ; ordre de l'outbox `dossier.changed` → `evaluation.arretee` →
+  `provision.revisee` ; `assurance` aligne la provision (séquence 2, 558 000, `EVALUATION`), le dossier la montre ;
+  correction 600 000 : rang 2, version 5 ; refus (400 `MONTANT_EVALUE`) et rejeu sans fait de plus ; arrêt corporel
+  2 000 000 sans table ni franchise, sans proposition ; quatre faits valides au schéma relu du registre ; ni motif ni
+  décompte dans aucun fait ; outbox vide, santé 200, 0 erreur au journal.
+- **Rejeu sur `origin/dev`** (`a5fae87`, image `--no-cache`, volumes neufs) : pilote 28/28 (un premier passage coupé par le délai de l’outil, rejoué sur une organisation neuve de la même pile).
+- Verrou Docker : pris à 12:13, une seule prise, rendu à 13:09 ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+
+**Reste** (D-1069-11) : le consommateur et l'envoi C-14 (C, information écrite) ; « montant validé »
+(`sinistres.decision.validee@1`) et « garantie retenue » hors de ce fait ; lever une alerte bloquante (STORY-1070) ; le
+chiffrage de l'expertise comme repère du motif (FR-61, STORY-1071).
