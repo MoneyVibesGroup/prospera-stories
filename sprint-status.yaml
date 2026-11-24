@@ -1786,17 +1786,20 @@ reserved_ranges:
       mutations rouges ; lint, tsc, build. Sans Docker (D-978-11) : la preuve de bout en bout est celle de la recette
       croisée complète de 1080. Lot 4 de B, n° 11 (EPIC-145). NON SLOTTÉE.
   - range: "STORY-979"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe B, lot 6 — les droits de la facture et des archives du cabinet au catalogue de tenant d'auth, hors du jeton : facturation:parametres:modifier au DIST_DAF seul (demande de D, STORY-1065, D-1065-13) ; les sept ged:* du cabinet et le rôle neuf CAB_ARCHIVISTE (demande de C, STORY-1087, PRD des services du cabinet §2.3) ; recopie des manifestes au catalogue (facturation ; ged 1.1.0 après la fusion de C) (prospera-auth-service, prospera-platform-catalog-service)"
     source_doc: "prospera-stories/stories/STORY-979.md"
     reserved_on: "2026-11-24"
     note: >
-      ↻ ROUVERTE le 2026-11-24 pour sa suite (fiche, « Suite du 2026-11-24 », D-979-10 → 16) : la demande de D
-      (STORY-1066), points (1) et (2) — facturation:avoir:valider au DIST_DAF seul, hors du jeton (auth,
-      AJOUTS_A_L_ANNEXE_B) ; le manifeste facturation 1.1.0 recopié au catalogue depuis prospera-stories@24049e4.
-      Branches MNV-979-avoir ; contrat annoncé avant la fusion (journal de B, « ⚠ Contrats ») ; sans Docker (D-979-15).
-      Le point (3), le consommateur de paiement, est une story neuve après le lot 6 (D-979-14). Placée après 1112, avant
-      1113, par la session du groupe B.
+      🏁 SUITE DONE le 2026-11-24 (rouverte, puis refermée ; fiche, « Suite du 2026-11-24 », D-979-10 → 16) — auth #49
+      (dev b49d8ab), catalogue #71 (dev de988b1) ; contrat annoncé avant la fusion (stories #789, main a0f49f0). La
+      demande de D (STORY-1066), points (1) et (2) : facturation:avoir:valider au DIST_DAF seul, hors du jeton
+      (AJOUTS_A_L_ANNEXE_B ; catalogue 165 codes, 24 + 141, borne inchangée, dv inchangé) ; le manifeste facturation
+      1.1.0 recopié depuis prospera-stories@24049e4 (sha256 vérifié ; manifestes:garde verte, 48 ; les huit droits =
+      la section facturation d'auth). Node 25 : auth 36 suites 592/592, complète 1448 passés (4 suites rouges connues) ;
+      catalogue 1607 passés (3 connues) ; lint, tsc, build ; 5/5 mutations rouges. Sans Docker (D-979-15). Le point (3),
+      le consommateur de paiement, est une story neuve après le lot 6 (D-979-14). Placée après 1112, avant 1113, par la
+      session du groupe B.
       Avant la suite : 🏁 DONE le 2026-11-24 — auth #48 (dev c0f6243), catalogue #68 (dev d7e67f1) et #69 (dev b75e34b) ; contrat
       annoncé avant la fusion (stories #777, amendé par #778 pour la copie de ged). Story neuve de la plage de B (930 →
       979, le dernier identifiant libre), hors des lignes du plan du lot 6 : les demandes de D (STORY-1065) et de C

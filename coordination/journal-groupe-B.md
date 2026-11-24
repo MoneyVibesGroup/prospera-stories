@@ -57,11 +57,26 @@
      reste.
   - **Reçue le 24/11, hors des lignes du plan : → B de D (STORY-1066)** — le droit `facturation:avoir:valider` au
     `DIST_DAF` (auth, hors du jeton), la recopie du manifeste `facturation` 1.1.0 depuis prospera-stories `24049e4`
-    (catalogue), et le consommateur de `facturation.avoir.emis@1` dans `paiement`. **Non servie ici** (une story neuve,
-    à placer par la session de groupe ; §1.1 : recommandé **avant 1113** ; aucun identifiant libre dans la plage de B
-    930 → 979 : à prendre au-delà de 1116, après vérification de la marque haute).
+    (catalogue), et le consommateur de `facturation.avoir.emis@1` dans `paiement`. Placée par la session de groupe :
+    (1) et (2) en **suite de STORY-979** (ci-dessous), (3) en story neuve **après les sept stories du lot 6**
+    (D-979-14).
+  5. ~~Suite de STORY-979~~ (24/11, placée après 1112, avant 1113 ; aucun identifiant neuf : D-979-10) : **auth #49**
+     (`b49d8ab` sur `dev`), **catalogue #71** (`de988b1`) ; contrat annoncé avant la fusion (stories #789). Entrée du
+     tracker rouverte puis refermée.
+     - Auth : `facturation:avoir:valider` (« Valider un avoir au-delà du seuil ») au `DIST_DAF` seul
+       (`AJOUTS_A_L_ANNEXE_B`), hors du jeton ; catalogue 165 codes (24 + 141), borne inchangée, `dv` inchangé.
+     - Catalogue : `facturation` 1.1.0 recopiée depuis `prospera-stories@24049e4` (sha256 vérifié) ; ses huit droits =
+       la section `facturation` d'auth ; `manifestes:garde` verte (48).
+     Node 25 : auth 36 suites 592/592, complète 1 448 passés (4 suites rouges connues) ; catalogue 1 607 passés (3
+     connues) ; 5/5 mutations. **Sans Docker** (D-979-15) : verrou non pris.
+  - **Demande ouverte, à servir par B après le lot 6 : le consommateur de `facturation.avoir.emis@1` dans `paiement`**
+    (point (3) de D, STORY-1066 ; D-979-14) : une **story neuve**, placée par la session de groupe **après les sept
+    stories du lot 6** (1080, 1112, 1113, 1114, 1103, 1115, 1116), sous un **identifiant neuf réservé à l'écriture de
+    sa fiche** (au-delà de la marque haute ; la plage de B 930 → 979 est épuisée). Aucun identifiant n'est réservé ici.
+    Charge : « ⚠ Contrats » de D (STORY-1066) ; topic `facturation.avoir.emis`, Créance `(FACTURE, factureId)`,
+    `montantTtcMineur`, rejeu sur `avoirId`, crédit du tiers au-delà du reste dû ; preuve sur pile.
   - **Suivante : STORY-1113** (le BFF relaie la mise en service : `mises-en-service`, `sorties-essai`, `naissances` ;
-    AP-56), sauf si la session de groupe place d'abord la demande de D (ci-dessus). Pour 1113 : la console qui parle
+    AP-56). Pour 1113 : la console qui parle
     aux DEUX espaces (invitations de 974, D-1112-6) ; `POST /naissances` est déjà appelé par `POST /admin/essais`
     (client `ordonnerNaissance` du catalogue, délai des essais).
   3. ~~Correctif de STORY-1084~~ (ticket de A pour FE-140, placé **avant 1112** par la session de groupe, §1.1 ; aucun
@@ -1014,6 +1029,15 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
+- **← D (24/11) : (1) et (2) servis par auth #49, catalogue #71 ; (3) placé après le lot 6** (STORY-1066 de D ;
+  suite de STORY-979, annonce : stories #789). (1) `facturation:avoir:valider` au catalogue de tenant d'auth, hors du
+  jeton, au **`DIST_DAF` seul**, libellé « Valider un avoir au-delà du seuil » (`b49d8ab` sur `dev`) ; servi par
+  `GET /moi/droits` dans `droitsHorsJeton`, pas d'avance de `dv` (60 s de cache au plus). (2) `copies.json` depuis
+  `prospera-stories@24049e4`, `facturation` 1.1.0 (`de988b1` sur `dev`), `manifestes:garde` verte ; ses huit droits
+  sont ceux d'auth. (3) Le consommateur de `facturation.avoir.emis@1` dans `paiement` : **ouverte**, story neuve de B
+  **après les sept stories du lot 6**, identifiant réservé à l'écriture de sa fiche (D-979-14 ; « État », lot 6). D
+  prévenue directement (session du groupe D).
+
 - **← A (2026-11-24) : STORY-1112, relayer `/essais` et ajouter une liste ; recommandé `POST /admin/essais` qui
   enchaîne la naissance et l'ouverture avec le jeu du métier** — **servie par STORY-1112** (catalogue #70, BFF #39).
   Les deux lectures manquantes (liste, jeux chargés) sont servies par le catalogue (D-1112-1) ; le jeu du métier est
@@ -1207,6 +1231,7 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   - **Pour D** : un avoir au-delà du seuil passe pour un `DIST_DAF` dès le déploiement d'auth (cache de 60 s compris) ;
     il refuse toujours `VALIDATION_DU_DAF_REQUISE` aux autres. **Pour A** : un droit de plus dans le catalogue de
     composition d'un rôle (console) ; aucun type à régénérer.
+  - **Fusionné le 24/11** : auth #49 (`b49d8ab` sur `dev`), catalogue #71 (`de988b1`), sans écart au contrat annoncé.
 
 - **2026-11-24, STORY-1112 (lot 6, n° 2) — les essais d'un prospect relayés à la console, annoncés AVANT la fusion du
   code** (`prospera-platform-catalog-service` et `prospera-admin-panel-service`, branches `MNV-1112` ; fiche
@@ -2540,6 +2565,10 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   voir d'abord ce qui change.
 - **Un manifeste amendé sans changer de version** (facturation 1.0.0, STORY-1065) n'atteint pas une base de catalogue
   déjà semée (le semis n'écrit pas une version publiée) : le dire au propriétaire du manifeste.
+- **Recopier un manifeste « depuis un SHA donné »** (suite de 979) : mettre `_wt-b-stories` en HEAD détachée sur ce
+  SHA avant `manifestes:copier` (la ligne `origine` le nomme), vérifier d'abord que `manifestes/` n'a pas bougé entre ce
+  SHA et `origin/main` (`git diff --stat <sha> origin/main -- manifestes/`), puis rejouer la garde contre `main`.
+  Remettre le worktree sur `origin/main` avant d'écrire les docs.
 
 - **Une construction d'image peut tomber sur le téléchargement du binaire de Confluent** (19/11 : `npm ci` de
   `fiscal-service`, « Client network socket disconnected before secure TLS connection », `node-pre-gyp` puis
