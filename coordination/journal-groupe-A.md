@@ -565,6 +565,8 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 - **→ B (2026-11-17) : le jeu du cabinet est dans `jeux-demonstration/cabinet-demo-togo/`** — ~~à faire par B~~ **servie par B (2026-11-17)** : plateforme #26 (`dev` `3407408`), étiquette `jeu-cabinet-v1` posée sur `e958bd6`. A a ajouté ce dossier (données seules, plateforme #25, `dev` `e958bd6`), sur la phrase du README « les jeux des verticales viennent de leurs propriétaires ». (1) La ligne du tableau « Qui écrit dans quel dossier » : `jeux-demonstration/cabinet-demo-togo/` → groupe A. (2) **L'étiquette `jeu-cabinet-v1`** : `generateur.source` du `jeu.json` la nomme (`prospera-plateforme@jeu-cabinet-v1:jeux-demonstration/cabinet-demo-togo/generateur/generer.mjs`) ; je n'en crée pas dans votre dépôt (D l'a fait pour `jeu-assurance-v1` ; si vous préférez qu'A le fasse, le dire ici). (3) Pour le catalogue : le dossier du jeu porte aussi `generateur/` (le vérificateur l'ignore) ; à `JEUX_DEMONSTRATION_DIR`, copier le dossier entier ou seulement `jeu.json` et `balance/`. Le jeu seul se rejoue : `node jeux-demonstration/cabinet-demo-togo/generateur/generer.mjs <dossier>` (même graine, mêmes empreintes). Les routes C13 de balance et de bilan viennent en STORY-928.
 
+- **→ C (24/11) : édition libre des lignes d'une écriture de facture** (FE-149, validée par l'utilisateur) : voir la section « Lot 6 » ci-dessus et le ticket `TICKET-BACKEND-comptabilite-ecriture-de-facture-modifiable-ligne-a-ligne` — ouverte.
+
 ## Réponses aux demandes reçues
 
 - **← B (2026-11-16) routes C13 du cabinet : servies** (2026-11-17, STORY-928, balance #156 `98078b0`, bilan #179 `1651d33`) : `POST /api/v1/instance/{balance|bilan}/{organisationId}/import` et `/effacement`, aux corps de `contrats-instance-v1`, sous l'identité `MOTEUR`, espace d'essai seulement (`INSTANCE_ESPACE=ESSAI`). Le jeu `cabinet-demo-togo` s'importe dans l'ordre (`profil-societe`, `balance`) et s'efface complètement (preuve Docker de bout en bout). Pour B : l'import de `bilan` n'a aucun objet (la part `bilan` du jeu n'existe pas, D-927-1) ; le dossier de démonstration n'est matérialisé que dans balance (ticket `dossier-de-demonstration-sans-creation-par-le-moteur`, à décider avec toi).
@@ -708,7 +710,7 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   l'annuaire, du menu ⋮ et de l'écran Essais. PR #34 fusionnée. Code : AP-55 après STORY-1080, AP-57 après 1112, AP-59 après
   1114, toutes trois du groupe B.
 
-- **2026-11-24 — Maquettes du cabinet FE-149, FE-150, FE-141 publiées, EN ATTENTE DE VALIDATION.** Prototype cabinet
+- **2026-11-24 — Maquettes du cabinet FE-149, FE-150, FE-141 publiées, VALIDÉES PAR L'UTILISATEUR LE 24/11.** Prototype cabinet
   (`prototypes/prospera-prototype.html`), branche `lot6-maquettes-cabinet`. L'Artifact cabinet `9iBJj5jTd1552uNPpZDJiL` est
   illisible depuis ce compte (bascule de compte) : **nouvelle URL `https://claude.ai/artifact/FEn4wbM4pYPJYJ3uqLoBgp`**, version 1.
   - FE-149 : Atelier › « Factures » : déposer (vrai téléversement), lecture, relecture avec un seul bouton « Inscrire les 3 factures
@@ -720,6 +722,16 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   - **Écart backend à décider (FE-141)** : les paquets publiés `syscohada-revise@2.2` et `@2.3` ne déclarent AUCUN seuil
     (STORY-553 contenant seul) : aujourd'hui tous les verdicts sont « aucun repère déclaré ». La maquette dessine le verdict avec
     trois repères d'exemple, marqués. Peupler les repères est une story de sourcing (non écrite).
+- ✅ **2026-11-24 — FE-149, FE-150 et FE-141 sont VALIDÉES par l'utilisateur**, avec les 7 réponses par défaut retenues ci-dessous,
+  **sauf un ajout sur FE-149** : « me donner la possibilité de modifier directement » la facture à corriger. Rendu : tous les champs
+  lus se modifient sur place, et l'écriture proposée se modifie directement dans son tableau (compte, débit, crédit, ajouter, supprimer,
+  total et équilibre en direct, « Modifié par vous »). Artifact mis à jour (même URL). Statuts : FE-149 et FE-141 `ready-for-dev`,
+  FE-150 `blocked` (attend STORY-1099).
+- → C (24/11) : **l'édition libre des lignes d'une écriture de facture n'est pas servie** : `POST …/factures/lots/{lotId}/inscrire`
+  n'accepte en correction que les montants, `compte`, `tiersId`, `journal`, `tva`, `compteDeTva`, `avoir`, `libelle`, `devise`, `dateEcriture`,
+  `numeroFacture` ; les lignes sont dérivées (D-1097-8). Demande : `lignes[]` en correction, avec les contrôles de la saisie du brouillard
+  (équilibre, comptes du plan propre, deux lignes au moins), et préciser que `inscrire` lève les signaux réparés par une correction. Ticket :
+  `tickets/TICKET-BACKEND-comptabilite-ecriture-de-facture-modifiable-ligne-a-ligne.md` (GAP dans `sprint-status.yaml`) — ouverte.
 - Questions posées à l'utilisateur pour la validation, avec la réponse par défaut :
   1. FE-141 : montrer les verdicts avec des repères d'exemple (marqués) tant que le référentiel n'en déclare aucun ? Défaut : oui ; le banc d'essai montre l'état réel.
   2. FE-149 : « Inscrire les 3 factures cochées » ne coche d'avance que les factures sans aucun avertissement ? Défaut : oui.
