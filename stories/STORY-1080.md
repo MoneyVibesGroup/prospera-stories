@@ -1,6 +1,6 @@
 # STORY-1080 : le cabinet installé par le moteur (clôture du lot 4 de B)
 
-Status: in-progress
+Status: done
 
 **Complexité :** grande (six vérifications d'installation dans deux services, la recette `cabinet-moteur` réécrite
 autour de `POST /installations`, le catalogue de la recette armé pour le moteur, la recette croisée complète)
@@ -146,10 +146,68 @@ d'un module DÉJÀ installé (levée de sanction) ne rejoue aucune vérification
 
 ## Preuves
 
-(à écrire à la livraison)
+- **balance (#159, `dev` `4edb4c8`) et bilan (#182, `dev` `0f17ec4`)**, fusionnés le 19/11 : Node 25, vérifications
+  27/27 (balance) et 17/17 (bilan), e2e `instance-c13` 24/24 chacun, suites complètes à leurs rouges préexistantes
+  (14 et 15 suites : binding de Confluent, chemins Windows) ; mutations 15/15 et 10/10.
+- **catalogue (#67, `dev` `fddfa7d`)** : Node 25, `src/etat-publie` 34/34 (5 neufs : la réponse de la console validée
+  par Ajv contre le contrat sans `utilisateur`, mot pour mot la lecture d'un administrateur sans `droits` ; aucune
+  double lecture ; 404 ; 503 ; `org:read` sans identité de service), e2e de la chaîne de gardes 5/5 (opérateur
+  `org:read` 200 ; sans `org:read`, membre de l'organisation elle-même : 403 ; 401 ; 400) ; suite complète 1 597 passés
+  (3 suites rouges connues, binding de Confluent) ; e2e : 5 suites rouges **à l'identique sur `origin/dev`** (172
+  échecs avant comme après : fournisseurs absents de leurs modules de test, `RedisHealthIndicator`,
+  `PublicationDesManifestes`) ; `tsc`, lint ; **mutations 6/6** rouges sur une assertion.
+- **BFF (#38, `dev` `7c85076`)** : Node 25, `etat-publie.spec` 15/15, OpenAPI 18/18 (2 neufs), unitaires 548/548 (44
+  suites), e2e 238/238 (13 suites) ; `tsc`, lint ; **mutations 6/6**.
+- **recette (#27, `dev` `a6da2ea`)** : `npm test` 10 suites, 98/98 ; `npm run verifier` vert ; **mutations de la
+  garde du profil 4/4** (bilan retiré d'`INSTALLATION_SERVICES`, secret du moteur différent d'auth, jeton statique
+  reposé, naissance sans adresse).
+- **Recette croisée complète, jouée une fois sur pile neuve : 11/11 suites, 142/142 tests, 1 160 s**
+  (`renvoi-du-lien`, `facturation`, `atelier-balance`, `distributeur`, `delegation`, `abonnement`, `zone-franche`, `cabinet-moteur`, `referentiel-par-dossier`, `pile`, `comptabilite`). `COMPOSE_PROJECT_NAME=grp-b`, `RECETTE_ESPACE=ESSAI`, volumes neufs, `COMPOSE_PARALLEL_LIMIT=2`,
+  images des treize services construites depuis `git -c core.autocrlf=false archive origin/dev` **après la fusion** de
+  #67 et #38 (auth `96f8ab3`, kyc `d4932c6`, catalogue `fddfa7d`, notification `e0a50c0`, paiement `4684d22`,
+  dossier `2bf9dbd`, document `da4ddf2`, balance `0ff2402` (1080 et 1099 de C), bilan `0f17ec4`, BFF `7c85076`,
+  fiscal `4ee8ed7`, comptabilité `6e4132b`, plateforme `50c12a6` pour le jeu), fiscal en surcouche, surcouche de
+  contextes hors dépôt. `cabinet-moteur` **11/11** :
+  - `POST /installations` de `balance` + `bilan` : **six vérifications `FAITE` / `VERT` / mesure 0**, plan `TERMINE`,
+    droits `moteur:<plan>`, modules ouverts par l'état publié ; **aucun jeton posé à la main** (le catalogue l'a demandé
+    à auth, STORY-978 : démarrage réel de `JetonsDuMoteur` prouvé) ;
+  - sur le cabinet qui tient une balance validée et un jeu d'états validé, les six mesures rejouées par le jeton du
+    moteur : `VERT`, `detail` lu (« 1 balance validée recalculée : 0 écart. », « 1 version figée recalculée (0 sans
+    empreinte, non jugée) : 0 jeu d'états altéré. », « 1 exercice ouvert examiné : 0 dossier sans paquet fiscal
+    publié. »…) ; jeton d'utilisateur 403 `IDENTITE_DE_SERVICE_REQUISE`, code non déclaré 404 `VERIFICATION_INCONNUE` ;
+  - **AP-55** : la console lit l'état publié par le BFF (`balance`/`bilan` `EN_SERVICE`, `SUSPENDU` sous sanction,
+    `EN_SERVICE` à la levée) ; la route du contrat refuse l'opérateur (403 `ORGANISATION_HORS_JETON`) et sert le même
+    état au cabinet ; une **seconde organisation installée par les relais du BFF** (offre, `POST …/installations`, plan
+    lu) : `balance` `EN_SERVICE`, `bilan` `NON_INSTALLE` — deux organisations, deux jetons du moteur ;
+  - FR-6 : `conseil` (sans adresse) n'est pas ouvert (`EN_ATTENTE`, `NON_EXECUTEE` `SERVICE_NON_CONFIGURE`) ;
+  - 924 + 923 contre le vrai `dossier-service`, **1081** (le collaborateur modifie un dossier de son portefeuille par le
+    BFF, 404 hors portefeuille), **1082** (C13 : le dossier de démonstration naît dans `dossier-service`, créé par le
+    moteur, visible au portefeuille du cabinet), effacement `EFFACE` puis `DEJA_EFFACE`.
+  - Points ouverts soldés : 974 (module d'invitation d'auth et fournisseur du catalogue démarrés : services `healthy`),
+    978, 1081, 1082 ; **1083/1084** déjà soldés à 1082.
+- **Essais avant la recette finale : 4.** (1) `cabinet-moteur` seul, pile neuve : 10/11, une assertion fausse de ma
+  recette (le portefeuille de `dossier-service` range ses lignes dans `lignes`, pas `items`) ; (2) la même : 11/11 en
+  200 s ; (3) **recette complète sur pile neuve : 9/11 suites, 134/142** — `delegation` rouge (3) : depuis STORY-960
+  (auth `cf8e001`, 17/11, après la dernière recette complète de 929), `DIST_ADMIN` ne lit plus le journal du paiement
+  ni ne rédige de modèle (403 `PERMISSION_DENIED`, voulu par l'annexe B), plus un 429 du plafond par adresse de la
+  notification ; `comptabilite` rouge en `ECONNRESET` sur Mailhog (`localhost`, fin de recette : le symptôme mémoire de
+  929). Recette corrigée (`delegation` : un membre du client au rôle de lecture composé, attente du 429) ; (4)
+  `delegation` + `comptabilite` sur la même pile : 20/20. Puis `down -v`, volumes retirés, `docker desktop restart`, et
+  la pile neuve de la recette finale.
+- **Verrou Docker** : pris à 02:00 (atomique, libre ; D ne le tenait pas), rendu à 03:26 après `down -v`
+  (aucun conteneur, volume ni réseau `grp-b` ne reste).
+
+## Livraison
+
+🏁 **DONE (2026-11-24)** — balance **#159** (`dev` `4edb4c8`, 19/11), bilan **#182** (`dev` `0f17ec4`, 19/11),
+catalogue **#67** (`dev` `fddfa7d`), BFF **#38** (`dev` `7c85076`), recette **#27** (`dev` `a6da2ea`) ; contrats
+annoncés avant la fusion (stories #728 le 19/11, #764 le 24/11), sans écart. Ticket
+`verifications-de-balance-et-de-bilan-non-servies` fermé. **AP-55 débloquée** (journal de B, « → A »).
 
 ## Ce qui reste
 
 - Les vérifications de `conseil` (`aucun-scenario-applique`, `gate-conseil`, balance-service), de `consolidation` et de
   `declarations` (fiscal, à A) ne sont pas servies : nommées par le ticket, hors de cette ligne du plan.
 - La mise en service avec `invites` jouée par une recette à deux espaces (D-1080-11).
+- La recette ne passe pas encore par `POST …/reprendre` du BFF (aucun plan inachevé reprenable dans ce parcours) :
+  relayé depuis STORY-917, éprouvé par ses tests ; AP-55 l'éprouvera dans son gate réel.

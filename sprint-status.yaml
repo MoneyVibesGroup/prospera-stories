@@ -977,14 +977,21 @@ reserved_ranges:
   #    du 2026-11-14. Ordre validé par l'utilisateur le 2026-11-18 (journal de A, « État », lot 4). Fiches écrites
   #    juste avant de coder ; le story_id_high_water_mark reste le plafond RÉELLEMENT écrit.
   - range: "STORY-1080"
-    status: "RÉSERVÉ"
+    status: "done"
     owner: "Groupe B, lot 4 (reçue de A) — balance et bilan servent leurs six routes …/verifications/… (verification-installation@1) ; la recette cabinet-moteur installe par POST /installations (le test D-929-1 s'inverse), le PUT de la console n'y sert plus qu'à la sanction ; le catalogue de la recette reçoit NAISSANCE_AUTH_URL, MOTEUR_JETON_SERVICE et INSTALLATION_SERVICES ; recette croisée complète jouée une fois (balance, bilan, recette)"
     source_doc: "prospera-stories/stories/STORY-1080.md"
     reserved_on: "2026-11-18"
     note: >
-      En cours (2026-11-19). Nommée par STORY-929 (D-929-1), réservée sur validation de l'utilisateur du 2026-11-18,
-      reçue de A (D-L4-1). Ticket verifications-de-balance-et-de-bilan-non-servies. Clôture du lot 4 de B : points
-      ouverts de 974, 978, 1081, 1082 soldés par la recette. Lot 4 de B, n° 10 de la ligne du plan. NON SLOTTÉE.
+      🏁 DONE le 2026-11-24 — balance #159 (dev 4edb4c8), bilan #182 (dev 0f17ec4), catalogue #67 (dev fddfa7d),
+      admin-panel #38 (dev 7c85076), recette #27 (dev a6da2ea) ; contrats annoncés avant la fusion (stories #728
+      le 19/11 ; #764 le 24/11 : GET /api/v1/console/etat-publie/{organisationId} au catalogue, org:read, le calcul du
+      contrat sans utilisateur ; GET /api/v1/admin/orgs/{orgId}/etat-publie au BFF, EtatPublieOrganisationDto).
+      Commencée au lot 4 (19/11), reprise et finie au lot 6 (n° 1 de B) : AP-55 débloquée. Recette croisée complète
+      sur pile neuve grp-b (ESSAI, images depuis origin/dev après fusion) : 11/11 suites, 142/142 tests,
+      1 160 s ; cabinet-moteur 11/11 (six vérifications VERT par POST /installations, aucun jeton posé à la main ;
+      seconde organisation installée par les relais du BFF ; état publié lu par la console). Mutations 6/6 (catalogue),
+      6/6 (BFF), 4/4 (garde du profil). Ticket verifications-de-balance-et-de-bilan-non-servies fermé. Points ouverts de
+      974, 978, 1081, 1082 soldés. NON SLOTTÉE.
   - range: "STORY-1081"
     status: "RÉSERVÉ"
     owner: "Groupe B, lot 4 (reçue de A) — le collaborateur modifie l'identité d'un dossier de son portefeuille, par le BFF : PATCH /dossiers/{id} ouvert à TENANT_USER dans dossier-service (la portée décide, 404 hors portée) et dans le BFF ; le 409 DOSSIER_NIF_DEJA_UTILISE ne nomme le dossier en conflit que dans la portée de l'appelant ; le 409 de version reste muet (D12) ; D-923-1 renversée par l'utilisateur (dossier, admin-panel)"
