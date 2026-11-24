@@ -1204,14 +1204,20 @@ reserved_ranges:
       Demande de l'utilisateur du 2026-11-18 (« côté archive, c'est important aussi d'avoir cela ») ; cloisonnement
       par cabinet exigé, comme pour STORY-1097 → 1099 (amendées le même jour). NON SLOTTÉE.
   - range: "STORY-1103"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe B, lot 6, n° 5 — renvoyer un dossier KYC pour correction : motif facultatif sur la marque d'une pièce, POST /admin/kyc/:orgId/request-correction (UNDER_REVIEW → PENDING_DOCUMENTS), kyc.correction.requested@1 au registre, relais du BFF (prospera-kyc-service, prospera-admin-panel-service). Écran : AP-62. L'e-mail au cabinet est demandé à D (D-1103-1)."
     source_doc: "prospera-stories/stories/STORY-1103.md"
     reserved_on: "2026-11-20"
     note: >
       Constat de A en dessinant la maquette d'AP-38 (2026-11-19) : le renvoi pour correction part sans motif, sans
       événement, et ne prévient pas le cabinet. Recommandation de A suivie par l'utilisateur. Placée au lot 6 de B, n° 5
-      (PLAN-LOT-6-2026-11-23.md §5). 2026-11-24 : décisions D-1103-1 → 10 et contrat annoncés avant le code. NON SLOTTÉE.
+      (PLAN-LOT-6-2026-11-23.md §5). 2026-11-24 : décisions D-1103-1 → 10 et contrat annoncés avant le code (stories
+      #805). 🏁 DONE le 2026-11-24 — kyc #29 (dev 9cef9cb), admin-panel #42 (dev c451b17). kyc.correction.requested@1
+      publié (schéma au dépôt, BACKWARD, validé contre l'événement produit) ; AP-62 débloquée (appel réel au BFF, vrai
+      client de kyc en HTTP, contre une doublure aux corps produits par le code de kyc de la story). Node 25 : kyc 521
+      passés (4 suites rouges connues, binding) et e2e 121/121 ; BFF 711/711 et e2e 294/294 ; mutations 16/16 et 8/8.
+      Docker : non ; verrou non pris. AC-5 (l'e-mail vu dans mailhog) ouvert avec la demande à D (D-1103-1 : l'e-mail
+      passe par prospera-expert-comptable et notification). Lot 6 de B, n° 5. NON SLOTTÉE.
   - range: "STORY-1104"
     status: "RÉSERVÉ"
     owner: "À placer au prochain plan — le projet financé : pro forma (TTC, validité, pièce), frais annexes, apport, montant demandé calculé, prêt demandé proposé d'office, et le contrat des documents du dossier (dépôt réel, aperçu, historique) ; bilan-service, document-service pour le stockage (demande à C). Écran : FE-152."

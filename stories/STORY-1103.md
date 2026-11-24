@@ -1,6 +1,6 @@
 # STORY-1103 : Renvoyer un dossier KYC pour correction — le cabinet est prévenu et lit le motif de chaque pièce
 
-Status: in-progress — **créée le 2026-11-19** par A, à la validation de la maquette d'AP-38 (l'utilisateur a suivi la
+Status: done (2026-11-24 ; AC-5 ouvert avec la demande à D, D-1103-1) — **créée le 2026-11-19** par A, à la validation de la maquette d'AP-38 (l'utilisateur a suivi la
 recommandation de A : « suis ta recommandation »). **Placée au lot 6 de B, n° 5** (`PLAN-LOT-6-2026-11-23.md` §5 ;
 Docker : non ; fini quand `kyc.correction.requested@1` est publié et AP-62 débloquée). Prise par B le 2026-11-24 :
 décisions du premier geste et contrat ci-dessous, **annoncés avant le code** (AC-1).
@@ -194,3 +194,41 @@ backend. Le renvoi, lui, a besoin de cette story.
 - Détail (`GET /api/v1/admin/orgs/{orgId}`, bloc `kyc`) : `KycDocumentDto` + `reviewStatus`, `reviewedAt?`,
   `motifRenvoi?` ; `KycDetailDto` + `correctionDemandeeLe?` ; `KycEvenementDossierDto` : type `RENVOI_CORRECTION`,
   `message?`, `texte?`, `piecesRenvoyees?` (`KycPieceRenvoyeeDto`).
+
+## Livré (2026-11-24)
+
+- **kyc #29** (`9cef9cb` sur `dev`) et **BFF #42** (`c451b17` sur `dev`), fusionnées en rebase, arbres identiques aux
+  branches poussées (`ee567cd`, `636a432`). Contrat annoncé avant le code : stories #805 ; **sans écart**. Deux
+  précisions de comportement, écrites dans « ⚠ Contrats » : le refus `RENVOI_SANS_PIECE_A_CORRIGER` est rendu avant
+  toute écriture ; un dossier déjà sorti de revue sans pièce rejetée reçoit `KYC_DECISION_CONFLIT`.
+- Fichiers neufs de kyc : `src/modules/kyc/texte-de-renvoi.util.ts` (composition, libellés), `dto/renvoi-correction.dto.ts`,
+  `contrat/schemas/kyc.correction.requested.json`, `scripts/schemas/registre.mjs` (+ `npm run schemas:compatibilite`,
+  `schemas:enregistrer`). Du BFF : `dto/renvoi-correction.dto.ts`, `test/admin-kyc-renvoi.e2e-spec.ts`,
+  `test/fixtures/kyc-renvoi/` (corps produits par le code de kyc de la story, `ORIGINE.json` dit d'où).
+- Aucun module, contrôleur, fournisseur, dépendance ni Dockerfile neuf ; `permission.enum.ts` intact (`kyc:reject`).
+
+## Preuves
+
+| AC | Preuve |
+|---|---|
+| AC-1 | « ⚠ Contrats » du journal de B, stories #805, fusionné avant la première ligne de code |
+| AC-2 | e2e kyc : la marque avec motif le rend (réponse, détail admin, `GET /kyc/status` du cabinet) ; approuvée ensuite, plus de motif ; marque sans motif ou blanche ⇒ effacé ; 501 caractères ⇒ 400 |
+| AC-3 | e2e kyc : 409 `RENVOI_SANS_PIECE_A_CORRIGER` (dossier inchangé, aucun événement), `If-Match` périmé ⇒ 409 `KYC_DECISION_CONFLIT`, absent ⇒ 428 ; BFF : les mêmes refus traversent par leur code |
+| AC-4 | unitaire : ordre profil (ETag) → pièces → transition → journal → `kyc.status.changed` → `kyc.correction.requested`, tous sous la même session, une fois chacun ; sans pièce ou ETag périmé, aucune écriture ; e2e : un seul `correctionRequested` |
+| AC-5 | **ouvert** : l'e-mail est hors des dépôts de B (D-1103-1), demande à D |
+| AC-6 | e2e kyc et BFF : chronologie `RENVOI_CORRECTION` avec auteur, message, texte et pièces ; `decisions` inchangées |
+| AC-7 | e2e kyc : `reject` sans `reason` ⇒ 400 ; suites existantes du rejet global vertes |
+| D-1103-2 | e2e cabinet : une pièce renvoyée redéposée ⇒ `UNDER_REVIEW` (journal `RESOUMISSION`, renvoi purgé, l'ancienne version garde son motif) ; deux renvoyées, une redéposée ⇒ le dossier attend |
+| Schéma | `src/kafka/kyc-correction-requested.schema.spec.ts` : l'événement produit par `KycEventsService` est valide (ajv, draft-07), le modèle fermé refuse 9 altérations ; le script du registre éprouvé contre un faux registre (nouveau sujet, BACKWARD posé, compatible, incompatible ⇒ code 1, registre injoignable ⇒ code 1) |
+
+- Node 25 : kyc unitaires **521 passés** (4 suites rouges connues, toutes du binding natif du client Kafka et
+  identiques sur `dev` : `app-cablage`, `kafka-producer`, `outbox-relay`, `document-extrait-consumer`), e2e **121/121** ;
+  BFF **711/711**, e2e **294/294** (dont 12 contre la doublure de kyc et 4 du contrat OpenAPI) ; `tsc`, lint des
+  fichiers touchés, `nest build` verts ; garde des noms de schéma uniques du BFF vert.
+- Mutations : kyc **16/16** (motif posé ou gardé à tort, retour en revue prématuré, purge oubliée, journal
+  `SOUMISSION`, renvoi compté comme soumission, renvoi sans pièce accepté, pièces non triées, événement non émis, 409
+  non traduit, texte non rogné, `correctionDemandeeLe` ou pièces absents du détail, `message` indéfini sérialisé, motif
+  perdu en route, ligne sans motif omise) ; BFF **8/8** (motif ou `If-Match` ou message perdus, code du refus
+  neutralisé ou relayé sous un autre statut, texte non rogné, borne relâchée, énumération amputée).
+- **Docker : non** (plan §5) : aucun module, dépendance ni Dockerfile ne change ; verrou non pris.
+
