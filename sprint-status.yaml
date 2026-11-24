@@ -639,6 +639,62 @@ reserved_ranges:
       réels, 37 e2e ; mutations 22/22 et 5/5 ; plateforme 657. Pile grp-d (Karapace) 27/27, rejouée depuis origin/dev.
       Lot D, n° 7 du lot 6, dernière : le lot 6 de D est fini, 7/7 (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-208 ; FR-61,
       FR-62, FR-67, FR-68, FR-75 ; remplaçante du plan de C). « Fini quand » fixé par la fiche (D-1071-1). NON SLOTTÉE.
+  - range: "STORY-1072"
+    status: "RÉSERVÉ"
+    owner: "Groupe D — le cabinet prévenu par e-mail d'un renvoi de son dossier KYC : modèle kyc-dossier-renvoi-correction (prospera-notification-service), consommateur de kyc.correction.requested@1 (prospera-expert-comptable), preuve AC-5 dans mailhog"
+    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    reserved_on: "2026-11-24"
+    note: >
+      Demande de B (STORY-1103, prospera-stories #805), placée par D le 24/11 (journal de D). Q-D-13 : qui tient
+      prospera-expert-comptable (défaut : D le porte). Fiche à écrire juste avant de coder. NON SLOTTÉE.
+  - range: "STORY-1073"
+    status: "RÉSERVÉ"
+    owner: "Groupe D — la facture lit sa fiche légale : l'identité légale du dossier propre de l'organisation (dossier-service) et les coordonnées de paiement des comptes d'encaissement (paiement) ; le DAF ne choisit plus que le compte imprimé (prospera-ventes-service)"
+    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    reserved_on: "2026-11-24"
+    note: >
+      Q-D-12 répondue par l'utilisateur le 24/11 (D-Q12-1, journal de D, #812). Dépend de deux livraisons de B (DossierEtatV1
+      complété ; comptes d'encaissement publiés). Fiche à écrire juste avant de coder. NON SLOTTÉE.
+  - range: "STORY-1074"
+    status: "RÉSERVÉ"
+    owner: "Groupe D — la consolidation s'installe à part : sa garde propre et ses trois vérifications (perimetre-arrete, ecritures-equilibrees, gate-consolidation) (prospera-bilan-service)"
+    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    reserved_on: "2026-11-24"
+    note: >
+      Amendement du lot 6 (24/11 soir, D-L6-5 : bilan passe de B à D). Source : consolidation.manifest.ts ; « Ce qui reste » de
+      STORY-1080 ; vente à part (STORY-549). Fiche à écrire juste avant de coder. Lot D, n° 11 du lot 6. NON SLOTTÉE.
+  - range: "STORY-1075"
+    status: "RÉSERVÉ"
+    owner: "Groupe D — les routes d'instance export, sante et migrer du bilan (prospera-bilan-service)"
+    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    reserved_on: "2026-11-24"
+    note: >
+      Amendement du lot 6 (24/11 soir, D-L6-5). Source : bilan.manifest.ts. Fiche à écrire juste avant de coder.
+      Lot D, n° 12 du lot 6. NON SLOTTÉE.
+  - range: "STORY-1076"
+    status: "RÉSERVÉ"
+    owner: "Groupe D — les seuils de l'analyse financière, sourcés et versionnés dans le paquet (aucun dans @2.2 ni @2.3) : FE-141 affiche ses verdicts (prospera-bilan-service)"
+    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    reserved_on: "2026-11-24"
+    note: >
+      Amendement du lot 6 (24/11 soir, D-L6-5). Source : journal de A, 24/11 (FE-141) ; STORY-552. Fiche à écrire juste avant
+      de coder ; sans source, une question au PO avec le choix par défaut. Lot D, n° 8 du lot 6. NON SLOTTÉE.
+  - range: "STORY-1077"
+    status: "RÉSERVÉ"
+    owner: "Groupe D — le contrôle « capitaux propres < ½ capital » (AUSCGIE 371-373 SARL, 664-669 SA) et son échéance légale (prospera-bilan-service)"
+    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    reserved_on: "2026-11-24"
+    note: >
+      Amendement du lot 6 (24/11 soir, D-L6-5). Source : analyse-pack-25-livres-2026-11-23.md §3, §7.1 ; forme juridique lue de
+      dossier-service. Fiche à écrire juste avant de coder. Lot D, n° 9 du lot 6. NON SLOTTÉE.
+  - range: "STORY-1078"
+    status: "RÉSERVÉ"
+    owner: "Groupe D — les contrôles d'intégrité de la liasse (FRNG = BFR + trésorerie nette, caisse créditrice, amortissements > brut, perte de change sans provision) et la liasse rapprochée de sa balance par l'empreinte (STORY-1022) (prospera-bilan-service)"
+    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    reserved_on: "2026-11-24"
+    note: >
+      Amendement du lot 6 (24/11 soir, D-L6-5). Source : analyse-pack-25-livres §7.2 ; referentiels/controles-balance-ohada.json.
+      Le rapprochement par l'empreinte attend STORY-1022 (C). Fiche à écrire juste avant de coder. Lot D, n° 10 du lot 6. NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
@@ -2268,6 +2324,47 @@ reserved_ranges:
       ExpertsService.exigerDesignable et par POST …/controle-de-designation ; GET experts/{expertId} déclaré en lecture
       seule au manifeste. Node 24 : 1056 unitaires sur MongoDB réel, 24 e2e, build 0 ; pas de pile. Lot 3 de C, n° 5.
       NON SLOTTÉE.
+  - range: "STORY-1023"
+    status: "RÉSERVÉ"
+    owner: "Groupe C — les contrats de la balance complétés : le dossier déclaré dans toutes les réponses (imports, cahiers, rejets, rapprochement) et la lecture inter-organisations de la plateforme (@PlatformReadOnly, AD-P16) (prospera-balance-service)"
+    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    reserved_on: "2026-11-24"
+    note: >
+      Amendement du lot 6 (24/11 soir, D-L6-5), consigne de l'utilisateur. Source : TICKET-BACKEND-balance-ne-declare-pas-son-dossier
+      (servi en partie par 906) ; spine balance §Non couvert. Fiche à écrire juste avant de coder. Lot C, n° 12 du lot 6. NON SLOTTÉE.
+  - range: "STORY-1022"
+    status: "RÉSERVÉ"
+    owner: "Groupe C — la balance publie l'empreinte de ses soldes (soldesChecksum), pour rapprocher la liasse de sa balance (prospera-balance-service)"
+    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    reserved_on: "2026-11-24"
+    note: >
+      Amendement du lot 6 (24/11 soir, D-L6-5). Source : stories/STORY-381.md (Écartés). Consommée par STORY-1078 (D, bilan).
+      Fiche à écrire juste avant de coder ; contrat annoncé avant le code. Lot C, n° 11 du lot 6. NON SLOTTÉE.
+  - range: "STORY-1021"
+    status: "RÉSERVÉ"
+    owner: "Groupe C — les routes d'instance export, sante et migrer de la balance (prospera-balance-service)"
+    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    reserved_on: "2026-11-24"
+    note: >
+      Amendement du lot 6 (24/11 soir, D-L6-5). Source : manifestes/balance.manifest.ts (routesInstance, migrer) ;
+      instance-c13.controller.ts ne sert que vérifications, import et effacement. Fiche à écrire juste avant de coder.
+      Lot C, n° 10 du lot 6. NON SLOTTÉE.
+  - range: "STORY-1020"
+    status: "RÉSERVÉ"
+    owner: "Groupe C — l'état de rapprochement s'exporte (PDF / Excel) ; débloque FE-077 (prospera-balance-service)"
+    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    reserved_on: "2026-11-24"
+    note: >
+      Amendement du lot 6 (24/11 soir, D-L6-5). Source : PRD Atelier FR-A17 ; FE-077 bloquée « aucune route d'export ».
+      Fiche à écrire juste avant de coder. Lot C, n° 8 du lot 6 (première des cinq). NON SLOTTÉE.
+  - range: "STORY-1019"
+    status: "RÉSERVÉ"
+    owner: "Groupe C — le conseil s'installe à part : sa garde propre (CONSEIL_NOT_ENTITLED) et ses deux vérifications (aucun-scenario-applique, gate-conseil) (prospera-balance-service)"
+    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    reserved_on: "2026-11-24"
+    note: >
+      Amendement du lot 6 (24/11 soir, D-L6-5). Source : manifestes/balance.manifest.ts, conseil.manifest.ts ; « Ce qui reste » de
+      STORY-1080 ; vente à part (STORY-549, PO le 12/11). Fiche à écrire juste avant de coder. Lot C, n° 9 du lot 6. NON SLOTTÉE.
   - range: "STORY-1018"
     status: "RÉSERVÉ"
     owner: "Groupe C — correctif de FR-73 : l indemnité proposée arrondie à 5 000 et le décompte au franc sont tous deux conformes à l arrêt de l évaluation (pas de motif), le refus MOTIF_ECRIT nomme les deux, le montant arrêté reste au franc (sinistres)"
