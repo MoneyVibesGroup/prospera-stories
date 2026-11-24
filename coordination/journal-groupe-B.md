@@ -1130,6 +1130,11 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   - **Catalogue** : `copies.json` recopié depuis `prospera-stories@1561370` ; seul `facturation` change (`droits[6]`,
     version 1.0.0 gardée par la source, D-979-7). **`ged` 1.1.0 n'est pas recopié** : il attend la fusion du code de C
     (D-979-8).
+  - **Amendement (24/11), annoncé AVANT la fusion** : le code de C est fusionné (document-service #30) et la 1.1.0 est
+    sur `main` ; le catalogue la recopie dans la même story (branche `MNV-979-ged`, depuis
+    `prospera-stories@4fab396`) : `ged` passe de 1.0.0 à **1.1.0** (version neuve semée à côté de l'ancienne), cinq
+    droits du cabinet de plus, `routesLectureSeule` remises sur les routes réelles. Ses sept `ged:*` du cabinet sont
+    ceux qu'auth attribue (D-979-3 vérifiée). Rien d'autre ne change.
   - **Pour D** : `PUT /api/v1/facturation/parametres` passe pour un `DIST_DAF` dès le déploiement d'auth (cache de
     60 s compris). **Pour C** : les routes du cabinet de `ged` passent pour l'associé, le collaborateur et l'archiviste
     selon la matrice. **Pour A** : un rôle de plus dans la liste des rôles d'un cabinet (console, AP-38 et suivantes) ;
