@@ -75,6 +75,7 @@
     sa fiche** (au-delà de la marque haute ; la plage de B 930 → 979 est épuisée). Aucun identifiant n'est réservé ici.
     Charge : « ⚠ Contrats » de D (STORY-1066) ; topic `facturation.avoir.emis`, Créance `(FACTURE, factureId)`,
     `montantTtcMineur`, rejeu sur `avoirId`, crédit du tiers au-delà du reste dû ; preuve sur pile.
+  6. **STORY-1113 — en cours** (24/11) : fiche écrite, contrat annoncé avant le code (« ⚠ Contrats »).
   - **Suivante : STORY-1113** (le BFF relaie la mise en service : `mises-en-service`, `sorties-essai`, `naissances` ;
     AP-56). Pour 1113 : la console qui parle
     aux DEUX espaces (invitations de 974, D-1112-6) ; `POST /naissances` est déjà appelé par `POST /admin/essais`
@@ -1209,6 +1210,32 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-24, STORY-1113 (lot 6, n° 3) — la mise en service relayée à la console, annoncée AVANT la fusion du
+  code** (`prospera-platform-catalog-service` et `prospera-admin-panel-service`, branches `MNV-1113` ; fiche
+  `stories/STORY-1113.md`, D-1113-1 → 9). **Ajouts seuls** : aucune route, aucun champ, aucun code existant ne change
+  de forme.
+  - **Catalogue, contrat `contrat/mise-en-service.openapi.json` 1.1.0 → 1.2.0** : `POST
+    /api/v1/sorties-essai/liste-blanche/verification` (`org:read`, corps `Destination`) : la décision de la liste
+    blanche de l'espace pour une destination, **sans journal** ; toujours 200, `{ autorisee: true, motif: REEL |
+    LISTE_BLANCHE }` ou `{ autorisee: false, code: ECRITURE_REELLE_DEPUIS_ESSAI }` (D-1113-6).
+  - **BFF, OpenAPI** (A génère ses types depuis lui) : `GET /api/v1/admin/naissances/{orgId}` (`org:read`, la
+    naissance de chaque espace, `NaissancesDto`) et `POST /api/v1/admin/naissances` (`entitlement:grant`, naissance au
+    réel, identité reprise de l'essai si l'ordre n'en donne pas ; 201 / 200 ; 422 `PROSPECT_SANS_NAISSANCE_D_ESSAI`) ;
+    `GET /api/v1/admin/mises-en-service/{orgId}` (les bilans), `GET …/{orgId}/invites` (les membres de l'essai qui
+    partiront), `POST …/{orgId}` (`{ modules, reprendreLesMembres? }`, 201 / 200 ; 422 `TROP_DE_MEMBRES_A_INVITER`) ;
+    `GET`/`POST /api/v1/admin/sorties-essai/liste-blanche`, `DELETE …/liste-blanche/{id}` (204), `POST
+    …/liste-blanche/verification`, `GET /api/v1/admin/sorties-essai/{orgId}/interceptions`. Schémas : `NaissanceDto`,
+    `NaissancesDto`, `NaissanceEtapeDto`, `NaitreAuReelRequestDto`, `MiseEnServiceDto`, `MisesEnServiceDto`,
+    `MiseEnServiceAttenduDto`, `MiseEnServiceInvitationsDto`, `MiseEnServiceInvitesDto`, `MiseEnServiceInviteDto`,
+    `MettreEnServiceRequestDto`, `SortieDEssaiDto`, `SortiesDEssaiDto`, `AjouterSortieDEssaiRequestDto`,
+    `DestinationDEssaiRequestDto`, `VerificationDeSortieDto`, `InterceptionDEssaiDto`, `InterceptionsDEssaiDto`.
+    Refus par leur code (liste fermée, D-1113-7), avec `modules` (codes en cause) et `champs` quand l'amont les donne.
+  - **BFF, déploiement** : deux variables **facultatives**, `CATALOG_ESSAI_SERVICE_URL` et `AUTH_ESSAI_SERVICE_URL`
+    (défaut : celles du réel, `CATALOG_SERVICE_URL`, `AUTH_SERVICE_URL`). Posées, les routes `/admin/essais` (1112) et
+    `/admin/sorties-essai` vont à l'essai, la mise en service et la naissance au réel au réel. Condition : le jeton de
+    l'opérateur est accepté par les services des deux espaces (D-1113-2).
+  - **Pour A (AP-56)** : types à régénérer depuis l'OpenAPI du BFF quand l'écran viendra (maquette d'abord).
 
 - **2026-11-24, suite de STORY-979 (lot 6) — `facturation:avoir:valider` au catalogue de tenant d'auth, hors du
   jeton, et le manifeste `facturation` 1.1.0 au catalogue, annoncés AVANT la fusion du code**
