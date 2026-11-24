@@ -112,6 +112,30 @@
     aucun conteneur, volume ni réseau `grp-d` ne reste.
   - **Suivante : STORY-1069** 🛡️ (`sinistres.evaluation.arretee@1` publié, D-1013-9 ; `sinistres`).
 
+- **STORY-1069** ✅ 🛡️ — `sinistres.evaluation.arretee@1` publié : l'arrêt de l'évaluation publie le fait au contrat, dans
+  sa transaction (prospera-plateforme#38, `dev` 9560b44 ; prospera-sinistres-service#30, `dev` a2671c6, a5fae87 ; annonce
+  « ⚠ Contrats » #800 avant le code, `main` 4aabfd2 ; aucun manifeste ne change : le fait était déjà en C5). Rituel
+  (2026-11-24) : aucune demande neuve à D dans les journaux de A, B et C. « Fini quand » fixé par la fiche (D-1069-1 :
+  le plan ne le fixait pas).
+  - **Le schéma** (`contrats/assurance/sinistres/evaluation.arretee.schema.json`, fermé, Ajv strict) : `versionObjet` (la
+    version du `dossier.changed@1` de la transaction), `rang`, `montant` au franc, `devise`, auteur et rôle, dates ;
+    avec un décompte : tables et `franchiseRetenue`. Jamais le motif écrit, le décompte détaillé, la nature corporelle,
+    la provision. Cinq champs classés au registre `classification-sante`.
+  - **La publication** : à chaque arrêt accepté (premier ou correction, tout volet), dans le crochet `faits` de
+    l'écriture : `dossier.changed` → `evaluation.arretee` → `provision.revisee` (1016) ; rien pour un refus ou un rejeu.
+  - **Le consommateur** nommé par la spine (AD-16) : `liaison-assureur`, à C (envoi C-14) — demande d'information
+    écrite (« Demandes aux autres groupes ») ; `expertises` n'en est pas (spine), à revoir avec 1071.
+  - Node 24 : plateforme 121 + 29 tests, `tsc` ; sinistres lint 0, **1336 unitaires (67 suites) sur MongoDB et Redis
+    réels** (8 délais de crochet de 5 s sous charge au premier passage, jamais sur 1069 : rejoués, verts ; piège 1069-1),
+    33 e2e, build ; mutations 10/10 (Node 25) et 3/3 (MongoDB réel), mutation du registre rouge. Pile `grp-d`
+    (sinistres + assurance + Karapace) : `docker compose up` sain, **pilote 28/28** (sujet neuf BACKWARD, témoins,
+    garde `classification-sante` 0 refus, faits valides au schéma relu du registre, ordre de l'outbox, provision alignée
+    à 558 000), rejoué sur l’image reconstruite depuis `origin/dev` (28/28).
+  - Décisions D-1069-1 → 11 (fiche ; D-1069-11 : ce qui reste) ; recette versionnée `scripts/recette/1069/`. **Verrou
+    Docker libre au rituel ; pris à 12:13, une seule prise, rendu à 13:09** ; aucun conteneur, volume ni réseau
+    `grp-d` ne reste.
+  - **Suivante : STORY-1070** 🛡️ (lever une alerte bloquante avec motif, D-1013-10 ; `sinistres`).
+
 ### Lot 4 (ouvert le 2026-11-18)
 
 - **Plan** : `PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §4 : **STORY-1060 → 1064**, le distributeur au backend (cinq stories ;
@@ -807,6 +831,16 @@
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-24, STORY-1069) : `sinistres.evaluation.arretee@1` est publié — information** (C tient
+  `prospera-liaison-assureur-service`, consommateur nommé par la spine, AD-16). Schéma :
+  `prospera-plateforme@9560b44`, `contrats/assurance/sinistres/evaluation.arretee.schema.json` (sujet
+  `sinistres.evaluation.arretee-value`). Un fait par arrêt accepté : `rang` (la plus haute fait foi), `montant`,
+  `devise`, `auteurId`, `roleExerce`, `arreteeLe`, `survenuLe`, `versionObjet`, et avec un décompte `tableVersion`,
+  `tableDeVetusteVersion`, `franchiseRetenue` ; il précède dans l'outbox la proposition `provision.revisee@1` (motif
+  `EVALUATION`), dont `assurance` tire le mouvement (`provision.changed@1` : provision avant et après, motif codé). De
+  quoi former le C-14 quand C l'écrira ; ni « garantie retenue » ni « montant validé » ne sont dans ce fait (D-1069-11).
+  Rien à faire avant votre story ; D ne touche pas votre dépôt. — ouverte (information)
+
 - **→ B (2026-11-24, STORY-1066) : l'avoir — un droit, le manifeste `facturation` 1.1.0, le consommateur de
   `paiement`** — **(1) et (2) servies** (auth #49, catalogue #71 : voir « Réponses aux demandes reçues ») ; **(3) ouverte
   (après le lot 6 de B)** : story neuve de B après ses sept stories, identifiant réservé à l'écriture de sa fiche
@@ -1121,7 +1155,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-24, STORY-1069), AVANT la fusion du code — un fait neuf : `sinistres.evaluation.arretee@1`
+- **PUBLIÉ (2026-11-24, STORY-1069, prospera-plateforme#38, `dev` 9560b44 ; prospera-sinistres-service#30, `dev`
+  a2671c6, a5fae87) ; ANNONCÉ avant la fusion du code (prospera-stories #800, `main` 4aabfd2), sans écart ; schéma
+  enregistré dans Karapace (sujet neuf, BACKWARD) et accepté par la garde `classification-sante`. — un fait neuf : `sinistres.evaluation.arretee@1`
   (`prospera-sinistres-service`, module `sinistres` ; schéma dans `prospera-plateforme`, `contrats/assurance/sinistres/`).**
   Fiche : `stories/STORY-1069.md` (D-1069-1 → 11). **Ajouts seuls** ; aucune route, aucun manifeste (le fait est déjà en
   C5 `publie`), aucune collection ne change ; `prospera-assurance-service` et `prospera-liaison-assureur-service` ne
@@ -1890,6 +1926,22 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1069** :
+  - (1) **Délais de crochet de 5 s sur le banc MongoDB réel sous charge** : la suite complète (`-w 2`) a compté 8
+    échecs « Exceeded timeout of 5000 ms for a hook » (portée, relances 999), jamais sur les tests de la story ; rejoués
+    seuls : portée verte, puis `dossiers.service.spec` encore 4 délais (1002) en `-w 1`, vert à `--testTimeout=20000`
+    (244/244). Lire le message (`thrown: "Exceeded timeout…"`) avant de chercher une régression.
+  - (2) **Un `docker run` de jest sans `--forceExit` ne s'arrête pas** (poignée ouverte) : le conteneur est resté en
+    marche, a tenu le réseau de la pile (`Resource is still in use` au `down`) ; `docker rm -f`, et toujours
+    `--forceExit` pour un rejeu.
+  - (3) **`gh pr merge` a répondu « TLS handshake timeout » mais la fusion était faite** côté GitHub : relire
+    `gh pr view` (`MERGED`, `headRefOid`) avant de relancer (« already merged »).
+  - (4) **Une mutation par `sed` d'une ligne qui figure dans plusieurs modules** (`"rang",` dans `ged` et `sinistres` du
+    registre) les retire toutes ; et `git checkout --` pour rendre le fichier efface aussi les modifications non
+    commitées : copier le fichier avant, muter par numéro de ligne, rendre la copie.
+  - (5) Le « Rebase and merge » de la plateforme change le SHA : l'origine des copies (`ORIGINE-DES-SCHEMAS.json`) se
+    corrige dans un second commit, après la fusion de la plateforme (patron de 1016).
 
 - **STORY-1068** :
   - (1) **`NODE_ENV: staging` fait tomber `assurance-service` au démarrage** (« unable to determine transport target for

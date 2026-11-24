@@ -603,9 +603,13 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1069.md"
     reserved_on: "2026-11-24"
     note: >
-      En cours le 2026-11-24 — annonce « ⚠ Contrats » avant le code (cette PR) ; prospera-plateforme#38 ouverte,
-      prospera-sinistres-service MNV-1069. Lot D, n° 5 du lot 6, deuxième story d'assurance de D (PLAN-LOT-6-2026-11-23.md
-      §6 ; EPIC-207, EPIC-212 ; FR-75, FR-73 ; reste de C, D-1013-9). « Fini quand » fixé par la fiche (D-1069-1). NON SLOTTÉE.
+      🏁 DONE le 2026-11-24 — prospera-plateforme#38 (dev 9560b44), prospera-sinistres-service#30 (dev a2671c6, a5fae87) ;
+      annonce « ⚠ Contrats » avant le code (docs #800, main 4aabfd2 ; aucun manifeste ne change). Le fait part dans la
+      transaction de l'arrêt (dossier.changed → evaluation.arretee → provision.revisee), à la version du dossier ; schéma
+      fermé, cinq champs classés. Node 24 : 1336 unitaires sur MongoDB réel, 33 e2e ; mutations 10/10 et 3/3. Pile grp-d
+      (Karapace) 28/28, rejouée depuis origin/dev. Consommateur liaison-assureur (C, C-14) : information. Lot D, n° 5 du
+      lot 6 (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-207, EPIC-212 ; FR-75, FR-73 ; reste de C, D-1013-9). « Fini quand » fixé
+      par la fiche (D-1069-1). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
