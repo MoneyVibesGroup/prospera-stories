@@ -1280,13 +1280,16 @@ reserved_ranges:
       intégration Mongo 10/10, e2e 253/253, mutation 5/5, gate grp-c vert ; D-1099-1 → 7 dans la fiche (cabinet sous
       @PorteeDuCabinet()).
   - range: "STORY-1100"
-    status: "RÉSERVÉ"
-    owner: "À placer au prochain plan — les archives du client apprennent la façon de classer du cabinet, et reçoivent les factures comptabilisées (document-service, module ged). Écran : FE-151."
+    status: "done"
+    owner: "Groupe C, lot 6 — les archives du client apprennent la façon de classer du cabinet, et reçoivent les factures comptabilisées (document-service, module ged ; prospera-comptabilite-service publie). Écran : FE-151."
     source_doc: "prospera-stories/stories/STORY-1100.md"
     reserved_on: "2026-11-18"
     note: >
       Demande de l'utilisateur du 2026-11-18 (« côté archive, c'est important aussi d'avoir cela ») ; cloisonnement
-      par cabinet exigé, comme pour STORY-1097 → 1099 (amendées le même jour). NON SLOTTÉE.
+      par cabinet exigé, comme pour STORY-1097 → 1099 (amendées le même jour).
+      ✅ 2026-11-24 : DONE — comptabilite-service #20 (`e4a53cc`), document-service #32 (`0716a58`), contrat #822 ;
+      fait neuf comptabilite.facture.inscrite v1 ; manifestes comptabilite 0.5.0 (#826) et ged 1.3.0 (#831) ; socle
+      comptabilité 334/334, e2e GED 203/203, mutation 8/8, gate grp-c vert ; D-1100-1 → 13 dans la fiche.
   - range: "STORY-1103"
     status: "done"
     owner: "Groupe B, lot 6, n° 5 — renvoyer un dossier KYC pour correction : motif facultatif sur la marque d'une pièce, POST /admin/kyc/:orgId/request-correction (UNDER_REVIEW → PENDING_DOCUMENTS), kyc.correction.requested@1 au registre, relais du BFF (prospera-kyc-service, prospera-admin-panel-service). Écran : AP-62. L'e-mail au cabinet est demandé à D (D-1103-1)."
