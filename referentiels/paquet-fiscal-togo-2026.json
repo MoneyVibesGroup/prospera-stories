@@ -247,7 +247,7 @@
   },
   "cnss": {
     "_meta": {
-      "source": "Barème communiqué par l'utilisateur 2026-07-19 — Code de Sécurité Sociale (texte distinct du CGI). À valider vs textes CNSS en vigueur.",
+      "source": "Loi n° 2011-006 du 21 février 2011 portant Code de sécurité sociale ; décret n° 2012-038/PR (taux et ventilation par branche) ; arrêté n° 3790/MFPTDS/DGT du 31 décembre 2022 (SMIG) ; décret n° 2023-096/PR (AMU). Références communiquées par l'utilisateur le 2026-07-19 (taux) et le 2026-11-24 (textes, branches, plafond, AMU). À relire par un fiscaliste ou un spécialiste de la paie sur les textes eux-mêmes.",
       "organisme": "CNSS Togo"
     },
     "tauxEmployeur": 0.175,
@@ -256,18 +256,52 @@
     "assiette": {
       "inclus": ["salaire de base", "primes", "gratifications", "commissions", "avantages en nature"],
       "exclus": ["remboursements de frais professionnels justifies (mission, deplacement)"],
-      "plancher": "l'assiette ne peut etre inferieure au SMIG en vigueur",
+      "plancher": "l'assiette mensuelle d'un travailleur a temps plein ne peut etre inferieure au SMIG en vigueur",
+      "plafond": null,
+      "deplafonnee": true,
+      "plafondSource": "aucun plafond : les cotisations s'appliquent a l'integralite des remunerations (communique par l'utilisateur le 2026-11-24)",
       "smig": {
         "mensuel": 52500,
         "horaire": 302.89,
         "devise": "XOF",
         "enVigueurDepuis": "2023-01-01",
-        "source": "valeur communiquee par l'utilisateur (PO) le 2026-11-24 ; texte officiel (decret fixant le SMIG) a citer",
+        "source": "arrete n° 3790/MFPTDS/DGT du 31 decembre 2022 (abroge l'arrete n° 009/2012, 35 000 FCFA) ; vaut aussi pour le SMAG",
         "note": "horaire = mensuel / 173,33 heures (40 h x 52 / 12)"
       }
     },
+    "branches": {
+      "_source": "decret n° 2012-038/PR",
+      "salarie": {
+        "prestationsFamilialesMaternite": { "employeur": 0.03, "salarie": 0.0, "total": 0.03 },
+        "risquesProfessionnels": { "employeur": 0.02, "salarie": 0.0, "total": 0.02 },
+        "pensions": { "employeur": 0.125, "salarie": 0.04, "total": 0.165 },
+        "total": { "employeur": 0.175, "salarie": 0.04, "total": 0.215 }
+      },
+      "travailleurIndependant": {
+        "prestationsFamilialesMaternite": 0.03,
+        "risquesProfessionnels": 0.02,
+        "pensions": 0.165,
+        "total": 0.215
+      },
+      "economieInformelle": {
+        "prestationsFamilialesMaternite": 0.03,
+        "risquesProfessionnels": null,
+        "pensions": 0.165,
+        "total": 0.195
+      }
+    },
+    "amu": {
+      "libelle": "Assurance maladie universelle",
+      "source": "decret n° 2023-096/PR",
+      "enVigueurDepuis": "2024-01-01",
+      "assiette": "salaire brut, deplafonne",
+      "tauxEmployeur": 0.05,
+      "tauxSalarie": 0.05,
+      "tauxTotal": 0.10,
+      "note": "cotisation distincte des trois branches historiques de la CNSS"
+    },
     "deductibiliteFiscale": "part patronale deductible du resultat fiscal comme charge de personnel",
-    "aCompleter": "plafond eventuel de cotisation, ventilation par branche (prestations familiales / risques professionnels / pensions), texte officiel du SMIG (la valeur est inscrite dans assiette.smig depuis le 2026-11-24)"
+    "aCompleter": "relecture experte des textes cites (loi 2011-006, decret 2012-038/PR, arrete 3790/MFPTDS/DGT, decret 2023-096/PR) ; organisme collecteur de l'AMU et sort de la part salariale de l'AMU dans la base de l'IRPP ; affiliation et cotisations des gerants"
   },
   "autresImpotsTaxes": {
     "presentsDansCGI": [
