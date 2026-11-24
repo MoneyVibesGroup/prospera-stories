@@ -28,7 +28,8 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
   - **24/11, consigne de l'utilisateur relayée par A** : A prend `prospera-fiscal-service` pour 323, 320, 322, 328 et le
      rend à C à la fusion de 328 (passation au journal de A). C prend **326** avant 1101. Ordre de C : 1087, 1088, 1100,
      puis, à la reprise du fiscal, 326, 1101, 315, 316 ;
-  3. **STORY-1088** l'original papier, et retrouver une pièce (document-service) ;
+  3. 🟡 **STORY-1088** l'original papier, et retrouver une pièce (document-service) : fiche écrite et contrat annoncé
+     le 24/11 (`stories/STORY-1088.md`) ;
   4. **STORY-1100** les archives apprennent la façon de classer du cabinet, et reçoivent les factures comptabilisées ;
   5. **STORY-1101** les déclarations face à la liasse (fiscal) — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
   6. **STORY-315** puis **316** le calendrier fiscal (fiscal) — fiches écrites juste avant.
@@ -283,6 +284,8 @@ seulement.
   `etat-publie.changed.<espace>`, double lecture) dans une story de la plage de C, après STORY-990.
 
 ## ⚠ Contrats
+
+- **2026-11-24 (STORY-1088), AVANT le code** : `document-service` (module `ged`, sous `/api/v1/ged/cabinet`) gère l'original papier et la recherche. **Ajouts seuls**. Réceptions (`POST/GET …/fonds/{numero}/receptions`, `GET /receptions/{numero}` et son bordereau PDF), boîtes (`PUT /boites/{id}/cote` unique au cabinet, `GET /boites/{id}/etiquette` PDF à code QR, `PUT /pieces/{id}/original`), sorties et retours (`POST /boites/{id}/sorties`, `POST /sorties/{id}/retour`, `GET /sorties?enRetard=true`), récolement (`POST/GET …/recolements`, écarts `MANQUANTE`, `EN_TROP`, `SORTIE_NON_RENTREE`), restitution (`POST …/restitutions`, bordereau PDF), recherche (`GET …/fonds/{numero}/recherche`, texte des natures sensibles jamais cherché), conservation par pièce. Droit `ged:physique:gerer`. Dépendances `pdf-lib`, `qrcode`. Manifeste `ged` 1.2.0 (→ B pour le catalogue). **→ A (FE-143)** : types à régénérer quand l'écran viendra.
 
 - **2026-11-24 (STORY-1087), AVANT le code** : `document-service` (module `ged`) s'ouvre au cabinet. **Ajouts seuls** ; le chemin de l'assurance ne change pas. Champ `domaine` (`SINISTRES` | `CABINET`, absent = `SINISTRES`) sur pièces, lots, fonds, versements ; routes neuves sous `/api/v1/ged/cabinet` : fonds d'un dossier client (`POST/GET …/dossiers/{dossierId}/fonds`, `GET …/fonds/{numero}`, numéro `ARC-AAAA-<CODE>-NNNNN`), plan de classement (`GET/POST …/natures`, table `ged-cabinet-2026.1`), pièces déjà déposées (`GET …/fonds/{numero}/pieces-du-dossier`, `POST …/reprises`). Droits du cabinet par `GET /moi/droits` (`ged:*`) et portée du dossier ; natures sensibles en 404 sans `ged:sensible:consulter` ; chiffrement de toutes les pièces du cabinet (`GED_CLE_CABINET`) ; quota 20 Go en alerte. Manifeste `ged` 1.1.0 (→ B pour le catalogue). **→ A (FE-143)** : types à régénérer quand l'écran viendra.
 
