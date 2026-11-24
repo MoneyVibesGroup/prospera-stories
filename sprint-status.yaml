@@ -584,6 +584,15 @@ reserved_ranges:
       FACTURE_D_UNE_COMMANDE_MODIFIEE. Node 24 : 667 unitaires, 24 e2e, 199 d'intégration ; mutations 11/11 et 12/12. Pile
       grp-d 23/23, rejouée depuis origin/dev. Lot D, n° 3 du lot 6, dernière du distributeur (PLAN-LOT-6-2026-11-23.md §6 ;
       EPIC-228 ; FR-31, FR-33 → FR-35 ; ordre de D-1062-12 (1) ; « fini quand » fixé par D-1067-1). NON SLOTTÉE.
+  - range: "STORY-1068"
+    status: "RÉSERVÉ"
+    owner: "sinistres lit assurance.provision.changed@1 — le dossier montre la provision en vigueur, celle du dernier mouvement effectif d'assurance (plus haute séquence ; AD-11, D-1016-10) : GET …/dossiers/{id} provision, GET …/evaluations montants.provision ; EN_VIGUEUR, SANS_MOUVEMENT, NON_INSTALLE (C4), NON_LISIBLE (annexe B, ligne 12) (prospera-sinistres-service, module sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1068.md"
+    reserved_on: "2026-11-24"
+    note: >
+      En cours le 2026-11-24 — annonce « ⚠ Contrats » avant le code (cette PR) ; prospera-sinistres-service#29 ouverte.
+      Lot D, n° 4 du lot 6, première story d'assurance de D (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-215 ; FR-76, FR-188 ;
+      reste de C, D-1016-10 ; passation de C constatée, D-L6-3). « Fini quand » fixé par la fiche (D-1068-1). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"

@@ -443,6 +443,9 @@
 
 ## Dépôts tenus
 
+- **Lot 6 (D-L6-3, reçus de C le 2026-11-23, constatés au rituel de 1068)** : `prospera-sinistres-service` (3409, modules
+  `sinistres` et `expertises`) et `prospera-assurance-service` (3013, module `assurance`) ; dans `prospera-plateforme`,
+  `contrats/assurance/`, `champs-sensibles/`, `classification-sante/`. `prospera-liaison-assureur-service` reste à C.
 - Distributeur (lot 2) : `prospera-ventes-service` (3412), `prospera-terrain-service` (3413),
   `prospera-recouvrement-service` (3414), `prospera-pilotage-service` (3415), `prospera-croissance-service` (3416).
 - `prospera-plateforme` : `series/` (`series-v1`, **`series-v1.1`** depuis STORY-1052), `vocabulaires/` (`vocabulaires-v1`), `contrats/distributeur/`
@@ -467,6 +470,20 @@
 - Lot 1 (frontend) : rien n'a été écrit ; `frontend-admin-panel` n'est tenu par personne pendant le lot 2.
 
 ## Passations
+
+- **← C, `prospera-sinistres-service` et `prospera-assurance-service`, constatée par D au rituel de 1068, le 2026-11-24**
+  (lot 6, D-L6-3 ; passation de C du 2026-11-23, « Passations » de son journal). Constat de la session de groupe à 11:06,
+  revérifié par la sous-session de 1068 : `origin/dev` de sinistres = **`ea1a111`** (MNV-1016), d'assurance =
+  **`8dc3285`** (MNV-1016), **exactement les SHA de la passation** ; aucune PR ouverte dans les deux dépôts ; checkouts
+  propres mais en retard (33 et 11 commits) : 1068 part d'`origin/dev` (`npm ci --ignore-scripts` refait : les
+  dépendances avaient changé). Repris de la passation : Node 24 pour les tests du client de Confluent (étage
+  `verification`), `admin.createTopics` avant `subscribe` et `metadataMaxAge: 10_000` (le patron des consommateurs de
+  sinistres le porte déjà), les « ⚠ Contrats » de C (1015, 1016 : le motif `EVALUATION` des trois faits de provision) et
+  ses « Pièges rencontrés ». À reprendre (plan §6) : 1068 (`provision.changed@1`, D-1016-10), 1069
+  (`sinistres.evaluation.arretee@1`, D-1013-9), 1070 (lever une alerte bloquante, D-1013-10), 1071 (la mission
+  d'expertise, FR-61). **`prospera-liaison-assureur-service` reste à C** (le plan ne le nomme pas ; C le cède sur simple
+  demande dans son journal) : D n'y touche pas. Dans `prospera-plateforme`, les dossiers que C y tenait
+  (`contrats/assurance/`, `champs-sensibles/`, `classification-sante/`) passent par `_wt-d-plateforme`.
 
 - **← B, `prospera-notification-service`, constatée par D au rituel de 1051, `dev` 5e6c553** (2026-11-17, D-L3-3). Au
   rituel : aucune PR ouverte, dernier commit sur `dev` = celui de la passation (MNV-957), checkout propre. Repris de la
@@ -1083,6 +1100,26 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-24, STORY-1068) avant la fusion du code (prospera-sinistres-service#29, `MNV-1068`). —
+  `prospera-sinistres-service`, module `sinistres` : le dossier montre la provision en vigueur, lue dans
+  `assurance.provision.changed@1` (AD-11, D-1016-10).**
+  Fiche : `stories/STORY-1068.md` (D-1068-1 → 11). **Ajouts seuls** ; **aucun schéma de fait ne change** ; **aucun
+  manifeste ne change** (la consommation est déjà déclarée en C5) ; `prospera-assurance-service` **ne change pas**.
+  - **Routes changées** (ajouts) : `GET /api/v1/sinistres/dossiers/{id}` gagne **`provision`** ; `GET …/dossiers/{id}/evaluations`
+    : **`montants.provision`** prend la même forme. Forme : `{ etat, montant, tenueParAssurance: true }` avec `etat`
+    `EN_VIGUEUR` (et `devise`, `sequence`, `montantAvant`, `motif`, `origine`, `effectiveLe`, `propositionId?`, `pieceId?` :
+    le dernier mouvement effectif, plus haute séquence), `SANS_MOUVEMENT`, `NON_INSTALLE` (`assurance` absent ou retiré :
+    « provision non tenue », C4) ou `NON_LISIBLE` (rôles hors DG, DT, RESP, GEST, AUD : annexe B, ligne 12) ; hors
+    `EN_VIGUEUR`, `montant` vaut `null`, jamais 0. ⚠️ **Pour un lecteur de `montants.provision`** : la valeur d'avant
+    (`{ montant: null, tenueParAssurance: true }`) gagne `etat` ; un `GREC` ou le comité y lisent `NON_LISIBLE`.
+  - **Consommateur neuf** : groupe `sinistres-service.provision` sur `assurance.provision.changed` (topic créé avant
+    l'abonnement ; un fait hors contrat est écarté, journalisé). « En attente du `RESP` » (`a-valider`) n'est pas lu
+    (D-1068-6) : il se lit chez `assurance`.
+  - **État publié** : `sinistres` projette désormais l'état du module **`assurance`** (voisin suivi, comme `reseau`) depuis
+    `etat-publie.changed.<espace>` ; rien à publier de plus pour le moteur (l'état d'`assurance` y est déjà).
+  - **Collection neuve** : `sinistres_provisions_en_vigueur` (une ligne par dossier provisionné, copie dérivée) ; copie
+    du contrat consommé `contrat/consommes/assurance.provision.changed.json` (`prospera-plateforme@8ce4325`).
 
 - **PUBLIÉ (2026-11-24, STORY-1067, prospera-ventes-service#15, `dev` cd5fc87 → 52971b5) ; ANNONCÉ avant la fusion du
   code (prospera-stories #792, `main` 6f939fa), sans écart. —
