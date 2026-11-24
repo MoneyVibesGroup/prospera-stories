@@ -1843,13 +1843,16 @@ reserved_ranges:
   # ── LOT 6 DE B (2026-11-24) : STORY-1112 → 1116, réservées par PLAN-LOT-6-2026-11-23.md §8 ; fiches écrites juste
   #    avant de coder, le story_id_high_water_mark monte au commit qui crée chacune.
   - range: "STORY-1114"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe B, lot 6, n° 4 — le BFF relaie le métier des organisations à la console (AP-59) : `vertical` dans GET /api/v1/admin/orgs (ligne) et GET /api/v1/admin/orgs/{orgId} (identity), filtre ?vertical= relayé à auth ; GET /api/v1/admin/verticaux (org:read) et PATCH /api/v1/admin/orgs/{orgId}/vertical (entitlement:grant) relayés à auth, projetés en DTO typés ; refus VERTICAL_INCONNU, VERTICAL_REQUIS, VERTICAL_ROLES_INCOMPATIBLES (details.roles) par leur code ; auth sert déjà tout (STORY-171) (prospera-admin-panel-service)"
     source_doc: "prospera-stories/stories/STORY-1114.md"
     reserved_on: "2026-11-24"
     note: >
-      Fiche écrite et contrat annoncé (journal de B, « ⚠ Contrats ») avant la fusion du code. Docker : non (aucun
-      module, contrôleur, fournisseur, dépendance ni Dockerfile neuf, D-1114-4). Lot 6 de B, n° 4. NON SLOTTÉE.
+      🏁 DONE le 2026-11-24 — admin-panel #41 (dev 3a5f5ef) ; contrat annoncé avant la fusion (stories #798). AP-59
+      débloquée : appel réel au BFF (vrai client d'auth en HTTP) contre une doublure qui rend les corps produits par le
+      code d'auth origin/dev b49d8ab (fixtures test/fixtures/auth-metier/) — lire, filtrer, changer, refus par leur
+      code. Node 25 : BFF 700/700 et e2e 278/278 ; mutations 13/13. Docker : non (aucun module, contrôleur,
+      fournisseur, dépendance ni Dockerfile neuf, D-1114-4) ; verrou non pris. Lot 6 de B, n° 4. NON SLOTTÉE.
   - range: "STORY-1113"
     status: "done"
     owner: "Groupe B, lot 6, n° 3 — le BFF relaie la mise en service à la console (AP-56) : la console parle aux deux espaces (CATALOG_ESSAI_SERVICE_URL, AUTH_ESSAI_SERVICE_URL) ; /api/v1/admin/naissances (naissance au réel, identité reprise de l'essai), /api/v1/admin/mises-en-service (membres de l'essai invités au réel), /api/v1/admin/sorties-essai (liste blanche, vérification, interceptions) ; au catalogue, POST /sorties-essai/liste-blanche/verification (contrat mise-en-service 1.2.0) (prospera-admin-panel-service, prospera-platform-catalog-service)"

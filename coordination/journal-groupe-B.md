@@ -91,12 +91,30 @@
      **Pile `grp-b` à deux espaces** (deux auth, deux catalogues, BFF) : **47/47 contrôles**. Verrou pris à 11:04,
      rendu à 11:11 (correction de D-1113-10), repris à 11:19, rendu à 11:22 ; aucun conteneur, volume ni réseau `grp-b`
      ne reste.
-  7. 🟡 **STORY-1114 en cours** (24/11) : fiche écrite, contrat annoncé (« ⚠ Contrats ») avant la fusion du code ;
-     BFF seul (auth sert déjà tout) ; Docker : non.
-  - **Suivante : STORY-1114** (le BFF relaie le métier, `vertical`, dans la liste et la fiche des organisations ;
-    `GET /admin/verticaux`, `PATCH /admin/organizations/{id}/vertical` ; AP-59 ; Docker : non). Demande de A du 24/11
-    (journal de A, « → B : STORY-1114 ») : refus `VERTICAL_ROLES_INCOMPATIBLES` 409 et `VERTICAL_INCONNU` 400 par leur
-    code. Rappel de 1113 : les précisions d'un refus relayé vont dans `details` (D-1113-10).
+  7. ~~STORY-1114~~ : **admin-panel #41** (`3a5f5ef` sur `dev`) ; contrat annoncé avant la fusion (stories #798).
+     **AP-59 débloquée** : la console lit le métier dans l'annuaire et la fiche, filtre la liste par métier, lit les
+     métiers et change celui d'une organisation, par le BFF.
+     - **BFF seul** (D-1114-1) : auth sert tout depuis STORY-171 (`vertical` en liste et en détail, `?vertical=` validé
+       contre le référentiel, `GET /admin/verticaux`, `PATCH …/vertical`) ; le catalogue et les naissances ne servent pas
+       le métier de l'annuaire. L'annuaire est le réel : pas de second espace ici (D-1114-2 ; le métier d'un prospect en
+       essai est dans `GET /admin/essais`, 1112).
+     - BFF : `vertical` dans la ligne et l'identité, filtre relayé ; `GET /admin/verticaux` (`org:read`) et `PATCH
+       /admin/orgs/{orgId}/vertical` (`entitlement:grant` ; chemin des actions d'une organisation au BFF, D-1114-3) ;
+       refus `VERTICAL_INCONNU`, `VERTICAL_REQUIS` (400 ; la liste rendait 503), `VERTICAL_ROLES_INCOMPATIBLES` (409,
+       `details.roles`). **Aucun contrôleur ni fournisseur neuf** (D-1114-4) : les routes vont à `AdminRolesController`
+       (monté sur `admin/`) et `AdminOrgActionsController`.
+     Node 25 : BFF 700/700, e2e 278/278 ; mutations 13/13. **Preuve sans Docker** : e2e avec le vrai client d'auth en
+     HTTP contre une doublure qui rend les corps **produits par le code d'auth** `origin/dev` `b49d8ab` (filtre
+     d'erreurs, services, DTO ; fixtures `test/fixtures/auth-metier/`) ; verrou non pris.
+  - **Suivante : STORY-1103** (renvoyer un dossier KYC pour correction, le cabinet est prévenu ; fiche écrite ;
+    `kyc-service` et BFF ; Docker : non ; fini quand `kyc.correction.requested@1` est publié et AP-62 débloquée).
+    **`kyc-service` est neuf pour B** : lire d'abord ses pièges dans `journal-groupe-A.md` et constater ici le dernier
+    commit de `dev` avant d'y toucher.
+  - **Reçue le 24/11, hors des lignes du plan : → B de A** (journal de A, fin du « Lot 6 ») — deux résultats faux de
+    `bilan-service` visibles à la démo du 15/01 : la projection qui rembourse plus que la dette
+    (`TICKET-BACKEND-projection-remboursements-non-plafonnes.md`, accepté par l'utilisateur le 19/11) et la liasse
+    rouverte lue avec `version: null` (`TICKET-BACKEND-liasse-rouverte-version-null.md`), « à placer après 1080 ».
+    **Ouverte, à placer par la session de groupe** (bilan est à B ; aucun identifiant réservé ici).
   3. ~~Correctif de STORY-1084~~ (ticket de A pour FE-140, placé **avant 1112** par la session de groupe, §1.1 ; aucun
      identifiant neuf) : **bilan #183** (`2364abc` sur `dev`, branche `MNV-1084-schema`) ; annonce avant la fusion :
      stories #783. La classe de la dette devient `ValeurIndicateurDetteDto` (D-1084-16) ; **garde neuf** sur le
@@ -1056,6 +1074,21 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   **après les sept stories du lot 6**, identifiant réservé à l'écriture de sa fiche (D-979-14 ; « État », lot 6). D
   prévenue directement (session du groupe D).
 
+- **← A (2026-11-24) : STORY-1114, `vertical` dans `GET /admin/orgs`, `GET /admin/orgs/{id}` et un filtre ; relais de
+  `GET /admin/verticaux` et `PATCH /admin/organizations/{id}/vertical` ; refus par leur code** — **servie par
+  STORY-1114** (BFF #41). Avec la demande du 19/11 (tri du bloc C d'AP-54 : « le champ `vertical` dans `/admin/orgs` »).
+  Le changement est servi au BFF sous **`PATCH /admin/orgs/{orgId}/vertical`** (la famille des actions d'une
+  organisation au BFF ; `admin/organizations` n'y existe pas, D-1114-3).
+- **→ A (2026-11-24) : AP-59 débloquée par STORY-1114** (BFF #41 `3a5f5ef`) : types à régénérer depuis l'OpenAPI du
+  BFF. Routes : `GET /api/v1/admin/orgs?vertical=<code>` (chaque ligne : `vertical?`, absent seulement avant migration ;
+  inconnu : 400 `VERTICAL_INCONNU`, vide : 400 `VERTICAL_REQUIS`) ; `GET /api/v1/admin/orgs/{orgId}`
+  (`identity.vertical`) ; `GET /api/v1/admin/verticaux` (`org:read`, `VerticauxDto { verticaux: [{ code, libelle, statut,
+  inscriptionOuverte, description? }] }`, dans l'ordre d'auth ; **`statut` en minuscules, `actif` | `a_venir`**, pas
+  `ACTIF` comme dans la maquette ; `plateforme` y figure, l'écran ne le propose pas) ; `PATCH
+  /api/v1/admin/orgs/{orgId}/vertical` (`entitlement:grant`, `{ vertical, reason? }` ; rend l'identité de la fiche avec
+  le métier changé ; 409 `VERTICAL_ROLES_INCOMPATIBLES` avec `details.roles`, les rôles à réattribuer d'abord ; 404
+  organisation inconnue). Preuve : appel réel au BFF contre une doublure HTTP aux corps produits par le code d'auth
+  (fiche STORY-1114, « Preuves ») ; le gate réel d'AP-59 sera le premier contre un vrai auth.
 - **← A (2026-11-19, tri du bloc C d'AP-54) : relayer `mises-en-service`, `sorties-essai`, `naissances` (AP-56)** —
   **servie par STORY-1113** (catalogue #72, BFF #40). La naissance est relayée seule, au réel, avec l'identité de
   l'essai ; la mise en service reprend les membres de l'essai ; `POST /sorties-essai/{org}/verifier` n'est pas relayée
@@ -1264,6 +1297,7 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
     **`details.roles`** (les rôles de tenant en cause). 403, 404 (sans code) et 503 comme toujours.
   - **Pour A (AP-59, lot 7)** : types à régénérer depuis l'OpenAPI du BFF ; les mots courts restent une table de
     l'écran indexée par `code` ; `statut` est en minuscules (`actif`, `a_venir`), pas `ACTIF` comme dans la maquette.
+  - **Fusionné le 24/11** : BFF #41 (`3a5f5ef` sur `dev`), sans écart au contrat annoncé.
 
 - **2026-11-24, STORY-1113 (lot 6, n° 3) — la mise en service relayée à la console, annoncée AVANT la fusion du
   code** (`prospera-platform-catalog-service` et `prospera-admin-panel-service`, branches `MNV-1113` ; fiche
@@ -2630,6 +2664,19 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une doublure « fidèle à l'octet » sans Docker** (STORY-1114) : les corps de l'amont se produisent par **son propre
+  code** (ts-node sur le checkout d'auth à `origin/dev`, `transpileOnly`, son `tsconfig` : même émission des champs ;
+  ses services avec des modèles Mongo doublés, son filtre d'erreurs sur les exceptions qu'ils lèvent), puis se
+  versionnent en fixtures. Constaté ainsi, pas supposé : chez auth, un refus `{ message, code }` sort avec `error:
+  "BAD_REQUEST"` / `"CONFLICT"` (nom de l'énumération, pas « Bad Request »), les précisions (`roles`) **à côté** du code,
+  et un `requestId`. Script : `s1114/capturer-auth.js` de la session (non versionné).
+- **Mutations sous Windows** (STORY-1114) : la marque d'un test rouge de jest (`×`) arrive mal décodée par un
+  `subprocess` Python ; lire la ligne `Tests: N failed`, et « Test suite failed to run » pour une mutation qui ne
+  compile pas. Une mutation qui élargit un garde (`!x && false`) peut casser le rétrécissement de type de TypeScript :
+  l'écrire en `… || autre condition`.
+- **`@typescript-eslint/unbound-method`** sur `Classe.prototype.methode` dans un test de métadonnées : lire la méthode
+  par `Object.getOwnPropertyDescriptor(prototype, 'methode')?.value`.
 
 - **L'enveloppe d'erreur du BFF (`AllExceptionsFilter`) ne garde que `code` et `details`** (STORY-1113) : tout autre
   champ d'une `HttpException` (`modules`, `refus`, `planId`, `champs`) est retiré sans bruit. Les e2e du BFF ne

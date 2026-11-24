@@ -1,6 +1,6 @@
 # STORY-1114 : le BFF relaie le métier (`vertical`) dans la liste et la fiche des organisations — lu, filtré, changé
 
-Status: in-progress
+Status: done
 
 **Complexité :** petite (un champ de plus dans deux vues, un filtre, deux relais typés ; aucun autre dépôt)
 
@@ -101,10 +101,49 @@ BFF `dcd76df` (`AdminOrgsController`, `OrgAggregationService`, `ListOrgsQueryDto
   session et versionnés en fixtures (`test/fixtures/auth-metier/`) ; la doublure vérifie la requête reçue (chemin,
   filtre, corps, jeton relayé). Les trois routes d'auth sont vérifiées présentes sur `origin/dev`.
 
-## Contrats touchés (annoncés avant la fusion, journal de B, « ⚠ Contrats »)
+## Contrats touchés (annoncés avant la fusion, journal de B, « ⚠ Contrats » : stories #798)
 
 - BFF, OpenAPI : `AdminOrgListItemDto.vertical?`, `OrganizationDetailDto.vertical?` (ajouts facultatifs) ; paramètre
   `vertical` de `GET /api/v1/admin/orgs` ; `GET /api/v1/admin/verticaux` (`VerticauxDto`, `VerticalDto`) ; `PATCH
   /api/v1/admin/orgs/{orgId}/vertical` (`ChangerDeMetierRequestDto`, réponse `OrganizationDetailDto`). Refus :
   `VERTICAL_INCONNU`, `VERTICAL_REQUIS` (400), `VERTICAL_ROLES_INCOMPATIBLES` (409, `details.roles`). Aucune route ni
   aucun champ existant ne change de forme.
+
+## Livré
+
+- **BFF #41** (`3a5f5ef` sur `dev`) : `vertical` dans la ligne de l'annuaire et l'identité de la fiche, filtre
+  `?vertical=`, `GET /api/v1/admin/verticaux`, `PATCH /api/v1/admin/orgs/{orgId}/vertical`, refus par leur code
+  (`src/admin/orgs/metier.ts`, `src/admin/orgs/dto/vertical.dto.ts` ; routes portées par `AdminRolesController` et
+  `AdminOrgActionsController`). Sans écart au contrat annoncé.
+- Annonce avant la fusion du code : prospera-stories #798 (fiche, tracker, « ⚠ Contrats »).
+
+## Preuves
+
+- **Les routes d'auth existent sur `origin/dev` `b49d8ab`** : `AdminVerticauxController` (`@Get('verticaux')`,
+  `@Patch('organizations/:id/vertical')`), `ListOrganizationsQueryDto.vertical`, `AdminOrganizationsService.list` (le
+  filtre validé par `exigerConnu` avant la liste) et `buildDetail` (`vertical` dans le détail).
+- **Corps réels d'auth, capturés de son code** (D-1114-9) : script de la session `s1114/capturer-auth.js` (ts-node sur le
+  checkout d'auth à `origin/dev`, sans rien y écrire) : `AllExceptionsFilter` d'auth sur les exceptions levées par
+  `AdminVerticauxService.reclasser` et `VerticauxService.exigerConnu` réels (409 avec `roles` à côté du code, 400
+  `VERTICAL_INCONNU` et `VERTICAL_REQUIS` avec `error: "BAD_REQUEST"`, 404 sans code, `requestId`), `lister()` sur le
+  socle semé (cinq métiers, statut en minuscules), `OrganizationDetailDto` / `PaginatedOrganizationsDto` construits comme
+  `buildDetail` et `list`. Neuf fichiers dans `test/fixtures/auth-metier/`, identiques à l'octet à la capture (`cmp`).
+- **BFF** (Node 25) : `src/admin/orgs/metier.spec.ts` 15/15 (projection sur les corps réels, entrées écartées, refus par
+  statut, rôles validés), `metier-relais.spec.ts` 10/10 (droits des deux routes, chemin, corps et jeton qui partent),
+  `org-aggregation.service.spec.ts` +5 (métier de chaque ligne, filtre avec les autres et avec `kycStatus`, 400 nommé au
+  lieu du 503) ; **`test/admin-metier.e2e-spec.ts` 17/17** : vraie chaîne de gardes, vrai `AuthServiceClient` en HTTP
+  contre la doublure, vraie enveloppe d'erreur (`details.roles`), validation au bord (rien ne part) ;
+  `openapi-contract.e2e-spec.ts` +4 (champs facultatifs, paramètre, `VerticauxDto`, corps et réponse du changement).
+  Unitaires **700/700** (49 suites), e2e **278/278** (16 suites) ; garde des noms de schéma et câblage du module racine
+  verts ; `tsc`, lint des fichiers touchés, build ; **mutations 13/13** rouges sur une assertion (le 400 nommé redevenu
+  503, le métier lu ailleurs, le filtre qui ne part pas, un statut inconnu ou un code mal formé admis, un rôle mal nommé
+  qui traverse, les rôles hors de `details`, `VERTICAL_REQUIS` retiré, une autre organisation acceptée, le motif perdu,
+  les deux droits, la borne de 40).
+- **Sans Docker** (D-1114-4) : aucun module, contrôleur, fournisseur, dépendance ni Dockerfile neuf ; verrou non pris.
+
+## Ce qui reste
+
+- **Pour A (AP-59, lot 7)** : l'écran (maquette validée), ses types régénérés depuis l'OpenAPI du BFF, et son gate réel
+  « lire, filtrer, changer » sans interception (AC-5 d'AP-59) ; `statut` est en minuscules (`actif`, `a_venir`).
+- Le gate réel d'AP-59 est le premier appel au BFF contre un vrai auth pour ces routes (la preuve d'ici est la doublure
+  aux corps réels) ; à rejouer à la recette de STORY-1115 si elle lève la console.
