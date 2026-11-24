@@ -1,8 +1,8 @@
 # STORY-1100 : Les archives du client apprennent la façon de classer du cabinet — et reçoivent les factures comptabilisées
 
-Status: in-progress — **créée le 2026-11-18** à la demande de l'utilisateur (« côté archive, c'est important aussi
-d'avoir cela »). **Prise le 2026-11-24** par la session du groupe C (lot 6), après STORY-1087 et 1088 (livrées) ;
-contrat annoncé ci-dessous avant le code.
+Status: done — **livrée le 2026-11-24** : prospera-comptabilite-service **#20** (`e4a53cc` sur `dev`) et document-service
+**#32** (`0716a58` sur `dev`) ; voir « Livraison ». Créée le 2026-11-18 à la demande de l'utilisateur (« côté archive,
+c'est important aussi d'avoir cela »), prise le 2026-11-24 par la session du groupe C (lot 6), contrat #822 avant le code.
 
 **Service :** `document-service` (module `ged`) · **Points :** 5
 **Dépend de :** STORY-1087 (la GED s'ouvre au cabinet), STORY-1088 (retrouver une pièce), STORY-1097 (factures en
@@ -52,6 +52,53 @@ contrat annoncé ci-dessous avant le code.
   contrôle humain reste exigé avant le versement. **Sans fonds ouvert**, la facture attend (`ged_factures_a_ranger`) et
   se range à l'ouverture du premier fonds du dossier. Un rejeu ne range jamais deux fois (unique sur l'écriture).
 - Manifeste `ged` **1.3.0** (`consomme` + routes de lecture neuves).
+
+### Livraison (2026-11-24)
+
+- **Comptabilité** (#20, `e4a53cc`) : `src/factures/evenement-facture-inscrite.ts`, schéma
+  `contrat/schemas/comptabilite.facture.inscrite.v1.json` (au registre : sujet `comptabilite.facture.inscrite-value`
+  neuf, compatible BACKWARD) ; l'inscription au lot et son fait s'écrivent dans **une** transaction ; manifeste
+  `comptabilite` **0.5.0** (`prospera-stories@a525d76`, #826).
+- **GED** (#32, `0716a58`) : `src/modules/ged/cabinet/` (mémoire de classement, suggestion, oubli, consommateur
+  `comptabilite.facture.inscrite` du groupe `ged.comptabilite`, factures à ranger) ; collections
+  `ged_memoire_de_classement`, `ged_memoire_oublis`, `ged_factures_a_ranger` ; unique partiel
+  `une_piece_par_ecriture_comptable` dans `ged_pieces` ; `ajv` en dépendance d'exécution ; manifeste `ged` **1.3.0**
+  (`prospera-stories@f703671`, #831). Codée par la sous-session de 1087 ; manifeste, recensement et gate par C.
+- **Preuves, comptabilité** : unitaires Node 24 **1013** (3 ignorés) ; socle **334/334** (16 suites, vrai Mongo rs0 +
+  Kafka), dont le fait conforme au contrat, envoyé par le relais, et aucun fait sur `DEJA_INSCRITE`.
+- **Preuves, GED** : unitaires Node 24 **1157** (un échec de charge de `lecteur.spec`, vert seul) ; e2e **203/203**
+  (14 suites) ; mutation **8/8** (cabinet avant fonds, texte sensible lu, nature hors plan reproposée, rejeu en double,
+  facture sans fonds qui n'attend pas, apprentissage au rejet, mémoire partagée entre cabinets, oubli sans effet) ; gate
+  `grp-c` : `healthy`, topic créé avant l'abonnement, **un vrai fait publié sur Kafka** est mis en attente `SANS_FONDS`,
+  un fait hors contrat est écarté et journalisé sans bloquer le groupe (retard 0), son **rejeu** ne crée pas de seconde
+  attente, les quatre routes neuves en 401 sans jeton, index uniques créés.
+- **Recensement de STORY-695** (`test/dossier-portee-collaborateur.e2e-spec.ts`) : il rougissait depuis 1087 (44 routes
+  du cabinet non classées ; seuls les e2e de la GED avaient été joués en 1087 et 1088). Les 44 routes sont inscrites dans
+  une liste **fermée** et justifiée (`PORTEE_DU_CABINET` : portée par collaborateur de `DossiersClients`).
+- **AC-4** (deux cabinets) : prouvé par les tests à deux organisations du module (unitaires et mémoire), et par la
+  mutation « mémoire partagée entre cabinets » ; pas rejoué à deux cabinets sur la pile.
+
+### Écarts au contrat, décidés au code
+
+- **D-1100-5** : le schéma consommé est copié dans `contrat/consommes/` (empreinte épinglée) **et** dans
+  `src/modules/ged/cabinet/schemas/` (l'image d'exécution n'embarque pas `contrat/`) ; un test les égale à l'octet.
+- **D-1100-6** : `conservationAns` n'est jamais retenue : une pièce n'a pas de durée propre (elle suit sa nature,
+  STORY-1087). Le champ existe dans la mémoire et la suggestion, vide.
+- **D-1100-7** : une seule clé par étage : le NIF s'il est connu, sinon le nom ; une pièce indexée au seul nom ne
+  retrouve pas une mémoire apprise sous le NIF. La reconnaissance dans le texte lu essaie le NIF et le nom retenus ; un
+  nom de moins de 4 caractères n'est jamais reconnu dans un texte.
+- **D-1100-8** : le texte lu (chiffré au repos, 1087) est déchiffré en mémoire pour la reconnaissance, jamais retenu.
+- **D-1100-9** : l'invariant « aucune route DELETE » du module admet la seule `DELETE …/memoire-de-classement/{id}` ;
+  elle marque la mémoire `oubliee` (rien n'est effacé), une réapprise la remet en service sous le même identifiant.
+- **D-1100-10** : les factures en attente se rangent après `POST …/dossiers/{dossierId}/fonds` (déclenché par le
+  contrôleur) ; une attente rangée passe `RANGEE` et reste en base.
+- **D-1100-11** : l'exercice de la pièce rangée est l'année de la fin de l'exercice de l'écriture ; à date d'ouverture
+  égale, le fonds au plus grand numéro d'archivage est choisi.
+- **D-1100-12** : la pièce source est cherchée par `pieceId` parmi les pièces comptables du dossier (port
+  `PiecesDeposees.lireParPieceId`). Vérifié : `document-service` garde le `pieceId` du dépôt tel quel, et la comptabilité
+  y met le SHA-256 du fichier. Introuvable ⇒ attente `PIECE_INTROUVABLE`.
+- **D-1100-13** : un fichier refusé par la GED (format, taille) met la facture en attente avec le code du refus ; une
+  panne d'infrastructure lève, et le message est relu.
 
 ### Décisions prises au contrat (contestables)
 

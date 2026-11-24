@@ -30,8 +30,9 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
      puis, à la reprise du fiscal, 326, 1101, 315, 316 ;
   3. ✅ **STORY-1088 DONE (24/11)** : document-service **#31** (`9d0cfd3` sur `dev`), fiche #811, manifeste `ged`
      1.2.0 #814. Unitaires Node 24 1122, e2e GED 17/17, mutation 6/6, gate `grp-c` vert, verrou cédé par A et rendu ;
-  4. 🟡 **STORY-1100** les archives apprennent la façon de classer du cabinet, et reçoivent les factures comptabilisées :
-     contrat annoncé le 24/11 (fiche) ;
+  4. ✅ **STORY-1100 DONE (24/11)** : comptabilité **#20** (`e4a53cc`), document-service **#32** (`0716a58`), contrat
+     #822, manifestes `comptabilite` 0.5.0 #826 et `ged` 1.3.0 #831. Socle comptabilité 334/334, e2e GED 203/203,
+     mutation 8/8, gate `grp-c` vert (vrai fait sur Kafka, rejeu sans double) ; verrou cédé par A et rendu ;
   5. **STORY-1101** les déclarations face à la liasse (fiscal) — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
   6. **STORY-315** puis **316** le calendrier fiscal (fiscal) — fiches écrites juste avant.
 - **Docker** : verrou du poste principal (`MoneyVibes_Apps\.verrou-docker`) partagé avec A ; aucune pile de C ne tourne.
@@ -196,9 +197,12 @@ seulement.
   `ged:lot:numeriser`, `ged:piece:indexer`, `ged:versement:verser`, `ged:physique:gerer`, `ged:piece:consulter`,
   `ged:sensible:consulter` (et rien d'un autre module). Sans cela, seul un `TENANT_ADMIN` a ces droits (D-1087-4). —
   ouverte.
-- **→ B (24/11, STORY-1087 puis 1088)** : recopier au catalogue le manifeste `ged` — désormais **1.2.0** (code
-  fusionné : document-service #30 `1db0a8f` et #31 `9d0cfd3` ; source `manifestes/ged.manifest.ts`, `4d244e4`). La 1.1.0
-  n'a pas à être semée seule. — ouverte.
+- **→ B (24/11, STORY-1087, 1088 puis 1100)** : recopier au catalogue le manifeste `ged` — désormais **1.3.0** (code
+  fusionné : document-service #30 `1db0a8f`, #31 `9d0cfd3`, #32 `0716a58` ; source `manifestes/ged.manifest.ts`,
+  `f703671`). Les 1.1.0 et 1.2.0 n'ont pas à être semées seules. — ouverte.
+- **→ B (24/11, STORY-1100)** : recopier au catalogue le manifeste `comptabilite` **0.5.0** (code fusionné :
+  comptabilite-service #20 `e4a53cc` ; source `manifestes/comptabilite.manifest.ts`, `a525d76`) : il publie
+  `comptabilite.facture.inscrite`, aucune route neuve. — ouverte.
 
 - **→ B (2026-11-15) : la garde partagée (STORY-937) et `sinistres-service`** — **information**. Le squelette de
   `prospera-sinistres-service` garde ses modules par un port, `EtatDesModules`, alimenté aujourd'hui par
@@ -248,6 +252,10 @@ seulement.
   `GET /api/v1/sinistres/dossiers/{id}/evaluations`). Même remarque que ci-dessus. — ouverte
 
 ## Réponses aux demandes reçues
+
+- **← A (24/11, passation pour STORY-1101, laissée par 322)** : lire `Obligation.montantDeclare.montant` par taxe et par
+  période ; une période sans déclaré a `montantDeclare` à `null` : la nommer, ne jamais la compter pour zéro ;
+  `GET /exercices/{id}/obligations/ecarts` existe (fiscal #56, `990256a`). — **notée**, pour 1101.
 
 - **← A (24/11, STORY-320) : `balance-service` sert la balance de référence de l'exercice, et un résumé sans lignes** —
   **prise**, non bloquante pour A (le fiscal prend aujourd'hui la plus haute version validée et équilibrée). C la fait
@@ -727,6 +735,16 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-1100, 24/11) document-service : jouer TOUS les e2e**, pas seulement `test/ged*` : le recensement de
+  STORY-695 (`dossier-portee-collaborateur.e2e-spec.ts`) exige que chaque route de `src/` soit classée ; il rougissait
+  depuis 1087 sans qu'on le voie. Une route neuve du cabinet s'inscrit dans `PORTEE_DU_CABINET`.
+- **(STORY-1100)** comptabilité, `test:socle` dans Docker : les 16 suites passent en ≈ 200 s, puis Jest **ne sort pas**
+  (poignées du client Kafka de Confluent) ; lire `docker logs`, puis `docker rm -f`. Le conteneur « tourne » sinon des
+  heures en tenant le verrou.
+- **(STORY-1100)** document-service, au démarrage d'une pile neuve : 7 consommateurs déjà là journalisent
+  « Unknown topic or partition » (leurs topics n'existent pas) et réessaient ; bruit connu, pas une panne. Avertissement
+  Swagger « Duplicate DTO `ReceptionDto` » (1088 et un autre module) : à renommer avant de générer les types de FE-143.
 
 - **(STORY-1087, 24/11) document-service au gate** : le port hôte 9001 (console MinIO) est pris sur ce poste par autre
   chose que Docker : surcouche `minio: ports: !reset []`. Sans `kyc-service`, un MinIO neuf n'a pas `kyc-documents` et
