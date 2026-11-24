@@ -66,8 +66,10 @@ Le plan de février (§3.3) partage ce dépôt **par dossier**. Entre A et C :
 - Un fichier d'un autre dossier dont on a besoin (par exemple une clé de message dans `src/coque/i18n/`) se demande
   dans son journal, ou s'ajoute dans **sa** PR en le disant dans la description. On ne réécrit jamais le fichier d'un
   autre dossier sans le dire.
-- **Docker** : PRA-02 et PRA-11 lèvent une pile. Le verrou `MoneyVibes_Apps\.verrou-docker` du poste principal
-  s'applique, piles `grp-a` / `grp-c`, `down -v` à la fin.
+- **Docker** : PRA-02 et PRA-11 lèvent une pile, `down -v` à la fin. PRA-11 (A) se joue sur le poste principal.
+  C quitte ce poste à la fin de son lot 6 (consigne de l'utilisateur, 24/11) : ses fiches PRA-02, 07, 08 et 09 se
+  codent sur l'autre poste, sous **son** verrou, partagé avec B et D (plan du lot 7, §2). Le partage du dépôt par
+  dossier ne change pas : il passe par `git`, pas par le poste.
 
 ## 4. Ce qui n'est pas écrit, et quand l'écrire
 
