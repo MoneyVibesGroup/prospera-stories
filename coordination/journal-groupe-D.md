@@ -197,6 +197,14 @@
 - **Le lot 6 de D est fini : 7 stories sur 7 (1065 → 1071), le 2026-11-24.** Trois de distributeur (1065 la facture
   juste (3), 1066 l'avoir, 1067 la commande (3)), quatre d'assurance (1068 → 1071) ; la passation à Dev A est mise à
   jour (« Passations », D-L3-6, avant le 04/12).
+- **Le lot 6 de D est rouvert le 2026-11-24 (soir)** par l'amendement du plan (`PLAN-LOT-6-2026-11-23.md` §2 D-L6-5,
+  §6) : consigne de l'utilisateur, les manques de l'Atelier, de la balance et du bilan entrent au lot 6, répartis par
+  dépôt. **D prend `prospera-bilan-service`** (repris de B, passation demandée ci-dessous) et cinq stories :
+  **STORY-1076** (les seuils de l'analyse financière) → **1077** (capitaux propres < ½ capital) → **1078** (les quatre
+  contrôles d'intégrité, et la liasse rapprochée de sa balance par l'empreinte de 1022, C) → **1074** (la consolidation
+  s'installe à part) → **1075** (les routes d'instance du bilan). **D'abord STORY-1072** (demande de B, 1103), le temps de
+  la passation du bilan ; **STORY-1073** attend B (Q-D-12). Les douze identifiants (1019 → 1023 de C, 1072 → 1078 de D)
+  sont réservés au tracker ; la marque haute ne bouge pas.
 
 ### Lot 4 (ouvert le 2026-11-18)
 
@@ -959,6 +967,17 @@
     - **Recettes** : `scripts/recette/1068` → `1071` (piles `grp-d`, pilotes Python, mutations).
 
 ## Demandes aux autres groupes
+
+- **→ B (2026-11-24, soir ; amendement du lot 6, D-L6-5) : la passation de `prospera-bilan-service` à D** — **ouverte**.
+  Le plan amendé fait passer le bilan de B à D pour ce lot (STORY-1074 → 1078 ; 1080 ✅ était la dernière story de B
+  dans ce dépôt). Demandé : écrire dans « Passations » du journal de B le dernier commit de B sur `dev`, les PR
+  ouvertes s'il y en a, et les pièges à lire ; B n'y touche plus pendant le lot 6. D commence par 1072 (hors bilan) et
+  ne touche pas au bilan avant cette passation.
+- **→ C (2026-11-24, soir ; amendement du lot 6, D-L6-5, D-L6-6) : cinq stories de `prospera-balance-service`** —
+  **information**. STORY-1019 → 1023 sont ajoutées à votre lot 6 (plan §4), après 316, dans l'ordre conseillé 1020 →
+  1019 → 1021 → 1022 → 1023. **STORY-1022** (l'empreinte des soldes) est lue par STORY-1078 de D : annoncez son contrat
+  ici quand vous l'écrivez. Repli D-L6-6 : si vous préférez céder la balance à D pour une ou plusieurs de ces stories,
+  écrivez la passation dans votre journal ; sans elle, D n'y touche pas.
 
 - **→ B (2026-11-24, après le lot 6 ; Q-D-12 répondue par l'utilisateur, D-Q12-1) : la fiche légale de l'organisation
   et ses comptes d'encaissement, publiés pour la facture** — **ouverte**. Deux sources, aucune copie (voir « Questions à
