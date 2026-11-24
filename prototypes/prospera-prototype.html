@@ -3772,6 +3772,11 @@
   .ana-fam:not(.ana-dette) .ana-tbl { table-layout: fixed; }
   .ana-fam:not(.ana-dette) .ana-tbl th:first-child { width: 46%; }
   .ana-fam:not(.ana-dette) .ana-tbl th:nth-child(2), .ana-fam:not(.ana-dette) .ana-tbl th:nth-child(3) { width: 16%; }
+  .fac-tbl .fac-in { height: 2rem; font: inherit; font-size: 0.84rem; }
+  .fac-tbl .fac-in.cpt { font-family: var(--font-mono); font-weight: 600; width: 100%; min-width: 9rem; }
+  .fac-tbl .fac-in.num { text-align: right; font-variant-numeric: tabular-nums; min-width: 6.5rem; }
+  .fac-lact { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; margin-top: 0.5rem; }
+  .fac-fields label > span .rep { margin: 0 0 0 0.4rem; font-size: 0.66rem; padding: 0.05rem 0.35rem; }
 </style>
 
 <div class="ribbon">
@@ -6430,7 +6435,7 @@
                       <button role="tab" type="button" aria-selected="false" data-fac-bench="mem-cabinet">Mémoire du cabinet</button>
                     </div>
                     <p style="margin:0.6rem 0 0"><b>Maquette FE-149</b> · routes de STORY-1097 (comptabilite 0.4.0, contrat #751) sous <code>/dossiers/{d}/exercices/{e}/factures/lots</code> : déposer <code>POST</code> (multipart : <code>fichiers</code> 1 à 50, PDF/JPEG/PNG, 10 Mo ; <code>sens</code> ; <code>avoir</code> ; <code>devise</code>), lire <code>GET /{lotId}</code> (la proposition est recalculée à chaque lecture), inscrire <code>POST /{lotId}/inscrire</code> (<code>pieces[].corrections</code> : ce qui est appliqué est ce qui a été relu). Droit : <code>comptabilite:ecriture:saisir</code>. <b>Le dépôt n’écrit aucune écriture</b> ; l’inscription crée un brouillard par pièce, jamais une écriture validée. Les fichiers déposés sont contrôlés pour de vrai (format, 10 Mo, 50 fichiers, doublon par empreinte SHA-256) mais ne partent nulle part ; le prototype n’a pas de lecteur de factures, la lecture reprend le lot d’exemple (CEET FA-0143 : HT 100&nbsp;000, TVA 18&nbsp;000, TTC 118&nbsp;000 pour la valeur de référence de l’AC-1).</p>
-                    <p style="margin:0.5rem 0 0"><b>Servi par le serveur</b> : <code>compteurs</code>, <code>pieces[].lecture</code> (valeur et confiance), <code>proposition</code> (journal, tiers connu ou <code>tiersACreer</code>, compte et sa <code>source</code>, TVA, lignes, totaux), <code>signaux</code> (codes stables : <code>ECART_HT_TVA_TTC</code>, <code>TVA_ABSENTE</code>, <code>DOUBLON_PROBABLE</code>, <code>TIERS_A_CREER</code>, <code>TIERS_A_CHOISIR</code>, <code>COMPTE_A_CHOISIR</code>, <code>LECTURE_ECHOUEE</code>…), <code>inscriptible</code>. <b>Rédigé par la maquette</b> : le texte de chaque signal (le serveur publie le code, le <code>message</code> est à aligner), et l’équilibre recalculé à l’écran après une correction (demandé par la fiche). À la vente, l’OCR ne lit que l’émetteur : le client est toujours à choisir (D-1097-3). <b>Absent du contrat</b> : « écarter » une pièce illisible (elle reste dans le lot) ; la saisie à la main d’une pièce illisible ; le numéro d’exercice d’une date hors exercice n’est pas proposé par un geste (<code>AUTRE_EXERCICE</code> se dit, la facture se redépose là).</p>
+                    <p style="margin:0.5rem 0 0"><b>Servi par le serveur</b> : <code>compteurs</code>, <code>pieces[].lecture</code> (valeur et confiance), <code>proposition</code> (journal, tiers connu ou <code>tiersACreer</code>, compte et sa <code>source</code>, TVA, lignes, totaux), <code>signaux</code> (codes stables : <code>ECART_HT_TVA_TTC</code>, <code>TVA_ABSENTE</code>, <code>DOUBLON_PROBABLE</code>, <code>TIERS_A_CREER</code>, <code>TIERS_A_CHOISIR</code>, <code>COMPTE_A_CHOISIR</code>, <code>LECTURE_ECHOUEE</code>…), <code>inscriptible</code>. <b>Rédigé par la maquette</b> : le texte de chaque signal (le serveur publie le code, le <code>message</code> est à aligner), et l’équilibre recalculé à l’écran après une correction (demandé par la fiche). À la vente, l’OCR ne lit que l’émetteur : le client est toujours à choisir (D-1097-3). <b>Absent du contrat</b> : l’édition libre des lignes de l’écriture (ajouter, supprimer, changer un débit ou un crédit : dessinée à la demande de l’utilisateur, ticket pour C ; seuls les montants, le compte, le tiers, le journal et la TVA se corrigent à l’inscription) ; « écarter » une pièce illisible (elle reste dans le lot) ; la saisie à la main d’une pièce illisible ; le numéro d’exercice d’une date hors exercice n’est pas proposé par un geste (<code>AUTRE_EXERCICE</code> se dit, la facture se redépose là).</p>
                     <p style="margin:0.5rem 0 0"><b>FE-150</b> · la marque « Repris de vos choix » lit <code>proposition.compte.source</code> (<code>MEMOIRE_DOSSIER</code>, <code>MEMOIRE_CABINET</code>, STORY-1098 #755) et le champ facultatif <code>suggestion</code> des lignes de cahiers (STORY-1099, #758). <code>COMPTE_PAR_DEFAUT_DU_TIERS</code> n’est pas une mémoire : il porte une mention grise, pas la marque. Une mémoire écartée (compte désactivé) est dite, jamais effacée en silence (<code>COMPTE_A_CHOISIR</code>, <code>details.ecarte</code>).</p>
                   </div>
                   </div>
@@ -23865,7 +23870,7 @@
             confianceTTC: p.confianceTTC, compte: p.compte || '', initial: p.compte || '', source: p.source, memId: p.memId, tiers: p.tiers ? p.tiers.code : '', tiersNom: p.tiers ? p.tiers.nom : '',
             aCreer: p.aCreer || null, traitement: sens === 'VENTE' ? 'FACTUREE' : 'RECUPERABLE', journal: sens === 'VENTE' ? 'VTE' : 'ACH', doublon: (p.signaux || []).some(function (s) { return s.code === 'DOUBLON_PROBABLE'; }),
             doublonDet: ((p.signaux || []).filter(function (s) { return s.code === 'DOUBLON_PROBABLE'; })[0] || {}).details, ecarte: ((p.signaux || []).filter(function (s) { return s.code === 'COMPTE_A_CHOISIR'; })[0] || { details: {} }).details.ecarte || '',
-            vu: false, compteChange: false, o: { ht: p.ht, tva: p.tva == null ? '' : p.tva, ttc: p.ttc } };
+            vu: false, compteChange: false, o: { ht: p.ht, tva: p.tva == null ? '' : p.tva, ttc: p.ttc, date: p.date, num: p.num, tiers: p.tiers ? p.tiers.code : '', journal: sens === 'VENTE' ? 'VTE' : 'ACH' } };
           S.ordre.push(p.id);
           S.coche[p.id] = false;
         });
@@ -23878,25 +23883,31 @@
         S.suite = !!suite;
       }
       function calc(w) {
-        var ht = num(w.ht), tva = (w.tva === '' || w.tva == null) ? 0 : num(w.tva), ttc = num(w.ttc), vente = w.sens === 'VENTE', L = [];
+        var ht = num(w.ht), tva = (w.tva === '' || w.tva == null) ? 0 : num(w.tva), ttc = num(w.ttc), vente = w.sens === 'VENTE', D = [];
         if (vente) {
-          L.push({ role: 'TIERS', compte: '411', debit: ttc, credit: 0 });
-          L.push({ role: 'PRODUIT', compte: w.compte || '', debit: 0, credit: ht });
-          if (tva > 0) L.push({ role: 'TVA', compte: '443', debit: 0, credit: tva });
+          D.push({ role: 'TIERS', compte: '411', debit: ttc, credit: 0 });
+          D.push({ role: 'PRODUIT', compte: w.compte || '', debit: 0, credit: ht });
+          if (tva > 0) D.push({ role: 'TVA', compte: '443', debit: 0, credit: tva });
         } else {
-          if (w.traitement === 'NON_RECUPERABLE') L.push({ role: 'CHARGE', compte: w.compte || '', debit: ht + tva, credit: 0 });
-          else { L.push({ role: 'CHARGE', compte: w.compte || '', debit: ht, credit: 0 }); if (tva > 0) L.push({ role: 'TVA', compte: F.tva.compte, debit: tva, credit: 0 }); }
-          L.push({ role: 'TIERS', compte: '401', debit: 0, credit: ttc });
+          if (w.traitement === 'NON_RECUPERABLE') D.push({ role: 'CHARGE', compte: w.compte || '', debit: ht + tva, credit: 0 });
+          else { D.push({ role: 'CHARGE', compte: w.compte || '', debit: ht, credit: 0 }); if (tva > 0) D.push({ role: 'TVA', compte: F.tva.compte, debit: tva, credit: 0 }); }
+          D.push({ role: 'TIERS', compte: '401', debit: 0, credit: ttc });
         }
-        var td = 0, tc = 0; L.forEach(function (l) { td += l.debit; tc += l.credit; });
+        var libre = !!w.L, L = libre ? w.L : D, td = 0, tc = 0;
+        L.forEach(function (l) { td += num(l.debit); tc += num(l.credit); });
         var sig = [];
-        if (ht + tva !== ttc) sig.push({ code: 'ECART_HT_TVA_TTC', gravite: 'BLOQUANT' });
+        /* écriture libre : c'est l'écriture qui fait foi, plus les montants lus ; sinon l'écart HT + TVA ≠ TTC est signalé */
+        if (!libre && ht + tva !== ttc) sig.push({ code: 'ECART_HT_TVA_TTC', gravite: 'BLOQUANT' });
         if (w.tva === '') sig.push({ code: 'TVA_ABSENTE', gravite: 'AVERTISSEMENT' });
         if (!w.tiers) sig.push({ code: vente ? 'TIERS_A_CHOISIR' : (w.aCreer ? 'TIERS_A_CREER' : 'TIERS_A_CHOISIR'), gravite: 'BLOQUANT' });
-        if (!w.compte) sig.push({ code: 'COMPTE_A_CHOISIR', gravite: 'BLOQUANT' });
+        if (L.some(function (l) { return !l.compte; })) sig.push({ code: 'COMPTE_A_CHOISIR', gravite: 'BLOQUANT' });
+        if (libre && td !== tc) sig.push({ code: 'ECRITURE_DESEQUILIBREE', gravite: 'BLOQUANT' });
+        if (libre && !L.length) sig.push({ code: 'ECRITURE_VIDE', gravite: 'BLOQUANT' });
         if (w.doublon) sig.push({ code: 'DOUBLON_PROBABLE', gravite: 'AVERTISSEMENT' });
-        return { lignes: L, td: td, tc: tc, equilibree: td === tc, signaux: sig, inscriptible: !sig.some(function (s) { return s.gravite === 'BLOQUANT'; }), ht: ht, tva: tva, ttc: ttc };
+        return { lignes: L, td: td, tc: tc, equilibree: td === tc, signaux: sig, inscriptible: !sig.some(function (x) { return x.gravite === 'BLOQUANT'; }), ht: ht, tva: tva, ttc: ttc, libre: libre };
       }
+      function materialiser(w) { if (!w.L) { w.L = calc(w).lignes.map(function (l) { return { role: l.role, compte: l.compte, debit: l.debit, credit: l.credit, mod: false }; }); } return w.L; }
+      function chargeLigne(w) { return (w.L || []).filter(function (l) { return l.role === 'CHARGE' || l.role === 'PRODUIT'; })[0]; }
       function groupe(w) {
         if (w.statut === 'INSCRITE') return 'done';
         if (w.statut === 'ILLISIBLE') return 'bloc';
@@ -24028,17 +24039,24 @@
         }
         var vente = w.sens === 'VENTE';
         var tiersSel = vente ? '<option value="">Choisir le client…</option>' + F.clients.map(function (c) { return '<option value="' + c.code + '"' + (w.tiers === c.code ? ' selected' : '') + '>' + esc(c.nom) + '</option>'; }).join('')
-          : '<option value="">' + (w.aCreer && !w.tiers ? 'Nouveau fournisseur' : 'Choisir le fournisseur…') + '</option>' + (w.tiers ? '<option value="' + esc(w.tiers) + '" selected>' + esc(w.tiersNom) + '</option>' : '');
+          : '<option value="">' + (w.aCreer && !w.tiers ? 'Nouveau fournisseur' : 'Choisir le fournisseur…') + '</option>' + tiersConnus(w).map(function (t) { return '<option value="' + esc(t.code) + '"' + (w.tiers === t.code ? ' selected' : '') + '>' + esc(t.nom) + '</option>'; }).join('') + '<option value="__new">Un autre fournisseur…</option>';
         var h = '<div class="fac-detail" data-fac-detail data-fac-id="' + esc(w.id) + '"><h4><span>' + esc(vente ? 'Vente ' + w.num : w.fournisseur) + '</span><span class="dc-badge auto">' + esc(w.num) + '</span><span data-fac-st></span></h4><div class="fac-two"><div>' + paperHtml(w);
-        h += '<div class="fac-fields"><label>Date<input type="date" data-fac-f="date" value="' + esc(w.date) + '"></label><label>N° de facture<input data-fac-f="num" value="' + esc(w.num) + '"></label>'
-          + '<label>Montant HT<input class="num" inputmode="numeric" data-fac-f="ht" value="' + esc(fr(num(w.ht))) + '"></label><label>TVA<input class="num" inputmode="numeric" data-fac-f="tva" value="' + esc(w.tva === '' ? '' : fr(num(w.tva))) + '" placeholder="non lue"></label>'
-          + '<label class="full' + '" data-fac-ttc>Montant TTC' + (w.confianceTTC ? ' <span class="dc-badge warn" style="margin-left:.3rem">lu avec peu de certitude</span>' : '') + '<input class="num" inputmode="numeric" data-fac-f="ttc" value="' + esc(fr(num(w.ttc))) + '"></label></div></div>';
-        h += '<div><div class="fac-sig" data-fac-sig></div><div class="fac-fields" style="margin-top:.2rem"><label>' + (vente ? 'Client' : 'Fournisseur') + '<select data-fac-f="tiers">' + tiersSel + '</select></label>'
-          + '<label>Journal<select data-fac-f="journal">' + F.journaux.map(function (j) { return '<option value="' + j.c + '"' + (w.journal === j.c ? ' selected' : '') + '>' + esc(j.l) + '</option>'; }).join('') + '</select></label>'
-          + '<label class="full">Compte ' + (vente ? 'de produit' : 'de charge') + '<input data-fac-f="compte" list="facComptes" value="' + esc(w.compte) + '" placeholder="Choisir un compte…" autocomplete="off"></label></div>'
+        h += '<div class="fac-fields"><label><span>Date<span class="rep chg" data-fac-chg="date" hidden>Modifié par vous</span></span><input type="date" data-fac-f="date" value="' + esc(w.date) + '"></label><label><span>N° de facture<span class="rep chg" data-fac-chg="num" hidden>Modifié par vous</span></span><input data-fac-f="num" value="' + esc(w.num) + '"></label>'
+          + '<label><span>Montant HT<span class="rep chg" data-fac-chg="ht" hidden>Modifié par vous</span></span><input class="num" inputmode="numeric" data-fac-f="ht" value="' + esc(fr(num(w.ht))) + '"></label><label><span>TVA<span class="rep chg" data-fac-chg="tva" hidden>Modifié par vous</span></span><input class="num" inputmode="numeric" data-fac-f="tva" value="' + esc(w.tva === '' ? '' : fr(num(w.tva))) + '" placeholder="non lue"></label>'
+          + '<label class="full' + '" data-fac-ttc><span>Montant TTC<span class="rep chg" data-fac-chg="ttc" hidden>Modifié par vous</span>' + (w.confianceTTC ? ' <span class="dc-badge warn" style="margin-left:.3rem">lu avec peu de certitude</span>' : '') + '</span><input class="num" inputmode="numeric" data-fac-f="ttc" value="' + esc(fr(num(w.ttc))) + '"></label></div></div>';
+        h += '<div><div class="fac-sig" data-fac-sig></div><div class="fac-fields" style="margin-top:.2rem"><label><span>' + (vente ? 'Client' : 'Fournisseur') + '<span class="rep chg" data-fac-chg="tiers" hidden>Modifié par vous</span></span><select data-fac-f="tiers">' + tiersSel + '</select></label>'
+          + '<label><span>Journal<span class="rep chg" data-fac-chg="journal" hidden>Modifié par vous</span></span><select data-fac-f="journal">' + F.journaux.map(function (j) { return '<option value="' + j.c + '"' + (w.journal === j.c ? ' selected' : '') + '>' + esc(j.l) + '</option>'; }).join('') + '</select></label>'
+          + '<label class="full"><span>Compte ' + (vente ? 'de produit' : 'de charge') + '<span class="rep chg" data-fac-chg="compte" hidden>Modifié par vous</span></span><input data-fac-f="compte" list="facComptes" value="' + esc(w.compte) + '" placeholder="Choisir un compte…" autocomplete="off"></label></div>'
           + (vente ? '' : '<label class="plan-chk" style="margin-top:.4rem"><input type="checkbox" data-fac-f="tvanr"' + (w.traitement === 'NON_RECUPERABLE' ? ' checked' : '') + '> La TVA de cette facture n’est pas récupérable</label>')
           + '<div data-fac-mark></div></div></div><div><div class="fac-grp" style="margin-bottom:.4rem">L’écriture proposée</div><div data-fac-ecr></div></div><div data-fac-actions class="fin-act" style="margin-top:0"></div></div>';
         return h;
+      }
+      function tiersConnus(w) {
+        var vu = {}, out = [];
+        F.pieces.forEach(function (p) { if (p.tiers && !vu[p.tiers.code]) { vu[p.tiers.code] = 1; out.push({ code: p.tiers.code, nom: p.tiers.nom }); } });
+        Object.keys(W).forEach(function (id) { var x = W[id]; if (x.sens !== 'VENTE' && x.tiers && !vu[x.tiers]) { vu[x.tiers] = 1; out.push({ code: x.tiers, nom: x.tiersNom }); } });
+        if (w.tiers && !vu[w.tiers]) out.push({ code: w.tiers, nom: w.tiersNom });
+        return out;
       }
       function sigHtml(w) {
         var c = calc(w), h = '';
@@ -24046,6 +24064,9 @@
           var cl = s.gravite === 'BLOQUANT' ? 'bloc' : 'warn', btn = '';
           var txt = F.signaux[s.code] || s.code;
           if (s.code === 'ECART_HT_TVA_TTC') txt = 'Les montants ne tombent pas juste : HT ' + fr(c.ht) + ' + TVA ' + fr(c.tva) + ' = ' + fr(c.ht + c.tva) + ', la facture dit ' + fr(c.ttc) + ' (écart de ' + fr(Math.abs(c.ht + c.tva - c.ttc)) + '). Corrigez le chiffre lu de travers.';
+          if (s.code === 'ECRITURE_DESEQUILIBREE') txt = 'L’écriture n’est pas équilibrée : débit ' + fr(c.td) + ', crédit ' + fr(c.tc) + '. Ajustez un montant ou ajoutez une ligne.';
+          if (s.code === 'ECRITURE_VIDE') txt = 'L’écriture n’a plus de ligne : ajoutez-en ou revenez à la proposition.';
+          if (s.code === 'COMPTE_A_CHOISIR' && c.libre) txt = 'Une ligne n’a pas de compte : choisissez-le dans le plan du dossier.';
           if (s.code === 'TIERS_A_CREER') btn = '<button class="btn btn-primary btn-sm" type="button" data-fac-act="creer-tiers">Créer ' + esc(w.aCreer.nom) + '</button>';
           if (s.code === 'DOUBLON_PROBABLE') { txt = 'Même fournisseur, même numéro de facture : l’écriture ' + esc((w.doublonDet || {}).numeroProvisoire || '') + ' du ' + jj((w.doublonDet || {}).date || w.date) + ' est déjà au brouillard.'; btn = '<button class="btn btn-ghost btn-sm" type="button" data-fac-act="voir-doublon">La voir</button>'; }
           if (s.code === 'TVA_ABSENTE') btn = '<button class="btn btn-ghost btn-sm" type="button" data-fac-act="garder">Garder ainsi</button>';
@@ -24055,18 +24076,28 @@
         if (!c.signaux.length) h = '<div class="s" style="background:var(--success-soft);border-color:transparent">' + IC.ok + '<span>Rien à signaler : la facture est lue, les montants tombent juste, tout est proposé.</span></div>';
         return h;
       }
+      function labelLigne(w, l) {
+        if (l.role === 'TIERS') { var nom = w.tiersNom || (w.sens === 'VENTE' && w.tiers ? (F.clients.filter(function (x) { return x.code === w.tiers; })[0] || {}).nom : ''); return esc(libCompte(l.compte)) + (nom ? ' · <b>' + esc(nom) + '</b>' : ' · tiers à choisir') + (w.num ? ' · pièce ' + esc(w.num) : ''); }
+        return l.compte ? esc(libCompte(l.compte)) : '<span style="color:var(--danger);font-weight:600">compte à choisir</span>';
+      }
+      function totHtml(w) {
+        var c = calc(w);
+        return '<table class="fac-tbl"><tfoot><tr><td>Total · journal ' + esc(w.journal) + '</td><td class="n">' + fr(c.td) + '</td><td class="n">' + fr(c.tc) + '</td><td style="width:2.4rem"></td></tr></tfoot></table><p style="margin:.5rem 0 0">'
+          + (c.equilibree ? '<span class="fac-bal ok">' + IC.ok + ' Équilibrée : ' + fr(c.td) + ' = ' + fr(c.tc) + '</span>' : '<span class="fac-bal ko">' + IC.warn + ' Déséquilibrée : débit ' + fr(c.td) + ', crédit ' + fr(c.tc) + ' (écart de ' + fr(Math.abs(c.td - c.tc)) + ')</span>') + '</p>';
+      }
       function ecrHtml(w) {
-        var c = calc(w), vente = w.sens === 'VENTE';
-        var h = '<table class="fac-tbl"><thead><tr><th>Compte</th><th class="n">Débit</th><th class="n">Crédit</th></tr></thead><tbody>';
-        c.lignes.forEach(function (l) {
-          var lib, cpt = l.compte;
-          if (l.role === 'TIERS') lib = esc(libCompte(cpt)) + (w.tiersNom || (vente && w.tiers) ? ' · <b>' + esc(w.tiersNom || (F.clients.filter(function (x) { return x.code === w.tiers; })[0] || {}).nom || '') + '</b>' : ' · tiers à choisir');
-          else if (!cpt) lib = '<span style="color:var(--danger);font-weight:600">compte à choisir</span>';
-          else lib = esc(libCompte(cpt));
-          h += '<tr><td><span class="cpt">' + esc(cpt || '—') + '</span><span class="rac">' + lib + (l.role === 'TIERS' && w.num ? ' · pièce ' + esc(w.num) : '') + '</span></td><td class="n">' + (l.debit ? fr(l.debit) : '') + '</td><td class="n">' + (l.credit ? fr(l.credit) : '') + '</td></tr>';
+        var c = calc(w), ro = S.ro;
+        var h = '<table class="fac-tbl"><thead><tr><th>Compte</th><th class="n">Débit</th><th class="n">Crédit</th><th></th></tr></thead><tbody>';
+        c.lignes.forEach(function (l, i) {
+          h += '<tr data-fac-row="' + i + '"><td><input class="fac-in cpt" list="facComptes" data-fac-l="' + i + ':compte" value="' + esc(l.compte) + '" placeholder="Rechercher un compte…" autocomplete="off" aria-label="Compte de la ligne ' + (i + 1) + '"' + (ro ? ' disabled' : '') + '><span class="rac" data-fac-lab="' + i + '">' + labelLigne(w, l) + '</span>'
+            + '<span data-fac-lmod="' + i + '">' + (l.mod ? '<span class="rep chg">' + IC.mem + 'Modifié par vous</span>' : '') + '</span></td>'
+            + '<td class="n"><input class="fac-in num" inputmode="numeric" data-fac-l="' + i + ':debit" value="' + (l.debit ? esc(fr(num(l.debit))) : '') + '" placeholder="0" aria-label="Débit de la ligne ' + (i + 1) + '"' + (ro ? ' disabled' : '') + '></td>'
+            + '<td class="n"><input class="fac-in num" inputmode="numeric" data-fac-l="' + i + ':credit" value="' + (l.credit ? esc(fr(num(l.credit))) : '') + '" placeholder="0" aria-label="Crédit de la ligne ' + (i + 1) + '"' + (ro ? ' disabled' : '') + '></td>'
+            + '<td class="n"><button class="btn btn-ghost btn-sm" type="button" data-fac-del="' + i + '" aria-label="Supprimer la ligne ' + (i + 1) + '"' + (ro ? ' disabled' : '') + '>' + IC.x + '</button></td></tr>';
         });
-        h += '</tbody><tfoot><tr><td>Total · journal ' + esc(w.journal) + '</td><td class="n">' + fr(c.td) + '</td><td class="n">' + fr(c.tc) + '</td></tr></tfoot></table>';
-        h += '<p style="margin:.5rem 0 0">' + (c.equilibree ? '<span class="fac-bal ok">' + IC.ok + ' Équilibrée : ' + fr(c.td) + ' = ' + fr(c.tc) + '</span>' : '<span class="fac-bal ko">' + IC.warn + ' Déséquilibrée : débit ' + fr(c.td) + ', crédit ' + fr(c.tc) + '</span>') + '</p>';
+        h += '</tbody></table><div data-fac-tot>' + totHtml(w) + '</div>';
+        h += '<div class="fac-lact"><button class="btn btn-ghost btn-sm" type="button" data-fac-act="ajout-ligne"' + (ro ? ' disabled' : '') + '>' + ico('<path d="M12 5v14M5 12h14"/>', 14) + ' Ajouter une ligne</button>'
+          + (w.L ? '<button class="btn btn-ghost btn-sm" type="button" data-fac-act="reset-lignes">Revenir à la proposition</button><span class="fin-sub" style="margin:0">Écriture modifiée à la main : c’est elle qui sera inscrite.</span>' : '') + '</div>';
         return h;
       }
       function actionsHtml(w) {
@@ -24086,8 +24117,26 @@
         poser(q('[data-fac-sig]'), sigHtml(w)); poser(q('[data-fac-mark]'), repHtml(w)); poser(q('[data-fac-ecr]'), ecrHtml(w)); poser(q('[data-fac-actions]'), actionsHtml(w));
         var st = q('[data-fac-st]'); var g = groupe(w);
         poser(st, g === 'done' ? '<span class="dc-badge ok">Au brouillard</span>' : g === 'bloc' ? '<span class="dc-badge fin-ko">À corriger</span>' : g === 'voir' ? '<span class="dc-badge warn">À regarder</span>' : '<span class="dc-badge ok">Prête</span>');
+        majChg(w);
         var ttc = q('[data-fac-ttc]'); if (ttc) ttc.classList.toggle('bad', calc(w).signaux.some(function (s) { return s.code === 'ECART_HT_TVA_TTC'; }));
         majListe();
+      }
+      function majTotaux(w) {
+        var q = function (x) { return root.querySelector(x); };
+        poser(q('[data-fac-sig]'), sigHtml(w)); poser(q('[data-fac-mark]'), repHtml(w)); poser(q('[data-fac-tot]'), totHtml(w)); poser(q('[data-fac-actions]'), actionsHtml(w));
+        var g = groupe(w), st = q('[data-fac-st]');
+        poser(st, g === 'done' ? '<span class="dc-badge ok">Au brouillard</span>' : g === 'bloc' ? '<span class="dc-badge fin-ko">À corriger</span>' : g === 'voir' ? '<span class="dc-badge warn">À regarder</span>' : '<span class="dc-badge ok">Prête</span>');
+        majChg(w); majListe();
+        var tt = q('[data-fac-ttc]'); if (tt) tt.classList.toggle('bad', calc(w).signaux.some(function (x) { return x.code === 'ECART_HT_TVA_TTC'; }));
+      }
+      /* « Modifié par vous » : toute valeur qui s'écarte de ce que la machine a lu ou de ce que la mémoire proposait */
+      function majChg(w) {
+        var o = w.o || {}, mod = {
+          date: o.date != null && w.date !== o.date, num: o.num != null && w.num !== o.num, ht: o.ht != null && num(w.ht) !== num(o.ht),
+          tva: o.tva != null && String(w.tva) !== String(o.tva) && num(w.tva) !== num(o.tva) || (o.tva != null && (w.tva === '') !== (o.tva === '')), ttc: o.ttc != null && num(w.ttc) !== num(o.ttc),
+          tiers: o.tiers != null && w.tiers !== o.tiers, journal: o.journal != null && w.journal !== o.journal, compte: !!w.compteChange
+        };
+        Object.keys(mod).forEach(function (k) { var e = root.querySelector('[data-fac-chg="' + k + '"]'); if (e) e.hidden = !mod[k]; });
       }
       function majListe() {
         poser(root.querySelector('[data-fac-list]'), listeHtml());
@@ -24235,16 +24284,42 @@
         var m = MEM.ecritures.dossier.filter(function (x) { return x.cle === 'NIF 1000234567'; })[0];
         W = {}; S.ordre = ['s1']; S.coche = { s1: true }; S.sel = 's1'; S.res = null; S.suite = true; S.sens = 'ACHAT';
         W.s1 = { id: 's1', nom: 'CEET-FA-0144.pdf', sens: 'ACHAT', statut: 'LUE', fournisseur: 'CEET', nif: '1000234567', num: 'FA-0144', date: '2026-04-20', ht: 85000, tva: 15300, ttc: 100300, compte: m ? m.compte : '', initial: m ? m.compte : '',
-          source: m ? { origine: 'MEMOIRE_DOSSIER', pieceRef: m.ref, choisiLe: m.le, choisiPar: m.par } : null, memId: m ? m.id : null, tiers: 'F-CEET', tiersNom: 'CEET', aCreer: null, traitement: m && m.tva === 'NON_RECUPERABLE' ? 'NON_RECUPERABLE' : 'RECUPERABLE', journal: 'ACH', doublon: false, ecarte: '', vu: false, compteChange: false, o: { ht: 85000, tva: 15300, ttc: 100300 } };
+          source: m ? { origine: 'MEMOIRE_DOSSIER', pieceRef: m.ref, choisiLe: m.le, choisiPar: m.par } : null, memId: m ? m.id : null, tiers: 'F-CEET', tiersNom: 'CEET', aCreer: null, traitement: m && m.tva === 'NON_RECUPERABLE' ? 'NON_RECUPERABLE' : 'RECUPERABLE', journal: 'ACH', doublon: false, ecarte: '', vu: false, compteChange: false, o: { ht: 85000, tva: 15300, ttc: 100300, date: '2026-04-20', num: 'FA-0144', tiers: 'F-CEET', journal: 'ACH' } };
         S.vue = 'relecture'; rendre();
       }
 
+      /* ── Cellules du tableau d'écriture : modification directe, effet immédiat ── */
+      function celluleModifiee(t, fin) {
+        var w = pieceDe(t); if (!w) return;
+        var p = t.dataset.facL.split(':'), i = +p[0], k = p[1], L = materialiser(w), l = L[i]; if (!l) return;
+        if (k === 'compte') {
+          var v = t.value.trim();
+          if (v && !compteOk(v)) { if (fin) { notify('error', 'Compte inconnu', 'Le compte ' + v + ' n’est pas au plan de ce dossier.'); t.value = l.compte; } return; }
+          if (!v && !fin) return;
+          l.compte = v; l.mod = true;
+          var lab = root.querySelector('[data-fac-lab="' + i + '"]'); if (lab) lab.innerHTML = labelLigne(w, l);
+          var lm = root.querySelector('[data-fac-lmod="' + i + '"]'); if (lm) lm.innerHTML = '<span class="rep chg">' + IC.mem + 'Modifié par vous</span>';
+          if (l.role === 'CHARGE' || l.role === 'PRODUIT') { w.compte = v; w.compteChange = v !== '' && v !== w.initial; var hc = root.querySelector('[data-fac-f="compte"]'); if (hc) hc.value = v; }
+        } else {
+          l[k] = num(t.value); l.mod = true;
+          var lm2 = root.querySelector('[data-fac-lmod="' + i + '"]'); if (lm2 && !lm2.innerHTML) lm2.innerHTML = '<span class="rep chg">' + IC.mem + 'Modifié par vous</span>';
+          if (fin) t.value = l[k] ? fr(l[k]) : '';
+        }
+        majTotaux(w);
+      }
       /* ── Événements ── */
       /* la pièce d'un champ est celle du panneau qui le porte, jamais « la pièce sélectionnée » : un champ qu'on quitte en changeant de pièce valide la sienne */
+      function nouveauTiers(w) {
+        dialogue('Un autre fournisseur', 'Il sera ajouté aux fournisseurs du dossier', '<label class="fac-fields" style="display:block"><label>Nom du fournisseur<input class="fac-in" data-l6-nom autocomplete="off" placeholder="Raison sociale"></label></label>', [{ t: 'Annuler' }, { t: 'Créer et choisir', cls: 'btn-primary', fn: function () {
+          var n = (ap.querySelector('[data-l6-nom]').value || '').trim(); if (!n) return;
+          w.tiers = 'F-N' + (MEM.n++); w.tiersNom = n.toUpperCase(); w.aCreer = null; S.sel = w.id; rendreDetail(); notify('success', 'Fournisseur créé', w.tiersNom + ' est ajouté aux fournisseurs du dossier.');
+        } }]);
+      }
       function pieceDe(el) { var d = el.closest && el.closest('[data-fac-detail]'); return d ? W[d.dataset.facId] : null; }
       if (root) {
         root.addEventListener('click', function (ev) {
           var t = ev.target;
+          var bd = t.closest('[data-fac-del]'); if (bd) { var wd = pieceDe(bd); if (wd) { materialiser(wd).splice(+bd.dataset.facDel, 1); S.sel = wd.id; majDetail(); } return; }
           var b = t.closest('[data-fac-sens]'); if (b) { S.sens = b.dataset.facSens; S.exemple = false; if (S.exemple === false && S.files.length && !S.files.some(function (f) { return f.file; })) S.files = []; rendre(); return; }
           if ((b = t.closest('[data-fac-voirf]'))) { voirFichier(S.files[+b.dataset.facVoirf]); return; }
           if ((b = t.closest('[data-fac-retirer]'))) { S.files.splice(+b.dataset.facRetirer, 1); rendre(); return; }
@@ -24276,6 +24351,8 @@
           else if (a === 'suite') suiteCeet();
           else if (a === 'nouveau') { var memo = S.brouillards, nx = S.next, dn = S.defn; var m0 = MEM; initFac(); S.brouillards = memo; S.next = nx; S.defn = dn; MEM = m0; rendre(); }
           else if (a === 'mes-choix') ouvrirMemoireDialogue();
+          else if (a === 'ajout-ligne') { materialiser(w2).push({ role: 'AUTRE', compte: '', debit: 0, credit: 0, mod: true }); majDetail(); }
+          else if (a === 'reset-lignes') { w2.L = null; majDetail(); }
         });
         root.addEventListener('keydown', function (ev) { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('[data-fac-sel]')) { ev.preventDefault(); ev.target.click(); } });
         root.addEventListener('change', function (ev) {
@@ -24286,19 +24363,25 @@
           if (t.matches('[data-fac-devise]')) { S.devise = t.value; return; }
           var c = t.closest('[data-fac-coche]'); if (c) { S.coche[c.dataset.facCoche] = t.checked; majListe(); return; }
           c = t.closest('[data-fac-bcoche]'); if (c) { S.coch[c.dataset.facBcoche] = t.checked; rendre(); return; }
+          if (t.dataset.facL) { celluleModifiee(t, true); return; }
           var f2 = t.dataset.facF; if (!f2) return;
           var w = pieceDe(t); if (!w) return;
           if (f2 === 'compte') {
             var v = t.value.trim();
             if (v && !compteOk(v)) { notify('error', 'Compte inconnu', 'Le compte ' + v + ' n’est pas au plan de ce dossier.'); w.compte = ''; }
-            else { w.compte = v; w.compteChange = v !== '' && v !== w.initial; if (v === w.initial) w.compteChange = false; }
+            else { w.compte = v; w.compteChange = v !== '' && v !== w.initial; if (v === w.initial) w.compteChange = false; var cl = chargeLigne(w); if (cl) { cl.compte = v; cl.mod = w.compteChange; } }
             t.value = w.compte;
-          } else if (f2 === 'tiers') { w.tiers = t.value; var op = t.options[t.selectedIndex]; w.tiersNom = t.value ? op.textContent : ''; }
+          } else if (f2 === 'tiers') {
+            if (t.value === '__new') { var cible = w; t.value = w.tiers || ''; nouveauTiers(cible); return; }
+            w.tiers = t.value; var op = t.options[t.selectedIndex]; w.tiersNom = t.value ? op.textContent : ''; if (t.value) w.aCreer = null;
+          }
           else if (f2 === 'journal') w.journal = t.value;
           else if (f2 === 'tvanr') w.traitement = t.checked ? 'NON_RECUPERABLE' : 'RECUPERABLE';
           majDetail();
         });
         root.addEventListener('input', function (ev) {
+          var tl = ev.target.dataset && ev.target.dataset.facL;
+          if (tl) { celluleModifiee(ev.target, false); return; }
           var t = ev.target, f2 = t.dataset && t.dataset.facF; if (!f2) return; var w = pieceDe(t); if (!w) return;
           if (['ht', 'tva', 'ttc', 'date', 'num'].indexOf(f2) < 0) return;
           w[f2] = t.value; majDetail();
