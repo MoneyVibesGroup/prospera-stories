@@ -568,6 +568,15 @@ reserved_ranges:
       mutations 10/10 et 6/6. Pile grp-d 25/25 (PDF lu par pdfjs), rejouée depuis origin/dev. → B (le droit, le manifeste
       1.1.0 à recopier, le consommateur de paiement). Lot D, n° 2 du lot 6 (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-230 ; FR-43,
       FR-45, FR-48, FR-217). NON SLOTTÉE.
+  - range: "STORY-1067"
+    status: "RÉSERVÉ"
+    owner: "La commande (3) — modifier une commande BROUILLON, TRANSMISE ou VALIDEE non commencée (FR-35) : à la révision lue, par l'auteur ou le bureau ; historique champ par champ ; une VALIDEE rejugée sur la différence (FR-33, la commande non comptée deux fois), sa réservation remplacée en un seul appel à stock (AD-8), ses bons qui gardent leur numéro ; une commande facturée ne se modifie pas (un avoir) (prospera-ventes-service, module commande)"
+    source_doc: "prospera-stories/stories/STORY-1067.md"
+    reserved_on: "2026-11-24"
+    note: >
+      En cours le 2026-11-24 — annonce « ⚠ Contrats » avant le code (cette PR) ; prospera-ventes-service#15 ouverte. Lot D,
+      n° 3 du lot 6, dernière du distributeur (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-228 ; FR-31, FR-33 → FR-35 ; ordre de
+      D-1062-12 (1)). « Fini quand » fixé par la fiche (D-1067-1). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
