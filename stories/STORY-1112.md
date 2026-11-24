@@ -1,6 +1,6 @@
 # STORY-1112 : le BFF relaie les essais d'un prospect à la console (ouvrir, prolonger, suivre)
 
-Status: in-progress (rouverte le 2026-11-24 pour sa suite : « Suite du 2026-11-24 », en fin de fiche)
+Status: done (rouverte et refermée le 2026-11-24 pour sa suite : « Suite du 2026-11-24 », en fin de fiche)
 
 **Complexité :** moyenne (deux lectures de plus au catalogue, huit relais typés au BFF, une ouverture en un geste)
 
@@ -300,3 +300,86 @@ contrat `essai-prospect.openapi.json` 1.1.0), BFF `c451b17` (`EssaisProxyService
 - **recette (profil)** — `auth-essai` : `NOTIFICATION_BASE_URL`, `NOTIFICATION_JETON_SERVICE`, `extra_hosts` ; variables
   facultatives `RECETTE_SORTIE_ESSAI_PORT` (18026, doit être libre sur le poste) et `RECETTE_SORTIE_ESSAI_JETON` ; garde
   neuve `recettes-sans-base`.
+
+### Livraison de la suite
+
+Toutes fusionnées en « Rebase and merge », `merged = true`, `head.sha` = SHA poussé, arbre de la branche identique à
+`dev` après rejeu :
+
+- **auth #50** : **`d69e34c` sur `dev`** (tête `f4f6cb2`) — `invitations-au-reel.controller.ts` (`EspaceReelGuard` lit
+  le corps brut), `invitations-au-reel.service.ts` (`estLaDemandeDuPremierAdministrateur`,
+  `exigerLeReelOuLePremierAdministrateur`, `exigerQuIlSoitLePremier`), leur spec ; e2e neuf
+  `test/invitations-premier-administrateur.e2e-spec.ts`.
+- **catalogue #73** : **`0894425` sur `dev`** (tête `95153b6`) — `src/essai/premier-administrateur.ts` (règles pures),
+  `premier-administrateur.service.ts`, `EssaiProspectService.ouvrir`, `OrdreDOuvertureDto.identiteAdministrateur`,
+  `essaiPublie`, schéma `InvitationDeLAdministrateur`, `EssaiModule` ← `MiseEnServiceModule` (exports), contrat
+  `essai-prospect` 1.2.0.
+- **admin-panel #43** : **`911c450` sur `dev`** (tête `5854256`) — DTO, projection, relais, client du catalogue.
+- **recette #30** : **`c99257a` sur `dev`** (tête `dd9dddc`) — profil (`auth-essai` → sortie de l'essai), `src/sortie-de-l-essai.ts`,
+  garde `src/recettes-sans-base.spec.ts`, recette `essai-mise-en-service` sans pose en base, README.
+- Contrat annoncé avant la fusion : prospera-stories #833 (`4605dc6` sur `main`).
+
+### Preuves de la suite
+
+- **auth** (Node 25) : `invitations-au-reel.spec.ts` **46/46** (30 avant : +16 — la garde sur le corps brut, six formes
+  refusées avant le corps dans l'essai, le premier administrateur servi puis validé, le jeton du moteur toujours exigé,
+  un second administrateur refusé sans écriture, les refus du réel valent dans l'essai, le réel inchangé) ; e2e neuf
+  **3/3** (vraies gardes globales que `@Public` laisse passer, garde du moteur, garde d'espace, validation de `main.ts`,
+  service réel) ; unitaire complet **1 464 passés**, 4 suites rouges connues (binding de Confluent sous Node 25) ; câblage
+  du module racine vert avec le binding doublé ; e2e complet 270/272 (`health`, `auth-register` : exigent une vraie
+  infrastructure Mongo/Redis/Kafka, sans rapport) ; `tsc`, lint.
+- **catalogue** (Node 25) : `src/essai/essai.spec.ts` 38/38 (+6 : sortie demandée avant auth, sous l'identité du
+  moteur ; `TENANT_ADMIN` sous l'identifiant tiré ; `ENVOYEE` validé par Ajv contre le contrat 1.2.0 ; nom par défaut ;
+  `INTERCEPTEE` sans appel d'auth puis reprise après la liste blanche ; `A_REPRENDRE` / `REFUSEE` sous le même
+  identifiant ; panne remontée ; essai effacé ; règles pures avec valeurs écrites) ; `test/essais-console.e2e-spec.ts`
+  **11/11** (+7 : l'ordre avec le nom à travers la chaîne de gardes, cinq noms mal formés 400, `entitlement:grant`) ;
+  unitaire complet **1 618 passés**, 3 suites rouges connues (binding) ; câblage vert avec le binding doublé (rouge sans
+  l'import de `MiseEnServiceModule`) ; e2e : les 5 suites rouges connues à l'identique (172, fournisseurs absents de leurs
+  modules de test) ; `tsc`, lint.
+- **BFF** (Node 25) : unitaires **718/718** (49 suites ; 711 avant), e2e **295/295** (17 suites) — projection de
+  l'invitation (champs nommés seuls, état hors liste écarté, code/motif/interception mal formés écartés un par un), relais
+  du nom (sans rôle métier inventé), bord (six noms mal formés 400, rien d'écrit), OpenAPI (schémas neufs, champs requis,
+  énumération), garde des noms de schéma unique vert ; `tsc`, lint.
+- **recette** (Node 25) : `npm test` **137/137** (14 suites ; 119 avant) — sortie de l'essai contre un vrai appel HTTP
+  (accusé `{ id }` en 202, 401/400/404, dernier message attendu), garde du profil amendée, garde `recettes-sans-base`
+  (toutes les recettes lues, hors `delegation`) ; `npm run verifier` vert.
+- **Mutations : 32/32 rouges sur une assertion** — auth 7 (forme admise : un membre ; rôle `TENANT_ADMIN` ; autre
+  administrateur ; comparaison d'identifiant ; corps passé à la garde ; garde ouverte hors essai ; e2e : autre
+  administrateur), catalogue 12 (état `ENVOYEE` ; essai effacé ; interception ; sortie non demandée ; rôle ; prénom par
+  défaut ; préfixe de l'identifiant ; reprise à l'ordre rejoué ; câblage sans `MiseEnServiceModule` ; invitation absente
+  de la réponse ; borne du nom ; invitation non faite à l'ouverture), BFF 7 (invitation absente ; état hors liste admis ; interception non vérifiée ; nom non relayé ; rôle métier inventé ; borne du nom ; format du rôle métier), recette 6 (jeton de la sortie ; accusé ;
+  adresse du réel dans le profil ; `extra_hosts` ; garde sans `mongosh` ; pose en base réintroduite dans la recette).
+  Cinq mutations écrites d'abord ne compilaient pas (`0 total`) ou visaient un mauvais dossier : réécrites ou jouées à la
+  main, puis rouges.
+- **Pile `grp-b` neuve** (volumes neufs, images reconstruites depuis `git -c core.autocrlf=false archive origin/dev` :
+  auth `d69e34c`, catalogue `0894425`, BFF `911c450`, kyc `9cef9cb`, notification `749b3cd`, paiement `4684d22`,
+  dossier `2bf9dbd`, document `9d0cfd3`, balance `0ff2402`, bilan `7b53ff5`, fiscal `990256a`, comptabilité `979ed53`,
+  plateforme `2c96703` ; recette `origin/dev` `c99257a`) :
+  - **`docker compose up` sain** : `catalogue-essai` et `platform-catalog-service` (module changé), `auth-essai`,
+    `auth-service`, `admin-panel` : `healthy`, « Nest application successfully started », aucune
+    `UnknownDependenciesException`.
+  - **`essai-mise-en-service` 8/8, sans aucune pose en base** (286 s) : l'ouverture hors liste blanche ⇒
+    `INTERCEPTEE`, l'interception lue par la console (`module: essai`, `COURRIEL`, l'adresse), rien à la sortie ; le
+    domaine en liste blanche, l'ouverture rejouée (200) ⇒ `ENVOYEE`, l'administratrice seule membre de l'essai
+    (`INVITED`, `TENANT_ADMIN`, `CAB_ASSOCIE`), son lien à la sortie de l'essai au nom du cabinet, **rien dans Mailhog** ;
+    rejouée encore, rien ne repart ; elle entre par ce lien (jeton `sub` = l'identifiant tiré, `org` = le prospect),
+    invite Kofi par `POST /users`, essaie sous un compte du jeu ; puis la signature, la naissance au réel, l'installation
+    par le moteur (six `VERT`), la mise en service qui invite les deux membres sous leur identifiant d'essai, leur entrée
+    au réel par Mailhog, le KYC, le dossier, `balance` et `bilan` ouverts. Journaux : « Écriture vers le réel interceptée
+    dans l'essai … essai → COURRIEL », puis deux « Message de compte « invitation » remis … (envoi sortie-essai-0001,
+    0002) ».
+  - **Recette croisée complète** : sur pile neuve (`grp-b`, images ci-dessus, volumes neufs ; recette `c99257a`), **10 suites vertes sur 12, 144 tests verts, 4 rouges, 2 sautés** (les deux C13 de `cabinet-moteur`, pile en `REEL`, D-1115-10), 1 687 s. **Les quatre suites rouges du dernier passage de 1115 sont vertes** : `atelier-balance` (188 s), `renvoi-du-lien` (252 s), `zone-franche` (337 s), `pile` (71 s) ; vertes aussi `essai-mise-en-service`, `comptabilite`, `distributeur`, `delegation`, `abonnement`, `referentiel-par-dossier`. **Les deux rouges sont deux `read ECONNRESET` entre le poste et la pile, cause prouvée par les journaux des services** : (1) `cabinet-moteur`, « le COLLABORATEUR modifie l'identité d'un dossier par le BFF » : le BFF a reçu le `PATCH /dossiers/{id}` et répondu **200 en 28 ms** (journal `admin-panel`, puis `dossier-service`), la réponse s'est perdue avant le client ; (2) `facturation` (STORY-649) : la boucle des 199 accusés vers notification a perdu sa connexion après 21 accusés servis 200 (aucun redémarrage, aucune erreur au journal de notification) ; les deux autres rouges de la suite en découlent (coût arrêté 2 937 au lieu de 2 403 : 21 accusés au coût réel au lieu de 199). Aucun ne touche l'essai ni la suite de 1112. **Rejouées seules sur une pile neuve** (`down -v`, mêmes images) : **`facturation` 7/7** (342 s), **`cabinet-moteur` 9/9** (2 sautés, 123 s). Aucun ticket : le défaut n'est dans aucun service ; c'est le relais de ports du poste (D-1115-12, deux coupures en 28 min contre 17 puis 12 au 24/11 après-midi). `atelier-balance` étant vert, rien à C
+- Verrou : Verrou pris à 20:17, rendu à 21:30 (construction des images, essai-mise-en-service, recette complète, deux rejeux) ; `down -v` à chaque fois ; aucun conteneur, volume ni réseau `grp-b` ne reste.
+
+### Ce qui reste (suite)
+
+- **→ A (AP-57, lot 7)** : nommer l'administrateur du prospect à l'ouverture (`identiteAdministrateur` : prénom, nom,
+  rôle métier) et montrer `invitationAdministrateur` ; `INTERCEPTEE` ⇒ proposer la mise en liste blanche de son adresse ou
+  de son domaine (`POST /admin/sorties-essai/liste-blanche`), puis rejouer l'ouverture (`POST /admin/essais`, même
+  ordre). La maquette validée d'AP-57 ne porte que le courriel : l'amender d'abord (maquette avant le code).
+- **Les autres messages de compte de l'auth d'essai** (l'invitation d'un collègue par `POST /users`, une
+  réinitialisation) partent par la notification de l'essai sans passer par la liste blanche (D-1112-13) : auth n'est pas
+  un module C13 qui intercepte. À trancher si la démo l'exige (une demande d'auth à `verifier`, ou la notification
+  d'essai qui intercepte elle-même).
+- **La notification d'un espace d'essai déployé** : la pile la remplace par la sortie que tient la recette (D-1112-17).
+- **STORY-1116** (cinq essais) peut ouvrir chaque essai par la console et y faire entrer son administrateur par le lien.
