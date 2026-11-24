@@ -7603,7 +7603,7 @@ sprints:
         epic: "EPIC-031"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
+        status: "ready-for-dev"  # 🟡 24/11 — session A, lot 6 (n° 7) : fiche stories/STORY-322.md et contrat annoncé avant le code. 321 NON faite avec elle (D-322-1) : le calculé du triplet est montantAttendu (MOTEUR, quand 321 existera) ou montantSaisi (SAISI_CABINET), sinon indisponible avec son motif nommé. Deux champs humains neufs (montantDeclare, montantPaye), motif d'écart exigé au visa, calculé figé au visa, lecture des écarts pour le dossier de contrôle (336) ; aucun droit neuf, aucun événement.
         assigned_to: null
       - story_id: "STORY-323"
         title: "Cycle de vie de l'obligation et rôles"
