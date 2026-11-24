@@ -1351,6 +1351,15 @@
   - **`expert-comptable`, variable d'environnement neuve `ESPACE_KYC_URL`** (facultative ; URL avec protocole ; exemple
     `http://localhost:3100/kyc`). **Absente : l'e-mail du renvoi n'est pas envoyé** (travail arrêté sur une erreur nommée)
     ; les trois e-mails existants n'en dépendent pas (D-1072-9). Une pile qui veut cet e-mail la pose.
+  - ⚠️ **Complément (2026-11-24, 19:40), avant la fusion de #92 — un comportement de `notification` change (D-1072-12).**
+    Relevé sur la pile `grp-d` de la story : deux demandes d'un même appelant l'une derrière l'autre (le renvoi à deux
+    administrateurs) ; la remise de la première, **déjà acceptée par le relais**, écrivait son journal pendant que la
+    seconde se préparait (même compteur de période) ; MongoDB abandonnait la transaction du journal
+    (`TransientTransactionError`), BullMQ rejouait la remise et **le premier destinataire recevait le message deux
+    fois**. Désormais le journal d'une remise (`JournalRemiseService` : remise, échec, écart) **rejoue sa transaction
+    entière** sur l'étiquette `TransientTransactionError`, cinq essais au plus ; toute autre erreur remonte comme avant.
+    Aucune route, aucun champ, aucun statut, aucun fait ne change ; vaut pour **tous** les appelants et tous les modèles
+    (les trois e-mails KYC, le paiement, l'assurance…), qui ne reçoivent plus de doublon dans ce cas.
 
 - **PUBLIÉ (2026-11-24, STORY-1071, prospera-plateforme#39, `dev` 2c96703 ; prospera-sinistres-service#33, `dev`
   9c9a997, 1c7b49a, b327f18, 095e577) ; ANNONCÉ avant la fusion du code (prospera-stories #809, `main` 77bd6c4), sans
