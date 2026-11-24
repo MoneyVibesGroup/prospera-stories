@@ -659,8 +659,10 @@ reserved_ranges:
     source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
     reserved_on: "2026-11-24"
     note: >
-      Q-D-12 répondue par l'utilisateur le 24/11 (D-Q12-1, journal de D, #812). Dépend de deux livraisons de B (DossierEtatV1
-      complété ; comptes d'encaissement publiés). Fiche à écrire juste avant de coder. NON SLOTTÉE.
+      Q-D-12 répondue par l'utilisateur le 24/11 (D-Q12-1, journal de D, #812). Portée élargie le 24/11 (soir) sur consigne de
+      l'utilisateur : D fait aussi les deux côtés producteurs (DossierEtatV1 complété dans prospera-dossier-service ;
+      comptes d'encaissement publiés par prospera-paiement-service), après une passation de B limitée à 1073. Ordre :
+      après 1076. Fiche à écrire juste avant de coder. NON SLOTTÉE.
   - range: "STORY-1074"
     status: "RÉSERVÉ"
     owner: "Groupe D — la consolidation s'installe à part : sa garde propre et ses trois vérifications (perimetre-arrete, ecritures-equilibrees, gate-consolidation) (prospera-bilan-service)"
