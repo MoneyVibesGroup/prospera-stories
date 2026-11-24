@@ -1830,13 +1830,18 @@ reserved_ranges:
   # ── LOT 6 DE B (2026-11-24) : STORY-1112 → 1116, réservées par PLAN-LOT-6-2026-11-23.md §8 ; fiches écrites juste
   #    avant de coder, le story_id_high_water_mark monte au commit qui crée chacune.
   - range: "STORY-1113"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe B, lot 6, n° 3 — le BFF relaie la mise en service à la console (AP-56) : la console parle aux deux espaces (CATALOG_ESSAI_SERVICE_URL, AUTH_ESSAI_SERVICE_URL) ; /api/v1/admin/naissances (naissance au réel, identité reprise de l'essai), /api/v1/admin/mises-en-service (membres de l'essai invités au réel), /api/v1/admin/sorties-essai (liste blanche, vérification, interceptions) ; au catalogue, POST /sorties-essai/liste-blanche/verification (contrat mise-en-service 1.2.0) (prospera-admin-panel-service, prospera-platform-catalog-service)"
     source_doc: "prospera-stories/stories/STORY-1113.md"
     reserved_on: "2026-11-24"
     note: >
-      🚧 EN COURS le 2026-11-24 — fiche écrite et contrat annoncé avant le code (journal de B, « ⚠ Contrats »).
-      Lot 6 de B, n° 3. NON SLOTTÉE.
+      🏁 DONE le 2026-11-24 — catalogue #72 (dev 45971cf), admin-panel #40 (dev 25aed19, dcd76df) ; contrat annoncé
+      avant la fusion (stories #791, amendé par #794 : les précisions des refus dans details, relais du moteur
+      d'installation compris). AP-56 débloquée : appel réel au BFF sur une pile grp-b à DEUX espaces (deux auth, deux
+      catalogues), 47/47 contrôles — un prospect ouvre son essai, signe, naît au réel sous le même identifiant avec
+      l'identité de l'essai, est mis en service ; ses deux collègues d'essai invités au réel sous leur identifiant
+      d'essai, sans les comptes du jeu ; rejeu sans rien doubler ; sorties de l'essai. Node 25 : catalogue 1612 passés
+      (3 suites rouges connues), BFF 670/670 et e2e 257/257 ; mutations 3/3 et 25/25. Lot 6 de B, n° 3. NON SLOTTÉE.
   - range: "STORY-1112"
     status: "done"
     owner: "Groupe B, lot 6, n° 2 — le BFF relaie les essais d'un prospect à la console (AP-57) : GET /api/v1/essais (liste, avec le prospect né) et GET /api/v1/jeux-demonstration au catalogue (org:read, contrat essai-prospect 1.1.0) ; au BFF, /api/v1/admin/essais (liste, lecture, prolongation, signature, jeu, effacement) projetés en DTO typés, et POST /admin/essais qui enchaîne la naissance et l'ouverture avec le jeu du métier ; refus relayés par leur code (prospera-admin-panel-service, prospera-platform-catalog-service)"

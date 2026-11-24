@@ -75,11 +75,26 @@
     sa fiche** (au-delà de la marque haute ; la plage de B 930 → 979 est épuisée). Aucun identifiant n'est réservé ici.
     Charge : « ⚠ Contrats » de D (STORY-1066) ; topic `facturation.avoir.emis`, Créance `(FACTURE, factureId)`,
     `montantTtcMineur`, rejeu sur `avoirId`, crédit du tiers au-delà du reste dû ; preuve sur pile.
-  6. **STORY-1113 — en cours** (24/11) : fiche écrite, contrat annoncé avant le code (« ⚠ Contrats »).
-  - **Suivante : STORY-1113** (le BFF relaie la mise en service : `mises-en-service`, `sorties-essai`, `naissances` ;
-    AP-56). Pour 1113 : la console qui parle
-    aux DEUX espaces (invitations de 974, D-1112-6) ; `POST /naissances` est déjà appelé par `POST /admin/essais`
-    (client `ordonnerNaissance` du catalogue, délai des essais).
+  6. ~~STORY-1113~~ : **catalogue #72** (`45971cf` sur `dev`), **admin-panel #40** (`25aed19`, `dcd76df`) ; contrat
+     annoncé avant la fusion (stories #791, amendé par #794). **AP-56 débloquée** : la console fait naître au réel,
+     met en service avec les membres de l'essai, tient les sorties de l'essai, par le BFF.
+     - **La console parle aux deux espaces** (D-1113-1) : `CATALOG_ESSAI_SERVICE_URL`, `AUTH_ESSAI_SERVICE_URL`
+       (facultatives, défaut : le réel) ; les essais de 1112 et les sorties vont à l'essai, la naissance au réel et la
+       mise en service au réel ; un coupe-circuit par catalogue. Le jeton de l'opérateur vaut dans les deux espaces :
+       condition de déploiement (D-1113-2, question à l'architecte ci-dessous).
+     - BFF : `/admin/naissances` (identité reprise de l'essai), `/admin/mises-en-service` (membres de l'essai invités,
+       sans les comptes du jeu ; `…/invites` les montre avant le geste), `/admin/sorties-essai` (liste blanche,
+       vérification, interceptions). Catalogue : la vérification pour la console, sans journal (contrat 1.2.0).
+     - **D-1113-10, trouvé par la preuve** : l'enveloppe d'erreur du BFF ne garde que `code` et `details` ; les
+       précisions des refus vont dans `details`, et le relais du moteur d'installation (917, 1080) est corrigé de même.
+     Node 25 : catalogue 1 612 passés (3 suites rouges connues) ; BFF 670/670, e2e 257/257 ; mutations 3/3 et 25/25.
+     **Pile `grp-b` à deux espaces** (deux auth, deux catalogues, BFF) : **47/47 contrôles**. Verrou pris à 11:04,
+     rendu à 11:11 (correction de D-1113-10), repris à 11:19, rendu à 11:22 ; aucun conteneur, volume ni réseau `grp-b`
+     ne reste.
+  - **Suivante : STORY-1114** (le BFF relaie le métier, `vertical`, dans la liste et la fiche des organisations ;
+    `GET /admin/verticaux`, `PATCH /admin/organizations/{id}/vertical` ; AP-59 ; Docker : non). Demande de A du 24/11
+    (journal de A, « → B : STORY-1114 ») : refus `VERTICAL_ROLES_INCOMPATIBLES` 409 et `VERTICAL_INCONNU` 400 par leur
+    code. Rappel de 1113 : les précisions d'un refus relayé vont dans `details` (D-1113-10).
   3. ~~Correctif de STORY-1084~~ (ticket de A pour FE-140, placé **avant 1112** par la session de groupe, §1.1 ; aucun
      identifiant neuf) : **bilan #183** (`2364abc` sur `dev`, branche `MNV-1084-schema`) ; annonce avant la fusion :
      stories #783. La classe de la dette devient `ValeurIndicateurDetteDto` (D-1084-16) ; **garde neuf** sur le
@@ -1039,6 +1054,24 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   **après les sept stories du lot 6**, identifiant réservé à l'écriture de sa fiche (D-979-14 ; « État », lot 6). D
   prévenue directement (session du groupe D).
 
+- **← A (2026-11-19, tri du bloc C d'AP-54) : relayer `mises-en-service`, `sorties-essai`, `naissances` (AP-56)** —
+  **servie par STORY-1113** (catalogue #72, BFF #40). La naissance est relayée seule, au réel, avec l'identité de
+  l'essai ; la mise en service reprend les membres de l'essai ; `POST /sorties-essai/{org}/verifier` n'est pas relayée
+  (route des modules, sous leur identité de service) : le catalogue sert à la place une vérification pour la console,
+  sans journal (D-1113-5, D-1113-6).
+- **→ A (2026-11-24) : AP-56 débloquée par STORY-1113** (catalogue #72 `45971cf`, BFF #40 `25aed19`/`dcd76df`) :
+  types à régénérer depuis l'OpenAPI du BFF quand l'écran viendra (maquette d'abord, aucune encore). Routes :
+  `GET /admin/naissances/{orgId}` (`NaissancesDto` : `essai?`, `reel?`), `POST /admin/naissances` (`{ organisationId }`
+  seul après un essai : l'identité est reprise ; 422 `PROSPECT_SANS_NAISSANCE_D_ESSAI` ; 409 `NAISSANCE_DIVERGENTE`
+  avec `details.champs`) ; `GET /admin/mises-en-service/{orgId}/invites` (« les invités repris », `ecartes`), `POST
+  /admin/mises-en-service/{orgId}` (`{ modules, reprendreLesMembres? }` ; 404 `ORGANISATION_INCONNUE` avant la
+  naissance au réel ; 409 `MISE_EN_SERVICE_*` avec `details.modules` pour « ceux qui ne le sont pas disent pourquoi » ;
+  `invitations.etat` `ENVOYEES` | `A_REPRENDRE` | `REFUSEES`), `GET …/{orgId}` (bilans) ; `GET|POST
+  /admin/sorties-essai/liste-blanche`, `DELETE …/{id}` (l'`id` encodé), `POST …/liste-blanche/verification`, `GET
+  /admin/sorties-essai/{orgId}/interceptions` (`origine`). Ordre proposé à l'écran : signer (AP-57) → naître au réel →
+  installer l'offre (AP-55) → mettre en service. **Pour AP-55** : les refus du moteur d'installation portent désormais
+  `details.modules`, `details.refus`, `details.planId` (ils n'arrivaient pas : D-1113-10), là où `grant-errors.ts` les
+  lit déjà. Preuve : appel réel au BFF sur une pile à deux espaces, 47/47 (fiche STORY-1113, « Preuves »).
 - **← A (2026-11-24) : STORY-1112, relayer `/essais` et ajouter une liste ; recommandé `POST /admin/essais` qui
   enchaîne la naissance et l'ouverture avec le jeu du métier** — **servie par STORY-1112** (catalogue #70, BFF #39).
   Les deux lectures manquantes (liste, jeux chargés) sont servies par le catalogue (D-1112-1) ; le jeu du métier est
@@ -1243,6 +1276,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
     `refus` et `planId` d'un refus passent désormais dans `details` — avant, ils étaient retirés sans bruit et
     n'atteignaient jamais la console, qui les lit déjà là (`frontend-admin-panel`, `grant-errors.ts`, `details.refus`,
     `details.modules`). Le `code` et le statut ne changent pas.
+  - **Fusionné le 24/11** : catalogue #72 (`45971cf` sur `dev`), BFF #40 (`25aed19`, `dcd76df`), sans écart au contrat
+    annoncé et amendé.
 
 - **2026-11-24, suite de STORY-979 (lot 6) — `facturation:avoir:valider` au catalogue de tenant d'auth, hors du
   jeton, et le manifeste `facturation` 1.1.0 au catalogue, annoncés AVANT la fusion du code**
@@ -2531,6 +2566,14 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Questions à l'utilisateur ou au PO
 
+- **STORY-1113, D-1113-2 — l'opérateur de la console dans les deux espaces** (question à l'architecte, ouverte) : la
+  console relaie le jeton de l'opérateur vers l'essai ET le réel ; il faut donc que les services des deux espaces
+  acceptent l'identité de l'opérateur de la console (même émetteur, même clé de vérification publiée). AD-15 interdit de
+  partager entre espaces les **identités de service** (`MOTEUR_JETON_SERVICE` reste propre à chaque espace) et ne dit
+  rien de l'opérateur. **Choix retenu par défaut** : une identité d'opérateur commune aux deux espaces (sur la pile de
+  preuve, les deux auth signent avec la même clé). L'autre voie (une session par espace dans la console) est plus
+  lourde pour l'écran et n'apporte rien à la démo du 15/01.
+
 - ~~**STORY-961, le plan de journaux du SMT**~~ (D-961-1) : **renversée** par l'utilisateur (18/11) et **servie par
   STORY-973** : le plan SMT déclare le journal de trésorerie (recettes et dépenses) et les à-nouveaux. Restent
   contestables D-973-2 (le journal `AN` gardé), D-973-5 (l'écart de règlement refusé sans journal d'OD) et D-973-6
@@ -2566,6 +2609,24 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **L'enveloppe d'erreur du BFF (`AllExceptionsFilter`) ne garde que `code` et `details`** (STORY-1113) : tout autre
+  champ d'une `HttpException` (`modules`, `refus`, `planId`, `champs`) est retiré sans bruit. Les e2e du BFF ne
+  montent pas le filtre (il est posé par `CommonModule`, `APP_FILTER`) : ils voyaient les champs, la console jamais.
+  Une précision de refus va dans `details` ; un e2e qui la vérifie monte `{ provide: APP_FILTER, useClass:
+  AllExceptionsFilter }`. Le relais du moteur d'installation (917, 1080) en souffrait depuis le 17/11.
+- **Deux espaces sur une pile** (STORY-1113) : un Kafka et un Redis par espace (un Kafka partagé ferait connaître au
+  catalogue du réel l'organisation née dans l'essai, par `identity.org.created`), des bases distinctes, des secrets du
+  moteur distincts, la même clé de signature pour que le jeton de l'opérateur vaille des deux côtés
+  (`JWT_SIGNING_KEY_PEM`, `JWT_SIGNING_KID` : importée au premier démarrage sur base neuve). Surcouche de la preuve :
+  `preuve1113/surcouche.yml` de la session (à reprendre pour STORY-1115). 12 conteneurs, tenus par la VM de 8 Go.
+- **Une organisation née par le moteur n'a aucun membre** : la console n'a pas de route pour inviter le premier membre
+  d'une organisation de l'essai (D-948-8 : « la route d'auth existante » demande un `TENANT_ADMIN` de l'organisation).
+  La preuve de 1113 a posé les collègues en base ; les comptes du jeu, eux, passent par la route du moteur
+  (`PUT /interne/organisations/{id}/comptes-du-jeu`). À trancher par la recette de STORY-1115.
+- **Mutation : retirer l'usage d'une constante ou d'un paramètre ne compile plus** (`noUnusedLocals`) : muter la
+  condition (`… && Date.now() < 0`, `|| x.length > 0`), pas la ligne qui seule l'utilise ; et une mutation sur une
+  étiquette (le nom d'un coupe-circuit) ne mesure rien : la choisir sur un comportement.
 
 - **`enableImplicitConversion` du `ValidationPipe` du BFF fait d'une chaîne un booléen** (STORY-1112) : `"oui"` ou
   `"false"` deviennent `true` avant `@IsBoolean`. Un booléen d'un corps se garde tel quel par
