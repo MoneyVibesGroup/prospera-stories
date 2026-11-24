@@ -114,7 +114,13 @@
     `bilan-service` visibles à la démo du 15/01 : la projection qui rembourse plus que la dette
     (`TICKET-BACKEND-projection-remboursements-non-plafonnes.md`, accepté par l'utilisateur le 19/11) et la liasse
     rouverte lue avec `version: null` (`TICKET-BACKEND-liasse-rouverte-version-null.md`), « à placer après 1080 ».
-    **Ouverte, à placer par la session de groupe** (bilan est à B ; aucun identifiant réservé ici).
+    ~~Ouverte, à placer par la session de groupe~~ **Placée par la session de groupe avant STORY-1103** (24/11, §1.1 :
+    une demande adressée à B passe avant la story suivante). Deux **correctifs**, aucun identifiant neuf : chacun se
+    rattache à la story qui a introduit le défaut — la projection à **STORY-483** (`dettesFinancieres` = base +
+    emprunts − remboursements, sans plafond ; `DETTES_FINANCIERES_NEGATIVES` y est né), la liasse à **STORY-065**
+    (`consulter` ne lisait la version que d'un jeu `VALIDE`, `cb8aa33` ; recopié par STORY-449). Commits
+    `MNV-483(bilan): …` et `MNV-065(bilan): …`, une PR de code par ticket, une PR de docs qui ferme les deux.
+    Contrat annoncé avant la fusion (« ⚠ Contrats »). En cours.
   3. ~~Correctif de STORY-1084~~ (ticket de A pour FE-140, placé **avant 1112** par la session de groupe, §1.1 ; aucun
      identifiant neuf) : **bilan #183** (`2364abc` sur `dev`, branche `MNV-1084-schema`) ; annonce avant la fusion :
      stories #783. La classe de la dette devient `ValeurIndicateurDetteDto` (D-1084-16) ; **garde neuf** sur le
@@ -1278,6 +1284,37 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-24, correctifs de STORY-483 et de STORY-065 (lot 6, tickets de A avant la démo du 15/01) — annoncés
+  AVANT la fusion du code** (`prospera-bilan-service`, branches `MNV-483-remboursements` et `MNV-065-rouverte` ;
+  tickets `TICKET-BACKEND-projection-remboursements-non-plafonnes.md` et `TICKET-BACKEND-liasse-rouverte-version-null.md` ;
+  fiches `stories/STORY-483.md` et `stories/STORY-065.md`, « Correctif du 2026-11-24 »). **Ajouts facultatifs
+  seulement** : aucune route, aucun champ existant ne change de nom ni de type, aucun appelant actuel n'est cassé.
+  - **Projection (correctif de STORY-483)** : un remboursement saisi au-delà de l'**encours restant** (dette de la
+    base + emprunts nouveaux − déjà remboursé) est **ramené à l'encours** ; la dette financière projetée ne devient
+    plus négative par cette porte. Aucun plafond quand l'encours n'est pas connu (dette de la base non ancrée,
+    ventilation indéterminée) ni sur le chemin du dossier de financement (les échéanciers de STORY-1084 font foi).
+    - `GET …/bilan/hypotheses/{id}/projection` et `…/projection-mensuelle` : champ neuf **`avertissements`**
+      (facultatif au contrat, toujours servi, vide quand rien n'est à dire) → schéma neuf
+      **`AvertissementProjectionDto`** `{ code, message, rang, libelle, exercice, remboursementSaisi,
+      encoursAvantRemboursement, remboursementRetenu, excedentNonRembourse }`, énumération nommée neuve
+      **`CodeAvertissementProjection`** = `REMBOURSEMENT_PLAFONNE`. Le mensuel republie ceux de son exercice, et sa
+      ligne `remboursements` répartit le remboursement **retenu** (l'articulation reste nulle).
+    - Comparaison (`…/hypotheses/comparaison`) : **`CodeAvertissementComparaison` gagne `REMBOURSEMENTS_PLAFONNES`**
+      (énuméré déclaré ouvert, D-476-5), `hypothesesIds` = les scénarios écrêtés.
+    - **`modeleVersion` 1.13.0 → 1.14.0** (doctrine du modèle : la valeur produite change, le tampon aussi). Seuls
+      les jeux qui remboursaient au-delà de l'encours changent de montants (trésorerie, financement net cumulé,
+      dette, ratios) ; tous les autres rendent les chiffres de 1.13.0 au franc.
+    - Export du prévisionnel : une métadonnée neuve « Remboursements » (« Tels que saisis », ou les écrêtements).
+  - **Liasse (correctif de STORY-065)** : sur un jeu **rouvert**, `version` rend la **dernière version figée** (celle
+    que `POST …/rouvrir` rend déjà), comme le DTO le documente depuis STORY-065 (« null si jamais validé »).
+    - `GET …/bilan/etats/{id}`, `POST …/{id}/recalculer`, `PUT …/{id}/complements` : `version` passe de `null` à la
+      dernière version figée sur un brouillon rouvert ; inchangé ailleurs (`origine` dit toujours d'où sort la liasse).
+    - `GET …/bilan/etats` (liste) : champ neuf **`version`** (facultatif, nullable, même sens) dans
+      `JeuEtatsSommaireDto`, lu en une agrégation.
+    - **Inchangés en sens** : `source.version` de l'analyse et `vue.version` de la consultation restent la version
+      **servie** (`null` pour un brouillon, même rouvert).
+  - **→ A** : régénérer `bilan.ts` après la fusion ; l'écran de FE-034 peut retirer son contournement (« Demandes »).
 
 - **2026-11-24, STORY-1114 (lot 6, n° 4) — le métier des organisations relayé à la console (AP-59), annoncé AVANT la
   fusion du code** (`prospera-admin-panel-service`, branche `MNV-1114` ; fiche `stories/STORY-1114.md`, D-1114-1 → 9).
