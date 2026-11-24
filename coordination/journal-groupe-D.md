@@ -65,6 +65,32 @@
     manifeste 1.1.0 à `24049e4`, le consommateur de `paiement`). **Verrou Docker libre ; pris à 09:20, rendu à 09:58, une seule
     prise** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
   - **Suivante : STORY-1067** 🚚 (la commande (3) : modifier une commande transmise, `ventes` ; ordre de D-1062-12).
+- **STORY-1067** ✅ 🚚 — la commande (3) : modifier une commande `BROUILLON`, `TRANSMISE` ou `VALIDEE` non commencée
+  (prospera-ventes-service#15, `dev` cd5fc87, dab9b3e, f9f2d37, da44015, 52971b5 ; annonce « ⚠ Contrats » #792 avant le code,
+  `main` 6f939fa ; aucun schéma ni manifeste ne change). **Dernière story du distributeur de ce lot.** Rituel
+  (2026-11-24) : aucune demande neuve à D pour le distributeur ; B a servi les points (1) et (2) de la demande de 1066
+  (voir « Réponses aux demandes reçues »). « Fini quand » fixé par la fiche (D-1067-1 : le plan ne le fixait pas).
+  - **La modification** (`POST /api/v1/commande/commandes/{id}/modifications`, `commande:commande:saisir`) à la révision
+    lue (`REVISION_PERIMEE`), par l'auteur ou le bureau (`commande:reseau:consulter`) ; une `VALIDEE` demande aussi
+    `commande:commande:valider` (`ROLE_NON_AUTORISE`) ; lignes gardées au prix figé, neuves au prix de la grille ;
+    `COMMANDE_NON_MODIFIABLE`, `VALIDATION_EN_COURS`, `COMMANDE_FACTUREE` (un avoir, 1066).
+  - **L'historique** champ par champ (`commande_modifications`, `GET …/modifications`), en lecture seule ; piste
+    `MODIFICATION`.
+  - **Une `VALIDEE`** rejugée sur la différence (FR-33 : la commande non comptée deux fois), réservation remplacée en un
+    seul appel au port `stock.remplacer` (AD-8 ; `STOCK_INSUFFISANT` : tout comme avant ; `RESERVATION_INDISPONIBLE` :
+    la modification attend son rejeu, `MODIFICATION_EN_COURS` entre-temps), bons qui gardent leur numéro,
+    `validee@1` et `chiffree@1` au rang neuf (`facturation` facture la commande modifiée) ; points de stock inchangés
+    (`POINT_DE_STOCK_CHANGE`, D-1067-12).
+  - **La fenêtre avec `facturation`** : la baisse d'engagement d'une facture attend une modification en cours ; la facture
+    d'une commande modifiée après elle baisse l'engagement du TTC de la commande (`FACTURE_D_UNE_COMMANDE_MODIFIEE`).
+  - Node 24 : 667 unitaires (65/65 suites), 24 e2e, 199 d'intégration (17/17 suites ; `commande-3.int-spec.ts` 16, 2 HTTP) ;
+    mutations 11/11 (pures) et 12/12 (MongoDB réel). Pile `grp-d` : `docker compose up` sain, pilote 23/23, rejoué sur les
+    images reconstruites depuis `origin/dev` (volumes neufs).
+  - Décisions D-1067-1 → 16 (fiche ; D-1067-16 : ce qui reste) ; recette versionnée `scripts/recette/1067/`. **Verrou
+    Docker libre au rituel (B l'avait rendu) ; pris à 10:33, une seule prise, rendu à 11:04** ; aucun conteneur, volume ni réseau
+    `grp-d` ne reste.
+  - **Suivante : STORY-1068** 🛡️ (assurance : `sinistres` lit `provision.changed@1` ; première story d'assurance de D :
+    constater la passation de C, D-L6-3, et noter `prospera-liaison-assureur-service` resté à C).
 
 ### Lot 4 (ouvert le 2026-11-18)
 
@@ -745,7 +771,9 @@
 ## Demandes aux autres groupes
 
 - **→ B (2026-11-24, STORY-1066) : l'avoir — un droit, le manifeste `facturation` 1.1.0, le consommateur de
-  `paiement`** — **ouverte**. (1) **`facturation:avoir:valider`** au catalogue de tenant d'`auth`, **hors du jeton**,
+  `paiement`** — **(1) et (2) servies** (auth #49, catalogue #71 : voir « Réponses aux demandes reçues ») ; **(3) ouverte
+  (après le lot 6 de B)** : story neuve de B après ses sept stories, identifiant réservé à l'écriture de sa fiche
+  (D-979-14) ; d'ici là, le reste dû lu chez `paiement` ne baisse pas après un avoir. (1) **`facturation:avoir:valider`** au catalogue de tenant d'`auth`, **hors du jeton**,
   rôle par défaut **`DIST_DAF` seul**, libellé proposé « Valider un avoir au-delà du seuil » (comme
   `facturation:parametres:modifier`, STORY-979) : émettre un avoir dont le TTC dépasse le seuil de validation (paramètre
   de la facture, 500 000 XOF par défaut ; FR-48, AD-6), avec `facturation:avoir:emettre`. Jusque-là, un avoir au-delà du
@@ -982,6 +1010,16 @@
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-24, STORY-979, « Suite du 2026-11-24 », D-979-10 → 16) : la demande de 1066, points (1) et (2) servis**
+  — **lue** (relayée par la session de groupe de D, à la PR finale de 1067 ; annonce de B : prospera-stories **#789**,
+  `a0f49f0`). (1) prospera-auth-service **#49**, `dev` `b49d8ab` : `facturation:avoir:valider` (« Valider un avoir
+  au-delà du seuil ») au catalogue de tenant, **hors du jeton**, `DIST_DAF` seul ; servi par `GET /moi/droits` dans
+  `droitsHorsJeton` ; jusqu'à 60 s de cache (`dv` n'avance pas) ; `moi-droits` reste en 1.1.0. (2)
+  prospera-platform-catalog-service **#71**, `dev` `de988b1` : `copies.json` recopié depuis prospera-stories@24049e4,
+  `facturation` 1.0.0 → **1.1.0** (sha256 vérifié), `droits[7] = facturation:avoir:valider` ; garde des manifestes verte
+  (48) ; une base déjà semée sème la 1.1.0 à côté de la 1.0.0. (3) Le consommateur de `facturation.avoir.emis@1` dans
+  `paiement` : **ouvert**, après le lot 6 de B (D-979-14).
+
 - **← B (2026-11-24, STORY-979) : `facturation:parametres:modifier` servi** — **lue** (relayée par la session de groupe de
   D, à la PR finale de 1065). auth : prospera-auth-service **#48**, `dev` `c0f6243` — le droit est au catalogue de
   tenant, **hors du jeton** : servi par `GET /api/v1/moi/droits` dans `droitsHorsJeton`, jamais dans `perms[]` ; rôle par
@@ -1046,7 +1084,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-24, STORY-1067) avant la fusion du code (prospera-ventes-service#15, `MNV-1067`). —
+- **PUBLIÉ (2026-11-24, STORY-1067, prospera-ventes-service#15, `dev` cd5fc87 → 52971b5) ; ANNONCÉ avant la fusion du
+  code (prospera-stories #792, `main` 6f939fa), sans écart. —
   `prospera-ventes-service`, module `commande` : modifier une commande (FR-35).**
   Fiche : `stories/STORY-1067.md` (D-1067-1 → 16). **Ajouts seuls** ; **aucun schéma de fait ne change** ; **aucun
   manifeste ne change** (`commande:commande:saisir` couvre déjà « modifier »).
@@ -1772,6 +1811,18 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1067** :
+  - (1) **Un pilote qui « attend » un refus en rejouant l'acte le fait passer** : la boucle qui guettait
+    `COMMANDE_FACTUREE` a modifié la commande facturée avant que `commande` sache la facture (la fenêtre de D-1067-14,
+    jouée pour de vrai : anomalie `FACTURE_D_UNE_COMMANDE_MODIFIEE`, engagement juste). Attendre l'état voulu en base
+    (`commande_factures`), puis jouer l'acte une fois ; rejouer le pilote sur une organisation neuve.
+  - (2) **Une garde jouée deux fois** (avant la transaction, puis dedans) fait survivre une mutation qui n'en retire
+    qu'une : muter la règle elle-même. Une mutation qui casse le rétrécissement d'une union (`reponse.issue === 'X'`)
+    ne compile pas : ajouter une condition au lieu de changer le littéral.
+  - (3) Une ligne neuve d'une facture exige la fiche de son article (`LIGNE_DESIGNATION`, 1065) : la poser dans le test.
+  - (4) `docker compose down` d'une pile qui monte `${RECETTE_DIR}` échoue sans la variable (« empty section between
+    colons ») : la reposer au `down -v`.
 
 - **STORY-1066** :
   - (1) **`npm ci` de l'étage `base` a échoué deux fois** (DNS de GitHub injoignable depuis le constructeur, puis

@@ -1,6 +1,6 @@
 # STORY-1067 : la commande (3) — modifier une commande `BROUILLON`, `TRANSMISE` ou `VALIDEE` non commencée, avec son historique champ par champ, le rejugement de FR-33 (la commande non comptée deux fois) et la réservation ajustée par un seul appel à `stock`
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-228 (la commande : saisie, validation, bon de livraison et prise de commande sur le terrain) ; FR-35
 (« modifier ou annuler une commande »), FR-33 (le plafond, « lors d'une modification, la commande elle-même n'est pas
@@ -57,8 +57,9 @@ plafond ; `commande.commande.changed@1` ; la modification par l'application terr
 - [x] Code sur `MNV-1067` (`ventes`) ; preuves sans Docker (Node 25 : `tsc`, lint, unitaires, mutations pures 11/11).
 - [x] Preuves sous le verrou Docker (Node 24 : unitaires, e2e, intégration sur MongoDB réel, mutations ; pile `grp-d`,
   pilote 23/23) ; PR `ventes` **#15** ouverte.
-- [ ] Annonce « ⚠ Contrats » fusionnée avant le code (cette PR de docs).
-- [ ] PR `ventes` fusionnée en rebase ; rejeu depuis `origin/dev` ; PR de docs finale.
+- [x] Annonce « ⚠ Contrats » fusionnée avant le code : prospera-stories **#792** (`main` **`6f939fa`**).
+- [x] PR `ventes` **#15** fusionnée en rebase (`dev` **`cd5fc87`** → **`52971b5`**) ; rejeu depuis `origin/dev` ; PR de
+  docs finale.
 
 ## Ce qui doit être vrai à la fin
 
@@ -197,3 +198,73 @@ change** ; **aucun manifeste ne change** (`commande:commande:saisir` couvre déj
   le plus haut rang) ; `commande.engagement-tiers.changed@1` suit la différence.
 - **Port `stock`** (AD-8, à servir par l'API de réservation de `stock` quand elle existera) : `remplacer` (D-1067-11).
 - **Collection neuve** : `commande_modifications` (au plan d'effacement C13).
+
+## Ce qui a été livré
+
+**2026-11-24** — après l'annonce « ⚠ Contrats » (prospera-stories **#792**, `main` `6f939fa`), une PR fusionnée en « Rebase
+and merge » :
+
+- `prospera-ventes-service` **#15** (`dev` **`cd5fc87`** (la modification), `dab9b3e` (recette), `f9f2d37`, `da44015`,
+  **`52971b5`** ; tête de la branche `ac4b762` vérifiée `open` et égale au SHA poussé avant la fusion ; arbre de `dev`
+  identique à la branche) :
+  - `src/modules/commande/commandes/` : `modification.ts` (le rapprochement des lignes, l'historique champ par champ, le
+    plan des bons et des remplacements, l'écart réduit ; pur), `modification.service.ts` (`ModificationDesCommandes` :
+    sans acte en une transaction ; la saga d'une `VALIDEE` ; l'historique), `schemas.ts` (`commande_modifications`,
+    `modifications`, `modificationEnCours`), `dto.ts` (`ModifierLaCommandeDto`), `commandes.controller.ts` (deux routes),
+    `commandes.service.ts` (la commande lue gagne deux champs ; le rejeu d'une validation rend l'acte, D-1067-15),
+    `annulation.service.ts` (`MODIFICATION_EN_COURS`) ;
+  - `garde-fous/` : `remplacer` au port `ReservationStock` (non branché : `INDISPONIBLE` ; recette : il applique) ;
+    `derniereLigne` du bon ; neuf codes de refus ; `sourceDeLEngagement` exporté ;
+  - `credit/projection-du-credit.service.ts` : la baisse attend une modification en cours ; la facture d'une commande
+    modifiée après elle baisse le TTC de la commande (`FACTURE_D_UNE_COMMANDE_MODIFIEE`) ;
+  - `instance/part-commande.ts` : `commande_modifications` au plan d'effacement ;
+  - tests : `modification.spec.ts` (13), `test/integration/commande-3.int-spec.ts` (16), deux cas HTTP dans
+    `garde-fous-http.int-spec.ts`, la doublure de `stock` (`remplacer`) ;
+  - **recette versionnée** : `scripts/recette/1067/` (`pile-1067.yml`, `emetteur-de-test.mjs`, `recette-1067.py`,
+    `mutations-1067.mjs`, `README.md`).
+- **Écart à l'annonce : aucun.**
+
+## Preuves
+
+- **Node 24** (étage `verification`, export `git -c core.autocrlf=false archive`) : `tsc` ; lint des fichiers touchés
+  (`endOfLine auto`) ; build ; **unitaires : 65/65 suites, 667 tests** (654 avant) ; **e2e : 2/2, 24** ; **intégration sur
+  MongoDB 8 en jeu de répliques : 17/17 suites, 199 tests** (181 avant), dont `commande-3.int-spec.ts` (16) : UJ-1
+  modifiée en brouillon (jus gardé à 12 500 malgré la grille passée à 13 000, eau neuve à 3 000, cola retiré : 375 240
+  TTC ; historique à sept champs ; piste ; rejeu ; `CLE_REUTILISEE_AVEC_AUTRE_CHARGE`) ; `REVISION_PERIMEE` (rien
+  d'écrit), `MODIFICATION_SANS_EFFET` (l'ordre seul), `COMMANDE_SANS_LIGNE`, `ARTICLE_SANS_PRIX` ; l'auteur, le bureau,
+  `ROLE_NON_AUTORISE`, `HORS_PORTEE`, `COMMANDE_INCONNUE` ; la commande terrain (écart réduit, reconfirmé à la révision
+  neuve, puis nul) ; `COMMANDE_NON_MODIFIABLE`, `VALIDATION_EN_COURS` ; **cinq modifications simultanées : une** ; une
+  `VALIDEE` portée à 424 800 (un remplacement `<commandeId>:1`, clés `…:1:1.1` et `…:1:1.3`, le bon `BL-2026-000001`
+  garde son numéro et prend une ligne 3, engagement 344 560 → 424 800, `validee@1` et `chiffree@1` au rang neuf
+  conformes, un seul bon émis ; `facturation` facture 424 800 ; sa Créance solde l'engagement à 0 ; puis
+  `COMMANDE_FACTUREE`) ; **plafond 1 000 000 : 600 000 → 900 000 acceptée (supplément 300 000, disponible 100 000), →
+  1 100 000 refusée (dépassement 100 000), la commande inchangée** ; une baisse non jugée même crédit bloqué, une hausse
+  `CREDIT_BLOQUE` ; `STOCK_INSUFFISANT` (commande et bons identiques, engagement 344 560 → 365 800 → 344 560, `REFUSEE` à
+  l'historique, rejeu du même refus, version 2 ensuite) ; `stock` injoignable (503, `MODIFICATION_EN_COURS` à la
+  modification et à l'annulation, rejeu qui conclut une fois) ; `POINT_DE_STOCK_CHANGE`, `ROLE_NON_AUTORISE` sans le
+  droit de valider, ligne retirée rendue, annulation qui rend 295 000 ; rejeu de la validation ; **cinq modifications
+  simultanées d'une `VALIDEE` : une, un seul remplacement** ; la fenêtre (facture d'avant la modification : baisse de
+  403 560, anomalie tracée ; facture projetée pendant une modification en attente : `EN_ATTENTE`, puis soldée par elle).
+  Par HTTP (vraie chaîne de gardes) : l'auteur, un autre commercial `ROLE_NON_AUTORISE`, clé et corps contrôlés (400),
+  `DROIT_INSUFFISANT` sans le droit de saisir, l'historique ; une `VALIDEE` refusée à l'auteur et au bureau sans le
+  droit de valider, acceptée au DC.
+- **Mutations : 23/23 rouges sur une assertion** — 11 pures (Node 25) : ligne gardée deux fois, unité hors de
+  l'identité, quantité absente de l'historique, `#2` perdu, ligne retirée sans effet, numéro de ligne rendu, ligne
+  retirée gardée chez `stock`, quantité sans remplacement, point de stock neuf non vu, clé sans version, absent et
+  `null` confondus ; 12 sur MongoDB réel (Node 24) : commande comptée deux fois au plafond, baisse oubliée, engagement
+  gardé au refus, refus de `stock` ignoré, commande facturée modifiée, révision ignorée, autre commercial, `VALIDEE` sans
+  le droit de valider, annulation pendant l'attente, baisse de facture qui n'attend pas, facture qui baisse son propre
+  TTC, rejeu de validation rejugé.
+- **Pile `grp-d`** (`scripts/recette/1067/pile-1067.yml`, image de la branche) : `docker compose up` sain (module Nest
+  changé, §1.5) ; pilote **23/23** : `CMD-2026-000001` (344 560) ; autre commercial 403 ; l'auteur la porte à 374 060
+  (version 1), rejeu, `REVISION_PERIMEE`, historique (cinq champs) ; validée `BL-2026-000001` ; le commercial 403 (droit de
+  valider) ; `POINT_DE_STOCK_CHANGE` ; le comptable la porte à 424 800 (supplément 50 740, clés `…:2:1.1` et `…:2:1.3`,
+  le bon garde son numéro, trois lignes ; adaptateur de recette : 24, 10, 6) ; `facturation` tient le fait chiffré au
+  rang 6 (Kafka) et facture 424 800 ; la facture connue (Kafka), `COMMANDE_FACTUREE` ; outbox vide ; `validee` (deux
+  états), `chiffree` (374 060, 424 800), `engagement-tiers.changed` (374 060, 424 800), un seul `bon-livraison.emis` lus
+  sur Kafka ; piste intègre (deux `MODIFICATION`). Un premier passage a joué pour de vrai la fenêtre de D-1067-14 (piège
+  1067-1) : le pilote corrigé a été rejoué sur une organisation neuve.
+- **Rejeu sur les images reconstruites depuis `origin/dev`** (`52971b5`, arbre identique à la branche ; construction avec cache) : sous Node 24, `tsc`, lint de `src` et `test` (`--max-warnings 0`), unitaires **65/65 suites, 667**, e2e **2/2, 24**, intégration **17/17 suites, 199** ; pile neuve (volumes neufs) : `docker compose up` sain, pilote **23/23**.
+- `git diff --stat` = `--ignore-cr-at-eol` à chaque commit ; aucun `index.ts` non suivi.
+- **Verrou Docker** : libre au rituel ; **pris à 10:33** (`D STORY-1067`), une seule prise, **rendu à 11:04** après
+  `down -v` (pile, MongoDB de test et son réseau) ; aucun conteneur, volume ni réseau `grp-d` ne reste.
