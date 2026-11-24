@@ -42,14 +42,19 @@
        1.1.0** après la fusion de C, dans la même story (D-979-8) ; `manifestes:garde` verte (48).
      Node 25 : auth 38 suites 677/677, complète 1 445 passés (4 suites rouges connues), câblage vert (binding doublé) ;
      catalogue 1 597 passés (3 connues) ; 12/12 mutations. **Sans Docker** (D-979-9) : verrou non pris.
-  - **Suivante : STORY-1112** (le BFF relaie les essais d'un prospect, `/essais` ; AP-57). La demande de A du 24/11
+  - **Suivante : STORY-1112** (le BFF relaie les essais d'un prospect, `/essais` ; AP-57 ; rien d'autre n'est demandé à
+    B au 24/11, après ce correctif). La demande de A du 24/11
     (journal de A, « Lot 6 ») en donne le détail : relais de `POST /essais`, `GET /essais/{org}`, prolongation,
     signature, jeu de démonstration, effacement, **et une liste** `GET /admin/essais` ; recommandé : `POST /admin/essais`
     qui enchaîne la naissance et l'ouverture.
-  - **Demande de A non servie, vue au rituel de 979** : `TICKET-BACKEND-financement-schema-valeur-indicateur` (bilan,
-    deux `ValeurIndicateurDto`, OpenAPI faux ; « Réponses »). Hors du périmètre de 979 ; **à placer par la session de
-    groupe** (§1.1 : avant 1112 ; correctif court, sans Docker : renommer le schéma Swagger de la dette et un garde
-    d'OpenAPI).
+  3. ~~Correctif de STORY-1084~~ (ticket de A pour FE-140, placé **avant 1112** par la session de groupe, §1.1 ; aucun
+     identifiant neuf) : **bilan #183** (`2364abc` sur `dev`, branche `MNV-1084-schema`) ; annonce avant la fusion :
+     stories #783. La classe de la dette devient `ValeurIndicateurDetteDto` (D-1084-16) ; **garde neuf** sur le
+     document OpenAPI de tout `AppModule` (`src/openapi-schemas-uniques.invariant.spec.ts`, D-1084-17), qui a trouvé
+     **trois autres doublons**, corrigés ici (D-1084-18 : `ExerciceCompareConsolideDto`, `ArticulationMensuelleDto`,
+     `ReferentielRefDto` commun). Contrat servi inchangé ; document 576 → 579 schémas, 98 chemins identiques. Node 25 :
+     garde 8/8, e2e 913/913 (7 suites), unitaire 15 suites rouges connues ; mutations 4/4. **Sans Docker** (aucun
+     module, dépendance ni Dockerfile ne change) : verrou non pris. Ticket fermé.
 
 ### Lot 4 (ouvert le 2026-11-18)
 
@@ -668,6 +673,14 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-24, correctif de STORY-1084) : régénérer `bilan.ts` et retirer `ValeurIndicateurDette` de FE-140** —
+  ouverte. bilan #183 (`2364abc` sur `dev`) : `npm run gen:api -- bilan` dans le front du cabinet ;
+  `IndicateurDetteDto.valeurs` y devient `ValeurIndicateurDetteDto[]` (`rang`, `exercice`, `statut`, `valeur`,
+  `motif`), le type écrit à la main dans `src/features/financement/api/financement.ts` peut partir. Au même tirage,
+  deux autres références deviennent justes : `ComparatifDto.exercice` → `ExerciceCompareConsolideDto` (états
+  consolidés), `ProjectionMensuelleResponseDto.articulation` → `ArticulationMensuelleDto`. Aucune route ni champ servi
+  ne change (« ⚠ Contrats »).
+
 - **→ D (2026-11-24, STORY-979), information : le manifeste `facturation` est resté en 1.0.0** avec
   `facturation:parametres:modifier` ajouté (D-979-7). Le semis du catalogue n'écrit pas une version déjà publiée : une
   base de catalogue déjà semée garde sa 1.0.0 sans le droit (et le signale « divergente » au démarrage) ; une pile
@@ -991,9 +1004,11 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 - **← A (2026-11-21, STORY-1094) : recopier le manifeste `comptabilite` au catalogue** — **servie** par la session de C
   à la demande de l'utilisateur (catalogue `eb495b5` et `acfb751`, manifeste 0.4.0, `manifestes:garde` verte), constatée
   par STORY-1080 sur `origin/dev`. Rien à faire de plus.
-- **← A (2026-11-24, FE-140) : deux `ValeurIndicateurDto` dans bilan, l'OpenAPI des indicateurs de dette est faux**
-  (`tickets/TICKET-BACKEND-financement-schema-valeur-indicateur.md`) — **lue, ouverte** : vue au rituel de 979, hors
-  de son périmètre ; à placer par la session de groupe (« État », lot 6).
+- **← A (24/11) : servie par bilan #183** (`2364abc` sur `dev` ; correctif de STORY-1084, annonce stories #783) —
+  deux `ValeurIndicateurDto` dans bilan, l'OpenAPI des indicateurs de dette faux
+  (`tickets/TICKET-BACKEND-financement-schema-valeur-indicateur.md`, **fermé**). `IndicateurDetteDto.valeurs` publie
+  `ValeurIndicateurDetteDto` `{ rang, exercice, statut, valeur, motif }` ; le garde demandé est écrit et a trouvé trois
+  autres doublons, corrigés aussi (« ⚠ Contrats »). Voir « → A ».
 - **← D (24/11) : `facturation:parametres:modifier` au catalogue de tenant d'auth (DAF) et recopie du manifeste
   `facturation`** (STORY-1065) — **servie par STORY-979** (auth #48, `c0f6243` sur `dev` ; catalogue #68, `d7e67f1` ;
   annonce : stories #777). Hors du jeton, servi par `GET /moi/droits` dans `droitsHorsJeton` ; au **`DIST_DAF` seul**
@@ -1166,6 +1181,7 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   - **Pour A** : régénérer `bilan.ts` (`npm run gen:api -- bilan`) dans le front du cabinet ; les trois noms neufs
     apparaissent, les trois références deviennent justes. Aucun code du front ne nomme ces quatre schémas hors des
     types générés (vérifié en lecture le 24/11) ; retirer `ValeurIndicateurDette` écrit à la main dans FE-140.
+  - **Fusionné le 24/11** : bilan #183 (`2364abc` sur `dev`), sans écart au contrat annoncé.
 
 - **2026-11-24, STORY-979 (lot 6) — huit droits neufs au catalogue de tenant d'auth, hors du jeton, et le rôle
   `CAB_ARCHIVISTE`, annoncés AVANT la fusion du code** (`prospera-auth-service` et
@@ -2397,6 +2413,17 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Swagger ne garde qu'une classe par nom de schéma, sans rien dire** (correctif de STORY-1084) : deux DTO de même
+  nom dans deux modules donnent un seul schéma, et toutes les références pointent la même forme ; `gen:api`, `tsc` et
+  le build du front restent verts sur un type faux. L'avertissement « Duplicate DTO detected » ne se déclenche presque
+  jamais. Bilan a désormais `src/openapi-schemas-uniques.invariant.spec.ts` (document de tout `AppModule`) ; le même
+  garde manque sans doute ailleurs (BFF, catalogue, auth) : à poser par la prochaine story de B qui touche leur
+  OpenAPI. Nommer un DTO par son module (`…DetteDto`, `…ConsolideDto`, `…MensuelleDto`).
+- **`@nestjs/swagger` ferme ses `exports`** : `SchemaObjectFactory` se lit par son chemin
+  (`join(dirname(require.resolve('@nestjs/swagger')), 'services', 'schema-object-factory')`).
+- **Les DTO de bilan sont en CRLF dans le checkout, les fichiers écrits après le clonage en LF** : un script de
+  remplacement doit convertir ses motifs à la fin de ligne du fichier, sinon il ne trouve rien (ou mélange les deux).
 
 - **Une demande « après la fusion de X » peut être servable avant la fin de la story** (STORY-979) : le code de C a
   été fusionné entre le rituel et les docs. Relire le journal du demandeur et `origin/main` juste avant la PR de docs ;
