@@ -205,6 +205,42 @@ Node 25.2.1 du poste, **sans Docker** (D-L4-3).
 - **Docker : non** (D-L4-3). Le démarrage réel de bilan avec `financement` (1083 et 1084) reste à prouver par la
   première story qui lève bilan (1082, au plus tard 1080).
 
+## Correctif du 2026-11-24 (ticket de A, FE-140)
+
+`tickets/TICKET-BACKEND-financement-schema-valeur-indicateur.md` : deux classes `ValeurIndicateurDto` dans bilan
+(l'analyse de STORY-552 et la dette de cette story). Swagger range les schémas par nom de classe et n'en gardait
+qu'une : `IndicateurDetteDto.valeurs` publiait la forme de l'analyse (ni `rang`, ni `exercice`, ni `statut`). Le
+serveur rendait la bonne forme ; le type généré du front était faux. Correctif de cette story, sans identifiant neuf :
+**bilan #183** (`2364abc` sur `dev`, branche `MNV-1084-schema`, tête `a30c9d6`) ; annonce avant la fusion :
+stories #783.
+
+- **D-1084-16 — Renommer la classe de la dette (`ValeurIndicateurDetteDto`)** plutôt que fixer un nom par
+  `@ApiSchema({ name })` : le nom TypeScript et le nom publié restent le même, un `grep` les trouve ensemble. La forme
+  de l'analyse garde son nom (c'est elle que Swagger publiait : les types déjà générés pour l'analyse ne bougent pas).
+  Contrat servi inchangé (aucune route, aucun champ) : pas de `@2`.
+- **D-1084-17 — Le garde porte sur le document de tout `AppModule`** (`src/openapi-schemas-uniques.invariant.spec.ts`,
+  `preview: true` comme le câblage du module racine), pas sur le balayage de `test/openapi-contract.e2e-spec.ts`, qui
+  ne monte pas tous les contrôleurs (le financement n'y est pas). Il relève la classe derrière chaque nom de schéma
+  (`SchemaObjectFactory.getSchemaMetadata`, lue par son chemin : hors des `exports` du paquet) et les valeurs de
+  chaque énumération nommée ; rouge si un nom vient de deux classes — même de forme identique — ou si une énumération
+  nommée porte deux jeux de valeurs. L'avertissement « Duplicate DTO detected » de Swagger ne suffit pas : il ne se
+  déclenche presque jamais (un nom déjà rangé n'est pas réexploré). Binding de Confluent doublé : le garde tourne sous
+  Node 25 comme sous 24.
+- **D-1084-18 — Les trois autres doublons trouvés par le garde sont corrigés ici**, plutôt que nommés dans le ticket :
+  même défaut, même dépôt, même annonce. `ExerciceCompareDto` des états consolidés → `ExerciceCompareConsolideDto`
+  (`ComparatifDto.exercice` publiait la comparaison d'exercices) ; `ControleArticulationDto` de la projection
+  mensuelle → `ArticulationMensuelleDto` (`articulation` publiait les contrôles de cohérence) ; `ReferentielRefDto`
+  local de la comparaison de versions → le commun (mêmes champs, document inchangé). À chaque fois, la classe que
+  Swagger publiait garde son nom.
+- **Preuves** (Node 25, sans Docker : aucun module, dépendance ni Dockerfile ne change) : document généré 576 → 579
+  schémas (trois ajoutés, aucun retiré), trois schémas modifiés (leur seule référence), 98 chemins identiques ;
+  `IndicateurDetteDto.valeurs.items.$ref` = `#/components/schemas/ValeurIndicateurDetteDto`
+  `{ rang, exercice, statut, valeur, motif }`, `ValeurIndicateurDto` de l'analyse identique à l'octet. Garde 8/8 ;
+  e2e `openapi-contract`, `financement`, `financement-emprunts`, `bilan-comparaison`, `bilan-comparaison-exercices`,
+  `consolidation-etats`, `bilan-projection` 913/913 ; suite unitaire 347 suites, 11 928 passés, les 15 suites rouges
+  connues (binding, chemins Windows) ; **mutations 4/4** rouges sur l'assertion (doublon de la dette remis, doublon de
+  forme identique remis, énumération nommée en double, relevé qui ne note plus rien) ; `tsc`, lint, `nest build`.
+
 ## Pour la suite
 
 - **FE-140 / FE-141** : types depuis l'OpenAPI vivant ; `echeancier.lignes` à afficher, `formule` au survol,

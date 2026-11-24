@@ -2,6 +2,9 @@
 
 > **Ouvert le 2026-11-24 par le groupe A (FE-140).** À prendre par le groupe qui tient `bilan-service` (B, ou la
 > session qui reprend STORY-1084). Aucun correctif n'a été fait côté backend par A.
+>
+> **✅ FERMÉ le 2026-11-24 par le groupe B** : correctif de STORY-1084, **bilan #183** (`2364abc` sur `dev`, branche
+> `MNV-1084-schema`) ; annonce « ⚠ Contrats » avant la fusion : stories #783. Voir « Résolution » en bas.
 
 ## Constat
 
@@ -32,3 +35,18 @@ Test à ajouter : un garde sur l'OpenAPI qui échoue si deux classes portent le 
 ## Après le correctif
 
 A régénère `bilan.ts` (`npm run gen:api -- bilan`) et retire `ValeurIndicateurDette` de FE-140.
+
+## Résolution (2026-11-24, groupe B)
+
+- La classe de la dette s'appelle **`ValeurIndicateurDetteDto`** (D-1084-16) ; `IndicateurDetteDto.valeurs` publie
+  `{ rang, exercice, statut, valeur, motif }`. `ValeurIndicateurDto` (l'analyse) est inchangé. Aucun champ, aucune
+  route ne change.
+- **Garde** : `src/openapi-schemas-uniques.invariant.spec.ts` construit le document de tout `AppModule` et rougit si
+  un nom de schéma vient de deux classes, ou si une énumération nommée porte deux jeux de valeurs (D-1084-17 ;
+  mutation : rouge quand le doublon est remis).
+- **Trois autres doublons trouvés par le garde, corrigés dans la même PR** (D-1084-18) :
+  `ComparatifDto.exercice` (états consolidés) → `ExerciceCompareConsolideDto` ;
+  `ProjectionMensuelleResponseDto.articulation` → `ArticulationMensuelleDto` ; `VersionCompareeDto.referentiel` →
+  le `ReferentielRefDto` commun (document inchangé).
+- **Pour A** : `npm run gen:api -- bilan`, puis retirer `ValeurIndicateurDette` écrit à la main dans FE-140 ; les deux
+  autres références (états consolidés, projection mensuelle) deviennent justes au même tirage.
