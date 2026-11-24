@@ -574,9 +574,16 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1067.md"
     reserved_on: "2026-11-24"
     note: >
-      En cours le 2026-11-24 — annonce « ⚠ Contrats » avant le code (cette PR) ; prospera-ventes-service#15 ouverte. Lot D,
-      n° 3 du lot 6, dernière du distributeur (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-228 ; FR-31, FR-33 → FR-35 ; ordre de
-      D-1062-12 (1)). « Fini quand » fixé par la fiche (D-1067-1). NON SLOTTÉE.
+      🏁 DONE le 2026-11-24 — prospera-ventes-service#15 (dev cd5fc87, dab9b3e, f9f2d37, da44015, 52971b5) ; annonce
+      « ⚠ Contrats » avant le code (docs #792, main 6f939fa ; aucun schéma ni manifeste ne change). Modifier une commande
+      BROUILLON, TRANSMISE ou VALIDEE à la révision lue (REVISION_PERIMEE), par l'auteur ou le bureau (ROLE_NON_AUTORISE ;
+      une VALIDEE demande aussi commande:commande:valider) ; historique champ par champ (commande_modifications) ; une
+      VALIDEE rejugée sur la différence (FR-33), réservation remplacée en un appel (port stock.remplacer, AD-8 ;
+      STOCK_INSUFFISANT, RESERVATION_INDISPONIBLE, MODIFICATION_EN_COURS), bons qui gardent leur numéro, validee@1 et
+      chiffree@1 au rang neuf ; COMMANDE_NON_MODIFIABLE, VALIDATION_EN_COURS, COMMANDE_FACTUREE, POINT_DE_STOCK_CHANGE ;
+      FACTURE_D_UNE_COMMANDE_MODIFIEE. Node 24 : 667 unitaires, 24 e2e, 199 d'intégration ; mutations 11/11 et 12/12. Pile
+      grp-d 23/23, rejouée depuis origin/dev. Lot D, n° 3 du lot 6, dernière du distributeur (PLAN-LOT-6-2026-11-23.md §6 ;
+      EPIC-228 ; FR-31, FR-33 → FR-35 ; ordre de D-1062-12 (1) ; « fini quand » fixé par D-1067-1). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
