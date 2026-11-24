@@ -96,7 +96,9 @@ export const MANIFESTE_COMPTABILITE = {
   // publiée ne change pas (STORY-934) : la 0.1.0 semée sans elles reste ce qu'elle était.
   // 0.3.0 (2026-11-23, STORY-1097) : les deux routes de lecture des lots de factures (factures/lots, factures/lots/{lotId}).
   // 0.4.0 (2026-11-23, STORY-1098) : les trois routes de lecture de la mémoire des choix.
-  version: '0.4.0',
+  // 0.5.0 (2026-11-24, STORY-1100) : le fait publié `comptabilite.facture.inscrite` (une facture d'un lot inscrite au
+  // brouillard ; la GED de document-service en range une copie au fonds d'archives du client). Aucune route neuve.
+  version: '0.5.0',
 
   // La comptabilité est une source : elle n'a besoin d'aucun autre module pour enregistrer. La balance qu'elle
   // publie (STORY-967) est ingérée par `balance` si `balance` est installé (origine `comptabilite` du hub, A-921).
@@ -130,6 +132,7 @@ export const MANIFESTE_COMPTABILITE = {
   // C5 : faits publiés et consommés.
   publie: [
     'balance.submitted', // STORY-967 : la balance dérivée du grand livre, origine `comptabilite`, `checksum` (outbox)
+    'comptabilite.facture.inscrite', // STORY-1100 : une facture inscrite au brouillard, v1 (outbox), lue par la GED
   ],
   consomme: [
     'etat-publie.changed.essai@1', // la garde (AD-24), dans l'espace d'essai
