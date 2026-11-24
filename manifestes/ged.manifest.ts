@@ -60,7 +60,9 @@
 
 export const MANIFESTE_GED = {
   code: 'ged',
-  version: '1.0.0',
+  // 1.1.0 (2026-11-24, STORY-1087) : la GED s'ouvre au cabinet comptable (fonds d'archives d'un dossier client, plan
+  // de classement OHADA, droits du cabinet) ; les routes de lecture deviennent les routes réelles.
+  version: '1.1.0',
 
   // C1 : aucune dépendance dure. La GED reçoit, lit, classe, conserve et retrouve des pièces sans autre module ; une pièce
   // enregistrée sans dossier va dans la file « à rattacher » (FR-159, FR-166).
@@ -97,6 +99,12 @@ export const MANIFESTE_GED = {
     'ged:sante:consulter', // capacité `sante:lire` (AD-8)
     'ged:parametre:administrer',
     'ged:journal:consulter', // AUD : journal des lectures de pièces (AD-17)
+    // STORY-1087 : les droits du cabinet (PRD des services du cabinet, §2.3), lus par GET /moi/droits.
+    'ged:fonds:gerer', // ouvrir un fonds d'archives, ajouter une nature (CAB_ASSOCIE, CAB_ARCHIVISTE)
+    'ged:piece:indexer', // indexer, contrôler, reprendre une pièce déjà déposée (CAB_ARCHIVISTE)
+    'ged:versement:verser', // verser au fonds, sceller, vérifier (CAB_ARCHIVISTE)
+    'ged:sensible:consulter', // bulletins, contrats de travail, pièces d'identité, pièces médicales (404 sinon)
+    'ged:physique:gerer', // STORY-1088 : réception, cotes, sorties et retours, récolement, restitution
   ],
 
   // C5 : faits publiés et consommés. Source : catalogue de la spine, AD-16. Aucun fait ne porte de contenu de santé
@@ -219,13 +227,26 @@ export const MANIFESTE_GED = {
   // `horodatage-qualifie` : option du scellement, à valider par le juriste (D21). Comportement seulement.
   interrupteurs: ['lecture-ia-des-pieces', 'horodatage-qualifie', 'format-archive-pdfa'],
 
-  // C2, C13 point 5 : routes autorisées en LECTURE_SEULE (consultation, journal, export). Aucun nom de route de `ged`
-  // n'est donné par le PRD ni la spine : TOUS ces noms sont des propositions, à figer par la story d'API.
+  // C2, C13 point 5 : routes autorisées en LECTURE_SEULE (consultation, export). 1.1.0 (STORY-1087) : les routes RÉELLES
+  // du service, à la place des propositions de la 1.0.0 (qui n'existaient pas), et celles du cabinet.
   routesLectureSeule: [
-    'GET /api/v1/ged/pieces', // [proposition]
-    'GET /api/v1/ged/pieces/{id}', // [proposition, la capacité santé s'applique, AD-8]
-    'GET /api/v1/ged/fonds', // [proposition]
-    'GET /api/v1/ged/journal', // [proposition, `ged:journal:consulter`]
+    'GET /api/v1/ged/a-rattacher',
+    'GET /api/v1/ged/a-refaire',
+    'GET /api/v1/ged/pieces/{pieceId}', // la capacité santé s'applique (AD-8)
+    'GET /api/v1/ged/pieces/{pieceId}/versions/{version}/lecture',
+    'GET /api/v1/ged/pieces/{pieceId}/versions/{version}/contenu',
+    'GET /api/v1/ged/lots/{lotId}',
+    'GET /api/v1/ged/fonds/{numero}',
+    'GET /api/v1/ged/cabinet/natures', // STORY-1087 : le plan de classement servi
+    'GET /api/v1/ged/cabinet/dossiers/{dossierId}/fonds', // STORY-1087 : les fonds d'un dossier client
+    'GET /api/v1/ged/cabinet/fonds/{numero}', // STORY-1087
+    'GET /api/v1/ged/cabinet/fonds/{numero}/pieces', // STORY-1087 : par rubrique et par exercice
+    'GET /api/v1/ged/cabinet/fonds/{numero}/pieces-du-dossier', // STORY-1087 : déjà déposées, par référence
+    'GET /api/v1/ged/cabinet/pieces/{pieceId}', // STORY-1087 : natures sensibles en 404 sans le droit
+    'GET /api/v1/ged/cabinet/pieces/{pieceId}/versions/{version}/contenu', // STORY-1087
+    'GET /api/v1/ged/cabinet/pieces/{pieceId}/versions/{version}/lecture', // STORY-1087
+    'GET /api/v1/ged/cabinet/lots/{lotId}', // STORY-1087
+    'GET /api/v1/ged/cabinet/quota', // STORY-1087 : le volume stocké et le quota de l'offre
     'GET /api/v1/instance/ged/{organisationId}/export',
   ],
 
