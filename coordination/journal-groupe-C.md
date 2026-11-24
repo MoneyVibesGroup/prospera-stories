@@ -18,8 +18,10 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
   1. ✅ **STORY-1099 DONE (24/11)** : balance-service **#160** (`0ff2402` sur `dev`), contrat #758. Unitaires Node 24
      5555, intégration Mongo 10/10, e2e 253/253, mutation 5/5, gate `grp-c` vert, verrou pris à A et rendu. Écart au
      contrat : la mémoire du cabinet est réservée à l'administrateur (D-1099-5, STORY-694) ;
-  2. 🟡 **STORY-1087** la GED s'ouvre au cabinet (document-service) : fiche écrite et contrat annoncé le 24/11
-     (`stories/STORY-1087.md`) ; Q-SC-5 : 20 Go par cabinet, en alerte seulement (D-1087-5) ;
+  2. ✅ **STORY-1087 DONE (24/11)** : document-service **#30** (`1db0a8f` sur `dev`), fiche #768, amendement #771
+     (le plan suit le dossier client : PERMANENT / ANNUEL, conservation, trace de numérisation), manifeste `ged` 1.1.0
+     #773. Codée par une sous-session ; unitaires Node 24 1100, e2e GED 16/16, mutation 8/8, gate `grp-c` vert, verrou
+     cédé par A et rendu. Q-SC-5 : 20 Go par cabinet, en alerte (D-1087-5) ;
   - ✅ **Ticket #762** (A, FE-149 : l'écriture de facture modifiable ligne à ligne) et la mémoire du cabinet de 1098
      réservée à l'administrateur : **comptabilite #19** (`979ed53` sur `dev`), contrat #767 ; test:socle 333/333,
      unitaires Node 24 1006/1006 ; verrou cédé par A, rendu ;
@@ -192,8 +194,8 @@ seulement.
   `ged:lot:numeriser`, `ged:piece:indexer`, `ged:versement:verser`, `ged:physique:gerer`, `ged:piece:consulter`,
   `ged:sensible:consulter` (et rien d'un autre module). Sans cela, seul un `TENANT_ADMIN` a ces droits (D-1087-4). —
   ouverte.
-- **→ B (24/11, STORY-1087)** : recopier au catalogue le manifeste `ged` **1.1.0** après la fusion du code (je
-  signalerai la fusion ici). — ouverte.
+- **→ B (24/11, STORY-1087)** : recopier au catalogue le manifeste `ged` **1.1.0** — **le code est fusionné**
+  (document-service #30, `1db0a8f`) ; source : `manifestes/ged.manifest.ts` (`a86e461`). — ouverte.
 
 - **→ B (2026-11-15) : la garde partagée (STORY-937) et `sinistres-service`** — **information**. Le squelette de
   `prospera-sinistres-service` garde ses modules par un port, `EtatDesModules`, alimenté aujourd'hui par
@@ -712,6 +714,12 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-1087, 24/11) document-service au gate** : le port hôte 9001 (console MinIO) est pris sur ce poste par autre
+  chose que Docker : surcouche `minio: ports: !reset []`. Sans `kyc-service`, un MinIO neuf n'a pas `kyc-documents` et
+  la santé tombe : `mc mb` avec `cgr.dev/chainguard/minio-client:latest-dev` sur le réseau de la pile.
+- **(STORY-1087)** L'épingle du manifeste (`src/socle/manifestes/sources-des-manifestes.ts`) se calcule sur les octets
+  LF : sur le poste (CRLF), le test d'empreinte rougit ; dans l'image construite depuis `git archive`, il passe.
 
 - **(STORY-1099, 24/11) balance-service** : ses sources sont en CRLF dans le checkout ; un script de remplacement doit
   normaliser `\r\n` en `\n` avant de chercher son motif (sinon « 0 occurrence »), et `eslint --fix` réécrit en LF tout
