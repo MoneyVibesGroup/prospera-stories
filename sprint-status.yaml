@@ -624,6 +624,16 @@ reserved_ranges:
       34 e2e ; mutations 11/11 et 3/3. Lot D, n° 6 du lot 6
       (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-207 ; FR-55, FR-75 ; reste de C, D-1013-10). « Fini quand » fixé par la fiche
       (D-1070-1). NON SLOTTÉE.
+  - range: "STORY-1071"
+    status: "RÉSERVÉ"
+    owner: "la mission d'expertise — sa machine d'états unique en données (FR-61 : créer, désigner par le référentiel, accepter, transmettre, rapport, complément, valider, contester, arbitrer, annuler) ; expertises.mission.changed@1 publié, lu par sinistres : une mission ouverte refuse l'évaluation (EXPERTISE_VALIDEE), le chiffrage validé est le repère du montant arrêté (FR-75, D-1070-11) (prospera-sinistres-service modules expertises et sinistres, prospera-plateforme contrats/assurance/expertises/)"
+    source_doc: "prospera-stories/stories/STORY-1071.md"
+    reserved_on: "2026-11-24"
+    note: >
+      🚧 EN COURS le 2026-11-24 — fiche et annonce « ⚠ Contrats » avant le code (deux routes d'écriture neuves, un fait
+      neuf expertises.mission.changed@1, EXPERTISE_VALIDEE calculée, un champ ajouté au dossier et à l'évaluation ; aucun
+      manifeste ne change). Lot D, n° 7 du lot 6, dernière (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-208 ; FR-61, FR-62, FR-67,
+      FR-68, FR-75 ; remplaçante du plan de C). « Fini quand » fixé par la fiche (D-1071-1). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
