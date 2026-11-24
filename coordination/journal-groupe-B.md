@@ -1048,6 +1048,25 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-24, STORY-1080 (amendement, lot 6) — la console lit l'état publié d'une organisation (AP-55), annoncé
+  AVANT la fusion du code** (`prospera-platform-catalog-service` et `prospera-admin-panel-service`, branches `MNV-1080` ;
+  fiche `stories/STORY-1080.md`, D-1080-14 → 17). **Le contrat figé de l'état publié (`contrat-etat-publie-v1`), sa
+  route et son événement ne changent pas.** Aucun topic, aucune collection, aucun droit neuf.
+  - **Catalogue — route neuve** `GET /api/v1/console/etat-publie/{organisationId}` (surface plateforme, permission
+    **`org:read`**, aucune identité de service) : le calcul de `GET /etat-publie/{organisationId}`, réponse du contrat
+    **sans `utilisateur`** et sans les `droits` des modules. Refus : 401, 403 (sans `org:read` ; un membre de
+    l'organisation compris), 400 `ORGANISATION_ID_INVALIDE`, 404 `ORGANISATION_INCONNUE`, 503 `HORLOGE_INDISPONIBLE`.
+  - **BFF — route neuve** `GET /api/v1/admin/orgs/{orgId}/etat-publie` (**`org:read`**) → 200
+    `EtatPublieOrganisationDto` : `schemaEtatPublie`, `versionMatrice`, `organisationId`, `espace` (`ESSAI`|`REEL`),
+    `heureDeReference { instantUtc, statut }`, `modules[] { code, libelle, etat, finLe?, effacementLe?, versionCode?,
+    acquis? }` ; `etat` est l'une des neuf valeurs (énumération `EtatPublieDuModule`), un état inconnu est rendu
+    `NON_INSTALLE`. Refus : 404 `ORGANISATION_INCONNUE` (code gardé), les autres traduits comme les relais du moteur
+    (503 si le catalogue est injoignable ou l'heure indisponible).
+  - **BFF — OpenAPI amendée, sans changement de comportement** : `LancerInstallationRequestDto.referentiels`
+    (`POST /admin/orgs/{orgId}/installations`) publie sa forme, `{ [module]: { code, version }[] }`.
+  - **Pour A (AP-55)** : régénérer les types depuis l'OpenAPI du BFF ; la ligne « où en est l'organisation » lit
+    `GET /admin/orgs/{orgId}/etat-publie` ; les relais de l'offre, des installations et de la reprise sont inchangés.
+
 - **2026-11-19, STORY-1080 — balance et bilan servent leurs vérifications d'installation ; le catalogue de la recette
   installe par le moteur, annoncé AVANT la fusion du code** (`prospera-balance-service`, `prospera-bilan-service`,
   `prospera-recette`, branches `MNV-1080` ; fiche `stories/STORY-1080.md`, D-1080-1 → 13). Ticket
