@@ -1236,6 +1236,13 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
     `/admin/sorties-essai` vont à l'essai, la mise en service et la naissance au réel au réel. Condition : le jeton de
     l'opérateur est accepté par les services des deux espaces (D-1113-2).
   - **Pour A (AP-56)** : types à régénérer depuis l'OpenAPI du BFF quand l'écran viendra (maquette d'abord).
+  - **Amendement du 24/11, avant la fusion (D-1113-10, trouvé par la preuve sur pile)** : les précisions d'un refus
+    relayé vont dans **`details`** (`details.modules`, `details.champs`), pas à côté du code : l'enveloppe d'erreur du
+    BFF (`AllExceptionsFilter`) ne garde que `code` et `details`. **Même correction pour le relais du moteur
+    d'installation** (917, 1080 : `POST /admin/orgs/{orgId}/installations`, `…/reprendre`, l'offre) : `modules`,
+    `refus` et `planId` d'un refus passent désormais dans `details` — avant, ils étaient retirés sans bruit et
+    n'atteignaient jamais la console, qui les lit déjà là (`frontend-admin-panel`, `grant-errors.ts`, `details.refus`,
+    `details.modules`). Le `code` et le statut ne changent pas.
 
 - **2026-11-24, suite de STORY-979 (lot 6) — `facturation:avoir:valider` au catalogue de tenant d'auth, hors du
   jeton, et le manifeste `facturation` 1.1.0 au catalogue, annoncés AVANT la fusion du code**
