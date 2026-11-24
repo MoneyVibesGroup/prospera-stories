@@ -1121,6 +1121,27 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-24, STORY-1069), AVANT la fusion du code — un fait neuf : `sinistres.evaluation.arretee@1`
+  (`prospera-sinistres-service`, module `sinistres` ; schéma dans `prospera-plateforme`, `contrats/assurance/sinistres/`).**
+  Fiche : `stories/STORY-1069.md` (D-1069-1 → 11). **Ajouts seuls** ; aucune route, aucun manifeste (le fait est déjà en
+  C5 `publie`), aucune collection ne change ; `prospera-assurance-service` et `prospera-liaison-assureur-service` ne
+  changent pas.
+  - **Le fait** (topic `sinistres.evaluation.arretee`, sujet `sinistres.evaluation.arretee-value`, JSON Schema draft-07
+    fermé, BACKWARD, clé = organisation) : `dossierId`, `reference` (`DEC-`), `numeroOfficiel?`, **`versionObjet`** (= le
+    `versionEtat` du `sinistres.dossier.changed@1` de la même transaction), **`rang`** (version de l'évaluation : la plus
+    haute fait foi), **`montant`** (entier ≥ 1, au franc), `devise` (`XOF`), `auteurId`, `roleExerce` (`GEST`, `GREC`,
+    `RESP`), `arreteeLe`, `survenuLe` ; avec un décompte : `tableVersion`, `tableDeVetusteVersion?`, `franchiseRetenue`.
+    ⛔ Jamais le motif écrit, le décompte détaillé, le formulaire, la nature corporelle ni la provision (elle est à
+    `assurance`, AD-11). Cinq champs classés au registre `classification-sante` (`sinistres`).
+  - **Quand** : à chaque arrêt accepté (`POST …/dossiers/{id}/evaluations`, premier ou correction), tout volet ; rien pour
+    un arrêt refusé ou rejoué. **Ordre dans la transaction** : `sinistres.dossier.changed@1` → `sinistres.evaluation.arretee@1`
+    → `sinistres.provision.revisee@1` (motif `EVALUATION`, s'il y a une provision ouverte, 1016).
+  - ⚠️ **Pour un consommateur des faits de `sinistres`** : un topic de plus (créé par le relais de l'outbox au démarrage) ;
+    `sinistres.dossier.changed@1` et `provision.revisee@1` ne changent pas.
+  - **Consommateur nommé par la spine (AD-16)** : **`liaison-assureur`** (C), pour l'envoi **C-14** (avec la provision
+    avant et après d'`assurance.provision.changed@1`) — à écrire par C, hors de cette story (D-1069-8). `expertises` n'est
+    pas consommateur (spine) : à revoir avec la mission d'expertise (1071) par un amendement si besoin.
+
 - **PUBLIÉ (2026-11-24, STORY-1068, prospera-sinistres-service#29, `dev` 2a8f9f1, ddcf52a) ; ANNONCÉ avant la fusion
   du code (prospera-stories #796, `main` 53f9e2a), sans écart. —
   `prospera-sinistres-service`, module `sinistres` : le dossier montre la provision en vigueur, lue dans
