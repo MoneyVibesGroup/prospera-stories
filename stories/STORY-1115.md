@@ -1,6 +1,6 @@
 # STORY-1115 : la recette « essayer, puis mettre en service » — un cabinet prospect ouvre un essai, en sort, naît dans le réel avec ses invitations
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (le second espace dans le profil de recette ; une recette croisée neuve, de bout en bout ;
 aucun service ne change)
@@ -93,6 +93,13 @@ d'auth existante », `POST /users`, qui exige un `TENANT_ADMIN` de l'organisatio
 - **D-1115-10 — La recette complète se joue dans le réel** (`RECETTE_ESPACE` au défaut, `REEL`) : l'essai est le second
   espace. Les deux tests C13 de `cabinet-moteur` (pile entière en `ESSAI`) y sont sautés, comme hors de 1080 ; la
   recette neuve est sautée en `RECETTE_ESPACE=ESSAI` (une mise en service n'existe que dans le réel).
+- **D-1115-12 — Une connexion par appel** (ajoutée le 24/11, trouvée par la recette complète) : le transport de la
+  recette (`transportFetch`) et la lecture de Mailhog envoient `connection: close` (recette #29, PR à part, dépôt de B) :
+  la réutilisation d'une connexion que Nest ferme après 5 s était la cause retenue des 17 `read ECONNRESET` du premier
+  passage complet. ⚠️ **Cause non prouvée** : le passage suivant, avec l'en-tête, a encore eu des `ECONNRESET` (sur des
+  connexions neuves), pendant la panne réseau du poste. L'en-tête reste (inoffensif) ; si les coupures reviennent hors
+  panne, chercher du côté du relais de ports de Docker Desktop, et donner à `transportFetch` un nouvel essai borné sur
+  `ECONNRESET` pour les lectures.
 - **D-1115-11 — Karapace** : la recette lève le registre de `docker-compose.socle.yml` et joue
   `schemas:compatibilite` puis `schemas:enregistrer` de kyc contre lui (`kyc.correction.requested@1`, jamais éprouvé
   contre un vrai registre, STORY-1103) ; résultat au journal, hors de la condition de fin.
@@ -109,12 +116,68 @@ d'auth existante », `POST /users`, qui exige un `TENANT_ADMIN` de l'organisatio
 
 ## Livré
 
-(à remplir)
+- **recette #28** (`af13aac` sur `dev`) : le second espace dans le profil (`kafka-essai`, `redis-essai`, `auth-essai`,
+  `catalogue-essai`), la clé commune (`src/espaces.ts`, passée à chaque `docker compose` par `environnementDUnAppel`),
+  le BFF à deux espaces, la recette `essai-mise-en-service`, la garde du profil étendue, `connexion` vers l'IdP d'un
+  espace nommé, README.
+- **recette #29** (`b38b268` sur `dev`) — **défaut révélé par la recette** (D-1115-12, ajoutée le 24/11) : une connexion
+  par appel (`connection: close` dans `transportFetch` et la lecture de Mailhog), après 17 `read ECONNRESET` au premier
+  passage complet. Cause non prouvée (voir D-1115-12).
+- Annonce avant la fusion : prospera-stories #808 (fiche, tracker, « ⚠ Contrats »). Ticket
+  `TICKET-BACKEND-premier-membre-d-un-essai.md`.
 
 ## Preuves
 
-(à remplir)
+- **Unitaires** (Node 25, `npm test`) : 12 suites, **119/119** (98 avant la story) ; `npm run verifier` (tsc strict,
+  Prettier) vert. Garde du profil : 8 tests neufs (services à la demande, espace en dur sur les deux seuls services de
+  l'essai, aucune adresse du réel ni d'adresse héritée du `.env` laissée, secret du moteur propre, clé interpolée et
+  aucune clé au dépôt, `.recette/` ignoré, ports en boucle locale, BFF) ; `espaces.spec.ts` (8), `compose.spec.ts`
+  (+3), `accueil.spec.ts` (+1), `http.spec.ts` (1, contre un vrai serveur HTTP local).
+- **Mutations : 24/24 rouges sur une assertion** (16 sur le profil : base, Kafka, Redis, JWKS, naissance, secret du
+  moteur, clé retirée ou en dur, sortie de messages, port publié, profil retiré, espace `REEL`, port hors boucle locale,
+  BFF vers le réel, dépendance au Kafka du réel, `.recette/` versionné ; 7 sur la clé et l'environnement ; 1 sur la
+  connexion par appel). Quatre mutations écrites d'abord ne compilaient pas (`0 total`) : réécrites pour compiler.
+- **Recette sur pile `grp-b` neuve** (volumes neufs, images reconstruites depuis `git -c core.autocrlf=false archive
+  origin/dev` : auth `b49d8ab`, kyc `9cef9cb`, catalogue `45971cf`, notification `e0a50c0`, paiement `4684d22`,
+  dossier `2bf9dbd`, document `1db0a8f`, balance `0ff2402`, bilan `7b53ff5`, BFF `c451b17`, fiscal `cb672c5`,
+  comptabilité `979ed53`, plateforme `2c96703` ; recette `origin/dev` `b38b268`) :
+  - **`essai-mise-en-service` 7/7** : la même clé publiée par les deux auth (`kid` `recette-console-…`), le jeton de
+    l'opérateur du réel accepté par le catalogue et l'auth de l'essai ; l'essai ouvert par la console, au catalogue de
+    l'essai seul (le réel : 404 au catalogue et à auth) ; l'administratrice entre dans l'essai (acceptation, connexion),
+    invite son collègue par `POST /users`, lui donne `CAB_COLLABORATEUR`, se connecte « en tant que » un compte du jeu ;
+    `…/invites` : les deux membres sous leur identifiant d'essai, 2 comptes du jeu écartés ; signé ; mise en service
+    avant la naissance 404 `ORGANISATION_INCONNUE` ; **né au réel** (201, identité de l'essai, même identifiant, sans
+    membre) ; `balance`+`bilan` non installés 409 (`details.modules`) ; **installés par le moteur par la console**
+    (six vérifications `VERT`, plan `TERMINE`, `EN_SERVICE`) ; **mise en service de `balance` et `bilan` : 201,
+    invitations `ENVOYEES` (2/2)**, au réel les deux membres sous leur identifiant d'essai (Ama `TENANT_ADMIN`
+    `CAB_ASSOCIE`, Kofi `TENANT_USER` `CAB_COLLABORATEUR`), aucun compte du jeu ; rejouée 200 (2 existants, 0 invité) ;
+    **chacun entre au réel par le lien reçu** (Mailhog, au nom du cabinet ; jeton `sub` = identifiant d'essai, `org` =
+    le prospect) ; KYC déposé par l'administratrice, approuvé par la console (BFF, `If-Match`) ; dossier client créé ;
+    `balance` et `bilan` ouverts au cabinet.
+  - **Recette complète, dernier passage (recette `b38b268`) : 8 suites vertes sur 12, 135 tests verts, 12 rouges, 2
+    sautés** (les deux C13 de `cabinet-moteur`, pile en `REEL`, D-1115-10), 1 693 s. Vertes : `essai-mise-en-service`,
+    `cabinet-moteur`, `comptabilite`, `referentiel-par-dossier`, `facturation`, `delegation`, `abonnement`,
+    `distributeur`. **Les 12 rouges sont toutes des appels du poste vers la pile coupés** (`read ECONNRESET` sur
+    `atelier-balance`, `renvoi-du-lien` — dont la lecture de Mailhog —, `zone-franche` ; `auth-service … injoignable`
+    sur `pile`), dans la dernière demi-heure, **pendant la panne réseau du poste** qui a aussi coupé la session (ENOTFOUND
+    vers l'API) ; à 18:18 tous les services répondaient 200 sur leurs ports, aucun conteneur n'avait redémarré. Aucune
+    ne touche le second espace ni le parcours. Pas relancée : D attendait le verrou, et le parcours de la story est vert.
+  - Premier passage complet (avant #29) : 8 suites vertes, 4 rouges (dont la recette neuve, au premier appel au BFF),
+    126 tests verts, 21 rouges, tous sur `read ECONNRESET` : D-1115-12.
+- **Karapace** (D-1115-11, `docker-compose.socle.yml`, registre vide de la pile) : `schemas:compatibilite` de kyc —
+  `kyc.correction.requested-value` nouveau sujet ; `schemas:enregistrer` — id 1, compatibilité `BACKWARD` posée ;
+  `schemas:compatibilite` rejoué — compatible ; **témoin** : le même schéma avec un champ neuf obligatoire —
+  `INCOMPATIBLE`, sortie 1.
+- Verrou : pris à 15:47 (après D-1071), rendu à 16:36 entre deux passes, repris de 16:38 à 17:05 et de 17:07 à
+  18:20 (la session coupée par la panne réseau de 17:40 à 18:17 l'a tenu) ; `down -v` à chaque fois ; aucun conteneur, volume ni réseau `grp-b` ne reste.
 
 ## Ce qui reste
 
-(à remplir)
+- **Le premier membre d'un essai** (D-1115-6) : `TICKET-BACKEND-premier-membre-d-un-essai.md` (auth, catalogue, BFF :
+  groupe B, à placer par la session de groupe, avant la démo du 15/01 ; l'écran : A). La recette n'écrit en base que ce
+  membre.
+- **Le jeu de démonstration dans l'essai de la pile** (D-1115-7) : aucun module ne tourne dans l'espace d'essai ;
+  STORY-1116 (cinq essais) dira s'il faut y lever `balance` et `bilan` de l'essai.
+- **D-1113-2** reste ouverte (identité d'opérateur commune : choix par défaut gardé, la recette le joue).
+- **Pour A (AP-56, AP-57)** : la pile de recette porte désormais les deux espaces ; le gate réel de leurs écrans s'y
+  joue (`npm run recette -- essai-mise-en-service` en montre le chemin).
