@@ -5,6 +5,23 @@
 
 ## État
 
+### Lot 6 du groupe A (2026-11-24) — FE-140 ✅
+
+- ✅ **FE-140 DONE (24/11)** : prospera-frontend-expert-comptable **#58** (`eb542a3` sur `dev`), docs (cette PR). L'onglet « Financement » (module ouvert), la liste, la création pré-remplie (objet + montant), l'étape « Les chiffres » (emprunts, échéancier, indicateurs de dette), les états et droits, les versions, les refus de 1083/1084 dits en métier ; les six autres étapes grisées « bientôt » (D-140-1). Preuves : vitest 1 768 verts, e2e simulés, **gate réel vert sur `grp-a`** (financement 1/1, FE-069 1/1) ; valeur de référence lue au franc (658 346 / 658 339 / 6 600 601). Décisions D-140-1 à 8 dans la fiche.
+- **Écart backend → B (24/11) — ouverte** : `ValeurIndicateurDto` existe deux fois dans bilan-service, l'OpenAPI des indicateurs de dette est faux ; `tickets/TICKET-BACKEND-financement-schema-valeur-indicateur.md`. Aucun correctif fait par A.
+- **Constats pour la suite** : (1) aucune route ne liste les banques : FE-152 attend STORY-1105 / AP-50 (D-140-2) ; (2) « Remis » ne sait pas s'il y a un dossier figé avant STORY-1086 : à masquer dans FE-142 (D-140-4) ; (3) `bilan.ts` committé avait dérivé du service (régénération large, tsc vert).
+- **Suite** : **FE-149** (les factures deviennent des écritures) quand sa maquette sera validée ; puis FE-150, FE-141, AP-55, AP-57, AP-59.
+- **Docker** : pile `grp-a` construite à partir des images du 19/11 (`up --no-build`) car le poste était saturé (9 `npm ci` en parallèle : >1 h, fetchs à 600 s) ; ces images contiennent 1083/1084 (bilan et auth postérieurs aux commits du 18/11) ; `down -v` fait, verrou rendu, session C prévenue.
+
+### Pièges du 24/11 (FE-140)
+
+- **Poste saturé** : RAM ~1 Go libre, disque C: plein à 100 % en fin de story (« No space left on device » sur un `git rebase`). Ne jamais lancer plusieurs builds d'images en parallèle ; ne pas dupliquer `node_modules` (copie de 400 paquets : >1 h sous charge). Mailhog et la console MinIO : surcouche `ports: !override` (8025 est tenu par Herd) et `GATE_MAILHOG_URL=http://localhost:18025`.
+- **Docker Desktop a redémarré en cours de gate** (ECONNRESET) : les conteneurs d'infra sont sortis en 255 ; `up -d --no-build` de la même commande les relève.
+- **Testing Library replie les espaces insécables** : comparer les montants avec `{ normalizer: (t) => t }`.
+- **Un composant « Avis » qui ignore ses props** a masqué un `data-testid` jusqu'au gate : étaler `...reste`.
+- `gh pr merge` peut planter par manque de mémoire (« cannot allocate memory ») après avoir fusionné : vérifier par `gh api …/pulls/<n> --jq .merged`.
+
+
 ### Des factures aux écritures, et la liasse face aux déclarations (2026-11-23) — session du groupe C
 
 Consigne de l'utilisateur du 23/11 à la session du groupe C (`moneyvibes-apps-dc`) : coder **STORY-1097, puis 1098, puis
