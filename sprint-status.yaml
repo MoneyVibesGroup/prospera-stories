@@ -7589,7 +7589,7 @@ sprints:
         epic: "EPIC-031"
         points: 5
         service: "fiscal-service"
-        status: "in_progress"  # 2026-11-24 — session A, lot 6 (n° 6) : fiche stories/STORY-320.md et contrat annoncé avant le code. 321 NON nécessaire : alimenter = lier à la balance (référence, état, statut de preuve), le calcul reste à balance-service. Ancrage : la prise en charge A_PREPARER → EN_PREPARATION.
+        status: "done"  # 🏁 DONE le 2026-11-24 — fiscal #55 (dev da3acd3), contrat annoncé avant le code (stories #784). Bases fiscales = lien vers la balance de l'exercice (basesFiscales : ALIMENTEES / PROVISOIRES / BLOQUEES), prise en charge qui alimente ou refuse (409 BASES_FISCALES_BLOQUEES), POST /obligations/{id}/bases ; aucun droit neuf, aucun événement ; 321 non nécessaire ; AD-14 respecté (origine jamais lue) — demande à C : balance de référence de l'exercice. Détail : stories/STORY-320.md « Livraison ». AVANT : session A, lot 6 (n° 6) : fiche stories/STORY-320.md et contrat annoncé avant le code. 321 NON nécessaire : alimenter = lier à la balance (référence, état, statut de preuve), le calcul reste à balance-service. Ancrage : la prise en charge A_PREPARER → EN_PREPARATION.
         assigned_to: null
       - story_id: "STORY-321"
         title: "Délégation du calcul au moteur de `balance-service`"
