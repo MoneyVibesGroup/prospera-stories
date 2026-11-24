@@ -1,3 +1,4 @@
+// Amendé le 2026-11-24 (STORY-1066) : C7, + `facturation:avoir:valider` (la validation du DAF d'un avoir au-delà du seuil, FR-48, AD-6 ; D-1066-9) ; version 1.0.0 → 1.1.0 (un ajout, une mineure ; elle porte aussi le droit de STORY-1065, D-1065-15).
 // Amendé le 2026-11-24 (STORY-1065) : C7, + `facturation:parametres:modifier` (les paramètres versionnés de la facture : fiche de l'émetteur, liste de travail des mentions légales, durée du lien public ; D-1065-2, D-1065-12).
 // Amendé le 2026-11-18 (STORY-1062) : C5, + `commande.commande.annulee@1` consommé (une commande annulée ne se facture plus, FR-35).
 // Amendé le 2026-11-17 (STORY-1059) : C5, + `facturation.serie.changed@1` publié (tête de la série des factures, AD-5) et + `commande.commande.chiffree@1` consommé (la facture d'une commande validée, AD-3, AD-29).
@@ -33,7 +34,7 @@
 //   périmètre du rôle) : `facturation:facture:emettre` = COMPTABLE, DAF ; FREELANCE pour ses propres factures,
 //   dans son espace ; `facturation:facture:consulter` = DG, DC, RESP_VENTES, DAF, COMPTABLE, CONTROLE_GESTION
 //   (lecture), RECOUVREMENT ; COMMERCIAL, FREELANCE, PROSPECTION pour leur portefeuille ;
-//   `facturation:avoir:emettre` = COMPTABLE, DAF ; `facturation:proforma:gerer` = DC, RESP_VENTES, COMMERCIAL,
+//   `facturation:avoir:emettre` = COMPTABLE, DAF ; `facturation:avoir:valider` = DAF (au-delà du seuil, STORY-1066) ; `facturation:proforma:gerer` = DC, RESP_VENTES, COMMERCIAL,
 //   FREELANCE, PROSPECTION, COMPTABLE, DAF ; `facturation:balance:consulter` = DG, DC, RESP_VENTES, DAF,
 //   COMPTABLE, CONTROLE_GESTION, RECOUVREMENT ; `facturation:numerotation:administrer` = DAF
 //   (initialisation par la reprise, une fois). Le CONTROLE_GESTION voit la marge par axe, pas la marge de
@@ -64,7 +65,7 @@
 
 export const MANIFESTE_FACTURATION = {
   code: 'facturation',
-  version: '1.0.0',
+  version: '1.1.0',
 
   // C1 : trois dépendances DURES, validées par le PO le 2026-11-12.
   // - catalogue : une ligne de facture porte un article, une taxe et un prix résolu ;
@@ -118,6 +119,10 @@ export const MANIFESTE_FACTURATION = {
     // l'émetteur imprimée sur chaque facture, la liste de travail des mentions légales (FR-44, A-1), la durée du
     // lien public (AD-33) et la durée de conservation (NFR-10). Rôle par défaut proposé : DAF.
     'facturation:parametres:modifier',
+    // Droit propre, STORY-1066 (D-1066-9 ; absent de l'annexe B.2) : émettre un avoir dont le TTC dépasse le seuil de
+    // validation (paramètre de la facture, 500 000 XOF par défaut ; FR-48 « avec validation d'un DAF au-dessus d'un
+    // seuil », AD-6). S'exerce avec `facturation:avoir:emettre`. Rôle par défaut proposé : DAF.
+    'facturation:avoir:valider',
   ],
 
   // C5 : faits publiés et consommés (annexe A.2). Chaque fait d'objet porte l'identifiant stable de l'objet,

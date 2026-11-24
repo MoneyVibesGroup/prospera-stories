@@ -42,6 +42,10 @@
     boucles bornées, pris à 03:27, une seule prise, rendu à 04:09** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
   - **Suivante : STORY-1066** 🚚 (l'avoir, `ventes` : `AV-`, `AVOIR_SUPERIEUR_A_LA_FACTURE`, `facturation.avoir.emis@1`, son
     PDF « Avoir » ; **monter le manifeste `facturation` à la source**, D-1065-15).
+- **STORY-1066** 🚧 🚚 — l'avoir (`ventes`, module `facturation`) : fiche écrite, annonce « ⚠ Contrats » avant le code
+  (cette PR) ; **manifeste `facturation` 1.1.0 à la source** (C7 : + `facturation:avoir:valider` ; D-1065-15). Rituel
+  (2026-11-24) : aucune demande neuve à D pour le distributeur dans les journaux de A, B et C (la réponse de B à 1065,
+  D-979-7, est celle que D-1065-15 sert ici).
 
 ### Lot 4 (ouvert le 2026-11-18)
 
@@ -721,6 +725,23 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-24, STORY-1066) : l'avoir — un droit, le manifeste `facturation` 1.1.0, le consommateur de
+  `paiement`** — **ouverte**. (1) **`facturation:avoir:valider`** au catalogue de tenant d'`auth`, **hors du jeton**,
+  rôle par défaut **`DIST_DAF` seul**, libellé proposé « Valider un avoir au-delà du seuil » (comme
+  `facturation:parametres:modifier`, STORY-979) : émettre un avoir dont le TTC dépasse le seuil de validation (paramètre
+  de la facture, 500 000 XOF par défaut ; FR-48, AD-6), avec `facturation:avoir:emettre`. Jusque-là, un avoir au-delà du
+  seuil répond 403 `VALIDATION_DU_DAF_REQUISE` à tous (échec fermé) ; en deçà, rien ne change. (2) **Recopier le
+  manifeste `facturation` 1.1.0 au catalogue** (`copies.json`) : la version monte à la source (D-1065-15, votre
+  D-979-7), elle porte aussi `facturation:parametres:modifier` ; le SHA de `prospera-stories` à recopier est donné à
+  la PR finale de 1066 (ci-dessous, à la fusion de cette annonce). (3) **Consommer `facturation.avoir.emis@1` dans
+  `paiement`** (AD-7, FR-48 : « `paiement` réduit la Créance de la facture en le consommant, en moins de 5 secondes » ;
+  au-delà du reste dû, un crédit du tiers) : topic `facturation.avoir.emis`, clé `<organisationId>:<factureId>`, schéma
+  `facturation.avoir.emis-value` (BACKWARD) ; la Créance à réduire est `(FACTURE, factureId)` ; le montant est
+  `montantTtcMineur` ; rejeu sur `avoirId` ; `cumulTtcMineur` est l'état absolu (TTC crédité sur la facture après cet
+  avoir) si vous préférez garder le plus haut ; `soldeLaFacture` dit qu'il ne reste rien à créditer. Charge complète :
+  « ⚠ Contrats » (STORY-1066). Sans ce consommateur, l'avoir est émis, numéroté, publié et imprimé, mais le reste dû lu
+  chez vous ne baisse pas.
+
 - **→ B (2026-11-24, STORY-1065) : `facturation:parametres:modifier` au catalogue de tenant d'`auth`, hors du jeton** —
   **servie par STORY-979 de B** (voir « Réponses aux demandes reçues ») ; reste, côté D, la version du manifeste
   (D-1065-15, avec 1066). Déclaré au manifeste `facturation` (C7, D-1065-13 ; absent de
@@ -1004,6 +1025,38 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-24, STORY-1066), avant le code. — `prospera-ventes-service`, module `facturation` : l'avoir.**
+  Fiche : `stories/STORY-1066.md` (D-1066-1 → 14). **Ajouts seuls** ; un fait neuf publié (déjà déclaré au manifeste) ;
+  un schéma relâché ; **manifeste `facturation` 1.1.0** (C7 : + `facturation:avoir:valider` ; D-1065-15).
+  - **Routes neuves** (préfixe `/api/v1/facturation`) : `POST /factures/{factureId}/avoirs` (`facturation:avoir:emettre`
+    ; au-delà du seuil, + `facturation:avoir:valider` ; `Idempotency-Key`) corps `{ motif: RETOUR_DE_MARCHANDISE |
+    ERREUR_DE_PRIX | REMISE_COMMERCIALE | LITIGE_DE_LIVRAISON | ERREUR_DE_FACTURATION, texte?, nature: TOTAL | LIGNES |
+    MONTANT, lignes?: [{ ligne, quantite, prixUnitaireHtMineur? }], montant?: { montantHtMineur, tauxTvaPourDixMille } }`
+    ⇒ 201 l'avoir (`avoirId`, `numero` `AV-…`, `factureId`, `factureNumero`, `motif`, `texte`, `nature`, `lignes`, `tva`,
+    HT, TVA, TTC, `ordre`, `cumulTtcMineur`, `resteACrediterTtcMineur`, `soldeLaFacture`, `statut: EMIS`, `emisLe`,
+    `emisPar`, `pdf`, `rejeu`), 200 au rejeu ; 400 `AVOIR_INVALIDE` (`details.erreurs`), `CLE_D_IDEMPOTENCE_MANQUANTE` ; 403
+    `VALIDATION_DU_DAF_REQUISE` (`details` : `seuilMineur`, `montantTtcMineur`), `HORS_PORTEE` ; 404 `FACTURE_INCONNUE` ;
+    409 `AVOIR_SUPERIEUR_A_LA_FACTURE` (`details` : ce qui dépasse, le reste à créditer ; aucun numéro consommé),
+    `CLE_REUTILISEE_AVEC_AUTRE_CHARGE`. `GET /factures/{factureId}/avoirs`, `GET /avoirs/{avoirId}` (404 `AVOIR_INCONNU`),
+    `GET /avoirs/{avoirId}/pdf` (`application/pdf`, `ETag`, `X-Empreinte-Sha256` ; 409 `PDF_EN_ATTENTE`,
+    `PDF_INDISPONIBLE` ; 500 `PDF_ALTERE`) : `facturation:facture:consulter`.
+  - **Routes changées** (ajouts) : `PUT /numerotation/{serie}` accepte `avoirs` (la suite de Sage des avoirs, une fois) ;
+    `GET /numerotation` rend aussi la série `avoirs` ; la facture rendue gagne `statut` (`EMISE | PARTIELLE | PAYEE |
+    CLOTUREE | ANNULEE_PAR_AVOIR`) et `avoirs { nombre, montantHtMineur, montantTvaMineur, montantTtcMineur,
+    resteACrediterTtcMineur }` ; les paramètres de la facture gagnent `seuilValidationAvoirMineur` (500 000 par défaut, de
+    0 à 10¹², **facultatif au `PUT`**, rendu par toute version lue).
+  - **Fait neuf publié** : `facturation.avoir.emis@1` (topic `facturation.avoir.emis`, clé `<organisationId>:<factureId>`,
+    schéma fermé `facturation.avoir.emis-value` en BACKWARD) : `avoirId`, `numero`, `factureId`, `factureNumero`,
+    `commandeId`, `livraisonId` (`null`), `tiersId`, `perimetre`, `devise`, `motif`, `nature`, `lignes` (`ligne`,
+    `articleId`, `quantite`, `prixUnitaireHtMineur`, `tauxTvaPourDixMille`, `montantHtMineur` ; vide pour un montant libre),
+    `tva` (par taux), `montantHtMineur`, `montantTvaMineur`, `montantTtcMineur`, `ordre`, `cumulTtcMineur`,
+    `resteACrediterTtcMineur`, `soldeLaFacture`, `emisLe`, `rang` (1). Ni désignation, ni nom, ni texte libre.
+  - **Fait relâché** : `facturation.serie.changed@1` — l'énumération `["factures"]` de `serie` est **retirée**
+    (BACKWARD, vérifié au registre avant la fusion) ; la série `avoirs` (`prefixe` `AV-`) y paraît. Un consommateur qui
+    ne gardait que la tête des factures filtre `serie = factures`.
+  - **Collections neuves** : `facturation_avoirs`, `facturation_credits_des_factures`, `facturation_pdfs_avoirs`.
+  - **Pour B** : voir « Demandes aux autres groupes » (le droit, le manifeste 1.1.0, le consommateur de `paiement`).
 
 - **PUBLIÉ (2026-11-24, STORY-1065, prospera-ventes-service#13, `dev` 3242844, ca44566, 5929438) ; ANNONCÉ avant la
   fusion du code (prospera-stories #763), sans écart. — `prospera-ventes-service`, module `facturation` : les
