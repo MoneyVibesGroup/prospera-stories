@@ -3590,6 +3590,188 @@
   .plan-wrap .plan-top h3 { margin: 0; font-size: 1.05rem; }
   .plan-wrap .plan-top .fin-sub { margin: 0.15rem 0 0; }
   @media (max-width: 640px) { .plan-ra { white-space: normal; } .plan-ap-foot { justify-content: stretch; } }
+
+  /* ═══ Lot 6 : FE-149 factures → écritures, FE-150 « Repris de vos choix », FE-141 analyse financière ═══ */
+  .fac-wrap { display: flex; flex-direction: column; gap: 1rem; }
+  .fac-head { display: flex; gap: 0.5rem 1rem; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; }
+  .fac-head h3 { margin: 0; font-size: 1.1rem; }
+  .fac-head p { margin: 0.15rem 0 0; font-size: 0.82rem; color: var(--muted-fg); }
+  .fac-steps { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  .fac-steps span { display: inline-flex; gap: 0.4rem; align-items: center; font-size: 0.78rem; font-weight: 600; padding: 0.28rem 0.7rem; border-radius: 999px; border: 1px solid var(--border); color: var(--muted-fg); background: var(--card); }
+  .fac-steps span i { font-style: normal; font-size: 0.68rem; width: 1.1rem; height: 1.1rem; border-radius: 50%; display: grid; place-items: center; background: var(--hover-surface); }
+  .fac-steps span.now { background: var(--primary); color: var(--primary-fg); border-color: transparent; }
+  .fac-steps span.now i { background: rgb(0 0 0 / 0.12); }
+  .fac-steps span.done { color: var(--success); background: var(--success-soft); border-color: transparent; }
+  .fac-sens { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; max-width: 30rem; }
+  .fac-sens button { font: inherit; display: flex; flex-direction: column; gap: 0.15rem; align-items: flex-start; text-align: left; padding: 0.75rem 0.9rem; border-radius: 0.65rem; border: 2px solid var(--border-strong); background: var(--card); color: var(--foreground); cursor: pointer; }
+  .fac-sens button b { font-size: 1rem; }
+  .fac-sens button small { color: var(--muted-fg); font-size: 0.76rem; }
+  .fac-sens button[aria-pressed="true"] { border-color: var(--primary); background: var(--hover-surface); }
+  .fac-sens button:focus-visible, .fac-item:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .fac-drop { border: 2px dashed var(--border-strong); border-radius: 0.9rem; padding: 2rem 1rem; text-align: center; background: var(--card); display: flex; flex-direction: column; gap: 0.6rem; align-items: center; }
+  .fac-drop.drop { border-color: var(--primary); background: var(--hover-surface); }
+  .fac-drop h4 { margin: 0; font-size: 1.05rem; }
+  .fac-drop p { margin: 0; font-size: 0.84rem; color: var(--muted-fg); max-width: 36rem; }
+  .fac-drop .row { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+  .fac-files { display: flex; flex-direction: column; gap: 0.35rem; margin: 0; padding: 0; list-style: none; }
+  .fac-file { display: flex; gap: 0.6rem; align-items: center; padding: 0.45rem 0.7rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--card); font-size: 0.84rem; }
+  .fac-file .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+  .fac-file small { color: var(--muted-fg); }
+  .fac-file.ko { border-color: var(--danger); background: var(--danger-soft); }
+  .fac-file.ign { opacity: 0.75; }
+  .fac-more { font-size: 0.82rem; }
+  .fac-more summary { cursor: pointer; font-weight: 600; color: var(--link); }
+  .fac-more .row { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; align-items: center; }
+  .fac-more label { display: inline-flex; gap: 0.4rem; align-items: center; }
+  .fac-more select { font: inherit; font-size: 0.82rem; padding: 0.25rem 0.4rem; border-radius: 0.4rem; border: 1px solid var(--border-strong); background: var(--card); color: var(--foreground); }
+  .fac-prog { height: 0.5rem; border-radius: 999px; background: var(--hover-surface); overflow: hidden; border: 1px solid var(--border); }
+  .fac-prog i { display: block; height: 100%; background: var(--primary); transition: width 0.3s; }
+  .fac-count { display: flex; gap: 0.5rem 1.2rem; flex-wrap: wrap; font-size: 0.9rem; }
+  .fac-count b { font-size: 1.15rem; margin-right: 0.2rem; }
+  .fac-cta { display: flex; gap: 0.7rem 1rem; align-items: center; flex-wrap: wrap; padding: 0.8rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
+  .fac-cta .grow { flex: 1 1 auto; }
+  .fac-cta p { margin: 0; font-size: 0.84rem; color: var(--muted-fg); }
+  .fac-grid { display: grid; grid-template-columns: minmax(15rem, 21rem) minmax(0, 1fr); gap: 1rem; align-items: start; }
+  .fac-grp { margin: 0 0 0.35rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); font-weight: 700; display: flex; gap: 0.4rem; align-items: center; }
+  .fac-list { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.9rem; }
+  .fac-item { display: grid; grid-template-columns: auto 1fr auto; gap: 0.1rem 0.6rem; align-items: center; padding: 0.55rem 0.7rem; border: 1px solid var(--border); border-radius: 0.6rem; background: var(--card); cursor: pointer; font-size: 0.84rem; }
+  .fac-item[aria-current="true"] { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary) inset; }
+  .fac-item b { font-weight: 650; }
+  .fac-item small { color: var(--muted-fg); grid-column: 2; }
+  .fac-item .amt { font-variant-numeric: tabular-nums; font-weight: 600; text-align: right; }
+  .fac-item .st { grid-column: 3; grid-row: 2; text-align: right; }
+  .fac-item.done { opacity: 0.7; }
+  .fac-detail { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.9rem; min-width: 0; }
+  .fac-detail h4 { margin: 0; font-size: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+  .fac-two { display: grid; grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr); gap: 1rem; align-items: start; }
+  .fac-paper { background: #fff; color: #1c1917; border: 1px solid #d6d3d1; border-radius: 0.3rem; padding: 0.9rem 0.9rem 1rem; font-size: 0.74rem; line-height: 1.45; box-shadow: var(--shadow-sm); position: relative; }
+  .fac-paper .top { display: flex; justify-content: space-between; gap: 0.5rem; border-bottom: 1px solid #d6d3d1; padding-bottom: 0.4rem; margin-bottom: 0.5rem; }
+  .fac-paper .top b { font-size: 0.86rem; }
+  .fac-paper .ln { height: 0.4rem; border-radius: 0.2rem; background: #e7e5e4; margin: 0.35rem 0; }
+  .fac-paper .tot { margin-top: 0.6rem; border-top: 1px solid #d6d3d1; padding-top: 0.4rem; display: grid; grid-template-columns: 1fr auto; gap: 0.1rem 0.8rem; font-variant-numeric: tabular-nums; }
+  .fac-paper .tot b { font-weight: 700; }
+  .fac-paper.flou > * { filter: blur(3px); }
+  .fac-paper .open { position: absolute; right: 0.4rem; bottom: 0.4rem; }
+  .fac-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 0.6rem; margin-top: 0.7rem; }
+  .fac-fields label { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.72rem; color: var(--muted-fg); font-weight: 600; }
+  .fac-fields input, .fac-fields select, .fac-in { font: inherit; font-size: 0.84rem; color: var(--foreground); background: var(--card); border: 1px solid var(--border-strong); border-radius: 0.45rem; padding: 0.35rem 0.5rem; height: 2.1rem; min-width: 0; width: 100%; }
+  .fac-fields input.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .fac-fields input:focus-visible, .fac-fields select:focus-visible, .fac-in:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+  .fac-fields .bad input { border-color: var(--danger); background: var(--danger-soft); }
+  .fac-fields .full { grid-column: 1 / -1; }
+  .fac-sig { display: flex; flex-direction: column; gap: 0.35rem; }
+  .fac-sig .s { display: flex; flex-wrap: wrap; gap: 0.4rem 0.5rem; align-items: flex-start; padding: 0.5rem 0.65rem; border-radius: 0.5rem; font-size: 0.84rem; background: var(--hover-surface); border: 1px solid var(--border); }
+  .fac-sig .s.bloc { background: var(--danger-soft); border-color: transparent; }
+  .fac-sig .s.warn { background: var(--warning-soft); border-color: transparent; }
+  .fac-sig .s > svg { flex: none; margin-top: 0.15rem; }
+  .fac-sig .s > span { flex: 1 1 12rem; min-width: 0; }
+  .fac-sig .s .btn { flex: none; }
+  .fac-sig .s .code { font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted-fg); }
+  .fac-tbl { border-collapse: collapse; width: 100%; font-size: 0.84rem; }
+  .fac-tbl th { text-align: left; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .fac-tbl td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .fac-tbl .n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .fac-tbl th.n { text-align: right; }
+  .fac-tbl tfoot td { font-weight: 700; border-bottom: 0; }
+  .fac-tbl .cpt { font-family: var(--font-mono); font-weight: 600; }
+  .fac-tbl .rac { display: block; font-size: 0.74rem; color: var(--muted-fg); font-family: var(--font-sans); font-weight: 400; }
+  .fac-bal { display: inline-flex; gap: 0.4rem; align-items: center; font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 999px; }
+  .fac-bal.ok { background: var(--success-soft); color: var(--success); }
+  .fac-bal.ko { background: var(--danger-soft); color: var(--danger); }
+  .rep { display: inline-flex; gap: 0.3rem; align-items: center; flex-wrap: wrap; font-size: 0.74rem; font-weight: 600; padding: 0.12rem 0.5rem; border-radius: 0.4rem; margin-top: 0.25rem; line-height: 1.35; }
+  .rep svg { width: 0.8rem; height: 0.8rem; flex: none; }
+  .rep.dos { background: rgb(37 99 235 / 0.12); color: #1d4ed8; }
+  .rep.cab { background: rgb(124 58 237 / 0.12); color: #6d28d9; }
+  .rep.def { background: var(--hover-surface); color: var(--muted-fg); border: 1px solid var(--border); font-weight: 500; }
+  .rep.chg { background: var(--warning-soft); color: #7c5300; }
+  .rep.ecarte { background: var(--danger-soft); color: var(--danger); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .rep.dos { color: #93c5fd; } :root:not([data-theme="light"]) .rep.cab { color: #c4b5fd; } :root:not([data-theme="light"]) .rep.chg { color: #fcd34d; } }
+  :root[data-theme="dark"] .rep.dos { color: #93c5fd; } :root[data-theme="dark"] .rep.cab { color: #c4b5fd; } :root[data-theme="dark"] .rep.chg { color: #fcd34d; }
+  .rep .lk { font: inherit; background: none; border: 0; color: inherit; text-decoration: underline; cursor: pointer; padding: 0; }
+  .fac-res { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.9rem 1rem; background: var(--card); display: flex; flex-direction: column; gap: 0.5rem; }
+  .fac-res.ok { background: var(--success-soft); border-color: transparent; }
+  .fac-res h4 { margin: 0; font-size: 1rem; }
+  .fac-res ul { margin: 0; padding-left: 1.1rem; font-size: 0.84rem; }
+  .fac-filtre { display: flex; gap: 0.6rem 1rem; flex-wrap: wrap; align-items: center; }
+  .fac-filtre .seg { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .fac-filtre button { font: inherit; font-size: 0.78rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--card); color: var(--muted-fg); cursor: pointer; }
+  .fac-filtre button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-fg); }
+  .fac-smt { text-align: center; padding: 2rem 1rem; border: 1px dashed var(--border-strong); border-radius: 0.8rem; background: var(--hover-surface); }
+  .fac-smt h4 { margin: 0 0 0.3rem; font-size: 1.05rem; }
+  .fac-smt p { margin: 0 auto 1rem; max-width: 34rem; color: var(--muted-fg); font-size: 0.86rem; }
+  [data-fac-ap].fin-ap, [data-mem-ap].fin-ap { z-index: 98; }
+  .fac-ap-box { width: min(34rem, 100%); }
+  .fac-ap-box.large { width: min(52rem, 100%); }
+  .fac-prev { display: block; max-width: 100%; max-height: 68vh; margin: 0 auto; border: 1px solid var(--border-strong); border-radius: 0.4rem; background: #fff; }
+  iframe.fac-prev { width: 100%; height: 68vh; }
+  /* Mémoire des choix */
+  .mem-wrap { display: flex; flex-direction: column; gap: 0.9rem; }
+  .mem-top { display: flex; gap: 0.5rem 1rem; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; }
+  .mem-top h3 { margin: 0; font-size: 1.05rem; }
+  .mem-top p { margin: 0.15rem 0 0; font-size: 0.82rem; color: var(--muted-fg); max-width: 46rem; }
+  .mem-lock { display: flex; gap: 0.5rem; align-items: center; font-size: 0.8rem; color: var(--muted-fg); }
+  .mem-tbl { border-collapse: collapse; width: 100%; min-width: 40rem; font-size: 0.84rem; }
+  .mem-tbl th { text-align: left; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); padding: 0.45rem 0.7rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .mem-tbl td { padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .mem-tbl td small { display: block; color: var(--muted-fg); font-size: 0.74rem; }
+  .mem-tbl .cpt { font-family: var(--font-mono); font-weight: 600; }
+  .mem-vide { text-align: center; padding: 1.6rem 1rem; border: 1px dashed var(--border-strong); border-radius: 0.7rem; background: var(--hover-surface); font-size: 0.86rem; color: var(--muted-fg); }
+  .mem-actes { font-size: 0.82rem; }
+  .mem-actes summary { cursor: pointer; font-weight: 600; color: var(--link); }
+  .mem-actes ul { margin: 0.4rem 0 0; padding-left: 1.1rem; }
+  /* Cahiers : la marque reprise dans la relecture */
+  .cah-rep { display: block; margin-top: 0.3rem; }
+  /* Analyse financière */
+  .ana-wrap { display: flex; flex-direction: column; gap: 1rem; }
+  .ana-top { display: flex; gap: 0.5rem 1rem; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; }
+  .ana-top h3 { margin: 0; font-size: 1.1rem; }
+  .ana-top p { margin: 0.15rem 0 0; font-size: 0.82rem; color: var(--muted-fg); }
+  .ana-legend { display: flex; gap: 0.4rem 0.7rem; flex-wrap: wrap; font-size: 0.74rem; color: var(--muted-fg); align-items: center; }
+  .ana-fam { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .ana-fam > h4 { margin: 0; padding: 0.7rem 1rem; font-size: 0.92rem; border-bottom: 1px solid var(--border); display: flex; gap: 0.6rem; align-items: baseline; flex-wrap: wrap; }
+  .ana-fam > h4 small { font-weight: 400; color: var(--muted-fg); font-size: 0.78rem; }
+  .ana-tbl { border-collapse: collapse; width: 100%; font-size: 0.86rem; min-width: 34rem; }
+  .ana-tbl th { text-align: left; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); padding: 0.4rem 1rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .ana-tbl th.n, .ana-tbl td.n { text-align: right; }
+  .ana-tbl td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .ana-tbl tr.ana-r { cursor: pointer; }
+  .ana-tbl tr.ana-r:hover td { background: var(--hover-surface); }
+  .ana-tbl td.n { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; }
+  .ana-tbl td.n.n1 { font-weight: 400; color: var(--muted-fg); }
+  .ana-tbl td .lb { display: flex; gap: 0.5rem; align-items: center; }
+  .ana-tbl td .lb button { font: inherit; background: none; border: 0; color: var(--foreground); text-align: left; cursor: pointer; padding: 0; font-weight: 600; }
+  .ana-tbl td .lb svg { width: 0.9rem; height: 0.9rem; color: var(--muted-fg); transition: transform 0.15s; flex: none; }
+  .ana-tbl tr.open .lb svg { transform: rotate(90deg); }
+  .ana-tbl td.det { background: var(--content-bg); padding: 0.8rem 1rem 1rem 2.4rem; }
+  .ana-det { display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.84rem; }
+  .ana-det .f { color: var(--muted-fg); }
+  .ana-det table { border-collapse: collapse; width: 100%; max-width: 46rem; font-size: 0.82rem; }
+  .ana-det th { text-align: left; font-size: 0.64rem; text-transform: uppercase; color: var(--muted-fg); padding: 0.25rem 0.5rem; border-bottom: 1px solid var(--border); }
+  .ana-det td { padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border); }
+  .ana-det .n { text-align: right; font-variant-numeric: tabular-nums; }
+  .ana-bornes { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .ana-v { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.72rem; font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 999px; white-space: nowrap; }
+  .ana-v.TRES_BON { background: var(--success-soft); color: var(--success); }
+  .ana-v.BON { background: rgb(37 99 235 / 0.12); color: #1d4ed8; }
+  .ana-v.ACCEPTABLE { background: var(--warning-soft); color: #7c5300; }
+  .ana-v.RISQUE { background: var(--danger-soft); color: var(--danger); }
+  .ana-v.AUCUN { background: var(--hover-surface); color: var(--muted-fg); font-weight: 500; border: 1px solid var(--border); }
+  .ana-v.INCALC { background: var(--hover-surface); color: var(--muted-fg); border: 1px dashed var(--border-strong); font-weight: 600; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ana-v.BON { color: #93c5fd; } :root:not([data-theme="light"]) .ana-v.ACCEPTABLE { color: #fcd34d; } }
+  :root[data-theme="dark"] .ana-v.BON { color: #93c5fd; } :root[data-theme="dark"] .ana-v.ACCEPTABLE { color: #fcd34d; }
+  .ana-na { text-align: center; padding: 2rem 1rem; border: 1px dashed var(--border-strong); border-radius: 0.8rem; background: var(--hover-surface); }
+  .ana-na h4 { margin: 0 0 0.3rem; }
+  .ana-na p { margin: 0 auto; max-width: 36rem; font-size: 0.86rem; color: var(--muted-fg); }
+  .ana-dette h4 .dc-badge { margin-left: 0.3rem; }
+  @media (max-width: 900px) { .fac-grid, .fac-two { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .fac-sens { grid-template-columns: 1fr; } .ana-tbl td.det { padding-left: 1rem; } }
+  .fac-wrap .btn:disabled, .fac-cta .btn:disabled, .fac-wrap .fin-act .btn:disabled, [data-mem-root] .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .fac-tbl .rac .linklike, .fac-tbl .rac .linklike svg { display: inline-flex; vertical-align: middle; }
+  .fac-tbl .rac .linklike { gap: 0.3rem; align-items: center; }
+  .fac-paper .top b { white-space: nowrap; }
+  .ana-fam:not(.ana-dette) .ana-tbl { table-layout: fixed; }
+  .ana-fam:not(.ana-dette) .ana-tbl th:first-child { width: 46%; }
+  .ana-fam:not(.ana-dette) .ana-tbl th:nth-child(2), .ana-fam:not(.ana-dette) .ana-tbl th:nth-child(3) { width: 16%; }
 </style>
 
 <div class="ribbon">
@@ -3665,6 +3847,10 @@
           <button class="nav-item" data-page="plan">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
             Plan comptable
+          </button>
+          <button class="nav-item" data-page="memoire">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+            Choix mémorisés
           </button>
           <button class="nav-item" data-page="me">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -4191,6 +4377,7 @@
               <div class="fin-tabs" role="tablist" aria-label="Sections du profil du cabinet" style="margin-top:0">
                 <button type="button" role="tab" aria-selected="true">Identité</button>
                 <button type="button" role="tab" aria-selected="false" data-plan-goto="plan">Plan comptable</button>
+                <button type="button" role="tab" aria-selected="false" data-plan-goto="memoire">Choix mémorisés</button>
               </div>
 
 
@@ -4421,6 +4608,7 @@
               <div class="fin-tabs" role="tablist" aria-label="Sections du profil du cabinet" data-admin-only style="margin-top:0">
                 <button type="button" role="tab" aria-selected="false" data-plan-goto="profile">Identité</button>
                 <button type="button" role="tab" aria-selected="true">Plan comptable</button>
+                <button type="button" role="tab" aria-selected="false" data-plan-goto="memoire">Choix mémorisés</button>
               </div>
               <div class="card-surface" style="margin-top:1rem">
                 <div class="plan-body" data-plan-ctx="cab"></div>
@@ -4439,6 +4627,18 @@
                 <p style="margin:0.6rem 0 0">FE-148 · routes de STORY-1094 (modèle du cabinet), 1095 (plan du dossier), 1096 (import Sage, aperçu puis enregistrement), à publier au contrat avant le code. Droits : écriture au modèle réservée à <code>TENANT_ADMIN</code> (403 nommé pour un collaborateur) ; au dossier, l’administrateur et le responsable écrivent, les contributeurs lisent. Aucun compte ni journal ne se supprime : il se désactive. Le fichier déposé reste dans le navigateur ; l’aperçu d’un fichier Excel reprend le fichier d’exemple (le CSV est lu pour de vrai).</p>
               </div>
             </section>
+
+            <!-- ================== FE-150 · Profil du cabinet › Choix mémorisés ================== -->
+            <section class="page" data-page="memoire" hidden>
+              <div class="fin-tabs" role="tablist" aria-label="Sections du profil du cabinet" data-admin-only style="margin-top:0">
+                <button type="button" role="tab" aria-selected="false" data-plan-goto="profile">Identité</button>
+                <button type="button" role="tab" aria-selected="false" data-plan-goto="plan">Plan comptable</button>
+                <button type="button" role="tab" aria-selected="true">Choix mémorisés</button>
+              </div>
+              <div class="card-surface" style="margin-top:1rem;padding:1.1rem"><div data-mem-root="cab"></div></div>
+              <div class="dc-note" data-note><b>FE-150 · mémoire du cabinet.</b> <code>GET /cabinet/memoire-des-choix</code> (écritures, STORY-1098) et <code>GET /cahiers/memoire-des-choix</code> (cahiers, STORY-1099) ; oublier : <code>DELETE …/{memoireId}</code>, réservé à <code>TENANT_ADMIN</code> (403 <code>TENANT_ADMIN_REQUIS</code>) ; journal des oublis : <code>…/actes</code>. Utilisez le sélecteur de rôle de la barre du haut pour voir le collaborateur : il lit, il n’oublie pas. La mémoire du cabinet ne garde que le <b>libellé</b> de la catégorie d’un cahier (D-1099-2). Aucune mémoire n’est partagée entre cabinets.</div>
+            </section>
+
 
             <!-- ===== FE-015 · Mon profil (collaborateur ET administrateur) =====
                  Un collaborateur n'a PAS accès au profil du cabinet : il dispose de
@@ -5052,6 +5252,7 @@
                   <button type="button" role="tab" aria-selected="true" data-dc-tab="dossier">Dossier</button>
                   <button type="button" role="tab" aria-selected="false" data-dc-tab="financement">Financement</button>
                 <button type="button" role="tab" aria-selected="false" data-dc-tab="plan">Plan comptable</button>
+                <button type="button" role="tab" aria-selected="false" data-dc-tab="memoire">Choix mémorisés</button>
                 </div>
 
                 <!-- Panneaux d'action, mêmes mécaniques que l'édition de configuration -->
@@ -5423,6 +5624,11 @@
               <div class="plan-wrap" data-dc-tabpanel="plan" hidden>
                 <div class="plan-body" data-plan-ctx="cli"></div>
                 <div class="dc-note" data-note><b>Maquette FE-148 · onglet du dossier.</b> Lecture : référentiel, puis modèle du cabinet, puis plan du dossier (STORY-1095). Droits : l’administrateur et le responsable du dossier écrivent, les contributeurs lisent. Chaque écriture est un acte du journal du dossier. Un numéro du modèle ne peut pas être repris par le dossier (409 qui nomme l’élément). Un compte du modèle se masque pour ce seul dossier s’il n’y est pas mouvementé.</div>
+              </div>
+
+              <div class="plan-wrap" data-dc-tabpanel="memoire" hidden>
+                <div class="card-surface" style="padding:1.1rem"><div data-mem-root="dos"></div></div>
+                <div class="dc-note" data-note><b>FE-150 · mémoire du dossier.</b> <code>GET /dossiers/{d}/memoire-des-choix</code> et <code>…/cahiers/memoire-des-choix</code> ; oublier : <code>DELETE …/{memoireId}</code> (qui peut saisir), journalisé. La mémoire du dossier apprend à l’inscription ; celle du cabinet à la validation ; un brouillard abandonné désapprend (essayez « Abandonner » dans le brouillard).</div>
               </div>
 
               <div class="fin" data-dc-tabpanel="financement" data-fin-root hidden>
@@ -6196,8 +6402,37 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg>
                       Impôts et taxes
                     </button>
+                    <button class="atl-tab" role="tab" data-atl-tab="factures" aria-selected="false" title="FE-149 : déposer des factures, relire l’écriture proposée, l’inscrire au brouillard puis la valider.">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg>
+                      Factures <span class="count">Achats · Ventes</span>
+                    </button>
                     <span class="grow"></span>
                     <span class="badge badge-active"><span class="d"></span>Module actif</span>
+                  </div>
+
+                  <!-- ═════ FE-149 · Factures → écritures (lot 6) ═════ -->
+                  <div class="atl-panel atl-body" data-atl-panel="factures" hidden>
+                    <div class="fac-wrap" data-fac-root></div>
+                  <div class="dc-note" data-note>
+                    <b>Banc d’essai (FE-149 · FE-150).</b> Chaque bouton remet l’écran dans l’état voulu.
+                    <div class="states-demo" role="tablist" aria-label="États des factures (démo)" style="margin-top:0.5rem;flex-wrap:wrap;border-radius:0.8rem">
+                      <button role="tab" type="button" aria-selected="true" data-fac-bench="depot">Dépôt</button>
+                      <button role="tab" type="button" aria-selected="false" data-fac-bench="lecture">Lecture en cours</button>
+                      <button role="tab" type="button" aria-selected="false" data-fac-bench="relecture">Relecture (achats)</button>
+                      <button role="tab" type="button" aria-selected="false" data-fac-bench="vente">Relecture (ventes)</button>
+                      <button role="tab" type="button" aria-selected="false" data-fac-bench="brouillard">Brouillard</button>
+                      <button role="tab" type="button" aria-selected="false" data-fac-bench="suite">Facture suivante de la CEET</button>
+                      <button role="tab" type="button" aria-selected="false" data-fac-bench="smt">Refus : dossier SMT</button>
+                      <button role="tab" type="button" aria-selected="false" data-fac-bench="clos">Refus : exercice clos</button>
+                      <button role="tab" type="button" aria-selected="false" data-fac-bench="indispo">Refus : documents indisponibles</button>
+                      <button role="tab" type="button" aria-selected="false" data-fac-bench="lecture-seule">Sans le droit de saisir</button>
+                      <button role="tab" type="button" aria-selected="false" data-fac-bench="mem-dossier">Mémoire du client</button>
+                      <button role="tab" type="button" aria-selected="false" data-fac-bench="mem-cabinet">Mémoire du cabinet</button>
+                    </div>
+                    <p style="margin:0.6rem 0 0"><b>Maquette FE-149</b> · routes de STORY-1097 (comptabilite 0.4.0, contrat #751) sous <code>/dossiers/{d}/exercices/{e}/factures/lots</code> : déposer <code>POST</code> (multipart : <code>fichiers</code> 1 à 50, PDF/JPEG/PNG, 10 Mo ; <code>sens</code> ; <code>avoir</code> ; <code>devise</code>), lire <code>GET /{lotId}</code> (la proposition est recalculée à chaque lecture), inscrire <code>POST /{lotId}/inscrire</code> (<code>pieces[].corrections</code> : ce qui est appliqué est ce qui a été relu). Droit : <code>comptabilite:ecriture:saisir</code>. <b>Le dépôt n’écrit aucune écriture</b> ; l’inscription crée un brouillard par pièce, jamais une écriture validée. Les fichiers déposés sont contrôlés pour de vrai (format, 10 Mo, 50 fichiers, doublon par empreinte SHA-256) mais ne partent nulle part ; le prototype n’a pas de lecteur de factures, la lecture reprend le lot d’exemple (CEET FA-0143 : HT 100&nbsp;000, TVA 18&nbsp;000, TTC 118&nbsp;000 pour la valeur de référence de l’AC-1).</p>
+                    <p style="margin:0.5rem 0 0"><b>Servi par le serveur</b> : <code>compteurs</code>, <code>pieces[].lecture</code> (valeur et confiance), <code>proposition</code> (journal, tiers connu ou <code>tiersACreer</code>, compte et sa <code>source</code>, TVA, lignes, totaux), <code>signaux</code> (codes stables : <code>ECART_HT_TVA_TTC</code>, <code>TVA_ABSENTE</code>, <code>DOUBLON_PROBABLE</code>, <code>TIERS_A_CREER</code>, <code>TIERS_A_CHOISIR</code>, <code>COMPTE_A_CHOISIR</code>, <code>LECTURE_ECHOUEE</code>…), <code>inscriptible</code>. <b>Rédigé par la maquette</b> : le texte de chaque signal (le serveur publie le code, le <code>message</code> est à aligner), et l’équilibre recalculé à l’écran après une correction (demandé par la fiche). À la vente, l’OCR ne lit que l’émetteur : le client est toujours à choisir (D-1097-3). <b>Absent du contrat</b> : « écarter » une pièce illisible (elle reste dans le lot) ; la saisie à la main d’une pièce illisible ; le numéro d’exercice d’une date hors exercice n’est pas proposé par un geste (<code>AUTRE_EXERCICE</code> se dit, la facture se redépose là).</p>
+                    <p style="margin:0.5rem 0 0"><b>FE-150</b> · la marque « Repris de vos choix » lit <code>proposition.compte.source</code> (<code>MEMOIRE_DOSSIER</code>, <code>MEMOIRE_CABINET</code>, STORY-1098 #755) et le champ facultatif <code>suggestion</code> des lignes de cahiers (STORY-1099, #758). <code>COMPTE_PAR_DEFAUT_DU_TIERS</code> n’est pas une mémoire : il porte une mention grise, pas la marque. Une mémoire écartée (compte désactivé) est dite, jamais effacée en silence (<code>COMPTE_A_CHOISIR</code>, <code>details.ecarte</code>).</p>
+                  </div>
                   </div>
 
                   <!-- --- Onglet SOURCES : choisir d'où vient la balance --- -->
@@ -10768,7 +11003,7 @@
                       </div>
 
                       <div class="imp-table-wrap">
-                        <div class="imp-table-cap">Lot <code>PRET</code> — dates, libellés et montants <b>éditables</b>. <b>Aucun compte n'est proposé ici</b>&nbsp;: la pré-proposition n'en porte pas (elle ne publie ni compte ni origine), le compte est <b>déduit à l'application</b> et se lit sur la ligne créée.</div>
+                        <div class="imp-table-cap">Lot <code>PRET</code> — dates, libellés et montants <b>éditables</b>. <b>La lecture ne propose aucun compte</b>&nbsp;; seule la <b>mémoire de vos choix</b> en pré-remplit un, et le dit<span data-note> (champ facultatif <code>suggestion</code>, STORY-1099)</span>. Sans mémoire, le compte est <b>déduit à l'application</b> et se lit sur la ligne créée.</div>
                         <div class="tbl-wrap">
                           <table class="imp-table">
                             <thead>
@@ -10779,7 +11014,7 @@
                                 <td><input type="checkbox" checked aria-label="Retenir cette pièce"></td>
                                 <td><button class="cah-vign" type="button" aria-label="Agrandir la page 3 du cahier"><span class="pg"><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg></span></button><span class="cah-piece">page 3</span></td>
                                 <td>14/03/2026</td>
-                                <td>Vente marchandises — Kodjo</td>
+                                <td>Vente marchandises — Kodjo<span class="cah-rep" data-cah-rep="k3" data-cah-niveau="dos"></span></td>
                                 <td class="num">150 000</td>
                                                                 <td><span class="cah-conf ok">96&nbsp;%</span></td>
                               </tr>
@@ -11422,7 +11657,7 @@
                               <td>14/03/2026</td>
                               <td>CEET — facture mars</td>
                               <td class="num">118 000</td>
-                              <td><select><option>Électricité CEET — 6051</option><option>Achats de marchandises — 601</option></select></td>
+                              <td><select><option value="">Choisir un poste…</option><option selected>Électricité CEET — 6051</option><option>Achats de marchandises — 601</option></select><span class="cah-rep" data-cah-rep="k1" data-cah-niveau="dos"></span></td>
                               <td><span class="cah-conf ok">confiance 96 %</span></td>
                             </tr>
                             <tr>
@@ -11431,7 +11666,7 @@
                               <td>18/03/2026</td>
                               <td>Station Total Bè</td>
                               <td class="num">90 000</td>
-                              <td><select><option>Carburant motos — 6055</option><option>Achats de marchandises — 601</option></select></td>
+                              <td><select><option value="">Choisir un poste…</option><option selected>Carburant motos — 6055</option><option>Achats de marchandises — 601</option></select><span class="cah-rep" data-cah-rep="l1" data-cah-niveau="cab"></span></td>
                               <td><span class="cah-conf ok">confiance 91 %</span></td>
                             </tr>
                             <tr class="cah-warn">
@@ -12286,6 +12521,10 @@
                     <button class="atl-tab" role="tab" data-bil-tab="validation" aria-selected="false" title="FE-034 — cycle brouillon → validé, snapshot immuable, versions et piste d'audit">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/><path d="M3 12a9 9 0 0 1 9-9"/></svg>
                       Validation <span class="badge badge-new" data-note>FE-034</span>
+                    </button>
+                    <button class="atl-tab" role="tab" data-bil-tab="analyse" aria-selected="false" title="FE-141 : les 19 indicateurs, leurs formules et leurs verdicts, tels que le serveur les sert.">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-5M12 16V7M17 16v-8"/></svg>
+                      Analyse <span class="badge badge-new" data-note>FE-141</span>
                     </button>
                     <button class="atl-tab" role="tab" data-bil-tab="previsionnel" aria-selected="false" title="FE-035 — hypothèses paramétrables sur base validée ; la projection est l’onglet Projection (FE-036)">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>
@@ -15722,6 +15961,22 @@
                        ASSERTÉES contre eux — la jointure est prouvée, pas affirmée.
                        Aucun montant n'est écrit à la main : ils sortent d'un script qui
                        transcrit le moteur, relu et asserté contre les voisins. -->
+                  <!-- ═════ FE-141 · Analyse financière (lot 6) ═════ -->
+                  <div class="atl-panel atl-body" data-bil-panel="analyse" hidden>
+                    <div data-ana-root></div>
+                    <div class="dc-note" data-note>
+                      <b>Banc d’essai (FE-141).</b>
+                      <div class="states-demo" role="tablist" aria-label="États de l’analyse (démo)" style="margin-top:0.5rem;flex-wrap:wrap;border-radius:0.8rem">
+                        <button role="tab" type="button" aria-selected="true" data-ana-bench="normal">Avec repères d’exemple</button>
+                        <button role="tab" type="button" aria-selected="false" data-ana-bench="aucun">Aujourd’hui : aucun repère déclaré</button>
+                        <button role="tab" type="button" aria-selected="false" data-ana-bench="detail">Lignes ouvertes</button>
+                        <button role="tab" type="button" aria-selected="false" data-ana-bench="incalc">Valeurs incalculables</button>
+                        <button role="tab" type="button" aria-selected="false" data-ana-bench="na">Référentiel non applicable</button>
+                      </div>
+                      <p style="margin:0.6rem 0 0"><b>Maquette FE-141</b> · <code>GET /dossiers/{id}/bilan/analyse</code> (STORY-552, 553, 554) : 19 indicateurs, chacun avec <code>formule</code>, <code>postes[]</code> (numérateur, dénominateur, marqueur, montants N et N-1), <code>n</code> et <code>n1</code> (<code>valeur</code>, <code>motif</code> si <code>null</code>, <code>verdict</code>, <code>motifVerdict</code>), <code>seuilApplique</code> (bornes, source, secteur retenu, paquet). Aucun chiffre n’est recalculé à l’écran : les valeurs sont lues dans le serveur (ici, calculées par le script <code>generer-donnees-lot6.py</code> sur la liasse 2025 du prototype, comparatif 2024, avec les règles de STORY-552, et assertées). <b>Écart backend à décider</b> : les paquets publiés (<code>syscohada-revise@2.2</code> et <code>@2.3</code>) ne déclarent <b>aucun seuil</b> (STORY-553 a livré le contenant, pas le contenu) ni de lecture courant/non courant (STORY-554) : aujourd’hui, tous les verdicts sont absents (« Aucun repère déclaré »). Les trois repères de la maquette (poids des capitaux propres, endettement, délai des clients) sont <b>des exemples</b> repris du corpus pédagogique, que la story 553 déclare « non citable » : ils ne doivent pas entrer au paquet sans source et sans validation d’un expert-comptable. Le bloc « Si le prêt est accordé » est la même mise en page pour les indicateurs de dette de STORY-1084 (<code>GET …/financements/{id}/indicateurs</code>), valeurs reprises du dossier de financement du prototype.</p>
+                    </div>
+                  </div>
+
                   <div class="atl-panel atl-body" data-bil-panel="previsionnel" hidden>
                     <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
                       <div>
@@ -17474,6 +17729,15 @@
   </div>
 </div>
 
+<script type="application/json" id="facData">{"dossier":{"nom":"Ets Kossi Distribution","referentiel":"SN","exercice":"2026","nif":"1000745307"},"tva":{"compte":"4452","libelle":"État, TVA récupérable sur achats"},"journaux":[{"c":"ACH","l":"Achats"},{"c":"VTE","l":"Ventes"},{"c":"OD","l":"Opérations diverses"}],"plan":{"refs":{"101":"Capital social","104":"Primes liées au capital social","111":"Réserve légale","118":"Autres réserves","121":"Report à nouveau créditeur","129":"Report à nouveau débiteur","131":"Résultat net : bénéfice","139":"Résultat net : perte","161":"Emprunts obligataires","162":"Emprunts auprès des établissements de crédit","213":"Logiciels","231":"Bâtiments industriels, agricoles et commerciaux","241":"Matériel et outillage industriels","244":"Matériel et mobilier de bureau","245":"Matériel de transport","311":"Marchandises A","312":"Marchandises B","321":"Matières premières","401":"Fournisseurs, dettes en compte","402":"Fournisseurs, effets à payer","408":"Fournisseurs, factures non parvenues","409":"Fournisseurs débiteurs","411":"Clients","412":"Clients, effets à recevoir","416":"Clients douteux ou litigieux","418":"Clients, produits non encore facturés","419":"Clients créditeurs","421":"Personnel, avances et acomptes","422":"Personnel, rémunérations dues","431":"Sécurité sociale","432":"Caisses de retraite","441":"État, impôt sur les bénéfices","443":"État, TVA facturée","445":"État, TVA récupérable","447":"État, impôts retenus à la source","471":"Débiteurs et créditeurs divers","481":"Fournisseurs d’investissements","491":"Dépréciations des comptes clients","511":"Effets à encaisser","512":"Effets à l’encaissement","513":"Chèques à encaisser","514":"Chèques à l’encaissement","515":"Cartes bancaires à encaisser","518":"Autres valeurs à l’encaissement","521":"Banques locales","522":"Banques autres États de la région","523":"Banques autres États de la zone monétaire","524":"Banques hors zone monétaire","525":"Banques, dépôts à terme","526":"Banques, intérêts courus","571":"Caisse siège social","572":"Caisse succursale A","573":"Caisse succursale B","601":"Achats de marchandises","602":"Achats de matières premières","604":"Achats stockés de fournitures consommables","605":"Autres achats","608":"Achats d’emballages","611":"Transports sur achats","612":"Transports sur ventes","621":"Sous-traitance générale","622":"Locations et charges locatives","624":"Entretien, réparations et maintenance","625":"Primes d’assurance","627":"Publicité et relations publiques","628":"Frais de télécommunications","631":"Frais bancaires","632":"Rémunérations d’intermédiaires et de conseils","641":"Impôts et taxes directs","661":"Rémunérations directes du personnel national","664":"Charges sociales","671":"Intérêts des emprunts","701":"Ventes de marchandises","702":"Ventes de produits finis","706":"Services vendus","707":"Produits accessoires"},"propres":{"401LOME":"Fournisseurs Lomé","411KARA":"Clients Kara","411LOME":"Clients Lomé","521100":"BOA Lomé","521200":"Orabank Lomé","521300":"Ecobank Lomé","571100":"Caisse principale","601100":"Achats de marchandises locales","661100":"Salaires du personnel","701100":"Ventes de marchandises Lomé","411KOSSI":"Clients grands comptes Kara","571300":"Caisse boutique Bè","622300":"Loyer boutique Bè"}},"comptes":[{"n":"601100","l":"Achats de marchandises locales"},{"n":"6052","l":null},{"n":"6053","l":null},{"n":"6041","l":null},{"n":"611","l":null},{"n":"622300","l":"Loyer boutique Bè"},{"n":"628","l":null},{"n":"6055","l":null},{"n":"605900","l":null,"actif":false}],"pieces":[{"id":"p1","memId":"m1","nom":"CEET-FA-0143.pdf","fournisseur":"CEET","nif":"1000234567","num":"FA-0143","date":"2026-04-12","ht":100000,"tva":18000,"ttc":118000,"compte":"6052","source":{"origine":"MEMOIRE_DOSSIER","pieceRef":"FA-0142","choisiLe":"2026-03-12","choisiPar":"Kofi Santos"},"tiers":{"code":"F-CEET","nom":"CEET","origine":"NIF"},"signaux":[],"traitement":"RECUPERABLE","lignes":[{"role":"CHARGE","compte":"6052","debit":100000,"credit":0},{"role":"TVA","compte":"4452","debit":18000,"credit":0},{"role":"TIERS","compte":"401","debit":0,"credit":118000}],"totalDebit":118000,"totalCredit":118000,"inscriptible":true},{"id":"p2","memId":"c2","nom":"Togocom-T-0418.pdf","fournisseur":"TOGOCOM","nif":"1000876543","num":"T-0418","date":"2026-04-05","ht":25000,"tva":4500,"ttc":29500,"compte":"628","source":{"origine":"MEMOIRE_CABINET","pieceRef":"T-0391","choisiLe":"2026-02-20","choisiPar":"Fatou Adjovi"},"tiers":{"code":"F-TOGOCOM","nom":"TOGOCOM","origine":"NIF"},"signaux":[],"traitement":"RECUPERABLE","lignes":[{"role":"CHARGE","compte":"628","debit":25000,"credit":0},{"role":"TVA","compte":"4452","debit":4500,"credit":0},{"role":"TIERS","compte":"401","debit":0,"credit":29500}],"totalDebit":29500,"totalCredit":29500,"inscriptible":true},{"id":"p3","nom":"Total-Togo-8841.jpg","fournisseur":"TOTAL TOGO","nif":"1000345678","num":"8841","date":"2026-04-08","ht":60000,"tva":10800,"ttc":70800,"compte":"6041","source":{"origine":"COMPTE_PAR_DEFAUT_DU_TIERS"},"tiers":{"code":"F-TOTAL","nom":"TOTAL TOGO","origine":"NIF"},"signaux":[],"traitement":"RECUPERABLE","lignes":[{"role":"CHARGE","compte":"6041","debit":60000,"credit":0},{"role":"TVA","compte":"4452","debit":10800,"credit":0},{"role":"TIERS","compte":"401","debit":0,"credit":70800}],"totalDebit":70800,"totalCredit":70800,"inscriptible":true},{"id":"p4","memId":"m2","nom":"Loyer-avril-Amegan.pdf","fournisseur":"M. AMEGAN","nif":null,"num":"LOY-04","date":"2026-04-01","ht":75000,"tva":null,"ttc":75000,"compte":"622300","source":{"origine":"MEMOIRE_DOSSIER","pieceRef":"LOY-03","choisiLe":"2026-03-02","choisiPar":"Kofi Santos"},"tiers":{"code":"F-AMEGAN","nom":"M. AMEGAN","origine":"NOM"},"signaux":[{"code":"TVA_ABSENTE","gravite":"AVERTISSEMENT"}],"traitement":"RECUPERABLE","lignes":[{"role":"CHARGE","compte":"622300","debit":75000,"credit":0},{"role":"TIERS","compte":"401","debit":0,"credit":75000}],"totalDebit":75000,"totalCredit":75000,"inscriptible":true},{"id":"p5","memId":"m3","nom":"SODIGAZ-SG-5521.pdf","fournisseur":"SODIGAZ","nif":"1000456789","num":"SG-5521","date":"2026-03-28","ht":80000,"tva":14400,"ttc":94400,"compte":"6053","source":{"origine":"MEMOIRE_DOSSIER","pieceRef":"SG-5498","choisiLe":"2026-03-03","choisiPar":"Kofi Santos"},"tiers":{"code":"F-SODIGAZ","nom":"SODIGAZ","origine":"NIF"},"signaux":[{"code":"DOUBLON_PROBABLE","gravite":"AVERTISSEMENT","details":{"numeroProvisoire":"ACH-BR-000212","date":"2026-03-28"}}],"traitement":"RECUPERABLE","lignes":[{"role":"CHARGE","compte":"6053","debit":80000,"credit":0},{"role":"TVA","compte":"4452","debit":14400,"credit":0},{"role":"TIERS","compte":"401","debit":0,"credit":94400}],"totalDebit":94400,"totalCredit":94400,"inscriptible":true},{"id":"p6","nom":"Transit-Express-TE-77.pdf","fournisseur":"TRANSIT EXPRESS","nif":null,"num":"TE-77","date":"2026-03-14","ht":50000,"tva":9000,"ttc":59000,"compte":null,"source":null,"tiers":null,"aCreer":{"nom":"TRANSIT EXPRESS","nif":null,"categorie":"FOURNISSEUR"},"signaux":[{"code":"TIERS_A_CREER","gravite":"BLOQUANT"},{"code":"COMPTE_A_CHOISIR","gravite":"BLOQUANT","details":{}}],"traitement":"RECUPERABLE","lignes":[{"role":"CHARGE","compte":null,"debit":50000,"credit":0},{"role":"TVA","compte":"4452","debit":9000,"credit":0},{"role":"TIERS","compte":"401","debit":0,"credit":59000}],"totalDebit":59000,"totalCredit":59000,"inscriptible":false},{"id":"p7","nom":"Quincaillerie-Adjovi-Q-209.jpg","fournisseur":"QUINCAILLERIE ADJOVI","nif":"1000567890","num":"Q-209","date":"2026-04-09","ht":120000,"tva":21600,"ttc":143000,"confianceTTC":0.62,"compte":null,"source":null,"tiers":{"code":"F-ADJOVI","nom":"QUINCAILLERIE ADJOVI","origine":"NIF"},"signaux":[{"code":"ECART_HT_TVA_TTC","gravite":"BLOQUANT","details":{"ht":120000,"tva":21600,"ttc":143000,"ecart":1400}},{"code":"COMPTE_A_CHOISIR","gravite":"BLOQUANT","details":{"ecarte":"605900","raison":"COMPTE_DESACTIVE","memoire":"MEMOIRE_DOSSIER"}}],"traitement":"RECUPERABLE","lignes":[{"role":"CHARGE","compte":null,"debit":120000,"credit":0},{"role":"TVA","compte":"4452","debit":21600,"credit":0},{"role":"TIERS","compte":"401","debit":0,"credit":143000}],"totalDebit":141600,"totalCredit":143000,"inscriptible":false},{"id":"p8","nom":"IMG_0537.jpg","statut":"ILLISIBLE","signaux":[{"code":"LECTURE_ECHOUEE","gravite":"BLOQUANT"}]}],"ventes":[{"id":"v1","memId":"m4","nom":"FV-0101.pdf","fournisseur":"ETS KOSSI DISTRIBUTION","nif":"1000745307","num":"FV-0101","date":"2026-04-02","ht":150000,"tva":27000,"ttc":177000,"compte":"701100","source":{"origine":"MEMOIRE_DOSSIER","pieceRef":"FV-0098","choisiLe":"2026-03-05","choisiPar":"Fatou Adjovi"},"tiers":null,"signaux":[{"code":"TIERS_A_CHOISIR","gravite":"BLOQUANT"}],"traitement":"FACTUREE","lignes":[{"role":"TIERS","compte":"411","debit":177000,"credit":0},{"role":"PRODUIT","compte":"701100","debit":0,"credit":150000},{"role":"TVA","compte":"443","debit":0,"credit":27000}],"totalDebit":177000,"totalCredit":177000,"inscriptible":false},{"id":"v2","memId":"m4","nom":"FV-0102.pdf","fournisseur":"ETS KOSSI DISTRIBUTION","nif":"1000745307","num":"FV-0102","date":"2026-04-06","ht":500000,"tva":90000,"ttc":590000,"compte":"701100","source":{"origine":"MEMOIRE_DOSSIER","pieceRef":"FV-0098","choisiLe":"2026-03-05","choisiPar":"Fatou Adjovi"},"tiers":null,"signaux":[{"code":"TIERS_A_CHOISIR","gravite":"BLOQUANT"}],"traitement":"FACTUREE","lignes":[{"role":"TIERS","compte":"411","debit":590000,"credit":0},{"role":"PRODUIT","compte":"701100","debit":0,"credit":500000},{"role":"TVA","compte":"443","debit":0,"credit":90000}],"totalDebit":590000,"totalCredit":590000,"inscriptible":false},{"id":"v3","memId":"m4","nom":"FV-0103.jpg","fournisseur":"ETS KOSSI DISTRIBUTION","nif":"1000745307","num":"FV-0103","date":"2026-04-10","ht":40000,"tva":7200,"ttc":47200,"compte":"701100","source":{"origine":"MEMOIRE_DOSSIER","pieceRef":"FV-0098","choisiLe":"2026-03-05","choisiPar":"Fatou Adjovi"},"tiers":null,"signaux":[{"code":"TIERS_A_CHOISIR","gravite":"BLOQUANT"}],"traitement":"FACTUREE","lignes":[{"role":"TIERS","compte":"411","debit":47200,"credit":0},{"role":"PRODUIT","compte":"701100","debit":0,"credit":40000},{"role":"TVA","compte":"443","debit":0,"credit":7200}],"totalDebit":47200,"totalCredit":47200,"inscriptible":false}],"clients":[{"code":"C-KODJO","nom":"Kodjo"},{"code":"C-MAIRIE-KARA","nom":"Mairie de Kara"},{"code":"C-SODIGAZ","nom":"SODIGAZ (vente)"}],"brouillards":[{"id":"b0","num":"ACH-000041","statut":"VALIDEE","date":"2026-02-27","libelle":"CEET — FA-0139","ref":"FA-0139","debit":94400,"credit":94400},{"id":"b1","num":"ACH-BR-000209","statut":"BROUILLARD","date":"2026-03-03","libelle":"SODIGAZ — SG-5498","ref":"SG-5498","debit":94400,"credit":94400},{"id":"b2","num":"ACH-BR-000210","statut":"BROUILLARD","date":"2026-03-12","libelle":"CEET — FA-0142","ref":"FA-0142","debit":118000,"credit":118000},{"id":"b3","num":"ACH-BR-000211","statut":"BROUILLARD","date":"2026-03-02","libelle":"M. AMEGAN — LOY-03","ref":"LOY-03","debit":75000,"credit":75000},{"id":"b4","num":"ACH-BR-000212","statut":"BROUILLARD","date":"2026-03-28","libelle":"SODIGAZ — SG-5521","ref":"SG-5521","debit":94400,"credit":94400}],"memoire":{"ecritures":{"dossier":[{"id":"m1","cle":"NIF 1000234567","nom":"CEET","sens":"ACHAT","compte":"6052","tva":"RECUPERABLE","journal":"ACH","tiers":"CEET","ref":"FA-0142","le":"2026-03-12","par":"Kofi Santos"},{"id":"m2","cle":"NOM · M. AMEGAN","nom":"M. AMEGAN","sens":"ACHAT","compte":"622300","tva":"RECUPERABLE","journal":"ACH","tiers":"M. AMEGAN","ref":"LOY-03","le":"2026-03-02","par":"Kofi Santos"},{"id":"m3","cle":"NIF 1000456789","nom":"SODIGAZ","sens":"ACHAT","compte":"6053","tva":"RECUPERABLE","journal":"ACH","tiers":"SODIGAZ","ref":"SG-5498","le":"2026-03-03","par":"Kofi Santos"},{"id":"m4","cle":"NOM · ETS KOSSI DISTRIBUTION","nom":"Vos ventes","sens":"VENTE","compte":"701100","tva":"FACTUREE","journal":"VTE","tiers":null,"ref":"FV-0098","le":"2026-03-05","par":"Fatou Adjovi"}],"cabinet":[{"id":"c1","cle":"NIF 1000234567","nom":"CEET","sens":"ACHAT","compte":"6052","tva":"RECUPERABLE","journal":"ACH","ref":"FA-0127","le":"2026-02-20","par":"Fatou Adjovi"},{"id":"c2","cle":"NIF 1000876543","nom":"TOGOCOM","sens":"ACHAT","compte":"628","tva":"RECUPERABLE","journal":"ACH","ref":"T-0391","le":"2026-02-20","par":"Fatou Adjovi"},{"id":"c3","cle":"NIF 1000612345","nom":"SOCIÉTÉ TOGOLAISE DES EAUX","sens":"ACHAT","compte":"6051","tva":"RECUPERABLE","journal":"ACH","ref":"E-2601","le":"2026-01-30","par":"Awa Diallo"},{"id":"c4","cle":"NOM · IMPRIMERIE DU GOLFE","nom":"IMPRIMERIE DU GOLFE","sens":"ACHAT","compte":"6055","tva":"NON_RECUPERABLE","journal":"ACH","ref":"IG-310","le":"2026-01-16","par":"Awa Diallo"}]},"cahiers":{"dossier":[{"id":"k1","cle":"NOM · CEET","nom":"CEET","cahier":"DEPENSES","choix":"Électricité CEET","compte":"6051","ref":"facture mars","le":"2026-03-14","par":"Kofi Santos"},{"id":"k3","cle":"LIBELLÉ · VENTE MARCHANDISES KODJO","nom":"Vente marchandises — Kodjo","cahier":"RECETTES","choix":"701","compte":"701","ref":"page 3","le":"2026-02-14","par":"Fatou Adjovi"}],"cabinet":[{"id":"l1","cle":"NOM · STATION TOTAL BÈ","nom":"Station Total Bè","cahier":"DEPENSES","choix":"Carburant motos","compte":null,"ref":"ticket 0388","le":"2026-02-02","par":"Awa Diallo"},{"id":"l2","cle":"NOM · CEET","nom":"CEET","cahier":"DEPENSES","choix":"Électricité CEET","compte":null,"ref":"facture janv.","le":"2026-02-01","par":"Awa Diallo"}]},"actes":[{"le":"2026-03-30","par":"Awa Diallo","texte":"Mémoire oubliée : IMPRIMERIE LOMÉ (écritures, cabinet).","motif":"GESTE"},{"le":"2026-03-21","par":"Kofi Santos","texte":"Mémoire oubliée : facture RC-77 abandonnée (écritures, dossier).","motif":"ABANDON"}]},"signaux":{"LECTURE_EN_COURS":"La lecture de cette facture est en cours.","LECTURE_ECHOUEE":"La facture n’a pas pu être lue. Redéposez une photo plus nette.","TIERS_A_CREER":"Ce fournisseur n’existe pas encore dans le dossier. Créez-le en un clic.","COMPTE_A_CHOISIR":"Aucun compte n’est proposé : choisissez celui de la charge.","ECART_HT_TVA_TTC":"Les montants ne tombent pas juste : HT + TVA ≠ TTC. Corrigez le montant lu de travers.","TVA_ABSENTE":"Aucune TVA n’a été lue : elle est laissée à zéro. Gardez ainsi si le loyer n’est pas soumis à la TVA.","DOUBLON_PROBABLE":"Même fournisseur, même numéro de facture : elle est peut-être déjà au brouillard.","TIERS_A_CHOISIR":"À la vente, le client n’est pas lu sur la facture : choisissez-le.","DATE_ABSENTE":"La date n’a pas été lue.","MONTANT_ABSENT":"Un montant n’a pas été lu."},"refus":{"FACTURES_RESERVEES_AU_SYSTEME_NORMAL":"Ce client tient ses cahiers (système minimal de trésorerie). Ses factures se déposent là-bas.","EXERCICE_CLOS":"L’exercice 2025 est clos. Déposez ces factures dans l’exercice 2026.","EXERCICE_INDETERMINE":"Aucun exercice ouvert ne couvre la date de cette facture.","AUTRE_EXERCICE":"La date de cette facture désigne un autre exercice ouvert : déposez-la là.","LOT_TROP_GRAND":"Un dépôt ne peut pas dépasser 50 fichiers. Déposez le reste dans un second lot.","FICHIER_TROP_VOLUMINEUX":"Ce fichier dépasse 10 Mo. Réduisez-le ou prenez une photo plus légère.","FORMAT_NON_PRIS_EN_CHARGE":"Seuls les PDF, les JPEG et les PNG sont lus.","FICHIER_ABSENT":"Choisissez au moins une facture.","SENS_REQUIS":"Dites si ce sont des achats ou des ventes.","DOCUMENTS_INDISPONIBLES":"Les documents sont momentanément indisponibles : la lecture reprendra dans un instant. Rien n’est perdu.","DEJA_INSCRITE":"Cette facture est déjà au brouillard.","INSCRIPTION_EN_COURS":"Cette facture est en cours d’inscription : patientez un instant.","PIECE_NON_INSCRIPTIBLE":"Il reste quelque chose à régler sur cette facture avant de l’inscrire.","DEVISE_ETRANGERE":"La facture n’est pas en francs CFA : la conversion n’est pas encore prise en charge."},"compteurs":{"pieces":8,"enLecture":0,"lues":7,"illisibles":1,"deposEchoues":0,"inscriptibles":5,"inscrites":0},"lot":{"lotId":"lot-demo","sens":"ACHAT","avoir":false,"devise":"XOF","creeLe":"2026-04-15","creePar":"Kofi Santos"}}</script>
+<script type="application/json" id="anaData">{"source":"Liasse du prototype : Bilan et compte de résultat 2025, comparatif 2024","jours":360,"masses":{"ACTIF_IMMOBILISE":[3750000,4130000],"ACTIF_CIRCULANT":[1100000,1120000],"TRESO_ACTIF":[850000,800000],"CP_MASSE":[4150000,3380000],"RESULTAT":[200000,800000],"DETTES_FIN":[700000,900000],"DETTES_FIN_ASSIM":[700000,900000],"PASSIF_CIRCULANT":[650000,870000],"TRESO_PASSIF":[0,100000],"STOCKS":[620000,370000],"CLIENTS":[430000,690000],"FOURNISSEURS":[420000,600000],"VENTES_MARCH":[12200000,13500000],"MARGE":[4350000,4780000],"CA":[16000000,16780000],"VA":[4120000,4534000],"EBE":[1140000,1814000],"ACHATS":[8100000,8600000],"VARIATION":[-250000,120000]},"indicateurs":[{"code":"POIDS_CAPITAUX_PROPRES","famille":"STRUCTURE","unite":"POURCENTAGE","libelle":"Poids des capitaux propres dans le total du passif","formule":"capitaux propres (résultat de l’exercice compris) / total du passif × 100. Distinct de l’« autonomie financière » du prévisionnel (capitaux propres / ressources stables).","n":{"valeur":76.32,"numerateur":4350000,"denominateur":5700000,"motif":null,"verdict":"TRES_BON","motifVerdict":null},"n1":{"valeur":69.09,"numerateur":4180000,"denominateur":6050000,"motif":null,"verdict":"TRES_BON","motifVerdict":null},"seuil":{"sens":"PLUS_HAUT_MIEUX","bornes":[{"niveau":"RISQUE","min":null,"max":20},{"niveau":"ACCEPTABLE","min":20,"max":30},{"niveau":"BON","min":30,"max":50},{"niveau":"TRES_BON","min":50,"max":null}],"secteurRetenu":"TOUS","source":"Repère d’exemple de la maquette : aucun repère n’est déclaré par le référentiel publié (STORY-553)."}},{"code":"ENDETTEMENT","famille":"STRUCTURE","unite":"RATIO","libelle":"Endettement financier","formule":"dettes financières / capitaux propres (résultat de l’exercice compris).","n":{"valeur":0.16,"numerateur":700000,"denominateur":4350000,"motif":null,"verdict":"TRES_BON","motifVerdict":null},"n1":{"valeur":0.22,"numerateur":900000,"denominateur":4180000,"motif":null,"verdict":"TRES_BON","motifVerdict":null},"seuil":{"sens":"PLUS_BAS_MIEUX","bornes":[{"niveau":"TRES_BON","min":null,"max":0.4},{"niveau":"BON","min":0.4,"max":0.6},{"niveau":"ACCEPTABLE","min":0.6,"max":0.8},{"niveau":"RISQUE","min":0.8,"max":null}],"secteurRetenu":"TOUS","source":"Repère d’exemple de la maquette : aucun repère n’est déclaré par le référentiel publié (STORY-553)."}},{"code":"CAPACITE_REMBOURSEMENT","famille":"STRUCTURE","unite":"ANNEES","libelle":"Capacité de remboursement","formule":"dettes financières / excédent brut d’exploitation, en années.","n":{"valeur":0.61,"numerateur":700000,"denominateur":1140000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":0.5,"numerateur":900000,"denominateur":1814000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"LIQUIDITE_GENERALE","famille":"LIQUIDITE","unite":"RATIO","libelle":"Liquidité générale","formule":"(actif circulant, hors activités ordinaires compris, + trésorerie-actif) / (passif circulant, hors activités ordinaires compris, + trésorerie-passif).","n":{"valeur":3.0,"numerateur":1950000,"denominateur":650000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":1.98,"numerateur":1920000,"denominateur":970000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"LIQUIDITE_REDUITE","famille":"LIQUIDITE","unite":"RATIO","libelle":"Liquidité réduite","formule":"(actif circulant − stocks + trésorerie-actif) / (passif circulant + trésorerie-passif).","n":{"valeur":2.05,"numerateur":1330000,"denominateur":650000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":1.6,"numerateur":1550000,"denominateur":970000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"LIQUIDITE_IMMEDIATE","famille":"LIQUIDITE","unite":"RATIO","libelle":"Liquidité immédiate","formule":"trésorerie-actif / (passif circulant + trésorerie-passif).","n":{"valeur":1.31,"numerateur":850000,"denominateur":650000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":0.82,"numerateur":800000,"denominateur":970000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"TAUX_MARGE_COMMERCIALE","famille":"RENTABILITE","unite":"POURCENTAGE","libelle":"Taux de marge commerciale","formule":"marge commerciale / ventes de marchandises × 100.","n":{"valeur":35.66,"numerateur":4350000,"denominateur":12200000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":35.41,"numerateur":4780000,"denominateur":13500000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"TAUX_VALEUR_AJOUTEE","famille":"RENTABILITE","unite":"POURCENTAGE","libelle":"Taux de valeur ajoutée","formule":"valeur ajoutée / chiffre d’affaires × 100.","n":{"valeur":25.75,"numerateur":4120000,"denominateur":16000000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":27.02,"numerateur":4534000,"denominateur":16780000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"TAUX_EBE","famille":"RENTABILITE","unite":"POURCENTAGE","libelle":"Taux d’excédent brut d’exploitation","formule":"excédent brut d’exploitation / chiffre d’affaires × 100.","n":{"valeur":7.13,"numerateur":1140000,"denominateur":16000000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":10.81,"numerateur":1814000,"denominateur":16780000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"MARGE_NETTE","famille":"RENTABILITE","unite":"POURCENTAGE","libelle":"Marge nette","formule":"résultat de l’exercice / chiffre d’affaires × 100.","n":{"valeur":1.25,"numerateur":200000,"denominateur":16000000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":4.77,"numerateur":800000,"denominateur":16780000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"ROE","famille":"RENTABILITE","unite":"POURCENTAGE","libelle":"Rentabilité des capitaux propres","formule":"résultat de l’exercice / capitaux propres (résultat compris) × 100.","n":{"valeur":4.6,"numerateur":200000,"denominateur":4350000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":19.14,"numerateur":800000,"denominateur":4180000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"ROA","famille":"RENTABILITE","unite":"POURCENTAGE","libelle":"Rentabilité de l’actif","formule":"résultat de l’exercice / total de l’actif × 100.","n":{"valeur":3.51,"numerateur":200000,"denominateur":5700000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":13.22,"numerateur":800000,"denominateur":6050000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"BFR","famille":"EXPLOITATION","unite":"MONTANT","libelle":"Besoin en fonds de roulement","formule":"actif circulant − passif circulant (hors activités ordinaires compris des deux côtés).","n":{"valeur":450000,"numerateur":450000,"denominateur":null,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":250000,"numerateur":250000,"denominateur":null,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"FRNG","famille":"EXPLOITATION","unite":"MONTANT","libelle":"Fonds de roulement net global","formule":"capitaux propres (résultat compris) + dettes financières et ressources assimilées − actif immobilisé.","n":{"valeur":1300000,"numerateur":1300000,"denominateur":null,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":950000,"numerateur":950000,"denominateur":null,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"TRESORERIE_NETTE","famille":"EXPLOITATION","unite":"MONTANT","libelle":"Trésorerie nette","formule":"trésorerie-actif − trésorerie-passif.","n":{"valeur":850000,"numerateur":850000,"denominateur":null,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":700000,"numerateur":700000,"denominateur":null,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"DIO","famille":"EXPLOITATION","unite":"JOURS","libelle":"Délai de rotation des stocks","formule":"stocks / achats consommés (achats + variation des stocks d’achats) × jours de la période.","n":{"valeur":28.43,"numerateur":620000,"denominateur":7850000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":15.28,"numerateur":370000,"denominateur":8720000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"DSO","famille":"EXPLOITATION","unite":"JOURS","libelle":"Délai de recouvrement des clients","formule":"créances clients / chiffre d’affaires × jours de la période. Montants tels que la liasse les porte (créances toutes taxes, chiffre d’affaires hors taxes).","n":{"valeur":9.68,"numerateur":430000,"denominateur":16000000,"motif":null,"verdict":"TRES_BON","motifVerdict":null},"n1":{"valeur":14.8,"numerateur":690000,"denominateur":16780000,"motif":null,"verdict":"TRES_BON","motifVerdict":null},"seuil":{"sens":"PLUS_BAS_MIEUX","bornes":[{"niveau":"TRES_BON","min":null,"max":30},{"niveau":"BON","min":30,"max":60},{"niveau":"ACCEPTABLE","min":60,"max":90},{"niveau":"RISQUE","min":90,"max":null}],"secteurRetenu":"TOUS","source":"Repère d’exemple de la maquette : aucun repère n’est déclaré par le référentiel publié (STORY-553)."}},{"code":"DPO","famille":"EXPLOITATION","unite":"JOURS","libelle":"Délai de paiement des fournisseurs","formule":"dettes fournisseurs / achats × jours de la période. Montants tels que la liasse les porte (dettes toutes taxes, achats hors taxes).","n":{"valeur":18.67,"numerateur":420000,"denominateur":8100000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":25.12,"numerateur":600000,"denominateur":8600000,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}},{"code":"CYCLE_EXPLOITATION","famille":"EXPLOITATION","unite":"JOURS","libelle":"Cycle d’exploitation","formule":"DIO + DSO − DPO, sur les valeurs publiées des trois délais (refaisable à la main).","n":{"valeur":19.44,"numerateur":null,"denominateur":null,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"},"n1":{"valeur":4.96,"numerateur":null,"denominateur":null,"motif":null,"verdict":null,"motifVerdict":"AUCUN_REPERE_DECLARE"}}],"composition":{"POIDS_CAPITAUX_PROPRES":[["N","Capital, report à nouveau, subventions d’investissement",[4150000,3380000]],["N","Résultat de l’exercice (compte de résultat)",[200000,800000]],["D","Total du passif (DZ)",[5700000,6050000]]],"ENDETTEMENT":[["N","Emprunts et dettes financières diverses (DA) et location-acquisition (DB)",[700000,900000]],["D","Capitaux propres, résultat compris",[4350000,4180000]]],"CAPACITE_REMBOURSEMENT":[["N","Dettes financières",[700000,900000]],["D","Excédent brut d’exploitation (XD)",[1140000,1814000]]],"LIQUIDITE_GENERALE":[["N","Actif circulant (BK) + trésorerie-actif (BT)",[1950000,1920000]],["D","Passif circulant (DP) + trésorerie-passif (DT)",[650000,970000]]],"LIQUIDITE_REDUITE":[["N","Actif circulant − stocks (BB) + trésorerie-actif",[1330000,1550000]],["D","Passif circulant + trésorerie-passif",[650000,970000]]],"LIQUIDITE_IMMEDIATE":[["N","Trésorerie-actif (BT)",[850000,800000]],["D","Passif circulant + trésorerie-passif",[650000,970000]]],"TAUX_MARGE_COMMERCIALE":[["N","Marge commerciale (XA)",[4350000,4780000]],["D","Ventes de marchandises (TA)",[12200000,13500000]]],"TAUX_VALEUR_AJOUTEE":[["N","Valeur ajoutée (XC)",[4120000,4534000]],["D","Chiffre d’affaires (XB)",[16000000,16780000]]],"TAUX_EBE":[["N","Excédent brut d’exploitation (XD)",[1140000,1814000]],["D","Chiffre d’affaires (XB)",[16000000,16780000]]],"MARGE_NETTE":[["N","Résultat net (XI)",[200000,800000]],["D","Chiffre d’affaires (XB)",[16000000,16780000]]],"ROE":[["N","Résultat net (XI)",[200000,800000]],["D","Capitaux propres, résultat compris",[4350000,4180000]]],"ROA":[["N","Résultat net (XI)",[200000,800000]],["D","Total de l’actif (BZ)",[5700000,6050000]]],"BFR":[["N","Actif circulant (BK)",[1100000,1120000]],["N","moins le passif circulant (DP)",[-650000,-870000]]],"FRNG":[["N","Capitaux propres, résultat compris",[4350000,4180000]],["N","Dettes financières et ressources assimilées (DD)",[700000,900000]],["N","moins l’actif immobilisé (AZ)",[-3750000,-4130000]]],"TRESORERIE_NETTE":[["N","Trésorerie-actif (BT)",[850000,800000]],["N","moins la trésorerie-passif (DT)",[0,-100000]]],"DIO":[["N","Stocks (BB)",[620000,370000]],["D","Achats consommés : achats (RA) + variation des stocks (RB)",[7850000,8720000]]],"DSO":[["N","Créances clients (BI)",[430000,690000]],["D","Chiffre d’affaires (XB)",[16000000,16780000]]],"DPO":[["N","Fournisseurs d’exploitation (DJ)",[420000,600000]],["D","Achats de marchandises (RA)",[8100000,8600000]]],"CYCLE_EXPLOITATION":[]},"dette":{"annees":["2026","2027","2028"],"projet":"Achat d’un camion de livraison · 25 000 000 F · 48 mois","indicateurs":[{"code":"COUVERTURE_SERVICE_DETTE","libelle":"Couverture du service de la dette","unite":"RATIO","valeurs":[1.76,1.56,1.65],"verdicts":["Solide","Solide","Solide"],"formule":"(capacité d’autofinancement + intérêts d’emprunt) / (capital remboursé + intérêts d’emprunt)"},{"code":"CAPACITE_ENDETTEMENT_RESIDUELLE","libelle":"Capacité d’endettement restante","unite":"MONTANT","valeurs":[-8653352,588400,11238024],"verdicts":["Aucune marge","Marge","Marge"],"formule":"capitaux propres − dettes financières, à la clôture"},{"code":"AUTONOMIE_FINANCIERE","libelle":"Autonomie financière","unite":"POURCENTAGE","valeurs":[37.7,50.9,68.4],"verdicts":["Correcte","Correcte","Correcte"],"formule":"capitaux propres / (capitaux propres + dettes financières) — la définition du prévisionnel"}]}}</script>
+  <!-- Lot 6 : fenêtre commune (pièce, confirmation, mémoire) -->
+  <div class="fin-ap" data-l6-ap hidden role="dialog" aria-modal="true" aria-label="Détail">
+    <div class="fin-ap-box fac-ap-box"><div class="fin-ap-h"><div><b data-l6-titre></b><small data-l6-sous></small></div><div class="fin-ap-b"><button class="btn btn-ghost btn-sm" type="button" data-l6-fermer aria-label="Fermer">Fermer</button></div></div>
+      <div class="fin-ap-c" data-l6-corps></div>
+      <div class="plan-ap-foot" data-l6-pied hidden style="justify-content:flex-end"></div></div>
+  </div>
+
   <!-- FE-148 : fenêtres du plan comptable (import Sage, historique, fichier déposé). Hors des pages pour rester visibles. -->
   <div class="fin-ap" data-plan-ap hidden role="dialog" aria-modal="true" aria-label="Plan comptable">
     <div class="fin-ap-box"><div class="fin-ap-h"><div><b data-plan-ap-titre></b><small data-plan-ap-sous></small></div><div class="fin-ap-b" data-plan-ap-btns></div></div>
@@ -17515,13 +17779,14 @@
     /* Pages où l'activation du cabinet (stepper + bandeau KYC) n'a rien à faire :
        ce bloc pilote l'ONBOARDING, pas la consultation d'une fiche. Le répéter
        au-dessus du profil parasitait l'écran (retour PO, 2026-07-22). */
-    var ACTIVATION_HIDDEN_ON = ["home", "profile", "plan", "me", "dossiers", "activite"];
+    var ACTIVATION_HIDDEN_ON = ["home", "profile", "plan", "memoire", "me", "dossiers", "activite"];
 
     var titles = {
       home:    ["Accueil", "Les modules ouverts pour votre cabinet"],
       dossiers: ["Dossiers clients", "Le portefeuille du cabinet — et le dossier actif"],
       profile: ["Profil du cabinet", "Identité et coordonnées de votre cabinet"],
       plan:    ["Plan comptable", "Profil du cabinet › les comptes et les journaux propres à votre cabinet"],
+      memoire: ["Choix mémorisés", "Profil du cabinet › ce que Prospera reprend d’office de vos choix"],
       me: ["Mon profil", "Vos informations personnelles"],
       users:   ["Utilisateurs", "Gérez les accès de votre cabinet"],
       kyc:     ["Vérification KYC", "Justificatifs légaux du cabinet"],
@@ -21922,6 +22187,7 @@
         dossierPanel.hidden = nom !== 'dossier';
         root.hidden = nom !== 'financement';
         var planPanel = open.querySelector('[data-dc-tabpanel="plan"]'); if (planPanel) planPanel.hidden = nom !== 'plan';
+        var memPanel = open.querySelector('[data-dc-tabpanel="memoire"]'); if (memPanel) memPanel.hidden = nom !== 'memoire';
       }
       tabs.forEach(function (b) { b.addEventListener('click', function () { afficherOnglet(b.dataset.dcTab); }); });
 
@@ -23489,6 +23755,716 @@
       });
 
       init(); rendre();
+    })();
+
+
+    /* ═══════════════ LOT 6 · FE-149 factures → écritures · FE-150 « Repris de vos choix » · FE-141 analyse financière ═══════════════
+       Le JS ne connaît AUCUN montant : tout vient des JSON #facData et #anaData, produits et vérifiés par
+       prototypes/exemples/generer-factures-lot6.py et generer-donnees-lot6.py. Une correction faite à l'écran rejoue la
+       règle de proposition de STORY-1097 sur les montants saisis (l'équilibre est recalculé à l'écran, FE-149) ; l'analyse
+       financière, elle, ne recalcule jamais rien : elle restitue ce que le serveur sert (FE-141). */
+    (function () {
+      var elF = document.getElementById('facData'), elA = document.getElementById('anaData');
+      var F = elF ? JSON.parse(elF.textContent) : null, A = elA ? JSON.parse(elA.textContent) : null;
+      if (!F) return;
+      var AUJ = F.lot.creeLe;                                   // « aujourd'hui » de la démonstration
+      function copie(o) { return JSON.parse(JSON.stringify(o)); }
+      function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+      function fr(n) { var s = String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); return (n < 0 ? '−' : '') + s; }
+      function dec(n) { return String(n).replace('.', ','); }
+      function jj(iso) { var p = String(iso).split('-'); return p[2] + '/' + p[1]; }
+      function jjmmaa(iso) { var p = String(iso).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+      function ico(p, w) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="' + (w || 16) + '" height="' + (w || 16) + '">' + p + '</svg>'; }
+      var IC = {
+        ok: ico('<path d="M20 6 9 17l-5-5"/>'), info: ico('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>'),
+        warn: ico('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/>'),
+        up: ico('<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 20h16"/>'), eye: ico('<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>'),
+        back: ico('<path d="M19 12H5M12 19l-7-7 7-7"/>'), next: ico('<path d="M5 12h14M12 5l7 7-7 7"/>'), x: ico('<path d="M18 6 6 18M6 6l12 12"/>'),
+        mem: ico('<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>', 13),
+        lock: ico('<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'), chev: ico('<path d="m9 18 6-6-6-6"/>')
+      };
+      function estAdmin() { var b = document.querySelector('#roleSeg [aria-selected="true"]'); return !b || b.dataset.role === 'admin'; }
+      function qui() { return estAdmin() ? 'Awa Diallo' : 'Kofi Santos'; }
+      function num(v) { var n = parseInt(String(v).replace(/[^\d-]/g, ''), 10); return isNaN(n) ? 0 : n; }
+      function pl(n, a, b) { return n + ' ' + (n > 1 ? b : a); }
+
+      /* ── Fenêtre commune (aperçu d'une pièce, confirmations) ── */
+      var ap = document.querySelector('[data-l6-ap]'), apFn = [], apUrl = null;
+      function fermerAp() { if (!ap) return; ap.hidden = true; if (apUrl) { URL.revokeObjectURL(apUrl); apUrl = null; } }
+      function dialogue(titre, sous, corps, boutons, large) {
+        if (!ap) return;
+        ap.querySelector('[data-l6-titre]').textContent = titre;
+        ap.querySelector('[data-l6-sous]').textContent = sous || '';
+        ap.querySelector('.fin-ap-box').classList.toggle('large', !!large);
+        ap.querySelector('[data-l6-corps]').innerHTML = corps;
+        apFn = [];
+        ap.querySelector('[data-l6-pied]').innerHTML = (boutons || []).map(function (b, i) { apFn.push(b.fn); return '<button class="btn ' + (b.cls || 'btn-ghost') + ' btn-sm" type="button" data-l6-btn="' + i + '">' + esc(b.t) + '</button>'; }).join('');
+        ap.querySelector('[data-l6-pied]').hidden = !(boutons && boutons.length);
+        ap.hidden = false;
+      }
+      if (ap) {
+        ap.addEventListener('click', function (ev) {
+          if (ev.target === ap || ev.target.closest('[data-l6-fermer]')) { fermerAp(); return; }
+          var b = ev.target.closest('[data-l6-btn]'); if (!b) return;
+          var fn = apFn[+b.dataset.l6Btn]; fermerAp(); if (fn) fn();
+        });
+        document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !ap.hidden) fermerAp(); });
+      }
+
+      /* ── Comptes : libellés lus dans le plan du prototype (jamais écrits ici) ── */
+      var REFS = F.plan.refs, PROPRES = F.plan.propres;
+      function racineDe(n) { var b = null; Object.keys(REFS).forEach(function (r) { if (n.indexOf(r) === 0 && (!b || r.length > b.length)) b = r; }); return b; }
+      function compteOk(n) { return !!n && (PROPRES[n] || racineDe(n)); }
+      function libCompte(n) {
+        if (n === F.tva.compte) return F.tva.libelle;
+        if (PROPRES[n]) return PROPRES[n];
+        if (REFS[n]) return REFS[n];
+        var r = racineDe(n); return r ? 'sous ' + r + ' ' + REFS[r] : '';
+      }
+      function optsComptes() {
+        var out = [], vu = {};
+        F.comptes.forEach(function (c) { if (c.actif === false) return; vu[c.n] = 1; out.push('<option value="' + esc(c.n) + '">' + esc(libCompte(c.n)) + '</option>'); });
+        Object.keys(PROPRES).forEach(function (n) { if (!vu[n] && /^[67]/.test(n)) out.push('<option value="' + esc(n) + '">' + esc(PROPRES[n]) + '</option>'); });
+        return out.join('');
+      }
+
+      /* ═══════════════ FE-150 · La mémoire des choix (état partagé avec les factures et les cahiers) ═══════════════ */
+      var MEM;
+      function initMem() { MEM = copie(F.memoire); MEM.oublis = []; MEM.actes = MEM.actes.slice(); MEM.n = 100; }
+      function cleDe(w) { return w.nif ? 'NIF ' + w.nif : 'NOM · ' + String(w.fournisseur).toUpperCase(); }
+      function memEntree(id) { var r = null; ['dossier', 'cabinet'].forEach(function (n) { MEM.ecritures[n].forEach(function (m) { if (m.id === id) r = m; }); }); return r; }
+      function memNiveau(id) { return MEM.ecritures.dossier.some(function (m) { return m.id === id; }) ? 'dossier' : 'cabinet'; }
+      function repHtml(w) {
+        /* la marque : ce qui vient de la MÉMOIRE se distingue toujours de ce que la machine a LU */
+        var s = w.source, h = '';
+        if (w.ecarte && !w.compte) return '<span class="rep ecarte">' + IC.warn + 'Votre mémoire proposait ' + esc(w.ecarte) + ', désactivé au plan du dossier : il n’est pas repris.</span>';
+        if (w.compteChange) return '<span class="rep chg">' + IC.mem + (w.initial ? 'Modifié par vous' : 'Choisi par vous') + ' : ce choix sera retenu pour les prochaines factures de ce fournisseur.</span>';
+        if (!s || !w.compte) return '';
+        if (s.origine === 'MEMOIRE_DOSSIER') h = '<span class="rep dos">' + IC.mem + 'Repris de votre saisie du ' + jj(s.choisiLe) + (s.pieceRef ? ', facture ' + esc(s.pieceRef) : '') + '</span>';
+        else if (s.origine === 'MEMOIRE_CABINET') h = '<span class="rep cab">' + IC.mem + 'Repris du choix du cabinet chez un autre client, le ' + jj(s.choisiLe) + '</span>';
+        else h = '<span class="rep def">Compte habituel de ce ' + (w.sens === 'VENTE' ? 'client' : 'fournisseur') + '</span>';
+        return h;
+      }
+
+      /* ═══════════════ FE-149 · Les factures deviennent des écritures ═══════════════ */
+      var root = document.querySelector('[data-fac-root]');
+      var S, W, T = null;
+      var LIM_FICHIERS = 50, LIM_OCTETS = 10 * 1024 * 1024;
+      function initFac() {
+        if (T) { clearTimeout(T); T = null; }
+        S = { vue: 'depot', sens: 'ACHAT', avoir: false, devise: 'XOF', files: [], ignores: [], erreurs: [], refus: null, ro: false, sel: null, coche: {}, res: null,
+              brouillards: copie(F.brouillards), fj: 'ALL', fp: 'ALL', coch: {}, next: 213, defn: 42, lu: 0, exemple: false, suite: false };
+        W = {};
+        initMem();
+      }
+      function bati(sens, suite) {
+        W = {}; var src = sens === 'VENTE' ? F.ventes : F.pieces; S.ordre = [];
+        src.forEach(function (p) {
+          if (p.statut === 'ILLISIBLE') { W[p.id] = { id: p.id, nom: p.nom, statut: 'ILLISIBLE', sens: sens }; S.ordre.push(p.id); return; }
+          W[p.id] = { id: p.id, nom: p.nom, sens: sens, statut: 'LUE', fournisseur: p.fournisseur, nif: p.nif, num: p.num, date: p.date, ht: p.ht, tva: p.tva == null ? '' : p.tva, ttc: p.ttc,
+            confianceTTC: p.confianceTTC, compte: p.compte || '', initial: p.compte || '', source: p.source, memId: p.memId, tiers: p.tiers ? p.tiers.code : '', tiersNom: p.tiers ? p.tiers.nom : '',
+            aCreer: p.aCreer || null, traitement: sens === 'VENTE' ? 'FACTUREE' : 'RECUPERABLE', journal: sens === 'VENTE' ? 'VTE' : 'ACH', doublon: (p.signaux || []).some(function (s) { return s.code === 'DOUBLON_PROBABLE'; }),
+            doublonDet: ((p.signaux || []).filter(function (s) { return s.code === 'DOUBLON_PROBABLE'; })[0] || {}).details, ecarte: ((p.signaux || []).filter(function (s) { return s.code === 'COMPTE_A_CHOISIR'; })[0] || { details: {} }).details.ecarte || '',
+            vu: false, compteChange: false, o: { ht: p.ht, tva: p.tva == null ? '' : p.tva, ttc: p.ttc } };
+          S.ordre.push(p.id);
+          S.coche[p.id] = false;
+        });
+        S.sel = S.ordre[0];
+        majMemoire();
+        S.ordre.forEach(function (id) { if (W[id].statut !== 'ILLISIBLE' && groupe(W[id]) === 'pret') S.coche[id] = true; });
+        var gr = function (id) { return W[id].statut === 'ILLISIBLE' ? 'bloc' : groupe(W[id]); };
+        var premier = S.ordre.filter(function (id) { return gr(id) === 'bloc' && W[id].statut !== 'ILLISIBLE'; })[0] || S.ordre.filter(function (id) { return gr(id) === 'voir'; })[0];
+        if (premier) S.sel = premier;
+        S.suite = !!suite;
+      }
+      function calc(w) {
+        var ht = num(w.ht), tva = (w.tva === '' || w.tva == null) ? 0 : num(w.tva), ttc = num(w.ttc), vente = w.sens === 'VENTE', L = [];
+        if (vente) {
+          L.push({ role: 'TIERS', compte: '411', debit: ttc, credit: 0 });
+          L.push({ role: 'PRODUIT', compte: w.compte || '', debit: 0, credit: ht });
+          if (tva > 0) L.push({ role: 'TVA', compte: '443', debit: 0, credit: tva });
+        } else {
+          if (w.traitement === 'NON_RECUPERABLE') L.push({ role: 'CHARGE', compte: w.compte || '', debit: ht + tva, credit: 0 });
+          else { L.push({ role: 'CHARGE', compte: w.compte || '', debit: ht, credit: 0 }); if (tva > 0) L.push({ role: 'TVA', compte: F.tva.compte, debit: tva, credit: 0 }); }
+          L.push({ role: 'TIERS', compte: '401', debit: 0, credit: ttc });
+        }
+        var td = 0, tc = 0; L.forEach(function (l) { td += l.debit; tc += l.credit; });
+        var sig = [];
+        if (ht + tva !== ttc) sig.push({ code: 'ECART_HT_TVA_TTC', gravite: 'BLOQUANT' });
+        if (w.tva === '') sig.push({ code: 'TVA_ABSENTE', gravite: 'AVERTISSEMENT' });
+        if (!w.tiers) sig.push({ code: vente ? 'TIERS_A_CHOISIR' : (w.aCreer ? 'TIERS_A_CREER' : 'TIERS_A_CHOISIR'), gravite: 'BLOQUANT' });
+        if (!w.compte) sig.push({ code: 'COMPTE_A_CHOISIR', gravite: 'BLOQUANT' });
+        if (w.doublon) sig.push({ code: 'DOUBLON_PROBABLE', gravite: 'AVERTISSEMENT' });
+        return { lignes: L, td: td, tc: tc, equilibree: td === tc, signaux: sig, inscriptible: !sig.some(function (s) { return s.gravite === 'BLOQUANT'; }), ht: ht, tva: tva, ttc: ttc };
+      }
+      function groupe(w) {
+        if (w.statut === 'INSCRITE') return 'done';
+        if (w.statut === 'ILLISIBLE') return 'bloc';
+        var c = calc(w); if (!c.inscriptible) return 'bloc';
+        if (c.signaux.length && !w.vu) return 'voir';
+        return 'pret';
+      }
+      function appliquerMemoire(w) {
+        /* ce qui est proposé est ce que la mémoire retient AUJOURD'HUI : un choix remplacé est repris à jour, un choix oublié n'est plus proposé (FE-150 AC-2, AC-3) */
+        if (!w.memId || w.compteChange || w.statut === 'INSCRITE') return;
+        var e = memEntree(w.memId);
+        if (!e) { w.compte = ''; w.initial = ''; w.source = null; return; }
+        w.compte = e.compte; w.initial = e.compte; w.ecarte = '';
+        w.source = { origine: memNiveau(w.memId) === 'dossier' ? 'MEMOIRE_DOSSIER' : 'MEMOIRE_CABINET', pieceRef: e.ref, choisiLe: e.le, choisiPar: e.par };
+        if (e.tva === 'RECUPERABLE' || e.tva === 'NON_RECUPERABLE') w.traitement = e.tva;
+      }
+      function majMemoire() { Object.keys(W).forEach(function (id) { if (W[id].statut !== 'ILLISIBLE') appliquerMemoire(W[id]); }); }
+      function nomMois(iso) { return ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'][+iso.split('-')[1] - 1] + ' ' + iso.split('-')[0]; }
+
+      /* ── Rendu ── */
+      var ETAPES = [['depot', 'Déposer'], ['relecture', 'Relire'], ['brouillard', 'Inscrire et valider']];
+      function steps() {
+        var cur = S.vue === 'depot' ? 0 : S.vue === 'brouillard' ? 2 : 1;
+        return '<div class="fac-steps" aria-label="Étapes">' + ETAPES.map(function (e, i) { return '<span class="' + (i < cur ? 'done' : i === cur ? 'now' : '') + '"><i>' + (i < cur ? '✓' : i + 1) + '</i>' + e[1] + '</span>'; }).join('') + '</div>';
+      }
+      function entete() {
+        return '<div class="fac-head"><div><h3>Factures de ' + esc(F.dossier.nom) + '</h3><p>Système normal · exercice ' + F.dossier.exercice + '. Une facture lue devient une écriture, que vous relisez avant qu’elle entre au brouillard.</p></div>' + steps() + '</div>';
+      }
+      function refusHtml() {
+        if (!S.refus) return '';
+        var c = S.refus.code, txt = F.refus[c] || c, act = '';
+        if (c === 'FACTURES_RESERVEES_AU_SYSTEME_NORMAL') act = '<button class="btn btn-primary btn-sm" type="button" data-fac-act="cahiers">Ouvrir les cahiers</button>';
+        if (c === 'EXERCICE_CLOS') act = '<button class="btn btn-ghost btn-sm" type="button" data-fac-act="fermer-refus">Déposer dans 2026</button>';
+        if (c === 'DOCUMENTS_INDISPONIBLES') act = '<button class="btn btn-ghost btn-sm" type="button" data-fac-act="fermer-refus">Réessayer</button>';
+        return '<div class="fin-notice ko" role="alert">' + IC.warn + '<span>' + esc(txt) + ' <span class="code" data-note style="font-family:var(--font-mono);font-size:.72rem">' + esc(c) + '</span></span>' + act + '</div>';
+      }
+      function vueDepot() {
+        var nb = S.files.length, h = '';
+        if (S.smt) {
+          return entete().replace('Système normal', 'Système minimal de trésorerie') + refusHtml() + '<div class="fac-smt"><h4>Ce client tient ses cahiers</h4><p>Un petit commerçant au système minimal de trésorerie enregistre ses recettes et ses dépenses dans des cahiers : une facture y devient une ligne, sans écriture en partie double.</p><button class="btn btn-primary" type="button" data-fac-act="cahiers">Ouvrir les cahiers du client</button></div>';
+        }
+        h += entete() + refusHtml();
+        if (S.ro) h += '<div class="fin-notice">' + IC.lock + '<span>Votre rôle peut lire les factures de ce dossier, mais pas en déposer ni les inscrire.</span></div>';
+        h += '<div><div class="fac-grp">Ces factures sont…</div><div class="fac-sens" role="group" aria-label="Sens des factures">'
+          + '<button type="button" data-fac-sens="ACHAT" aria-pressed="' + (S.sens === 'ACHAT') + '"><b>Des achats</b><small>Ce que le client doit à ses fournisseurs</small></button>'
+          + '<button type="button" data-fac-sens="VENTE" aria-pressed="' + (S.sens === 'VENTE') + '"><b>Des ventes</b><small>Ce que ses clients lui doivent</small></button></div></div>';
+        h += '<div class="fac-drop" data-fac-zone><span style="color:var(--muted-fg)">' + ico('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M12 18v-6M9 15l3-3 3 3"/>', 34) + '</span>'
+          + '<h4>Déposez les factures ici</h4><p>PDF, JPEG ou PNG, jusqu’à 50 à la fois (10 Mo chacune). Rien n’est écrit tant que vous n’avez pas relu et inscrit.</p>'
+          + '<div class="row"><label class="btn btn-primary" style="cursor:pointer">' + IC.up + ' Choisir des factures<input type="file" data-fac-up multiple accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" style="display:none"' + (S.ro ? ' disabled' : '') + '></label>'
+          + '<button class="btn btn-ghost" type="button" data-fac-act="exemple"' + (S.ro ? ' disabled' : '') + '>Essayer avec des factures d’exemple</button></div></div>';
+        if (S.erreurs.length) h += '<div class="fin-notice ko" role="alert">' + IC.warn + '<span>' + S.erreurs.map(function (e) { return esc(e); }).join('<br>') + '</span></div>';
+        if (nb || S.ignores.length) {
+          h += '<div><div class="fac-grp">' + pl(nb, 'facture prête à lire', 'factures prêtes à lire') + '</div><ul class="fac-files">';
+          S.files.forEach(function (f, i) { h += '<li class="fac-file"><span class="nm">' + esc(f.nom) + '</span><small>' + esc(f.taille) + '</small>' + (f.file ? '<button class="btn btn-ghost btn-sm" type="button" data-fac-voirf="' + i + '">' + IC.eye + ' Voir</button>' : '') + '<button class="btn btn-ghost btn-sm" type="button" data-fac-retirer="' + i + '" aria-label="Retirer ' + esc(f.nom) + '">' + IC.x + '</button></li>'; });
+          S.ignores.forEach(function (f) { h += '<li class="fac-file ign"><span class="nm">' + esc(f.nom) + '</span><small>déjà dans ce lot : déposée une seule fois</small></li>'; });
+          h += '</ul></div>';
+        }
+        h += '<details class="fac-more"><summary>Autres réglages (avoirs, devise)</summary><div class="row"><label><input type="checkbox" data-fac-avoir' + (S.avoir ? ' checked' : '') + '> Ce sont des avoirs</label>'
+          + '<label>Devise <select data-fac-devise><option value="XOF"' + (S.devise === 'XOF' ? ' selected' : '') + '>Franc CFA (XOF)</option><option value="XAF"' + (S.devise === 'XAF' ? ' selected' : '') + '>Franc CFA (XAF)</option></select></label></div></details>';
+        h += '<div class="fac-cta"><div class="grow"><b>' + (nb ? 'Prêt à lire ' + pl(nb, 'facture', 'factures') : 'Choisissez des factures pour commencer') + '</b><p>La lecture prend quelques instants. Vous relisez chaque écriture avant de l’inscrire.</p></div>'
+          + '<button class="btn btn-primary btn-lg" type="button" data-fac-act="lire"' + (nb && !S.ro ? '' : ' disabled') + '>Lire ' + (nb ? pl(nb, 'la facture', 'les ' + nb + ' factures').replace(/^1 /, '') : 'les factures') + ' ' + IC.next + '</button></div>';
+        return h;
+      }
+      function vueLecture() {
+        var total = S.ordre.length, lu = S.lu, pct = Math.round(lu * 100 / total);
+        return entete() + refusHtml() + '<div class="fac-res"><h4>Lecture en cours…</h4><div class="fac-prog" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100"><i style="width:' + pct + '%"></i></div>'
+          + '<div class="fac-count"><span><b>' + total + '</b>déposées</span><span><b>' + lu + '</b>lues</span><span><b>' + (total - lu) + '</b>en cours</span></div>'
+          + '<p class="fin-sub" style="margin:0">Vous pouvez déjà passer à la relecture : ' + (lu ? 'les factures lues sont prêtes.' : 'les premières arrivent.') + '</p></div>'
+          + '<div class="fac-cta"><span class="grow"></span><button class="btn btn-primary" type="button" data-fac-act="relire">Passer à la relecture ' + IC.next + '</button></div>';
+      }
+      function itemHtml(id) {
+        var w = W[id], g = w.statut === 'ILLISIBLE' ? 'bloc' : groupe(w), c = w.statut === 'ILLISIBLE' ? null : calc(w);
+        var st = '';
+        if (w.statut === 'ILLISIBLE') st = '<span class="dc-badge fin-ko">Illisible</span>';
+        else if (g === 'done') st = '<span class="dc-badge ok">' + esc(w.numProv) + '</span>';
+        else if (g === 'bloc') st = '<span class="dc-badge fin-ko">À corriger</span>';
+        else if (g === 'voir') st = '<span class="dc-badge warn">À regarder</span>';
+        else st = '<span class="dc-badge ok">Prête</span>';
+        var box = (g === 'pret' || g === 'voir') && !S.ro ? '<input type="checkbox" data-fac-coche="' + id + '"' + (S.coche[id] ? ' checked' : '') + ' aria-label="Inscrire cette facture">' : '<span></span>';
+        var nom = w.statut === 'ILLISIBLE' ? w.nom : (w.sens === 'VENTE' ? (w.tiersNom || 'Client à choisir') : w.fournisseur), sous = w.statut === 'ILLISIBLE' ? 'La lecture a échoué' : (w.num + ' · ' + jj(w.date));
+        return '<div class="fac-item' + (g === 'done' ? ' done' : '') + '" role="button" tabindex="0" data-fac-sel="' + id + '" aria-current="' + (S.sel === id) + '">' + box + '<b>' + esc(nom) + '</b><span class="amt">' + (c ? fr(c.ttc) : '') + '</span><small>' + esc(sous) + '</small><span class="st">' + st + '</span></div>';
+      }
+      function listeHtml() {
+        var G = { bloc: [], voir: [], pret: [], done: [] };
+        S.ordre.forEach(function (id) { var w = W[id]; G[w.statut === 'ILLISIBLE' ? 'bloc' : groupe(w)].push(id); });
+        var a = G.bloc.concat(G.voir), h = '';
+        if (a.length) h += '<div class="fac-grp">' + IC.warn + ' À regarder (' + a.length + ')</div><div class="fac-list">' + a.map(itemHtml).join('') + '</div>';
+        if (G.pret.length) h += '<div class="fac-grp">' + IC.ok + ' Prêtes (' + G.pret.length + ')</div><div class="fac-list">' + G.pret.map(itemHtml).join('') + '</div>';
+        if (G.done.length) h += '<div class="fac-grp">Déjà au brouillard (' + G.done.length + ')</div><div class="fac-list">' + G.done.map(itemHtml).join('') + '</div>';
+        return h;
+      }
+      function ctaHtml() {
+        var ids = S.ordre.filter(function (id) { var g = W[id].statut === 'ILLISIBLE' ? 'bloc' : groupe(W[id]); return S.coche[id] && (g === 'pret' || g === 'voir'); });
+        var prets = S.ordre.filter(function (id) { return W[id].statut !== 'ILLISIBLE' && groupe(W[id]) === 'pret'; }).length;
+        var reste = S.ordre.filter(function (id) { var g = W[id].statut === 'ILLISIBLE' ? 'bloc' : groupe(W[id]); return g === 'bloc' || g === 'voir'; }).length;
+        var nbIns = S.ordre.filter(function (id) { return W[id].statut === 'INSCRITE'; }).length;
+        var h = '<div class="fac-cta"><div class="grow"><b>' + pl(S.ordre.length, 'facture lue', 'factures lues') + ' · ' + pl(prets, 'prête', 'prêtes') + (reste ? ' · ' + reste + ' à regarder' : '') + '</b>'
+          + '<p>' + (ids.length ? 'Les factures cochées entrent au brouillard : rien n’est validé, vous le ferez ensuite.' : (nbIns ? 'Tout ce qui était coché est au brouillard.' : 'Cochez les factures à inscrire.')) + '</p></div>';
+        if (nbIns) h += '<button class="btn btn-ghost" type="button" data-fac-act="brouillard">Voir le brouillard</button>';
+        h += '<button class="btn btn-ghost" type="button" data-fac-act="nouveau">Déposer d’autres factures</button>';
+        h += '<button class="btn btn-primary btn-lg" type="button" data-fac-act="inscrire"' + (ids.length && !S.ro ? '' : ' disabled') + '>' + IC.ok + ' Inscrire ' + (ids.length === 1 ? 'la facture cochée' : 'les ' + ids.length + ' factures cochées') + ' au brouillard</button></div>';
+        return h;
+      }
+      function resHtml() {
+        if (!S.res) return '';
+        var r = S.res, h = '<div class="fac-res ' + (r.ok.length ? 'ok' : '') + '">';
+        if (r.ok.length) h += '<h4>' + IC.ok + ' ' + pl(r.ok.length, 'facture inscrite', 'factures inscrites') + ' au brouillard</h4><p class="fin-sub" style="margin:0">Rien n’est validé : l’écriture reste modifiable tant que vous ne l’avez pas validée.</p>';
+        if (r.ko.length) h += '<h4>' + IC.warn + ' ' + pl(r.ko.length, 'facture refusée', 'factures refusées') + '</h4><ul>' + r.ko.map(function (k) { return '<li><b>' + esc(k.nom) + '</b> : ' + esc(F.refus[k.code] || k.code) + ' <span class="code" data-note style="font-family:var(--font-mono);font-size:.7rem">' + esc(k.code) + '</span></li>'; }).join('') + '</ul>';
+        if (r.ok.length) h += '<div><button class="btn btn-primary" type="button" data-fac-act="brouillard">Voir le brouillard et valider ' + IC.next + '</button></div>';
+        return h + '</div>';
+      }
+      function paperHtml(w, bouton) {
+        var flou = w.statut === 'ILLISIBLE';
+        var nm = flou ? w.nom : w.fournisseur;
+        var h = '<div class="fac-paper' + (flou ? ' flou' : '') + '" aria-label="Image de la facture">';
+        h += '<div class="top"><div><b>' + esc(flou ? 'Facture' : w.fournisseur) + '</b>' + (w.nif ? '<br>NIF ' + esc(w.nif) : '') + '</div><div style="text-align:right">' + (flou ? '' : 'Facture N° <b>' + esc(w.num) + '</b><br>' + jjmmaa(w.date)) + '</div></div>';
+        h += '<div class="ln" style="width:80%"></div><div class="ln" style="width:62%"></div><div class="ln" style="width:70%"></div>';
+        var o = w.o || { ht: w.ht, tva: w.tva, ttc: w.ttc };
+        if (!flou) h += '<div class="tot"><span>Total HT</span><b>' + fr(num(o.ht)) + '</b><span>TVA</span><b>' + (o.tva === '' || o.tva == null ? '—' : fr(num(o.tva))) + '</b><span>Total TTC</span><b>' + fr(num(o.ttc)) + '</b></div>';
+        else h += '<div class="tot"><span>…</span><b>…</b></div>';
+        h += '</div>';
+        return h;
+      }
+      function detailHtml() {
+        var w = W[S.sel]; if (!w) return '';
+        if (w.statut === 'ILLISIBLE') {
+          return '<div class="fac-detail" data-fac-detail><h4>' + esc(w.nom) + ' <span class="dc-badge fin-ko">Illisible</span></h4><div class="fac-two"><div>' + paperHtml(w) + '</div><div class="fac-sig"><div class="s bloc">' + IC.warn + '<span>' + esc(F.signaux.LECTURE_ECHOUEE) + ' <span class="code" data-note>LECTURE_ECHOUEE</span></span></div>'
+            + '<div><label class="btn btn-primary btn-sm" style="cursor:pointer">' + IC.up + ' Redéposer une photo<input type="file" data-fac-redepot accept=".pdf,.jpg,.jpeg,.png" style="display:none"></label></div><p class="fin-sub" style="margin:0">Les autres factures du lot ne sont pas retenues par cette pièce.</p></div></div></div>';
+        }
+        var vente = w.sens === 'VENTE';
+        var tiersSel = vente ? '<option value="">Choisir le client…</option>' + F.clients.map(function (c) { return '<option value="' + c.code + '"' + (w.tiers === c.code ? ' selected' : '') + '>' + esc(c.nom) + '</option>'; }).join('')
+          : '<option value="">' + (w.aCreer && !w.tiers ? 'Nouveau fournisseur' : 'Choisir le fournisseur…') + '</option>' + (w.tiers ? '<option value="' + esc(w.tiers) + '" selected>' + esc(w.tiersNom) + '</option>' : '');
+        var h = '<div class="fac-detail" data-fac-detail data-fac-id="' + esc(w.id) + '"><h4><span>' + esc(vente ? 'Vente ' + w.num : w.fournisseur) + '</span><span class="dc-badge auto">' + esc(w.num) + '</span><span data-fac-st></span></h4><div class="fac-two"><div>' + paperHtml(w);
+        h += '<div class="fac-fields"><label>Date<input type="date" data-fac-f="date" value="' + esc(w.date) + '"></label><label>N° de facture<input data-fac-f="num" value="' + esc(w.num) + '"></label>'
+          + '<label>Montant HT<input class="num" inputmode="numeric" data-fac-f="ht" value="' + esc(fr(num(w.ht))) + '"></label><label>TVA<input class="num" inputmode="numeric" data-fac-f="tva" value="' + esc(w.tva === '' ? '' : fr(num(w.tva))) + '" placeholder="non lue"></label>'
+          + '<label class="full' + '" data-fac-ttc>Montant TTC' + (w.confianceTTC ? ' <span class="dc-badge warn" style="margin-left:.3rem">lu avec peu de certitude</span>' : '') + '<input class="num" inputmode="numeric" data-fac-f="ttc" value="' + esc(fr(num(w.ttc))) + '"></label></div></div>';
+        h += '<div><div class="fac-sig" data-fac-sig></div><div class="fac-fields" style="margin-top:.2rem"><label>' + (vente ? 'Client' : 'Fournisseur') + '<select data-fac-f="tiers">' + tiersSel + '</select></label>'
+          + '<label>Journal<select data-fac-f="journal">' + F.journaux.map(function (j) { return '<option value="' + j.c + '"' + (w.journal === j.c ? ' selected' : '') + '>' + esc(j.l) + '</option>'; }).join('') + '</select></label>'
+          + '<label class="full">Compte ' + (vente ? 'de produit' : 'de charge') + '<input data-fac-f="compte" list="facComptes" value="' + esc(w.compte) + '" placeholder="Choisir un compte…" autocomplete="off"></label></div>'
+          + (vente ? '' : '<label class="plan-chk" style="margin-top:.4rem"><input type="checkbox" data-fac-f="tvanr"' + (w.traitement === 'NON_RECUPERABLE' ? ' checked' : '') + '> La TVA de cette facture n’est pas récupérable</label>')
+          + '<div data-fac-mark></div></div></div><div><div class="fac-grp" style="margin-bottom:.4rem">L’écriture proposée</div><div data-fac-ecr></div></div><div data-fac-actions class="fin-act" style="margin-top:0"></div></div>';
+        return h;
+      }
+      function sigHtml(w) {
+        var c = calc(w), h = '';
+        c.signaux.forEach(function (s) {
+          var cl = s.gravite === 'BLOQUANT' ? 'bloc' : 'warn', btn = '';
+          var txt = F.signaux[s.code] || s.code;
+          if (s.code === 'ECART_HT_TVA_TTC') txt = 'Les montants ne tombent pas juste : HT ' + fr(c.ht) + ' + TVA ' + fr(c.tva) + ' = ' + fr(c.ht + c.tva) + ', la facture dit ' + fr(c.ttc) + ' (écart de ' + fr(Math.abs(c.ht + c.tva - c.ttc)) + '). Corrigez le chiffre lu de travers.';
+          if (s.code === 'TIERS_A_CREER') btn = '<button class="btn btn-primary btn-sm" type="button" data-fac-act="creer-tiers">Créer ' + esc(w.aCreer.nom) + '</button>';
+          if (s.code === 'DOUBLON_PROBABLE') { txt = 'Même fournisseur, même numéro de facture : l’écriture ' + esc((w.doublonDet || {}).numeroProvisoire || '') + ' du ' + jj((w.doublonDet || {}).date || w.date) + ' est déjà au brouillard.'; btn = '<button class="btn btn-ghost btn-sm" type="button" data-fac-act="voir-doublon">La voir</button>'; }
+          if (s.code === 'TVA_ABSENTE') btn = '<button class="btn btn-ghost btn-sm" type="button" data-fac-act="garder">Garder ainsi</button>';
+          if (s.code === 'DOUBLON_PROBABLE') btn += '<button class="btn btn-ghost btn-sm" type="button" data-fac-act="garder">Inscrire quand même</button>';
+          h += '<div class="s ' + cl + '">' + (cl === 'bloc' ? IC.warn : IC.info) + '<span>' + esc(txt) + ' <span class="code" data-note>' + s.code + '</span></span>' + btn + '</div>';
+        });
+        if (!c.signaux.length) h = '<div class="s" style="background:var(--success-soft);border-color:transparent">' + IC.ok + '<span>Rien à signaler : la facture est lue, les montants tombent juste, tout est proposé.</span></div>';
+        return h;
+      }
+      function ecrHtml(w) {
+        var c = calc(w), vente = w.sens === 'VENTE';
+        var h = '<table class="fac-tbl"><thead><tr><th>Compte</th><th class="n">Débit</th><th class="n">Crédit</th></tr></thead><tbody>';
+        c.lignes.forEach(function (l) {
+          var lib, cpt = l.compte;
+          if (l.role === 'TIERS') lib = esc(libCompte(cpt)) + (w.tiersNom || (vente && w.tiers) ? ' · <b>' + esc(w.tiersNom || (F.clients.filter(function (x) { return x.code === w.tiers; })[0] || {}).nom || '') + '</b>' : ' · tiers à choisir');
+          else if (!cpt) lib = '<span style="color:var(--danger);font-weight:600">compte à choisir</span>';
+          else lib = esc(libCompte(cpt));
+          h += '<tr><td><span class="cpt">' + esc(cpt || '—') + '</span><span class="rac">' + lib + (l.role === 'TIERS' && w.num ? ' · pièce ' + esc(w.num) : '') + '</span></td><td class="n">' + (l.debit ? fr(l.debit) : '') + '</td><td class="n">' + (l.credit ? fr(l.credit) : '') + '</td></tr>';
+        });
+        h += '</tbody><tfoot><tr><td>Total · journal ' + esc(w.journal) + '</td><td class="n">' + fr(c.td) + '</td><td class="n">' + fr(c.tc) + '</td></tr></tfoot></table>';
+        h += '<p style="margin:.5rem 0 0">' + (c.equilibree ? '<span class="fac-bal ok">' + IC.ok + ' Équilibrée : ' + fr(c.td) + ' = ' + fr(c.tc) + '</span>' : '<span class="fac-bal ko">' + IC.warn + ' Déséquilibrée : débit ' + fr(c.td) + ', crédit ' + fr(c.tc) + '</span>') + '</p>';
+        return h;
+      }
+      function actionsHtml(w) {
+        var c = calc(w), g = groupe(w), h = '';
+        if (w.statut === 'INSCRITE') return '<span class="dc-badge ok">' + IC.ok + ' ' + esc(w.numProv) + ' · au brouillard</span><span class="grow"></span><button class="btn btn-ghost btn-sm" type="button" data-fac-act="brouillard">Voir le brouillard</button>';
+        h += '<button class="btn btn-primary btn-sm" type="button" data-fac-act="inscrire-une"' + (c.inscriptible && !S.ro ? '' : ' disabled') + '>' + IC.ok + ' Inscrire cette facture</button>';
+        var nxt = S.ordre.filter(function (id) { return id !== S.sel && W[id].statut !== 'INSCRITE' && (W[id].statut === 'ILLISIBLE' || groupe(W[id]) !== 'pret'); })[0];
+        if (nxt) h += '<button class="btn btn-ghost btn-sm" type="button" data-fac-sel="' + nxt + '">Facture suivante à regarder ' + IC.next + '</button>';
+        h += '<span class="grow"></span><button class="btn btn-ghost btn-sm" type="button" data-fac-act="mes-choix">' + IC.mem + ' Mes choix pour ce client</button>';
+        return h;
+      }
+      /* un bouton remplacé entre l'appui et le relâchement perd son clic : on ne touche au DOM que si le contenu change */
+      function poser(el, h) { if (el && el._h !== h) { el.innerHTML = h; el._h = h; } }
+      function majDetail() {
+        var w = W[S.sel]; if (!w || w.statut === 'ILLISIBLE') return;
+        var q = function (s) { return root.querySelector(s); };
+        poser(q('[data-fac-sig]'), sigHtml(w)); poser(q('[data-fac-mark]'), repHtml(w)); poser(q('[data-fac-ecr]'), ecrHtml(w)); poser(q('[data-fac-actions]'), actionsHtml(w));
+        var st = q('[data-fac-st]'); var g = groupe(w);
+        poser(st, g === 'done' ? '<span class="dc-badge ok">Au brouillard</span>' : g === 'bloc' ? '<span class="dc-badge fin-ko">À corriger</span>' : g === 'voir' ? '<span class="dc-badge warn">À regarder</span>' : '<span class="dc-badge ok">Prête</span>');
+        var ttc = q('[data-fac-ttc]'); if (ttc) ttc.classList.toggle('bad', calc(w).signaux.some(function (s) { return s.code === 'ECART_HT_TVA_TTC'; }));
+        majListe();
+      }
+      function majListe() {
+        poser(root.querySelector('[data-fac-list]'), listeHtml());
+        poser(root.querySelector('[data-fac-cta]'), ctaHtml());
+      }
+      function vueRelecture() {
+        var h = entete() + refusHtml();
+        if (S.exemple && S.files.some(function (f) { return f.file; })) h += '<div class="fin-notice">' + IC.info + '<span>Lecture d’exemple : le prototype n’a pas de lecteur de factures, il montre ici le lot de démonstration, quels que soient les fichiers déposés.</span></div>';
+        if (S.suite) h += '<div class="fin-notice">' + IC.info + '<span>Facture suivante du même fournisseur : ce que vous avez choisi tout à l’heure est proposé d’office.</span></div>';
+        h += '<div data-fac-res>' + resHtml() + '</div><div data-fac-cta>' + ctaHtml() + '</div><div class="fac-grid"><div data-fac-list>' + listeHtml() + '</div><div data-fac-slot>' + detailHtml() + '</div></div>';
+        return h;
+      }
+      /* ── Brouillard et journaux (FE-149 point 4) ── */
+      function lignesBrouillard() {
+        return S.brouillards.filter(function (b) { return (S.fj === 'ALL' || b.num.indexOf(S.fj) === 0) && (S.fp === 'ALL' || b.date.slice(0, 7) === S.fp); });
+      }
+      function vueBrouillard() {
+        var rows = lignesBrouillard(), h = entete() + refusHtml();
+        var mois = []; S.brouillards.forEach(function (b) { var m = b.date.slice(0, 7); if (mois.indexOf(m) < 0) mois.push(m); }); mois.sort();
+        h += '<div class="fac-filtre"><div class="seg" role="group" aria-label="Journal"><button type="button" data-fac-fj="ALL" aria-pressed="' + (S.fj === 'ALL') + '">Tous les journaux</button>' + F.journaux.slice(0, 2).map(function (j) { return '<button type="button" data-fac-fj="' + j.c + '" aria-pressed="' + (S.fj === j.c) + '">' + esc(j.l) + '</button>'; }).join('') + '</div>'
+          + '<div class="seg" role="group" aria-label="Période"><button type="button" data-fac-fp="ALL" aria-pressed="' + (S.fp === 'ALL') + '">Toute la période</button>' + mois.map(function (m) { return '<button type="button" data-fac-fp="' + m + '" aria-pressed="' + (S.fp === m) + '">' + nomMois(m) + '</button>'; }).join('') + '</div></div>';
+        var cochables = rows.filter(function (b) { return b.statut === 'BROUILLARD'; });
+        var nCoch = cochables.filter(function (b) { return S.coch[b.id]; }).length;
+        h += '<div class="fac-cta"><div class="grow"><b>' + pl(cochables.length, 'écriture au brouillard', 'écritures au brouillard') + '</b><p>Valider donne le numéro définitif : l’écriture ne se modifie plus, elle se contre-passe.</p></div>'
+          + '<button class="btn btn-ghost" type="button" data-fac-act="tout-cocher">' + (nCoch === cochables.length && nCoch ? 'Tout décocher' : 'Tout cocher') + '</button>'
+          + '<button class="btn btn-primary btn-lg" type="button" data-fac-act="valider"' + (nCoch && !S.ro ? '' : ' disabled') + '>' + IC.ok + ' Valider ' + (nCoch === 1 ? 'l’écriture cochée' : 'les ' + nCoch + ' écritures cochées') + '</button></div>';
+        if (!rows.length) return h + '<div class="mem-vide">Aucune écriture pour ce journal et cette période.</div>';
+        h += '<div class="card-surface scroll-x" style="padding:0"><table class="fac-tbl" style="min-width:44rem"><thead><tr><th style="width:2rem"></th><th>Numéro</th><th>Date</th><th>Libellé</th><th class="n">Débit</th><th class="n">Crédit</th><th>État</th><th></th></tr></thead><tbody>';
+        var td = 0, tc = 0;
+        rows.forEach(function (b) {
+          td += b.debit; tc += b.credit;
+          h += '<tr><td>' + (b.statut === 'BROUILLARD' && !S.ro ? '<input type="checkbox" data-fac-bcoche="' + b.id + '"' + (S.coch[b.id] ? ' checked' : '') + ' aria-label="Valider ' + esc(b.libelle) + '">' : '') + '</td><td><span class="cpt" style="font-family:var(--font-mono);font-weight:600">' + esc(b.numDef || b.num) + '</span>' + (b.numDef ? '<span class="rac">était ' + esc(b.num) + '</span>' : '') + '</td><td>' + jj(b.date) + '</td>'
+            + '<td>' + esc(b.libelle) + '<span class="rac"><button class="linklike" type="button" data-fac-piece="' + b.id + '">' + IC.eye + ' Voir la pièce ' + esc(b.ref) + '</button></span></td><td class="n">' + fr(b.debit) + '</td><td class="n">' + fr(b.credit) + '</td>'
+            + '<td>' + (b.statut === 'VALIDEE' ? '<span class="dc-badge ok">Validée</span>' : '<span class="dc-badge warn">Brouillard</span>') + '</td><td class="n">' + (b.statut === 'BROUILLARD' && !S.ro ? '<button class="btn btn-ghost btn-sm" type="button" data-fac-abandon="' + b.id + '">Abandonner</button>' : '') + '</td></tr>';
+        });
+        h += '</tbody><tfoot><tr><td></td><td colspan="3">Total du journal sur la période</td><td class="n">' + fr(td) + '</td><td class="n">' + fr(tc) + '</td><td colspan="2"></td></tr></tfoot></table></div>';
+        h += '<div class="fac-cta"><button class="btn btn-ghost" type="button" data-fac-act="retour-lot">' + IC.back + ' Revenir aux factures lues</button><span class="grow"></span><button class="btn btn-ghost" type="button" data-fac-act="suite">Essayer la facture suivante de la CEET</button><button class="btn btn-ghost" type="button" data-fac-act="nouveau">Déposer d’autres factures</button></div>';
+        return h;
+      }
+      function rendre() {
+        if (!root) return;
+        var v = S.vue;
+        root.innerHTML = v === 'depot' ? vueDepot() : v === 'lecture' ? vueLecture() : v === 'relecture' ? vueRelecture() : vueBrouillard();
+        if (v === 'relecture') majDetail();
+      }
+      function rendreDetail() { var s = root.querySelector('[data-fac-slot]'); if (s) { s.innerHTML = detailHtml(); ['[data-fac-sig]', '[data-fac-mark]', '[data-fac-ecr]', '[data-fac-actions]', '[data-fac-st]'].forEach(function (q) { var e = s.querySelector(q); if (e) e._h = null; }); majDetail(); } }
+
+      /* ── Dépôt : de vrais fichiers, contrôlés comme le fera le serveur (taille, format, nombre, doublon par empreinte) ── */
+      function tailleTxt(o) { return o < 1024 * 1024 ? Math.max(1, Math.round(o / 1024)) + ' Ko' : (Math.round(o / 1024 / 1024 * 10) / 10).toString().replace('.', ',') + ' Mo'; }
+      function empreinte(file) {
+        if (!(window.crypto && crypto.subtle && file.arrayBuffer)) return Promise.resolve(file.name + '|' + file.size);
+        return file.arrayBuffer().then(function (b) { return crypto.subtle.digest('SHA-256', b); }).then(function (d) { return Array.prototype.map.call(new Uint8Array(d), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); });
+      }
+      function ajouter(liste) {
+        var fichiers = Array.prototype.slice.call(liste || []); S.erreurs = []; S.refus = null; S.exemple = false;
+        var chaine = Promise.resolve();
+        fichiers.forEach(function (f) {
+          chaine = chaine.then(function () {
+            var ext = (f.name.split('.').pop() || '').toLowerCase();
+            if (['pdf', 'jpg', 'jpeg', 'png'].indexOf(ext) < 0) { S.erreurs.push(f.name + ' : ' + F.refus.FORMAT_NON_PRIS_EN_CHARGE); return; }
+            if (f.size > LIM_OCTETS) { S.erreurs.push(f.name + ' : ' + F.refus.FICHIER_TROP_VOLUMINEUX); return; }
+            if (S.files.length >= LIM_FICHIERS) { S.refus = { code: 'LOT_TROP_GRAND' }; return; }
+            return empreinte(f).then(function (h) {
+              if (S.files.some(function (x) { return x.h === h; })) { S.ignores.push({ nom: f.name }); return; }
+              S.files.push({ nom: f.name, taille: tailleTxt(f.size), file: f, h: h });
+            });
+          });
+        });
+        chaine.then(rendre);
+      }
+      function voirFichier(f) {
+        if (apUrl) URL.revokeObjectURL(apUrl);
+        apUrl = URL.createObjectURL(f.file);
+        var ext = (f.nom.split('.').pop() || '').toLowerCase();
+        dialogue(f.nom, f.taille + ' · déposée à l’instant, rien n’est envoyé', ext === 'pdf' ? '<iframe class="fac-prev" src="' + apUrl + '" title="' + esc(f.nom) + '"></iframe>' : '<img class="fac-prev" src="' + apUrl + '" alt="' + esc(f.nom) + '">', [{ t: 'Fermer' }], true);
+      }
+      function lancerLecture() {
+        S.refus = null;
+        bati(S.sens, false);
+        S.vue = 'lecture'; S.lu = 0; rendre();
+        var total = S.ordre.length, pas = function () {
+          if (S.vue !== 'lecture') return;
+          S.lu = Math.min(total, S.lu + 1); rendre();
+          if (S.lu < total) T = setTimeout(pas, 320); else T = setTimeout(function () { if (S.vue === 'lecture') { S.vue = 'relecture'; rendre(); } }, 600);
+        };
+        T = setTimeout(pas, 400);
+      }
+      function exemple() {
+        S.files = F.pieces.map(function (p) { return { nom: p.nom, taille: 'exemple', file: null, h: p.id }; }); S.ignores = []; S.erreurs = []; S.refus = null; S.exemple = true;
+        if (S.sens === 'VENTE') S.files = F.ventes.map(function (p) { return { nom: p.nom, taille: 'exemple', file: null, h: p.id }; });
+        rendre();
+      }
+
+      /* ── Inscrire au brouillard, valider, abandonner ── */
+      function numProv(j) { var n = S.next++; return j + '-BR-' + ('000000' + n).slice(-6); }
+      function apprendre(w) {
+        var cle = cleDe(w), liste = MEM.ecritures.dossier;
+        var e = liste.filter(function (m) { return m.cle === cle && m.sens === (w.sens === 'VENTE' ? 'VENTE' : 'ACHAT'); })[0];
+        var nv = { cle: cle, nom: w.sens === 'VENTE' ? 'Vos ventes' : w.fournisseur, sens: w.sens === 'VENTE' ? 'VENTE' : 'ACHAT', compte: w.compte, tva: w.traitement, journal: w.journal, tiers: w.sens === 'VENTE' ? null : w.tiersNom, ref: w.num, le: AUJ, par: qui() };
+        if (e) { Object.keys(nv).forEach(function (k) { e[k] = nv[k]; }); w.apprisId = e.id; }
+        else { nv.id = 'm' + (MEM.n++); liste.push(nv); w.apprisId = nv.id; }
+      }
+      function inscrire(ids) {
+        var ok = [], ko = [];
+        ids.forEach(function (id) {
+          var w = W[id], c = w.statut === 'ILLISIBLE' ? null : calc(w);
+          if (w.statut === 'INSCRITE') { ko.push({ nom: w.fournisseur, code: 'DEJA_INSCRITE' }); return; }
+          if (!c || !c.inscriptible) { ko.push({ nom: w.fournisseur || w.nom, code: 'PIECE_NON_INSCRIPTIBLE' }); return; }
+          w.statut = 'INSCRITE'; w.numProv = numProv(w.journal);
+          var o = w.o || {}; var modif = w.compteChange || (w.o && (num(w.ht) !== num(o.ht) || num(w.tva) !== num(o.tva) || num(w.ttc) !== num(o.ttc)));
+          S.brouillards.push({ id: 'n-' + id, num: w.numProv, statut: 'BROUILLARD', date: w.date, libelle: (w.sens === 'VENTE' ? 'Vente' : w.fournisseur) + ' — ' + w.num, ref: w.num, debit: c.td, credit: c.tc, pieceId: id, decision: modif ? 'MODIFIEE' : 'ACCEPTEE', mem: w.apprisId });
+          apprendre(w); S.brouillards[S.brouillards.length - 1].mem = w.apprisId; S.coche[id] = false;
+          ok.push({ nom: w.fournisseur, num: w.numProv });
+        });
+        S.res = { ok: ok, ko: ko };
+        if (ok.length) notify('success', pl(ok.length, 'facture inscrite', 'factures inscrites'), 'Elles sont au brouillard, rien n’est validé.');
+        var s = root.querySelector('[data-fac-res]'); poser(s, resHtml());
+        majListe(); majDetail(); rendreDetail();
+      }
+      function validerCoches() {
+        var rows = S.brouillards.filter(function (b) { return b.statut === 'BROUILLARD' && S.coch[b.id]; });
+        dialogue('Valider ' + pl(rows.length, 'l’écriture', 'les ' + rows.length + ' écritures'), 'Geste définitif', '<p style="margin:0">La numérotation devient <b>définitive</b> et l’écriture <b>ne peut plus être modifiée</b> : pour la corriger, on la contre-passe. Les choix retenus pour ce fournisseur remontent à la mémoire de votre cabinet.</p>', [
+          { t: 'Annuler' }, { t: 'Valider', cls: 'btn-primary', fn: function () {
+            rows.forEach(function (b) {
+              b.statut = 'VALIDEE'; b.numDef = b.num.indexOf('VTE') === 0 ? 'VTE-' : 'ACH-'; b.numDef += ('000000' + (S.defn++)).slice(-6); S.coch[b.id] = false;
+              var m = b.mem && memEntree(b.mem);
+              if (m) { var cle = m.cle, c = MEM.ecritures.cabinet.filter(function (x) { return x.cle === cle && x.sens === m.sens; })[0]; var cp = { cle: m.cle, nom: m.nom, sens: m.sens, compte: m.compte, tva: m.tva, journal: m.journal, ref: m.ref, le: AUJ, par: qui() };
+                if (c) Object.keys(cp).forEach(function (k) { c[k] = cp[k]; }); else { cp.id = 'c' + (MEM.n++); MEM.ecritures.cabinet.push(cp); } }
+            });
+            notify('success', pl(rows.length, 'écriture validée', 'écritures validées'), 'Numéros définitifs attribués.'); rendre();
+          } }]);
+      }
+      function abandonner(id) {
+        var b = S.brouillards.filter(function (x) { return x.id === id; })[0]; if (!b) return;
+        dialogue('Abandonner ' + b.num, b.libelle, '<p style="margin:0">L’écriture disparaît du brouillard.' + (b.pieceId ? ' La facture redevient à inscrire dans son lot, et <b>le choix qu’elle avait fait retenir est oublié</b>.' : '') + ' Aucun numéro définitif n’est perdu.</p>', [
+          { t: 'Garder' }, { t: 'Abandonner l’écriture', cls: 'btn-primary', fn: function () {
+            S.brouillards = S.brouillards.filter(function (x) { return x.id !== id; });
+            if (b.pieceId && W[b.pieceId]) { var w = W[b.pieceId]; w.statut = 'LUE'; delete w.numProv; S.coche[b.pieceId] = true;
+              if (b.mem) { ['dossier'].forEach(function (n) { MEM.ecritures[n] = MEM.ecritures[n].filter(function (m) { return m.id !== b.mem; }); }); }
+              MEM.actes.unshift({ le: AUJ, par: qui(), texte: 'Mémoire oubliée : ' + w.fournisseur + ' (écritures, dossier), brouillard abandonné.', motif: 'ABANDON' }); }
+            notify('success', 'Écriture abandonnée', 'La facture est de nouveau à inscrire.'); rendre();
+          } }]);
+      }
+      function suiteCeet() {
+        var m = MEM.ecritures.dossier.filter(function (x) { return x.cle === 'NIF 1000234567'; })[0];
+        W = {}; S.ordre = ['s1']; S.coche = { s1: true }; S.sel = 's1'; S.res = null; S.suite = true; S.sens = 'ACHAT';
+        W.s1 = { id: 's1', nom: 'CEET-FA-0144.pdf', sens: 'ACHAT', statut: 'LUE', fournisseur: 'CEET', nif: '1000234567', num: 'FA-0144', date: '2026-04-20', ht: 85000, tva: 15300, ttc: 100300, compte: m ? m.compte : '', initial: m ? m.compte : '',
+          source: m ? { origine: 'MEMOIRE_DOSSIER', pieceRef: m.ref, choisiLe: m.le, choisiPar: m.par } : null, memId: m ? m.id : null, tiers: 'F-CEET', tiersNom: 'CEET', aCreer: null, traitement: m && m.tva === 'NON_RECUPERABLE' ? 'NON_RECUPERABLE' : 'RECUPERABLE', journal: 'ACH', doublon: false, ecarte: '', vu: false, compteChange: false, o: { ht: 85000, tva: 15300, ttc: 100300 } };
+        S.vue = 'relecture'; rendre();
+      }
+
+      /* ── Événements ── */
+      /* la pièce d'un champ est celle du panneau qui le porte, jamais « la pièce sélectionnée » : un champ qu'on quitte en changeant de pièce valide la sienne */
+      function pieceDe(el) { var d = el.closest && el.closest('[data-fac-detail]'); return d ? W[d.dataset.facId] : null; }
+      if (root) {
+        root.addEventListener('click', function (ev) {
+          var t = ev.target;
+          var b = t.closest('[data-fac-sens]'); if (b) { S.sens = b.dataset.facSens; S.exemple = false; if (S.exemple === false && S.files.length && !S.files.some(function (f) { return f.file; })) S.files = []; rendre(); return; }
+          if ((b = t.closest('[data-fac-voirf]'))) { voirFichier(S.files[+b.dataset.facVoirf]); return; }
+          if ((b = t.closest('[data-fac-retirer]'))) { S.files.splice(+b.dataset.facRetirer, 1); rendre(); return; }
+          if ((b = t.closest('[data-fac-fj]'))) { S.fj = b.dataset.facFj; rendre(); return; }
+          if ((b = t.closest('[data-fac-fp]'))) { S.fp = b.dataset.facFp; rendre(); return; }
+          if ((b = t.closest('[data-fac-abandon]'))) { abandonner(b.dataset.facAbandon); return; }
+          if ((b = t.closest('[data-fac-piece]'))) {
+            var bb = S.brouillards.filter(function (x) { return x.id === b.dataset.facPiece; })[0]; var w = bb && bb.pieceId ? W[bb.pieceId] : null;
+            var fake = w || { fournisseur: bb.libelle.split(' — ')[0], num: bb.ref, date: bb.date, ht: Math.round(bb.debit / 1.18), tva: bb.debit - Math.round(bb.debit / 1.18), ttc: bb.debit, nif: null };
+            dialogue('Pièce ' + bb.ref, 'Liée à l’écriture ' + (bb.numDef || bb.num), paperHtml(fake), [{ t: 'Fermer' }]); return;
+          }
+          if ((b = t.closest('[data-fac-sel]'))) { if (t.closest('input')) return; S.sel = b.dataset.facSel; if (S.vue === 'relecture') { var l = root.querySelector('[data-fac-list]'); if (l) poser(l, listeHtml()); rendreDetail(); } return; }
+          b = t.closest('[data-fac-act]'); if (!b) return;
+          var a = b.dataset.facAct, w2 = W[S.sel];
+          if (a === 'exemple') exemple();
+          else if (a === 'lire') lancerLecture();
+          else if (a === 'relire') { if (T) { clearTimeout(T); T = null; } S.vue = 'relecture'; rendre(); }
+          else if (a === 'cahiers') { var n = document.querySelector('.atl-tab[data-atl-tab="cahiers"]'); if (n) n.click(); }
+          else if (a === 'fermer-refus') { S.refus = null; rendre(); }
+          else if (a === 'creer-tiers') { w2.tiers = 'F-' + w2.aCreer.nom.split(' ')[0]; w2.tiersNom = w2.aCreer.nom; w2.aCreer = null; notify('success', 'Fournisseur créé', w2.tiersNom + ' est ajouté aux fournisseurs du dossier.'); rendreDetail(); }
+          else if (a === 'garder') { w2.vu = true; majDetail(); }
+          else if (a === 'voir-doublon') { S.fj = 'ACH'; S.fp = 'ALL'; var bd = S.brouillards.filter(function (x) { return x.num === (w2.doublonDet || {}).numeroProvisoire; })[0]; dialogue('Écriture déjà au brouillard', bd ? bd.num + ' · ' + jj(bd.date) : '', bd ? '<table class="fac-tbl"><tbody><tr><td>' + esc(bd.libelle) + '</td><td class="n">' + fr(bd.debit) + '</td></tr></tbody></table><p class="fin-sub" style="margin:.6rem 0 0">Même fournisseur, même numéro de facture, même montant.</p>' : '', [{ t: 'Fermer' }]); }
+          else if (a === 'inscrire') { var ids = S.ordre.filter(function (id) { var g = W[id].statut === 'ILLISIBLE' ? 'bloc' : groupe(W[id]); return S.coche[id] && (g === 'pret' || g === 'voir'); }); inscrire(ids); }
+          else if (a === 'inscrire-une') inscrire([S.sel]);
+          else if (a === 'brouillard') { S.vue = 'brouillard'; var nw = S.brouillards.filter(function (x) { return x.statut === 'BROUILLARD' && x.pieceId; }); S.coch = {}; nw.forEach(function (x) { S.coch[x.id] = true; }); rendre(); }
+          else if (a === 'retour-lot') { S.vue = Object.keys(W).length ? 'relecture' : 'depot'; rendre(); }
+          else if (a === 'tout-cocher') { var rows = lignesBrouillard().filter(function (x) { return x.statut === 'BROUILLARD'; }); var tous = rows.every(function (x) { return S.coch[x.id]; }); rows.forEach(function (x) { S.coch[x.id] = !tous; }); rendre(); }
+          else if (a === 'valider') validerCoches();
+          else if (a === 'suite') suiteCeet();
+          else if (a === 'nouveau') { var memo = S.brouillards, nx = S.next, dn = S.defn; var m0 = MEM; initFac(); S.brouillards = memo; S.next = nx; S.defn = dn; MEM = m0; rendre(); }
+          else if (a === 'mes-choix') ouvrirMemoireDialogue();
+        });
+        root.addEventListener('keydown', function (ev) { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('[data-fac-sel]')) { ev.preventDefault(); ev.target.click(); } });
+        root.addEventListener('change', function (ev) {
+          var t = ev.target;
+          if (t.matches('[data-fac-up]')) { ajouter(t.files); t.value = ''; return; }
+          if (t.matches('[data-fac-redepot]')) { var f = t.files && t.files[0]; if (f) { notify('success', 'Photo reçue', f.name + ' sera lue dans un nouveau lot.'); } t.value = ''; return; }
+          if (t.matches('[data-fac-avoir]')) { S.avoir = t.checked; return; }
+          if (t.matches('[data-fac-devise]')) { S.devise = t.value; return; }
+          var c = t.closest('[data-fac-coche]'); if (c) { S.coche[c.dataset.facCoche] = t.checked; majListe(); return; }
+          c = t.closest('[data-fac-bcoche]'); if (c) { S.coch[c.dataset.facBcoche] = t.checked; rendre(); return; }
+          var f2 = t.dataset.facF; if (!f2) return;
+          var w = pieceDe(t); if (!w) return;
+          if (f2 === 'compte') {
+            var v = t.value.trim();
+            if (v && !compteOk(v)) { notify('error', 'Compte inconnu', 'Le compte ' + v + ' n’est pas au plan de ce dossier.'); w.compte = ''; }
+            else { w.compte = v; w.compteChange = v !== '' && v !== w.initial; if (v === w.initial) w.compteChange = false; }
+            t.value = w.compte;
+          } else if (f2 === 'tiers') { w.tiers = t.value; var op = t.options[t.selectedIndex]; w.tiersNom = t.value ? op.textContent : ''; }
+          else if (f2 === 'journal') w.journal = t.value;
+          else if (f2 === 'tvanr') w.traitement = t.checked ? 'NON_RECUPERABLE' : 'RECUPERABLE';
+          majDetail();
+        });
+        root.addEventListener('input', function (ev) {
+          var t = ev.target, f2 = t.dataset && t.dataset.facF; if (!f2) return; var w = pieceDe(t); if (!w) return;
+          if (['ht', 'tva', 'ttc', 'date', 'num'].indexOf(f2) < 0) return;
+          w[f2] = t.value; majDetail();
+        });
+        ['dragenter', 'dragover'].forEach(function (n) { root.addEventListener(n, function (ev) { var z = ev.target.closest && ev.target.closest('[data-fac-zone]'); if (!z) return; ev.preventDefault(); z.classList.add('drop'); }); });
+        root.addEventListener('dragleave', function (ev) { var z = ev.target.closest && ev.target.closest('[data-fac-zone]'); if (z && !z.contains(ev.relatedTarget)) z.classList.remove('drop'); });
+        root.addEventListener('drop', function (ev) { var z = ev.target.closest && ev.target.closest('[data-fac-zone]'); if (!z) return; ev.preventDefault(); z.classList.remove('drop'); if (ev.dataTransfer && ev.dataTransfer.files.length && !S.ro) ajouter(ev.dataTransfer.files); });
+      }
+      var dl = document.createElement('datalist'); dl.id = 'facComptes'; dl.innerHTML = optsComptes(); document.body.appendChild(dl);
+
+      /* ═══════════════ FE-150 · Gérer la mémoire (par dossier, par cabinet), factures et cahiers ═══════════════ */
+      var MS = { dos: { tab: 'ecritures' }, cab: { tab: 'ecritures' } };
+      function sensTxt(s) { return s === 'VENTE' ? 'Ventes' : 'Achats'; }
+      function tvaTxt(t) { return t === 'RECUPERABLE' ? 'TVA récupérable' : t === 'NON_RECUPERABLE' ? 'TVA non récupérable' : 'TVA facturée'; }
+      function memTable(ctx) {
+        var niveau = ctx === 'dos' ? 'dossier' : 'cabinet', tab = MS[ctx].tab, h = '';
+        var liste = tab === 'ecritures' ? MEM.ecritures[niveau] : MEM.cahiers[niveau];
+        var peut = ctx === 'dos' ? true : estAdmin();
+        if (!liste.length) return '<div class="mem-vide">' + (ctx === 'dos' ? 'Rien n’est encore retenu pour ce client. Chaque facture inscrite et chaque cahier appliqué apprend.' : 'Rien n’est encore retenu pour votre cabinet. Un choix y remonte quand l’écriture est validée.') + '</div>';
+        h += '<div class="scroll-x card-surface" style="padding:0"><table class="mem-tbl"><thead><tr><th>Quand on reconnaît…</th><th>' + (tab === 'ecritures' ? 'Prospera propose' : 'Prospera range dans') + '</th><th>D’où ça vient</th><th></th></tr></thead><tbody>';
+        liste.forEach(function (m) {
+          if (tab === 'ecritures') h += '<tr><td><b>' + esc(m.nom) + '</b><small>' + esc(m.cle) + ' · ' + sensTxt(m.sens) + '</small></td><td><span class="cpt">' + esc(m.compte) + '</span><small>' + esc(libCompte(m.compte)) + ' · ' + tvaTxt(m.tva) + ' · journal ' + esc(m.journal) + (m.tiers ? ' · tiers ' + esc(m.tiers) : '') + '</small></td><td>Facture ' + esc(m.ref) + '<small>le ' + jjmmaa(m.le) + ' · ' + esc(m.par) + '</small></td>';
+          else h += '<tr><td><b>' + esc(m.nom) + '</b><small>' + esc(m.cle) + ' · cahier de ' + (m.cahier === 'DEPENSES' ? 'dépenses' : 'recettes') + '</small></td><td><b>' + esc(m.cahier === 'DEPENSES' ? m.choix : 'Ventes de marchandises') + '</b><small>' + (m.compte ? 'compte ' + esc(m.compte) : (niveau === 'cabinet' ? 'catégorie retrouvée par son libellé dans chaque dossier' : '')) + '</small></td><td>' + esc(m.ref) + '<small>le ' + jjmmaa(m.le) + ' · ' + esc(m.par) + '</small></td>';
+          h += '<td style="text-align:right"><button class="btn btn-ghost btn-sm" type="button" data-mem-oubli="' + ctx + ':' + m.id + '"' + (peut ? '' : ' disabled title="Réservé à l’administrateur du cabinet"') + '>Oublier</button></td></tr>';
+        });
+        h += '</tbody></table></div>';
+        if (!peut) h += '<p class="mem-lock" style="margin:0">' + IC.lock + 'Seul l’administrateur du cabinet peut oublier un choix du cabinet : il sert tous les dossiers.</p>';
+        return h;
+      }
+      function memHtml(ctx) {
+        var tab = MS[ctx].tab, dos = ctx === 'dos';
+        var h = '<div class="mem-wrap"><div class="mem-top"><div><h3>' + (dos ? 'Choix mémorisés pour ' + esc(F.dossier.nom) : 'Choix mémorisés du cabinet') + '</h3><p>' + (dos ? 'Ce que Prospera reprend d’office quand une facture ou une ligne de cahier de ce client ressemble à une précédente. Vous gardez ou changez toujours le choix proposé.' : 'Ce que votre cabinet a validé sur ses dossiers de même référentiel : il sert de repli quand le dossier n’a rien retenu.') + '</p></div>'
+          + '<span class="mem-lock">' + IC.lock + 'Réservé à votre cabinet : un autre cabinet, même s’il suit ce client, ne voit rien de tout cela.</span></div>'
+          + '<div class="fac-filtre"><div class="seg" role="group" aria-label="Quoi"><button type="button" data-mem-tab="' + ctx + ':ecritures" aria-pressed="' + (tab === 'ecritures') + '">Factures et écritures</button><button type="button" data-mem-tab="' + ctx + ':cahiers" aria-pressed="' + (tab === 'cahiers') + '">Cahiers</button></div></div>'
+          + memTable(ctx);
+        h += '<details class="mem-actes"><summary>Ce qui a été oublié (' + MEM.actes.length + ')</summary><ul>' + MEM.actes.map(function (a) { return '<li>' + jjmmaa(a.le) + ' · ' + esc(a.par) + ' : ' + esc(a.texte) + '</li>'; }).join('') + '</ul></details></div>';
+        return h;
+      }
+      function rendMem() { document.querySelectorAll('[data-mem-root]').forEach(function (el) { el.innerHTML = memHtml(el.dataset.memRoot); }); }
+      function ouvrirMemoireDialogue() { dialogue('Mes choix pour ce client', F.dossier.nom, '<div data-mem-root="dos">' + memHtml('dos') + '</div>', [{ t: 'Fermer' }], true); }
+      function oublier(ctx, id) {
+        var niveau = ctx === 'dos' ? 'dossier' : 'cabinet', tab = MS[ctx].tab, liste = (tab === 'ecritures' ? MEM.ecritures : MEM.cahiers)[niveau];
+        var m = liste.filter(function (x) { return x.id === id; })[0]; if (!m) return;
+        dialogue('Oublier ce choix ?', m.nom, '<p style="margin:0">La prochaine fois, <b>' + esc(m.nom) + '</b> ne sera plus rangé d’office : ' + (tab === 'ecritures' ? 'il faudra choisir le compte.' : 'il faudra choisir la catégorie.') + ' Les écritures déjà passées ne changent pas. L’oubli est consigné dans le journal du cabinet.</p>', [
+          { t: 'Garder' }, { t: 'Oublier', cls: 'btn-primary', fn: function () {
+            if (tab === 'ecritures') MEM.ecritures[niveau] = liste.filter(function (x) { return x.id !== id; }); else MEM.cahiers[niveau] = liste.filter(function (x) { return x.id !== id; });
+            MEM.actes.unshift({ le: AUJ, par: qui(), texte: 'Mémoire oubliée : ' + m.nom + ' (' + (tab === 'ecritures' ? 'écritures' : 'cahiers') + ', ' + (ctx === 'dos' ? 'dossier' : 'cabinet') + ').', motif: 'GESTE' });
+            majMemoire(); rendMem(); if (root && S.vue === 'relecture') { majListe(); rendreDetail(); }
+            cahMajMarques();
+            notify('success', 'Choix oublié', m.nom + ' ne sera plus proposé d’office.');
+          } }]);
+      }
+      document.addEventListener('click', function (ev) {
+        var b = ev.target.closest && ev.target.closest('[data-mem-tab]'); if (b) { var p = b.dataset.memTab.split(':'); MS[p[0]].tab = p[1]; rendMem(); return; }
+        b = ev.target.closest && ev.target.closest('[data-mem-oubli]'); if (b) { var q = b.dataset.memOubli.split(':'); oublier(q[0], q[1]); return; }
+        b = ev.target.closest && ev.target.closest('[data-mem-goto]'); if (b) { ouvrirMemoireDialogue(); }
+      });
+
+      /* ── Cahiers : la marque « Repris de vos choix » dans la relecture (STORY-1099, champ `suggestion`) ── */
+      function cahMajMarques() {
+        document.querySelectorAll('[data-cah-rep]').forEach(function (el) {
+          var id = el.dataset.cahRep, niveau = el.dataset.cahNiveau, liste = MEM.cahiers[niveau === 'cab' ? 'cabinet' : 'dossier'];
+          var m = liste.filter(function (x) { return x.id === id; })[0];
+          if (!m) { el.innerHTML = ''; var cell = el.closest('td'); var sel = cell && cell.querySelector('select'); if (sel) { sel.selectedIndex = 0; } return; }
+          var pre = m.cahier === 'RECETTES' ? 'Compte de produit ' + esc(m.compte) + ' : ' : '';
+          el.innerHTML = niveau === 'cab' ? '<span class="rep cab">' + IC.mem + pre + 'repris du choix du cabinet chez un autre client, le ' + jj(m.le) + '</span>' : '<span class="rep dos">' + IC.mem + pre + 'repris de votre saisie du ' + jj(m.le) + ', ' + esc(m.ref) + '</span>';
+        });
+      }
+
+      /* ═══════════════ FE-141 · L'analyse financière : on restitue, on ne recalcule jamais ═══════════════ */
+      var aroot = document.querySelector('[data-ana-root]');
+      var AS = { mode: 'normal', repere: true, ouvert: {} };
+      var FAM = [['STRUCTURE', 'Structure financière', 'Le client est-il solide ?'], ['LIQUIDITE', 'Liquidité', 'Peut-il payer ce qu’il doit à court terme ?'], ['RENTABILITE', 'Rentabilité', 'Gagne-t-il de l’argent ?'], ['EXPLOITATION', 'Exploitation', 'Comment tourne son activité ?']];
+      var VERDICT = { TRES_BON: 'Très bon', BON: 'Bon', ACCEPTABLE: 'Acceptable', RISQUE: 'Risqué' };
+      var MOTIFS = { DENOMINATEUR_NUL: 'rien à diviser', DENOMINATEUR_NEGATIF: 'le dénominateur est négatif', SIG_NON_RECONCILIES: 'les soldes intermédiaires ne retombent pas sur le résultat', COLONNE_N1_INCOMPLETE: 'le comparatif de l’an dernier est incomplet', MARQUEUR_ABSENT: 'le référentiel ne désigne pas un poste nécessaire', DUREE_EXERCICE_INCONNUE: 'la durée de l’exercice est inconnue', RESULTAT_NON_AFFECTE: 'le résultat figure deux fois', POSTE_NON_MESURE: 'un poste n’est pas mesuré' };
+      function valTxt(ind, v) {
+        if (v == null) return '—';
+        var u = ind.unite; if (u === 'POURCENTAGE') return dec(v.toFixed(2)) + ' %'; if (u === 'MONTANT') return fr(v) + ' F'; if (u === 'JOURS') return dec(v.toFixed(2)) + ' j'; if (u === 'ANNEES') return dec(v.toFixed(2)) + ' an' + (v >= 2 ? 's' : ''); return dec(v.toFixed(2));
+      }
+      function incalc(col, ind) {
+        var m = col.motif; if (AS.mode === 'incalc' && ['TAUX_EBE', 'TAUX_VALEUR_AJOUTEE', 'CAPACITE_REMBOURSEMENT', 'DSO'].indexOf(ind.code) >= 0) return m || (ind.code === 'DSO' ? 'DENOMINATEUR_NUL' : 'SIG_NON_RECONCILIES');
+        return null;
+      }
+      function chip(col, ind) {
+        var motif = incalc(col, ind);
+        if (motif) return '<span class="ana-v INCALC" title="' + esc(MOTIFS[motif] || motif) + '">Incalculable</span>';
+        if (!AS.repere || !ind.seuil) return '<span class="ana-v AUCUN">Aucun repère</span>';
+        return '<span class="ana-v ' + col.verdict + '">' + VERDICT[col.verdict] + '</span>';
+      }
+      function cell(col, ind) { var m = incalc(col, ind); return m ? '<span title="' + esc(MOTIFS[m] || m) + '" style="color:var(--muted-fg)">incalculable</span>' : valTxt(ind, col.valeur); }
+      function detailAna(ind) {
+        var comp = A.composition[ind.code] || [], h = '<div class="ana-det"><div><b>Comment c’est calculé</b><div class="f">' + esc(ind.formule) + '</div></div>';
+        var m = incalc(ind.n, ind);
+        if (m) h += '<div class="fin-notice">' + IC.info + '<span><b>Incalculable cette année</b> : ' + esc(MOTIFS[m] || m) + '. Prospera préfère ne rien afficher plutôt qu’un zéro trompeur. <span class="code" data-note>' + esc(m) + '</span></span></div>';
+        if (ind.code === 'CYCLE_EXPLOITATION') h += '<table><thead><tr><th></th><th class="n">2025</th><th class="n">2024</th></tr></thead><tbody>' + ['DIO', 'DSO', 'DPO'].map(function (c, i) { var x = A.indicateurs.filter(function (z) { return z.code === c; })[0]; return '<tr><td>' + (i === 2 ? 'moins ' : i ? 'plus ' : '') + esc(x.libelle) + '</td><td class="n">' + valTxt(x, x.n.valeur) + '</td><td class="n">' + valTxt(x, x.n1.valeur) + '</td></tr>'; }).join('') + '</tbody></table>';
+        else if (comp.length) h += '<table><thead><tr><th>Ce qui entre dans le calcul</th><th class="n">2025</th><th class="n">2024</th></tr></thead><tbody>' + comp.map(function (c) { return '<tr><td>' + (c[0] === 'D' ? '<span class="f">÷</span> ' : '') + esc(c[1]) + '</td><td class="n">' + fr(c[2][0]) + '</td><td class="n">' + fr(c[2][1]) + '</td></tr>'; }).join('') + '</tbody></table>';
+        if (ind.unite === 'JOURS' && ind.code !== 'CYCLE_EXPLOITATION') h += '<div class="f">Délai en jours sur une année de ' + A.jours + ' jours, exercice de 12 mois.</div>';
+        if (AS.repere && ind.seuil) {
+          h += '<div><b>Le repère appliqué</b> <span class="dc-badge soon">exemple</span><div class="ana-bornes" style="margin-top:.3rem">' + ind.seuil.bornes.map(function (b) { var t = b.min == null ? 'moins de ' + dec(b.max) : b.max == null ? dec(b.min) + ' et plus' : 'de ' + dec(b.min) + ' à moins de ' + dec(b.max); return '<span class="ana-v ' + b.niveau + '">' + VERDICT[b.niveau] + ' : ' + t + '</span>'; }).join('') + '</div><div class="f" style="margin-top:.3rem">Repères généraux (secteur non précisé). ' + esc(ind.seuil.source) + '</div></div>';
+        } else if (AS.repere) h += '<div class="f">Le référentiel ne déclare pas de repère pour cet indicateur : la valeur est donnée sans jugement.</div>';
+        return h + '</div>';
+      }
+      function lignesAna(fam) {
+        return A.indicateurs.filter(function (i) { return i.famille === fam; }).map(function (ind) {
+          var ouv = !!AS.ouvert[ind.code];
+          return '<tr class="ana-r' + (ouv ? ' open' : '') + '" data-ana-ouvre="' + ind.code + '"><td><span class="lb">' + IC.chev + '<button type="button" aria-expanded="' + ouv + '">' + esc(ind.libelle) + '</button></span></td><td class="n">' + cell(ind.n, ind) + '</td><td class="n n1">' + cell(ind.n1, ind) + '</td><td>' + chip(ind.n, ind) + '</td></tr>' + (ouv ? '<tr><td class="det" colspan="4">' + detailAna(ind) + '</td></tr>' : '');
+        }).join('');
+      }
+      function detteHtml() {
+        var D = A.dette;
+        var h = '<div class="ana-fam ana-dette"><h4>Si le prêt est accordé <span class="dc-badge info">' + esc(D.projet) + '</span><small>Prévisionnel du dossier de financement, sur les trois prochains exercices.</small></h4><div class="scroll-x"><table class="ana-tbl"><thead><tr><th>Indicateur de dette</th>' + D.annees.map(function (a) { return '<th class="n">' + a + '</th>'; }).join('') + '</tr></thead><tbody>';
+        D.indicateurs.forEach(function (ind) {
+          var key = 'd-' + ind.code, ouv = !!AS.ouvert[key];
+          h += '<tr class="ana-r' + (ouv ? ' open' : '') + '" data-ana-ouvre="' + key + '"><td><span class="lb">' + IC.chev + '<button type="button" aria-expanded="' + ouv + '">' + esc(ind.libelle) + '</button></span></td>' + ind.valeurs.map(function (v, i) {
+            var txt = ind.unite === 'POURCENTAGE' ? dec(v.toFixed(1)) + ' %' : ind.unite === 'MONTANT' ? fr(v) + ' F' : dec(v.toFixed(2));
+            return '<td class="n">' + txt + '<div style="margin-top:.2rem"><span class="ana-v ' + (ind.verdicts[i] === 'Aucune marge' ? 'RISQUE' : ind.verdicts[i] === 'Solide' ? 'TRES_BON' : ind.verdicts[i] === 'Marge' ? 'BON' : 'BON') + '">' + esc(ind.verdicts[i]) + '</span></div></td>'; }).join('') + '</tr>';
+          if (ouv) h += '<tr><td class="det" colspan="4"><div class="ana-det"><div><b>Comment c’est calculé</b><div class="f">' + esc(ind.formule) + '</div></div><div class="f">Les repères de la banque choisie s’afficheront ici dès qu’ils seront connus (STORY-1085).</div></div></td></tr>';
+        });
+        return h + '</tbody></table></div></div>';
+      }
+      function rendAna() {
+        if (!aroot) return;
+        if (AS.mode === 'na') { aroot.innerHTML = '<div class="ana-na"><h4>L’analyse financière n’est pas disponible pour ce dossier</h4><p>Elle est écrite pour le système normal (SYSCOHADA révisé). Ce dossier est tenu en <b>microfinance (SFD-BCEAO)</b> : ses ratios sont ceux de la réglementation prudentielle, pas ceux-ci. <span class="code" data-note>statut NON_APPLICABLE · sfd-bceao</span></p></div>'; return; }
+        var h = '<div class="ana-wrap"><div class="ana-top"><div><h3>Analyse financière · ' + esc(F.dossier.nom) + '</h3><p>Exercice 2025 comparé à 2024. Chaque chiffre est celui du serveur ; ouvrez une ligne pour voir comment il est fait.</p></div>'
+          + '<div class="ana-legend"><span class="ana-v TRES_BON">Très bon</span><span class="ana-v BON">Bon</span><span class="ana-v ACCEPTABLE">Acceptable</span><span class="ana-v RISQUE">Risqué</span><span class="ana-v AUCUN">Aucun repère</span></div></div>';
+        if (AS.repere) h += '<div class="fin-notice">' + IC.info + '<span><b>Repères d’exemple.</b> Le référentiel publié ne déclare pas encore de repères par secteur : seuls trois indicateurs sont jugés ici, à titre d’exemple. Les autres sont donnés sans jugement.</span></div>';
+        else h += '<div class="fin-notice">' + IC.info + '<span>Le référentiel ne déclare aucun repère pour l’instant : les valeurs sont données sans jugement.</span></div>';
+        FAM.forEach(function (f) { h += '<div class="ana-fam"><h4>' + f[1] + '<small>' + f[2] + '</small></h4><div class="scroll-x"><table class="ana-tbl"><thead><tr><th>Indicateur</th><th class="n">2025</th><th class="n">2024</th><th>Verdict</th></tr></thead><tbody>' + lignesAna(f[0]) + '</tbody></table></div></div>'; });
+        h += detteHtml() + '</div>';
+        aroot.innerHTML = h;
+      }
+      if (aroot && A) {
+        rendAna();
+        aroot.addEventListener('click', function (ev) { var r = ev.target.closest('[data-ana-ouvre]'); if (!r) return; var k = r.dataset.anaOuvre; AS.ouvert[k] = !AS.ouvert[k]; rendAna(); });
+        document.addEventListener('click', function (ev) {
+          var b = ev.target.closest && ev.target.closest('[data-ana-bench]'); if (!b) return;
+          var k = b.dataset.anaBench; b.parentNode.querySelectorAll('[data-ana-bench]').forEach(function (x) { x.setAttribute('aria-selected', String(x === b)); });
+          AS.mode = k === 'incalc' ? 'incalc' : k === 'na' ? 'na' : 'normal'; AS.repere = k !== 'aucun'; AS.ouvert = k === 'detail' ? { 'TAUX_EBE': false, 'POIDS_CAPITAUX_PROPRES': true, 'DSO': true, 'CYCLE_EXPLOITATION': true } : {}; rendAna();
+          var t = document.querySelector('[data-bil-tab="analyse"]'); if (t) t.click();
+        });
+      }
+
+      /* ── Banc d'essai FE-149 / FE-150 (notes de conception) ── */
+      document.addEventListener('click', function (ev) {
+        var b = ev.target.closest && ev.target.closest('[data-fac-bench]'); if (!b) return;
+        var k = b.dataset.facBench; b.parentNode.querySelectorAll('[data-fac-bench]').forEach(function (x) { x.setAttribute('aria-selected', String(x === b)); });
+        initFac(); fermerAp(); rendre(); rendMem();
+        var tab = document.querySelector('.atl-tab[data-atl-tab="factures"]'); if (tab) tab.click();
+        if (k === 'relecture') { bati('ACHAT', false); S.vue = 'relecture'; }
+        else if (k === 'vente') { S.sens = 'VENTE'; bati('VENTE', false); S.vue = 'relecture'; }
+        else if (k === 'lecture') { lancerLecture(); return; }
+        else if (k === 'brouillard') { bati('ACHAT', false); ['p1', 'p2', 'p3'].forEach(function (id) { S.coche[id] = true; }); S.vue = 'relecture'; rendre(); inscrire(['p1', 'p2', 'p3']); S.vue = 'brouillard'; S.coch = {}; S.brouillards.forEach(function (x) { if (x.pieceId) S.coch[x.id] = true; }); }
+        else if (k === 'smt') { S.smt = true; S.refus = { code: 'FACTURES_RESERVEES_AU_SYSTEME_NORMAL' }; }
+        else if (k === 'clos') { S.refus = { code: 'EXERCICE_CLOS' }; }
+        else if (k === 'indispo') { bati('ACHAT', false); S.vue = 'relecture'; S.refus = { code: 'DOCUMENTS_INDISPONIBLES' }; }
+        else if (k === 'lecture-seule') { S.ro = true; bati('ACHAT', false); S.vue = 'relecture'; }
+        else if (k === 'suite') { suiteCeet(); return; }
+        else if (k === 'mem-dossier' || k === 'mem-cabinet') { var n = document.querySelector(k === 'mem-cabinet' ? '.nav-item[data-page="memoire"]' : '.nav-item[data-page="dossiers"]'); if (n) n.click(); if (k === 'mem-dossier') { var tt = document.querySelector('[data-dc-tab="memoire"]'); var tous = document.querySelector('[data-dc-scope="all"]'); if (tous && tous.offsetParent) tous.click(); var carte = [].filter.call(document.querySelectorAll('.dc-card[data-dc-go="open"]'), function (c) { return /Ets Kossi Distribution/.test(c.textContent); })[0]; if (carte) carte.click(); tt = document.querySelector('[data-dc-tab="memoire"]'); if (tt) tt.click(); } return; }
+        rendre();
+      });
+      document.addEventListener('click', function (ev) {
+        var g = ev.target.closest && ev.target.closest('[data-plan-goto]'); if (g && g.dataset.planGoto === 'memoire') { /* géré par la navigation commune */ }
+      });
+      window.__fac = function () { return { S: S, W: W, MEM: MEM }; };
+      initFac(); rendre(); rendMem(); cahMajMarques();
+      var roleSeg = document.getElementById('roleSeg'); if (roleSeg) roleSeg.addEventListener('click', function () { setTimeout(function () { rendMem(); if (S && S.vue === 'brouillard') rendre(); }, 0); });
     })();
 
   })();

@@ -708,6 +708,27 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   l'annuaire, du menu ⋮ et de l'écran Essais. PR #34 fusionnée. Code : AP-55 après STORY-1080, AP-57 après 1112, AP-59 après
   1114, toutes trois du groupe B.
 
+- **2026-11-24 — Maquettes du cabinet FE-149, FE-150, FE-141 publiées, EN ATTENTE DE VALIDATION.** Prototype cabinet
+  (`prototypes/prospera-prototype.html`), branche `lot6-maquettes-cabinet`. L'Artifact cabinet `9iBJj5jTd1552uNPpZDJiL` est
+  illisible depuis ce compte (bascule de compte) : **nouvelle URL `https://claude.ai/artifact/FEn4wbM4pYPJYJ3uqLoBgp`**, version 1.
+  - FE-149 : Atelier › « Factures » : déposer (vrai téléversement), lecture, relecture avec un seul bouton « Inscrire les 3 factures
+    cochées », brouillard et journaux (valider, abandonner), renvoi des dossiers SMT vers les cahiers, refus nommés.
+  - FE-150 : la marque « Repris de vos choix » (mémoire du dossier, du cabinet, compte par défaut, modifié, écarté) dans la relecture
+    des factures et des cahiers ; « Choix mémorisés » en onglet du dossier et page du profil du cabinet, oublier avec confirmation.
+  - FE-141 : Bilan › « Analyse » : 19 indicateurs calculés sur la liasse du prototype (assertés), lignes qui s'ouvrent, repères,
+    incalculables, non applicable, et bloc des indicateurs de dette. Fiche FE-141 écrite.
+  - **Écart backend à décider (FE-141)** : les paquets publiés `syscohada-revise@2.2` et `@2.3` ne déclarent AUCUN seuil
+    (STORY-553 contenant seul) : aujourd'hui tous les verdicts sont « aucun repère déclaré ». La maquette dessine le verdict avec
+    trois repères d'exemple, marqués. Peupler les repères est une story de sourcing (non écrite).
+- Questions posées à l'utilisateur pour la validation, avec la réponse par défaut :
+  1. FE-141 : montrer les verdicts avec des repères d'exemple (marqués) tant que le référentiel n'en déclare aucun ? Défaut : oui ; le banc d'essai montre l'état réel.
+  2. FE-149 : « Inscrire les 3 factures cochées » ne coche d'avance que les factures sans aucun avertissement ? Défaut : oui.
+  3. FE-149 : l'onglet s'appelle « Factures » et le brouillard est une vue de cet onglet ? Défaut : oui.
+  4. FE-149 : pièce illisible = « Redéposer une photo » seulement (pas de saisie à la main, absente du contrat) ? Défaut : oui.
+  5. FE-150 : « Choix mémorisés » en onglet du dossier, page du profil du cabinet (lisible par tous, oubli réservé à l'administrateur) ? Défaut : oui.
+  6. FE-150 : cahiers et écritures partagent le même écran de gestion de la mémoire ? Défaut : oui.
+  7. FE-141 : pas de variation N / N-1 à l'écran (on ne recalcule jamais) ? Défaut : oui.
+
 ## Questions à l'utilisateur ou au PO
 
 - **Parcours réel du dossier de financement (2026-11-21), avec le choix retenu par défaut** (aucune ne bloque l'écriture des fiches) :
