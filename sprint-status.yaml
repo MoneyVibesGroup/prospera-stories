@@ -552,6 +552,15 @@ reserved_ranges:
       haché, expiration, révocation, route publique avec débit, ouvertures tracées). Node 24 : 634 unitaires, 24 e2e, 171
       d'intégration ; mutations 11/11 et 9/9. Pile grp-d 27/27 (texte du PDF lu par pdfjs), rejouée depuis origin/dev.
       Q-D-12 au PO. Lot D, n° 1 du lot 6 (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-230 ; FR-44, FR-46, FR-47, AD-33). NON SLOTTÉE.
+  - range: "STORY-1066"
+    status: "RÉSERVÉ"
+    owner: "L'avoir — annuler tout ou partie d'une facture émise (total, par lignes, montant libre ; jamais plus que le reste à créditer, taux par taux, AVOIR_SUPERIEUR_A_LA_FACTURE), sous un numéro AV- continu (série avoirs, suite reprenable de Sage), son fait facturation.avoir.emis@1, son PDF « Avoir », la facture ANNULEE_PAR_AVOIR et la validation du DAF au-delà du seuil (facturation:avoir:valider) (prospera-ventes-service, module facturation)"
+    source_doc: "prospera-stories/stories/STORY-1066.md"
+    reserved_on: "2026-11-24"
+    note: >
+      🚧 EN COURS le 2026-11-24 — fiche écrite avant le code ; annonce « ⚠ Contrats » avant le code (manifeste facturation
+      1.1.0 à la source, C7 : + facturation:avoir:valider ; D-1065-15). Lot D, n° 2 du lot 6 (PLAN-LOT-6-2026-11-23.md §6 ;
+      EPIC-230 ; FR-43, FR-45, FR-48, FR-217). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
