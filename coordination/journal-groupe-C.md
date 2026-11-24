@@ -33,6 +33,8 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
   4. ✅ **STORY-1100 DONE (24/11)** : comptabilité **#20** (`e4a53cc`), document-service **#32** (`0716a58`), contrat
      #822, manifestes `comptabilite` 0.5.0 #826 et `ged` 1.3.0 #831. Socle comptabilité 334/334, e2e GED 203/203,
      mutation 8/8, gate `grp-c` vert (vrai fait sur Kafka, rejeu sans double) ; verrou cédé par A et rendu ;
+  4 bis. 🟡 **STORY-1117** (demande de A, STORY-320) la balance de référence d'un exercice et la liste sans lignes
+     (`balance-service`, puis le fiscal qui la lit) : contrat annoncé le 24/11 (fiche) ;
   5. **STORY-1101** les déclarations face à la liasse (fiscal) — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
   6. **STORY-315** puis **316** le calendrier fiscal (fiscal) — fiches écrites juste avant.
 - **Docker** : verrou du poste principal (`MoneyVibes_Apps\.verrou-docker`) partagé avec A ; aucune pile de C ne tourne.
@@ -177,6 +179,13 @@ seulement.
 
 ## Passations
 
+- **← A (2026-11-24, à la fusion de 328) : `prospera-fiscal-service`** — rendu à C sur `dev` **`0596fc4`** (fiscal #57,
+  docs #841 `d38b268`). Patron des anomalies pour 326 et 1101 : code `SIGNALEE` au `CATALOGUE`
+  (`domain/obligations/anomalies.ts`), `AnomaliesObligationsService.signaler(...)` / `retirer`, empreinte du fait (la
+  même ne rouvre pas une levée), `409 ANOMALIE_BLOQUANTE`, levée `POST /obligations/{id}/anomalies/{code}/levee`,
+  dossier de contrôle `GET /exercices/{id}/obligations/anomalies` ; pour 1101, un code de rapprochement
+  `bloque: ['A_DEPOSER']`. Restent à faire hors de C : 321, 333, 334.
+
 - **→ D (2026-11-23, lot 6, D-L6-3) : `prospera-sinistres-service` et `prospera-assurance-service`** — derniers commits
   de C sur `dev` : sinistres **`ea1a111`** (STORY-1016), assurance **`8dc3285`** (STORY-1016). C n'y touche plus pendant
   le lot 6. À reprendre par D (plan §6) : `sinistres` lit `provision.changed@1` (D-1016-10), publie
@@ -258,7 +267,7 @@ seulement.
   `GET /exercices/{id}/obligations/ecarts` existe (fiscal #56, `990256a`). — **notée**, pour 1101.
 
 - **← A (24/11, STORY-320) : `balance-service` sert la balance de référence de l'exercice, et un résumé sans lignes** —
-  **prise**, non bloquante pour A (le fiscal prend aujourd'hui la plus haute version validée et équilibrée). C la fait
+  **prise : STORY-1117** (contrat du 24/11), non bloquante pour A (le fiscal prend aujourd'hui la plus haute version validée et équilibrée). C la fait
   après STORY-1100, avant de reprendre le fiscal : (1) une lecture de la balance que le moteur de balance retient pour un
   exercice (la règle existante de sélection, sans que le fiscal lise l'origine, AD-14) ; (2) une vue résumée de la liste
   (sans `lignes`), par un paramètre de lecture facultatif. Contrat annoncé avant le code, ici et dans une fiche.
@@ -300,6 +309,8 @@ seulement.
   `etat-publie.changed.<espace>`, double lecture) dans une story de la plage de C, après STORY-990.
 
 ## ⚠ Contrats
+
+- **2026-11-24 (STORY-1117), AVANT le code** : `balance-service` sert `GET /api/v1/dossiers/{dossierId}/balances/reference?au=AAAA-MM-JJ` → `{ balance: BalanceResumeDto | null }` (la dernière VALIDÉE complète dont l'exercice contient `au`, à défaut le dernier BROUILLON complet ; socles d'à-nouveaux et portefeuilles SFD exclus, provisionnée comprise) et `GET …/balances/resumes` (la liste, sans `lignes`). `BalanceResumeDto` = `BalanceResponseDto` sans `lignes`. Manifeste `balance` 1.1.0. Le fiscal lit la référence (D-320-5 levé), sans lire l'origine. **→ B** : copie du manifeste `balance` 1.1.0 au catalogue après la fusion. **→ A** : types de `balance-service` à régénérer si un écran les lit.
 
 - **2026-11-24 (STORY-1100), AVANT le code** : **fait neuf** `comptabilite.facture.inscrite` v1, publié par `prospera-comptabilite-service` (outbox, schéma `contrat/schemas/comptabilite.facture.inscrite.v1.json`, registre de schémas) à chaque facture inscrite au brouillard ; consommé par `document-service` (GED), qui range une copie pré-indexée dans le fonds du client (ou l'y range à l'ouverture du fonds). Mémoire de classement de la GED : `GET /api/v1/ged/cabinet/pieces/{pieceId}/suggestion`, `GET …/fonds/{numero}/memoire-de-classement`, `GET` et `DELETE /api/v1/ged/cabinet/memoire-de-classement[/{memoireId}]`, champ facultatif `indexation.nifTiers`. Manifestes : `comptabilite` 0.5.0 (`publie`), `ged` 1.3.0 (`consomme`, routes de lecture). **→ B** : les deux copies au catalogue après la fusion. **→ A (FE-151)** : types à régénérer.
 
