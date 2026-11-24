@@ -1046,6 +1046,42 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-24, STORY-1067) avant la fusion du code (prospera-ventes-service#15, `MNV-1067`). —
+  `prospera-ventes-service`, module `commande` : modifier une commande (FR-35).**
+  Fiche : `stories/STORY-1067.md` (D-1067-1 → 16). **Ajouts seuls** ; **aucun schéma de fait ne change** ; **aucun
+  manifeste ne change** (`commande:commande:saisir` couvre déjà « modifier »).
+  - **Route neuve** `POST /api/v1/commande/commandes/{commandeId}/modifications` (`commande:commande:saisir` ;
+    `Idempotency-Key`) corps `{ revision, lignes?, dateLivraisonSouhaitee?, messageClient? }` (`revision` : celle de la
+    commande lue ; `lignes` absent : inchangées, présent : la liste neuve entière ; date et message absents : inchangés,
+    `null` : effacés) ⇒ 201 `{ …la commande, modification: { version, statut: APPLIQUEE | EN_ATTENTE_DE_STOCK | REFUSEE,
+    statutDeLaCommande, demandeePar, demandeeLe, appliqueeLe, revisionAvant, revisionApres, changements: [{ champ, avant,
+    apres }], montantTtcAvantMineur, montantTtcApresMineur, jugement, remplacements, refus }, rejeu }`. Qui : l'auteur de
+    la commande, ou un membre qui a aussi `commande:reseau:consulter` ; une `VALIDEE` demande en plus
+    `commande:commande:valider` ; sinon 403 `ROLE_NON_AUTORISE` (`details.droitRequis`). Refus : 400
+    `CLE_D_IDEMPOTENCE_MANQUANTE`, `COMMANDE_SANS_LIGNE`, `MONTANT_HORS_BORNES`, `MODIFICATION_SANS_EFFET` ; 403
+    `HORS_PORTEE` ; 404 `COMMANDE_INCONNUE` ; 409 `REVISION_PERIMEE` (`details` : `revisionLue`, `revision`),
+    `COMMANDE_NON_MODIFIABLE`, `VALIDATION_EN_COURS`, `COMMANDE_FACTUREE` (`factureId`, `numero` : un avoir),
+    `MODIFICATION_EN_COURS`, `POINT_DE_STOCK_CHANGE` (`ajoutes`, `vides`), `ARTICLE_SANS_PRIX`, `UNITE_NON_VENDUE`,
+    `CREDIT_BLOQUE`, `PLAFOND_INCONNU`, `STOCK_NON_INSTALLE`, `ENCOURS_NON_INSTALLE`, `PLAFOND_CREDIT_DEPASSE`,
+    `STOCK_INSUFFISANT`, `CLE_REUTILISEE_AVEC_AUTRE_CHARGE` ; 503 `RESERVATION_INDISPONIBLE` (la modification attend :
+    rejouer la même demande).
+  - **Route neuve** `GET /api/v1/commande/commandes/{commandeId}/modifications` (`commande:reseau:consulter` ou
+    `commande:portefeuille:consulter`, portée de lecture ; 404 `COMMANDE_INCONNUE`) ⇒ `{ modifications: [...] }` par
+    version.
+  - **Routes changées** (ajouts) : la commande lue gagne `modifications` (nombre appliqué) et `modificationEnCours`
+    (`{ version, depuis }` ou `null`) ; `POST /commandes/{commandeId}/annulation` peut refuser 409 `MODIFICATION_EN_COURS`.
+  - **Faits** (schémas inchangés) : après la modification d'une commande `VALIDEE`, **`commande.commande.validee@1` et
+    `commande.commande.chiffree@1` repartent pour la même commande à un rang plus haut** (états absolus : garder le plus
+    haut rang ; `facturation` le fait déjà) ; `commande.engagement-tiers.changed@1` suit la différence (relevé à la
+    transaction 1 si le TTC monte, rendu si `stock` refuse). `commande.bon-livraison.emis@1` n'est pas republié : un bon
+    garde son identité et son numéro, ses lignes suivent la commande.
+  - **Port `stock`** (AD-8, pour l'API de réservation de `stock` quand elle existera) : `remplacer({ organisationId, cle:
+    <commandeId>:<version>, lignes: [{ cle: <commandeId>:<version>:<rang du bon>.<ligne>, reservation: <bonId>:<ligne>,
+    bonId, ligne, pointDeStockId, articleId, quantite }] })` : toutes ou aucune, idempotent par `cle`, 0 = rendue ;
+    réponses `REMPLACEE`, `REFUSEE` (`STOCK_INSUFFISANT`, `lignes`), `INDISPONIBLE`.
+  - **Collection neuve** : `commande_modifications` (au plan d'effacement C13). **Champ neuf** sur `commande_bons` :
+    `derniereLigne` (facultatif).
+
 - **PUBLIÉ (2026-11-24, STORY-1066, prospera-ventes-service#14, `dev` d9f4264 → adaa2bb) ; ANNONCÉ avant la fusion du
   code (prospera-stories #782, `main` 24049e4), sans écart ; schémas vérifiés au registre (Karapace, contre les versions
   d'`origin/dev`). — `prospera-ventes-service`, module `facturation` : l'avoir.**
