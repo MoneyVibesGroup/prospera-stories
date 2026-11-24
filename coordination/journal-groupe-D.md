@@ -5,6 +5,23 @@
 
 ## État
 
+### Lot 6 (ouvert le 2026-11-24)
+
+- **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
+  d'assurance et trois de distributeur, au backend, les deux verticaux alternés : 1065 (la facture juste (3)), 1066
+  (l'avoir), 1067 (la commande (3)), puis 1068 → 1071 (l'assurance : `sinistres` lit `provision.changed@1`,
+  `sinistres.evaluation.arretee@1`, l'alerte bloquante, la mission d'expertise). Une sous-session neuve par story
+  (`REGLES-DES-GROUPES.md` §1.2). **Dépôts** : ceux du distributeur (comme au lot 4), **plus `prospera-sinistres-service`
+  et `prospera-assurance-service`** (D-L6-3 : repris de C, qui écrit sa passation avant 1068 ; la première story
+  d'assurance de D la constate). **Même poste que B** (BFF de la console, recette, catalogue, auth, kyc, bilan, balance,
+  dossier ; quatre stories sur sept avec une pile complète) : **même verrou Docker**. Avant le 04/12 : la passation à
+  Dev A mise à jour (D-L3-6), par 1071.
+- **STORY-1065** 🚧 — la facture juste (3) : les mentions légales (liste de travail jusqu'à A-1, paramètre versionné), le
+  PDF figé, le lien public d'envoi (`ventes`). Rituel (2026-11-24) : aucune demande neuve à D pour le distributeur dans
+  les journaux de A, B et C (la passation de C, D-L6-3, vise 1068) ; verrou Docker libre. Annonce « ⚠ Contrats » avant
+  le code (cette PR) ; manifeste `facturation` amendé (C7 : `facturation:parametres:modifier`) ; → B (le droit) ;
+  Q-D-12 au PO.
+
 ### Lot 4 (ouvert le 2026-11-18)
 
 - **Plan** : `PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §4 : **STORY-1060 → 1064**, le distributeur au backend (cinq stories ;
@@ -683,6 +700,15 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-24, STORY-1065) : `facturation:parametres:modifier` au catalogue de tenant d'`auth`, hors du jeton** —
+  **ouverte**, sans urgence (aucun écran ne l'appelle). Déclaré au manifeste `facturation` (C7, D-1065-13 ; absent de
+  l'annexe B.2, comme `commande:parametres:modifier` et `terrain:parametres:modifier` : `AJOUTS_A_L_ANNEXE_B`). Libellé
+  proposé : « Modifier les paramètres de la facture » (la fiche de l'émetteur, la liste des mentions légales, la durée
+  du lien public). **Rôle par défaut proposé : `DAF`**, lui seul. Jusque-là, `PUT /api/v1/facturation/parametres`
+  répond 403 `DROIT_INSUFFISANT` à tous (échec fermé), et l'émission d'une facture refuse
+  `MENTION_OBLIGATOIRE_MANQUANTE` tant que la fiche de l'émetteur n'est pas posée. Au passage, le catalogue recopie le
+  manifeste `facturation` (`copies.json`).
+
 - **→ B (2026-11-18) : le fichier des comptes du jeu est prêt ; `comptes` dans `jeu-demonstration@1` et la pose par le
   catalogue (votre remplaçante, D-972-9 ; STORY-1064, D-1064-4)** — **ouverte**, sans urgence (le catalogue monte le jeu
   à `jeu-grossiste-golfe-v1`). Le jeu **1.2.0** (étiquette `jeu-grossiste-golfe-v1.2`, plateforme `dev` 50c12a6) porte dans chaque
@@ -945,6 +971,32 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-24, STORY-1065), AVANT la fusion du code. — `prospera-ventes-service`, module `facturation` : les
+  mentions légales, le PDF figé, le lien public d'envoi.** Fiche : `stories/STORY-1065.md` (D-1065-1 → 14). **Ajouts
+  seuls** ; **aucun fait ne change** (`facturation.facture.emise@1` ne porte ni mention ni PDF) ; **manifeste
+  `facturation` amendé** (C7 : + `facturation:parametres:modifier`, recopié à l'octet dans `ventes`).
+  - **Routes neuves** (préfixe `/api/v1/facturation`) : `GET /parametres` (un droit du module) et `PUT /parametres`
+    (`facturation:parametres:modifier` ; corps `{ versionAttendue, valeurs, motif }` ; 400 `PARAMETRES_INVALIDES`
+    `details.erreurs`, 409 `PARAMETRES_VERSION_PERIMEE`) : `valeurs = { emetteur: { raisonSociale, formeJuridique,
+    capital, adresseDuSiege, nif, rccm, regimeFiscal, rib, mobileMoney }, mentionsExigees: [codes], penalitesDeRetard,
+    escompte, dureeDuLienJours (7), conservationAnnees (10) }` ; `GET /factures/{factureId}/pdf`
+    (`facturation:facture:consulter` ; `application/pdf`, `ETag`, `X-Empreinte-Sha256` ; 409 `PDF_EN_ATTENTE`,
+    `PDF_INDISPONIBLE` ; 404 `FACTURE_INCONNUE` ; 500 `PDF_ALTERE`) ; `POST /factures/{factureId}/liens`
+    (`facturation:facture:emettre`, `Idempotency-Key` ; 201 `{ lienId, factureId, numero, url, creeLe, expireLe, etat,
+    ouvertures, rejeu }`, l'`url` rendue une seule fois, `null` au rejeu) ; `GET /factures/{factureId}/liens`
+    (consulter ; jamais le jeton) ; `POST /factures/{factureId}/liens/{lienId}/revocation` (émettre ; 404 `LIEN_INCONNU`) ;
+    **`GET /liens-publics/{jeton}`, publique** (sans compte : le PDF `inline` ; 404 `LIEN_INCONNU`, 410 `LIEN_EXPIRE`,
+    `LIEN_REVOQUE`, 503 `PDF_EN_ATTENTE`, 429 au-delà de 30 ouvertures par minute et par adresse).
+  - **Routes changées** (ajouts) : `POST /factures` peut refuser **409 `MENTION_OBLIGATOIRE_MANQUANTE`** (`details.manquantes
+    : [{ code, fiche: ORGANISATION | POINT_DE_VENTE | ARTICLE | PARAMETRES, id }]`, aucun numéro consommé) ; la facture
+    rendue gagne `parametresVersion`, `mentions` (émetteur, client, désignations, pénalités, escompte, conservation) et
+    `pdf { etat: EN_ATTENTE | PRODUIT | ECHEC, empreinteSha256, octets, produitLe }`.
+  - **Collections neuves** : `facturation_parametres`, `facturation_clients_lus` et `facturation_articles_lus` (futures
+    projections de `pdv` et de `catalogue`, remplies par personne aujourd'hui), `facturation_pdfs`,
+    `facturation_liens_publics`. **Configuration** : `FACTURATION_LIENS_BASE_URL`, `FACTURATION_PDF_INTERVALLE_MS`.
+    **Dépendance** : `pdfkit` 0.19.1 (épinglée) ; polices Liberation Sans (SIL OFL 1.1) dans le dépôt.
+  - **Pour B** : voir « Demandes aux autres groupes » (le droit au catalogue de tenant d'`auth`).
 
 - **PUBLIÉ (2026-11-18, STORY-1064, prospera-plateforme#37, `dev` 50c12a6, étiquette `jeu-grossiste-golfe-v1.2` ;
   prospera-ventes-service#12, `dev` edb3f8f) ; ANNONCÉ avant la fusion du code (prospera-stories #715), sans écart. —
@@ -1503,6 +1555,16 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-12 (2026-11-24, STORY-1065) — Qui tient la fiche légale de l'organisation (raison sociale, forme juridique,
+  capital, siège, NIF, RCCM, régime fiscal, RIB, compte Mobile Money) qu'imprime chaque facture ?** FR-44 la veut « lue
+  de la fiche de l'Organisation », mais aucun service ne la porte : `auth` publie le nom, le pays et le logo
+  (`identity.org.*`), `kyc` ne publie aucune donnée déclarée. **Choix par défaut (D-1065-2) : le DAF la saisit dans les
+  paramètres versionnés de `facturation`** (`PUT /api/v1/facturation/parametres`, droit `facturation:parametres:modifier`),
+  jamais en dur ; le jour où un propriétaire la publie (`auth`, ou une fiche de l'organisation du moteur), `facturation`
+  la lit. **Et A-1 reste à faire** : la liste de travail des mentions (quatorze codes, toutes exigées par défaut) et la
+  durée de conservation (10 ans) attendent l'expert-comptable du client avant la recette de la facture ; elles se
+  corrigent par le même paramètre, sans développement.
 
 - **Q-D-11 (2026-11-18, STORY-1060) — Quels jours fériés le calendrier par défaut déclare-t-il ?** Choix par défaut
   (D-1060-4) : du lundi au samedi travaillés ; dix jours fériés légaux du Togo que l'on sait dater : 1er janvier, lundi
