@@ -155,6 +155,36 @@ catégorie du sens (fournisseur à l'achat, client à la vente).
   compte désactivé, masqué ou sans racine est écarté et dit (`COMPTE_A_CHOISIR`, `details.ecarte`, `details.raison`).
   Un compte corrigé par le comptable n'est pas contrôlé à la lecture : la saisie le refuse nommément.
 
+### Amendement du 2026-11-24 — l'écriture se corrige ligne à ligne (ticket #762, demande de A pour FE-149)
+
+L'utilisateur, en validant la maquette de FE-149, a exigé de modifier **directement** l'écriture proposée : changer le
+compte d'une ligne (celle du tiers comprise), un débit ou un crédit, ajouter ou supprimer une ligne. Contrat annoncé
+**avant le code**, ajouts seuls :
+
+- **`corrections.lignes`** (facultatif, 2 à 500) : `[{ compte, debit, credit, libelle?, tiersId?, reference? }]`,
+  entiers en francs. Présentes, elles **remplacent** les lignes dérivées ; la proposition rend `lignes` avec
+  `role: LIBRE`, ses totaux et `equilibree`. Les signaux qui ne servaient qu'à dériver les lignes (`MONTANT_ABSENT`,
+  `MONTANT_NON_ENTIER`, `ECART_HT_TVA_TTC`, `TVA_ABSENTE`, `COMPTE_A_CHOISIR`, `TIERS_A_CREER`, `TIERS_A_CHOISIR`,
+  `TIERS_AMBIGU`) tombent ; un signal neuf, bloquant, **`ECRITURE_DESEQUILIBREE`** (`details` : débit, crédit, écart)
+  dit qu'elles ne s'équilibrent pas. Restent : date et exercice, devise, journal, doublon, lecture. À l'inscription,
+  la saisie du brouillard contrôle les lignes comme toute saisie (comptes admis du plan propre, tiers d'un collectif,
+  au moins deux lignes, une ligne n'a qu'un sens).
+- **Le compte du tiers** se change par ces lignes libres (aucun champ neuf pour lui seul).
+- **La décision** : une écriture à lignes libres est `MODIFIEE`. La mémoire (STORY-1098) n'apprend que le compte de
+  charge ou de produit, le traitement de la TVA et le journal **s'ils sont corrigés ou proposés** ; les lignes libres
+  ne s'apprennent pas.
+- **Aperçu** : `POST …/factures/lots/{lotId}/apercu` — même corps que `inscrire`, **aucune écriture** : rend le lot
+  réévalué avec ces corrections (signaux levés ou levés, `inscriptible`), pour que l'écran montre ce que le serveur
+  acceptera avant d'inscrire. Droit : `comptabilite:ecriture:saisir`. `inscrire` réévalue déjà ainsi (le point 4 du
+  ticket est confirmé : une correction qui tombe juste lève le signal).
+
+### Amendement du 2026-11-24 — la mémoire du cabinet réservée à l'administrateur (suite de STORY-1098)
+
+`GET /api/v1/cabinet/memoire-des-choix` et `…/actes` répondent désormais **403 `TENANT_ADMIN_REQUIS`** à un
+collaborateur, comme l'oubli : la mémoire du cabinet est apprise dans tous ses dossiers, et sa provenance (lot, pièce,
+écriture) en dirait trop hors de son portefeuille (même règle que les cahiers, D-1099-5). Les suggestions servies dans
+un dossier ne changent pas.
+
 ---
 
 ## Pourquoi
