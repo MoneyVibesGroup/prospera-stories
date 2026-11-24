@@ -15,7 +15,7 @@
   et `prospera-assurance-service`** (D-L6-3 : repris de C, qui écrit sa passation avant 1068 ; la première story
   d'assurance de D la constate). **Même poste que B** (BFF de la console, recette, catalogue, auth, kyc, bilan, balance,
   dossier ; quatre stories sur sept avec une pile complète) : **même verrou Docker**. Avant le 04/12 : la passation à
-  Dev A mise à jour (D-L3-6), par 1071.
+  Dev A mise à jour (D-L3-6), par 1071 — **faite le 2026-11-24 ; le lot 6 de D est fini (7/7)**.
 - **STORY-1065** ✅ 🚚 — la facture juste (3) : les mentions légales, le PDF figé, le lien public d'envoi
   (prospera-ventes-service#13, `dev` 3242844, ca44566, 5929438 ; annonce « ⚠ Contrats » #763 avant le code, manifeste
   `facturation` amendé, C7). Rituel (2026-11-24) : aucune demande neuve à D pour le distributeur dans les journaux de A,
@@ -158,6 +158,44 @@
     conteneur, volume ni réseau `grp-d` ne reste.
   - **Suivante : STORY-1071** 🛡️ (la mission d'expertise, FR-61 ; `sinistres` ; dernière du lot 6 : « Le lot 6 de D est
     fini » et la passation à Dev A, D-L3-6).
+
+- **STORY-1071** ✅ 🛡️ — la mission d'expertise et sa machine unique (FR-61), et l'évaluation qui l'attend
+  (prospera-plateforme#39, `dev` 2c96703 ; prospera-sinistres-service#33, `dev` 9c9a997, 1c7b49a, b327f18, 095e577 ;
+  annonce « ⚠ Contrats » #809 avant le code, `main` 77bd6c4 ; aucun manifeste ne change). Rituel (2026-11-24) : une
+  demande neuve de B à D (STORY-1103 : prévenir le cabinet d'un renvoi KYC), **placée en STORY-1072** (« Réponses aux
+  demandes reçues ») ; rien d'autre pour D dans les journaux de A et C. « Fini quand » fixé par la fiche (D-1071-1 : le
+  plan ne le fixait pas).
+  - **La mission** (`expertises`, `src/modules/expertises/missions/`) : la machine en données
+    (`machine-des-missions-2026.1.json` : treize états, treize actes, rôles, motifs, délais de rapport par domaine) ;
+    `POST /api/v1/expertises/missions` (GEST, RESP ; `A_DESIGNER`) et `POST …/missions/{id}/actes` ; `GET …/missions` et
+    `/{id}` (déjà déclarées). Désignation jugée par `exigerDesignable` (1014) après le rôle et le graphe ; l'expert qui a
+    décliné n'est plus désignable (`EXPERT_NON_ELIGIBLE`) ; externe imposé (contre-expertise, contradictoire) ;
+    `TRANSMISE` pour un externe ; actes de l'expert par son compte, ou « saisis pour le cabinet » sans compte ; rapport =
+    `pieceId` + `versionPiece` (+ chiffrage) ; `COMPLEMENT_EXPERT_RECU` ; arbitrage RESP, DG, DT. Mission médicale non
+    servie (D-1071-5).
+  - **Le fait** `expertises.mission.changed@1` (schéma fermé, neuf champs classés ; ni domaine, ni texte, ni expert
+    nommé), publié par l'outbox du service (code commun : `topics.ts` gagne `ExpertisesTopic`, l'invariant vérifie chaque
+    topic au manifeste de son module).
+  - **`sinistres`** : consommateur `sinistres-service.missions` ; mission rangée au dossier (commande du système, piste
+    `MISSION_CHANGEE`) ; **`EXPERTISE_VALIDEE` devient une condition calculée** (elle n'était posée par personne : la
+    transition 7 refusait tout dossier) — un dossier sans mission passe, une mission ouverte est nommée, à la transition
+    et à l'arrêt ; **le chiffrage validé est le repère du montant arrêté** (D-1070-11 : motif s'il diffère,
+    `chiffrageDExpertise` copié).
+  - Node 24 : lint 0, **suite unitaire complète d'un trait 1437/1437 (73 suites) sur MongoDB et Redis réels, 140 s**, 37
+    e2e, build ; mutations 22/22 (Node 25) et 5/5 (MongoDB réel) ; plateforme 657 tests (0 échec), `typecheck`. Pile
+    `grp-d` (sinistres + Karapace) : `docker compose up` sain, **pilote 27/27** (mission lue en 0,3 s, arrêt refusé puis
+    repéré sur le chiffrage, transition 7 sans constat, huit faits valides au schéma du registre).
+    Rejoué sur l'export d'`origin/dev` (`095e577`, images `--no-cache`, volumes neufs) : lint 0, unitaires 1437/1437 d'un
+    trait (73 s), 37 e2e, build 0, pilote 27/27.
+  - Décisions D-1071-1 → 12 (fiche ; D-1071-12 : ce qui reste) ; recette versionnée `scripts/recette/1071/`. **Verrou
+    Docker libre au rituel ; pris à 15:19, une seule prise, rendu à 15:46** ; aucun conteneur, volume ni réseau `grp-d`
+    ne reste.
+  - **Suivante** : aucune dans le lot 6. Hors du lot : **STORY-1072** (la demande de B : le cabinet prévenu par e-mail
+    d'un renvoi KYC), placée ici, fiche à écrire juste avant de coder.
+
+- **Le lot 6 de D est fini : 7 stories sur 7 (1065 → 1071), le 2026-11-24.** Trois de distributeur (1065 la facture
+  juste (3), 1066 l'avoir, 1067 la commande (3)), quatre d'assurance (1068 → 1071) ; la passation à Dev A est mise à
+  jour (« Passations », D-L3-6, avant le 04/12).
 
 ### Lot 4 (ouvert le 2026-11-18)
 
@@ -561,14 +599,18 @@
 - **← C, `prospera-assureur-fictif`, constatée par D au rituel de 1046, `dev` 78ad10c** (2026-11-17, plan du lot 3
   §5). C n'avait pas écrit sa passation (« Passations : aucune ») ; au rituel : aucune PR ouverte, dernier commit sur
   `dev` du 2026-11-16 (MNV-987). C est actif ailleurs (sinistres, 1001 → 1002), pas sur ce dépôt.
-- **→ Dev A (mise à jour complète le 2026-11-17, à la fin du lot 3 ; D-L2-5, D-L3-6 : avant le 04/12) : le distributeur,
-  et ce que D tient d'autre.** La synthèse d'abord, puis le détail par sujet (les sous-points qui suivent).
+- **→ Dev A (mise à jour complète le 2026-11-24, à la fin du lot 6 ; la précédente : 2026-11-17, fin du lot 3 ;
+  D-L2-5, D-L3-6 : avant le 04/12) : le distributeur, l'assurance reprise de C, et ce que D tient d'autre.** La synthèse
+  d'abord, puis le détail par sujet (les sous-points qui suivent).
   - **Dépôts tenus par D** : `reseau-service` (3419), `prospera-ventes-service` (3412 : `commande`, `facturation`,
     `approvisionnement`, `entrepot`), `prospera-terrain-service` (3413 : `terrain`, `conquete-objectifs`),
     `prospera-recouvrement-service` (3414), `prospera-pilotage-service` (3415), `prospera-croissance-service` (3416),
-    `prospera-assureur-fictif` (3411, reçu de C), `prospera-notification-service` (3008, reçu de B) ; dans
-    `prospera-plateforme` : `series/`, `vocabulaires/`, `contrats/distributeur/`, `encours/`, `contrats/objets/reseau/`,
-    `jeux-demonstration/grossiste-golfe*/` et `assurance-compagnie-demo-reduite/`. Étiquettes : `series-v1`,
+    `prospera-assureur-fictif` (3411, reçu de C), `prospera-notification-service` (3008, reçu de B), **et depuis le lot
+    6 (D-L6-3) `prospera-sinistres-service` (3409, modules `sinistres` et `expertises`) et `prospera-assurance-service`
+    (3013)** ; dans `prospera-plateforme` : `series/`, `vocabulaires/`, `contrats/distributeur/`, `encours/`,
+    `contrats/objets/reseau/`, `jeux-demonstration/grossiste-golfe*/` et `assurance-compagnie-demo-reduite/`, **et
+    `contrats/assurance/`, `champs-sensibles/`, `classification-sante/`** (repris de C ; `prospera-liaison-assureur-service`
+    reste à C). Étiquettes : `series-v1`,
     `series-v1.1`, `vocabulaires-v1`, `contrats-distributeur-v1`, `acces-distributeur-v1`, `encours-v1`,
     `objets-reseau-v1`, `jeu-grossiste-golfe-v1`, `jeu-grossiste-golfe-v1.1`, `jeu-grossiste-golfe-v1.2`,
     `calendrier-distributeur-v1`, `jeu-assurance-v1`, `conformite-portee-reseau-v1`. Fusion en « Rebase
@@ -578,7 +620,12 @@
     vocabulaires et catalogue des faits, encours, garde-fous et plafond, séries hébergées sans perte, les 15 rôles dans
     les cinq services, la Reprise réseau, la commande (1), le jeu « Grossiste du Golfe » et ses routes C13, **la facture
     juste (1)** ; côté assurance : compagnie de démonstration, LC fictif refusé en réel, sa recette, prévenir l'assuré (1)
-    et (2). Détail et SHA : « État », plus haut.
+    et (2) ; **lot 4** (1060 → 1064) : le calendrier de l'organisation, la facture juste (2), la commande (2), la
+    tranche de `reseau`, les comptes du jeu ; **lot 6** (1065 → 1071) : la facture juste (3) (mentions légales, PDF
+    figé, lien public), l'avoir, la commande (3) (modifier une commande transmise), puis l'assurance : `sinistres` lit
+    la provision en vigueur (1068), publie `sinistres.evaluation.arretee@1` (1069), lève une alerte bloquante (1070), et
+    la mission d'expertise avec sa machine unique, l'évaluation qui l'attend (1071). Détail et SHA : « État », plus
+    haut.
   - **Mise en service d'un client qui quitte Sage** (réponse de l'utilisateur à Q-D-10, 2026-11-18) : la reprise du
     dernier numéro de facture (`facturation.suite-numerotation@1`, EPIC-244) se pose **avant sa première facture** ; à
     la liste de mise en service du distributeur de février.
@@ -589,7 +636,35 @@
     paramètre est `terrain_parametres` (`src/modules/terrain/parametres/`) : les distances et le géorepérage de `terrain`
     (AD-12) s'y ajoutent comme clés de plus (valeurs complètes à chaque version). Un plan de journée garde
     `parametresVersion` ; un plan créé ailleurs qu'à l'import (EPIC-233) se datera par `dateDuPlanDeJournee`.
-  - **Ce qui reste, dans l'ordre conseillé** : (1) ~~la facture juste (2)~~ **livrée par 1061** (suite de Sage, format,
+  - **Ce qui reste, dans l'ordre conseillé (mis à jour le 2026-11-24, fin du lot 6)** — les restes nommés par les
+    fiches 1065 → 1071, puis la liste d'avant (qui garde son historique) :
+    - **Placée** : **STORY-1072** — la demande de B (STORY-1103) : le cabinet prévenu par e-mail d'un renvoi de son
+      dossier KYC (modèle `kyc-dossier-renvoi-correction` dans `notification`, consommateur de
+      `kyc.correction.requested@1` dans `prospera-expert-comptable`, preuve AC-5 dans mailhog) ; voir « Réponses aux
+      demandes reçues ».
+    - **Distributeur**, dans l'ordre : (a) **l'envoi de la facture par `notification`** (D-1065-14 (2) : le geste
+      « envoyer », lien public, WhatsApp puis SMS, e-mail avec le PDF ; `ENVOYE` / `ECHEC`) ; (b) **l'avoir (2)**
+      (D-1066-14 : la demande du comptable validée par le DAF, `IMPUTE` / `REMBOURSE` lus chez `paiement`, le retour en
+      stock, `facturation.facture.changed@1`, l'envoi et la liste des avoirs, les avoirs du freelance, les routes C13) ;
+      (c) **la commande (4)** (D-1067-16 : ajouter un point de stock ou vider un bon d'une `VALIDEE`, la modification qui
+      attend la réservation, `commande.commande.changed@1`, la modification par l'application terrain, la facture
+      complémentaire), puis la livraison et le reliquat (`entrepot`) et la facture par livraison, l'allocation du matin,
+      la remise, la dérogation (D-1062-12) ; (d) la liste des factures, les balances, la proforma, le lien de paiement,
+      les routes C13 de `facturation` (D-1065-14 (3)–(5)) ; (e) les portées des comptes du jeu (3 bis, plus bas) ; (f)
+      les consommateurs `pdv`, `catalogue`, `stock` et les routes C13 des autres modules (4), (5) plus bas.
+    - **Assurance**, dans l'ordre : (a) **la mission (2)** (D-1071-12) : la contre-expertise qui ouvre sa mission
+      (FR-66, `CONTRE_EXPERTISE_NON_AUTORISEE`, la contestée `ARBITREE` à sa validation), le passage outre du `RESP` sur
+      un complément non revenu (FR-67), les seuils et le classement de la désignation (FR-62, FR-59 : validation du
+      `RESP`, externe au-delà de 3 000 000), le rapport déposé dans `ged` par la mission (`expertises.rapport.depose@1`),
+      les honoraires (cinq montants, visa, FR-68, FR-182), le retard de rapport (FR-184) ; (b) **`expertises` lit le
+      dossier** (`sinistres.dossier.changed@1` : existence, volet, portée de l'agent, D-1071-11) et la provision pour le
+      budget indicatif (D-1068-11, FR-185) ; (c) **la mission médicale** (FR-63, FR-63a : sous-étapes, convocation,
+      `MED`, santé ; D-1071-5) ; (d) les autres alertes de FR-55 (vol sans plainte, seuils d'`alertes_instruction`) et
+      l'écran « Lever » (D-1070-11) ; (e) « en attente du `RESP` » au dossier (`assurance.provision.a-valider@1`, amender
+      la spine, D-1068-6, D-1068-11) ; (f) le « montant validé » du C-14 (`sinistres.decision.validee@1`, D-1069-11) ; (g)
+      les routes C13 et les vérifications d'`expertises` (manifeste), la proposition de l'IA (`SUGGEREE`, FR-58), le
+      portail des cabinets (AD-15), les écrans (coque `prospera-app`).
+    - **La liste d'avant (lots 3 et 4)** : (1) ~~la facture juste (2)~~ **livrée par 1061** (suite de Sage, format,
     `PARTIELLE`/`PAYEE`) ; ~~la facture juste (3)~~ **livrée par 1065** (mentions légales en paramètre, PDF figé, lien
     public d'AD-33 ; reste l'envoi par `notification`, D-1065-14) ; puis, dans l'ordre de D-1061-12 : l'avoir ; la facture par livraison et `SANS_BON` (après la commande (2)) ;
     la liste des factures et les balances ; (2) ~~la commande (2)~~ **livrée par 1062** (`CMD-`, `TRANSMISE`, annuler) ;
@@ -606,7 +681,11 @@
     `facturation`, `approvisionnement`, `entrepot`, `conquete-objectifs` ; (6) les dettes héritées de `notification`
     (4 suites e2e rouges). Les restes nommés par story, dans les fiches : D-1061-12 (la facture), D-1062-12 (la
     commande), D-1063-12 (`reseau`), D-1064-9 (les comptes du jeu).
-  - **Demandes ouvertes chez les autres groupes** (détail dans « Demandes aux autres groupes ») : **chez B** — le jeu
+  - **Demandes ouvertes chez les autres groupes** (détail dans « Demandes aux autres groupes ») : **chez B (lot 6)** —
+    **le consommateur de `facturation.avoir.emis@1` dans `paiement`** (STORY-1066, point (3) : après le lot 6 de B,
+    D-979-14 ; d'ici là, le reste dû lu chez `paiement` ne baisse pas après un avoir), `terrain:parametres:modifier`
+    (1060), `comptes` dans `jeu-demonstration@1` (1064) ; **chez C (lot 6)** — consommer `sinistres.evaluation.arretee@1`
+    pour l'envoi C-14 (1069, information) ; **chez B (lots 3 et 4)** — le jeu
     « Grossiste du Golfe » (README, `INSTALLATION_SERVICES` avec `commande` et `terrain`, comptes du jeu : STORY-972
     annoncée), **le consommateur de `facturation.facture.emise@1`** (charge fixée par 1059), le crédit du tiers (2)
     (`paiement.credit-tiers.changed@1`) ; **chez C** — la part Prospera de l'annexe E et trois écarts du générateur
@@ -617,7 +696,10 @@
     (encours certain pour le plafond), Q-D-5 (`commande:parametres:modifier`, DG et `DIST_ADMIN`), Q-D-6 (seul le numéro
     officiel est facultatif à l'assuré), Q-D-7 (la recette lit la personne par son rôle), Q-D-8 (`objets-de-l-annexe-c`
     vert sans documents), Q-D-9 (dimanche chômé, samedi travaillé), **Q-D-10** (la série `FAC-` démarre à 0 sans reprise
-    de Sage).
+    de Sage), **Q-D-11** (les jours fériés du calendrier par défaut : du lundi au samedi travaillés, dix fériés du Togo),
+    **Q-D-12** (la fiche légale de l'organisation saisie par le DAF dans les paramètres de la facture, D-1065-2) ;
+    **Q-D-13** (qui tient `prospera-expert-comptable` : choix par défaut, D y porte le consommateur de
+    `kyc.correction.requested@1` pour 1072).
   - **Pièges** : la section « Pièges rencontrés » (par story, la plus récente d'abord). À lire avant tout : le verrou
     Docker du poste et les commandes courtes (1058-5, 1055-2), les fins de ligne et `git archive` (§1.7), les mutations
     qui rougissent sur une compilation (1053-2, 1058-2, 1059-1), `--load` au `docker build` (1056-1), Karapace qui
@@ -850,7 +932,25 @@
       dans `generer.test.mjs` et `ventes` (`src/socle/instance/identifiant-du-jeu.spec.ts`) ;
     - **les portées** des comptes dans `reseau` sont la suite (D-1064-8, « Ce qui reste » (3 bis)).
   - **Le lot 3 de D est fini.** **Le lot 4 de D est fini** (1060 → 1064, le 2026-11-18) : ~~les remplaçantes
-    d'EPIC-227 (1063)~~ **livrée**, ~~les comptes du jeu (1064)~~ **livrée**.
+    d'EPIC-227 (1063)~~ **livrée**, ~~les comptes du jeu (1064)~~ **livrée**. **Le lot 6 de D est fini** (1065 → 1071,
+    le 2026-11-24).
+  - **L'assurance reprise de C (lot 6), pour Dev A** :
+    - **`sinistres`** : le dossier et sa machine (table `table-des-transitions-2026.2.json`, conditions lues dans les
+      constats ou calculées : `CONDITIONS_CALCULEES` de `machine/machine.ts`, dont **`EXPERTISE_VALIDEE` depuis 1071**) ;
+      toute écriture du dossier passe par `ecrireUneCommande` (version, piste chaînée, `dossier.changed@1`, faits de
+      l'acte dans la même transaction) ; un fait d'un autre module s'applique par une commande du système (patron :
+      `appliquerPieceControlee`, `appliquerMissionChangee`).
+    - **Les consommateurs** (patron : `provision/consommateur-provision.service.ts`, `missions/consommateur-missions.service.ts`) :
+      topic créé avant l'abonnement, `metadataMaxAge: 10_000`, relance avec recul, fait hors contrat écarté ; tests du
+      client de Confluent sous Node 24 (étage `verification`).
+    - **Les faits publiés** : schéma dans `prospera-plateforme/contrats/assurance/<module>/`, chaque champ classé au
+      registre `classification-sante`, copie à l'octet dans `contrat/schemas/` (empreintes dans
+      `ORIGINE-DES-SCHEMAS.json`) ; l'outbox du service sert `sinistres` ET `expertises` (`kafka/outbox/topics.ts`).
+    - **`expertises`** : le référentiel des experts (1014 : `exigerDesignable`) et la mission (1071 : la machine en données
+      `machine-des-missions-2026.1.json`, `jugerLActe` pur, `MissionsService`). Un acte de plus = une ligne de la table
+      (et sa règle dans `jugerLActe`) ; une version neuve de la table se publie à côté, la mission garde la sienne.
+    - **Bancs MongoDB** : une base par fichier, vidée entre deux tests (D-1070-10) ; jamais de DDL par test.
+    - **Recettes** : `scripts/recette/1068` → `1071` (piles `grp-d`, pilotes Python, mutations).
 
 ## Demandes aux autres groupes
 
@@ -1104,6 +1204,17 @@
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-24, STORY-1103, prospera-stories #805) : consommer `kyc.correction.requested@1` pour prévenir le cabinet
+  par e-mail** — **lue au rituel de 1071 ; placée en STORY-1072** (plage de D, la première hors du lot 6 ; fiche écrite
+  juste avant de coder ; le plafond du tracker ne monte qu'à son écriture). Contenu retenu : (1) dans
+  `prospera-notification-service` (tenu par D), le modèle **`kyc-dossier-renvoi-correction`** (variables `texte`, déjà
+  composé par `kyc`, et `lien`, l'espace du cabinet), à côté des trois modèles KYC du socle ; (2) le **consommateur de
+  `kyc.correction.requested`** dans **`prospera-expert-comptable`**, au même endroit que celui de `kyc.status.changed`
+  (même patron, une demande par administrateur du cabinet, clé d'idempotence = `eventId`) — ce dépôt n'a pas de
+  titulaire (plan maître §2) : **question à l'utilisateur, choix par défaut : D le porte avec le modèle** ; (3) la preuve
+  de l'**AC-5** : l'e-mail vu dans mailhog, dans la recette. Aucune urgence de démo (la console renvoie, le cabinet lit
+  les motifs dans son statut).
+
 - **← B (2026-11-24, STORY-979, « Suite du 2026-11-24 », D-979-10 → 16) : la demande de 1066, points (1) et (2) servis**
   — **lue** (relayée par la session de groupe de D, à la PR finale de 1067 ; annonce de B : prospera-stories **#789**,
   `a0f49f0`). (1) prospera-auth-service **#49**, `dev` `b49d8ab` : `facturation:avoir:valider` (« Valider un avoir
@@ -1178,8 +1289,10 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-24, STORY-1071) avant la fusion du code (prospera-plateforme `MNV-1071`, prospera-sinistres-service
-  `MNV-1071`). — `prospera-sinistres-service`, modules `expertises` et `sinistres` : la mission d'expertise et sa
+- **PUBLIÉ (2026-11-24, STORY-1071, prospera-plateforme#39, `dev` 2c96703 ; prospera-sinistres-service#33, `dev`
+  9c9a997, 1c7b49a, b327f18, 095e577) ; ANNONCÉ avant la fusion du code (prospera-stories #809, `main` 77bd6c4), sans
+  écart ; schéma enregistré dans Karapace (sujet neuf, BACKWARD) et accepté par la garde `classification-sante`. —
+  `prospera-sinistres-service`, modules `expertises` et `sinistres` : la mission d'expertise et sa
   machine unique (FR-61), un fait neuf `expertises.mission.changed@1` (schéma dans `prospera-plateforme`,
   `contrats/assurance/expertises/`), et l'évaluation qui l'attend.** Fiche : `stories/STORY-1071.md` (D-1071-1 → 11).
   **Ajouts seuls**, sauf un comportement qui change (⚠ plus bas) ; **aucun manifeste ne change** (les deux lectures
@@ -1942,6 +2055,12 @@
 
 ## Questions à l'utilisateur ou au PO
 
+- **Q-D-13 (2026-11-24, STORY-1071, pour STORY-1072) — Qui tient `prospera-expert-comptable` ?** Le dépôt n'a pas de
+  titulaire (plan maître §2) ; la demande de B (STORY-1103) y place le consommateur de `kyc.correction.requested@1`, à
+  côté de celui de `kyc.status.changed` (les trois e-mails KYC du cabinet en partent). **Choix par défaut : D le porte**
+  avec le modèle `kyc-dossier-renvoi-correction` de `notification` (STORY-1072), le temps de cette story ; le dépôt ne
+  change pas de titulaire pour autant. À trancher par l'utilisateur avant 1072 si un autre groupe doit le tenir.
+
 - **Q-D-12 (2026-11-24, STORY-1065) — Qui tient la fiche légale de l'organisation (raison sociale, forme juridique,
   capital, siège, NIF, RCCM, régime fiscal, RIB, compte Mobile Money) qu'imprime chaque facture ?** FR-44 la veut « lue
   de la fiche de l'Organisation », mais aucun service ne la porte : `auth` publie le nom, le pays et le logo
@@ -2012,6 +2131,19 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1071** :
+  - (1) **Une condition de la machine du dossier peut n'être posée par personne** : `EXPERTISE_VALIDEE` était un constat
+    (échec fermé, D-988-1) qu'aucune commande n'écrivait — la transition 7 refusait tout dossier, et les tests la
+    posaient à la main. Avant de compter sur un constat, chercher qui l'écrit (`grep "constats"` dans `dossiers.service.ts`) ;
+    sinon, en faire une condition calculée (`CONDITIONS_CALCULEES`) et l'éprouver dans les tests générés de la table.
+  - (2) **Une mutation qui laisse une variable sans usage, ou qui compare deux littéraux sans recouvrement, ne compile
+    pas** (`m.etat === ''` dans un bloc qui teste `m.etat === 'COMPLEMENT_DEMANDE'` ; `close &&` retiré) : muter la
+    valeur (`const close = m.etat !== ''`) ou garder sur une autre variable (`m.version < 0`).
+  - (3) Le pilote Python imprime des `✔` : sous Git Bash la sortie est en cp1252 (`UnicodeEncodeError`) ; lancer
+    `python -X utf8`.
+  - (4) Une recherche de bloc YAML par `index('  mongo:')` trouve d'abord `      mongo:` (une dépendance) : chercher
+    `'\n  mongo:\n    image'`.
 
 - **STORY-1070** :
   - (1) **Les délais de crochet du banc MongoDB (1069-1) venaient de la DDL par test, pas du code** : une suite verte
