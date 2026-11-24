@@ -168,6 +168,11 @@
      e2e 11/11 ; BFF 718/718, e2e 295/295 ; recette 137/137 ; **mutations 32/32**. **Pile `grp-b` neuve** (images depuis
      `origin/dev`) : `docker compose up` sain (catalogue et auth des deux espaces, BFF) ; **`essai-mise-en-service` 8/8
      sans aucune pose en base** ; recette croisée complète sur pile neuve 10/12 suites, 144 tests verts, 4 rouges sur deux read ECONNRESET poste ↔ pile prouvés par les journaux des services (le BFF a répondu 200 en 28 ms ; notification a servi 21 accusés puis la connexion s'est coupée), les quatre rouges de 1115 verts (atelier-balance, renvoi-du-lien, zone-franche, pile), facturation 7/7 et cabinet-moteur 9/9 rejouées seules sur pile neuve. Verrou pris à 20:17, rendu à 21:30 (construction des images, essai-mise-en-service, recette complète, deux rejeux) ; `down -v` à chaque fois ; aucun conteneur, volume ni réseau `grp-b` ne reste
+  12. **Seconde suite de STORY-979 (24/11 au soir) — en cours** : la demande de C (« Réponses » : ← C, STORY-1088
+     puis 1100), **placée par la session de groupe maintenant, avant STORY-1116** (aucun identifiant neuf, D-979-17,
+     même patron que la recopie de `facturation` 1.1.0, D-979-10) : `ged` 1.3.0 et `comptabilite` 0.5.0 recopiés au
+     catalogue depuis `prospera-stories@f703671` (**catalogue #74**) ; contrat annoncé avant la fusion (« ⚠ Contrats »).
+     Entrée du tracker rouverte.
   - **Suivante : STORY-1116** (cinq essais simultanés sur la même pile, chacun dans son espace ; `prospera-recette`,
     catalogue ; recette complète ; fiche à écrire juste avant de coder, identifiant réservé par le plan §8), après la
     suite de 1112 (ci-dessus).
@@ -1277,7 +1282,8 @@ STORY-1073** (24/11, passation ci-dessous) : B n'y touche plus jusqu'à ce que D
   `comptabilite` 0.5.0** (journal de C : « → B (24/11, STORY-1087 puis 1088) » et « ⚠ Contrats » de 1100 ; `main`
   `f703671`, `a525d766`) — **reçue le 24/11 pendant la suite de 1112, à placer par la session de groupe** (recommandé :
   une suite de STORY-979, copies de manifestes sans Docker, avant ou juste après 1116 ; la 1.2.0 n'a pas à être semée
-  seule). Non servie ici : hors du ticket placé.
+  seule). Non servie ici : hors du ticket placé. **Placée par la session de groupe le 24/11 au soir : maintenant,
+  avant STORY-1116, en seconde suite de STORY-979** (aucun identifiant neuf ; D-979-17) ; catalogue #74, en cours.
 
 - **← A (24/11) : servis par bilan #184 et #185** (`d98b7c4` et `7b53ff5` sur `dev` ; correctifs de STORY-483 et de
   STORY-065, annonce stories #802) — les deux résultats faux de `bilan-service` visibles à la démo du 15/01 :
@@ -1508,6 +1514,24 @@ STORY-1073** (24/11, passation ci-dessous) : B n'y touche plus jusqu'à ce que D
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-24 au soir, seconde suite de STORY-979 — les manifestes `ged` 1.3.0 et `comptabilite` 0.5.0 publiés au
+  catalogue, annoncés AVANT la fusion du code** (`prospera-platform-catalog-service`, branche
+  `MNV-979-manifestes-ged-comptabilite`, PR #74 ; fiche `stories/STORY-979.md`, « Suite du 2026-11-24 (soir) »,
+  D-979-17 → 22). Aucune route, aucun champ, aucun topic du catalogue ne change de forme ; aucun droit ne change.
+  - **`copies.json`** recopié depuis `prospera-stories@f703671` (sha256 de `manifestes/ged.manifest.ts` :
+    `d40d604d…2f0626` ; de `manifestes/comptabilite.manifest.ts`, identique à `a525d76` : `b129d891…63538c`) ; seuls
+    deux manifestes changent :
+    - **`ged` 1.1.0 → 1.3.0** (semée à côté de la 1.1.0 sur une base déjà semée ; la 1.2.0 n'est jamais semée) :
+      consomme `comptabilite.facture.inscrite` ; quatorze routes de lecture du cabinet de plus (réceptions et leur
+      bordereau, boîtes et leur étiquette, sorties, récolements, restitutions et leur bordereau, recherche, suggestion,
+      mémoire de classement d'un fonds et du cabinet). Ses vingt `droits` inchangés.
+    - **`comptabilite` 0.4.0 → 0.5.0** : publie `comptabilite.facture.inscrite` (sans suffixe, comme le code des deux
+      services). Ses neuf `droits`, ses routes inchangés.
+  - **Auth inchangé** : les neuf `comptabilite:*` et les sept `ged:*` du cabinet y sont déjà ; les treize `ged:*` de
+    l'assurance (depuis la 1.0.0) n'y sont pas et n'y entrent pas ici (D-979-19, « → C »).
+  - **Pour C** : un catalogue neuf sème `ged` 1.3.0 et `comptabilite` 0.5.0 ; un catalogue déjà semé les reçoit à son
+    prochain démarrage. **Pour A** : rien à régénérer (aucune forme du BFF ni du catalogue ne change).
 
 - **2026-11-24, suite de STORY-1112 — le premier membre d'un essai, annoncé AVANT la fusion** (`prospera-auth-service`,
   `prospera-platform-catalog-service`, `prospera-admin-panel-service`, `prospera-recette`, branches

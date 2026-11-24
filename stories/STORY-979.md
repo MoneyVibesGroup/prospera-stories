@@ -1,6 +1,7 @@
 # STORY-979 : les droits de la facture et des archives du cabinet au catalogue de tenant d'auth
 
-Status: done (rouverte et refermée le 2026-11-24 pour sa suite : « Suite du 2026-11-24 », en fin de fiche)
+Status: in-progress (rouverte le 2026-11-24 au soir pour sa seconde suite : « Suite du 2026-11-24 (soir) », en fin de
+fiche ; rouverte et refermée le 2026-11-24 pour la première : « Suite du 2026-11-24 »)
 
 **Complexité :** faible (huit droits neufs au catalogue de tenant, hors du jeton ; un rôle du socle neuf ; une ligne
 d'ajout à l'annexe B ; la copie des manifestes du catalogue ; aucun champ, aucune route, aucun topic)
@@ -277,3 +278,91 @@ Toutes fusionnées en « Rebase and merge », `merged = true`, `head.sha` = SHA 
 - **D** : un avoir au-delà du seuil passe pour un `DIST_DAF` sur une image d'auth reconstruite depuis `dev` (cache de
   60 s compris) ; un catalogue déjà semé reçoit `facturation` 1.1.0 à son prochain démarrage (D-979-13).
 - **B** : le consommateur de `facturation.avoir.emis@1` dans `paiement` (D-979-14), story neuve après le lot 6.
+
+---
+
+## Suite du 2026-11-24 (soir) : les manifestes `ged` 1.3.0 et `comptabilite` 0.5.0
+
+**Demande servie :** journal de C, « → B (24/11, STORY-1087, 1088 puis 1100) » (`ged` 1.3.0, source
+`manifestes/ged.manifest.ts` à `f703671`) et « → B (24/11, STORY-1100) » (`comptabilite` 0.5.0, source
+`manifestes/comptabilite.manifest.ts` à `a525d76`) ; journal de B, « ← C (24/11, STORY-1088 puis STORY-1100) ».
+**Pourquoi 979 et pas une story neuve :** même patron que la recopie de `facturation` 1.1.0 (D-979-10, catalogue #71) :
+une recopie de manifestes, sans identifiant neuf. Branche `MNV-979-manifestes-ged-comptabilite` (catalogue seul), docs
+`docs-979-ged-comptabilite`.
+**Place :** décidée par la session du groupe B, **maintenant, avant STORY-1116**, après la suite de STORY-1112
+(§1.1 : une demande adressée à B passe avant la story suivante). Le tracker rouvre l'entrée de 979 (`in-progress`) le
+temps de la suite et la referme (`done`) dans la PR de docs finale.
+**Sources lues :** journaux de C et de B (les deux demandes, mot pour mot) ; `manifestes/ged.manifest.ts` à
+`prospera-stories@f703671` (1.3.0, sha256 `d40d604d9472f4a6d53878d2952e554e2796f48c5bc74ce06bdfcb8e2f2f0626`) et
+`manifestes/comptabilite.manifest.ts` à `a525d76` (0.5.0, sha256
+`b129d891b77937148855e314ebcba410446839eaacf8612be97337a7f963538c`), vérifiés sur le blob et sur une extraction LF ;
+code relu sur `origin/dev` du catalogue `0894425` (`copies.json`, `scripts/manifestes/`, `manifestes-seed.service.spec.ts`,
+le schéma du manifeste) et d'auth `d69e34c` (`droits-hors-jeton.ts`, `table-d-acces-cabinet.ts`) ; lus sans y toucher :
+`origin/dev` de `document-service` (`0716a58`) et de `prospera-comptabilite-service` (le topic
+`comptabilite.facture.inscrite`, sans suffixe, des deux côtés).
+
+**Ce qui existait déjà (relu avant le code) :** au catalogue, `ged` en 1.1.0 (catalogue #69) et `comptabilite` en
+0.4.0. Les deux SHA nommés par C sont sur `origin/main` ; `a525d76` est un ancêtre de `f703671`, et entre `f703671` et
+`origin/main` (`b0efacc`), `manifestes/` n'a pas changé : la copie depuis `f703671` est celle de `main`.
+`manifestes:garde` contre `f703671` : **rouge sur `ged` et `comptabilite` seuls** (`ged` : `version`, `consomme[10 → 12]`,
+`routesLectureSeule[17 → 31]` ; `comptabilite` : `version`, `publie[1]`) ; aucun autre manifeste ne diffère.
+
+| Exigence | Fait |
+|---|---|
+| `ged` 1.3.0 au catalogue (la 1.2.0 n'est pas semée seule) | `copies.json` depuis `prospera-stories@f703671` : 1.1.0 → **1.3.0**, consomme `comptabilite.facture.inscrite`, quatorze routes de lecture du cabinet de plus |
+| `comptabilite` 0.5.0 au catalogue | même copie : 0.4.0 → **0.5.0**, publie `comptabilite.facture.inscrite` ; aucune route neuve |
+| Les droits des deux manifestes existent au catalogue de tenant d'auth | les neuf `comptabilite:*` et les sept `ged:*` du cabinet : oui, à l'octet ; aucun droit ne change entre 1.1.0 et 1.3.0 (D-979-19) |
+| Rien d'autre ne change | garde rouge avant sur ces deux seuls ; verte après (48) |
+
+### Décisions (prises par défaut, contestables)
+
+- **D-979-17 — Une seconde suite de 979, avant STORY-1116.** Décidée par la session du groupe B (comme D-979-10) :
+  la plage de B est épuisée et le travail est celui de 979 (même fichier, même voie que D-979-8 et D-979-12). D-979-16
+  étant déjà prise par la première suite, les décisions de celle-ci commencent à D-979-17.
+- **D-979-18 — La copie depuis `f703671`, entière.** `npm run manifestes:copier` lit tout `manifestes/` : lancé depuis
+  `_wt-b-stories` en HEAD détachée sur `f703671` (`origine` : `prospera-stories@f703671`), comparé à une copie faite
+  depuis `git -c core.autocrlf=false archive f703671 manifestes` : identiques, sauf la ligne `origine`. `a525d76` (le
+  SHA de `comptabilite` nommé par C) est un ancêtre de `f703671` et `comptabilite.manifest.ts` n'a pas changé entre eux
+  (même sha256) : une seule copie sert les deux demandes. La garde a montré, avant la copie, que **seuls `ged` et
+  `comptabilite`** changent : aucun autre manifeste n'est entraîné. La 1.2.0 de `ged` n'a jamais été sur une copie :
+  une base déjà semée garde sa 1.1.0 et reçoit la 1.3.0 à côté (D-979-13), sans 1.2.0.
+- **D-979-19 — Aucun droit à ajouter dans auth ; un écart ancien, écrit et non comblé.** La 1.3.0 de `ged` et la 0.5.0
+  de `comptabilite` ne changent aucun `droits` (garde). Les neuf `comptabilite:*` et les sept `ged:*` du cabinet sont au
+  catalogue de tenant d'auth (`DROITS_HORS_JETON`, `table-d-acces-cabinet.ts`), à l'octet. **Les treize autres `ged:*`
+  du manifeste** (`ged:piece:recevoir`, `…:controler`, `…:rattacher`, `ged:fonds:verser`, `…:sceller`, `…:verifier`,
+  `ged:papier:sortir`, `ged:dossier:reconstituer`, `ged:destruction:proposer`, `…:viser`, `ged:sante:consulter`,
+  `ged:parametre:administrer`, `ged:journal:consulter`), présents depuis la 1.0.0, **ne sont pas dans auth** : ils
+  désignent les rôles de l'assurance (ACC, NUM, ARCH, AUD, RESP, DG), qu'auth ne connaît pas (aucun droit `sinistres:`,
+  `assurance:` ni table d'accès de ce métier), et aucune garde de `document-service` ne les lit (son recensement ne
+  classe que les routes du cabinet, droits du cabinet). Les poser sans rôle n'attribuerait rien et les offrirait à la
+  composition des rôles d'un cabinet sans route qui les lise : **non posés ici**. Ils entreront avec la table d'accès
+  du métier de l'assurance, dans la story qui la fera. Information à C (« → C »).
+- **D-979-20 — Le test de semis suit la copie.** `manifestes-seed.service.spec.ts` épinglait `comptabilite` en 0.4.0 :
+  il passe en 0.5.0, et un test neuf vérifie le fait publié par `comptabilite`, consommé par `ged` 1.3.0, et une route
+  de la mémoire de classement. Aucune logique neuve : les mutations portent sur la copie (D-979-22).
+- **D-979-21 — Sans Docker** (comme D-979-15). Aucun module Nest, aucune dépendance, aucun Dockerfile ne change : une
+  copie JSON semée au démarrage du catalogue. Le verrou n'est pas pris.
+- **D-979-22 — Contrats.** Deux manifestes publiés au catalogue changent de version (`ged` 1.3.0, `comptabilite`
+  0.5.0) ; aucune route, aucun champ, aucun topic du catalogue ne change de forme. Annoncé dans « ⚠ Contrats » avant la
+  fusion. Le topic `comptabilite.facture.inscrite` est écrit sans `@1` par ses deux manifestes et par le code des deux
+  services (même graphie) : le schéma du manifeste le permet ; information à C, sans effet ici.
+
+### Livraison de la suite (soir)
+
+- **catalogue #74** (branche `MNV-979-manifestes-ged-comptabilite`, tête `f22f6f9`) : `copies.json` depuis
+  `prospera-stories@f703671` ; `manifestes-seed.service.spec.ts`. Fusion après l'annonce du contrat.
+
+### Preuves de la suite (soir)
+
+- **Sans Docker** (D-979-21) : aucun module, aucune dépendance, aucun Dockerfile touchés ; verrou non pris.
+- **Catalogue, Node 25** : `manifestes:garde` **rouge avant la copie** (`ged` et `comptabilite` seuls), **verte après
+  (48)**, contre `f703671` puis contre `origin/main` (`b0efacc`) ; sha256 des deux manifestes vérifiés sur le blob et sur
+  l'extraction LF ; les deux copies (worktree, `git archive`) identiques hors `origine`.
+- **Tests relancés par chemin** : `src/modules/catalog/manifeste` 3 suites, 58/58 (le test de semis rouge sur
+  `0.4.0` avant sa mise à jour) ; **suite complète : 104 suites, 1 619 passés**, 3 suites rouges connues (binding
+  natif de Confluent sous Node 25 : `app-cablage.invariant.spec.ts`, `kafka-producer.service.spec.ts`,
+  `outbox-relay.service.spec.ts`).
+- **Lint** du spec touché (contenu indexé, LF) et **build** : verts. `copies.json` est généré (ni lint ni prettier,
+  comme avant).
+- **Mutations : 2/2 rouges sur assertion** (test de semis et garde) : `comptabilite` remis en 0.4.0 ;
+  `comptabilite.facture.inscrite` retiré de ce que `ged` consomme.
