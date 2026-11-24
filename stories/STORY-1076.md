@@ -1,6 +1,6 @@
 # STORY-1076 : les seuils de l'analyse financière, sourcés et versionnés dans le paquet — FE-141 affiche ses verdicts
 
-Status: in-progress
+Status: done
 
 **Plan :** `coordination/PLAN-LOT-6-2026-11-23.md` §6, amendement du 2026-11-24 (soir, D-L6-5), n° 8 · **Dépôt :**
 `prospera-bilan-service` (repris de B, passation constatée au rituel : `origin/dev` = `7b53ff5`, aucune PR ouverte) ·
@@ -113,4 +113,31 @@ citable (recherche ci-dessous) : ils gardent « aucun repère déclaré », et c
 
 ## Preuves
 
-À compléter à la livraison.
+**Livré :** prospera-bilan-service#186, fusionnée en rebase le 2026-11-24 (`head` `b49f46b`, rejoué sur `dev` en
+**`e4cee3e`**, arbre identique) ; annonce « ⚠ Contrats » prospera-stories #835 (`main` cb0c2da) avant le code.
+
+- **Sources des paquets** : `_meta.seuils` de `table-de-passage-syscohada.json` (`@2.1`, zone franche),
+  `-2.2.json`, `-2.3.json` ; `node scripts/referentiels/build.mjs` : **seuls les quatre artefacts attendus bougent** ;
+  chacun, bloc `seuils` retiré, est égal au JSON d'avant (AC-6). Empreintes (octets commités, `autocrlf=false`) :
+  `@2.1` `abaffa01…`, `@2.2` `8b6255f7…`, `@2.3` `7a39c0da…`, zone franche `11f60ebc…` ; registre et quatre specs à jour
+  (AC-7).
+- **Spec neuve `analyse.seuils-livres.spec.ts` : 22/22** — bornes, sens, secteur écrits dans le test (AC-2), source
+  citée (BCEAO, texte, mars 2020, paragraphe, phrase, URL, cas des télécommunications, AC-3), même bloc dans les quatre
+  paquets, bornes à la norme et un centième en dessous, liasse saine « BON » (72,73 % ; 2,56 ; 10 %) et fragile
+  « RISQUE » (4,76 % ; 0,38 ; −20 %) sous les quatre paquets, seuil appliqué publié, seize indicateurs sans repère
+  (AC-5), aucune valeur changée (AC-4).
+- **Specs reprises** : `analyse.seuils` (AC-1 de 553 prouvé sur une variante sans bloc ; SFD, CIMA, SMT sans seuils se
+  chargent), `analyse.service` (le premier indicateur jugé, l'endettement sans repère), `analyse.lecture-alternative`
+  (variantes sans `seuils`, piège 1076-4).
+- **e2e (vrai HTTP, artefacts embarqués)** : `bilan-analyse` + `openapi-contract` **583/583** — le dry-run sous `@2.1`
+  sert `POIDS_CAPITAUX_PROPRES` 68,75 « BON », `LIQUIDITE_GENERALE` 3 « BON », `MARGE_NETTE` 27,08 « BON », seize
+  `AUCUN_REPERE_DECLARE`.
+- **Suite unitaire complète (Node 25)** : 333 suites vertes sur 349, **11 973 tests verts** ; les 16 rouges sont
+  connues et sans lien (13 binding de Confluent, `dossier-scope.invariant` et `analyse.agnosticisme` sur les chemins
+  Windows, `homogeneisation.regles` sous la charge — 73/73 seul).
+- **Mutations 9/9 tuées sur l'assertion** (le registre suit l'empreinte mutée : aucune `ReferentielIntegrityError`) :
+  20 → 25, 1 → 1,5, 0 → 5, marge nette retirée, secteur `47`, source sans URL, bloc retiré de la table partagée, seuil
+  posé sur `LIQUIDITE_REDUITE`, `BON` → `TRES_BON`.
+- Lint des fichiers touchés 0 ; `nest build` OK ; `git diff --stat` = `--ignore-cr-at-eol`.
+- **Sans Docker** : aucun module, dépendance ni Dockerfile ne change (précédent de B : 483, 065, 1084) ; le
+  comportement servi est prouvé par l'e2e HTTP sur les artefacts embarqués. Verrou non pris (tenu par B, 1112).

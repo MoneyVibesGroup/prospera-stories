@@ -237,6 +237,35 @@
   - **Suivante : STORY-1076** (les seuils de l'analyse financière, `prospera-bilan-service` ; première story de bilan de
     D : constater la passation de B, `7b53ff5`, dans « Passations »).
 
+- **STORY-1076** ✅ 📊 — les seuils de l'analyse financière, sourcés et versionnés dans le paquet : FE-141 reçoit ses
+  verdicts (prospera-bilan-service#186, `dev` e4cee3e ; annonce « ⚠ Contrats » #835 avant le code, `main` cb0c2da).
+  **Première story de bilan de D** : passation de B constatée au rituel (`origin/dev` = `7b53ff5`, aucune PR ouverte ;
+  « Passations »). Rituel (2026-11-24) : rien d'autre pour D chez A, B et C (l'écart FE-141 du journal de A est cette
+  story).
+  - **La recherche des sources** (fiche) : aucune source citable dans `prospera-stories` (pack de 25 livres, référentiels,
+    rapports, PRD : les « couverture 1,20, autonomie 33 % » du PRD sont des [ASSUMPTION]) ; une source publique
+    officielle : **BCEAO, procédure révisée du dispositif des accords de classement des entreprises non financières (mars
+    2020)**, quatre ratios de décision en codes de la liasse SYSCOHADA révisé. Trois ont **la même formule** qu'un
+    indicateur publié : autonomie financière CP / DZ ≥ 20 % (`POIDS_CAPITAUX_PROPRES`), liquidité générale (BK + BT) /
+    (DP + DT) ≥ 1, marge nette XI / XB positive. La quatrième (capacité de remboursement ≤ 4) divise par la **CAFG**,
+    l'indicateur par l'EBE : non appliquée (D-1076-8).
+  - **Livré** : le bloc `seuils` de `syscohada-revise@2.1`, `@2.2`, `@2.3` et `zone-franche-togo@1.0` (même bloc,
+    `TOUS` secteurs, deux niveaux `RISQUE` / `BON`, source citée avec paragraphe, phrase et URL), **révision en place**
+    (D-1076-2 : additif, liasse inchangée, prouvé bloc retiré) ; empreintes à jour ; les **seize autres** indicateurs
+    restent sans repère (**Q-D-14**, défaut appliqué). Le contrat d'analyse ne change pas, son contenu si.
+  - Preuves : Node 25, suite complète : 333 suites vertes sur 349, 11 973 tests verts (les 16 rouges connues : 13
+    binding de Confluent, deux chemins Windows, `homogeneisation.regles` sous la charge — vert seul) ; spec neuve
+    `analyse.seuils-livres` 22/22 (quatre paquets par le vrai chargeur, liasse saine « BON », fragile « RISQUE », seize
+    sans repère) ; e2e `bilan-analyse` + `openapi-contract` 583/583 (dry-run réel : trois verdicts « BON ») ; **mutations
+    9/9 tuées sur l'assertion** ; lint 0, build OK ; arbre fusionné identique au commit testé.
+  - Décisions D-1076-1 → 8 (fiche) ; Q-D-14 au PO ; → C : recopie à l'octet des trois `syscohada-revise` dans
+    `balance-service` (ticket). **Sans Docker** (aucun module, dépendance ni Dockerfile ne change ; précédent de B
+    pour 483/065/1084) : verrou non pris (tenu par B, 1112, au moment de la story).
+  - **Suivante : STORY-1073** (plan amendé, `main` a39f250 : ordre 1072 ✅ → 1076 ✅ → **1073** → 1077 → 1078 → 1074 →
+    1075) — la facture lit sa fiche légale, D faisant aussi les côtés producteurs (`dossier-service`, `paiement`) ; B
+    a écrit leur passation limitée à 1073 (journal de B, `main` dde8f19 : dossier `2bf9dbd`, paiement `4684d22`) : la
+    sous-session de 1073 la constate. Puis STORY-1077 (capitaux propres < ½ capital, `bilan-service`).
+
 ### Lot 4 (ouvert le 2026-11-18)
 
 - **Plan** : `PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §4 : **STORY-1060 → 1064**, le distributeur au backend (cinq stories ;
@@ -1017,7 +1046,7 @@
   si). Rien à faire dans `kyc-service`.
 - **→ C (2026-11-24, STORY-1076) : recopier à l'octet dans `prospera-balance-service` les trois paquets SYSCOHADA
   révisé** (`syscohada-revise-2.1/2.2/2.3.json`, bloc `seuils` peuplé, révision en place D-1076-2) et leurs empreintes
-  (registre, `ARTEFACTS_PARTAGES`) — **ouverte**. Ticket : `tickets/TICKET-BACKEND-balance-recopie-paquets-syscohada-seuils-1076.md`
+  (registre, `ARTEFACTS_PARTAGES`) — **ouverte** (bilan `dev` `e4cee3e`, prospera-bilan-service#186). Ticket : `tickets/TICKET-BACKEND-balance-recopie-paquets-syscohada-seuils-1076.md`
   (empreintes d'avant et d'après). `balance-service` ne lit pas `seuils` : rien ne casse en service ; sa garde « octets
   identiques à ceux de bilan-service » rougit tant que la recopie n'est pas faite, sur un poste où les deux dépôts sont
   côte à côte. D ne touche pas à `balance-service` (D-L6-5).
@@ -1397,7 +1426,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-24, STORY-1076) avant la fusion du code (prospera-bilan-service `MNV-1076`). — Les seuils de
+- **PUBLIÉ (2026-11-24, STORY-1076, prospera-bilan-service#186, `dev` e4cee3e) ; ANNONCÉ avant la fusion du code
+  (prospera-stories #835, `main` cb0c2da), sans écart. — Les seuils de
   l'analyse financière, sourcés (BCEAO), dans les paquets SYSCOHADA révisé : FE-141 reçoit des verdicts.** Fiche :
   `stories/STORY-1076.md` (D-1076-1 → 8, Q-D-14). **Aucune route, aucun champ, aucune valeur d'énumération ne change** :
   le contrat de `GET|POST …/bilan/analyse` (STORY-552/553) est inchangé ; ce qui change, c'est son **contenu**.
@@ -2315,6 +2345,22 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1076** (premier passage de D dans `bilan-service`) :
+  - (1) **`prettier --write` sur un motif (`referentiel/*.spec.ts`) réécrit en LF tous les fichiers du dossier** du
+    checkout (CRLF par `autocrlf`) : `git status` les dit modifiés sans aucun diff (`--ignore-cr-at-eol` identique).
+    Ne passer à prettier que ses fichiers ; sinon `git checkout --` des seuls fichiers sans diff avant le commit.
+  - (2) **Un artefact de référentiel se restaure par `git -c core.autocrlf=false checkout --`** (sinon CRLF, empreinte
+    fausse) ; un `.ts` du checkout par un `git checkout --` ordinaire (il y est en CRLF). Les sources JSON et les
+    artefacts réécrits par `build.mjs` sont en LF dans le checkout. **Le `git switch dev` d'après la fusion
+    les a réécrits en CRLF** (empreinte de `@2.3` fausse) : supprimer, puis `git -c core.autocrlf=false checkout --`.
+  - (3) **Jest écrit son rapport sur stderr** : `npx jest > f 2>&1`, jamais `2>&1 > f` (le fichier reste vide).
+  - (4) **Un paquet livré porte désormais des seuils** : une spec qui fabrique une variante de l'artefact réel pour
+    éprouver un AUTRE bloc doit retirer `seuils` (sinon la version citée par le seuil appliqué suit la variante) ; le
+    patron est dans `analyse.lecture-alternative.spec.ts`.
+  - (5) **Changer une empreinte de paquet** : elle est épinglée dans le registre et dans quatre specs
+    (`referentiel-registry`, `referentiels-additionnels-coherence`, `notes-syscohada-2.2`, `titres-rubriques-2.2`) ;
+    un remplacement des quatre valeurs par un script, puis un commentaire « MAJ STORY-n » à chaque endroit.
 
 - **STORY-1072** :
   - (1) **Un e-mail envoyé deux fois à un seul des destinataires** : chercher le rejeu côté `notification`, pas chez
