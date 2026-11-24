@@ -659,6 +659,33 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   3. un **rendu** DOCX et PDF d'un contenu structuré (sections, blocs, tableaux) pour les documents générés.
   Aucun id de story n'est réservé par A : C le prend dans sa plage.
 
+## Lot 6 (2026-11-24)
+
+- **2026-11-24 — Maquettes de la console AP-57, AP-55, AP-59 publiées, EN ATTENTE DE VALIDATION.** Prototype console
+  (`frontend-admin-panel/docs/mockups/ap-02-organisations.html`), PR **#34** (`lot6-maquettes-console`, non fusionnée).
+  L'Artifact console du lot 4 (`7rbu7npMzRV9QE45CZsjJZ`) est introuvable (bascule de compte) : **nouvelle URL
+  `https://claude.ai/artifact/4DyGogjGKen824fHcgViAy`**.
+  - AP-57 : écran « Essais » (5 essais, une action par ligne, « Ouvrir un essai » avec le jeu coché d'avance).
+  - AP-55 : section « Offre et mise en service » de la fiche (offre du métier pré-cochée, « Installer N modules », « Reprendre »).
+  - AP-59 : colonne et filtre « Métier », « Changer de métier » sur la fiche.
+- → B (24/11) : **STORY-1112** : relayer `POST /essais`, `GET /essais/{org}`, `POST …/prolongation`, `…/signature`,
+  `…/jeu-demonstration`, `POST/GET …/effacement` (corps et codes de refus du catalogue, tels quels), **et ajouter une
+  liste des essais** (`GET /admin/essais` : le catalogue ne sert que la lecture par organisation) ; recommandé aussi :
+  `POST /admin/essais` qui enchaîne la naissance du prospect (`POST /naissances`) puis l'ouverture, avec le jeu choisi
+  par le BFF selon le métier (le catalogue attend un code et une version de jeu, sans route pour les lister) — ouverte.
+- → B (24/11) : **STORY-1114** : `vertical` (code du service) dans `GET /admin/orgs`, `GET /admin/orgs/{id}` et un filtre
+  `vertical` sur la liste ; relais de `GET /admin/verticaux` et `PATCH /admin/organizations/{id}/vertical` (corps `vertical`,
+  `reason` facultatif ; refus `VERTICAL_ROLES_INCOMPATIBLES` 409 et `VERTICAL_INCONNU` 400 transmis avec leur code) — ouverte.
+- → B (24/11) : **AP-55** : relayer `GET /etat-publie/{org}` (aujourd'hui sans relais BFF) en lecture pour `org:read` ; les
+  relais d'offre et d'installation existent déjà — ouverte.
+- Questions posées à l'utilisateur pour la validation, avec la réponse par défaut :
+  1. Créer le prospect dans le même geste que l'essai (nom + métier + courriel) ? Défaut : oui (AC-1 le demande).
+  2. « Prêt à signer » n'existe pas côté serveur : « Signer » est proposé en principal quand l'essai est terminé ou en dernière semaine déjà prolongé, sinon dans « Détails ». OK ? Défaut : oui.
+  3. « Signer » en un clic sans confirmation, « Effacer » avec confirmation ? Défaut : oui.
+  4. Retirer « Activer un vertical » de la fiche (remplacé par l'offre) et garder « + Octroyer » jusqu'à la fusion de 1080 ? Défaut : oui.
+  5. Mots courts des métiers (Cabinet, Distributeur, Microfinance, Assurance) au lieu des libellés du service ? Défaut : oui, table de l'écran ; « Plateforme » n'est pas proposé au changement.
+  6. Les autres écrans (tableau de bord, assistant) gardent Distribution/Finance jusqu'à AP-58 ? Défaut : oui.
+
 ## Questions à l'utilisateur ou au PO
 
 - **Parcours réel du dossier de financement (2026-11-21), avec le choix retenu par défaut** (aucune ne bloque l'écriture des fiches) :
