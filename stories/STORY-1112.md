@@ -1,6 +1,6 @@
 # STORY-1112 : le BFF relaie les essais d'un prospect à la console (ouvrir, prolonger, suivre)
 
-Status: done
+Status: in-progress (rouverte le 2026-11-24 pour sa suite : « Suite du 2026-11-24 », en fin de fiche)
 
 **Complexité :** moyenne (deux lectures de plus au catalogue, huit relais typés au BFF, une ouverture en un geste)
 
@@ -167,3 +167,136 @@ adresse (`sub`, `org`, `roles`, `perms`).
 - **STORY-1113** : la naissance et la mise en service relayées seules (AP-56) ; la console à deux espaces (D-1112-6).
 - L'effacement de bout en bout (certificat signé) n'est pas rejoué ici : il demande l'échéance passée (horloge de
   recette) et les modules levés ; éprouvé par 953 au catalogue, et à rejouer par la recette de **STORY-1115**.
+
+---
+
+## Suite du 2026-11-24 : le premier membre d'un essai
+
+**Ticket servi :** `tickets/TICKET-BACKEND-premier-membre-d-un-essai.md` (ouvert par B le 24/11 dans STORY-1115,
+D-1115-6) : une organisation née par le moteur dans l'espace d'essai n'a aucun membre, et aucune route n'y fait entrer
+son administrateur. Personne ne peut donc entrer dans l'essai d'un prospect : ni sous son nom, ni « en tant que » un
+compte du jeu (FR-21 exige d'être membre).
+**Pourquoi 1112 et pas une story neuve :** ouvrir un essai par la console (1112) ne sert que si quelqu'un peut y entrer.
+Aucun identifiant neuf : branches `MNV-1112-premier-membre` (auth, catalogue, admin-panel, recette), commits
+`MNV-1112(auth|catalogue|admin-panel|recette): …`, docs `docs-1112-premier-membre`. Le tracker rouvre l'entrée de 1112
+(`in-progress`) le temps de la suite et la referme (`done`) dans la PR de docs finale, comme pour la suite de 979.
+**Place :** décidée par la session du groupe B, **avant STORY-1116** (1116 ouvre cinq essais simultanés : il faut pouvoir
+y entrer par de vraies routes) et avant la démo du 15/01.
+**Sources lues :** le ticket ; fiches STORY-938 (D-938-1 → 5), 948 (D-948-5 → 8), 951 (D-951-1), 972 (D-972-5 → 9), 974
+(D-974-1 → 11), 1112 (D-1112-1 → 9), 1113 (D-1113-1 → 10), 1115 (D-1115-1 → 12) ; journal de B (état, pièges,
+« ⚠ Contrats » de 1113 et 1115). Code relu sur `origin/dev` : auth `b49d8ab` (`InvitationsAuReelController`,
+`EspaceReelGuard`, `InvitationsAuReelService`, `InvitationService`, `MailProcessor`, `NotificationClient`,
+`messages-de-compte.ts`, `MembershipsService`), catalogue `45971cf` (`EssaiProspectService`, `OrdreDOuvertureDto`,
+`essaiPublie`, `SortiesDEssai`, `sorties-d-essai.ts`, `InvitationsDAuthParHttp`, `MiseEnServiceModule`, `EssaiModule`,
+contrat `essai-prospect.openapi.json` 1.1.0), BFF `c451b17` (`EssaisProxyService`, `projection.ts`, `essai.dto.ts`,
+`CatalogueDeLEssaiClient`), recette `b38b268` (`essai-mise-en-service.recette.ts`, `profil-de-recette.spec.ts`,
+`agregateur-sms.ts`, `courrier.ts`, profil).
+
+**Ce qui existait déjà (relu avant le code) :**
+- auth sert déjà, sous l'identité du moteur, `PUT /interne/organisations/{id}/invitations` (974) : un membre neuf sous un
+  identifiant donné, `INVITED`, `TENANT_ADMIN` ou `TENANT_USER`, son rôle métier proposé au métier, ses événements dans la
+  transaction, son e-mail après elle, idempotent par membre. Dans l'essai, sa garde rend 403 `ESPACE_D_ESSAI_REFUSE`
+  avant le corps (D-974-2). L'e-mail part par la notification de l'espace de l'auth (`NOTIFICATION_BASE_URL`) : dans
+  l'essai, celle de l'essai.
+- Le catalogue appelle déjà cette route (mise en service, `InvitationsDAuthParHttp`, même secret et même adresse que la
+  naissance) et tient la règle des sorties de l'essai (`SortiesDEssai.verifier` : liste blanche, journal des
+  interceptions, `ECRITURE_REELLE_DEPUIS_ESSAI`). L'ordre d'ouverture ne porte que l'adresse de l'administrateur
+  (`administrateur`), sans son nom ; elle sert aux avis de fin d'essai.
+- Le BFF relaie l'ouverture (`POST /admin/essais`, 1112) et les sorties de l'essai (`/admin/sorties-essai`, 1113).
+- La recette pose le premier membre dans `auth_essai` par `mongosh` (D-1115-6) ; l'essai de la pile n'a aucune sortie
+  de messages (D-1115-5) ; la garde du profil ne lit que le profil, pas les recettes.
+
+| Exigence (critères du ticket) | Fait |
+|---|---|
+| Un prospect dont l'essai vient d'ouvrir reçoit (par la sortie de l'essai) un lien, choisit son mot de passe, se connecte à l'essai, invite un collègue par `POST /users`, et se connecte « en tant que » un compte du jeu | catalogue : invitation à l'ouverture ; auth : la route du moteur ouverte à l'essai pour ce cas ; recette : le parcours de bout en bout, le lien lu à la sortie de l'essai |
+| Aucun message ne part au réel depuis l'essai (NFR-3) | l'e-mail part par la sortie de l'essai, après la liste blanche de l'essai ; hors liste : intercepté, journalisé, rien ne part ; recette : rien dans Mailhog (le réel) |
+| La recette `essai-mise-en-service` n'écrit plus rien en base | la pose en base disparaît ; garde `src/recettes-sans-base.spec.ts` |
+| D-974-2 ne s'ouvre que pour ce cas, avec un test qui garde le reste fermé | un membre, `TENANT_ADMIN`, aucun autre administrateur actif ; tout le reste 403 avant le corps (tests) |
+
+### Décisions (prises par défaut, contestables)
+
+- **D-1112-10 — Une suite de 1112, pas une story neuve**, placée par la session du groupe B avant 1116 (ci-dessus).
+  L'entrée du tracker est rouverte puis refermée ; la marque haute ne bouge pas.
+- **D-1112-11 — auth : la route d'invitation du moteur s'ouvre à l'essai pour le premier administrateur, et pour lui
+  seul** (point 1 du ticket ; pas de route sœur). `PUT /api/v1/interne/organisations/{id}/invitations` fait déjà tout ce
+  qu'il faut (identifiant donné, `INVITED`, rôle et rôle métier, événements, e-mail au nom de l'organisation, idempotence
+  par membre, refus nommés) : une route sœur en recopierait 280 lignes. Dans l'espace d'essai, la garde
+  (`EspaceReelGuard`) reconnaît sur le **corps brut**, avant toute validation, la seule forme admise : **un membre,
+  `TENANT_ADMIN`** ; toute autre forme reste 403 `ESPACE_D_ESSAI_REFUSE` avant la lecture du corps (D-974-2 intact pour
+  elles). Le service vérifie ensuite que l'organisation **n'a pas d'autre administrateur actif** (403
+  `ESPACE_D_ESSAI_REFUSE` sinon, rien d'écrit) : un administrateur rejoué est `EXISTANT` (200). Les refus du réel valent
+  (`ORGANISATION_INCONNUE`, `COMPTE_DU_JEU_HORS_DU_REEL`, `TENANT_ROLE_INCONNU`, `TENANT_ROLE_NON_PROPOSE`,
+  `MEMBRE_EN_CONFLIT`). Le jeton du moteur reste exigé. **Rien ne change dans le réel.** Aucune route, aucun champ,
+  aucun module ni fournisseur neuf ; ni la garde des droits ni `permission.enum.ts` (copié à l'octet, MNV-650) ne sont
+  touchés : la route est `@Public` sous `JetonDuMoteurGuard`, sans droit. Les membres suivants entrent par la console de
+  cet administrateur (`POST /users`), comme le disait D-948-8.
+- **D-1112-12 — catalogue : l'essai invite son premier administrateur à l'ouverture, sous l'identité du moteur** (point 2
+  du ticket, même patron que la naissance et que l'invitation au réel de 974). Après l'ouverture (le fait, l'état publié,
+  les avis, le jeu importé), `PremierAdministrateurDeLEssai` : (1) demande la sortie de son courriel à la liste blanche
+  de l'essai (D-1112-13) ; (2) l'invite chez l'auth de l'essai (`InvitationsDAuthParHttp`, `TENANT_ADMIN`) ; (3) écrit
+  l'issue dans l'essai, `invitationAdministrateur { userId, etat, le?, code?, motif?, interceptionId? }`, sans adresse ni
+  nom (l'adresse est déjà dans `destinataires`). États : `ENVOYEE`, `INTERCEPTEE`, `A_REPRENDRE` (auth injoignable,
+  `motif`), `REFUSEE` (refus d'auth, `code`) — la règle de D-974-9. **L'essai est ouvert quoi qu'il arrive** (c'est un
+  fait) ; **l'ordre d'ouverture rejoué** (200, mêmes destinataires) **reprend l'invitation tant qu'elle n'est pas
+  `ENVOYEE`** (et sur un essai ouvert avant cette suite, qui n'en a pas) ; un essai effacé n'invite plus. Une panne de
+  base pendant l'invitation remonte (500) : le même ordre reprend. `MiseEnServiceModule` exporte `SortiesDEssai` et
+  `INVITATIONS_D_AUTH`, qu'`EssaiModule` importe (un fournisseur neuf).
+- **D-1112-13 — La liste blanche de l'essai décide de la sortie du courriel** (« l'e-mail part par la sortie de l'essai,
+  liste blanche, 951/1113 »). La partie A de l'essai demande `SortiesDEssai.verifier` (la règle n'existe qu'une fois,
+  D-951-1) sous l'identité du moteur limitée à l'organisation, module `essai`, destination `COURRIEL` = l'adresse de
+  l'administrateur. Hors liste : `INTERCEPTEE`, l'interception est au journal (`demandeePar: service:moteur`), **auth
+  n'est pas appelée, aucun membre n'est écrit, rien ne part**. La console met l'adresse (ou `*@domaine` du prospect) en
+  liste blanche (`POST /admin/sorties-essai/liste-blanche`, 1113), puis rejoue l'ouverture. **Pas de liste blanche
+  implicite** : on ferme, on n'ouvre pas ; l'ajout reste un geste de l'opérateur, journalisé. ⚠️ Les autres messages de
+  compte de l'auth d'essai (l'invitation d'un collègue par `POST /users`, une réinitialisation) ne passent pas par la
+  liste blanche : auth n'est pas un module C13 qui intercepte ; ils partent par la notification de l'essai (« Ce qui
+  reste »).
+- **D-1112-14 — L'identifiant du premier administrateur est tiré de l'organisation** : les 24 premiers caractères
+  hexadécimaux de `sha256("prospera:essai:premier-administrateur:<organisationId>")`. Le même à chaque reprise (auth est
+  idempotente par membre : rejouer ne double rien, et une réponse perdue ne fait pas naître un second administrateur),
+  sans état à écrire avant l'appel ; c'est sous lui que l'administrateur entre au réel à la mise en service (FR-42), comme
+  les comptes du jeu sous `identifiantDuJeu` (D-972-5).
+- **D-1112-15 — Le nom de l'administrateur : facultatif dans l'ordre, avec un défaut.** `identiteAdministrateur {
+  prenom, nom, roleMetier? }` (1 à 100 caractères ; `roleMetier` au format d'auth) au catalogue (contrat `essai-prospect`
+  1.1.0 → **1.2.0**) et au BFF. Absent : prénom « Administrateur », nom du prospect né dans l'essai, aucun rôle métier
+  inventé ; l'administrateur corrige son profil. Le rendre obligatoire casserait l'ordre de 1112 (et la maquette
+  validée d'AP-57 ne le demande pas) : **→ A** (AP-57, lot 7) — nommer l'administrateur à l'ouverture et montrer l'issue
+  de son invitation.
+- **D-1112-16 — BFF : aucune route neuve** (point 3 du ticket : l'ouverture suffit, la reprise est le même ordre rejoué).
+  `POST /admin/essais` relaie `identiteAdministrateur` champ par champ ; `EssaiDto.invitationAdministrateur` est projeté
+  (état dans une liste fermée, identifiant et interception au format d'un ObjectId, code et motif au format d'un code ;
+  une forme hors contrat est écartée, l'essai traverse). Noms de schéma uniques : `EssaiIdentiteAdministrateurDto`,
+  `EssaiInvitationAdministrateurDto`, `EtatDInvitationDeLAdministrateurDEssai`.
+- **D-1112-17 — Recette : la sortie de messages de l'essai est tenue par la recette ; plus rien en base** (point 4 du
+  ticket ; D-1115-5 amendée). En déploiement, l'auth de l'essai remet ses messages à la notification de l'espace d'essai.
+  La pile n'en lève pas : une notification d'essai demanderait sa base, son Kafka et son Redis sur la VM de 8 Go, et ses
+  bases ont des noms fixes (`notification_service`, `…_preuves`) : partager `mongo-notification` mêlerait les espaces.
+  La recette tient donc le point de remise (`src/sortie-de-l-essai.ts`, le contrat `POST /api/v1/service/envois` de
+  notification-service, accusé `{ id }`), comme elle tient le faux agrégateur SMS ; `auth-essai` y est branchée par
+  `NOTIFICATION_BASE_URL: http://host.docker.internal:${RECETTE_SORTIE_ESSAI_PORT:-18026}`,
+  `NOTIFICATION_JETON_SERVICE` interpolé, `extra_hosts: host-gateway`. Le catalogue de l'essai n'a toujours aucune
+  sortie. Le parcours : ouverture hors liste blanche ⇒ `INTERCEPTEE`, interception lue par la console, rien à la sortie ;
+  domaine du prospect en liste blanche, ouverture rejouée ⇒ `ENVOYEE`, l'administratrice membre `INVITED`
+  `TENANT_ADMIN` `CAB_ASSOCIE` de l'essai, son lien à la sortie de l'essai, **rien dans Mailhog** (le réel) ; elle entre
+  par ce lien ; le reste comme en 1115. **Garde neuve** `src/recettes-sans-base.spec.ts` : aucune recette n'a de client
+  de base ni d'écriture Mongo, hors de l'entorse nommée (`delegation`, STORY-651, point 2) ; `essai-mise-en-service`
+  n'exécute rien dans un conteneur.
+- **D-1112-18 — Docker.** Le catalogue change de module (un fournisseur et un import neufs) : `docker compose up` du
+  catalogue (les deux espaces) prouvé par la pile de recette. Auth et le BFF ne changent ni de module, ni de fournisseur,
+  ni de dépendance, ni de Dockerfile ; ils sont reconstruits et levés par la même pile. La recette se joue sur des images
+  reconstruites depuis `origin/dev` après la fusion, volumes neufs, puis la recette croisée complète.
+
+### Contrats touchés (annoncés avant la fusion, journal de B, « ⚠ Contrats »)
+
+- **auth** — `PUT /api/v1/interne/organisations/{id}/invitations` : dans l'espace d'**essai**, la demande du premier
+  administrateur (un membre `TENANT_ADMIN`, aucun autre administrateur actif) est servie (201 / 200) ; tout le reste y
+  reste 403 `ESPACE_D_ESSAI_REFUSE`. Le réel ne change pas. Route, corps, réponse et codes inchangés.
+- **catalogue** — `contrat/essai-prospect.openapi.json` **1.2.0** (ajouts facultatifs) : `OrdreDOuverture.identiteAdministrateur`,
+  `EssaiProspect.invitationAdministrateur`. Le journal des interceptions de l'essai peut porter des entrées `module:
+  essai`, `demandeePar: service:moteur`.
+- **BFF (OpenAPI, A génère ses types)** — `OuvrirEssaiRequestDto.identiteAdministrateur` (`EssaiIdentiteAdministrateurDto`,
+  facultatif) ; `EssaiDto.invitationAdministrateur` (`EssaiInvitationAdministrateurDto`, énumération
+  `EtatDInvitationDeLAdministrateurDEssai`), facultatif, rendu par toutes les routes qui rendent un essai.
+- **recette (profil)** — `auth-essai` : `NOTIFICATION_BASE_URL`, `NOTIFICATION_JETON_SERVICE`, `extra_hosts` ; variables
+  facultatives `RECETTE_SORTIE_ESSAI_PORT` (18026, doit être libre sur le poste) et `RECETTE_SORTIE_ESSAI_JETON` ; garde
+  neuve `recettes-sans-base`.

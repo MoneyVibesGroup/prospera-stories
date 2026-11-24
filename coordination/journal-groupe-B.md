@@ -148,9 +148,16 @@
        poste, aucune sur le second espace ; non relancée (D attendait le verrou). Unitaires 119/119 ; mutations 24/24. **Karapace** : `kyc.correction.requested@1`
        enregistré (id 1, BACKWARD), compatible ; témoin (champ neuf obligatoire) `INCOMPATIBLE`. Verrou pris à 15:47,
        rendu à 16:36, repris 16:38 → 17:05 et 17:07 → 18:20 (session coupée par la panne réseau) ; aucun conteneur, volume ni réseau `grp-b` ne reste.
+  11. **Suite de STORY-1112 — le premier membre d'un essai** (`TICKET-BACKEND-premier-membre-d-un-essai.md`, D-1115-6) :
+     **placée par la session de groupe le 24/11, avant STORY-1116** (1116 ouvre cinq essais simultanés : il faut pouvoir
+     y entrer par de vraies routes) et avant la démo du 15/01. **Aucun identifiant neuf** (D-1112-10) : c'est la suite de
+     1112 (ouvrir un essai par la console ne sert que si quelqu'un peut y entrer) — branches `MNV-1112-premier-membre`
+     (auth, catalogue, admin-panel, recette), commits `MNV-1112(auth|catalogue|admin-panel|recette): …`, docs
+     `docs-1112-premier-membre` ; fiche STORY-1112, « Suite du 2026-11-24 » (D-1112-10 → 18) ; entrée du tracker
+     rouverte (`in-progress`), refermée à la fin. **En cours** ; contrat annoncé avant la fusion (« ⚠ Contrats »).
   - **Suivante : STORY-1116** (cinq essais simultanés sur la même pile, chacun dans son espace ; `prospera-recette`,
-    catalogue ; recette complète ; fiche à écrire juste avant de coder, identifiant réservé par le plan §8). Le ticket du
-    premier membre d'un essai (ci-dessous) la précède utilement : **à placer par la session de groupe**.
+    catalogue ; recette complète ; fiche à écrire juste avant de coder, identifiant réservé par le plan §8), après la
+    suite de 1112 (ci-dessus).
   - **Reçue le 24/11, hors des lignes du plan : → B de A** (journal de A, fin du « Lot 6 ») — deux résultats faux de
     `bilan-service` visibles à la démo du 15/01 : la projection qui rembourse plus que la dette
     (`TICKET-BACKEND-projection-remboursements-non-plafonnes.md`, accepté par l'utilisateur le 19/11) et la liasse
@@ -835,8 +842,8 @@ comptabilité sont à C (D-L6-1).
 
 ## Demandes aux autres groupes
 
-- **→ B (2026-11-24, STORY-1115) : le premier membre d'un essai n'a pas de route** — ouverte, **à placer par la
-  session de groupe** (recommandé : avant STORY-1116 et la démo du 15/01). `TICKET-BACKEND-premier-membre-d-un-essai.md` :
+- **→ B (2026-11-24, STORY-1115) : le premier membre d'un essai n'a pas de route** — **placée par la session de groupe
+  le 24/11 : suite de STORY-1112, avant STORY-1116** (en cours, « État » n° 11) ; jusque-là ouverte. `TICKET-BACKEND-premier-membre-d-un-essai.md` :
   une organisation née par le moteur dans l'essai n'a aucun membre, et aucune route ne fait entrer son administrateur
   (`POST /users` exige un `TENANT_ADMIN` de l'organisation ; l'invitation au réel refuse l'essai, D-974-2). Auth,
   catalogue de l'essai (inviter `administrateur` à l'ouverture), BFF si besoin ; **→ A** l'écran ensuite. La recette
@@ -1203,6 +1210,12 @@ comptabilité sont à C (D-L6-1).
 
 ## Réponses aux demandes reçues
 
+- **← C (24/11, STORY-1088 puis STORY-1100) : recopier au catalogue `ged` (désormais 1.3.0, après 1.2.0) et
+  `comptabilite` 0.5.0** (journal de C : « → B (24/11, STORY-1087 puis 1088) » et « ⚠ Contrats » de 1100 ; `main`
+  `f703671`, `a525d766`) — **reçue le 24/11 pendant la suite de 1112, à placer par la session de groupe** (recommandé :
+  une suite de STORY-979, copies de manifestes sans Docker, avant ou juste après 1116 ; la 1.2.0 n'a pas à être semée
+  seule). Non servie ici : hors du ticket placé.
+
 - **← A (24/11) : servis par bilan #184 et #185** (`d98b7c4` et `7b53ff5` sur `dev` ; correctifs de STORY-483 et de
   STORY-065, annonce stories #802) — les deux résultats faux de `bilan-service` visibles à la démo du 15/01 :
   `TICKET-BACKEND-projection-remboursements-non-plafonnes.md` (remboursements plafonnés à l'encours, avertissement
@@ -1432,6 +1445,34 @@ comptabilité sont à C (D-L6-1).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-24, suite de STORY-1112 — le premier membre d'un essai, annoncé AVANT la fusion** (`prospera-auth-service`,
+  `prospera-platform-catalog-service`, `prospera-admin-panel-service`, `prospera-recette`, branches
+  `MNV-1112-premier-membre` ; fiche `stories/STORY-1112.md`, « Suite du 2026-11-24 », D-1112-10 → 18). **Ajouts et une
+  ouverture bornée** : aucune route, aucun champ, aucun topic existant ne change de nom ni de type.
+  - **auth** — `PUT /api/v1/interne/organisations/{id}/invitations` (identité du moteur) : dans l'espace d'**essai**,
+    la demande du **premier administrateur** (un seul membre, `role: TENANT_ADMIN`, aucun autre administrateur actif dans
+    l'organisation) est servie (201, ou 200 rejouée : `EXISTANT`) ; tout le reste y reste 403 `ESPACE_D_ESSAI_REFUSE`
+    (avant la lecture du corps, sauf l'organisation déjà pourvue, refusée après lecture sans rien écrire). Le réel ne
+    change pas. Son e-mail part par la notification de l'espace d'essai. Résumé et description OpenAPI de la route
+    complétés.
+  - **catalogue** — `contrat/essai-prospect.openapi.json` **1.1.0 → 1.2.0** (ajouts facultatifs) :
+    `OrdreDOuverture.identiteAdministrateur { prenom, nom, roleMetier? }` ; `EssaiProspect.invitationAdministrateur {
+    userId, etat: ENVOYEE | A_REPRENDRE | INTERCEPTEE | REFUSEE, le?, code?, motif?, interceptionId? }`. À l'ouverture
+    (et à l'ordre rejoué tant que l'état n'est pas `ENVOYEE`), l'administrateur est invité chez l'auth de l'essai sous
+    un identifiant tiré de l'organisation, **après la liste blanche de l'essai** (hors liste : `INTERCEPTEE`, rien ne
+    part). Le journal des interceptions peut porter `module: essai`, `demandeePar: service:moteur`.
+  - **BFF (OpenAPI : A génère ses types)** — `POST /api/v1/admin/essais` : `identiteAdministrateur` facultatif
+    (`EssaiIdentiteAdministrateurDto`) ; `EssaiDto.invitationAdministrateur` facultatif
+    (`EssaiInvitationAdministrateurDto`, énumération `EtatDInvitationDeLAdministrateurDEssai`), rendu par toutes les
+    routes qui rendent un essai. Aucune route neuve.
+  - **recette (profil, lu par qui lance la pile)** — `auth-essai` reçoit `NOTIFICATION_BASE_URL`
+    (`http://host.docker.internal:${RECETTE_SORTIE_ESSAI_PORT:-18026}`), `NOTIFICATION_JETON_SERVICE` et `extra_hosts:
+    host-gateway` : la sortie de messages de l'essai, tenue par la recette (`src/sortie-de-l-essai.ts`). **Le port 18026
+    doit être libre** sur le poste qui joue `essai-mise-en-service`. Garde neuve `src/recettes-sans-base.spec.ts`.
+  - **→ A (AP-57, lot 7)** : nommer l'administrateur du prospect à l'ouverture (prénom, nom, rôle métier) et montrer
+    l'issue de son invitation (`INTERCEPTEE` ⇒ mettre son adresse ou son domaine en liste blanche, puis rejouer
+    l'ouverture) ; écrit à la fin de la suite (« Réponses »).
 
 - **2026-11-24, STORY-1115 (lot 6, n° 6) — le second espace dans le profil de recette, annoncé AVANT la fusion**
   (`prospera-recette`, branche `MNV-1115` ; fiche `stories/STORY-1115.md`, D-1115-1 → 11). Aucun service, aucune
