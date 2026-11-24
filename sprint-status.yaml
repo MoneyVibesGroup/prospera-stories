@@ -7337,7 +7337,7 @@ sprints:
         epic: "EPIC-031"
         points: 8
         service: "fiscal-service"
-        status: "not_started"
+        status: "ready-for-dev"  # 2026-11-24 : fiche écrite (stories/STORY-323.md), contrat annoncé avant le code ; session A, lot 6 (n° 5). Onze états + visa de l'associé (V6) ; réconciliée avec les états de `depots` (538, inchangés) ; aucun droit neuf.
         assigned_to: null
       - story_id: "STORY-324"
         title: "Validation du client capturée comme pièce"

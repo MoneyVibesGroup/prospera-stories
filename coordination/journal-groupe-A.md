@@ -621,6 +621,12 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
 
 ## ⚠ Contrats
 
+- **2026-11-24 (STORY-323, session A), AVANT le code** : `prospera-fiscal-service` ajoute **le cycle de vie de l'obligation** (onze états) et **le visa de l'associé** (V6). **Ajouts seuls** ; aucun droit neuf (les trois droits `fiscalite:declaration:*` suffisent : manifeste `declarations` et catalogue d'auth inchangés) ; aucun événement Kafka. Détail : `stories/STORY-323.md`, « Contrat annoncé avant le code » et D-323-1 à 12.
+  - **Route** : `POST /api/v1/obligations/{id}/transition`, corps `{ vers }` (un des onze états : `A_PREPARER`, `EN_PREPARATION`, `A_CONTROLER`, `A_VALIDER`, `VALIDEE`, `A_DEPOSER`, `DEPOSEE`, `ACCUSE_RECU`, `A_PAYER`, `PAYEE`, `CLOTUREE`) ; 200 = l'obligation. Cycle strictement séquentiel ; pas de retour en arrière (STORY-325). Le droit dépend de la cible (associé : `valider` pour le contrôle, le visa et la clôture ; `deposer` pour déposer et consigner l'accusé ; `preparer` pour le reste).
+  - **Champs neufs, facultatifs**, sur la réponse de l'obligation : `visa` (`{ par, nom, le }` ou `null`), `prochainEtat`, `droitRequis`. `statut` garde son nom et sa place. **→ D (FE-081, écrans du dépôt)** : types à régénérer ; griser le bouton selon `droitRequis`.
+  - **Refus** : 403 `DROIT_FISCAL_REFUSE` (journalisé), 404 `OBLIGATION_INTROUVABLE`, 409 `TRANSITION_NON_PREVUE`, `VISA_REQUIS`, `OBLIGATION_DESACTIVEE`, `OBLIGATION_BLOQUEE`, `TRANSITION_CONCURRENTE`.
+  - **Réconciliation avec `depots` (538)** : `depots` ne change pas d'un octet (états `TRANSMISE`/`ACCEPTEE`/`REJETEE`, `lireObligation`, `fiscal.declaration.deposee`). Le `statut` de l'objet `Obligation` est l'état du CABINET ; la lecture de `depots` est l'état de la chaîne d'UN dépôt de liasse. Correspondance écrite et éprouvée : `A_DEPOSER`→`A_DEPOSER`, `TRANSMISE`→`DEPOSEE`, `ACCEPTEE`→`ACCUSE_RECU`, `REJETEE_A_RETRANSMETTRE`→`A_DEPOSER`. La liaison automatique est à 333/334.
+
 - **2026-11-23 (STORY-1099, session du groupe C), AVANT le code** : `prospera-balance-service` ajoute **la mémoire des choix dans les cahiers**. **Ajouts seuls** ; aucun événement ; manifeste `balance` inchangé. Détail : `stories/STORY-1099.md`.
   - **Lecture d'un lot OCR** : chaque ligne pré-proposée gagne un champ **facultatif** `suggestion` (`categorieId`, `categorieLibelle`, `compteCharge`, `compteProduit`, `source` : `MEMOIRE_DOSSIER` | `MEMOIRE_CABINET`). **→ D (FE-150)** : types à régénérer ; un client qui ignore le champ ne change rien.
   - **Routes neuves** : `GET /api/v1/dossiers/{dossierId}/cahiers/memoire-des-choix` (+ `/suggestion`), `DELETE …/{memoireId}` ; `GET /api/v1/cahiers/memoire-des-choix`, `DELETE …/{memoireId}` (`TENANT_ADMIN`), `GET /api/v1/cahiers/memoire-des-choix/actes`. Refus 404 `MEMOIRE_INTROUVABLE`.
@@ -696,6 +702,8 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   Aucun id de story n'est réservé par A : C le prend dans sa plage.
 
 ## Lot 6 (2026-11-24)
+
+- **2026-11-24 — STORY-323 en cours** (n° 5 de A, chaîne fiscale 323 → 320 → 322 → 328). Fiche écrite et contrat annoncé (ci-dessus, « ⚠ Contrats ») avant le code. Code : `prospera-fiscal-service`, branche `MNV-323`. Le manifeste du module est `declarations`, pas `fiscalite` : aucun droit neuf, donc rien à recopier au catalogue (pas de demande à B).
 
 - **2026-11-24 — Maquettes de la console AP-57, AP-55, AP-59 publiées, EN ATTENTE DE VALIDATION.** Prototype console
   (`frontend-admin-panel/docs/mockups/ap-02-organisations.html`), PR **#34** (`lot6-maquettes-console`, non fusionnée).
