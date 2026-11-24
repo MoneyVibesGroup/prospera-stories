@@ -461,3 +461,51 @@ prémisse.
 (contrat d'artefact partagé, leçon STORY-428), branches supprimées. PR `docs/` mergée sur `main`.
 
 Assigné à : `vivianMoneyVibesGroupes`.
+
+---
+
+## Correctif du 2026-11-24 (ticket de A, démo du 15/01)
+
+`tickets/TICKET-BACKEND-projection-remboursements-non-plafonnes.md` (accepté par l'utilisateur le 19/11) : sur le jeu
+de démonstration d'Ets Kossi Distribution, la dette financière de la base vaut **700 000** et le jeu rembourse
+**600 000 par an** ; le moteur appliquait la saisie telle quelle, la dette projetée valait 100 000, **−500 000**,
+**−1 100 000**, deux ratios sur trois se taisaient en `DETTES_FINANCIERES_NEGATIVES` et l'autonomie financière
+dépassait 1. Le défaut est né ici : cette story a introduit `dettesFinancieres = dette de base + emprunts −
+remboursements` sans regarder l'encours (la revue a fait taire le ratio, constat 2, sans fermer la cause). Correctif
+de cette story, sans identifiant neuf : **bilan #184** (`d98b7c4` sur `dev`, branche `MNV-483-remboursements`) ;
+annonce avant la fusion : stories #802. Groupe B (bilan est à B depuis le lot 4).
+
+- **D-483-8 — Plafonner à l'encours restant, et le dire** (recommandation de la session de groupe, appliquée : le code
+  ne montre rien qu'elle casse), plutôt que refuser le jeu. Le remboursement **retenu** de chaque exercice vaut
+  `min(saisi, encours)`, l'encours étant la dette de la base + les emprunts nouveaux jusqu'à cet exercice − le déjà
+  remboursé ; chaque écrêtement publie un avertissement `REMBOURSEMENT_PLAFONNE` (exercice, saisi, encours, retenu,
+  **excédent non remboursé**). C'est le **flux** qui est plafonné (unité pure `remboursements-plafonnes.ts`, en tête du
+  moteur annuel) : trésorerie, financement net cumulé, dette, intérêts et ratios lisent la série retenue, donc
+  `controle.ecart = 0` et l'identité de somme constante (D-483-3) tiennent par construction. Un refus aurait bloqué la
+  démo sur une saisie que le cabinet fait couramment (« on rembourse 600 000 par an »), sans rien apprendre de plus que
+  l'avertissement. `avertissements` est publié **toujours**, vide quand rien n'est à dire (patron D-476-3), et
+  **facultatif au contrat** (aucun client généré n'est cassé). Le mensuel répartit le remboursement retenu (l'ancrage
+  lui passe les avertissements de son exercice : l'articulation reste une identité) et les republie ; la comparaison
+  nomme les scénarios écrêtés (`REMBOURSEMENTS_PLAFONNES`, énuméré ouvert de D-476-5) ; l'export l'écrit dans une
+  métadonnée « Remboursements ». **Modèle 1.13.0 → 1.14.0** : les montants changent sur ces jeux-là seulement.
+- **D-483-9 — Aucun plafond quand l'encours n'est pas connu** : dette de la base non ancrée (le paquet ne déclare pas
+  le marqueur `dettesFinancieres`, `dettesFinancieresAncrees: false`) — plafonner aux seuls emprunts nouveaux
+  effacerait le remboursement d'une dette réelle que le modèle ne voit pas — ou ventilation indéterminée (D-483-7). Le
+  remboursement saisi est alors retenu comme avant, et `DETTES_FINANCIERES_NEGATIVES` reste le motif honnête.
+- **D-483-10 — Le chemin du dossier de financement (STORY-1084) n'est pas plafonné** : ses remboursements sont le
+  capital des échéanciers, qui font foi (le banquier lit le tableau d'amortissement, et les indicateurs de dette de 1084
+  lisent ce même capital). Par construction, ils ne dépassent pas l'encours quand la dette de la base vient des
+  échéanciers ; s'ils le dépassent, c'est que la comptabilité dit moins que les échéanciers, et la dette négative nomme
+  cette incohérence. **L'échéancier des emprunts de 1084 ne change pas** (calculé dans `financement/emprunts`, hors de
+  la projection) ; `financement-emprunts` e2e identique.
+- **Preuves** (Node 25, sans Docker : aucun module, dépendance ni Dockerfile ne change) : spec neuve `remboursements-plafonnes.spec.ts` **14/14** sur le jeu du ticket (dette 100 000, 0, 0 ; avertissements
+  N+2 — excédent 500 000 — et N+3 — excédent 600 000 ; aucun `DETTES_FINANCIERES_NEGATIVES` ; écart 0 ; articulation
+  mensuelle nulle sur les trois exercices ; encours inconnu et chemin 1084 non plafonnés) ; projection, export et
+  financement 51 suites (seul rouge : `restitution.spec`, binding natif, rouge aussi sur `dev`) ; e2e `bilan-projection`,
+  `bilan-comparaison`, `financement-emprunts`, `openapi-contract` **717/717**, `bilan-export` 14/14 ; suite unitaire
+  complète 348 suites, les 15 rouges connues (binding, chemins Windows ; une 16ᵉ, `notes-coherence`, venait des JSON
+  en CRLF du checkout, verte sur un arbre LF) ; garde des noms de schéma (D-1084-17) vert ; document OpenAPI 579 → 581
+  schémas (`AvertissementProjectionDto`, `CodeAvertissementProjection`), 98 chemins identiques, aucun champ requis
+  ajouté ; **mutations 11/11** rouges sur l'assertion (plafond retiré, encours sans emprunts, plafond sur base non
+  ancrée, plafond sur le chemin 1084, mensuel qui répartit la saisie, ancrage qui republie tout, comparaison muette,
+  export muet, base négative, DTO annuel et mensuel sans avertissements) ; `tsc`, lint des fichiers touchés.
