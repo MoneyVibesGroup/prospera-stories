@@ -1155,6 +1155,28 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-24, STORY-1070), avant la fusion du code — `prospera-sinistres-service`, module `sinistres` :
+  lever une alerte bloquante du décompte (FR-55, D-1013-10).** Fiche : `stories/STORY-1070.md` (D-1070-1 → 11).
+  **Ajouts seuls** ; **aucun schéma de fait ne change** (ni `dossier.changed@1`, ni `evaluation.arretee@1`) ; **aucun
+  manifeste ne change** (une route d'écriture n'est pas déclarée ; la lecture reste `GET …/instruction`) ; aucune
+  collection ne change (la levée est rangée dans `instruction`, déjà persisté).
+  - **Route neuve** : `POST /api/v1/sinistres/dossiers/{id}/instruction/levees` (200, rend la lecture du formulaire),
+    corps `{ code, motif, roleExerce, versionLue, cleIdempotence }` ; rôles GEST, GREC, RESP ; dossier `EN_INSTRUCTION`
+    ou `EVALUE`. Refus : 400 `MOTIF_ECRIT` (motif < 10 caractères) ; 403 `DROIT_INSUFFISANT` ; 404 ; 409
+    **`ALERTE_ABSENTE`** (neuf : pas d'alerte `BLOQUANT` de ce code au décompte du dernier enregistrement ; détails :
+    `bloquantes`), **`ALERTE_DEJA_LEVEE`** (neuf), **`LEVEE_IMPOSSIBLE`** (neuf : hors fenêtre), `INSTRUCTION_NON_ENREGISTREE`,
+    `TYPE_DE_SINISTRE_ABSENT`, `DECOMPTE_IMPOSSIBLE`, `DECOMPTE_INVALIDE`, `SEPARATION_DES_TACHES`, `ETAT_PERIME`,
+    `CLE_REUTILISEE`.
+  - **Lectures changées** (ajouts) : `GET …/dossiers/{id}/instruction` gagne **`alertes`** (les alertes du décompte du
+    dernier enregistrement : `code`, `niveau`, `message` ; pour un `BLOQUANT`, `levee` ou `null`) et **`levees`**
+    (l'historique : `code`, `enregistrement`, `motif`, `par`, `roleExerce`, `le`) ; `GET …/evaluations` : une évaluation
+    arrêtée après une levée porte **`alertesLevees`** (les levées qui ont servi, copiées).
+  - ⚠️ **Pour un écran ou un client de `POST …/evaluations`** : `ALERTE_BLOQUANTE_NON_LEVEE` ne change pas de forme
+    (`details.alertes` : les codes **non levés** sur l'enregistrement en vigueur) ; une levée vaut pour l'enregistrement
+    du formulaire sur lequel elle est faite (D-1070-3) : un nouvel enregistrement qui garde l'alerte la rebloque.
+  - ⚠️ **Séparation des tâches** : l'auteur d'une levée devient partie (`EVALUER`, D-1070-5) : il ne valide, ne contrôle
+    ni n'enregistre l'accord ensuite.
+
 - **PUBLIÉ (2026-11-24, STORY-1069, prospera-plateforme#38, `dev` 9560b44 ; prospera-sinistres-service#30, `dev`
   a2671c6, a5fae87) ; ANNONCÉ avant la fusion du code (prospera-stories #800, `main` 4aabfd2), sans écart ; schéma
   enregistré dans Karapace (sujet neuf, BACKWARD) et accepté par la garde `classification-sante`. — un fait neuf : `sinistres.evaluation.arretee@1`

@@ -610,6 +610,16 @@ reserved_ranges:
       (Karapace) 28/28, rejouée depuis origin/dev. Consommateur liaison-assureur (C, C-14) : information. Lot D, n° 5 du
       lot 6 (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-207, EPIC-212 ; FR-75, FR-73 ; reste de C, D-1013-9). « Fini quand » fixé
       par la fiche (D-1069-1). NON SLOTTÉE.
+  - range: "STORY-1070"
+    status: "RÉSERVÉ"
+    owner: "lever une alerte bloquante — le gestionnaire lève avec un motif l'alerte BLOQUANT du décompte (POST …/instruction/levees), sur l'enregistrement du formulaire en vigueur ; l'arrêt de l'évaluation passe et copie la levée ; lever, c'est évaluer (partie, cumuls) ; la raison s'affiche au formulaire (D-1013-10, FR-55) (prospera-sinistres-service module sinistres)"
+    source_doc: "prospera-stories/stories/STORY-1070.md"
+    reserved_on: "2026-11-24"
+    note: >
+      🚧 EN COURS le 2026-11-24 — fiche et annonce « ⚠ Contrats » avant le code (une route d'écriture, trois codes de
+      refus, des champs ajoutés aux lectures ; aucun schéma de fait ni manifeste ne change). Lot D, n° 6 du lot 6
+      (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-207 ; FR-55, FR-75 ; reste de C, D-1013-10). « Fini quand » fixé par la fiche
+      (D-1070-1). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
