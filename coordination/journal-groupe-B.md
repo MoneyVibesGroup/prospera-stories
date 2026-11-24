@@ -8,8 +8,9 @@
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §5 (validé le 23/11) : B tient le **BFF** (`admin-panel-service`), la
-  **recette**, le **catalogue**, **auth**, **kyc** (neuf pour B), **bilan** et la **plateforme** (hors dossiers de C et
-  D) ; **balance (cahiers) et la comptabilité passent à C** (D-L6-1). Ordre : **1080, 1112, 1113, 1114, 1103, 1115,
+  **recette**, le **catalogue**, **auth**, **kyc** (neuf pour B) et la **plateforme** (hors dossiers de C et D) ;
+  **balance (cahiers) et la comptabilité passent à C** (D-L6-1). ~~bilan~~ : **`prospera-bilan-service` passe à D**
+  (amendement du 24/11 au soir, D-L6-5, stories #815 ; D prend STORY-1074 → 1078) — passation écrite (« Passations »). Ordre : **1080, 1112, 1113, 1114, 1103, 1115,
   1116** ; 1112 → 1116 réservés par le plan, fiches écrites juste avant de coder. Une sous-session neuve par story. Même
   poste que D (1065 → 1071), même verrou Docker.
 - **Ouverture** : la session de B du 19/11 s'était arrêtée au milieu de 1080 (recette non committée, verrou « B
@@ -126,8 +127,30 @@
      BFF 711/711, e2e 294/294 (doublure HTTP de kyc aux corps produits par le code de kyc de la story) ; mutations
      16/16 (kyc) et 8/8 (BFF) ; schéma validé contre l'événement produit (ajv) ; script du registre éprouvé contre un
      faux registre. **Sans Docker** (aucun module, dépendance ni Dockerfile ne change) : verrou non pris.
-  - **Suivante : STORY-1115** (la recette « essayer, puis mettre en service » ; `prospera-recette` ; recette complète
-    sur pile neuve ; fiche à écrire juste avant de coder, identifiant réservé par le plan §8).
+  10. ~~STORY-1115~~ : **recette #28** (`af13aac` sur `dev`) et **#29** (`b38b268`, défaut révélé par la recette) ;
+     contrat annoncé avant la fusion (stories #808). **Le parcours « essayer, puis mettre en service » vert de bout en
+     bout sur pile neuve.**
+     - **Le second espace dans le profil de recette** (D-1115-1 → 5) : `auth-essai` (`127.0.0.1:3021`), `catalogue-essai`
+       (`127.0.0.1:3023`), `kafka-essai`, `redis-essai`, levés à la demande ; aucune adresse du réel (garde) ; secret du
+       moteur propre ; aucune sortie de messages ; le BFF à deux espaces. **Identité d'opérateur commune** (D-1113-2, choix
+       par défaut gardé, question toujours ouverte) : la clé de signature des deux auth, tirée par le paquet dans
+       `.recette/` (non versionné).
+     - **Recette `essai-mise-en-service` 7/7** : essai ouvert par la console ; l'administratrice entre (premier membre
+       **posé en base** : aucune route, ticket ci-dessous), invite un collègue, essaie sous un compte du jeu ; signé ;
+       né au réel sous le même identifiant ; `balance` et `bilan` installés par le moteur (six `VERT`) puis **mis en
+       service** (un vrai sous-ensemble, la limite de 1113 levée) ; les deux membres invités au réel sous leur identifiant
+       d'essai, entrent par le lien reçu ; KYC approuvé par la console ; dossier créé ; `balance` et `bilan` ouverts.
+     - **D-1115-12, trouvé par la recette** : 17 `read ECONNRESET` rougissaient quatre suites ; une connexion par appel
+       (`connection: close`), PR à part — **cause non prouvée** (des coupures sont revenues avec l'en-tête, pendant la
+       panne réseau du poste).
+     - Recette complète sur pile neuve (images depuis `origin/dev`) : **8/12 suites, 135 tests verts, 12 rouges** —
+       toutes des connexions du poste vers la pile coupées (`ECONNRESET`, « injoignable ») pendant la panne réseau du
+       poste, aucune sur le second espace ; non relancée (D attendait le verrou). Unitaires 119/119 ; mutations 24/24. **Karapace** : `kyc.correction.requested@1`
+       enregistré (id 1, BACKWARD), compatible ; témoin (champ neuf obligatoire) `INCOMPATIBLE`. Verrou pris à 15:47,
+       rendu à 16:36, repris 16:38 → 17:05 et 17:07 → 18:20 (session coupée par la panne réseau) ; aucun conteneur, volume ni réseau `grp-b` ne reste.
+  - **Suivante : STORY-1116** (cinq essais simultanés sur la même pile, chacun dans son espace ; `prospera-recette`,
+    catalogue ; recette complète ; fiche à écrire juste avant de coder, identifiant réservé par le plan §8). Le ticket du
+    premier membre d'un essai (ci-dessous) la précède utilement : **à placer par la session de groupe**.
   - **Reçue le 24/11, hors des lignes du plan : → B de A** (journal de A, fin du « Lot 6 ») — deux résultats faux de
     `bilan-service` visibles à la démo du 15/01 : la projection qui rembourse plus que la dette
     (`TICKET-BACKEND-projection-remboursements-non-plafonnes.md`, accepté par l'utilisateur le 19/11) et la liasse
@@ -723,7 +746,36 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 **Lot 2** : en plus, les dépôts neufs **`centrale-service`** et **`agent-instance`** (créés par l'utilisateur, `main` et
 `dev` posées par STORY-955).
 
+**Lot 6** (plan §2, amendé le 24/11, D-L6-5) : le BFF, `prospera-recette`, le catalogue, auth, `kyc-service`, la
+plateforme (hors dossiers de C et D), et `prospera-dossier-service` par défaut (aucun plan ne l'attribue ailleurs).
+**`prospera-bilan-service` n'est plus à B** depuis le 24/11 au soir : il est à D (passation ci-dessous) ; balance et
+comptabilité sont à C (D-L6-1).
+
 ## Passations
+
+- **Donnée le 2026-11-24 (soir, D-L6-5, stories #815) : `prospera-bilan-service` à D** (STORY-1074 → 1078 de D). B n'y
+  écrit plus ; une demande passe par le journal de D. **← D (24/11) : passation de bilan-service écrite.**
+  - **Dernier commit de B sur `dev` : `7b53ff5`** (MNV-065, la liasse rouverte relue avec sa dernière version figée,
+    correctif de STORY-065) ; avant : `d98b7c4` (MNV-483, remboursements plafonnés à l'encours, modèle de projection
+    **1.14.0**), `2364abc` (MNV-1084, un nom de schéma OpenAPI = une classe), `0f17ec4` (MNV-1080, les trois
+    vérifications d'installation de bilan). **Aucune PR ouverte** (`gh pr list --state open`, 24/11).
+  - **Ce que D trouve** : le **garde des noms de schéma** `src/openapi-schemas-uniques.invariant.spec.ts` (D-1084-17 :
+    une classe par nom de schéma, sur le document de tout `AppModule` ; nommer un DTO par son module) ; le modèle de
+    projection 1.14.0 (`avertissements`, `REMBOURSEMENT_PLAFONNE`, D-483-8 → 10) ; la `version` de la liasse rouverte
+    (D-065-1 → 3) ; les trois vérifications `verification-installation@1` (copie à l'octet du catalogue) que la recette
+    `cabinet-moteur` et `essai-mise-en-service` jouent.
+  - **Pièges propres à bilan** (détail dans « Pièges ») : le checkout du poste garde **deux brouillons non suivis du
+    15/11, `cr-map.txt` et `cr-postes.txt`** — à laisser, jamais à committer ; sous Node 25, **15 suites unitaires
+    rouges connues** (13 binding de Confluent, `dossier-scope.invariant` qui cherche `\n` dans un décorateur sorti en
+    CRLF, `analyse.agnosticisme` qui compare des chemins `dto\…`) ; `export.service` et `homogeneisation.regles`
+    rougissent sous la charge (les relancer seules) ; **CRLF et empreintes du paquet** : un worktree sort ses 75 JSON de
+    référentiels en CRLF (`ReferentielIntegrityError`, 64 tests rouges) — `git -c core.autocrlf=false checkout --` ; les
+    DTO du checkout sont en CRLF, les fichiers neufs en LF (un script de remplacement suit la fin de ligne du fichier) ;
+    le fixture non typé de `test/bilan-export.e2e-spec.ts` (tout champ neuf lu par l'export s'y ajoute) ; l'invariant du
+    plan d'effacement C13 (toute collection neuve à champ d'organisation va dans `plan-d-effacement.ts`) ; mutations
+    longues (≈ 1,5 min chacune, en tâche de fond).
+  - **Ce qui reste ouvert sur bilan** : rien de demandé à B ; les écrans de l'Atelier et des états sont chez A (D-L6-5) ;
+    les stories 1074 → 1078 sont celles de D.
 
 - **Reçues le 2026-11-18 (D-L4-1) : `prospera-admin-panel-service` (BFF de la console) et `prospera-dossier-service`**,
   de A, pour le lot 4. **Constatées par STORY-1081** :
@@ -782,6 +834,21 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   membre qui reçoit le rôle par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif).
 
 ## Demandes aux autres groupes
+
+- **→ B (2026-11-24, STORY-1115) : le premier membre d'un essai n'a pas de route** — ouverte, **à placer par la
+  session de groupe** (recommandé : avant STORY-1116 et la démo du 15/01). `TICKET-BACKEND-premier-membre-d-un-essai.md` :
+  une organisation née par le moteur dans l'essai n'a aucun membre, et aucune route ne fait entrer son administrateur
+  (`POST /users` exige un `TENANT_ADMIN` de l'organisation ; l'invitation au réel refuse l'essai, D-974-2). Auth,
+  catalogue de l'essai (inviter `administrateur` à l'ouverture), BFF si besoin ; **→ A** l'écran ensuite. La recette
+  `essai-mise-en-service` pose ce seul membre en base (D-1115-6) et ne posera plus rien quand la route existera.
+- **← D (2026-11-24, journal de D, stories #812, Q-D-12 répondue) : la fiche légale et les comptes d'encaissement,
+  publiés pour la facture (STORY-1073 de D en dépend)** — **reçue, placée après le lot 6** par la session de groupe :
+  (1) une story **`dossier-service`** (B le garde par défaut : le plan du lot 6 ne l'attribue à personne) — les champs
+  facultatifs de la fiche légale dans `DossierEtatV1` (`dossier.created` / `dossier.updated`, `schemaVersion`
+  inchangé) et le rejeu de l'état courant des dossiers propres ; (2) une story **`paiement`** — les comptes
+  d'encaissement publiés (un fait d'état par compte, sans secret), **groupée avec le consommateur de
+  `facturation.avoir.emis@1`** (demande de 1066, point 3, D-979-14). Identifiants neufs réservés à l'écriture de leurs
+  fiches ; « ⚠ Contrats » avant le code.
 
 - **→ D (2026-11-24, STORY-1103) : consommer `kyc.correction.requested@1` pour prévenir le cabinet** — ouverte.
   B publie l'événement (`kyc-service`, schéma `contrat/schemas/kyc.correction.requested.json`, contrat dans « ⚠
@@ -1382,6 +1449,9 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
     routes d'essai du BFF (`/admin/essais`, `/admin/sorties-essai`, la lecture des membres de l'essai) vont à
     `catalogue-essai` et `auth-essai` ; les autres ne changent pas.
   - Recette neuve `essai-mise-en-service` (dans `npm run recette`, sautée en `RECETTE_ESPACE=ESSAI`).
+  - **Fusionné le 24/11** : recette #28 (`af13aac` sur `dev`), **sans écart au contrat annoncé** ; puis #29
+    (`b38b268`) : le transport de la recette envoie `connection: close` (D-1115-12, rien de visible pour qui lance
+    la pile, sinon des recettes qui ne meurent plus en `ECONNRESET`).
 
 - **2026-11-24, STORY-1103 (lot 6, n° 5) — renvoyer un dossier KYC pour correction, annoncé AVANT le code (AC-1)**
   (`prospera-kyc-service` et `prospera-admin-panel-service`, branches `MNV-1103` ; fiche `stories/STORY-1103.md`,
@@ -2840,6 +2910,20 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **`read ECONNRESET` (« fetch failed ») entre le poste et la pile** (STORY-1115) : 17 au premier passage complet,
+  attribués à la connexion réutilisée après le `keepAliveTimeout` de Nest (la recette envoie désormais
+  `connection: close`, comme le script de preuve de 1113) ; d'autres au passage suivant, sur connexions neuves, pendant
+  une panne réseau du poste. Un `POST` coupé n'est jamais rejoué : lire la `Cause` de jest avant de chercher un défaut
+  dans le service.
+- **La recette fait `up` sans `--build` pour ses services de suite** (dossier, balance, bilan, BFF…) : une image
+  `grp-b-*` d'un autre jour sert sans un mot (STORY-1115 : le BFF de 14 h avant, sans `/admin/essais`, 404). Avant une
+  recette, `docker compose … build` de **tous** les services depuis les archives.
+- **PowerShell lit `-d` et `-v` comme `-Debug` et `-Verbose`** quand un script les reçoit par
+  `ValueFromRemainingArguments` : `up -d` s'est attaché, `down -v` a laissé les volumes. Passer les arguments de compose
+  en une chaîne. Et `down` n'enlève pas les services d'un profil non actif (`fiscal`) : nommer `--profile fiscal`.
+- **Sur des volumes conservés, auth garde la clé de son premier démarrage** : la clé commune des deux espaces ne vaut
+  que sur des volumes neufs (`down -v`).
 
 - **Les doubles en mémoire des e2e de kyc n'annulent pas la transaction** (STORY-1103) : `withTransaction` y exécute
   la fonction, sans rollback. Un refus levé APRÈS une écriture y laisse l'écriture (la capture des corps l'a montré :
