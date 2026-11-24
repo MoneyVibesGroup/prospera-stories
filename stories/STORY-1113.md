@@ -131,6 +131,12 @@ console (D-974-8), et rien ne la lui donne aujourd'hui.
   se prouve avec `balance`. Le membre « collègue » de l'essai est posé dans la base de l'auth d'essai (la console n'a
   pas de route pour inviter dans une organisation sans administrateur : D-948-8), à côté des comptes du jeu.
 
+- **D-1113-10 — Les précisions d'un refus vont dans `details`** (ajoutée le 24/11, trouvée par la preuve sur pile) :
+  l'enveloppe d'erreur du BFF (`AllExceptionsFilter`) ne garde que `code` et `details` ; posés à côté du code,
+  `modules` et `champs` étaient retirés sans bruit (les e2e ne montaient pas le filtre : celui de 1113 le monte). Le même
+  défaut touchait le relais du moteur d'installation (917, 1080 : `modules`, `refus`, `planId`), que la console lit déjà
+  dans `details` (`grant-errors.ts`) : corrigé ici de même (dépôt de B), annoncé avant la fusion.
+
 ## Contrats touchés (annoncés avant la fusion, journal de B, « ⚠ Contrats »)
 
 - Catalogue, `contrat/mise-en-service.openapi.json` 1.2.0 : `POST /api/v1/sorties-essai/liste-blanche/verification`
@@ -143,3 +149,5 @@ console (D-974-8), et rien ne la lui donne aujourd'hui.
   `VerificationDeSortieDto`, `InterceptionDEssaiDto`, `InterceptionsDEssaiDto` ; variables `CATALOG_ESSAI_SERVICE_URL`
   et `AUTH_ESSAI_SERVICE_URL` (facultatives). Aucune route existante ne change de forme ; les routes `/admin/essais`
   vont au catalogue de l'essai quand il est configuré.
+- BFF (amendement du 24/11, D-1113-10) : les précisions des refus relayés (`modules`, `champs` ; et pour le moteur
+  d'installation `modules`, `refus`, `planId`) passent dans `details`.
