@@ -46,7 +46,9 @@
 
 export const MANIFESTE_BALANCE = {
   code: 'balance',
-  version: '1.0.0',
+  // 1.1.0 (2026-11-24, STORY-1117) : la balance de référence d'un exercice et la liste sans lignes (deux routes de
+  // lecture).
+  version: '1.1.0',
 
   // Le module est la source : il ne dépend d'aucun autre module. Le référentiel comptable et le paquet
   // fiscal sont des artefacts du catalogue (STORY-078), pas des modules.
@@ -148,6 +150,8 @@ export const MANIFESTE_BALANCE = {
   routesLectureSeule: [
     'GET /api/v1/instance/balance/{organisationId}/export',
     'GET /api/v1/dossiers/{dossierId}/balances',
+    'GET /api/v1/dossiers/{dossierId}/balances/reference', // STORY-1117 : la balance de référence à une date
+    'GET /api/v1/dossiers/{dossierId}/balances/resumes', // STORY-1117 : la liste, sans les lignes
     'GET /api/v1/dossiers/{dossierId}/balances/{id}',
     'GET /api/v1/dossiers/{dossierId}/balances/{id}/export',
     'GET /api/v1/dossiers/{dossierId}/balances/{id}/controles',
