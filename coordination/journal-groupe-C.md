@@ -30,7 +30,8 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
      puis, à la reprise du fiscal, 326, 1101, 315, 316 ;
   3. ✅ **STORY-1088 DONE (24/11)** : document-service **#31** (`9d0cfd3` sur `dev`), fiche #811, manifeste `ged`
      1.2.0 #814. Unitaires Node 24 1122, e2e GED 17/17, mutation 6/6, gate `grp-c` vert, verrou cédé par A et rendu ;
-  4. **STORY-1100** les archives apprennent la façon de classer du cabinet, et reçoivent les factures comptabilisées ;
+  4. 🟡 **STORY-1100** les archives apprennent la façon de classer du cabinet, et reçoivent les factures comptabilisées :
+     contrat annoncé le 24/11 (fiche) ;
   5. **STORY-1101** les déclarations face à la liasse (fiscal) — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
   6. **STORY-315** puis **316** le calendrier fiscal (fiscal) — fiches écrites juste avant.
 - **Docker** : verrou du poste principal (`MoneyVibes_Apps\.verrou-docker`) partagé avec A ; aucune pile de C ne tourne.
@@ -291,6 +292,8 @@ seulement.
   `etat-publie.changed.<espace>`, double lecture) dans une story de la plage de C, après STORY-990.
 
 ## ⚠ Contrats
+
+- **2026-11-24 (STORY-1100), AVANT le code** : **fait neuf** `comptabilite.facture.inscrite` v1, publié par `prospera-comptabilite-service` (outbox, schéma `contrat/schemas/comptabilite.facture.inscrite.v1.json`, registre de schémas) à chaque facture inscrite au brouillard ; consommé par `document-service` (GED), qui range une copie pré-indexée dans le fonds du client (ou l'y range à l'ouverture du fonds). Mémoire de classement de la GED : `GET /api/v1/ged/cabinet/pieces/{pieceId}/suggestion`, `GET …/fonds/{numero}/memoire-de-classement`, `GET` et `DELETE /api/v1/ged/cabinet/memoire-de-classement[/{memoireId}]`, champ facultatif `indexation.nifTiers`. Manifestes : `comptabilite` 0.5.0 (`publie`), `ged` 1.3.0 (`consomme`, routes de lecture). **→ B** : les deux copies au catalogue après la fusion. **→ A (FE-151)** : types à régénérer.
 
 - **2026-11-24 (STORY-1088), AVANT le code** : `document-service` (module `ged`, sous `/api/v1/ged/cabinet`) gère l'original papier et la recherche. **Ajouts seuls**. Réceptions (`POST/GET …/fonds/{numero}/receptions`, `GET /receptions/{numero}` et son bordereau PDF), boîtes (`PUT /boites/{id}/cote` unique au cabinet, `GET /boites/{id}/etiquette` PDF à code QR, `PUT /pieces/{id}/original`), sorties et retours (`POST /boites/{id}/sorties`, `POST /sorties/{id}/retour`, `GET /sorties?enRetard=true`), récolement (`POST/GET …/recolements`, écarts `MANQUANTE`, `EN_TROP`, `SORTIE_NON_RENTREE`), restitution (`POST …/restitutions`, bordereau PDF), recherche (`GET …/fonds/{numero}/recherche`, texte des natures sensibles jamais cherché), conservation par pièce. Droit `ged:physique:gerer`. Dépendances `pdf-lib`, `qrcode`. Manifeste `ged` 1.2.0 (→ B pour le catalogue). **→ A (FE-143)** : types à régénérer quand l'écran viendra.
 
