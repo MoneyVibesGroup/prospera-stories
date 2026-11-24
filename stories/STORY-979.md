@@ -1,6 +1,6 @@
 # STORY-979 : les droits de la facture et des archives du cabinet au catalogue de tenant d'auth
 
-Status: done
+Status: in-progress (rouverte le 2026-11-24 pour sa suite : « Suite du 2026-11-24 », en fin de fiche)
 
 **Complexité :** faible (huit droits neufs au catalogue de tenant, hors du jeton ; un rôle du socle neuf ; une ligne
 d'ajout à l'annexe B ; la copie des manifestes du catalogue ; aucun champ, aucune route, aucun topic)
@@ -165,3 +165,70 @@ Toutes fusionnées en « Rebase and merge », `merged = true`, `head.sha` = SHA 
   un archiviste s'attribue par `tenantRole`. Ce que `ged` (ou un autre service) donne encore au rôle socle sans lire de
   droit : D-979-5 (« → C »).
 - **A** : un rôle de plus (« Archiviste ») dans la liste des rôles d'un cabinet ; aucune forme ne change.
+
+---
+
+## Suite du 2026-11-24 : le droit de l'avoir et le manifeste `facturation` 1.1.0
+
+**Demande servie :** journal de D, « → B (2026-11-24, STORY-1066) », points **(1)** et **(2)** seulement. Le point (3)
+(consommer `facturation.avoir.emis@1` dans `paiement`) n'est pas ici (D-979-14).
+**Pourquoi 979 et pas une story neuve :** même nature que 979 (un droit hors du jeton par `AJOUTS_A_L_ANNEXE_B`, une
+recopie de manifeste), et D-979-7 promettait cette recopie le jour où la version monterait à la source. Aucun
+identifiant neuf : branches `MNV-979-avoir` (auth, catalogue), docs `docs-979-avoir`.
+**Place :** décidée par la session du groupe B, juste après STORY-1112 et **avant STORY-1113** (§1.1 : une demande
+adressée à B passe avant la story suivante). Le tracker rouvre l'entrée de 979 (`in-progress`) le temps de la suite et
+la referme (`done`) dans la PR de docs finale.
+**Sources lues :** journal de D (la demande, mot pour mot) ; fiche et entrée de STORY-1066 (D-1066-9, D-1065-15) ;
+manifeste `manifestes/facturation.manifest.ts` à `prospera-stories@24049e4` (1.1.0, sha256
+`80933b6183648f4ea86a6de95aa18f6dde1368ab8ce182e37868e2535f273458`, vérifié sur le blob et sur une extraction LF) ;
+`origin/dev` de `prospera-ventes-service` (`adaa2bb`, lu sans y toucher : `DROIT_DE_VALIDATION_DE_L_AVOIR =
+'facturation:avoir:valider'`). Code relu sur `origin/dev` d'auth `c0f6243` (`droits-hors-jeton.ts`,
+`table-d-acces-distributeur.ts` et leurs tests) et du catalogue `706f1b8` (`copies.json`, `scripts/manifestes/`).
+
+**Ce qui existait déjà (relu avant le code) :** aucun `facturation:avoir:valider` dans auth (`git grep` sur
+`origin/dev`) ; le `DIST_DAF` détient déjà `facturation:avoir:emettre` (annexe B.2). Au catalogue,
+`manifestes:garde` contre `24049e4` : **rouge sur `facturation` seul** (`manifeste.droits[7]`, `manifeste.version`).
+Entre `24049e4` et `origin/main` (`7197de4`), `manifestes/` n'a pas changé (diff vide) : la copie depuis `24049e4` est
+aussi celle de `main`.
+
+| Exigence | Fait |
+|---|---|
+| `facturation:avoir:valider` au catalogue de tenant, hors du jeton, libellé « Valider un avoir au-delà du seuil » | une entrée de `DROITS_HORS_JETON`, à la fin de la section `facturation` (ordre du manifeste) |
+| Au `DIST_DAF` seul | une ligne d'`AJOUTS_A_L_ANNEXE_B` (`['DAF']`) |
+| La borne du jeton ne bouge pas ; `dv` n'avance pas | aucun code dans `perms[]` (17 + 24 = 41 ≤ 44) ; données seules, pas d'événement |
+| Les droits `facturation` d'auth = ceux du manifeste 1.1.0 | les huit, dans l'ordre du manifeste (test écrit en toutes lettres) |
+| La copie du manifeste `facturation` 1.1.0 au catalogue | `copies.json` depuis `prospera-stories@24049e4` ; `manifestes:garde` verte (48) |
+
+### Décisions (prises par défaut, contestables)
+
+- **D-979-10 — Une suite de 979, pas une story neuve.** La plage de B (930 → 979) est épuisée, et le travail est
+  celui de 979 (même voie, mêmes fichiers, même recopie promise par D-979-7). L'entrée du tracker est rouverte puis
+  refermée ; la marque haute ne bouge pas.
+- **D-979-11 — `facturation:avoir:valider`, hors du jeton, au DAF seul.** À la lettre du manifeste 1.1.0 (C7,
+  D-1066-9), 25 caractères, libellé « Valider un avoir au-delà du seuil » (celui que D propose). L'annexe B.2 ne le
+  nomme pas : il entre dans `AJOUTS_A_L_ANNEXE_B`, comme `facturation:parametres:modifier`. Rôle par défaut :
+  **`DIST_DAF`**, lui seul, comme D le demande ; ni le comptable (qui émet des avoirs, mais sous le seuil), ni le DG,
+  ni l'administrateur : une surcharge de l'organisation peut le leur donner. Le droit s'exerce avec
+  `facturation:avoir:emettre`, que le DAF détient déjà (vérifié par test). Placé à la fin de la section `facturation`
+  du catalogue, après `facturation:parametres:modifier`, dans l'ordre des `droits` du manifeste.
+- **D-979-12 — La copie depuis `24049e4`, entière.** `npm run manifestes:copier` lit tout `manifestes/` : lancé depuis
+  `_wt-b-stories` en HEAD détachée sur `24049e4` (`origine` : `prospera-stories@24049e4`), comparé à une copie faite
+  depuis `git -c core.autocrlf=false archive 24049e4 manifestes` : identiques, sauf la ligne `origine`. Seul
+  `facturation` change : version 1.0.0 → **1.1.0** et `droits[7]` (`facturation:avoir:valider`) ; la 1.1.0 porte aussi
+  `facturation:parametres:modifier` (déjà copié en 1.0.0 par D-979-7).
+- **D-979-13 — La 1.1.0 atteint une base déjà semée.** Le semis n'écrit pas une version déjà publiée, mais une version
+  neuve se sème à côté de l'ancienne (comme `ged` 1.1.0, D-979-8) : la limite de D-979-7 (« la copie diffère du
+  manifeste publié ») tombe pour `facturation`. Sans effet sur l'attribution : auth ne lit pas cette copie, `ventes`
+  lit `/moi/droits`.
+- **D-979-14 — Le point (3) de D est une story neuve, après le lot 6.** Consommer `facturation.avoir.emis@1` dans
+  `paiement` (réduire la Créance `(FACTURE, factureId)`, le crédit du tiers au-delà du reste dû, le rejeu sur
+  `avoirId`) n'est ni un droit ni une copie : c'est un consommateur Kafka, un état et sa preuve sur pile. La session
+  du groupe B le place **après les sept stories du lot 6**, sous un identifiant neuf réservé au moment d'écrire sa
+  fiche (au-delà de la marque haute, la plage de B étant épuisée). Écrit dans le journal de B comme demande ouverte ;
+  aucun identifiant n'est réservé ici. Jusque-là, l'avoir est émis, numéroté, publié et imprimé, mais le reste dû lu
+  chez `paiement` ne baisse pas (D le sait : sa demande le dit).
+- **D-979-15 — Sans Docker** (comme D-979-9). Aucun module Nest, aucune dépendance, aucun Dockerfile ne change : une
+  liste de données dans auth, une copie JSON semée au démarrage du catalogue. Le verrou n'est pas pris.
+- **D-979-16 — Aucun contrat ne change de forme.** Le jeton ne change pas ; `moi-droits` reste en 1.1.0 (seules les
+  valeurs de `droitsHorsJeton` du DAF changent) ; `identity.droits.changed@1` ne porte aucun droit. Annoncé quand même
+  dans « ⚠ Contrats » avant la fusion (valeur visible de D, droit neuf visible de la console).

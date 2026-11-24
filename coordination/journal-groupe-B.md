@@ -1186,6 +1186,28 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## ⚠ Contrats
 
+- **2026-11-24, suite de STORY-979 (lot 6) — `facturation:avoir:valider` au catalogue de tenant d'auth, hors du
+  jeton, et le manifeste `facturation` 1.1.0 au catalogue, annoncés AVANT la fusion du code**
+  (`prospera-auth-service` et `prospera-platform-catalog-service`, branches `MNV-979-avoir` ; fiche
+  `stories/STORY-979.md`, « Suite du 2026-11-24 », D-979-10 → 16). Tout est AJOUT : aucune route, aucun champ, aucun
+  topic ne change de forme.
+  - **Catalogue de tenant** (`DROITS_HORS_JETON`) : `facturation:avoir:valider` (« Valider un avoir au-delà du
+    seuil »), à la fin de la section `facturation`, après `facturation:parametres:modifier` (l'ordre des `droits` du
+    manifeste 1.1.0). 165 codes en tout (24 du jeton, 141 hors du jeton). **Jamais dans `perms[]`** : la borne du jeton
+    ne bouge pas (17 + 24 = 41 ≤ 44). Servi par `GET /api/v1/moi/droits`, dans `droitsHorsJeton` (`moi-droits` 1.1.0,
+    inchangé).
+  - **Attribution par défaut** : au **`DIST_DAF` seul** (`AJOUTS_A_L_ANNEXE_B`, D-1066-9) ; il détient déjà
+    `facturation:avoir:emettre`. Ni le comptable, ni le DG, ni l'administrateur (une surcharge de l'organisation peut
+    le leur donner).
+  - **Pas d'avance de `dv`** à la livraison (D-949-3 : 60 s de cache au plus) ; `identity.droits.changed@1` inchangé.
+  - **Catalogue** : `copies.json` recopié depuis `prospera-stories@24049e4` (sha256 de
+    `manifestes/facturation.manifest.ts` : `80933b61…f273458`, vérifié) ; seul `facturation` change : version
+    1.0.0 → **1.1.0** (semée à côté de la 1.0.0) et `droits[7]` = `facturation:avoir:valider`. Les huit `droits` de la
+    1.1.0 sont, à l'octet et dans l'ordre, la section `facturation` du catalogue d'auth.
+  - **Pour D** : un avoir au-delà du seuil passe pour un `DIST_DAF` dès le déploiement d'auth (cache de 60 s compris) ;
+    il refuse toujours `VALIDATION_DU_DAF_REQUISE` aux autres. **Pour A** : un droit de plus dans le catalogue de
+    composition d'un rôle (console) ; aucun type à régénérer.
+
 - **2026-11-24, STORY-1112 (lot 6, n° 2) — les essais d'un prospect relayés à la console, annoncés AVANT la fusion du
   code** (`prospera-platform-catalog-service` et `prospera-admin-panel-service`, branches `MNV-1112` ; fiche
   `stories/STORY-1112.md`). **Ajouts seuls** : aucune route, aucun champ, aucun code existant ne change.
