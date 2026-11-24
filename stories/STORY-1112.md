@@ -1,6 +1,6 @@
 # STORY-1112 : le BFF relaie les essais d'un prospect à la console (ouvrir, prolonger, suivre)
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (deux lectures de plus au catalogue, huit relais typés au BFF, une ouverture en un geste)
 
@@ -117,6 +117,53 @@ adresse (`sub`, `org`, `roles`, `perms`).
   parties, `OuvrirEssaiRequestDto`, `ProlongerEssaiRequestDto` ; variable `UPSTREAM_ESSAI_TIMEOUT_MS`. Aucune route
   existante ne change.
 
+## Livré
+
+- **catalogue #70** (`706f1b8` sur `dev`) : `GET /api/v1/essais`, `GET /api/v1/jeux-demonstration`, contrat
+  `essai-prospect` 1.1.0.
+- **BFF #39** (`3071886` sur `dev`) : `/api/v1/admin/essais` (huit routes), DTO publiés, garde des noms de schéma.
+- Annonce avant la fusion du code : prospera-stories #786 (journal de B, « ⚠ Contrats », 24/11).
+
 ## Preuves
 
-*(à remplir à la livraison)*
+- **Catalogue** (Node 25) : `src/essai/liste-des-essais.spec.ts` 10/10 (chaque réponse validée par Ajv contre le
+  contrat 1.1.0 ; tri par fin, filtre, 200 / 201 essais et `tronquee`, naissance de l'ESSAI seule, une requête ; jeux
+  par code puis version en nombres, enregistrements sommés) ; `test/essais-console.e2e-spec.ts` 4/4 (vraie chaîne de
+  gardes : `org:read` 200, sans lui ou membre d'une organisation 403, 401, filtre inconnu ou paramètre de trop 400) ;
+  `src/essai` 102 tests verts ; unitaire complet **1 607 passés** (3 suites rouges connues : binding de Confluent sous
+  Node 25) ; e2e : 5 suites rouges à l'identique sur `origin/dev` (172, fournisseurs absents de leurs modules de test) ;
+  `tsc`, lint ; **mutations 7/7** rouges sur une assertion.
+- **BFF** (Node 25) : `src/admin/essais/essais.spec.ts` 53/53 (projection champ par champ, anti-fuite, 503 hors
+  contrat, choix du jeu, refus par leur code à leur statut, ordre jeu → naissance → essai, droits de chaque route),
+  `test/admin-essais.e2e-spec.ts` 6/6 (chaîne de gardes et validation au bord), `test/openapi-contract.e2e-spec.ts`
+  21/21 (3 neufs : huit opérations, `EssaiDto`, `EffacementDto`, l'ordre d'ouverture), garde des noms 3/3 ;
+  unitaires **604/604** (46 suites), e2e **247/247** (14 suites) ; `tsc`, lint ; **mutations 13/13** rouges (dont le
+  garde : une seconde classe `EssaiDto` le fait rougir, `EssaiDto ×2`).
+- **Pile `grp-b`, appel réel au BFF contre le vrai catalogue et le vrai auth** (espace d'ESSAI ; images construites
+  depuis `git -c core.autocrlf=false archive` : auth `origin/dev` `c0f6243`, catalogue et BFF des branches de la
+  story ; jeux de la plateforme `50c12a6` montés, six chargés) : **38/38 contrôles** —
+  - jeux lus (`cabinet-demo-togo`, trois `grossiste-golfe@1.2.0`, assurance, témoin) ; sans jeton 401 ;
+  - `POST /admin/essais` d'un cabinet : **201 en 8,2 s** (la naissance chez auth, puis l'import du jeu dans la
+    requête : D-1112-7 tenue, le délai court de 3 s l'aurait coupé), `OUVERT`, J0 → J+30, effacement à J+60, jeu
+    `cabinet-demo-togo` choisi par le BFF, prospect rendu, aucun `detail` ni `ouvertPar` ; naissance `NEE` dans
+    l'espace d'essai, organisation présente chez auth ; rejoué 200 (même `debutLe`) ; autre administrateur 409
+    `ESSAI_DIVERGENT` ; autre nom 409 `NAISSANCE_DIVERGENTE` ; essai à blanc 201 sans jeu ; `imf-sfd` 422
+    `JEU_DEMONSTRATION_ABSENT` **sans naissance écrite** (404) ; ordre mal formé 400 ;
+  - liste : 2 essais, chacun avec son prospect, par fin croissante ; un essai 200 ; un inconnu 404 `ESSAI_INCONNU` ;
+  - prolonger de 10 jours : 200, `prolongations` 1, fin + 10 j, effacement suivi ; une seconde 409
+    `ESSAI_DEJA_PROLONGE` ; 31 jours 400 au bord ;
+  - reprendre l'import 200 (3,9 s ; `balance` `NON_IMPORTE` `SERVICE_INJOIGNABLE`, balance n'est pas levée :
+    D-1112-9) ; essai à blanc 409 `ESSAI_SANS_JEU` ; effacer trop tôt 409 `EFFACEMENT_PREMATURE` ; aucun plan 404
+    `EFFACEMENT_INCONNU` ;
+  - signer 200 `SIGNE`, rejoué 200 (même `signeLe`) ; prolonger un essai signé 409 ; liste `?statut=SIGNE` ;
+    effacer un essai signé 409 `ESSAI_SIGNE`.
+  Aucun journal d'erreur au BFF. Verrou pris à 09:58 (après D-1066), rendu à 10:07 ; `down -v`, aucun conteneur,
+  volume ni réseau `grp-b` ne reste. Script : `scripts1112/preuve.mjs` de la session (non versionné : il appelle les
+  ports publiés d'une pile levée à la main).
+
+## Ce qui reste
+
+- **Pour A (AP-57, lot 7)** : l'écran, ses types régénérés depuis l'OpenAPI du BFF, et son gate réel.
+- **STORY-1113** : la naissance et la mise en service relayées seules (AP-56) ; la console à deux espaces (D-1112-6).
+- L'effacement de bout en bout (certificat signé) n'est pas rejoué ici : il demande l'échéance passée (horloge de
+  recette) et les modules levés ; éprouvé par 953 au catalogue, et à rejouer par la recette de **STORY-1115**.

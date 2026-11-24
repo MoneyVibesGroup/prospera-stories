@@ -42,13 +42,28 @@
        1.1.0** après la fusion de C, dans la même story (D-979-8) ; `manifestes:garde` verte (48).
      Node 25 : auth 38 suites 677/677, complète 1 445 passés (4 suites rouges connues), câblage vert (binding doublé) ;
      catalogue 1 597 passés (3 connues) ; 12/12 mutations. **Sans Docker** (D-979-9) : verrou non pris.
-  - 🟡 **STORY-1112 en cours (24/11)** : fiche `stories/STORY-1112.md`, contrat annoncé (« ⚠ Contrats ») avant le
-    code ; branches `MNV-1112` du BFF et du catalogue.
-  - **Suivante : STORY-1112** (le BFF relaie les essais d'un prospect, `/essais` ; AP-57 ; rien d'autre n'est demandé à
-    B au 24/11, après ce correctif). La demande de A du 24/11
-    (journal de A, « Lot 6 ») en donne le détail : relais de `POST /essais`, `GET /essais/{org}`, prolongation,
-    signature, jeu de démonstration, effacement, **et une liste** `GET /admin/essais` ; recommandé : `POST /admin/essais`
-    qui enchaîne la naissance et l'ouverture.
+  4. ~~STORY-1112~~ : **catalogue #70** (`706f1b8` sur `dev`), **admin-panel #39** (`3071886`) ; contrat annoncé
+     avant la fusion (stories #786). **AP-57 débloquée** : la console ouvre, suit, prolonge, signe un essai, reprend
+     l'import du jeu, efface et lit le certificat, par le BFF.
+     - Catalogue (D-1112-1, même solution que D-1080-14) : `GET /essais` (liste, prospect lu dans sa naissance
+       d'essai, par fin, 200 au plus) et `GET /jeux-demonstration` (`org:read`) ; contrat `essai-prospect` 1.1.0.
+     - BFF : huit routes sous `/api/v1/admin/essais`, projetées champ par champ (ni `detail`, ni identifiant
+       d'opérateur) ; `POST /admin/essais` enchaîne le jeu du métier (choisi par le BFF, D-1112-4), la naissance et
+       l'ouverture ; refus par leur code (liste fermée par statut) ; `UPSTREAM_ESSAI_TIMEOUT_MS` (D-1112-7) ; **garde
+       des noms de schéma uniques posé** (D-1112-8, piège de 1084).
+     Node 25 : catalogue 1 607 passés (3 suites rouges connues), e2e 5 rouges à l'identique ; BFF 604/604, e2e 247/247 ;
+     mutations 7/7 et 13/13. **Pile `grp-b`** (ESSAI, vrai auth, vrai catalogue) : **38/38 contrôles**, ouverture
+     201 en 8,2 s. Verrou pris à 09:58 (après D-1066), rendu à 10:07 ; aucun conteneur, volume ni réseau `grp-b` ne
+     reste.
+  - **Reçue le 24/11, hors des lignes du plan : → B de D (STORY-1066)** — le droit `facturation:avoir:valider` au
+    `DIST_DAF` (auth, hors du jeton), la recopie du manifeste `facturation` 1.1.0 depuis prospera-stories `24049e4`
+    (catalogue), et le consommateur de `facturation.avoir.emis@1` dans `paiement`. **Non servie ici** (une story neuve,
+    à placer par la session de groupe ; §1.1 : recommandé **avant 1113** ; aucun identifiant libre dans la plage de B
+    930 → 979 : à prendre au-delà de 1116, après vérification de la marque haute).
+  - **Suivante : STORY-1113** (le BFF relaie la mise en service : `mises-en-service`, `sorties-essai`, `naissances` ;
+    AP-56), sauf si la session de groupe place d'abord la demande de D (ci-dessus). Pour 1113 : la console qui parle
+    aux DEUX espaces (invitations de 974, D-1112-6) ; `POST /naissances` est déjà appelé par `POST /admin/essais`
+    (client `ordonnerNaissance` du catalogue, délai des essais).
   3. ~~Correctif de STORY-1084~~ (ticket de A pour FE-140, placé **avant 1112** par la session de groupe, §1.1 ; aucun
      identifiant neuf) : **bilan #183** (`2364abc` sur `dev`, branche `MNV-1084-schema`) ; annonce avant la fusion :
      stories #783. La classe de la dette devient `ValeurIndicateurDetteDto` (D-1084-16) ; **garde neuf** sur le
@@ -998,6 +1013,18 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   démarrer.
 
 ## Réponses aux demandes reçues
+
+- **← A (2026-11-24) : STORY-1112, relayer `/essais` et ajouter une liste ; recommandé `POST /admin/essais` qui
+  enchaîne la naissance et l'ouverture avec le jeu du métier** — **servie par STORY-1112** (catalogue #70, BFF #39).
+  Les deux lectures manquantes (liste, jeux chargés) sont servies par le catalogue (D-1112-1) ; le jeu du métier est
+  choisi par le BFF (D-1112-4) ; `commercial` est exigé dans l'ordre (le jeton de l'opérateur ne porte pas son
+  adresse, la console la connaît : « Suivi par vous »).
+- **→ A (2026-11-24) : AP-57 débloquée par STORY-1112** (catalogue #70 `706f1b8`, BFF #39 `3071886`) : régénérer les
+  types de la console depuis l'OpenAPI du BFF (`/api/v1/admin/essais`, `EssaiDto`, `EssaisDto`, `EffacementDto`,
+  `OuvrirEssaiRequestDto`) ; l'organisation d'un prospect neuf est choisie UNE fois par la console (24 hexadécimaux,
+  gardée pour le rejeu) ; la table des refus de la maquette se branche sur `code` (`JEU_DEMONSTRATION_ABSENT` en
+  plus) ; la prochaine action d'une ligne se calcule depuis `finLe`, `effacementLe`, `prolongations`, `statut`. Preuve :
+  appel réel au BFF contre le vrai catalogue sur une pile `grp-b`, 38/38 (fiche STORY-1112, « Preuves »).
 
 - **← A (2026-11-24) : AP-55, relayer `GET /etat-publie/{org}` en lecture pour `org:read`** — **servie par STORY-1080**
   (catalogue #67, BFF #38). La route du contrat ne peut pas être relayée telle quelle : elle refuse tout appelant qui
@@ -2458,6 +2485,18 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **`enableImplicitConversion` du `ValidationPipe` du BFF fait d'une chaîne un booléen** (STORY-1112) : `"oui"` ou
+  `"false"` deviennent `true` avant `@IsBoolean`. Un booléen d'un corps se garde tel quel par
+  `@Transform(({ obj }) => obj.<champ>)` ; une mutation qui retire le `@Transform` laisse l'import inutile (TS6133) :
+  muter la valeur (`Boolean(obj.<champ>)`), pas la ligne.
+- **`eslint --fix` a retiré `statut as HttpStatus`** (STORY-1112), puis l'import est devenu inutile : relancer `tsc`
+  après `--fix` (piège de 1084, une fois de plus).
+- **L'ouverture d'un essai avec un jeu dure plusieurs secondes** (8,2 s sur la pile, naissance chez auth comprise,
+  sans modules levés) : tout appelant de `POST /essais` doit avoir un délai long (le BFF : `UPSTREAM_ESSAI_TIMEOUT_MS`).
+- **Garde des noms de schéma au BFF** : le document de l'`AppModule` du BFF a 34 chemins (au 24/11) ; le garde
+  rougit sur une seconde classe de même nom (`EssaiDto ×2`). Reste à poser au catalogue et à auth s'ils publient des
+  DTO par Swagger (le contrat de l'essai est écrit à la main, `contrat/*.json`).
 
 - **Swagger ne garde qu'une classe par nom de schéma, sans rien dire** (correctif de STORY-1084) : deux DTO de même
   nom dans deux modules donnent un seul schéma, et toutes les références pointent la même forme ; `gen:api`, `tsc` et

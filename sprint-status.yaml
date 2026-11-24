@@ -1805,13 +1805,18 @@ reserved_ranges:
   # ── LOT 6 DE B (2026-11-24) : STORY-1112 → 1116, réservées par PLAN-LOT-6-2026-11-23.md §8 ; fiches écrites juste
   #    avant de coder, le story_id_high_water_mark monte au commit qui crée chacune.
   - range: "STORY-1112"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe B, lot 6, n° 2 — le BFF relaie les essais d'un prospect à la console (AP-57) : GET /api/v1/essais (liste, avec le prospect né) et GET /api/v1/jeux-demonstration au catalogue (org:read, contrat essai-prospect 1.1.0) ; au BFF, /api/v1/admin/essais (liste, lecture, prolongation, signature, jeu, effacement) projetés en DTO typés, et POST /admin/essais qui enchaîne la naissance et l'ouverture avec le jeu du métier ; refus relayés par leur code (prospera-admin-panel-service, prospera-platform-catalog-service)"
     source_doc: "prospera-stories/stories/STORY-1112.md"
     reserved_on: "2026-11-24"
     note: >
-      Contrat annoncé avant la fusion (journal de B, « ⚠ Contrats », 2026-11-24). Preuve : appel réel au BFF contre le
-      vrai catalogue sur une pile grp-b. Lot 6 de B, n° 2 (« Fini quand : AP-57 débloquée »). NON SLOTTÉE.
+      🏁 DONE le 2026-11-24 — catalogue #70 (dev 706f1b8), admin-panel #39 (dev 3071886) ; contrat annoncé avant
+      la fusion (stories #786 : essai-prospect 1.1.0, GET /essais et GET /jeux-demonstration ; BFF /admin/essais, huit
+      routes, EssaiDto, EssaisDto, EffacementDto, JEU_DEMONSTRATION_ABSENT, UPSTREAM_ESSAI_TIMEOUT_MS). AP-57
+      débloquée : appel réel au BFF contre le vrai catalogue (espace d'essai) et le vrai auth sur une pile grp-b, 38/38
+      contrôles (ouvrir 201 en 8,2 s avec naissance et jeu du métier, rejeu 200, liste avec prospects, prolonger,
+      refus par leur code, signer). Node 25 : catalogue 1607 passés (3 suites rouges connues), BFF 604/604 et e2e
+      247/247 ; mutations 7/7 et 13/13. Garde des noms de schéma posé au BFF. Lot 6 de B, n° 2. NON SLOTTÉE.
   - range: "STORY-969"
     status: "RÉSERVÉ"
     owner: "Le lettrage — des lignes validées d'un même compte de tiers (collectif, tiers, devise), équilibrées ; manuel ; partiel (une ligne garde son reste, jamais lettrée au-delà de son montant, même sous la concurrence : verrou du compte de tiers) ; code AA, AB… par compte de tiers et exercice ; automatique par PROPOSITIONS (référence, puis montant et date, fenêtre de 90 jours), acceptées (PROPOSE_PAR_LA_MACHINE) ou modifiées (CHOISI_PAR_L_UTILISATEUR) ; délettrage tracé, refusé sur un exercice clos ; écarts de règlement sous un seuil (1 000) soldés par une écriture d'écart validée et numérotée (658 / 758) ; le lettrage vit à côté des écritures (en ajout seul) ; balance âgée par le port de 968 ; balance publiée inchangée (prospera-comptabilite-service)"
