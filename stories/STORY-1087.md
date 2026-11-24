@@ -104,6 +104,47 @@ cabinet, `ged:physique:gerer` (STORY-1088) déclaré, `routesLectureSeule` remis
 d'aujourd'hui sont des propositions qui n'existent pas) et les routes de lecture du cabinet. **→ B** : copie au
 catalogue après la fusion.
 
+### Amendement du 2026-11-24 — le plan suit le dossier client d'un cabinet (recherche demandée par l'utilisateur)
+
+**Ce que font les cabinets.** Le dossier d'un client s'y tient en deux parties : le **dossier permanent** (les
+informations durables, utiles à toutes les missions : statuts, RCCM, contrats importants, organigramme, lettre de
+mission, description de l'activité et du système comptable ; tenu à jour, les documents dépassés en sortent) et le
+**dossier annuel**, un par exercice (pièces comptables, déclarations, états, et les travaux du cabinet qui prouvent les
+diligences : feuilles de travail, note de synthèse). Le classement se fait par fonction, et chaque document porte le
+nom du client et la référence de son sous-dossier. La destruction d'un dossier est approuvée par la direction du
+cabinet et inscrite à un registre. En fin de mission, le cabinet restitue au client les documents qu'il lui a confiés.
+
+**Le droit applicable.** L'AUDCIF (OHADA 2017), article 24 : livres, pièces justificatives et documents équivalents
+conservés **dix ans**. Togo, loi n° 2017-007 sur les transactions électroniques : l'écrit électronique a la force
+probante du papier si son auteur est identifié et son intégrité garantie par sa conservation ; la durée de conservation
+des documents électroniques y est de vingt ans, ou celle du papier (un projet d'amendement porte vingt ans au moins pour
+les copies électroniques : à vérifier avant de s'y fier). Les référentiels d'une « copie fiable » sont NF Z42-026 (la
+numérisation fidèle) et NF Z42-013 / ISO 14641 (la conservation) : non obligatoires, ils servent de preuve en cas de
+contrôle ou de litige.
+
+**Ce que cela change au contrat** (ajouts seuls, transmis à la sous-session de code le 24/11) :
+
+- Chaque nature appartient à une **rubrique** : `PERMANENT` (sans exercice ; sous-rubriques `JURIDIQUE`, `CONTRATS`,
+  `MISSION`) ou `ANNUEL` (exercice **exigé**, 422 `EXERCICE_REQUIS` ; sous-rubriques `ACHATS`, `VENTES`, `TRESORERIE`,
+  `SOCIAL`, `FISCAL`, `ETATS`, `TRAVAUX`). Le fonds rend ses pièces groupées par rubrique, et par exercice pour
+  l'annuel. Une nature ajoutée par le cabinet déclare sa rubrique et sa sous-rubrique.
+- Chaque nature porte `conservationAns` (**10** par défaut, AUDCIF art. 24) et son point de départ : `FIN_EXERCICE` pour
+  l'annuel, `FIN_MISSION` pour le permanent. Affichée seulement : aucune destruction (la destruction, approuvée et
+  inscrite au registre, est d'un lot suivant).
+- Chaque version déposée au cabinet garde sa **trace de numérisation** quand le dépôt la donne (`format`,
+  `resolutionDpi`, `pages`, opérateur, date) ; le contrôle humain reste obligatoire avant le versement. Avec l'empreinte,
+  le scellé et le journal déjà en place, c'est la base d'une copie fiable, sans prétendre à une certification.
+- La **restitution** en fin de mission (bordereau) appartient à STORY-1088 (AC-4), qui la sert déjà.
+
+Sources : [mémoire « Procédé d'organisation du dossier client »](https://www.memoireonline.com/05/14/8893/Procede-dorganisation-du-dossier-client-et-de-revision-de-comptes.html),
+[OQLF, « dossier permanent »](https://vitrinelinguistique.oqlf.gouv.qc.ca/fiche-gdt/fiche/503747/dossier-permanent),
+[IBR, « Les documents de travail du réviseur »](https://www.ibr-ire.be/docs/default-source/fr/Documents/reglementation-et-publications/normes-et-recommandations/recommandations/Les-documents-de-travail-du-reviseur.pdf),
+[AUDCIF, article 24](https://www.lexenegal.sn/code/ohada-comptabilite-information-financiere/art-24),
+[Togo, loi 2017-007](http://kalieu-elongo.com/wp-content/uploads/2018/03/Togo-Loi-2017-07-transactions-electroniques.pdf),
+[rapport de l'Assemblée nationale sur son amendement](https://assemblee-nationale.tg/wp-content/uploads/2023/07/Transaction-electro-Rapport.pdf),
+[valeur probante, NF Z42-013 et NF Z42-026](https://www.solutions-numeriques.com/dossiers/larchivage-a-vocation-probatoire),
+[restitution en fin de mission](https://lawinsider.com/fr/contracts/aKNIuiKl7mS).
+
 ### Décisions prises au contrat (contestables)
 
 - **D-1087-1** : le porteur générique est un champ `domaine` plutôt qu'un module neuf : un seul circuit, deux porteurs.
