@@ -1,6 +1,6 @@
 # STORY-320 : Les bases fiscales viennent de la balance — rien ne se ressaisit, et ce qui manque se nomme
 
-Status: in-progress — **Fiche écrite le 2026-11-24** par la session du groupe A (lot 6, n° 6 de la ligne de A : plan
+Status: done — **Livrée le 2026-11-24** : prospera-fiscal-service **#55** (`da3acd3` sur `dev`), contrat annoncé avant le code (prospera-stories #784). **Fiche écrite le 2026-11-24** par la session du groupe A (lot 6, n° 6 de la ligne de A : plan
 amendé le 24/11, #769). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md`
 (EPIC-031), la règle « rien ne se ressaisit pour la déclaration du mois » de la salle des cabinets (V3,
 `salle-cabinets-validations-2026-11-19.md`).
@@ -62,10 +62,15 @@ Ceux de l'épic, tels quels :
   jour UTC. Une balance se rapproche **par ses bornes**, jamais par un identifiant d'exercice supposé (`exerciceId` est
   facultatif chez `balance-service`). Les exercices décalés (non calendaires) sont couverts pour `AAAA-MM` et `AAAA-Tn`,
   approximés pour les périodes annuelles : écart nommé, repris par la story qui ouvrira le calendrier d'exercice.
-- **D-320-5 — Quelle balance.** Exclues : les socles d'ouverture (`origine: A_NOUVEAUX`, ce ne sont pas des mouvements)
-  et les balances provisionnées (`PROVISIONS_FISCALES` : elles contiennent la charge d'impôt que l'on va justement
-  calculer, une base ne peut pas contenir son propre résultat). Parmi le reste : **la plus haute version validée**
-  équilibrée ; à défaut, **la plus haute version en brouillon** équilibrée ; à défaut, le blocage. Lecture en deux
+- **D-320-5 — Quelle balance.** **⛔ AMENDÉE à la livraison (garde AD-14).** Le brouillon de cette décision excluait
+  les socles d'ouverture (`A_NOUVEAUX`) et les balances provisionnées (`PROVISIONS_FISCALES`). La garde
+  `garde-agnosticisme-balance.spec.ts` (AD-14, STORY-309) l'a refusé, à raison : **ce service ne lit ni ne teste jamais
+  l'origine d'une balance**. Le champ `origine` annoncé dans le contrat n'a donc **jamais été publié** (retiré avant la
+  fusion ; rien à régénérer). Conséquence assumée : parmi les balances dont l'exercice contient la date, on retient
+  **la plus haute version validée** équilibrée, sans savoir si c'est un socle ou une provision. **Écart nommé, demande à
+  C** : `balance-service` doit servir « la balance de référence de l'exercice » (celle qu'il retient déjà pour son
+  propre moteur, sans socle) ; tant que ce n'est pas fait, un socle validé de version plus haute pourrait être retenu.
+  Retenue donc : **la plus haute version validée** équilibrée ; à défaut, **la plus haute version en brouillon** équilibrée ; à défaut, le blocage. Lecture en deux
   appels filtrés (`etat=VALIDÉE`, puis `etat=BROUILLON` seulement si la première n'a rien donné), plafond 50 chacun ;
   un troisième (`etat=REJETÉE`) ne sert qu'à dire pourquoi on bloque.
 - **D-320-6 — Trois états des bases.** `ALIMENTEES` (balance validée), `PROVISOIRES` (balance en brouillon : AC-3 — la
@@ -118,7 +123,7 @@ suffit : manifeste `declarations` et catalogue d'auth inchangés) ; aucun évén
   { statut: 'ALIMENTEES' | 'PROVISOIRES' | 'BLOQUEES',
     constateLe: ISO,
     source: { balanceId, version, etat: 'VALIDEE' | 'BROUILLON', statutPreuve, checksum, devise,
-              exercice: { debut, fin }, origine: string | null, valideeLe: ISO | null } | null,
+              exercice: { debut, fin }, valideeLe: ISO | null } | null,
     manque: { code: 'BALANCE_ABSENTE' | 'BALANCE_REJETEE' | 'BALANCE_DESEQUILIBREE' | 'BALANCE_NON_LISIBLE',
               message: string } | null }
   ```
@@ -162,3 +167,10 @@ Le calcul des montants (321) ; le triplet (322) ; les anomalies et leur levée (
 | Date | Événement |
 |---|---|
 | 2026-11-24 | Fiche écrite, contrat annoncé (PR de docs) avant le code. |
+| 2026-11-24 | **DONE.** Code : fiscal #55 (`da3acd3` sur `dev`). Preuves : unitaires sur Node 24 dans l'étage `verification` (178 suites, 2 487 tests, 1 ignoré) ; `test:conformite` 13 suites / 77 tests sur `mongo:7` en jeu de répliques (dont `bases-fiscales.conformite-spec.ts` : 7 tests) ; e2e `obligations` 48/48 (7 nouveaux) ; mutations rouges sur l'assertion : 11 unitaires (dont l'exclusion d'origine, la plus haute version, la fin de période, le blocage retiré, la lecture hors ordre, l'amont avalé, l'état permis) et 3 sur Mongo (comparaison-échange retirée, audit hors transaction, bases non posées avec l'état) ; `docker compose up` (pile `grp-a`, image construite depuis `git archive` du commit) : sain (mongodb, mongodb-audit, kafka up), les routes neuves rendent 401 ; `down -v` fait. **Non prouvé** : la lecture contre un `balance-service` réel (aucun événement, HTTP seul) — l'adaptateur est éprouvé contre le contrat lu dans `BalanceResponseDto`. |
+
+## Livraison (2026-11-24)
+
+- **Dépôt** : `prospera-fiscal-service`, `MNV-320` → `dev` (#55). Fichiers : `domain/obligations/bases-fiscales.ts` (date de référence, choix de la balance, trois états, quatre manques, acte d'audit), `application/obligations/bases-obligations.service.ts` (résoudre, revérifier), `application/obligations/cycle-obligations.service.ts` (la prise en charge alimente), `ports/source-balances.ts`, `adapters/http/contrat-balance-service.ts` + `HttpSourceBalances`, registre (`constaterBases`, `transitionner(…, bases)`), route `POST /api/v1/obligations/{id}/bases`, champ `basesFiscales`, `BALANCE_SERVICE_URL`.
+- **Tel que annoncé**, sauf D-320-5 (ci-dessus) et deux détails : la route `…/bases` refuse aussi une obligation écartée (`409 OBLIGATION_DESACTIVEE`) ; le refus `BASES_FISCALES_BLOQUEES` porte le manque dans `details`.
+- **Ce que 322 doit savoir** : `basesFiscales.source` dit sur QUELLE balance (id, version, empreinte, exercice) le calculé sera produit — 322 et 321 la liront, jamais ils ne rechercheront une balance eux-mêmes. Un constat est celui de la dernière tentative (`constateLe`) ; il ne se rafraîchit pas seul. `montantAttendu` est toujours `null`. Une base provisoire n'empêche pas le visa : c'est 328 (anomalie `BASE_PROVISOIRE`). Le patron d'écriture reste `transitionner` / `constaterBases` (comparaison-échange + audit dans la même transaction).
