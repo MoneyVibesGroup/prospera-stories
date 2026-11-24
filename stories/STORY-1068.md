@@ -1,6 +1,6 @@
 # STORY-1068 : `sinistres` lit `assurance.provision.changed@1` — le dossier montre la provision en vigueur, celle du dernier mouvement effectif d'`assurance`
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-215 (les contrats lus, la provision et les états techniques) ; FR-76 (« la dernière provision est la
 dernière ligne »), FR-188, FR-75 (les cinq montants, chacun à sa source) · **Dépôt :** `prospera-sinistres-service`
@@ -48,7 +48,8 @@ d'`origin/dev`.**
   mutations 12/12. Annonce « ⚠ Contrats » : cette PR de docs, fusionnée avant le code.
 - [x] Sous le verrou (pris à 11:29) : Node 24 (étage `verification`) lint, 1328/1328 unitaires sur MongoDB et Redis
   réels, 33 e2e, build, mutations MongoDB 4/4 ; `docker compose up` sain ; pilote 27/27 sur pile `grp-d`.
-- [ ] PR de code fusionnée en rebase ; rejeu sur les images d'`origin/dev` ; PR de docs finale.
+- [x] PR de code fusionnée en rebase (#29, `dev` `2a8f9f1`, `ddcf52a`) ; rejeu sur les images d'`origin/dev` 27/27 ;
+  PR de docs finale.
 
 ## Ce qui doit être vrai à la fin
 
@@ -105,3 +106,38 @@ d'`origin/dev`.**
 Voir le journal de D, « ⚠ Contrats » (2026-11-24, STORY-1068) : routes changées par ajout (`provision`,
 `montants.provision`), groupe de consommateurs neuf, collection neuve, `assurance` voisin suivi. Aucun schéma de fait,
 aucun manifeste, aucun autre dépôt ne change.
+
+## Ce qui a été livré
+
+**2026-11-24** — prospera-sinistres-service **#29**, fusionnée en « Rebase and merge » (`dev` **`2a8f9f1`**, `ddcf52a`) ;
+annonce « ⚠ Contrats » avant le code : prospera-stories **#796** (`main` `53f9e2a`).
+
+- `src/modules/sinistres/provision/` : `provision-en-vigueur.ts` (pur : lecture du fait, vue, rôles de lecture),
+  `provisions-en-vigueur.ts` (read-model `sinistres_provisions_en_vigueur`, mémoire et MongoDB : plus haute séquence,
+  course rejouée), `consommateur-provision.service.ts` (groupe `sinistres-service.provision`),
+  `lecture-de-la-provision.service.ts` (état publié d'`assurance` + read-model) ; `assurance` voisin suivi
+  (`modules-heberges.ts`) ; `GET …/dossiers/{id}` gagne `provision`, `montantsDuDossier` reçoit la provision lue ;
+  copie du contrat consommé (`contrat/consommes/assurance.provision.changed.json`, `prospera-plateforme@8ce4325`).
+- Recette versionnée `scripts/recette/1068/` (pile, émetteur, pilote, mutations).
+
+## Preuves
+
+- **Node 25** (poste, sans Docker) : 1161 unitaires verts ; seules les 5 attendues rougissent (`app.module`,
+  `app-cablage` : client Kafka natif) ; lint des fichiers touchés, `tsc --noEmit` ; **mutations 12/12** sur l'assertion
+  (droits, installation, référence, motif, séquence nulle, montant avant, égalité et retard de séquence en mémoire,
+  `REVOKED`, voisin, rôles du jeton au dossier et aux évaluations).
+- **Node 24** (étage `verification`, image depuis `git -c core.autocrlf=false archive`) : lint 0 ; **1328/1328 unitaires
+  (67 suites) sur MongoDB et Redis réels** ; 33/33 e2e ; build ; **mutations MongoDB 4/4** (`$lte`, `$ne`, perdant de la
+  course, proposition gardée) ; la spec de 1068 sur MongoDB réel : 20/20.
+- **Pile `grp-d`** (sinistres de la branche, assurance d'`origin/dev` `8dc3285`, même Kafka) : `docker compose up` sain ;
+  **pilote 27/27** : `SANS_MOUVEMENT`, puis séquences 1 (600 000, **1,3 s** après la proposition, pile neuve) et 2
+  (900 000) ; GEST à 3 200 000 : `a-valider` publié (écart 2 300 000), provision montrée inchangée ; acceptée par un
+  autre RESP chez `assurance` : séquence 3 (3 200 000, `VALIDATION_HIERARCHIQUE`) ; vieux fait rejoué, illisible et hors
+  contrat écartés (journalisés), consommateur vivant ; dossier sans version de plus ; `…/evaluations` identique ; AUD
+  lit, l'accueil `NON_LISIBLE` ; O2 sans `assurance` : `NON_INSTALLE` ; outbox vides, retard du groupe 0, 0 erreur au
+  journal des deux services.
+- **Rejeu sur les images reconstruites depuis `origin/dev`** (`ddcf52a`, `--no-cache`, volumes neufs) : pilote 27/27.
+- Verrou Docker : pris à 11:29, une seule prise, rendu à 11:48 ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+
+**Reste** (D-1068-11) : « en attente du `RESP` » au dossier (`a-valider`, amender la spine, D-1068-6) ; `expertises`
+consomme aussi ce fait (avec FR-61, STORY-1071) ; la liste « à revoir » côté `sinistres` ; un écran.

@@ -92,6 +92,26 @@
   - **Suivante : STORY-1068** 🛡️ (assurance : `sinistres` lit `provision.changed@1` ; première story d'assurance de D :
     constater la passation de C, D-L6-3, et noter `prospera-liaison-assureur-service` resté à C).
 
+- **STORY-1068** ✅ 🛡️ — `sinistres` lit `assurance.provision.changed@1` : le dossier montre la provision en vigueur
+  (prospera-sinistres-service#29, `dev` 2a8f9f1, ddcf52a ; annonce « ⚠ Contrats » #796 avant le code, `main` 53f9e2a ;
+  aucun schéma ni manifeste ne change ; `assurance` non touché). **Première story d'assurance de D** : passation de C
+  constatée (« Passations » : sinistres `ea1a111`, assurance `8dc3285`, les SHA de C ; `prospera-liaison-assureur-service`
+  reste à C). Rituel (2026-11-24) : aucune demande neuve à D dans les journaux de A, B et C. « Fini quand » fixé par la
+  fiche (D-1068-1 : le plan ne le fixait pas).
+  - **Le consommateur** `sinistres-service.provision` (topic créé avant l'abonnement, métadonnées à 10 s) ; un fait
+    illisible ou hors contrat écarté entier ; **le read-model** `sinistres_provisions_en_vigueur` (plus haute séquence
+    par dossier : rejeu, doublon, retard et course sans effet ; le dossier ne gagne ni version, ni piste, ni fait).
+  - **La vue** : `provision` au dossier lu, `montants.provision` aux évaluations : `EN_VIGUEUR` (montant, devise,
+    séquence, avant, motif, origine, date d'effet), `SANS_MOUVEMENT`, `NON_INSTALLE` (`assurance` voisin suivi, C4),
+    `NON_LISIBLE` (hors DG, DT, RESP, GEST, AUD : annexe B, ligne 12). « En attente du `RESP` » n'est pas lu (D-1068-6).
+  - Node 24 : 1328 unitaires (67 suites) sur MongoDB et Redis réels, 33 e2e, lint, build ; mutations 12/12 (Node 25) et
+    4/4 (MongoDB réel). Pile `grp-d` (sinistres + assurance, même Kafka) : `docker compose up` sain, pilote 27/27
+    (latence du premier mouvement 1,3 s), rejoué sur l'image reconstruite depuis `origin/dev`.
+  - Décisions D-1068-1 → 11 (fiche ; D-1068-11 : ce qui reste) ; recette versionnée `scripts/recette/1068/`. **Verrou
+    Docker libre au moment des preuves (B l'avait rendu après 1113) ; pris à 11:29, une seule prise, rendu à 11:48** ;
+    aucun conteneur, volume ni réseau `grp-d` ne reste.
+  - **Suivante : STORY-1069** 🛡️ (`sinistres.evaluation.arretee@1` publié, D-1013-9 ; `sinistres`).
+
 ### Lot 4 (ouvert le 2026-11-18)
 
 - **Plan** : `PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §4 : **STORY-1060 → 1064**, le distributeur au backend (cinq stories ;
@@ -1101,7 +1121,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-24, STORY-1068) avant la fusion du code (prospera-sinistres-service#29, `MNV-1068`). —
+- **PUBLIÉ (2026-11-24, STORY-1068, prospera-sinistres-service#29, `dev` 2a8f9f1, ddcf52a) ; ANNONCÉ avant la fusion
+  du code (prospera-stories #796, `main` 53f9e2a), sans écart. —
   `prospera-sinistres-service`, module `sinistres` : le dossier montre la provision en vigueur, lue dans
   `assurance.provision.changed@1` (AD-11, D-1016-10).**
   Fiche : `stories/STORY-1068.md` (D-1068-1 → 11). **Ajouts seuls** ; **aucun schéma de fait ne change** ; **aucun
@@ -1848,6 +1869,20 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1068** :
+  - (1) **`NODE_ENV: staging` fait tomber `assurance-service` au démarrage** (« unable to determine transport target for
+    "pino-pretty" » : le paquet n'est pas dans l'image de production) ; `sinistres` aussi le lirait. Sur une pile de
+    preuve des deux services d'assurance : `NODE_ENV: production` (comme leurs compose de développement).
+  - (2) **Une mutation qui rend un import ou une fonction inutiles ne compile pas** (piège 1063-1, encore) : retirer
+    `entierPositif(...)` ou `EntitlementStatus.REVOKED` ; la garder lue (`entierPositif(x) || x === 0`,
+    `!== ("X" as EntitlementStatus)`). Dans un script de mutations, une apostrophe dans une chaîne entre apostrophes casse
+    le script entier en silence : `node --check` avant de le lancer.
+  - (3) **La course d'un upsert ne se prouve pas par `Promise.all`** (piège 1062-1) : l'espion sur `updateOne` du modèle
+    joue l'écrivain concurrent (il insère, puis rend `matchedCount: 0`) ; la mutation « le perdant abandonne » n'est
+    tuée que par lui.
+  - (4) Le checkout de `sinistres` avait 33 commits de retard et ses dépendances avaient changé (`bullmq`, `ioredis`,
+    `ajv`…) : `npm ci --ignore-scripts` avant toute suite locale.
 
 - **STORY-1067** :
   - (1) **Un pilote qui « attend » un refus en rejouant l'acte le fait passer** : la boucle qui guettait
