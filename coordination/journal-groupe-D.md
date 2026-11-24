@@ -16,11 +16,32 @@
   d'assurance de D la constate). **Même poste que B** (BFF de la console, recette, catalogue, auth, kyc, bilan, balance,
   dossier ; quatre stories sur sept avec une pile complète) : **même verrou Docker**. Avant le 04/12 : la passation à
   Dev A mise à jour (D-L3-6), par 1071.
-- **STORY-1065** 🚧 — la facture juste (3) : les mentions légales (liste de travail jusqu'à A-1, paramètre versionné), le
-  PDF figé, le lien public d'envoi (`ventes`). Rituel (2026-11-24) : aucune demande neuve à D pour le distributeur dans
-  les journaux de A, B et C (la passation de C, D-L6-3, vise 1068) ; verrou Docker libre. Annonce « ⚠ Contrats » avant
-  le code (cette PR) ; manifeste `facturation` amendé (C7 : `facturation:parametres:modifier`) ; → B (le droit) ;
-  Q-D-12 au PO.
+- **STORY-1065** ✅ 🚚 — la facture juste (3) : les mentions légales, le PDF figé, le lien public d'envoi
+  (prospera-ventes-service#13, `dev` 3242844, ca44566, 5929438 ; annonce « ⚠ Contrats » #763 avant le code, manifeste
+  `facturation` amendé, C7). Rituel (2026-11-24) : aucune demande neuve à D pour le distributeur dans les journaux de A,
+  B et C (la passation de C, D-L6-3, vise 1068).
+  - **Les mentions légales** (FR-44, liste de travail jusqu'à A-1) : `facturation_parametres` versionnés (`GET|PUT
+    /api/v1/facturation/parametres`, droit neuf `facturation:parametres:modifier`, servi par B : STORY-979) — la fiche de
+    l'émetteur saisie par le DAF faute de propriétaire (Q-D-12), quatorze codes de mention (toutes exigées par défaut),
+    pénalités, escompte, durée du lien (7 j), conservation (10 ans) ; client et articles lus dans
+    `facturation_clients_lus` et `facturation_articles_lus` (futures projections de `pdv` et `catalogue`, remplies par
+    personne) ; **`MENTION_OBLIGATOIRE_MANQUANTE` jugée dans la transaction du numéro, aucun numéro consommé** ; mentions
+    figées sur la facture (`mentions`, `parametresVersion`).
+  - **Le PDF figé** (FR-46, AD-6) : pdfkit 0.19.1 épinglé, Liberation Sans embarquée (OFL, empreintes figées),
+    déterministe (dates du document = émission) ; `pdf.etat` `EN_ATTENTE` → `PRODUIT` (`ECHEC` après cinq essais),
+    produit après la réponse et par un balayage (2 s) ; octets dans `facturation_pdfs` (écriture majoritaire) avant
+    `PRODUIT` ; empreinte vérifiée à chaque lecture (`PDF_ALTERE`) ; `GET …/factures/{id}/pdf`.
+  - **Le lien public** (AD-33) : jeton de 128 bits haché, adresse rendue une fois, expiration figée, révocation ; `GET
+    /api/v1/facturation/liens-publics/{jeton}` sans compte (statut « route publique » neuf dans l'invariant des routes),
+    30 ouvertures par minute et par adresse, chaque ouverture tracée dans la piste.
+  - Node 24 : 634 unitaires (63/63 suites), 24 e2e, 171 d'intégration (21 neufs) ; mutations 11/11 (pures) et 9/9
+    (MongoDB réel). Pile `grp-d` : `docker compose up` sain, pilote 27/27 (texte du PDF servi lu par `pdfjs-dist`), rejoué
+    sur les images reconstruites depuis `origin/dev` (`--no-cache`, volumes neufs).
+  - Décisions D-1065-1 → 15 (fiche ; D-1065-15 : la version du manifeste `facturation` monte avec 1066) ; recette
+    versionnée `scripts/recette/1065/` ; Q-D-12 au PO. **Verrou Docker tenu par B (1080) de 02:00 à 03:27 ; attendu par
+    boucles bornées, pris à 03:27, une seule prise, rendu à 04:09** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+  - **Suivante : STORY-1066** 🚚 (l'avoir, `ventes` : `AV-`, `AVOIR_SUPERIEUR_A_LA_FACTURE`, `facturation.avoir.emis@1`, son
+    PDF « Avoir » ; **monter le manifeste `facturation` à la source**, D-1065-15).
 
 ### Lot 4 (ouvert le 2026-11-18)
 
@@ -436,8 +457,8 @@
     (AD-12) s'y ajoutent comme clés de plus (valeurs complètes à chaque version). Un plan de journée garde
     `parametresVersion` ; un plan créé ailleurs qu'à l'import (EPIC-233) se datera par `dateDuPlanDeJournee`.
   - **Ce qui reste, dans l'ordre conseillé** : (1) ~~la facture juste (2)~~ **livrée par 1061** (suite de Sage, format,
-    `PARTIELLE`/`PAYEE`) ; **la facture juste (3)** et suivantes, dans l'ordre de D-1061-12 (fiche 1061) : mentions
-    légales A-1, PDF et lien public d'envoi ; l'avoir ; la facture par livraison et `SANS_BON` (après la commande (2)) ;
+    `PARTIELLE`/`PAYEE`) ; ~~la facture juste (3)~~ **livrée par 1065** (mentions légales en paramètre, PDF figé, lien
+    public d'AD-33 ; reste l'envoi par `notification`, D-1065-14) ; puis, dans l'ordre de D-1061-12 : l'avoir ; la facture par livraison et `SANS_BON` (après la commande (2)) ;
     la liste des factures et les balances ; (2) ~~la commande (2)~~ **livrée par 1062** (`CMD-`, `TRANSMISE`, annuler) ;
     **la commande (3)** et suivantes, dans l'ordre de D-1062-12 : modifier, livraison et reliquat (avec `entrepot`, puis la
     facture par livraison), allocation du matin, remise, dérogation ; détail plus bas, « La commande (2) » ; (3) ~~les remplaçantes d'EPIC-227~~
@@ -701,7 +722,8 @@
 ## Demandes aux autres groupes
 
 - **→ B (2026-11-24, STORY-1065) : `facturation:parametres:modifier` au catalogue de tenant d'`auth`, hors du jeton** —
-  **ouverte**, sans urgence (aucun écran ne l'appelle). Déclaré au manifeste `facturation` (C7, D-1065-13 ; absent de
+  **servie par STORY-979 de B** (voir « Réponses aux demandes reçues ») ; reste, côté D, la version du manifeste
+  (D-1065-15, avec 1066). Déclaré au manifeste `facturation` (C7, D-1065-13 ; absent de
   l'annexe B.2, comme `commande:parametres:modifier` et `terrain:parametres:modifier` : `AJOUTS_A_L_ANNEXE_B`). Libellé
   proposé : « Modifier les paramètres de la facture » (la fiche de l'émetteur, la liste des mentions légales, la durée
   du lien public). **Rôle par défaut proposé : `DAF`**, lui seul. Jusque-là, `PUT /api/v1/facturation/parametres`
@@ -919,6 +941,17 @@
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-24, STORY-979) : `facturation:parametres:modifier` servi** — **lue** (relayée par la session de groupe de
+  D, à la PR finale de 1065). auth : prospera-auth-service **#48**, `dev` `c0f6243` — le droit est au catalogue de
+  tenant, **hors du jeton** : servi par `GET /api/v1/moi/droits` dans `droitsHorsJeton`, jamais dans `perms[]` ; rôle par
+  défaut **`DIST_DAF` seul** (« Modifier les paramètres de la facture ») ; jusqu'à 60 s de cache (pas d'avance de `dv`).
+  Catalogue : prospera-platform-catalog-service **#68**, `dev` `d7e67f1`, `copies.json` recopié depuis
+  prospera-stories@1561370, garde des manifestes verte (48). Annonce de B : prospera-stories **#777**. **D-979-7
+  (information)** : le manifeste `facturation` est resté en 1.0.0 ; un catalogue déjà semé garde l'ancienne 1.0.0 sans le
+  droit et la signale « divergente ». **Décision de D (D-1065-15)** : la version monte à la source dans **STORY-1066**
+  (l'avoir touche `facturation`) ; si l'avoir n'ajoute rien au manifeste, 1066 la monte quand même en **1.0.1** ; B la
+  recopie ensuite. Le code de 1065 n'est pas rouvert.
+
 - **← A (2026-11-18) : réponses de l'utilisateur à Q-D-1 → Q-D-10** — **lue** au rituel de 1060. Q-D-9 **renversée** ⇒
   STORY-1060 (un calendrier propre à chaque organisation) ; les neuf autres **confirmées** (« Questions à l'utilisateur
   ou au PO ») ; la reprise du dernier numéro de facture avant la première facture d'un client qui quitte Sage est
@@ -972,8 +1005,10 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-24, STORY-1065), AVANT la fusion du code. — `prospera-ventes-service`, module `facturation` : les
-  mentions légales, le PDF figé, le lien public d'envoi.** Fiche : `stories/STORY-1065.md` (D-1065-1 → 14). **Ajouts
+- **PUBLIÉ (2026-11-24, STORY-1065, prospera-ventes-service#13, `dev` 3242844, ca44566, 5929438) ; ANNONCÉ avant la
+  fusion du code (prospera-stories #763), sans écart. — `prospera-ventes-service`, module `facturation` : les
+  mentions légales, le PDF figé, le lien public d'envoi.** Fiche : `stories/STORY-1065.md` (D-1065-1 → 15 ; la version
+  du manifeste, restée en 1.0.0, monte avec 1066 : D-1065-15). **Ajouts
   seuls** ; **aucun fait ne change** (`facturation.facture.emise@1` ne porte ni mention ni PDF) ; **manifeste
   `facturation` amendé** (C7 : + `facturation:parametres:modifier`, recopié à l'octet dans `ventes`).
   - **Routes neuves** (préfixe `/api/v1/facturation`) : `GET /parametres` (un droit du module) et `PUT /parametres`
@@ -1626,6 +1661,25 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1065** :
+  - (1) **Un PDF à police embarquée n'a pas de texte lisible dans ses flux** (glyphes en hexadécimal) : un test qui
+    cherche « FAC-2026-000001 » dans les octets ne trouve rien. Vérifier les mentions par un espion sur
+    `PdfDocument.prototype.text` (unitaires) et lire le PDF servi avec un vrai lecteur (`pdfjs-dist` de
+    `document-service`, hors des dépendances du service, `scripts/recette/1065/texte-du-pdf.mjs`) ; `pdfjs` rend l'espace
+    insécable comme une espace : comparer sans elle. Les métadonnées (`/CreationDate`, `/Title`) sont des objets
+    indirects : chercher `(D:…)`, pas `/CreationDate (D:…)`.
+  - (2) **Le cache des droits est par membre (piège 1056-3) a resservi** dans un test HTTP : un membre lu d'abord avec
+    d'autres droits garde ceux-là ; un refus (403) se prouve avec un membre neuf, et chaque jeu de droits a son membre.
+  - (3) **Le verrou a été tenu 87 min par B (1080, recette complète)** : code, unitaires sous Node 25, mutations pures,
+    lint, recette et fiche faits d'abord ; boucles bornées de 9 min ; une prise, toutes les preuves d'affilée (41 min).
+  - (4) **Un `docker compose up` lancé pendant la construction `--no-cache` prend l'ancienne image du même nom** (la
+    construction n'avait pas fini) : attendre « IMAGES OK », vérifier `docker images` (« Created ») et le contenu de
+    l'image (les polices dans `dist`) avant de lever la pile du rejeu ; la pile levée trop tôt a été descendue sans
+    preuve.
+  - (5) Une mutation qui retire un décorateur rend son import inutile (`noUnusedLocals`) : la garder par
+    `...[Public()].filter(() => false)`. Un heredoc Python long avec des apostrophes a encore échoué : script ou
+    remplacements par l'outil d'édition.
 
 - **STORY-1064** :
   - (1) **Le piège 1063-2 (CRLF du journal) a resservi**, aggravé : un script de remplacements corrigé par un second
