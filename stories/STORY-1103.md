@@ -1,7 +1,9 @@
 # STORY-1103 : Renvoyer un dossier KYC pour correction — le cabinet est prévenu et lit le motif de chaque pièce
 
-Status: ready-for-dev — **créée le 2026-11-19**, à la validation de la maquette d'AP-38. L'utilisateur a suivi la
-recommandation de A : « suis ta recommandation ». Non slottée, à placer au prochain plan.
+Status: in-progress — **créée le 2026-11-19** par A, à la validation de la maquette d'AP-38 (l'utilisateur a suivi la
+recommandation de A : « suis ta recommandation »). **Placée au lot 6 de B, n° 5** (`PLAN-LOT-6-2026-11-23.md` §5 ;
+Docker : non ; fini quand `kyc.correction.requested@1` est publié et AP-62 débloquée). Prise par B le 2026-11-24 :
+décisions du premier geste et contrat ci-dessous, **annoncés avant le code** (AC-1).
 
 **Services :** `kyc-service` (principal) · le BFF `admin-panel-service` (relais) · le service qui envoie déjà les
 e-mails KYC au cabinet (consommateur de `kyc.status.changed`, STORY-021 ; à confirmer au premier geste, D-1103-1)
@@ -95,3 +97,100 @@ backend. Le renvoi, lui, a besoin de cette story.
 - Le rejet global avec motif composé : AP-38, sans backend.
 - Un motif par pièce lisible du cabinet **dans son espace**, pièce par pièce : il suit naturellement l'AC-2. Son écran
   côté cabinet est à nommer au prochain tri.
+
+---
+
+## Ce que le code disait le 2026-11-24 (relu avant la fiche, `kyc-service` `origin/dev` `d4932c6`, BFF `3a5f5ef`)
+
+- Rien de la story n'était servi : la marque de pièce part sans corps, aucun arc ne ramène un dossier en
+  `PENDING_DOCUMENTS`, aucun événement de renvoi, aucun schéma d'événement dans `kyc-service` (ni `contrat/`, ni
+  registre).
+- Les routes de kyc sont sous **`/admin/kyc/:orgId/…`** ; celles de la fiche (`/admin/orgs/:orgId/kyc/…`) sont celles
+  du **BFF**, qui les relaie (D-1103-3).
+- Le BFF ne publiait pas `reviewStatus` ni `reviewedAt` d'une pièce dans `KycDocumentDto` (servis par kyc depuis
+  STORY-128, traversés à l'exécution, absents de l'OpenAPI) : ajoutés ici (D-1103-9).
+- **Le chemin des e-mails KYC** (D-1103-1) : `prospera-expert-comptable` consomme `kyc.status.changed` (STORY-021) et,
+  depuis STORY-590, demande les trois messages (`kyc-dossier-recu`, `kyc-dossier-approuve`, `kyc-dossier-a-corriger`)
+  à `prospera-notification-service`, qui en tient les textes (socle). Aucun des deux n'est à B.
+
+## Décisions du premier geste (B, 2026-11-24)
+
+- **D-1103-1 — l'e-mail au cabinet n'est pas dans un dépôt de B.** Le consommateur des e-mails KYC est
+  `prospera-expert-comptable` (tenu par **personne**, plan maître §2) et les textes vivent dans
+  `prospera-notification-service` (**à D** depuis le lot 3, D-L3-3). B ne touche ni l'un ni l'autre : B **publie
+  l'événement** (schéma au dépôt, compatible BACKWARD), avec un texte déjà composé (D-1103-5) pour que l'e-mail n'ait
+  rien à recomposer, et adresse la suite à **D** (`→ D (2026-11-24) : consommer kyc.correction.requested@1 pour
+  prévenir le cabinet — ouverte`, journal de B). Question à l'utilisateur, **choix par défaut : D porte aussi le
+  consommateur dans `prospera-expert-comptable`** (même patron que STORY-590 : destinataires lus dans le read-model
+  d'identité, une demande par administrateur du cabinet). **L'AC-5 (mailhog) reste ouvert** avec cette demande ; le
+  « fini quand » du plan (événement publié, AP-62 débloquée) ne l'attend pas.
+- **D-1103-2 — le renvoi fait passer le dossier en `PENDING_DOCUMENTS`** (recommandation de la fiche), arc neuf
+  `UNDER_REVIEW → PENDING_DOCUMENTS`. Le chemin de soumission convient **à une correction près** : depuis
+  `PENDING_DOCUMENTS`, le dossier ne repasse en revue que lorsque **plus aucune pièce courante n'est `REJECTED`**
+  (toutes les pièces renvoyées remplacées). Sans elle, le premier re-dépôt d'une seule des deux pièces renvoyées
+  rouvrirait la revue. Ce retour est journalisé `RESOUMISSION` (et non `SOUMISSION`) et purge `reviewedAt`,
+  `reviewedBy`, `correctionDemandeeLe`, comme la re-soumission après rejet. Le rejet global (`REJECTED → UNDER_REVIEW`)
+  ne change pas (AC-7).
+- **D-1103-3 — chemins** : kyc `POST /admin/kyc/:orgId/request-correction` ; BFF `POST
+  /api/v1/admin/orgs/{orgId}/kyc/request-correction`. La marque de pièce garde ses routes : **corps facultatif** sur
+  `…/documents/:documentId/reject` (rien n'est renommé, §1.8).
+- **D-1103-4 — le renvoi émet aussi `kyc.status.changed`** (invariant du service : pas de transition sans événement),
+  `previousStatus: UNDER_REVIEW`, `status: PENDING_DOCUMENTS`, `reviewedBy`. Les consommateurs relus (balance, bilan,
+  dossier, paiement, assurance, réseau, notification, expert-comptable…) n'ouvrent leur garde que sur `APPROVED` ;
+  expert-comptable n'envoie aucun e-mail pour `PENDING_DOCUMENTS`. Les deux événements partent par l'outbox, dans la
+  transaction du renvoi.
+- **D-1103-5 — kyc compose le texte** que lira le cabinet, une fois, et le fige dans l'événement **et** le journal :
+  le message rogné (s'il y en a un), puis une ligne par pièce renvoyée, dans l'ordre RCCM puis CFE, `— <libellé> :
+  <motif>` ou `— <libellé>` sans motif, jointes par un saut de ligne. Libellés = ceux de la console (`RCCM`, `Carte
+  CFE`). C'est la règle de `composeMotif` de la maquette validée, plus la ligne d'une pièce sans motif (§3 de la
+  fiche).
+- **D-1103-6 — le schéma** est `contrat/schemas/kyc.correction.requested.json` dans `kyc-service` (patron d'auth et du
+  catalogue : un fichier par topic, titre = topic, sujet `<topic>-value`, modèle fermé). Le script du registre
+  (`npm run schemas:compatibilite` / `schemas:enregistrer`, BACKWARD) parle à l'API REST du registre par `fetch` :
+  **aucune dépendance neuve** (Docker : non). Preuve sans pile : un test valide l'événement **produit par le code**
+  contre le schéma.
+- **D-1103-7 — le renvoi estampille `reviewedAt` et `reviewedBy`** (plus `correctionDemandeeLe`, même instant) : une
+  décision concurrente reçoit le 409 `KYC_DECISION_CONFLIT` qui nomme le renvoi (`DECISION_CONCURRENTE`, verdict
+  `PENDING_DOCUMENTS`, auteur, date), au lieu d'un `DOSSIER_MODIFIE` muet.
+- **D-1103-8 — le motif d'une pièce** : rogné, 500 au plus, vide ⇒ absent ; une nouvelle marque « rejetée » sans motif
+  efface l'ancien ; une approbation (de la pièce ou du dossier) l'efface ; le rejet global garde ceux déjà posés ; une
+  pièce remplacée le garde dans l'historique (`SUPERSEDED`).
+- **D-1103-9 — le BFF** relaie le corps de la marque, la route neuve et les champs neufs en DTO typés publiés dans son
+  OpenAPI (noms de schéma uniques) ; `RENVOI_SANS_PIECE_A_CORRIGER` traverse par son code (409) ; le conflit de
+  décision traverse comme pour `reject` (`details`).
+- **D-1103-10 — `correctionDemandeeLe`** est servi au détail admin et au statut du cabinet (`GET /kyc/status`) : le
+  cabinet distingue « renvoyé pour correction » de « jamais soumis », sans lire le journal.
+- Permission : **`kyc:reject`** (aucune neuve ; `permission.enum.ts` n'est pas touché, piège MNV-650).
+
+## Contrat (annoncé avant le code, AC-1)
+
+**kyc-service** (ajouts seuls) :
+
+- `POST /admin/kyc/:orgId/documents/:documentId/reject` : corps **facultatif** `RejeterPieceKycDto { motif?: string }`
+  (500 au plus après rognage ; vide ⇒ absent ; au-delà ⇒ 400). Réponse `AdminKycDocumentReviewDto` + `motifRenvoi?`.
+- **`POST /admin/kyc/:orgId/request-correction`** (`kyc:reject`, `If-Match` obligatoire) : corps facultatif
+  `DemanderCorrectionKycDto { message?: string }` (1 000 au plus, rogné, vide ⇒ absent). 200 → `AdminKycReviewItemDto`
+  (`status: PENDING_DOCUMENTS`). Refus : 404 dossier inconnu ; 428 `PRECONDITION_REQUISE` ; 409
+  `KYC_DECISION_CONFLIT` (`details` comme `reject`) si le dossier n'est pas en revue ou a bougé ; **409
+  `RENVOI_SANS_PIECE_A_CORRIGER`** si aucune pièce courante n'est `REJECTED` ; 400 message trop long.
+- Champs neufs (facultatifs) : `motifRenvoi` sur `KycDocumentResponseDto` (cabinet), `AdminKycDocumentDto` et
+  `AdminKycDocumentReviewDto` ; `correctionDemandeeLe` sur `AdminKycDetailDto` et `KycStatusResponseDto` ; dans la
+  chronologie (`AdminKycEvenementDto`), type neuf **`RENVOI_CORRECTION`** et `message?`, `texte?`, `piecesRenvoyees?`
+  (`AdminKycPieceRenvoyeeDto { documentId, type, libelle, version, motifRenvoi? }`). Les `decisions` ne changent pas
+  (un renvoi n'est pas un verdict).
+- Machine à états : arc neuf `UNDER_REVIEW → PENDING_DOCUMENTS` (D-1103-2), visible sur `kyc.status.changed`.
+- **Événement neuf `kyc.correction.requested` v1** (clé `orgId`, outbox, une fois par renvoi) : `schemaVersion: 1`,
+  `eventId` (uuid), `occurredAt`, `orgId`, `demandeLe` (= `correctionDemandeeLe`), `demandePar` (userId opaque de
+  l'opérateur), `message?`, `pieces[]` (au moins une : `documentId`, `type` `RCCM` | `CFE`, `libelle`, `version`,
+  `motifRenvoi?`), `texte` (D-1103-5). Modèle fermé ; aucun binaire, aucune clé de stockage, aucune adresse.
+
+**BFF** (OpenAPI, A génère ses types depuis lui) :
+
+- `POST /api/v1/admin/orgs/{orgId}/kyc/documents/{documentId}/reject` : corps facultatif `RejeterPieceKycRequestDto
+  { motif? }` ; réponse `KycDocumentReviewDto` + `motifRenvoi?`.
+- **`POST /api/v1/admin/orgs/{orgId}/kyc/request-correction`** (`kyc:reject`, `If-Match` relayé) : corps
+  `DemanderCorrectionKycRequestDto { message? }` → `KycDecisionResultDto`. Refus relayés : 428, 409
+  `KYC_DECISION_CONFLIT` (`details`), 409 **`RENVOI_SANS_PIECE_A_CORRIGER`**, 400, 403, 404, 503.
+- Détail (`GET /api/v1/admin/orgs/{orgId}`, bloc `kyc`) : `KycDocumentDto` + `reviewStatus`, `reviewedAt?`,
+  `motifRenvoi?` ; `KycDetailDto` + `correctionDemandeeLe?` ; `KycEvenementDossierDto` : type `RENVOI_CORRECTION`,
+  `message?`, `texte?`, `piecesRenvoyees?` (`KycPieceRenvoyeeDto`).
