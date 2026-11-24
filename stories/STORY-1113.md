@@ -1,6 +1,6 @@
 # STORY-1113 : le BFF relaie la mise en service à la console — naissance au réel, mise en service, sorties de l'essai
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (la console parle aux deux espaces ; une lecture de plus au catalogue ; douze relais typés)
 
@@ -137,7 +137,7 @@ console (D-974-8), et rien ne la lui donne aujourd'hui.
   défaut touchait le relais du moteur d'installation (917, 1080 : `modules`, `refus`, `planId`), que la console lit déjà
   dans `details` (`grant-errors.ts`) : corrigé ici de même (dépôt de B), annoncé avant la fusion.
 
-## Contrats touchés (annoncés avant la fusion, journal de B, « ⚠ Contrats »)
+## Contrats touchés (annoncés avant la fusion, journal de B, « ⚠ Contrats » : stories #791, amendé par #794)
 
 - Catalogue, `contrat/mise-en-service.openapi.json` 1.2.0 : `POST /api/v1/sorties-essai/liste-blanche/verification`
   (ajout).
@@ -151,3 +151,70 @@ console (D-974-8), et rien ne la lui donne aujourd'hui.
   vont au catalogue de l'essai quand il est configuré.
 - BFF (amendement du 24/11, D-1113-10) : les précisions des refus relayés (`modules`, `champs` ; et pour le moteur
   d'installation `modules`, `refus`, `planId`) passent dans `details`.
+
+## Livré
+
+- **catalogue #72** (`45971cf` sur `dev`) : `POST /api/v1/sorties-essai/liste-blanche/verification`, contrat
+  `mise-en-service` 1.2.0.
+- **BFF #40** (`25aed19` et `dcd76df` sur `dev`) : la console à deux espaces, `/api/v1/admin/naissances` (2 routes),
+  `/api/v1/admin/mises-en-service` (3), `/api/v1/admin/sorties-essai` (5), DTO publiés ; les précisions des refus dans
+  `details` (D-1113-10, relais du moteur d'installation compris).
+- Annonce avant la fusion du code : prospera-stories #791 (fiche, tracker, « ⚠ Contrats »), amendée par #794 (`details`).
+
+## Preuves
+
+- **Catalogue** (Node 25) : `src/mise-en-service/services.spec.ts` 32/32 (5 neufs : refus dans l'essai sans journal,
+  joker couvrant, autre type de sortie, réel sans lire la liste, décisions validées par Ajv contre le contrat 1.2.0) ;
+  `test/sorties-essai-console.e2e-spec.ts` 4/4 (vraie chaîne de gardes : `org:read` 200, sans lui ou membre 403, 401,
+  corps mal formé 400) ; unitaire complet **1 612 passés** (3 suites rouges connues : binding de Confluent sous Node 25) ;
+  e2e : 5 suites rouges à l'identique d'`origin/dev` (172) ; `tsc`, lint, build ; **mutations 3/3** rouges.
+- **BFF** (Node 25) : `src/admin/mise-en-service/mise-en-service.spec.ts` (projections champ par champ, membres de
+  l'essai et comptes du jeu, borne de 200, deux espaces, refus par leur code, droits de chaque route),
+  `test/admin-mise-en-service.e2e-spec.ts` 6/6 (vraie chaîne de gardes, validation au bord, **vraie enveloppe
+  d'erreur** : `details.modules`, `details.champs`), `test/openapi-contract.e2e-spec.ts` (4 neufs : dix opérations,
+  corps, `MiseEnServiceDto` sans opérateur ni `eventId`, `NaissancesDto`), clients des deux espaces et coupe-circuit
+  par espace, configuration ; garde des noms de schéma vert ; unitaires **670/670** (47 suites), e2e **257/257** (15
+  suites) ; `tsc`, lint, build ; **mutations 25/25** rouges sur une assertion (dont : un compte du jeu ou un suspendu
+  invité, la borne de 200 à 199, l'essai lu quand `reprendreLesMembres` est faux, une naissance d'essai rendue par le
+  « réel », la liste blanche lue au réel, les essais de 1112 au catalogue du réel, les précisions hors de `details`).
+- **Pile `grp-b` à DEUX espaces, appel réel au BFF contre les vrais catalogues et les vrais auth** (réel :
+  `auth-service`, `platform-catalog-service` ; essai : `auth-essai`, `catalogue-essai`, leur Kafka et leur Redis ; même
+  clé de signature, secrets du moteur distincts ; images depuis `git -c core.autocrlf=false archive` : auth
+  `origin/dev` `b49d8ab`, catalogue et BFF des branches de la story) : **47/47 contrôles** —
+  - le jeton de l'opérateur, émis par l'auth du réel, accepté par le catalogue et l'auth de l'essai (D-1113-2) ;
+  - un cabinet prospect ouvre son essai par `POST /admin/essais` : **l'essai est au catalogue de l'essai, pas à celui
+    du réel**, et l'auth du réel ne connaît pas l'organisation ; `GET /admin/naissances` : née dans l'essai seul ;
+  - dans l'essai : deux collègues (posés en base, D-1113-9), un suspendu, deux comptes du jeu (posés par la vraie route
+    du moteur de l'essai) ; `GET …/invites` : les deux collègues sous leur identifiant d'essai, 3 écartés ;
+  - signé ; mise en service avant la naissance au réel : 404 `ORGANISATION_INCONNUE` (le réel ne voit pas l'essai) ;
+  - **`POST /admin/naissances` sans identité : 201 en 424 ms, née au RÉEL avec le nom, le métier et le pays de
+    l'essai**, sous le même identifiant chez l'auth du réel ; rejouée 200 ; autre identité 409 `NAISSANCE_DIVERGENTE`
+    (`details.champs` [nom, pays]) ; sans essai ni identité 422 `PROSPECT_SANS_NAISSANCE_D_ESSAI`, rien d'écrit ;
+  - `balance` 409 `MISE_EN_SERVICE_MODULE_NON_INSTALLE` (`details.modules` [balance]), personne d'invité ;
+  - **mise en service de `instance` : 201 en 355 ms, invitations `ENVOYEES` (2 demandées, 2 invitées)** ; au réel, les
+    deux collègues **sous leur identifiant d'essai** (FR-42), Ama `TENANT_ADMIN` `CAB_ASSOCIE` `INVITED`, aucun compte du
+    jeu, pas le suspendu ; rejouée 200 en 136 ms (2 existants, 0 invité), toujours deux membres ; un bilan, sans `_id`,
+    `eventId` ni opérateur ; `reprendreLesMembres: "false"` 400 ;
+  - sorties : liste blanche (ajout 201 puis 200, la liste du réel reste vide), vérification `LISTE_BLANCHE` /
+    `ECRITURE_REELLE_DEPUIS_ESSAI` sans journal, joker `*` 422 `SORTIE_INVALIDE`, un module de l'essai (jeton de service
+    du moteur de l'essai) intercepté 403, l'interception relayée (`origine: SERVICE`, sans l'appelant), retrait 204 puis
+    404 `SORTIE_INCONNUE` ; sans jeton 401.
+  Aucun journal d'erreur au BFF ni aux catalogues. Le premier passage (45/47) a trouvé D-1113-10 : verrou pris à 11:04,
+  rendu à 11:11 pour corriger ; repris à 11:19, rendu à 11:22. `down -v` à chaque fois : aucun conteneur, volume ni
+  réseau `grp-b` ne reste. Script : `s1113/preuve.mjs` de la session (non versionné : il appelle les ports publiés d'une
+  pile levée à la main ; surcouche `preuve1113/surcouche.yml`).
+- **Délai mesuré** (D-1113-8) : naissance au réel 424 à 862 ms, mise en service avec invitations 355 à 600 ms, sans
+  Reprise installée ; le délai des écritures longues (30 s) garde la marge de la relecture de la Reprise et d'auth.
+
+## Ce qui reste
+
+- **Pour A (AP-56, lot 7)** : la maquette (aucune encore), puis l'écran, ses types régénérés depuis l'OpenAPI du BFF,
+  et son gate réel « essai vers réel sans interception » (AC-5) — sur une pile à deux espaces (la surcouche de la preuve
+  en donne la forme).
+- **Pour le déploiement** (D-1113-2) : la console a une identité d'opérateur acceptée des deux espaces ; question à
+  l'architecte écrite au journal de B.
+- **Non servi par le catalogue** : la « répétition générale » d'AP-56 (AC-4) n'a pas de route (le moteur ne la sert
+  pas encore) ; « répétition » se lit ici comme l'essai lui-même, « rejeu » comme l'ordre rejoué (200).
+- **STORY-1115** : la recette « essayer, puis mettre en service » rejoue ce parcours de bout en bout avec les modules
+  levés (installation au réel par le moteur, puis mise en service d'un vrai sous-ensemble) ; elle aura besoin de deux
+  espaces dans la recette (aujourd'hui un seul par pile, `RECETTE_ESPACE`).
