@@ -28,8 +28,8 @@ d'ordinaire partie de la story qui révise, mais `balance-service` est tenu par 
 
 ## Ce qui est demandé à C
 
-1. Recopier les trois artefacts depuis `origin/dev` de `prospera-bilan-service` (SHA de la fusion de STORY-1076, au
-   journal de D), **à l'octet** : `git -c core.autocrlf=false show origin/dev:src/modules/bilan/referentiel/assets/<f>`.
+1. Recopier les trois artefacts depuis `origin/dev` de `prospera-bilan-service` (fusion de STORY-1076 : **`e4cee3e`**,
+   prospera-bilan-service#186), **à l'octet** : `git -c core.autocrlf=false show origin/dev:src/modules/bilan/referentiel/assets/<f>`.
 2. Mettre à jour les trois empreintes du registre (`src/modules/referentiel/referentiel-registry.ts`) et de
    `ARTEFACTS_PARTAGES` (`referentiel-assets-coherence.spec.ts`, `recopieLe: '… (STORY-1076)'`).
 3. Vérifier que la garde « octets identiques à ceux de bilan-service » repasse au vert avec `bilan-service` à jour à côté.
