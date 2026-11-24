@@ -75,7 +75,9 @@
     stories du lot 6** (1080, 1112, 1113, 1114, 1103, 1115, 1116), sous un **identifiant neuf réservé à l'écriture de
     sa fiche** (au-delà de la marque haute ; la plage de B 930 → 979 est épuisée). Aucun identifiant n'est réservé ici.
     Charge : « ⚠ Contrats » de D (STORY-1066) ; topic `facturation.avoir.emis`, Créance `(FACTURE, factureId)`,
-    `montantTtcMineur`, rejeu sur `avoirId`, crédit du tiers au-delà du reste dû ; preuve sur pile.
+    `montantTtcMineur`, rejeu sur `avoirId`, crédit du tiers au-delà du reste dû ; preuve sur pile. **Seule, et après
+    le retour de `paiement`** (prêté à D pour STORY-1073 le 24/11, voir « Passations ») : elle n'est plus groupée
+    avec les comptes d'encaissement, que D publie lui-même dans 1073.
   6. ~~STORY-1113~~ : **catalogue #72** (`45971cf` sur `dev`), **admin-panel #40** (`25aed19`, `dcd76df`) ; contrat
      annoncé avant la fusion (stories #791, amendé par #794). **AP-56 débloquée** : la console fait naître au réel,
      met en service avec les membres de l'essai, tient les sorties de l'essai, par le BFF.
@@ -756,9 +758,43 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 **Lot 6** (plan §2, amendé le 24/11, D-L6-5) : le BFF, `prospera-recette`, le catalogue, auth, `kyc-service`, la
 plateforme (hors dossiers de C et D), et `prospera-dossier-service` par défaut (aucun plan ne l'attribue ailleurs).
 **`prospera-bilan-service` n'est plus à B** depuis le 24/11 au soir : il est à D (passation ci-dessous) ; balance et
-comptabilité sont à C (D-L6-1).
+comptabilité sont à C (D-L6-1). **`prospera-dossier-service` et `prospera-paiement-service` sont prêtés à D pour
+STORY-1073** (24/11, passation ci-dessous) : B n'y touche plus jusqu'à ce que D écrive dans son journal qu'il les rend.
 
 ## Passations
+
+- **Prêtés le 2026-11-24 (soir) à D, pour STORY-1073 seule : `prospera-dossier-service` et
+  `prospera-paiement-service`** (consigne de l'utilisateur, relayée par D : « Gère tout cela dans la story 1073 sans
+  attendre la livraison de B »). D fait dans 1073 les deux demandes de #812 (voir « Demandes », ← D du 24/11). B n'écrit
+  plus dans ces deux dépôts **jusqu'à ce que D écrive dans son journal qu'il les rend** (fin de 1073). Les deux
+  stories que B y avait placées après le lot 6 sont retirées ; seul le consommateur de `facturation.avoir.emis@1`
+  reste à B, après le retour de `paiement`.
+  - **Dernier commit de B sur `dev`** : dossier **`2bf9dbd`** (MNV-1082, le dossier de démonstration créé par le
+    moteur) ; paiement **`4684d22`** (MNV-976, le consommateur de `facturation.facture.emise@1`). **Aucune PR ouverte**
+    (`gh pr list --state open`, 24/11, deux dépôts).
+  - **Checkouts du poste** : `dossier-service` sur `MNV-1082`, propre (fusionnée en rebase : pointe `640991c`, rejoué
+    en `2bf9dbd`) — B le laisse tel quel, D part d'`origin/dev` ; `prospera-paiement-service` sur `dev`, à jour, propre.
+  - **Pièges de dossier-service** (détail dans « Pièges ») : checkout en CRLF (`core.autocrlf=true` ; compter les fins
+    de ligne par Python) ; sous Node 25, **7 suites rouges connues** sur `origin/dev` (6 binding de Confluent,
+    `registre-pays.coherence`), **9** si le paquet fiscal embarqué sort en CRLF (`git -c core.autocrlf=false checkout
+    -- src/modules/portefeuille/echeance/assets/`) ; l'invariant de STORY-363 lit le **texte** des contrôleurs (ne
+    pas citer `@RequiresDossierAccess()` en commentaire) ; le double Mongo de `dossiers.e2e-spec.ts` porte l'index du
+    NIF (création et `findOneAndUpdate`) ; le portefeuille range ses lignes dans `lignes` ; un seul exercice OUVERT
+    par dossier ; `KYC_NOT_APPROVED` sans KYC approuvé de l'organisation ; identité de service du moteur
+    (`IDENTITE_DE_SERVICE_REFUSEE` sur les routes métier, D-1082) ; dette **D-1082-10** (le dossier de démonstration
+    n'est pas effacé en fin d'essai). `DossierEtatV1` : ajouts facultatifs seulement (Karapace BACKWARD, §1.8).
+  - **Pièges de paiement** : client de Confluent testé sous **Node 24** seulement (étage `verification`) ;
+    `npm ci --ignore-scripts` sous Node 25 ; `.dockerignore` garde `test/` ; `/health` rend 503 sans
+    `PI_SPI_API_BASE_URL` et `PI_SPI_TOKEN_URL` (`scripts/recette/976/` pose le simulateur) ; invariants qui mordent
+    à juste titre : codes d'acte réservés (`ENCAISSEMENT_*`), compte de dépendances d'`AffecterLEncaissement`,
+    inventaire fermé `ECRITURES_DARGENT` (`piste-opposable.invariant.spec.ts`), aucune minuterie (AD-12), la garde ne
+    lit aucune configuration, aucun identifiant ne contient « change », seul le service des demandes écrit
+    `$set: { etat }` ; `@SurfacePlateforme()` rend 404 avant la garde ; clef de Créance insensible à la casse ; un
+    rejeu par `EcritureDArgent` consigne une trace (sentinelle `RejeuSansEffet`) ; une mutation interrompue laisse le
+    fichier muté. Patron d'un consommateur : celui de 976 (`SupervisionConsommateur`, groupe propre, depuis le début,
+    même cas d'usage que la route, idempotent).
+  - **Ce que B ne fait pas pendant le prêt** : le ticket « premier membre » (suite de 1112) et STORY-1116 ne touchent
+    ni l'un ni l'autre ; un défaut trouvé chez eux devient un ticket pour D.
 
 - **Donnée le 2026-11-24 (soir, D-L6-5, stories #815) : `prospera-bilan-service` à D** (STORY-1074 → 1078 de D). B n'y
   écrit plus ; une demande passe par le journal de D. **← D (24/11) : passation de bilan-service écrite.**
@@ -849,7 +885,10 @@ comptabilité sont à C (D-L6-1).
   catalogue de l'essai (inviter `administrateur` à l'ouverture), BFF si besoin ; **→ A** l'écran ensuite. La recette
   `essai-mise-en-service` pose ce seul membre en base (D-1115-6) et ne posera plus rien quand la route existera.
 - **← D (2026-11-24, journal de D, stories #812, Q-D-12 répondue) : la fiche légale et les comptes d'encaissement,
-  publiés pour la facture (STORY-1073 de D en dépend)** — **reçue, placée après le lot 6** par la session de groupe :
+  publiés pour la facture (STORY-1073 de D en dépend)** — **retirée le 24/11 au soir : D la fait lui-même dans
+  STORY-1073** (consigne de l'utilisateur ; dossier et paiement prêtés à D, voir « Passations »). Les deux stories
+  ci-dessous ne seront pas écrites par B ; le consommateur de `facturation.avoir.emis@1` reste à B, seul, après le
+  retour de `paiement`. Placement d'avant :
   (1) une story **`dossier-service`** (B le garde par défaut : le plan du lot 6 ne l'attribue à personne) — les champs
   facultatifs de la fiche légale dans `DossierEtatV1` (`dossier.created` / `dossier.updated`, `schemaVersion`
   inchangé) et le rejeu de l'état courant des dossiers propres ; (2) une story **`paiement`** — les comptes
