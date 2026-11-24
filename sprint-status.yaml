@@ -7361,7 +7361,7 @@ sprints:
         epic: "EPIC-031"
         points: 8
         service: "fiscal-service"
-        status: "ready-for-dev"  # 2026-11-24 : fiche écrite (stories/STORY-323.md), contrat annoncé avant le code ; session A, lot 6 (n° 5). Onze états + visa de l'associé (V6) ; réconciliée avec les états de `depots` (538, inchangés) ; aucun droit neuf.
+        status: "done"  # 🏁 DONE le 2026-11-24 — fiscal #54 (dev cb672c5), contrat annoncé avant le code (stories #775). Onze états, visa de l'associé (V6), aucun droit neuf, depots (538) inchangé. Détail : stories/STORY-323.md « Livraison ». AVANT : fiche écrite (stories/STORY-323.md), contrat annoncé avant le code ; session A, lot 6 (n° 5). Onze états + visa de l'associé (V6) ; réconciliée avec les états de `depots` (538, inchangés) ; aucun droit neuf.
         assigned_to: null
       - story_id: "STORY-324"
         title: "Validation du client capturée comme pièce"
@@ -7545,7 +7545,7 @@ sprints:
         epic: "EPIC-032"
         points: 5
         service: "fiscal-service"
-        status: "not_started"  #  # ⚡⚡ JALON « FORMAT CONFIRME » LEVE LE 2026-08-28 : le PO a fourni UNE PIECE REELLE DE DEPOT — 1000745307_2025_Definitif.xlsx, DSF DEFINITIVE du dossier PMS (NIF 1000745307, exercice 2025), 92 feuilles. C est exactement ce que le blocage attendait (« aucune piece reelle de depot en main a ce jour »). STORY-330/331/332/333 cessent d etre bloquees.  — Historique —  ⛔ BLOQUÉE par le jalon `format confirmé`.
+        status: "not_started"  # ⚠ 2026-11-24 (A, STORY-323) : l'accusé (numéro ou document) est DÉJÀ consigné sur le dépôt (538, 539, 689-691) ; NON COUVERT : la liaison à l'obligation (le passage à ACCUSE_RECU depuis un dépôt accepté, `ACCUSE_REQUIS`) et la qualification du retard — la correspondance est écrite dans `etatDuCycleSelonLeDepot` (323). Statut inchangé, périmètre à réécrire avant de coder.  # ⚡⚡ JALON « FORMAT CONFIRME » LEVE LE 2026-08-28 : le PO a fourni UNE PIECE REELLE DE DEPOT — 1000745307_2025_Definitif.xlsx, DSF DEFINITIVE du dossier PMS (NIF 1000745307, exercice 2025), 92 feuilles. C est exactement ce que le blocage attendait (« aucune piece reelle de depot en main a ce jour »). STORY-330/331/332/333 cessent d etre bloquees.  — Historique —  ⛔ BLOQUÉE par le jalon `format confirmé`.
         assigned_to: null
       - story_id: "STORY-558"
         title: "Le gabarit de depot est une donnee du paquet pays — le classeur GUDEF Togo en est la premiere instance, pas le modele en dur"
@@ -7589,7 +7589,7 @@ sprints:
         epic: "EPIC-032"
         points: 3
         service: "fiscal-service"
-        status: "not_started"  # ⛔ BLOQUÉE par le jalon `format confirmé`.
+        status: "not_started"  # ⚠ 2026-11-24 (A, STORY-323) : le rejet (motif verbatim, chaîne de dépôts) est DÉJÀ couvert par 538 ; NON COUVERT : le retour de l'OBLIGATION à `A_DEPOSER` (retour en arrière motivé : STORY-325). Statut inchangé.  # ⛔ BLOQUÉE par le jalon `format confirmé`.
         assigned_to: null
       - story_id: "STORY-335"
         title: "Archivage des livrables et accusés"

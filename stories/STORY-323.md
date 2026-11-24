@@ -1,6 +1,6 @@
 # STORY-323 : Le cycle de vie de l'obligation — onze états, des rôles, et le visa de l'associé
 
-Status: ready-for-dev — **fiche écrite le 2026-11-24** par la session du groupe A (lot 6, n° 5 de la ligne de A : plan
+Status: done — **Livrée le 2026-11-24** : prospera-fiscal-service **#54** (`cb672c5` sur `dev`), contrat annoncé avant le code (prospera-stories #775). **Fiche écrite le 2026-11-24** par la session du groupe A (lot 6, n° 5 de la ligne de A : plan
 amendé le 24/11, #769). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md`
 (EPIC-031), le visa de la salle des cabinets (V6, `salle-cabinets-validations-2026-11-19.md`).
 
@@ -166,3 +166,11 @@ et `regler` ; tout événement Kafka.
 | Date | Événement |
 |---|---|
 | 2026-11-24 | Fiche écrite, contrat annoncé (PR de docs) avant le code. |
+| 2026-11-24 | **DONE.** Code : fiscal #54 (`cb672c5` sur `dev`). Preuves : unitaires (ciblés `-w 2` sur Node 25, puis la suite entière sur Node 24 dans l'étage `verification` : 175 suites, 2 433 tests verts) ; `test:conformite` 12 suites / 70 tests sur `mongo:7` en jeu de répliques (dont `cycle.conformite-spec.ts` : 5 tests) ; e2e `obligations` 41/41 (3 nouveaux) ; mutations : saut d'état, droit de `VALIDEE`, visa non exigé, droit non vérifié, garde `OBLIGATION_DESACTIVEE`, droit vérifié après les gardes, comparaison-échange retirée, audit hors transaction — toutes rougissent sur l'assertion ; `docker compose up` du service (pile `grp-a`, image construite depuis le commit) : sain, la route neuve et le calendrier rendent 401 sans jeton ; `down -v` fait. |
+
+## Livraison (2026-11-24)
+
+- **Dépôt** : `prospera-fiscal-service`, `MNV-323` → `dev` (#54). Fichiers : `domain/obligations/cycle.ts` (états, transitions, visa, correspondance avec `depots`), `application/obligations/{cycle-obligations.service,droits-du-cycle}.ts`, `adapters/mongo/mongo-annuaire-noms.ts` (nom de l'associé lu dans `identity_users`), `ports/{annuaire-noms,registre-obligations}.ts`, route `POST /api/v1/obligations/{id}/transition`, champs `visa`, `prochainEtat`, `droitRequis` sur la réponse.
+- **Tel que annoncé** : aucune décision D-323-1 à 12 n'a changé. Un point de forme : le tableau des droits vit dans `application/` et non dans le domaine (la garde de pureté du domaine refuse l'import du catalogue des droits).
+- **Ce que 320 doit savoir** : `statut` suit le cycle ; une dérivation ne le touche jamais (AD-17). Une obligation à bases bloquées (320) doit rester à `A_PREPARER` : la prise en charge `A_PREPARER → EN_PREPARATION` est le point où brancher le blocage motivé (V3). Le registre expose `transitionner` (comparaison-échange sur `statut`, audit `OBLIGATION_TRANSITION` dans la même transaction) ; tout nouvel acte d'écriture sur l'obligation suit ce patron.
+- **Reste à d'autres stories** : lier l'obligation à la chaîne d'un dépôt et déplacer l'obligation à l'accusé (333, 334, `etatDuCycleSelonLeDepot`) ; `ACCUSE_REQUIS` ; pièce de validation du client (324) ; retours en arrière motivés (325) ; écran du dossier de dépôt (FE-081).
