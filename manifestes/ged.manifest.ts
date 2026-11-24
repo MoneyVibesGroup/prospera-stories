@@ -64,7 +64,9 @@ export const MANIFESTE_GED = {
   // de classement OHADA, droits du cabinet) ; les routes de lecture deviennent les routes réelles.
   // 1.2.0 (2026-11-24, STORY-1088) : l'original papier (réceptions, boîtes, cotes, sorties, récolement, restitution)
   // et la recherche dans un fonds.
-  version: '1.2.0',
+  // 1.3.0 (2026-11-24, STORY-1100) : la mémoire de classement du cabinet (suggestion, consultation, oubli) et les
+  // factures comptabilisées rangées au fonds du client (`comptabilite.facture.inscrite`).
+  version: '1.3.0',
 
   // C1 : aucune dépendance dure. La GED reçoit, lit, classe, conserve et retrouve des pièces sans autre module ; une pièce
   // enregistrée sans dossier va dans la file « à rattacher » (FR-159, FR-166).
@@ -139,6 +141,7 @@ export const MANIFESTE_GED = {
     'sinistres.acces-sante.accorde@1', // table locale de lecture (AD-26)
     'sinistres.acces-sante.retire@1',
     'reprise.cles-rattachement.publiees@1', // numéro de police, de sinistre, `DEC-`, numéro d'archivage d'origine (FR-215)
+    'comptabilite.facture.inscrite', // STORY-1100 : une facture inscrite au brouillard, rangée en copie pré-indexée au fonds du client (si `comptabilite` est installé)
     'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
     'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
@@ -260,6 +263,9 @@ export const MANIFESTE_GED = {
     'GET /api/v1/ged/cabinet/fonds/{numero}/restitutions', // STORY-1088
     'GET /api/v1/ged/cabinet/restitutions/{numero}/bordereau', // STORY-1088 : le bordereau de restitution (PDF)
     'GET /api/v1/ged/cabinet/fonds/{numero}/recherche', // STORY-1088 : retrouver une pièce
+    'GET /api/v1/ged/cabinet/pieces/{pieceId}/suggestion', // STORY-1100 : le classement que le cabinet a déjà choisi
+    'GET /api/v1/ged/cabinet/fonds/{numero}/memoire-de-classement', // STORY-1100
+    'GET /api/v1/ged/cabinet/memoire-de-classement', // STORY-1100 : la mémoire du cabinet, et le journal des oublis
     'GET /api/v1/instance/ged/{organisationId}/export',
   ],
 
