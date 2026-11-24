@@ -1,6 +1,6 @@
 # STORY-322 : Calculé, déclaré, payé — trois montants distincts et durables, et l'écart se motive
 
-Status: ready-for-dev — **Fiche écrite le 2026-11-24** par la session du groupe A (lot 6, n° 7 de la ligne de A : plan
+Status: done — **Livrée le 2026-11-24** : prospera-fiscal-service **#56** (`990256a` sur `dev`), contrat annoncé avant le code (prospera-stories #818). **Fiche écrite le 2026-11-24** par la session du groupe A (lot 6, n° 7 de la ligne de A : plan
 amendé le 24/11, #769). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md`
 (EPIC-031, STORY-322), la règle FR-F24 du PRD fiscalité, et ce que lira STORY-1101 (C).
 
@@ -145,3 +145,12 @@ Pas de preuve Kafka (aucun événement).
 | Date | Événement |
 |---|---|
 | 2026-11-24 | Fiche écrite, contrat annoncé (PR de docs) avant le code. Décision sur 321 : non, D-322-1. |
+| 2026-11-24 | **DONE.** Code : fiscal #56 (`990256a` sur `dev`). Preuves : unitaires sur Node 24 dans l'étage `verification` (180 suites, 2 510 tests, 1 ignoré) ; `test:conformite` 14 suites / 82 tests sur `mongo:7` en jeu de répliques (dont `triplet.conformite-spec.ts` : 5 tests) ; e2e `obligations` 52/52 (4 nouveaux) ; mutations rouges sur l'assertion : 5 unitaires (motif au visa, calculé figé, déclaré figé au dépôt, payé hors état, motif du payé) et 2 sur Mongo (comparaison-échange du déclaré, filtre du visa sur le déclaré lu) ; `docker compose up` du service, sain, les trois routes neuves rendent `401` sans jeton. Verrou Docker pris puis rendu (pile `grp-a`, `down -v`). |
+
+## Livraison (2026-11-24)
+
+- **Dépôt** : `prospera-fiscal-service`, `MNV-322` → `dev` (#56). Fichiers : `domain/obligations/triplet.ts` (le calculé et ses trois indisponibilités, l'écart, les gardes, les trois actes d'audit), `application/obligations/triplet-obligations.service.ts` (déclarer, payer, écarts), `application/obligations/cycle-obligations.service.ts` (le visa exige le motif et fige), `adapters/mongo/mongo-registre-obligations.ts` (`enregistrerDeclare`, `enregistrerPaye`, `transitionner` avec `figer`), `obligations.controller.ts` (3 routes), `dto/obligation.dto.ts` (`triplet`).
+- **Tel que annoncé.** Un seul détail : le refus `MONTANT_DECLARE_NON_ENREGISTRABLE` couvre aussi un statut hors plage (avant la prise en charge, après l'accusé).
+- **321 non faite (D-322-1)** : `calcule.montant` vaut `null` avec `indisponible: CALCUL_DELEGUE_NON_DISPONIBLE` tant que `montantAttendu` n'est pas écrit. Le jour où 321 l'écrira, le triplet le lit sans changement (`origine: MOTEUR`).
+- **Ce que 328 doit savoir** : candidats d'anomalie lisibles sur l'obligation : `triplet.ecarts.motifRequis` (écart sans motif), `triplet.declare === null` à partir de `DEPOSEE`, `triplet.calcule.indisponible` ; `basesFiscales.statut === 'PROVISOIRES'` pour `BASE_PROVISOIRE` (laissée par 320, D-320-15). Le motif du visa est déjà un REFUS (409 `MOTIF_ECART_REQUIS`) : 328 n'a pas à le doubler, seulement à lever ou signaler ce qui passe. Patron d'écriture : comparaison-échange + audit dans la même transaction, comme `transitionner`.
+- **Ce que 1101 doit savoir** : le déclaré se lit sur `Obligation.montantDeclare.montant` (`RegistreObligations.duDossier`), par taxe et période ; une période sans déclaré a `montantDeclare: null` : à NOMMER, jamais zéro.
