@@ -136,6 +136,29 @@
     `grp-d` ne reste.
   - **Suivante : STORY-1070** 🛡️ (lever une alerte bloquante avec motif, D-1013-10 ; `sinistres`).
 
+- **STORY-1070** ✅ 🛡️ — lever une alerte bloquante : le gestionnaire lève avec un motif l'alerte `BLOQUANT` du
+  décompte, et l'évaluation s'arrête (prospera-sinistres-service#31, `dev` 6a0c28d ; #32, le banc MongoDB, `dev` 6002aac ; annonce « ⚠ Contrats » #803 avant le
+  code, `main` 36d4acf ; aucun schéma de fait ni manifeste ne change). Rituel (2026-11-24) : aucune demande neuve à D
+  dans les journaux de A, B et C. « Fini quand » fixé par la fiche (D-1070-1 : le plan ne le fixait pas).
+  - **La levée** (`POST …/dossiers/{id}/instruction/levees`, GEST, GREC, RESP ; `EN_INSTRUCTION` ou `EVALUE`) : motif
+    ≥ 10 caractères (`MOTIF_ECRIT`) ; seulement une alerte `BLOQUANT` présente au décompte du **dernier** enregistrement
+    (`ALERTE_ABSENTE`), une fois par enregistrement (`ALERTE_DEJA_LEVEE`) ; hors fenêtre `LEVEE_IMPOSSIBLE`. Rangée dans
+    `instruction.levees` (ajout seul), piste `LEVER_ALERTE`, `dossier.changed@1` seul.
+  - **L'arrêt** : levée sur l'enregistrement en vigueur, l'alerte ne bloque plus ; l'évaluation copie `alertesLevees` ;
+    un nouvel enregistrement qui garde l'alerte la rebloque (D-1070-3). **Lever, c'est évaluer** (partie `EVALUER`).
+  - **La raison s'affiche** : `GET …/instruction` gagne `alertes` (et leur levée) et `levees`.
+  - **Les délais de crochet de 1069 sont revenus** au rejeu sur `origin/dev` (7 échecs, après un premier passage vert) :
+    cause mesurée (une base, six collections et leurs index créés puis supprimés **par test**, sérialisés dans `mongod`)
+    et corrigée dans le banc (#32 : base créée une fois, collections vidées entre deux tests ; aucun délai relevé ;
+    D-1070-10, piège 1070-1).
+  - Node 24 : lint 0, **suite unitaire complète d'un trait 1366/1366 (68 suites) au délai de 5 s, 85 s** (168 s avant),
+    34 e2e, build ; mutations 11/11 et 3/3 (MongoDB réel) ; rejoué sur l'export d'`origin/dev`.
+  - Décisions D-1070-1 → 11 (fiche ; D-1070-11 : ce qui reste) ; recette versionnée `scripts/recette/1070/`. Pas de pile
+    `grp-d` (D-1070-9). **Verrou Docker libre au rituel ; pris à 13:40, une seule prise, rendu à 14:34** ; aucun
+    conteneur, volume ni réseau `grp-d` ne reste.
+  - **Suivante : STORY-1071** 🛡️ (la mission d'expertise, FR-61 ; `sinistres` ; dernière du lot 6 : « Le lot 6 de D est
+    fini » et la passation à Dev A, D-L3-6).
+
 ### Lot 4 (ouvert le 2026-11-18)
 
 - **Plan** : `PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §4 : **STORY-1060 → 1064**, le distributeur au backend (cinq stories ;
@@ -1155,7 +1178,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-24, STORY-1070), avant la fusion du code — `prospera-sinistres-service`, module `sinistres` :
+- **PUBLIÉ (2026-11-24, STORY-1070, prospera-sinistres-service#31, `dev` 6a0c28d) ; ANNONCÉ avant la fusion du code
+  (prospera-stories #803, `main` 36d4acf), sans écart. — `prospera-sinistres-service`, module `sinistres` :
   lever une alerte bloquante du décompte (FR-55, D-1013-10).** Fiche : `stories/STORY-1070.md` (D-1070-1 → 11).
   **Ajouts seuls** ; **aucun schéma de fait ne change** (ni `dossier.changed@1`, ni `evaluation.arretee@1`) ; **aucun
   manifeste ne change** (une route d'écriture n'est pas déclarée ; la lecture reste `GET …/instruction`) ; aucune
@@ -1948,6 +1972,19 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1070** :
+  - (1) **Les délais de crochet du banc MongoDB (1069-1) venaient de la DDL par test, pas du code** : une suite verte
+    une fois (1366/1366, 168 s) a rougi au rejeu (7 délais). Un banc créait par test une base, six `createCollection` +
+    `syncIndexes`, puis un `dropDatabase`, sérialisés dans `mongod` (0,5 s seul, 1,6 s à 4 bancs, 2,8 s à 8). Corrigé
+    dans `dossiers.service.spec.ts` (#32) : base créée une fois par fichier, `deleteMany` entre deux tests, `afterAll`
+    qui la supprime ⇒ 0 délai, 85 s. Un nouveau banc MongoDB suit ce patron ; on ne relève pas le délai.
+    Une seule réussite ne prouve pas l'absence de délai : rejouer.
+  - (2) **Une mutation qui lit un champ absent du type ne compile pas** (`e.code` dans `alertesDuFormulaire`) : la
+    garder sur une variable du bloc (`moment.enregistrement < 0 ? … : undefined`).
+  - (3) Une portée de dossier : un gestionnaire non affecté ne voit pas le dossier (404 `DOSSIER_INTROUVABLE`, pas 403) ;
+    un test d'un « autre » acteur passe par le `RESP` qui a affecté.
+  - (4) Un paramètre par défaut d'une aide de test (`motif = '…'`) avale un `undefined` explicite : passer `''`.
 
 - **STORY-1069** :
   - (1) **Délais de crochet de 5 s sur le banc MongoDB réel sous charge** : la suite complète (`-w 2`) a compté 8

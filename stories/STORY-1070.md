@@ -1,6 +1,6 @@
 # STORY-1070 : lever une alerte bloquante — le gestionnaire lève avec un motif l'alerte `BLOQUANT` du décompte, et l'évaluation s'arrête
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-207 (instruire le dossier) ; FR-55 (« une alerte `BLOQUANT` empêche l'enregistrement de l'évaluation tant
 qu'elle n'est pas levée par le gestionnaire avec un motif ; la raison s'affiche »), FR-75 (une évaluation arrêtée n'est
@@ -71,8 +71,19 @@ d'un trait, sur MongoDB et Redis réels, et par l'e2e HTTP.** Le fait `sinistres
 - **D-1070-9 — Pas de pile `grp-d`** : aucun module Nest, aucune dépendance, aucun Dockerfile ne change (§1.5), aucun
   fait neuf ; le chemin HTTP (gardes, validation, filtre) est prouvé par l'e2e, l'écriture par le service sur MongoDB
   réel (transaction, piste, outbox). Patron de 1013.
-- **D-1070-10 — Les délais de crochet du banc MongoDB** (piège 1069-1) : la suite complète se joue d'un trait sous
-  Node 24 ; si les délais reviennent, la cause est cherchée et corrigée dans un commit séparé (voir « Preuves »).
+- **D-1070-10 — Les délais de crochet du banc MongoDB (piège 1069-1) : la cause est corrigée dans le banc, sans
+  relever aucun délai** (prospera-sinistres-service#32, commit séparé de la story). Constat : la suite complète d'un
+  trait est passée 1366/1366 à 5 s sur la branche (168 s), puis **7 échecs** au rejeu sur `origin/dev` (le
+  `beforeEach` ET l'`afterEach` du même test au-delà de 5 s, puis six tests de suite : une saturation de `mongod`, pas
+  un défaut de la story). Cause mesurée : `dossiers.service.spec.ts` créait **par test** une base, six collections et
+  leurs index, puis la supprimait ; ces opérations de catalogue se sérialisent dans `mongod` — `beforeEach` médian
+  **0,52 s seul, 1,58 s à 4 bancs concurrents, 2,83 s à 8** (p95 3,3 s). Le poste est partagé (B) : la marge sous 5 s
+  disparaît sous charge. **Correction** : la base du fichier est créée une fois (collections et index posés une fois),
+  vidée par `deleteMany` entre deux tests (même état de départ, compteurs compris), supprimée en `afterAll`. Un délai
+  relevé aurait masqué la saturation ; un `maxWorkers` plus bas ne retire pas la DDL. Résultat : **1366/1366, 0 délai,
+  85 s** (deux fois moins) ; sous une charge de DDL forcée (8 bancs concurrents en boucle) : 6 échecs en 266 s contre
+  **35 en 791 s** avant. Les petits bancs par test qui restent (`provision-en-vigueur`, `experts`,
+  `declaration-rapide`) ne font qu'une ou deux collections : à convertir au même patron s'ils rougissent un jour.
 - **D-1070-11 — Ce qui reste** : les autres alertes de FR-55 (vol sans plainte, `BLOQUANT` ; les seuils de
   `alertes_instruction`) ne sont pas encore produites par le décompte : chacune, écrite un jour, se lève par la même
   commande ; l'écran « Lever » (front) ; le chiffrage de l'expertise comme repère du motif (FR-61, STORY-1071).
@@ -86,8 +97,55 @@ manifeste, aucune collection ne change.
 ## Où en est-on (pour une reprise après interruption)
 
 - [x] Rituel : plan, règles, journaux de A, B, C, D (aucune demande neuve à D) ; fiches 1011, 1013, 1069 ; FR-55, FR-136.
-- [ ] Code : `prospera-sinistres-service` `MNV-1070`.
-- [ ] Preuves sans Docker (Node 25) : unitaires, lint, `tsc`, mutations ; annonce fusionnée avant le code.
-- [ ] Sous le verrou : Node 24 (étage `verification`) lint, suite unitaire complète d'un trait, e2e, build, mutations
-  MongoDB.
-- [ ] PR de code fusionnée ; PR de docs finale.
+- [x] Code : `prospera-sinistres-service` `MNV-1070` (4e881f0) ; PR **#31**.
+- [x] Preuves sans Docker (Node 25) : spec pure et banc mémoire de la story (22/22), lint des fichiers touchés, `tsc` ;
+  annonce fusionnée avant le code (#803, `main` 36d4acf).
+- [x] Sous le verrou (pris à 13:40) : Node 24 (étage `verification`) lint, suite unitaire complète d'un trait, e2e,
+  build, mutations 11/11 et 3/3 ; mesure du banc MongoDB.
+- [x] PR de code fusionnées (#31, `dev` 6a0c28d ; #32, le banc MongoDB, `dev` 6002aac) ; rejeu sur l'export
+  d'`origin/dev` ; PR de docs finale.
+
+## Ce qui a été livré
+
+**2026-11-24** — trois PR fusionnées en « Rebase and merge » :
+
+- prospera-stories **#803** (`main` 36d4acf) : la fiche, l'entrée du tracker et l'annonce « ⚠ Contrats », **avant le code**.
+- prospera-sinistres-service **#31** (`dev` **6a0c28d**) :
+  - `evaluation/evaluation.ts` (pur) : `decompteDuMoment` (l'aide commune à l'arrêt, à la levée et à la lecture : tables
+    à la date de survenance, dernier enregistrement, calcul fait une fois ; l'arrêt garde son ordre de refus),
+    `jugerLaLevee`, `leveeDe` (la levée d'UN enregistrement), `alertesDuFormulaire` ; `jugerLArret` : une alerte levée
+    sur l'enregistrement en vigueur ne bloque plus, `ALERTE_BLOQUANTE_NON_LEVEE` nomme les seules non levées,
+    `alertesLevees` copiées dans l'évaluation.
+  - `instruction/formulaires.ts` : `LeveeDAlerte`, `instruction.levees` (ajout seul ; champ `Mixed` déjà persisté).
+  - `partie/partie.ts` : une levée rend son auteur partie (`EVALUER`).
+  - `dossiers/` : `leverUneAlerte` (commande du dossier : portée, rôle, fenêtre `LEVEE_IMPOSSIBLE`, cumul, jugement,
+    piste `LEVER_ALERTE`, `dossier.changed@1` seul), `POST …/instruction/levees` et `LeveeDto`, codes `ALERTE_ABSENTE`,
+    `ALERTE_DEJA_LEVEE`, `LEVEE_IMPOSSIBLE` ; `GET …/instruction` gagne `alertes` et `levees` ; les évaluations lues
+    rendent `alertesLevees` (dates en ISO).
+  - Tests : `evaluation/levee.spec.ts` (16 purs), six tests de service sur les deux dépôts (mémoire et MongoDB réel),
+    un test de `partie`, un invariant de route, un e2e HTTP ; recette versionnée `scripts/recette/1070/mutations-1070.mjs`.
+- prospera-sinistres-service **#32** (`dev` **6002aac**, commit séparé de la story, D-1070-10) : le banc MongoDB de
+  `dossiers.service.spec.ts` crée sa base une fois et vide ses collections entre deux tests (plus de DDL par test).
+
+## Preuves
+
+- **Node 25** (poste, sans Docker) : `levee.spec` et les tests « 1070 » du service (banc mémoire) 22/22 ; lint des
+  fichiers touchés (règle `endOfLine: auto`) 0 ; `tsc --noEmit` 0.
+- **Node 24** (étage `verification`, image depuis `git -c core.autocrlf=false archive` de la branche, MongoDB en jeu de
+  répliques et Redis réels) : lint 0 ; **suite unitaire complète d'un trait (`-w 2`), délai par défaut de 5 s :
+  1366/1366, 68/68 suites, 168 s, aucun délai de crochet** ; e2e **34/34** (4 suites) ; build 0.
+- **Mutations** (dans l'image, sur l'assertion, aucune « ne compile pas ») : **11/11** pures et banc mémoire (motif non
+  exigé, levée valable pour tous les enregistrements, alerte non bloquante levée, double levée, levée sans effet sur
+  l'arrêt, levée non copiée, levée sur le premier enregistrement, formulaire muet, levée non écrite, levée permise en
+  validation, auteur hors partie) ; **3/3** sur MongoDB réel (levée non écrite, sans effet, valable partout).
+- **Le banc MongoDB** (D-1070-10) : mesuré, `beforeEach` médian 0,52 s seul, 1,58 s à 4 bancs concurrents, 2,83 s à 8
+  (p95 3,3 s). Rejeu sur l'export d'`origin/dev` `6a0c28d` (image `--no-cache`) : e2e 34/34, unitaires **1359/1366 : 7
+  délais de crochet** (1070 AC-4 et six tests de 1015 à la suite, MongoDB réel) ⇒ #32. Avec le banc corrigé : **1366/1366,
+  0 délai, 85 s** ; sous charge de DDL forcée : 6 échecs / 266 s, contre 35 / 791 s pour l'image d'avant.
+- **Rejeu sur `origin/dev`** (`6002aac`, image depuis l'export) : lint 0, **unitaires 1366/1366 (68 suites) d’un trait, 0 délai, 80 s**, e2e 34/34, build 0.
+- **Pas de pile `grp-d`** (D-1070-9) : aucun module Nest, aucune dépendance, aucun Dockerfile ne change.
+- Verrou Docker : pris à 13:40, une seule prise, rendu à 14:34 ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+
+**Reste** (D-1070-11) : les autres alertes de FR-55 (vol sans plainte, `BLOQUANT` ; les seuils d'`alertes_instruction`)
+ne sont pas produites par le décompte : chacune se lèvera par la même commande ; l'écran « Lever » ; le chiffrage de
+l'expertise comme repère du motif (FR-61, STORY-1071).
