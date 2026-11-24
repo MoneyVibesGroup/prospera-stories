@@ -228,6 +228,10 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← A (24/11) : l'écriture de facture modifiable ligne à ligne** (ticket #762, FE-149) — **prise** : contrat annoncé
+  le 24/11 dans `stories/STORY-1097.md` (« Amendement du 2026-11-24 ») ; `corrections.lignes`, signal
+  `ECRITURE_DESEQUILIBREE`, route d'aperçu `POST …/apercu`. Codée avant STORY-1087.
+
 - **← D (2026-11-16) : consommer `reseau.portee.changed@1` et passer la suite de conformité (STORY-1004)** — **servie**
   par `prospera-sinistres-service#15` (`dev` `29069cc`) : consommateur `sinistres-service.portee-reseau`, read-model
   par `(organisation, utilisateur)`, suite `conformite-portee-reseau-v1` copiée à l'octet (`f2779975…`) et jouée sur
@@ -260,6 +264,8 @@ seulement.
   `etat-publie.changed.<espace>`, double lecture) dans une story de la plage de C, après STORY-990.
 
 ## ⚠ Contrats
+
+- **2026-11-24 (STORY-1097 amendée, ticket #762), AVANT le code** : `prospera-comptabilite-service` — `POST …/factures/lots/{lotId}/inscrire` accepte **`corrections.lignes`** (lignes libres qui remplacent les lignes dérivées ; signal neuf bloquant `ECRITURE_DESEQUILIBREE` ; `role: LIBRE`) ; route neuve **`POST …/factures/lots/{lotId}/apercu`** (même corps, aucune écriture, droit `comptabilite:ecriture:saisir`). Et `GET /api/v1/cabinet/memoire-des-choix` + `…/actes` : **403 `TENANT_ADMIN_REQUIS`** pour un collaborateur. **→ A (FE-149, FE-150)** : types à régénérer. Manifeste inchangé (aucune route de lecture neuve).
 
 - **2026-11-18, STORY-1016 — un motif de plus, aucun champ ni version.** `EVALUATION` entre dans l'énumération `motif` de
   `sinistres.provision.revisee@1`, `assurance.provision.changed@1` et `assurance.provision.a-valider@1` (BACKWARD : un
