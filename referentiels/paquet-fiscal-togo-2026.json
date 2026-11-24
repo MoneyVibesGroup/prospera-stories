@@ -256,10 +256,18 @@
     "assiette": {
       "inclus": ["salaire de base", "primes", "gratifications", "commissions", "avantages en nature"],
       "exclus": ["remboursements de frais professionnels justifies (mission, deplacement)"],
-      "plancher": "l'assiette ne peut etre inferieure au SMIG en vigueur"
+      "plancher": "l'assiette ne peut etre inferieure au SMIG en vigueur",
+      "smig": {
+        "mensuel": 52500,
+        "horaire": 302.89,
+        "devise": "XOF",
+        "enVigueurDepuis": "2023-01-01",
+        "source": "valeur communiquee par l'utilisateur (PO) le 2026-11-24 ; texte officiel (decret fixant le SMIG) a citer",
+        "note": "horaire = mensuel / 173,33 heures (40 h x 52 / 12)"
+      }
     },
     "deductibiliteFiscale": "part patronale deductible du resultat fiscal comme charge de personnel",
-    "aCompleter": "plafond eventuel de cotisation, ventilation par branche (prestations familiales / risques professionnels / pensions), valeur SMIG a jour"
+    "aCompleter": "plafond eventuel de cotisation, ventilation par branche (prestations familiales / risques professionnels / pensions), texte officiel du SMIG (la valeur est inscrite dans assiette.smig depuis le 2026-11-24)"
   },
   "autresImpotsTaxes": {
     "presentsDansCGI": [
