@@ -5,6 +5,37 @@
 
 ## État
 
+### Lot 6 (ouvert le 2026-11-24)
+
+- **Plan** : `PLAN-LOT-6-2026-11-23.md` §5 (validé le 23/11) : B tient le **BFF** (`admin-panel-service`), la
+  **recette**, le **catalogue**, **auth**, **kyc** (neuf pour B), **bilan** et la **plateforme** (hors dossiers de C et
+  D) ; **balance (cahiers) et la comptabilité passent à C** (D-L6-1). Ordre : **1080, 1112, 1113, 1114, 1103, 1115,
+  1116** ; 1112 → 1116 réservés par le plan, fiches écrites juste avant de coder. Une sous-session neuve par story. Même
+  poste que D (1065 → 1071), même verrou Docker.
+- **Ouverture** : la session de B du 19/11 s'était arrêtée au milieu de 1080 (recette non committée, verrou « B
+  STORY-1080 03:27 » orphelin) ; le verrou a été **rendu le 24/11 par la session de groupe** (aucune pile `grp-b` ne
+  tournait). Checkouts constatés : `admin-panel` sur `MNV-1081`, catalogue sur `MNV-978`, auth sur `MNV-1083`, balance
+  et bilan sur `MNV-1080` — **toutes fusionnées** ; `bilan-service` garde ses deux brouillons du 15/11.
+- **Avancement** :
+  1. ~~STORY-1080~~ : **catalogue #67** (`fddfa7d` sur `dev`), **admin-panel #38** (`7c85076`), **recette #27**
+     (`a6da2ea`), après balance #159 et bilan #182 (19/11) ; contrats annoncés avant la fusion (stories #728, #764).
+     Le cabinet installé par le moteur : six vérifications `VERT` par `POST /installations`, aucun jeton posé à la
+     main ; **AP-55 débloquée** — la console lit l'état publié d'une organisation (route de la console au catalogue,
+     `org:read`, D-1080-14 ; relais typé au BFF, D-1080-15) et installe par les relais du BFF (preuve : la recette).
+     **Recette croisée complète sur pile neuve : 11/11 suites, 142/142 tests, 1 160 s**
+     (`cabinet-moteur` 11/11). Verrou pris à 02:00, rendu à 03:26 ; aucun conteneur, volume ni réseau
+     `grp-b` ne reste.
+  - **Suivante : STORY-1112** (le BFF relaie les essais d'un prospect, `/essais` ; AP-57). La demande de A du 24/11
+    (journal de A, « Lot 6 ») en donne le détail : relais de `POST /essais`, `GET /essais/{org}`, prolongation,
+    signature, jeu de démonstration, effacement, **et une liste** `GET /admin/essais` ; recommandé : `POST /admin/essais`
+    qui enchaîne la naissance et l'ouverture.
+  - **Trois demandes reçues le 24/11, hors des lignes du plan** (« Réponses ») : D (1065) `facturation:parametres:modifier`
+    au `DAF` et la recopie du manifeste `facturation` ; C (1087) le rôle `CAB_ARCHIVISTE` et les droits `ged:*` des
+    rôles du cabinet dans auth, puis la recopie du manifeste `ged` 1.1.0 après la fusion de C. Toutes dans auth et le
+    catalogue, sans Docker : **une story neuve de la plage de B** (le dernier identifiant libre, **STORY-979**, vérifié
+    libre sur `main` et dans les PR ouvertes le 24/11, non réservé ici), **à placer par la session de groupe**
+    (recommandé : après 1112, avant 1113 ; la recopie de `ged` attend la fusion de 1087).
+
 ### Lot 4 (ouvert le 2026-11-18)
 
 - **Plan** : `PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §3 : B tient le backend du cabinet (balance, bilan, dossier, BFF
@@ -622,6 +653,19 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-24) : AP-55 débloquée par STORY-1080** (catalogue #67, BFF #38, recette #27). Le moteur installe le
+  cabinet par `POST /installations` (six vérifications de balance et de bilan servies, `VERT`) ; la console peut
+  quitter le `PUT …/entitlements/{module}` pour l'installation (AC-5 d'AP-55 : la condition « 1080 fusionnée et la
+  recette passe par `POST /installations` » est remplie ; le `PUT` reste servi pour la sanction et sa levée). Routes du
+  BFF à appeler : `GET|PUT /admin/orgs/{orgId}/offre`, `POST|GET /admin/orgs/{orgId}/installations`,
+  `GET …/installations/{planId}`, `POST …/{planId}/reprendre` (inchangées) et **`GET /admin/orgs/{orgId}/etat-publie`**
+  (neuve, `org:read`, `EtatPublieOrganisationDto` : `espace`, `heureDeReference`, `modules[] { code, libelle, etat
+  (neuf états), finLe?, effacementLe?, versionCode?, acquis? }` ; 404 `ORGANISATION_INCONNUE` quand l'organisation n'a
+  encore ni offre ni droit). Types à régénérer depuis l'OpenAPI du BFF (`referentiels` y est désormais typé). Preuve :
+  la recette `cabinet-moteur` installe une organisation par ces relais et y lit `EN_SERVICE`, `SUSPENDU`,
+  `NON_INSTALLE`. — **information** ; votre demande du 24/11 est servie (« Réponses »). AP-55 est sortie de
+  votre lot 6 par l'amendement du 24/11 (lot 7) : le backend l'attend, prêt.
+
 - **→ A (2026-11-18, STORY-970) : la clôture comptable ne touche pas dossier-service ; deux verrous** — **information**,
   aucune action demandée (D-970-1). L'exercice et sa clôture administrative restent chez vous (`POST …/clore`,
   `POST …/rouvrir`, Q8). La comptabilité a son propre état « clôturé » : le sceau de la chaîne de piste de l'exercice,
@@ -916,6 +960,20 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Réponses aux demandes reçues
 
+- **← A (2026-11-24) : AP-55, relayer `GET /etat-publie/{org}` en lecture pour `org:read`** — **servie par STORY-1080**
+  (catalogue #67, BFF #38). La route du contrat ne peut pas être relayée telle quelle : elle refuse tout appelant qui
+  n'est pas membre de l'organisation (`ORGANISATION_HORS_JETON`, contrat figé). Le catalogue sert donc une route de la
+  console (même calcul, sans `utilisateur`), et le BFF la relaie en `GET /admin/orgs/{orgId}/etat-publie` (« → A »).
+- **← A (2026-11-21, STORY-1094) : recopier le manifeste `comptabilite` au catalogue** — **servie** par la session de C
+  à la demande de l'utilisateur (catalogue `eb495b5` et `acfb751`, manifeste 0.4.0, `manifestes:garde` verte), constatée
+  par STORY-1080 sur `origin/dev`. Rien à faire de plus.
+- **← D (2026-11-24, STORY-1065) : `facturation:parametres:modifier` au catalogue de tenant d'auth (DAF) et recopie
+  du manifeste `facturation`** — **lue, ouverte** : story neuve de la plage de B, à placer par la session de groupe
+  (« État », lot 6).
+- **← C (2026-11-24, STORY-1087) : le rôle `CAB_ARCHIVISTE` et les droits `ged:*` des rôles du cabinet dans auth ; la
+  recopie du manifeste `ged` 1.1.0 au catalogue après votre fusion** — **lues, ouvertes** : même story neuve que la
+  demande de D (« État », lot 6) ; la recopie attend votre signal de fusion.
+
 - **← D (2026-11-18, STORY-1064) : `comptes` dans `jeu-demonstration@1` et la pose des comptes par le catalogue** —
   **lue, gardée pour la remplaçante de B** (D-972-9, plan §3) ; pas dans STORY-975. La forme proposée (un `comptes`
   facultatif à la racine du jeu, `{ fichier, enregistrements, sha256 }`, vérifié comme un objet, posé après l'import
@@ -1066,6 +1124,7 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
     (`POST /admin/orgs/{orgId}/installations`) publie sa forme, `{ [module]: { code, version }[] }`.
   - **Pour A (AP-55)** : régénérer les types depuis l'OpenAPI du BFF ; la ligne « où en est l'organisation » lit
     `GET /admin/orgs/{orgId}/etat-publie` ; les relais de l'offre, des installations et de la reprise sont inchangés.
+  - **Fusionné le 24/11** : catalogue #67 (`fddfa7d` sur `dev`), BFF #38 (`7c85076`), sans écart au contrat annoncé.
 
 - **2026-11-19, STORY-1080 — balance et bilan servent leurs vérifications d'installation ; le catalogue de la recette
   installe par le moteur, annoncé AVANT la fusion du code** (`prospera-balance-service`, `prospera-bilan-service`,
@@ -1093,6 +1152,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
     `POST /installations` ; le `PUT` n'y sert plus qu'à la sanction et à sa levée.
   - **Pour A (relecture, console)** : rien à changer ; les bilans d'un plan d'installation de `balance` et `bilan`
     portent désormais des voyants mesurés.
+  - **Fusionné** : balance #159 (`4edb4c8`) et bilan #182 (`0f17ec4`) le 19/11 ; recette #27 (`a6da2ea`) le 24/11,
+    sans écart au contrat annoncé.
 
 - **2026-11-19, STORY-978 — le catalogue demande un jeton du moteur par organisation, annoncé AVANT la fusion du
   code** (`prospera-platform-catalog-service`, branche `MNV-978` ; fiche `stories/STORY-978.md`, D-978-1 → 11).
@@ -2241,6 +2302,25 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une construction d'image peut tomber sur le téléchargement du binaire de Confluent** (19/11 : `npm ci` de
+  `fiscal-service`, « Client network socket disconnected before secure TLS connection », `node-pre-gyp` puis
+  compilation impossible) : c'est le réseau, pas le code ; relancer la construction (STORY-1080, le 24/11 : verte).
+- **Le portefeuille de `dossier-service` (`GET /dossiers`) range ses lignes dans `lignes`** (`PortefeuilleResponseDto`),
+  pas dans `items` : `liste(corps, 'lignes')` dans la recette (STORY-1080).
+- **La route du contrat de l'état publié ne se relaie pas à la console** : elle est réservée aux membres de
+  l'organisation et aux identités de service (`ORGANISATION_HORS_JETON`) ; la console lit
+  `GET /api/v1/console/etat-publie/{org}` (`org:read`) par le BFF (STORY-1080).
+- **Ajouter un contrôleur au document de `test/openapi-contract.e2e-spec.ts` du BFF fait voir ses DTO à l'invariant
+  « aucun objet sans propriétés »** : `LancerInstallationRequestDto.referentiels` y tombait (corrigé par STORY-1080).
+- **`delegation` (STORY-650/651) supposait que `DIST_ADMIN` lit le journal du paiement et rédige un modèle** : faux depuis
+  STORY-960 (annexe B). Une recette qui lit une donnée métier du distributeur passe par un membre au rôle composé
+  (STORY-1080). Une recette complète n'avait pas été rejouée depuis 929 (17/11) : chaque story qui touche auth ou les
+  droits doit rejouer les suites qui s'en servent (`delegation`, `distributeur`, `abonnement`).
+- **En fin de recette complète, la notification rend 429 (plafond par adresse) et Mailhog `ECONNRESET`** : la première
+  s'attend (`retry-after`), le second se soigne par `docker desktop restart` avant la pile neuve (piège de 929).
+- **`docker compose … down -v` de la recette a laissé les cinq volumes nommés `grp-b_*`** (24/11) : les lister après
+  (`docker volume ls --filter name=grp-b`) et les retirer (`docker volume rm`) avant une pile « neuve ».
 
 - **Le compose racine du poste pose `INGESTION_SOURCE_SYSTEMS` sur balance** (sans la comptabilité, ni
   `microfinance-service`) : il cache le défaut du service. Le profil de recette la retire par `KEY: !reset null`

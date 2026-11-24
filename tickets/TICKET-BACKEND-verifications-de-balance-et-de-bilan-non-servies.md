@@ -4,7 +4,10 @@
 **Ouvert par :** STORY-929 (A, 2026-11-17), décision D-929-1
 **Story nommée :** **STORY-1080** (id proposé : le max réservé est 1079, groupe D ; la plage suivante de A reste à fixer par le plan suivant)
 **Priorité :** Must avant que la console quitte le `PUT` des droits (lot de D) et avant la mise en service (installation par le moteur, S13)
-**État :** 🟡 ouvert — porté par **STORY-1080** (réservée le 2026-11-18, lot 4 de A, sur validation de l'utilisateur)
+**État :** ✅ fermé le 2026-11-24 par **STORY-1080** (groupe B) — balance #159 (`dev` `4edb4c8`), bilan #182 (`dev`
+`0f17ec4`), recette #27 (`dev` `a6da2ea`) : les six routes servies, `cabinet-moteur` installe par
+`POST /installations` (six vérifications `VERT`), recette croisée complète verte sur pile neuve. Restent non servies,
+hors de ce ticket : les vérifications de `conseil`, `consolidation`, `declarations`.
 
 ---
 
