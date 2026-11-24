@@ -1,3 +1,4 @@
+// Amendé le 2026-11-24 (STORY-1073, groupe D, dépôt prêté par B) : C5, + `paiement.compte.changed@1` publié (l'état imprimable d'un compte d'encaissement, sans aucun secret du coffre ; lu par `facturation`, Q-D-12, D-Q12-1) ; version 1.0.0 → 1.1.0 (un ajout, une mineure).
 // Manifeste M33 — Encaissements & PI-SPI (format du contrat de module, clause C1, amendée le 2026-11-10, le
 // 2026-11-11 et le 2026-11-12).
 // Source : prospera-stories (décision du PO du 2026-11-11, réponse 7 au §9 de l'amendement du plan v3).
@@ -78,7 +79,7 @@
 
 export const MANIFESTE_PAIEMENT = {
   code: 'paiement',
-  version: '1.0.0',
+  version: '1.1.0',
 
   depends: [],
 
@@ -135,6 +136,7 @@ export const MANIFESTE_PAIEMENT = {
     'paiement.creance.troppercu.constate',
     'paiement.creance.anomalie.constatee',
     // Nouveaux, 2026-11-13 (voir l'en-tête) :
+    'paiement.compte.changed@1', // [STORY-1073] état imprimable d'un compte d'encaissement (nature, titulaire, fournisseur, empreinte visible, destination PI-SPI, vérifié ; révision = rang de l'acte du compte) ; jamais un secret ; consommé par facturation
     'paiement.creance.changed@1', // état absolu : tiers, source, périmètre, composantes, reste dû, montantExigible, lueLe, échéance, ancienneté (FR-247 ; IMF AD-6)
     'paiement.credit-tiers.changed@1', // solde, origine (avance, acompte, trop-perçu, avoir), imputations (FR-248)
     'paiement.encaissement.changed@1', // état absolu d'un encaissement ; consommé par la microfinance (spine IMF, AD-9)

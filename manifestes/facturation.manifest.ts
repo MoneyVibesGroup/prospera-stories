@@ -1,3 +1,4 @@
+// Amendé le 2026-11-24 (STORY-1073) : C5, + `dossier.created`, `dossier.updated` consommés (le dossier propre de l'organisation : l'identité légale imprimée, Q-D-12, D-Q12-1) et + `paiement.compte.changed@1` consommé (les comptes d'encaissement : les coordonnées de paiement imprimées) ; version 1.1.0 → 1.2.0 (des ajouts, une mineure).
 // Amendé le 2026-11-24 (STORY-1066) : C7, + `facturation:avoir:valider` (la validation du DAF d'un avoir au-delà du seuil, FR-48, AD-6 ; D-1066-9) ; version 1.0.0 → 1.1.0 (un ajout, une mineure ; elle porte aussi le droit de STORY-1065, D-1065-15).
 // Amendé le 2026-11-24 (STORY-1065) : C7, + `facturation:parametres:modifier` (les paramètres versionnés de la facture : fiche de l'émetteur, liste de travail des mentions légales, durée du lien public ; D-1065-2, D-1065-12).
 // Amendé le 2026-11-18 (STORY-1062) : C5, + `commande.commande.annulee@1` consommé (une commande annulée ne se facture plus, FR-35).
@@ -65,7 +66,7 @@
 
 export const MANIFESTE_FACTURATION = {
   code: 'facturation',
-  version: '1.1.0',
+  version: '1.2.0',
 
   // C1 : trois dépendances DURES, validées par le PO le 2026-11-12.
   // - catalogue : une ligne de facture porte un article, une taxe et un prix résolu ;
@@ -148,6 +149,9 @@ export const MANIFESTE_FACTURATION = {
     'commande.commande.annulee@1', // [AD-3 ; STORY-1062] une commande annulée ne se facture plus (COMMANDE_ANNULEE)
     'paiement.creance.changed@1', // reste dû, échéance, ancienneté : de quoi déduire PARTIELLE et PAYEE (FR-49)
     'paiement.creance.soldee', // topic de `paiement`, sans suffixe de version
+    'paiement.compte.changed@1', // [STORY-1073] l'état imprimable d'un compte d'encaissement : les coordonnées de paiement de la facture, jamais un secret (FR-44, D-Q12-1)
+    'dossier.created', // [STORY-1073] topic de `dossier-service`, sans suffixe : le dossier propre (`estLeCabinet`) porte l'identité légale imprimée (FR-44, D-Q12-1)
+    'dossier.updated', // [STORY-1073] son état absolu à chaque changement ; un dossier client est ignoré
     'catalogue.grille.publiee@1', // prix résolus pour les lignes et les proformas
     'pdv.plafond.changed@1', // plafond de crédit, y compris sa suspension (FR-V33) ; seul chemin du blocage de crédit
     'connecteurs.domaine.changed@1', // propriétaire du domaine facturation.factures, plus tard (spine de Connecteurs, AD-3)
