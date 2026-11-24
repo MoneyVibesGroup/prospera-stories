@@ -62,7 +62,9 @@ export const MANIFESTE_GED = {
   code: 'ged',
   // 1.1.0 (2026-11-24, STORY-1087) : la GED s'ouvre au cabinet comptable (fonds d'archives d'un dossier client, plan
   // de classement OHADA, droits du cabinet) ; les routes de lecture deviennent les routes réelles.
-  version: '1.1.0',
+  // 1.2.0 (2026-11-24, STORY-1088) : l'original papier (réceptions, boîtes, cotes, sorties, récolement, restitution)
+  // et la recherche dans un fonds.
+  version: '1.2.0',
 
   // C1 : aucune dépendance dure. La GED reçoit, lit, classe, conserve et retrouve des pièces sans autre module ; une pièce
   // enregistrée sans dossier va dans la file « à rattacher » (FR-159, FR-166).
@@ -247,6 +249,17 @@ export const MANIFESTE_GED = {
     'GET /api/v1/ged/cabinet/pieces/{pieceId}/versions/{version}/lecture', // STORY-1087
     'GET /api/v1/ged/cabinet/lots/{lotId}', // STORY-1087
     'GET /api/v1/ged/cabinet/quota', // STORY-1087 : le volume stocké et le quota de l'offre
+    'GET /api/v1/ged/cabinet/fonds/{numero}/receptions', // STORY-1088 : les réceptions d'archives
+    'GET /api/v1/ged/cabinet/receptions/{numero}', // STORY-1088
+    'GET /api/v1/ged/cabinet/receptions/{numero}/bordereau', // STORY-1088 : le bordereau de réception (PDF)
+    'GET /api/v1/ged/cabinet/fonds/{numero}/boites', // STORY-1088 : les boîtes, leur cote et leur présence
+    'GET /api/v1/ged/cabinet/boites/{boiteId}', // STORY-1088
+    'GET /api/v1/ged/cabinet/boites/{boiteId}/etiquette', // STORY-1088 : l'étiquette à code QR (PDF)
+    'GET /api/v1/ged/cabinet/sorties', // STORY-1088 : les sorties en cours, et en retard
+    'GET /api/v1/ged/cabinet/fonds/{numero}/recolements', // STORY-1088
+    'GET /api/v1/ged/cabinet/fonds/{numero}/restitutions', // STORY-1088
+    'GET /api/v1/ged/cabinet/restitutions/{numero}/bordereau', // STORY-1088 : le bordereau de restitution (PDF)
+    'GET /api/v1/ged/cabinet/fonds/{numero}/recherche', // STORY-1088 : retrouver une pièce
     'GET /api/v1/instance/ged/{organisationId}/export',
   ],
 
