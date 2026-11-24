@@ -35,6 +35,8 @@
     catalogue, sans Docker : **une story neuve de la plage de B** (le dernier identifiant libre, **STORY-979**, vérifié
     libre sur `main` et dans les PR ouvertes le 24/11, non réservé ici), **à placer par la session de groupe**
     (recommandé : après 1112, avant 1113 ; la recopie de `ged` attend la fusion de 1087).
+  2. 🚧 **STORY-979** : placée **avant 1112** par la session de groupe (§1.1 : une demande adressée à B passe avant la
+     story suivante ; D-979-1, contre la proposition de 1080). Contrat annoncé avant la fusion (« ⚠ Contrats »).
 
 ### Lot 4 (ouvert le 2026-11-18)
 
@@ -1105,6 +1107,33 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-24, STORY-979 (lot 6) — huit droits neufs au catalogue de tenant d'auth, hors du jeton, et le rôle
+  `CAB_ARCHIVISTE`, annoncés AVANT la fusion du code** (`prospera-auth-service` et
+  `prospera-platform-catalog-service`, branches `MNV-979` ; fiche `stories/STORY-979.md`, D-979-1 → 9). Tout est
+  AJOUT : aucune route, aucun champ, aucun topic ne change de forme.
+  - **Catalogue de tenant** (`DROITS_HORS_JETON`) : `facturation:parametres:modifier` (« Modifier les paramètres de
+    la facture », fin de la section `facturation`) ; section `ged` neuve : `ged:fonds:gerer`, `ged:lot:numeriser`,
+    `ged:piece:indexer`, `ged:versement:verser`, `ged:physique:gerer`, `ged:piece:consulter`,
+    `ged:sensible:consulter`. 164 codes en tout (24 du jeton, 140 hors du jeton). **Jamais dans `perms[]`** : la
+    borne du jeton ne bouge pas (17 + 24 = 41 ≤ 44). Servis par `GET /api/v1/moi/droits`, dans `droitsHorsJeton`
+    (contrat `moi-droits` 1.1.0, inchangé).
+  - **Attribution par défaut** : `facturation:parametres:modifier` au **`DIST_DAF` seul** (`AJOUTS_A_L_ANNEXE_B`,
+    D-1065-13) ; `ged:*` selon la matrice §2.3 du PRD des services du cabinet : `CAB_ASSOCIE` ← `ged:fonds:gerer`,
+    `ged:piece:consulter`, `ged:sensible:consulter` ; `CAB_COLLABORATEUR` ← `ged:piece:consulter` ;
+    **`CAB_ARCHIVISTE`** ← les sept, et aucun droit d'un autre module.
+  - **Rôle neuf du socle de tenant** : `CAB_ARCHIVISTE` (« Archiviste », vertical `cabinet`, couverture `partiel`),
+    réaligné au démarrage d'auth ; rôle par défaut d'aucun rôle du socle (`TENANT_ADMIN` → associé, `TENANT_USER` →
+    collaborateur, inchangés) : il s'attribue (`tenantRole`) comme tout rôle du socle du métier. Visible dans les
+    listes de rôles de la console et du cabinet.
+  - **Pas d'avance de `dv`** à la livraison (D-949-3) ; `identity.droits.changed@1` inchangé.
+  - **Catalogue** : `copies.json` recopié depuis `prospera-stories@1561370` ; seul `facturation` change (`droits[6]`,
+    version 1.0.0 gardée par la source, D-979-7). **`ged` 1.1.0 n'est pas recopié** : il attend la fusion du code de C
+    (D-979-8).
+  - **Pour D** : `PUT /api/v1/facturation/parametres` passe pour un `DIST_DAF` dès le déploiement d'auth (cache de
+    60 s compris). **Pour C** : les routes du cabinet de `ged` passent pour l'associé, le collaborateur et l'archiviste
+    selon la matrice. **Pour A** : un rôle de plus dans la liste des rôles d'un cabinet (console, AP-38 et suivantes) ;
+    aucun type à régénérer (aucune forme ne change).
 
 - **2026-11-24, STORY-1080 (amendement, lot 6) — la console lit l'état publié d'une organisation (AP-55), annoncé
   AVANT la fusion du code** (`prospera-platform-catalog-service` et `prospera-admin-panel-service`, branches `MNV-1080` ;

@@ -1762,6 +1762,16 @@ reserved_ranges:
       passés (3 suites rouges connues, binding de Confluent) ; câblage du module racine vert (binding doublé) ; 26/26
       mutations rouges ; lint, tsc, build. Sans Docker (D-978-11) : la preuve de bout en bout est celle de la recette
       croisée complète de 1080. Lot 4 de B, n° 11 (EPIC-145). NON SLOTTÉE.
+  - range: "STORY-979"
+    status: "in-progress"
+    owner: "Groupe B, lot 6 — les droits de la facture et des archives du cabinet au catalogue de tenant d'auth, hors du jeton : facturation:parametres:modifier au DIST_DAF seul (demande de D, STORY-1065, D-1065-13) ; les sept ged:* du cabinet et le rôle neuf CAB_ARCHIVISTE (demande de C, STORY-1087, PRD des services du cabinet §2.3) ; recopie des manifestes au catalogue (facturation ; ged 1.1.0 après la fusion de C) (prospera-auth-service, prospera-platform-catalog-service)"
+    source_doc: "prospera-stories/stories/STORY-979.md"
+    reserved_on: "2026-11-24"
+    note: >
+      🚧 2026-11-24 — story neuve de la plage de B (930 → 979, le dernier identifiant libre), hors des lignes du plan
+      du lot 6 : les demandes de D (STORY-1065) et de C (STORY-1087) du 24/11, placées avant STORY-1112 par la session
+      du groupe B (D-979-1). Contrat annoncé avant la fusion du code (« ⚠ Contrats » du journal de B). Sans Docker
+      (D-979-9). NON SLOTTÉE.
   - range: "STORY-969"
     status: "RÉSERVÉ"
     owner: "Le lettrage — des lignes validées d'un même compte de tiers (collectif, tiers, devise), équilibrées ; manuel ; partiel (une ligne garde son reste, jamais lettrée au-delà de son montant, même sous la concurrence : verrou du compte de tiers) ; code AA, AB… par compte de tiers et exercice ; automatique par PROPOSITIONS (référence, puis montant et date, fenêtre de 90 jours), acceptées (PROPOSE_PAR_LA_MACHINE) ou modifiées (CHOISI_PAR_L_UTILISATEUR) ; délettrage tracé, refusé sur un exercice clos ; écarts de règlement sous un seuil (1 000) soldés par une écriture d'écart validée et numérotée (658 / 758) ; le lettrage vit à côté des écritures (en ajout seul) ; balance âgée par le port de 968 ; balance publiée inchangée (prospera-comptabilite-service)"
