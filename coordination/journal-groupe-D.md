@@ -42,10 +42,29 @@
     boucles bornées, pris à 03:27, une seule prise, rendu à 04:09** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
   - **Suivante : STORY-1066** 🚚 (l'avoir, `ventes` : `AV-`, `AVOIR_SUPERIEUR_A_LA_FACTURE`, `facturation.avoir.emis@1`, son
     PDF « Avoir » ; **monter le manifeste `facturation` à la source**, D-1065-15).
-- **STORY-1066** 🚧 🚚 — l'avoir (`ventes`, module `facturation`) : fiche écrite, annonce « ⚠ Contrats » avant le code
-  (cette PR) ; **manifeste `facturation` 1.1.0 à la source** (C7 : + `facturation:avoir:valider` ; D-1065-15). Rituel
-  (2026-11-24) : aucune demande neuve à D pour le distributeur dans les journaux de A, B et C (la réponse de B à 1065,
-  D-979-7, est celle que D-1065-15 sert ici).
+- **STORY-1066** ✅ 🚚 — l'avoir (prospera-ventes-service#14, `dev` d9f4264, 2937af8, e9f77dd, adaa2bb ; annonce
+  « ⚠ Contrats » #782 avant le code, `main` 24049e4 : **manifeste `facturation` 1.1.0 à la source**, C7 : +
+  `facturation:avoir:valider` ; D-1065-15). Rituel (2026-11-24) : aucune demande neuve à D pour le distributeur dans les
+  journaux de A, B et C (la réponse de B à 1065, D-979-7, est celle que D-1065-15 sert ici).
+  - **L'avoir** (`POST /api/v1/facturation/factures/{factureId}/avoirs`, `facturation:avoir:emettre`) : `TOTAL`, `LIGNES`,
+    `MONTANT`, motif de FR-48 ; jamais plus que le reste à créditer, ligne par ligne et taux par taux
+    (`AVOIR_SUPERIEUR_A_LA_FACTURE`, jugé dans la transaction du numéro sur le crédit de la facture,
+    `facturation_credits_des_factures` : aucun numéro consommé ; deux avoirs simultanés, un seul passe) ; la TVA d'un
+    taux soldé est son reste exact (le cumul égale la facture au franc).
+  - **La numérotation suivie** : série `avoirs`, `AV-AAAA-NNNNNN`, tête sur `facturation.serie.changed@1` (énumération de
+    `serie` retirée, BACKWARD) ; suite reprenable de Sage (`PUT /numerotation/avoirs`, FR-217).
+  - **Le fait** `facturation.avoir.emis@1` (neuf ; clé `<org>:<factureId>`, `cumulTtcMineur`, `soldeLaFacture`) ; **le PDF
+    « Avoir »** figé (`facturation_pdfs_avoirs`) ; **la facture lue** gagne `statut` (`ANNULEE_PAR_AVOIR`) et `avoirs`, son
+    document n'est pas modifié (AD-6).
+  - **Le seuil du DAF** : `seuilValidationAvoirMineur` (500 000, facultatif au `PUT`, repris de la version lue), droit
+    neuf `facturation:avoir:valider` (→ B), 403 `VALIDATION_DU_DAF_REQUISE` sans numéro.
+  - Node 24 : 654 unitaires (64/64 suites), 24 e2e, 181 d'intégration (10 neufs) ; mutations 10/10 (pures) et 6/6
+    (MongoDB réel) ; Karapace : avoir neuf, série BACKWARD (témoin INCOMPATIBLE). Pile `grp-d` : `docker compose up` sain,
+    pilote 25/25 (texte du PDF lu par `pdfjs-dist`), rejoué sur les images reconstruites depuis `origin/dev`.
+  - Décisions D-1066-1 → 14 (fiche) ; recette versionnée `scripts/recette/1066/` ; → B (le droit, la recopie du
+    manifeste 1.1.0 à `24049e4`, le consommateur de `paiement`). **Verrou Docker libre ; pris à 09:20, rendu à 09:58, une seule
+    prise** ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+  - **Suivante : STORY-1067** 🚚 (la commande (3) : modifier une commande transmise, `ventes` ; ordre de D-1062-12).
 
 ### Lot 4 (ouvert le 2026-11-18)
 
@@ -733,7 +752,8 @@
   seuil répond 403 `VALIDATION_DU_DAF_REQUISE` à tous (échec fermé) ; en deçà, rien ne change. (2) **Recopier le
   manifeste `facturation` 1.1.0 au catalogue** (`copies.json`) : la version monte à la source (D-1065-15, votre
   D-979-7), elle porte aussi `facturation:parametres:modifier` ; le SHA de `prospera-stories` à recopier est donné à
-  la PR finale de 1066 (ci-dessous, à la fusion de cette annonce). (3) **Consommer `facturation.avoir.emis@1` dans
+  la fusion de l'annonce : **`prospera-stories` `24049e4`** (`manifestes/facturation.manifest.ts`, version 1.1.0,
+  sha256 `80933b6183648f4ea86a6de95aa18f6dde1368ab8ce182e37868e2535f273458`, déjà recopié à l'octet par `ventes`). (3) **Consommer `facturation.avoir.emis@1` dans
   `paiement`** (AD-7, FR-48 : « `paiement` réduit la Créance de la facture en le consommant, en moins de 5 secondes » ;
   au-delà du reste dû, un crédit du tiers) : topic `facturation.avoir.emis`, clé `<organisationId>:<factureId>`, schéma
   `facturation.avoir.emis-value` (BACKWARD) ; la Créance à réduire est `(FACTURE, factureId)` ; le montant est
@@ -1026,7 +1046,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-24, STORY-1066), avant le code. — `prospera-ventes-service`, module `facturation` : l'avoir.**
+- **PUBLIÉ (2026-11-24, STORY-1066, prospera-ventes-service#14, `dev` d9f4264 → adaa2bb) ; ANNONCÉ avant la fusion du
+  code (prospera-stories #782, `main` 24049e4), sans écart ; schémas vérifiés au registre (Karapace, contre les versions
+  d'`origin/dev`). — `prospera-ventes-service`, module `facturation` : l'avoir.**
   Fiche : `stories/STORY-1066.md` (D-1066-1 → 14). **Ajouts seuls** ; un fait neuf publié (déjà déclaré au manifeste) ;
   un schéma relâché ; **manifeste `facturation` 1.1.0** (C7 : + `facturation:avoir:valider` ; D-1065-15).
   - **Routes neuves** (préfixe `/api/v1/facturation`) : `POST /factures/{factureId}/avoirs` (`facturation:avoir:emettre`
@@ -1714,6 +1736,21 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1066** :
+  - (1) **`npm ci` de l'étage `base` a échoué deux fois** (DNS de GitHub injoignable depuis le constructeur, puis
+    « Completion callback never invoked » au déballage du binaire de Confluent) : le cache de la couche était perdu.
+    Vérifier la sortie (`VERIF 1`), relancer la construction ; ne jamais lever une pile sur une image du même nom plus
+    ancienne (piège 1065-4).
+  - (2) **Une pile recomposée par copie de deux piles** (1065 + le bloc Karapace de 1061) a gardé deux fois
+    `emetteur-de-test` : `docker compose` refuse (« mapping key already defined »). Relire le YAML assemblé.
+  - (3) **Importer une fixture d'un `*.spec.ts`** dans une autre suite y rejoue ses `describe` : la reposer dans le test.
+    Une série de plus change les lectures qui listent les séries et un PUT vers une série qui devient servie : les
+    tests de 1061 qui comparaient en `toEqual` ou attendaient 400 ont été mis à jour (piège 1062-4).
+  - (4) **Une mutation sur une règle d'arrondi peut être équivalente sur les cas d'UJ-1** (le reste exact égale l'arrondi) :
+    un cas de 12 F à 18 % (cinq avoirs de 1 F, puis le reste) la tue.
+  - (5) La session a été coupée par une limite d'API à 04:30 (travail non commité intact, repris à 09:01) : commiter par
+    étapes dès que le code compile.
 
 - **STORY-1065** :
   - (1) **Un PDF à police embarquée n'a pas de texte lisible dans ses flux** (glyphes en hexadécimal) : un test qui

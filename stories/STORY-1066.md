@@ -1,6 +1,6 @@
 # STORY-1066 : l'avoir — annuler tout ou partie d'une facture émise, sous un numéro `AV-` continu, avec son fait, son PDF « Avoir » et la validation du DAF au-delà du seuil
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-230 (la facturation : la facture juste, l'avoir, la proforma et le lien public) ; FR-43 (la suite des
 avoirs), FR-45, FR-48, FR-217 (la suite reprise, par série) · **Dépôt :** `prospera-ventes-service` (module
@@ -50,10 +50,12 @@ tous les avoirs de l'organisation (avec la liste des factures, D-1061-12 (4)).
 - [x] Rituel : plan du lot 6, règles, journaux de A, B, C, D (aucune demande neuve à D pour le distributeur ; la
   réponse de B à 1065, D-979-7, est celle que D-1065-15 sert ici), fiches 1059 → 1065, épic, spine, PRD, manifeste,
   table d'accès d'`auth`, code de `paiement` (aucun consommateur d'avoir).
-- [ ] Annonce « ⚠ Contrats » fusionnée avant le code (cette PR de docs) ; manifeste `facturation` **1.1.0** à la source.
-- [ ] `ventes` : PR `MNV-1066` fusionnée en rebase.
-- [ ] Verrou Docker pris et rendu ; aucun conteneur, volume ni réseau `grp-d`.
-- [ ] PR de docs finale (fiche `done`, tracker, journal : demande → B avec le SHA du manifeste à recopier).
+- [x] Annonce « ⚠ Contrats » fusionnée avant le code : prospera-stories **#782** (`main` **`24049e4`**) ; manifeste
+  `facturation` **1.1.0** à la source.
+- [x] `ventes` : PR **#14** fusionnée en rebase (`dev` **`d9f4264`**, `2937af8`, `e9f77dd`, **`adaa2bb`**).
+- [x] Verrou Docker : libre ; **pris à 09:20**, une seule prise, **rendu à 09:58** ; aucun conteneur, volume
+  ni réseau `grp-d`.
+- [x] PR de docs finale (fiche `done`, tracker, journal : demande → B avec le SHA du manifeste à recopier, `24049e4`).
 
 ## Ce qui doit être vrai à la fin
 
@@ -127,8 +129,8 @@ tous les avoirs de l'organisation (avec la liste des factures, D-1061-12 (4)).
   seuil, ou un DAF » ; la table d'accès donne `facturation:avoir:emettre` au COMPTABLE **et** au DAF : rien ne les
   distingue, et un rôle ne décide jamais d'un droit (D-960-12). D'où **`facturation:avoir:valider`** (C7 ; rôle par défaut
   proposé : `DIST_DAF` seul ; → B). Au-delà de `seuilValidationAvoirMineur` (TTC de l'avoir, strictement au-dessus ;
-  500 000 par défaut, paramètre versionné de la facture, **facultatif au `PUT`**, de 0 à 10¹² : les versions de 1065
-  restent valides et le rendent), l'émission exige ce droit en plus : sinon 403 `VALIDATION_DU_DAF_REQUISE` (`details` :
+  500 000 par défaut, paramètre versionné de la facture, **facultatif au `PUT`** — absent, la valeur de la version lue est
+  reprise —, de 0 à 10¹² : les versions de 1065 restent valides et le rendent), l'émission exige ce droit en plus : sinon 403 `VALIDATION_DU_DAF_REQUISE` (`details` :
   `seuilMineur`, `montantTtcMineur`), jugé avant toute écriture. Le circuit à deux personnes (le comptable demande, le
   DAF valide) vient plus tard (D-1066-14) ; jusqu'au service de B, un avoir au-delà du seuil est refusé à tous (échec
   fermé), en deçà il passe.
@@ -180,3 +182,65 @@ déclaré au manifeste) ; un schéma relâché ; un droit neuf au manifeste `fac
   (énumération de `serie` retirée ; la série `avoirs` y paraît).
 - **Collections neuves** : `facturation_avoirs`, `facturation_credits_des_factures`, `facturation_pdfs_avoirs`.
 - **Droit neuf** : `facturation:avoir:valider` (manifeste `facturation` 1.1.0) ; **→ B** : D-1066-13.
+
+## Ce qui a été livré
+
+**2026-11-24** — après l'annonce « ⚠ Contrats » (prospera-stories **#782**, `main` `24049e4`), une PR fusionnée en « Rebase
+and merge » :
+
+- `prospera-ventes-service` **#14** (`dev` **`d9f4264`**, `2937af8`, `e9f77dd`, **`adaa2bb`** ; tête de la branche `624cee9`
+  vérifiée `open` et égale au SHA poussé avant la fusion) :
+  - `src/modules/facturation/avoirs/` : `avoirs.ts` (la demande lue et nommée, les montants et ce qui dépasse, le crédit
+    après l'avoir, le statut de la facture, le seuil ; pur), `schemas.ts` (`facturation_avoirs`,
+    `facturation_credits_des_factures`, `facturation_pdfs_avoirs`), `avoirs.service.ts` (`AvoirsDesFactures` : émettre
+    dans la transaction du numéro, lire, lister), `avoirs.controller.ts` (les quatre routes) ;
+  - `src/modules/facturation/pdf/` : `rendu.ts` (`rendreLAvoir` ; le rendu de la facture inchangé à l'octet),
+    `pdfs-avoirs.service.ts` (`PdfDesAvoirs` : production, balayage, octets vérifiés) ;
+  - `factures/faits.ts` (`faitSerie`, `faitAvoirEmis`, série `avoirs` déclarée), `factures.service.ts` (`statut`, `avoirs`
+    de la facture lue), `numerotation/` (format par défaut par série, `avoirs` reprenable), `parametres/`
+    (`seuilValidationAvoirMineur`, facultatif et repris), `erreurs.ts` (quatre codes) ;
+  - `contrat/schemas/facturation.avoir.emis.json` (neuf), `facturation.serie.changed.json` (énumération de `serie`
+    retirée) ; `module.manifest.ts` recopié à l'octet (`24049e4`, empreinte refigée) ;
+  - **recette versionnée** : `scripts/recette/1066/` (`pile-1066.yml`, `emetteur-de-test.mjs`, `recette-1066.py`,
+    `texte-du-pdf.mjs`, `mutations-1066.mjs`, `README.md`).
+- **Écart à l'annonce : aucun.** Précisions : un `PUT` des paramètres sans le seuil reprend celui de la version lue
+  (D-1066-9) ; dans `lignes`, `quantite` et `prixUnitaireHtMineur` valent `null` pour le reste d'une ligne déjà en partie
+  créditée (avoir `TOTAL`).
+- **→ B** : D-1066-13 (journal de D, « Demandes aux autres groupes ») : le droit, la recopie du manifeste 1.1.0
+  (`prospera-stories` `24049e4`), le consommateur de `paiement`.
+
+## Preuves
+
+- **Node 24** (étage `verification`, export `git -c core.autocrlf=false archive`) : `tsc` ; lint des fichiers touchés
+  (`endOfLine auto`) ; build ; **unitaires : 64/64 suites, 654 tests** (634 avant) ; **e2e : 2/2, 24** ; **intégration sur
+  MongoDB 8 en jeu de répliques : 16/16 suites, 181 tests** (171 avant), dont `avoir-http.int-spec.ts` (10, vraie chaîne de
+  gardes) : partiel puis total (`AV-2026-000001`, `000002`, facture `ANNULEE_PAR_AVOIR` au franc, document de la facture
+  inchangé, faits et têtes, piste intègre) ; dépassement sans numéro ; `AVOIR_INVALIDE` ; rejeu et
+  `CLE_REUTILISEE_AVEC_AUTRE_CHARGE` ; seuil du DAF (comptable refusé sans numéro, DAF passe, seuil abaissé et repris
+  par un `PUT` sans lui) ; droits et portée (403, 404 `FACTURE_INCONNUE`, `AVOIR_INCONNU`) ; **deux avoirs simultanés qui
+  ensemble dépasseraient : un seul passe ; vingt avoirs en parallèle : vingt numéros consécutifs** ; suite des avoirs
+  reprise de Sage (`AV00412` ⇒ `AV00413`) ; PDF (attente, empreinte, conservation jusqu'au 24/11/2036, altéré ⇒
+  `PDF_ALTERE`, facture d'avant 1065 ⇒ `PDF_INDISPONIBLE`) ; balayage et cinq échecs ⇒ `ECHEC`.
+- **Mutations : 16/16 rouges sur une assertion** — 10 pures (Node 25, puis Node 24 dans l'image) : TVA d'un taux soldé
+  par l'arrondi, TVA non bornée, ligne créditée au-delà de son reste, prix au-dessus de la ligne, total réparti par ligne
+  après un montant libre, seuil atteint au lieu de dépassé, préfixe `AV-` perdu, seuil par défaut changé, facture datée
+  de l'avoir sur le PDF, fait sous la clé de l'avoir ; 6 sur MongoDB réel : crédit tenu ignoré, seuil ignoré, facture
+  soldée non signalée, jamais `ANNULEE_PAR_AVOIR`, octets altérés servis, suite des avoirs absente des séries lues.
+- **Karapace 6.2** sur la pile : les schémas d'`origin/dev` d'avant la story enregistrés d'abord, puis ceux de la story :
+  `facturation.avoir.emis-value` **nouveau sujet**, `facturation.serie.changed-value` **compatible BACKWARD** (énumération
+  retirée) ; **témoin** : une énumération et un champ exigé remis sont refusés `INCOMPATIBLE`.
+- **Pile `grp-d`** (`scripts/recette/1066/pile-1066.yml`, image de la branche) : `docker compose up` sain (module Nest
+  changé, §1.5) ; pilote **25/25** : facture `FAC-2026-000001`, séries `factures` et `avoirs` ; `AV-2026-000001` (29 500),
+  rejeu, dépassement (la ligne nommée) et motif refusés sans numéro ; seuil abaissé, comptable 403, DAF `AV-2026-000002`
+  (315 060) ; facture `ANNULEE_PAR_AVOIR` ; **texte du PDF lu par `pdfjs-dist`** (« Avoir », numéro, « Avoir sur la facture
+  FAC-2026-000001 du 24/11/2026 », motif, ligne, totaux, A4) ; mêmes octets après `docker restart` ; outbox vide ;
+  `facturation.avoir.emis` (deux faits, clé de la facture, cumul, solde) et la tête `avoirs` lus sur Kafka ; piste intègre.
+- **Rejeu sur les images reconstruites depuis `origin/dev`** (`adaa2bb`, arbre identique à la branche ; construction avec
+  cache, l'étage `base` reconstruit dans la même prise après deux échecs réseau de `npm ci`) : sous Node 24, unitaires
+  **64/64 suites, 654**, e2e **2/2, 24**, intégration **16/16 suites, 181** ; pile neuve (volumes neufs) : `docker compose
+  up` sain, pilote **25/25** ; au registre, Karapace a répondu en erreur sur une partie de l'enregistrement « d'avant »
+  juste après `healthy` (§1.9) : les schémas de la story s'enregistrent et le témoin est refusé `INCOMPATIBLE` (la
+  compatibilité BACKWARD du relâchement est celle de la première pile).
+- `git diff --stat` = `--ignore-cr-at-eol` à chaque commit ; aucun `index.ts` non suivi.
+- **Verrou Docker** : libre au rituel ; **pris à 09:20** (`D STORY-1066`), une seule prise, **rendu à 09:58** après `down -v`
+  (pile, MongoDB de test et son réseau) ; aucun conteneur, volume ni réseau `grp-d` ne reste.

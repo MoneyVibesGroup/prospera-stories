@@ -558,9 +558,16 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1066.md"
     reserved_on: "2026-11-24"
     note: >
-      🚧 EN COURS le 2026-11-24 — fiche écrite avant le code ; annonce « ⚠ Contrats » avant le code (manifeste facturation
-      1.1.0 à la source, C7 : + facturation:avoir:valider ; D-1065-15). Lot D, n° 2 du lot 6 (PLAN-LOT-6-2026-11-23.md §6 ;
-      EPIC-230 ; FR-43, FR-45, FR-48, FR-217). NON SLOTTÉE.
+      🏁 DONE le 2026-11-24 — prospera-ventes-service#14 (dev d9f4264, 2937af8, e9f77dd, adaa2bb) ; annonce « ⚠ Contrats »
+      avant le code (docs #782, main 24049e4 : manifeste facturation 1.1.0 à la source, C7 : + facturation:avoir:valider ;
+      D-1065-15). L'avoir total, par lignes ou montant libre, jamais plus que le reste à créditer taux par taux
+      (AVOIR_SUPERIEUR_A_LA_FACTURE jugé dans la transaction du numéro, aucun numéro consommé ; TVA soldée au franc) ; série
+      AV-AAAA-NNNNNN et sa suite reprenable de Sage ; facturation.avoir.emis@1 (neuf) et facturation.serie.changed relâché
+      (BACKWARD) ; PDF « Avoir » figé ; facture ANNULEE_PAR_AVOIR lue ; seuil du DAF (seuilValidationAvoirMineur,
+      facturation:avoir:valider, VALIDATION_DU_DAF_REQUISE). Node 24 : 654 unitaires, 24 e2e, 181 d'intégration ;
+      mutations 10/10 et 6/6. Pile grp-d 25/25 (PDF lu par pdfjs), rejouée depuis origin/dev. → B (le droit, le manifeste
+      1.1.0 à recopier, le consommateur de paiement). Lot D, n° 2 du lot 6 (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-230 ; FR-43,
+      FR-45, FR-48, FR-217). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
