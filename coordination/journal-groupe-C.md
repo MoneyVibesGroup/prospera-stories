@@ -18,7 +18,11 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
   1. ✅ **STORY-1099 DONE (24/11)** : balance-service **#160** (`0ff2402` sur `dev`), contrat #758. Unitaires Node 24
      5555, intégration Mongo 10/10, e2e 253/253, mutation 5/5, gate `grp-c` vert, verrou pris à A et rendu. Écart au
      contrat : la mémoire du cabinet est réservée à l'administrateur (D-1099-5, STORY-694) ;
-  2. **STORY-1087** la GED s'ouvre au cabinet (document-service) ; Q-SC-5 (quota) : choix par défaut écrit dans la fiche ;
+  2. 🟡 **STORY-1087** la GED s'ouvre au cabinet (document-service) : fiche écrite et contrat annoncé le 24/11
+     (`stories/STORY-1087.md`) ; Q-SC-5 : 20 Go par cabinet, en alerte seulement (D-1087-5) ;
+  - 🟡 **Ticket #762** (A, FE-149 : l'écriture de facture modifiable ligne à ligne) et la mémoire du cabinet de 1098
+     réservée à l'administrateur : contrat #767, code poussé (`MNV-1098-cabinet-admin`, `aa7c703`), preuve de bout en
+     bout en attente du verrou Docker ;
   3. **STORY-1088** l'original papier, et retrouver une pièce (document-service) ;
   4. **STORY-1100** les archives apprennent la façon de classer du cabinet, et reçoivent les factures comptabilisées ;
   5. **STORY-1101** les déclarations face à la liasse (fiscal) — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
@@ -179,6 +183,15 @@ seulement.
 
 ## Demandes aux autres groupes
 
+- **→ B (24/11, STORY-1087)** : dans `auth-service`, créer le rôle **`CAB_ARCHIVISTE`** et attribuer les droits `ged:*`
+  selon la matrice du PRD des services du cabinet (§2.3) : `CAB_ASSOCIE` : `ged:fonds:gerer`, `ged:piece:consulter`,
+  `ged:sensible:consulter` ; `CAB_COLLABORATEUR` : `ged:piece:consulter` ; `CAB_ARCHIVISTE` : `ged:fonds:gerer`,
+  `ged:lot:numeriser`, `ged:piece:indexer`, `ged:versement:verser`, `ged:physique:gerer`, `ged:piece:consulter`,
+  `ged:sensible:consulter` (et rien d'un autre module). Sans cela, seul un `TENANT_ADMIN` a ces droits (D-1087-4). —
+  ouverte.
+- **→ B (24/11, STORY-1087)** : recopier au catalogue le manifeste `ged` **1.1.0** après la fusion du code (je
+  signalerai la fusion ici). — ouverte.
+
 - **→ B (2026-11-15) : la garde partagée (STORY-937) et `sinistres-service`** — **information**. Le squelette de
   `prospera-sinistres-service` garde ses modules par un port, `EtatDesModules`, alimenté aujourd'hui par
   `entitlement.changed` (D-980-2). Quand la garde partagée de STORY-937 sera publiée dans `prospera-plateforme`, C
@@ -264,6 +277,8 @@ seulement.
   `etat-publie.changed.<espace>`, double lecture) dans une story de la plage de C, après STORY-990.
 
 ## ⚠ Contrats
+
+- **2026-11-24 (STORY-1087), AVANT le code** : `document-service` (module `ged`) s'ouvre au cabinet. **Ajouts seuls** ; le chemin de l'assurance ne change pas. Champ `domaine` (`SINISTRES` | `CABINET`, absent = `SINISTRES`) sur pièces, lots, fonds, versements ; routes neuves sous `/api/v1/ged/cabinet` : fonds d'un dossier client (`POST/GET …/dossiers/{dossierId}/fonds`, `GET …/fonds/{numero}`, numéro `ARC-AAAA-<CODE>-NNNNN`), plan de classement (`GET/POST …/natures`, table `ged-cabinet-2026.1`), pièces déjà déposées (`GET …/fonds/{numero}/pieces-du-dossier`, `POST …/reprises`). Droits du cabinet par `GET /moi/droits` (`ged:*`) et portée du dossier ; natures sensibles en 404 sans `ged:sensible:consulter` ; chiffrement de toutes les pièces du cabinet (`GED_CLE_CABINET`) ; quota 20 Go en alerte. Manifeste `ged` 1.1.0 (→ B pour le catalogue). **→ A (FE-143)** : types à régénérer quand l'écran viendra.
 
 - **2026-11-24 (STORY-1097 amendée, ticket #762), AVANT le code** : `prospera-comptabilite-service` — `POST …/factures/lots/{lotId}/inscrire` accepte **`corrections.lignes`** (lignes libres qui remplacent les lignes dérivées ; signal neuf bloquant `ECRITURE_DESEQUILIBREE` ; `role: LIBRE`) ; route neuve **`POST …/factures/lots/{lotId}/apercu`** (même corps, aucune écriture, droit `comptabilite:ecriture:saisir`). Et `GET /api/v1/cabinet/memoire-des-choix` + `…/actes` : **403 `TENANT_ADMIN_REQUIS`** pour un collaborateur. **→ A (FE-149, FE-150)** : types à régénérer. Manifeste inchangé (aucune route de lecture neuve).
 
