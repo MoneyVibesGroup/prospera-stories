@@ -741,6 +741,18 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   6. FE-150 : cahiers et écritures partagent le même écran de gestion de la mémoire ? Défaut : oui.
   7. FE-141 : pas de variation N / N-1 à l'écran (on ne recalcule jamais) ? Défaut : oui.
 
+- **2026-11-24 — Le lot 6 de A change (consigne de l'utilisateur).** FE-150, AP-55, AP-57, AP-59 sortent du lot (lot 7) ;
+  A prend la chaîne fiscale **323 → 320 → 322 → 328** (plan amendé, §3 et §4). Ordre : FE-149 → 323 → 320 → 322 → 328 →
+  FE-141. Le financement reste après (l'utilisateur).
+- **Passation (24/11) : C → A, `prospera-fiscal-service`**, accord de la session C (aucun travail en cours chez elle) ; A le
+  rend à C à la fusion de 328 (ligne de passation ici). C prend 326 juste avant 1101, puis 315, 316.
+- ⚠ Constat de la recherche du 24/11 : STORY-1101 dépend de 322, 326 et 328, qui n'existaient pas ; le tracker fiscal est
+  périmé (315 → 350 `not_started` alors que 333, 334 et une partie de 335 sont couverts par 537 → 539, 688 → 691) ;
+  `prospera-dossier-service` n'a plus rien d'ouvert pour le cabinet. Ids libres à partir de **STORY-1117**.
+- → B (24/11) : deux résultats faux de `bilan-service` visibles à la démo du 15/01 : projection qui rembourse plus que la
+  dette (`TICKET-BACKEND-projection-remboursements-non-plafonnes.md`, accepté par l'utilisateur le 19/11) et liasse
+  rouverte lue avec `version: null` (`TICKET-BACKEND-liasse-rouverte-version-null.md`) ; à placer après 1080 — ouverte.
+
 ## Questions à l'utilisateur ou au PO
 
 - **Parcours réel du dossier de financement (2026-11-21), avec le choix retenu par défaut** (aucune ne bloque l'écriture des fiches) :
