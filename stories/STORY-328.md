@@ -1,6 +1,6 @@
 # STORY-328 : Les anomalies d'une obligation — une gravité, ce qui bloque, et la levée qui se motive
 
-Status: in_progress — **Fiche écrite le 2026-11-24** par la session du groupe A (lot 6, n° 8 de la ligne de A : plan
+Status: done — **Livrée le 2026-11-24** : prospera-fiscal-service **#57** (`0596fc4` sur `dev`, premier commit `046be0f`), contrat annoncé avant le code (prospera-stories #830). **Fiche écrite le 2026-11-24** par la session du groupe A (lot 6, n° 8 de la ligne de A : plan
 amendé le 24/11, #769). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md`
 (EPIC-031, STORY-328), FR-F65 et FR-F66 du PRD fiscalité, et ce que lira STORY-1101 (C).
 
@@ -176,4 +176,12 @@ et les routes neuves rendent `401` sans jeton. Pas de preuve Kafka (aucun évén
 
 | Date | Événement |
 |---|---|
-| 2026-11-24 | Fiche écrite, contrat annoncé (PR de docs) avant le code. |
+| 2026-11-24 | Fiche écrite, contrat annoncé (PR de docs, #830) avant le code. |
+| 2026-11-24 | **DONE.** Code : fiscal #57 (`0596fc4` sur `dev`). Preuves : unitaires sur Node 24 dans l'étage `verification` (182 suites, 2 563 tests verts ; une suite rouge à l'origine, la garde `$setOnInsert` de `mongo-registre-obligations.spec.ts`, corrigée et rejouée verte seule) ; `test:conformite` 15 suites / 92 tests sur `mongo:7` en jeu de répliques (dont `anomalies.conformite-spec.ts` : 10 tests) ; e2e `obligations` (3 nouveaux) ; 16 mutations unitaires et 5 sur Mongo rouges sur l'assertion ; `docker compose up` du service (pile `grp-a`, image construite depuis l'archive du commit) : sain, les trois routes neuves rendent `401` sans jeton ; `down -v` fait, verrou rendu. |
+
+## Livraison (2026-11-24)
+
+- **Dépôt** : `prospera-fiscal-service`, `MNV-328` → `dev` (#57). Fichiers : `domain/obligations/anomalies.ts` (le catalogue, la lecture, la porte, la levée, le signalement, les actes audités), `application/obligations/anomalies-obligations.service.ts` (lever, lister, signaler, retirer), `application/obligations/cycle-obligations.service.ts` (la porte, après le motif d'écart), `application/obligations/droits-du-cycle.ts` (`droitDeLevee`), `adapters/mongo/mongo-registre-obligations.ts` (`leverAnomalie`, `signalerAnomalie`, `retirerAnomalie`, `garde` de la transition), deux champs Mixed sur `obligation.schema.ts`, deux routes, le champ `anomalies` de la réponse.
+- **Tel que annoncé**, D-328-1 à 12 inchangées. Deux précisions de livraison : (1) `signalerAnomalie` est idempotent par empreinte et rend l'obligation sans écrire ; (2) `retirerAnomalie` rend `null` quand il n'y avait rien à retirer (pas une erreur).
+- **Ce que 326 doit savoir** : son code se pose dans `CATALOGUE` (`domain/obligations/anomalies.ts`) avec `origine: 'SIGNALEE'`, sa gravité, `bloque` (les états d'arrivée qu'il refuse) et `levable` ; il signale par `AnomaliesObligationsService.signaler(orgId, obligationId, { code, empreinte, explication, action, details }, par)` — le module `ObligationsModule` exporte le service — et retire par `retirer(orgId, id, code, par)` quand le constat disparaît. L'empreinte est celle du FAIT (ex. les deux montants et la tolérance) : la même ne rouvre pas une levée, une autre la rouvre. Aucun refus ni levée à écrire : `ANOMALIE_BLOQUANTE` et la route de levée sont déjà là. Les tests de la couture utilisent un catalogue de test (`CATALOGUE_AVEC_SIGNALEE` dans `anomalies.spec.ts`) : le catalogue de départ n'a aucun code signalable.
+- **Ce que 1101 doit savoir** : le rapprochement lève son code SIGNALEE sur l'obligation de dépôt de la liasse, avec `bloque: ['A_DEPOSER']` (AC-4) ; l'écart est dit en une phrase par `explication` et `action` (AC-2), nomme les périodes manquantes (jamais zéro, AC-3). Le motif de levée figure déjà au dossier de contrôle : `GET /exercices/{id}/obligations/anomalies`. Le déclaré se lit toujours sur `Obligation.montantDeclare.montant`. Un couple absent du paquet : ne signale rien (AC-5).
