@@ -91,6 +91,8 @@
      **Pile `grp-b` à deux espaces** (deux auth, deux catalogues, BFF) : **47/47 contrôles**. Verrou pris à 11:04,
      rendu à 11:11 (correction de D-1113-10), repris à 11:19, rendu à 11:22 ; aucun conteneur, volume ni réseau `grp-b`
      ne reste.
+  7. 🟡 **STORY-1114 en cours** (24/11) : fiche écrite, contrat annoncé (« ⚠ Contrats ») avant la fusion du code ;
+     BFF seul (auth sert déjà tout) ; Docker : non.
   - **Suivante : STORY-1114** (le BFF relaie le métier, `vertical`, dans la liste et la fiche des organisations ;
     `GET /admin/verticaux`, `PATCH /admin/organizations/{id}/vertical` ; AP-59 ; Docker : non). Demande de A du 24/11
     (journal de A, « → B : STORY-1114 ») : refus `VERTICAL_ROLES_INCOMPATIBLES` 409 et `VERTICAL_INCONNU` 400 par leur
@@ -1243,6 +1245,25 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-24, STORY-1114 (lot 6, n° 4) — le métier des organisations relayé à la console (AP-59), annoncé AVANT la
+  fusion du code** (`prospera-admin-panel-service`, branche `MNV-1114` ; fiche `stories/STORY-1114.md`, D-1114-1 → 9).
+  **Ajouts seuls** : aucune route, aucun champ, aucun code existant ne change de forme ; auth ne change pas (il sert
+  déjà tout, STORY-171).
+  - **BFF, OpenAPI** (A génère ses types depuis lui) : `vertical` (facultatif, code du service : `cabinet`,
+    `distributeur`, `imf-sfd`, `assurance-cima`, `plateforme`…) dans `AdminOrgListItemDto` (`GET /api/v1/admin/orgs`)
+    et dans `OrganizationDetailDto` (`identity` de `GET /api/v1/admin/orgs/{orgId}`, où il arrivait déjà sans être
+    publié) ; paramètre facultatif **`vertical`** de `GET /api/v1/admin/orgs` (appliqué en base par auth, avec les
+    autres filtres) ; **`GET /api/v1/admin/verticaux`** (`org:read`) → `VerticauxDto { verticaux: VerticalDto[] }`,
+    `VerticalDto` = `code`, `libelle`, `statut` (`actif` | `a_venir`), `inscriptionOuverte`, `description?` ;
+    **`PATCH /api/v1/admin/orgs/{orgId}/vertical`** (`entitlement:grant`, corps `ChangerDeMetierRequestDto { vertical,
+    reason? }`) → `OrganizationDetailDto` (l'identité, métier changé). Le chemin est celui des actions d'une
+    organisation au BFF (`admin/orgs/{orgId}/…`), pas `admin/organizations` d'auth (D-1114-3).
+  - **Refus par leur code** (liste fermée, D-1114-6) : 400 `VERTICAL_INCONNU`, `VERTICAL_REQUIS` (liste filtrée et
+    changement ; sur la liste, au lieu du 503 d'aujourd'hui) ; 409 `VERTICAL_ROLES_INCOMPATIBLES` avec
+    **`details.roles`** (les rôles de tenant en cause). 403, 404 (sans code) et 503 comme toujours.
+  - **Pour A (AP-59, lot 7)** : types à régénérer depuis l'OpenAPI du BFF ; les mots courts restent une table de
+    l'écran indexée par `code` ; `statut` est en minuscules (`actif`, `a_venir`), pas `ACTIF` comme dans la maquette.
 
 - **2026-11-24, STORY-1113 (lot 6, n° 3) — la mise en service relayée à la console, annoncée AVANT la fusion du
   code** (`prospera-platform-catalog-service` et `prospera-admin-panel-service`, branches `MNV-1113` ; fiche
