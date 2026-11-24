@@ -150,13 +150,24 @@
        poste, aucune sur le second espace ; non relancée (D attendait le verrou). Unitaires 119/119 ; mutations 24/24. **Karapace** : `kyc.correction.requested@1`
        enregistré (id 1, BACKWARD), compatible ; témoin (champ neuf obligatoire) `INCOMPATIBLE`. Verrou pris à 15:47,
        rendu à 16:36, repris 16:38 → 17:05 et 17:07 → 18:20 (session coupée par la panne réseau) ; aucun conteneur, volume ni réseau `grp-b` ne reste.
-  11. **Suite de STORY-1112 — le premier membre d'un essai** (`TICKET-BACKEND-premier-membre-d-un-essai.md`, D-1115-6) :
-     **placée par la session de groupe le 24/11, avant STORY-1116** (1116 ouvre cinq essais simultanés : il faut pouvoir
-     y entrer par de vraies routes) et avant la démo du 15/01. **Aucun identifiant neuf** (D-1112-10) : c'est la suite de
-     1112 (ouvrir un essai par la console ne sert que si quelqu'un peut y entrer) — branches `MNV-1112-premier-membre`
-     (auth, catalogue, admin-panel, recette), commits `MNV-1112(auth|catalogue|admin-panel|recette): …`, docs
-     `docs-1112-premier-membre` ; fiche STORY-1112, « Suite du 2026-11-24 » (D-1112-10 → 18) ; entrée du tracker
-     rouverte (`in-progress`), refermée à la fin. **En cours** ; contrat annoncé avant la fusion (« ⚠ Contrats »).
+  11. ~~Suite de STORY-1112 — le premier membre d'un essai~~ (`TICKET-BACKEND-premier-membre-d-un-essai.md`, D-1115-6 ;
+     **placée par la session de groupe le 24/11, avant STORY-1116** et avant la démo du 15/01 ; aucun identifiant neuf,
+     D-1112-10) : **auth #50** (`d69e34c` sur `dev`), **catalogue #73** (`0894425`), **admin-panel #43** (`911c450`),
+     **recette #30** (`c99257a`) ; contrat annoncé avant la fusion (stories #833). Entrée du tracker rouverte puis
+     refermée ; **ticket fermé**.
+     - auth : la route d'invitation du moteur servie dans l'essai pour **le premier administrateur seul** (un membre
+       `TENANT_ADMIN`, aucun autre administrateur actif) ; tout le reste 403 `ESPACE_D_ESSAI_REFUSE` avant le corps ;
+       réel inchangé ; garde des droits et `permission.enum.ts` intacts (D-1112-11).
+     - catalogue : l'essai invite son administrateur à l'ouverture, sous l'identité du moteur, **après la liste blanche
+       de l'essai** (`INTERCEPTEE` sinon, journalisée), sous un identifiant tiré de l'organisation ; l'ordre rejoué
+       reprend ; `invitationAdministrateur`, `identiteAdministrateur` (contrat `essai-prospect` 1.2.0 ; D-1112-12 → 15).
+     - BFF : aucune route neuve ; le nom relayé, l'issue projetée (D-1112-16).
+     - recette : **plus rien en base** (garde `recettes-sans-base`) ; la sortie de messages de l'essai tenue par la
+       recette (`auth-essai` → `host.docker.internal:18026`, D-1112-17, D-1115-5 amendée).
+     Node 25 : auth 46/46, e2e 3/3 (complète 1 464 passés, 4 suites rouges connues) ; catalogue 1 618 passés (3 connues),
+     e2e 11/11 ; BFF 718/718, e2e 295/295 ; recette 137/137 ; **mutations 32/32**. **Pile `grp-b` neuve** (images depuis
+     `origin/dev`) : `docker compose up` sain (catalogue et auth des deux espaces, BFF) ; **`essai-mise-en-service` 8/8
+     sans aucune pose en base** ; recette croisée complète sur pile neuve 10/12 suites, 144 tests verts, 4 rouges sur deux read ECONNRESET poste ↔ pile prouvés par les journaux des services (le BFF a répondu 200 en 28 ms ; notification a servi 21 accusés puis la connexion s'est coupée), les quatre rouges de 1115 verts (atelier-balance, renvoi-du-lien, zone-franche, pile), facturation 7/7 et cabinet-moteur 9/9 rejouées seules sur pile neuve. Verrou pris à 20:17, rendu à 21:30 (construction des images, essai-mise-en-service, recette complète, deux rejeux) ; `down -v` à chaque fois ; aucun conteneur, volume ni réseau `grp-b` ne reste
   - **Suivante : STORY-1116** (cinq essais simultanés sur la même pile, chacun dans son espace ; `prospera-recette`,
     catalogue ; recette complète ; fiche à écrire juste avant de coder, identifiant réservé par le plan §8), après la
     suite de 1112 (ci-dessus).
@@ -878,8 +889,8 @@ STORY-1073** (24/11, passation ci-dessous) : B n'y touche plus jusqu'à ce que D
 
 ## Demandes aux autres groupes
 
-- **→ B (2026-11-24, STORY-1115) : le premier membre d'un essai n'a pas de route** — **placée par la session de groupe
-  le 24/11 : suite de STORY-1112, avant STORY-1116** (en cours, « État » n° 11) ; jusque-là ouverte. `TICKET-BACKEND-premier-membre-d-un-essai.md` :
+- ~~**→ B (2026-11-24, STORY-1115) : le premier membre d'un essai n'a pas de route**~~ — **servie le 24/11 par la
+  suite de STORY-1112** (auth #50, catalogue #73, admin-panel #43, recette #30 ; « État » n° 11) ; ticket fermé. `TICKET-BACKEND-premier-membre-d-un-essai.md` :
   une organisation née par le moteur dans l'essai n'a aucun membre, et aucune route ne fait entrer son administrateur
   (`POST /users` exige un `TENANT_ADMIN` de l'organisation ; l'invitation au réel refuse l'essai, D-974-2). Auth,
   catalogue de l'essai (inviter `administrateur` à l'ouverture), BFF si besoin ; **→ A** l'écran ensuite. La recette
@@ -1249,6 +1260,19 @@ STORY-1073** (24/11, passation ci-dessous) : B n'y touche plus jusqu'à ce que D
 
 ## Réponses aux demandes reçues
 
+- **→ A (2026-11-24) : l'administrateur du prospect entre dans l'essai — servi par la suite de STORY-1112** (BFF #43
+  `911c450`, catalogue #73 `0894425`, auth #50 `d69e34c`) : types à régénérer depuis l'OpenAPI du BFF. Pour AP-57
+  (lot 7) : `POST /api/v1/admin/essais` accepte `identiteAdministrateur { prenom, nom, roleMetier? }` (facultatif ;
+  absent : « Administrateur » et le nom du prospect) ; chaque `EssaiDto` porte `invitationAdministrateur { userId, etat,
+  le?, code?, motif?, interceptionId? }`. `ENVOYEE` : son lien est parti ; `INTERCEPTEE` : son adresse n'est pas dans la
+  liste blanche de l'essai — la mettre (adresse ou `*@domaine`) par `POST /admin/sorties-essai/liste-blanche`, puis
+  rejouer `POST /admin/essais` (même ordre, 200) ; `A_REPRENDRE` : rejouer ; `REFUSEE` : `code` (ex.
+  `TENANT_ROLE_NON_PROPOSE`). La maquette validée ne porte que le courriel : à amender avant le code. Preuve : la recette
+  `essai-mise-en-service` (8/8), qui joue ce chemin par le BFF.
+- **← D (24/11, information) : STORY-1072 livrée** (notification #92, expert-comptable #11 ; l'AC-5 de 1103 vu dans
+  mailhog) — reçue ; la demande « → D : consommer `kyc.correction.requested@1` » reste écrite telle quelle, sa clôture
+  revient à la session de groupe.
+
 - **← C (24/11, STORY-1088 puis STORY-1100) : recopier au catalogue `ged` (désormais 1.3.0, après 1.2.0) et
   `comptabilite` 0.5.0** (journal de C : « → B (24/11, STORY-1087 puis 1088) » et « ⚠ Contrats » de 1100 ; `main`
   `f703671`, `a525d766`) — **reçue le 24/11 pendant la suite de 1112, à placer par la session de groupe** (recommandé :
@@ -1512,6 +1536,8 @@ STORY-1073** (24/11, passation ci-dessous) : B n'y touche plus jusqu'à ce que D
   - **→ A (AP-57, lot 7)** : nommer l'administrateur du prospect à l'ouverture (prénom, nom, rôle métier) et montrer
     l'issue de son invitation (`INTERCEPTEE` ⇒ mettre son adresse ou son domaine en liste blanche, puis rejouer
     l'ouverture) ; écrit à la fin de la suite (« Réponses »).
+  - **Fusionné le 24/11** : auth #50 (`d69e34c`), catalogue #73 (`0894425`), admin-panel #43 (`911c450`), recette #30
+    (`c99257a`), **sans écart au contrat annoncé**.
 
 - **2026-11-24, STORY-1115 (lot 6, n° 6) — le second espace dans le profil de recette, annoncé AVANT la fusion**
   (`prospera-recette`, branche `MNV-1115` ; fiche `stories/STORY-1115.md`, D-1115-1 → 11). Aucun service, aucune
@@ -3057,10 +3083,16 @@ STORY-1073** (24/11, passation ci-dessous) : B n'y touche plus jusqu'à ce que D
   moteur distincts, la même clé de signature pour que le jeton de l'opérateur vaille des deux côtés
   (`JWT_SIGNING_KEY_PEM`, `JWT_SIGNING_KID` : importée au premier démarrage sur base neuve). Surcouche de la preuve :
   `preuve1113/surcouche.yml` de la session (à reprendre pour STORY-1115). 12 conteneurs, tenus par la VM de 8 Go.
-- **Une organisation née par le moteur n'a aucun membre** : la console n'a pas de route pour inviter le premier membre
-  d'une organisation de l'essai (D-948-8 : « la route d'auth existante » demande un `TENANT_ADMIN` de l'organisation).
-  La preuve de 1113 a posé les collègues en base ; les comptes du jeu, eux, passent par la route du moteur
-  (`PUT /interne/organisations/{id}/comptes-du-jeu`). À trancher par la recette de STORY-1115.
+- ~~**Une organisation née par le moteur n'a aucun membre**~~ (servi par la suite de 1112 : le catalogue de l'essai
+  invite le premier administrateur à l'ouverture, après la liste blanche). Une adresse hors liste blanche rend
+  `INTERCEPTEE` (rien ne part) : la recette met d'abord le domaine du prospect en liste blanche.
+- **PowerShell 5.1 écrit les journaux `*>` en UTF-16** (suite de 1112) : `grep` ne voit rien ; lire par
+  `iconv -f UTF-16LE -t UTF-8`.
+- **Un paramètre par défaut avale `undefined`** (suite de 1112, e2e d'auth) : `inviter(corps, jeton = JETON)` appelé
+  avec `undefined` envoie le jeton ; un test « sans jeton » passe `null`.
+- **Le script de mutations joue la commande dans le dossier du fichier muté** (suite de 1112) : une mutation du profil
+  (`docker-compose.recette.yml`, à la racine du dépôt) jouée depuis la racine rend `0 total` ; jouer la garde depuis
+  `paquets/recette-croisee`.
 - **Mutation : retirer l'usage d'une constante ou d'un paramètre ne compile plus** (`noUnusedLocals`) : muter la
   condition (`… && Date.now() < 0`, `|| x.length > 0`), pas la ligne qui seule l'utilise ; et une mutation sur une
   étiquette (le nom d'un coupe-circuit) ne mesure rien : la choisir sur un comportement.

@@ -2002,17 +2002,23 @@ reserved_ranges:
       d'essai, sans les comptes du jeu ; rejeu sans rien doubler ; sorties de l'essai. Node 25 : catalogue 1612 passés
       (3 suites rouges connues), BFF 670/670 et e2e 257/257 ; mutations 3/3 et 25/25. Lot 6 de B, n° 3. NON SLOTTÉE.
   - range: "STORY-1112"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe B, lot 6, n° 2 — le BFF relaie les essais d'un prospect à la console (AP-57) : GET /api/v1/essais (liste, avec le prospect né) et GET /api/v1/jeux-demonstration au catalogue (org:read, contrat essai-prospect 1.1.0) ; au BFF, /api/v1/admin/essais (liste, lecture, prolongation, signature, jeu, effacement) projetés en DTO typés, et POST /admin/essais qui enchaîne la naissance et l'ouverture avec le jeu du métier ; refus relayés par leur code (prospera-admin-panel-service, prospera-platform-catalog-service)"
     source_doc: "prospera-stories/stories/STORY-1112.md"
     reserved_on: "2026-11-24"
     note: >
-      🔄 ROUVERTE le 2026-11-24 pour sa suite (fiche, « Suite du 2026-11-24 », D-1112-10 → 18) : le premier membre
-      d'un essai (TICKET-BACKEND-premier-membre-d-un-essai.md, ouvert par B dans STORY-1115, D-1115-6) — la route
-      d'invitation du moteur d'auth ouverte à l'essai pour le premier administrateur seul ; le catalogue de l'essai
-      l'invite à l'ouverture après la liste blanche (essai-prospect 1.2.0) ; le BFF relaie son nom et l'issue ; la
-      recette n'écrit plus rien en base. Placée avant STORY-1116 par la session du groupe B. Branches
-      MNV-1112-premier-membre (auth, catalogue, admin-panel, recette).
+      🏁 SUITE DONE le 2026-11-24 (rouverte, puis refermée ; fiche, « Suite du 2026-11-24 », D-1112-10 → 18) — auth #50
+      (dev d69e34c), catalogue #73 (dev 0894425), admin-panel #43 (dev 911c450), recette #30 (dev c99257a) ; contrat
+      annoncé avant la fusion (stories #833, main 4605dc6). Le premier membre d'un essai
+      (TICKET-BACKEND-premier-membre-d-un-essai.md, fermé) : la route d'invitation du moteur d'auth servie dans l'essai
+      pour le premier administrateur seul (un membre TENANT_ADMIN, aucun autre administrateur actif ; tout le reste 403
+      ESPACE_D_ESSAI_REFUSE avant le corps) ; le catalogue de l'essai l'invite à l'ouverture sous l'identité du moteur,
+      après la liste blanche (INTERCEPTEE sinon), l'ordre rejoué la reprend (essai-prospect 1.2.0) ; le BFF relaie son
+      nom et l'issue ; la recette n'écrit plus rien en base (garde recettes-sans-base), la sortie de messages de l'essai
+      tenue par la recette. Recette essai-mise-en-service 8/8 sur pile neuve, images depuis origin/dev ; recette croisée complète sur pile neuve 10/12 suites, 144 tests verts, 4 rouges sur deux read ECONNRESET poste ↔ pile prouvés par les journaux des services (le BFF a répondu 200 en 28 ms ; notification a servi 21 accusés puis la connexion s'est coupée), les quatre rouges de 1115 verts (atelier-balance, renvoi-du-lien, zone-franche, pile), facturation 7/7 et cabinet-moteur 9/9 rejouées seules sur pile neuve.
+      Node 25 : auth 46/46 et e2e 3/3 (complète 1464 passés, 4 suites rouges connues) ; catalogue 1618 passés (3
+      connues), e2e 11/11 ; BFF 718/718, e2e 295/295 ; recette 137/137 ; mutations 32/32. Placée avant STORY-1116 par
+      la session du groupe B.
       Avant la suite : 🏁 DONE le 2026-11-24 — catalogue #70 (dev 706f1b8), admin-panel #39 (dev 3071886) ; contrat annoncé avant
       la fusion (stories #786 : essai-prospect 1.1.0, GET /essais et GET /jeux-demonstration ; BFF /admin/essais, huit
       routes, EssaiDto, EssaisDto, EffacementDto, JEU_DEMONSTRATION_ABSENT, UPSTREAM_ESSAI_TIMEOUT_MS). AP-57

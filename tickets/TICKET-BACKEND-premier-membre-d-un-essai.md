@@ -8,7 +8,8 @@
 **Bloque :** la démo du 15/01 (« chaque client testable par le prospect ») et STORY-1116 (cinq essais) : sans membre,
 personne ne se connecte à l'essai, ni sous son nom, ni « en tant que » un compte du jeu (FR-21 exige déjà d'être membre).
 **Priorité :** Must avant la démo du 15/01.
-**Statut :** **ouvert**, à placer par la session du groupe B.
+**Statut :** **fermé le 2026-11-24** — servi par la suite de STORY-1112 (placée par la session du groupe B avant
+STORY-1116) : auth #50, catalogue #73, admin-panel #43, recette #30 ; « Résolution » ci-dessous.
 
 ---
 
@@ -49,3 +50,20 @@ service) passe déjà par les vraies routes.
   connecte à l'essai, invite un collègue par `POST /users`, et se connecte « en tant que » un compte du jeu.
 - Aucun message ne part au réel depuis l'essai (NFR-3).
 - La recette `essai-mise-en-service` n'écrit plus rien en base.
+
+## Résolution (2026-11-24, groupe B — suite de STORY-1112, D-1112-10 → 18)
+
+- **auth** (point 1) : pas de route sœur — `PUT /api/v1/interne/organisations/{id}/invitations` est servie dans l'espace
+  d'essai pour **le premier administrateur seul** (un membre `TENANT_ADMIN`, reconnu sur le corps brut par la garde ;
+  aucun autre administrateur actif, vérifié par le service). Tout le reste y reste 403 `ESPACE_D_ESSAI_REFUSE` avant le
+  corps (D-974-2), tests à l'appui ; le réel ne change pas ; ni la garde des droits ni `permission.enum.ts` ne sont
+  touchés. Son e-mail part par la notification de l'espace d'essai.
+- **catalogue de l'essai** (point 2) : à l'ouverture, et à l'ordre rejoué tant qu'elle n'est pas partie, la partie A
+  demande la sortie du courriel à **la liste blanche de l'essai** (hors liste : `INTERCEPTEE`, journalisée, rien ne part),
+  puis l'invite sous l'identité du moteur, sous un identifiant tiré de l'organisation ; l'issue est dans l'essai
+  (`invitationAdministrateur`). Nom facultatif dans l'ordre (`identiteAdministrateur`), défaut « Administrateur » + le
+  nom du prospect. Contrat `essai-prospect` 1.2.0.
+- **BFF** (point 3) : aucune route neuve ; `POST /admin/essais` relaie le nom, `EssaiDto` porte l'issue.
+- **Recette** (point 4) : plus rien en base (garde `src/recettes-sans-base.spec.ts`) ; l'administratrice entre par le lien
+  reçu à la sortie de messages de l'essai, que tient la recette. `essai-mise-en-service` 8/8 sur pile neuve.
+- **→ A** : nommer l'administrateur à l'ouverture et montrer l'issue de son invitation (AP-57, lot 7).
