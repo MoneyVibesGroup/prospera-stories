@@ -1,6 +1,6 @@
 # STORY-1065 : la facture juste (3) — les mentions légales de chaque facture (liste de travail jusqu'à A-1), son PDF figé et son lien public d'envoi
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-230 (la facturation : la facture juste, l'avoir, la proforma et le lien public) ; FR-44, FR-46, FR-47
 (le lien seulement), NFR-10 · **Dépôt :** `prospera-ventes-service` (module `facturation`) ; aucun contrat partagé de
@@ -43,10 +43,11 @@ l'avoir et de la proforma ; le lien de paiement.
 
 - [x] Rituel : plan du lot 6, règles, journaux de A, B, C, D (aucune demande neuve à D pour le distributeur ; la
   passation de C vise 1068), fiches 1059 → 1064, épic, spine, PRD, manifeste, table d'accès d'`auth`.
-- [ ] Annonce « ⚠ Contrats » fusionnée avant le code (prospera-stories, PR de cette fiche) ; manifeste amendé (C7).
-- [ ] `ventes` : PR fusionnée en rebase.
-- [ ] Verrou Docker : pris, rendu ; aucun conteneur, volume ni réseau `grp-d`.
-- [ ] PR de docs finale.
+- [x] Annonce « ⚠ Contrats » fusionnée avant le code : prospera-stories **#763** (`main` `45d47f1`) ; manifeste amendé (C7).
+- [x] `ventes` : PR **#13** fusionnée en rebase (`dev` **`3242844`**, `ca44566`, **`5929438`**).
+- [x] Verrou Docker : tenu par B (1080) de 02:00 à 03:27 ; **pris à 03:27**, une seule prise, **rendu à 04:09** ; aucun
+  conteneur, volume ni réseau `grp-d`.
+- [x] PR de docs finale.
 
 ## Ce qui doit être vrai à la fin
 
@@ -155,6 +156,13 @@ l'avoir et de la proforma ; le lien de paiement.
   factures et les balances ; (5) les routes C13 de `facturation` (dont l'effacement des liens et la conservation des
   pièces, NFR-10) ; la proforma et son PDF ; le lien de paiement (FR-47) ; l'image de signature et de cachet.
 
+- **D-1065-15 — La version du manifeste `facturation` monte avec STORY-1066** (décision de la session de groupe de D,
+  reçue le 24/11 avec la réponse de B, D-979-7). Le manifeste est resté en **1.0.0** malgré le droit neuf (C7) : un
+  catalogue déjà semé garde l'ancienne 1.0.0 sans le droit et la signale « divergente ». La version monte **à la source**
+  (`prospera-stories/manifestes/facturation.manifest.ts`) dans STORY-1066 (l'avoir touche aussi `facturation`) ; si
+  l'avoir n'ajoute rien au manifeste, 1066 la monte quand même en **1.0.1** ; B la recopie ensuite. Le code de 1065
+  n'est pas rouvert pour cela.
+
 ## Contrat annoncé avant le code
 
 Annoncé dans le journal de D, « ⚠ Contrats », avant la fusion du code (cette PR). **Ajouts seuls** ; aucun fait ne
@@ -171,3 +179,76 @@ change ; un droit neuf au manifeste `facturation` (C7).
 - **Configuration** : `FACTURATION_LIENS_BASE_URL` (l'adresse publique des liens, derrière la passerelle),
   `FACTURATION_PDF_INTERVALLE_MS`.
 - **Dépendance** : `pdfkit` 0.19.1 (épinglée).
+
+## Ce qui a été livré
+
+**2026-11-24** — après l'annonce « ⚠ Contrats » (prospera-stories **#763**, `main` `45d47f1`), une PR fusionnée en « Rebase
+and merge » :
+
+- `prospera-ventes-service` **#13** (`dev` **`3242844`**, `ca44566`, **`5929438`** ; tête de la branche `1432b4e`
+  vérifiée `open` et égale au SHA poussé avant la fusion) :
+  - `src/modules/facturation/parametres/` : `parametres.ts` (catalogue fermé des quatorze mentions, valeurs par défaut,
+    vérification nommée), `schemas.ts` (`facturation_parametres`), `parametres.service.ts` (versions en ajout seul,
+    lecture dans la session du numéro), `parametres.controller.ts` (`GET|PUT /facturation/parametres`) ;
+  - `src/modules/facturation/mentions/` : `mentions.ts` (mentions manquantes, mentions figées ; pur), `schemas.ts`
+    (`facturation_clients_lus`, `facturation_articles_lus`) ;
+  - `src/modules/facturation/pdf/` : `rendu.ts` (le PDF, pdfkit), `polices.ts` et `polices/` (Liberation Sans normale et
+    grasse, licence OFL), `schemas.ts` (`facturation_pdfs`), `pdfs.service.ts` (production, balayage, octets vérifiés) ;
+  - `src/modules/facturation/liens/` : `liens.ts` (jeton, empreinte, état ; pur), `schemas.ts`
+    (`facturation_liens_publics`), `liens.service.ts`, `liens.controller.ts` (créer, lister, révoquer),
+    `liens-publics.controller.ts` (la route publique) ;
+  - `factures.service.ts` (mentions jugées et figées dans la transaction du numéro, PDF `EN_ATTENTE`, production lancée
+    après la réponse), `factures.controller.ts` (`GET …/pdf`), `erreurs.ts` (neuf codes ; 410 et 500 nommés) ;
+  - `src/socle/acces/route-publique.decorator.ts` et l'invariant des routes (`acces.invariant.spec.ts`) : le statut
+    « route publique d'AD-33 » ; `module.manifest.ts` recopié à l'octet (`45d47f1`, empreinte refigée) ; `nest-cli.json`
+    (les polices copiées dans `dist`) ; `pdfkit` 0.19.1 et `@types/pdfkit` 0.17.6 épinglés ; configuration
+    `FACTURATION_LIENS_BASE_URL`, `FACTURATION_PDF_INTERVALLE_MS` ;
+  - **recette versionnée** : `scripts/recette/1065/` (`pile-1065.yml`, `emetteur-de-test.mjs`, `recette-1065.py`,
+    `texte-du-pdf.mjs`, `mutations-1065.mjs`, `README.md`).
+- **Écart à l'annonce : aucun.**
+- **← B** : le droit `facturation:parametres:modifier` est servi par STORY-979 (auth #48, `dev` `c0f6243` : catalogue de
+  tenant, hors du jeton, `DIST_DAF` seul ; catalogue #68, `dev` `d7e67f1`, `copies.json` recopié ; annonce
+  prospera-stories #777). La version du manifeste : D-1065-15.
+
+## Preuves
+
+- **Node 24** (étage `verification`, export `git -c core.autocrlf=false archive`) : `tsc` ; lint des fichiers touchés
+  (`endOfLine auto`) ; build (les polices dans `dist/modules/facturation/pdf/polices`) ; **unitaires : 63/63 suites, 634
+  tests** (602 avant) ; **e2e : 2/2, 24** ; **intégration sur MongoDB 8 en jeu de répliques : 15/15 suites, 171 tests**
+  (150 avant), dont :
+  - `facture-3.int-spec.ts` (14) : sans fiche de l'émetteur, 409 `MENTION_OBLIGATOIRE_MANQUANTE` (neuf mentions nommées),
+    ni numéro, ni facture, ni fait, ni piste ; le DAF pose la fiche, la facture prend `FAC-2026-000001` ; client et
+    article absents (échec fermé), puis liste réduite ; mentions figées (paramètre et fiche changés ensuite : ni la
+    facture ni son PDF ne changent, le rendu refait donne l'empreinte stockée) ; PDF produit, stocké, conservé jusqu'au
+    24/11/2036, relu, rendu identique « des années plus tard » ; cinq producteurs simultanés, un PDF ; balayage ; cinq
+    échecs ⇒ `ECHEC` ; octets altérés ⇒ `PDF_ALTERE` ; facture d'avant 1065 ⇒ `PDF_INDISPONIBLE`, aucun lien ; lien :
+    adresse une fois, jeton absent de la base, rejeu sans adresse, `CLE_REUTILISEE_AVEC_AUTRE_CHARGE`, onze ouvertures
+    (dont dix simultanées) comptées et tracées, piste intègre, expiration au septième jour à la milliseconde, durée
+    figée, révocation, **mille jetons au hasard et cinq mal formés : tous `LIEN_INCONNU`**, PDF en attente ⇒ 503 ;
+  - `facture-3-http.int-spec.ts` (7, vraie chaîne de gardes, débit compris) : paramètres (403, 400, 200, 409) ; 409
+    `MENTION_OBLIGATOIRE_MANQUANTE` puis 201 ; `…/pdf` 409 avec `Retry-After`, 200 avec `ETag` et empreinte, 404 hors de
+    l'organisation, 403 sans `consulter` ; lien 201 puis 200 sans adresse, liste sans jeton, ouverture sans compte
+    (`inline`, `no-store`, `noindex`, `no-referrer`), 410 après révocation ; jeton mal formé et jeton inconnu : **même
+    corps** ; 31ᵉ ouverture d'une adresse : 429, une autre adresse passe.
+- **Mutations : 20/20 rouges sur une assertion** — 11 pures (Node 25, puis Node 24 dans l'image) : NIF d'un client au
+  statut inconnu non exigé, RIB **et** Mobile Money exigés, nom du client hors de la liste, lien de 31 jours, conservation
+  de 9 ans, lien actif à l'instant d'expiration, jeton de 21 caractères, date du document lue à l'horloge, pied sans le
+  nombre de pages, milliers à l'espace ordinaire, route publique sans `@Public()` ; 9 sur MongoDB réel : mention
+  manquante ignorée, jamais `ECHEC`, octets altérés servis, jeton gardé en clair, rejeu qui rend une adresse, ouverture
+  non comptée, ouverture tracée sous un autre motif, version périmée admise, route publique sans limitation propre. Une
+  mutation qui ne compilait pas (import rendu inutile) a été réécrite.
+- **Pile `grp-d`** (`scripts/recette/1065/pile-1065.yml`, image de la branche) : `docker compose up` sain (module Nest et
+  dépendance changés, §1.5) ; pilote **27/27** : refus sans numéro consommé ; paramètres (403 au comptable, 400 nommé,
+  version 2 du DAF) ; `FAC-2026-000001` rendue en 0,12 s avec PDF `EN_ATTENTE`, `PRODUIT` aussitôt (33 494 octets) ;
+  `GET …/pdf` à l'empreinte ; **le texte du PDF servi, lu par `pdfjs-dist`, porte les mentions de FR-44 sur une page
+  A4** ; les mêmes octets après `docker restart` ; lien (adresse une fois, rejeu, jeton ni dans la liste ni dans la base,
+  ouverture sans compte, ouvertures tracées, 404 identiques, 410 expiré et révoqué, piste intègre) ; outbox vide ;
+  `facturation.facture.emise` inchangé ; 429 au-delà de 30 ouvertures par minute.
+- **Rejeu sur les images reconstruites depuis `origin/dev`** (`5929438`, `--no-cache`, volumes neufs) : polices présentes
+  dans l'image `runtime` ; `docker compose up` sain ; pilote **27/27** ; sous Node 24 sur l'image d'`origin/dev` :
+  unitaires **63/63 suites, 634**, e2e **2/2, 24**, intégration **15/15 suites, 171**.
+- `git diff --stat` = `--ignore-cr-at-eol` à chaque commit ; aucun `index.ts` non suivi ; aucun fait ne change (pas de
+  Karapace à jouer).
+- **Verrou Docker** : tenu par B (STORY-1080) au moment du besoin ; code, unitaires sous Node 25, mutations pures, lint
+  et recette faits d'abord ; attente par boucles bornées de 9 min (02:11 → 03:27) ; **pris à 03:27** (`D STORY-1065`),
+  une seule prise, **rendu à 04:09** après `down -v` ; aucun conteneur, volume ni réseau `grp-d` ne reste.
