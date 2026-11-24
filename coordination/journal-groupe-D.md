@@ -203,7 +203,9 @@
   **STORY-1076** (les seuils de l'analyse financière) → **1077** (capitaux propres < ½ capital) → **1078** (les quatre
   contrôles d'intégrité, et la liasse rapprochée de sa balance par l'empreinte de 1022, C) → **1074** (la consolidation
   s'installe à part) → **1075** (les routes d'instance du bilan). **D'abord STORY-1072** (demande de B, 1103), le temps de
-  la passation du bilan ; **STORY-1073** attend B (Q-D-12). Les douze identifiants (1019 → 1023 de C, 1072 → 1078 de D)
+  la passation du bilan ; **STORY-1073** juste après 1076 : D y fait aussi les deux côtés producteurs
+  (`dossier-service`, `paiement`), sur consigne de l'utilisateur du 24/11 (soir) : « gère tout cela dans la story 1073 sans attendre la livraison de B », après la passation de B limitée à
+  1073. Les douze identifiants (1019 → 1023 de C, 1072 → 1078 de D)
   sont réservés au tracker ; la marque haute ne bouge pas.
 
 - **STORY-1072** ✅ 📨 — le cabinet prévenu par e-mail du renvoi de son dossier KYC (demande de B, STORY-1103)
@@ -693,8 +695,9 @@
     - **Placée** : **STORY-1073** — la facture lit sa fiche légale (Q-D-12 répondue par l'utilisateur, D-Q12-1) :
       l'identité légale projetée du dossier propre de l'organisation (`dossier-service`), les coordonnées de paiement
       des comptes d'encaissement de `paiement` ; le DAF ne choisit plus que le ou les comptes imprimés ; la fiche saisie
-      en 1065 n'est plus lue. **Dépend des deux demandes à B** (« Demandes aux autres groupes », fiche légale) ; fiche
-      à écrire juste avant de coder.
+      en 1065 n'est plus lue. **D fait aussi les deux côtés producteurs** (consigne de l'utilisateur du 24/11 (soir) : « gère tout cela dans la story 1073 sans attendre la livraison de B ») :
+      les champs légaux dans `DossierEtatV1` (`dossier-service`) et la publication des comptes d'encaissement
+      (`paiement`), après la passation de B limitée à 1073 ; fiche à écrire juste avant de coder.
     - **Distributeur**, dans l'ordre : (a) **l'envoi de la facture par `notification`** (D-1065-14 (2) : le geste
       « envoyer », lien public, WhatsApp puis SMS, e-mail avec le PDF ; `ENVOYE` / `ECHEC`) ; (b) **l'avoir (2)**
       (D-1066-14 : la demande du comptable validée par le DAF, `IMPUTE` / `REMBOURSE` lus chez `paiement`, le retour en
@@ -1030,9 +1033,17 @@
   ici quand vous l'écrivez. Repli D-L6-6 : si vous préférez céder la balance à D pour une ou plusieurs de ces stories,
   écrivez la passation dans votre journal ; sans elle, D n'y touche pas.
 
-- **→ B (2026-11-24, après le lot 6 ; Q-D-12 répondue par l'utilisateur, D-Q12-1) : la fiche légale de l'organisation
-  et ses comptes d'encaissement, publiés pour la facture** — **ouverte**. Deux sources, aucune copie (voir « Questions à
-  l'utilisateur ou au PO », Q-D-12). Rien ne presse avant les stories du lot 6 de B ; STORY-1073 de D en dépend.
+- **→ B (2026-11-24, soir) : passation de `prospera-dossier-service` et de `prospera-paiement-service`, limitée à
+  STORY-1073** — **ouverte**. Sur consigne de l'utilisateur du 24/11 (soir) : « gère tout cela dans la story 1073 sans attendre la livraison de B », **D fait lui-même les deux points
+  ci-dessous dans STORY-1073** ; les deux stories que B avait placées pour eux sont retirées. B garde le consommateur de
+  `facturation.avoir.emis@1` dans `paiement` (demande de 1066, point 3), à faire après que D lui a rendu le dépôt.
+  Demandé : écrire la passation dans « Passations » du journal de B (dernier commit de B sur `dev` : vus `2bf9dbd`
+  pour dossier, `4684d22` pour paiement, aucune PR ouverte le 24/11 à 20:20 ; pièges). D rend les deux dépôts par une
+  ligne de ce journal à la fin de 1073. Sans passation écrite, 1073 ne touche pas ces dépôts.
+- **(remplacée le 2026-11-24, soir, par la demande ci-dessus) → B (2026-11-24, après le lot 6 ; Q-D-12 répondue par
+  l'utilisateur, D-Q12-1) : la fiche légale de l'organisation et ses comptes d'encaissement, publiés pour la facture**
+  — le contenu reste le cahier des charges de STORY-1073. Deux sources, aucune copie (voir « Questions à
+  l'utilisateur ou au PO », Q-D-12).
   (1) **`dossier-service`** : ajouter à `DossierEtatV1` (`dossier.created` / `dossier.updated`), en **champs
   facultatifs additifs** (`schemaVersion` inchangé, comme `secteur` ou `codeNaema`), ce que le dossier porte déjà :
   `sigle`, `formeJuridique`, `nifSociete` (forme saisie), `rccm`, `numeroCnss`, `capitalSocial` (unités mineures XOF),
