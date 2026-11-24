@@ -656,9 +656,12 @@ reserved_ranges:
   - range: "STORY-1073"
     status: "RÉSERVÉ"
     owner: "Groupe D — la facture lit sa fiche légale : l'identité légale du dossier propre de l'organisation (dossier-service) et les coordonnées de paiement des comptes d'encaissement (paiement) ; le DAF ne choisit plus que le compte imprimé (prospera-ventes-service)"
-    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    source_doc: "prospera-stories/stories/STORY-1073.md"
     reserved_on: "2026-11-24"
     note: >
+      🚧 EN COURS (2026-11-24) — fiche écrite, contrat annoncé avant le code (journal de D, « ⚠ Contrats ») : DossierEtatV1
+      + neuf champs facultatifs du dossier propre ; paiement.compte.changed@1 (sans secret) ; facturation les projette,
+      comptesImprimes ; manifestes facturation 1.2.0 et paiement 1.1.0 ; catalogue des faits v2.
       Q-D-12 répondue par l'utilisateur le 24/11 (D-Q12-1, journal de D, #812). Portée élargie le 24/11 (soir) sur consigne de
       l'utilisateur : D fait aussi les deux côtés producteurs (DossierEtatV1 complété dans prospera-dossier-service ;
       comptes d'encaissement publiés par prospera-paiement-service), après une passation de B limitée à 1073. Ordre :

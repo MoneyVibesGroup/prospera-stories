@@ -645,6 +645,13 @@
 
 ## Passations
 
+- **← B (2026-11-24, soir, prospera-stories #837, `main` dde8f19) : `prospera-dossier-service` et
+  `prospera-paiement-service` prêtés à D pour STORY-1073 seule — constatée par STORY-1073** (rituel, 24/11) :
+  `origin/dev` de dossier = **`2bf9dbd`** (MNV-1082), de paiement = **`4684d22`** (MNV-976), les SHA nommés par B ;
+  **aucune PR ouverte** (`gh pr list`, deux dépôts). Checkouts : `dossier-service` sur `MNV-1082` (propre, fusionnée) —
+  branche `MNV-1073` partie d'`origin/dev`, `MNV-1082` gardée ; `prospera-paiement-service` sur `dev` à jour, propre. D
+  les rend à B par une ligne de ce journal à la fin de 1073.
+
 - **← B, `prospera-bilan-service`, constatée par D au rituel de 1076, le 2026-11-24** (lot 6 amendé, D-L6-5 ; passation
   de B du 24/11, « Passations » de son journal, prospera-stories #820). Constat de la sous-session de 1076 :
   `origin/dev` = **`7b53ff5`** (MNV-065), **exactement le SHA de la passation** ; `gh pr list --state open` : aucune PR
@@ -1425,6 +1432,51 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-24, STORY-1073), avant la fusion du code — La facture lit sa fiche légale de ses deux sources ; D
+  fait aussi les côtés producteurs (`dossier-service` et `paiement`, prêtés par B pour cette story, #837).** Fiche :
+  `stories/STORY-1073.md` (D-1073-1 → 11, Q-D-15). **Ajouts seuls** : aucun champ, aucune route, aucun topic existant
+  n'est renommé ni retiré ; trois PR de code et une de la plateforme.
+  - **`dossier-service`, `DossierEtatV1`** (`dossier.created`, `dossier.updated` ; `schemaVersion` **1 inchangé**) : neuf
+    champs **facultatifs** — `sigle`, `formeJuridique` (`SA`, `SARL`, `SAS`, `SUARL`, `EI`, `AUTRE`), `nifSociete` (forme
+    saisie), `rccm`, `numeroCnss`, `capitalSocial` (entier ≥ 0, unités mineures de `devise`), `adresse`, `telephone`,
+    `email` — **sur le seul dossier propre** (`estLeCabinet: true`) ; clé **absente** (jamais `null` ni vide) quand le
+    dossier ne la porte pas, **toujours absente sur un dossier client** (sa liste blanche ne change pas). Ni le régime
+    fiscal (sa source est `dossier.axes.decides`, D-1073-3), ni dirigeants, ni actionnaires. Pour les consommateurs
+    actuels (balance, bilan, document, microfinance, ventes…) : rien à faire, ils lisent nommément. La commande
+    opérateur `npm run republier:dossiers` (STORY-696) republie ces champs pour les dossiers propres existants.
+  - **`paiement`, fait neuf `paiement.compte.changed@1`** (sujet `paiement.compte.changed-value`, JSON, **BACKWARD**,
+    modèle fermé, `contrat/schemas/paiement.compte.changed.json` ; clé de partition `orgId`) : l'état imprimable d'un
+    compte d'encaissement, **enfilé dans la transaction de sa déclaration et de chaque vérification**. Enveloppe de
+    `paiement` (`schemaVersion` 1, `eventId`, `orgId`, `occurredAt` = l'instant de l'acte) ; charge : `organisationId`,
+    `compteId`, `revision` (**le rang de l'acte au journal chaîné du compte** : croissant, jamais réutilisé ; la plus haute
+    fait foi, deux faits de même révision sont identiques), `nature` (`MARCHAND`, `BANCAIRE`, `MOBILE_MONEY`, `PI_SPI`),
+    `titulaire`, `fournisseur`, `pays`, `devise`, `empreinteVisible`, `destinationPiSpi` (`{ numeroDeCompte,
+    participant }` pour un compte PI-SPI, sinon `null`), `verifie` (booléen). **Jamais un secret du coffre** :
+    l'identifiant scellé (numéro, IBAN, identifiant marchand), la clef de notification et son ancienne clef ne sortent
+    pas (NFR-1, AD-14) ; un compte déclaré avant la story ne publie qu'à sa prochaine vérification (D-1073-10). Topic
+    sans tiret : la convention de `paiement` le refuse (D-1073-6). Code commun : `EcritureDArgent.executer` passe
+    désormais l'entrée consignée à `publier(resultat, entree)` ; ses autres appelants l'ignorent.
+  - **`ventes` (`facturation`)** : groupe neuf **`ventes-service.emetteur`** (`KAFKA_EMETTEUR_GROUP_ID`, facultative),
+    depuis le début, sur `dossier.created`, `dossier.updated` et `paiement.compte.changed` ; deux collections neuves
+    (`facturation_organisations_lues`, `facturation_comptes_lus`). **Paramètres de la facture** (`PUT
+    /api/v1/facturation/parametres`, même route, même droit) : `comptesImprimes` **neuf et facultatif** (au plus 5
+    `compteId`, distincts, dans l'ordre ; le premier est le compte par défaut) ; `emetteur` **devient facultatif**
+    (absent, la version lue est gardée) et **seul `emetteur.regimeFiscal` y est encore lu** (D-1073-4). **Facture lue**
+    (`mentions.emetteur`) : les champs de 1065 restent (`rib` et `mobileMoney` valent `null` sur une facture émise
+    depuis) ; s'y ajoutent, facultatifs, `sigle`, `telephone`, `email`, `numeroCnss`, `comptes` (`compteId`,
+    `revision`, `nature`, `titulaire`, `fournisseur`, `numero`, `participant`, `devise`, `verifie`), `dossierId`,
+    `versionDuDossier`. **`MENTION_OBLIGATOIRE_MANQUANTE`** : `EMETTEUR_REGIME_FISCAL` et
+    `EMETTEUR_COORDONNEES_DE_PAIEMENT` nomment désormais la fiche `PARAMETRES` (avant : `ORGANISATION`) ; la forme
+    `AUTRE` manque (D-1073-8). Le PDF imprime le sigle, les contacts, le n° CNSS et un compte par ligne (nature,
+    fournisseur ou participant, n° affichable, titulaire). Pour l'écran des paramètres (A ou D) : le formulaire ne
+    saisit plus la fiche, il choisit les comptes et le régime fiscal.
+  - **Manifestes** (à la source dans ce dépôt) : `facturation` **1.2.0** (C5 : + `dossier.created`, `dossier.updated`,
+    `paiement.compte.changed@1` consommés ; aucun droit, aucune route) ; `paiement` **1.1.0** (C5 : +
+    `paiement.compte.changed@1` publié). **Catalogue des faits du distributeur v2** (`prospera-plateforme`,
+    `contrats/distributeur/catalogue-faits.json`, étiquette `contrats-distributeur-v2` après la fusion ; `src/index.ts`
+    inchangé) : + `paiement.compte.changed@1` (origine `MANIFESTE`, consommateur `facturation`). → B : recopies du
+    catalogue de `platform-catalog-service` (les deux manifestes), « Demandes aux autres groupes ».
 
 - **PUBLIÉ (2026-11-24, STORY-1076, prospera-bilan-service#186, `dev` e4cee3e) ; ANNONCÉ avant la fusion du code
   (prospera-stories #835, `main` cb0c2da), sans écart. — Les seuils de
@@ -2240,6 +2292,15 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-15 (2026-11-24, STORY-1073) — Le numéro complet d'un compte d'encaissement (RIB, IBAN, numéro Mobile Money)
+  s'imprime-t-il sur la facture ?** Dans `paiement`, l'identifiant d'un compte est **scellé au coffre** (STORY-243, AD-14
+  : « aucun chemin ne restitue ») ; seule son empreinte visible (« ••••4521 ») est en clair, avec la destination d'un
+  compte PI-SPI (numéro de compte et participant, en clair par construction). **Choix par défaut appliqué (D-1073-6) :**
+  la facture imprime l'empreinte visible (et, pour un compte PI-SPI, sa destination), le titulaire et le fournisseur ;
+  jamais le clair. Un payeur qui doit virer sur un RIB complet ne le lit donc pas sur la facture. Si le PO veut le RIB
+  complet imprimé : une donnée **non secrète** « numéro imprimable » déclarée avec le compte dans `paiement` (tracée
+  comme la déclaration), publiée par le même fait — une story de `paiement` (B), jamais un déchiffrement.
 
 - **Q-D-14 (2026-11-24, STORY-1076) — Les repères de l'analyse financière sans source citable.** Seuls trois des 19
   indicateurs ont une norme publiée par une source citable sur la même formule (BCEAO, accords de classement, mars
