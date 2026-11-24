@@ -1,6 +1,6 @@
 # STORY-979 : les droits de la facture et des archives du cabinet au catalogue de tenant d'auth
 
-Status: in-progress
+Status: done
 
 **Complexité :** faible (huit droits neufs au catalogue de tenant, hors du jeton ; un rôle du socle neuf ; une ligne
 d'ajout à l'annexe B ; la copie des manifestes du catalogue ; aucun champ, aucune route, aucun topic)
@@ -51,7 +51,7 @@ sur `main` (la 1.1.0 de C n'y est pas : code de C non fusionné, aucune PR ouver
 | Le rôle `CAB_ARCHIVISTE` | rôle du socle de tenant, vertical `cabinet`, couverture `partiel`, rôle par défaut d'aucun rôle du socle (attribué) |
 | La borne du jeton ne bouge pas | aucun code neuf dans `perms[]` : 17 + 24 = 41 ≤ 44 |
 | La copie du manifeste `facturation` au catalogue | `copies.json` recopié depuis `prospera-stories@1561370` ; `manifestes:garde` verte (48) |
-| La copie du manifeste `ged` 1.1.0 | **ouverte** : elle attend la fusion du code de C (D-979-8) |
+| La copie du manifeste `ged` 1.1.0 | recopiée dans la même story, après la fusion de C (D-979-8) |
 
 ## Décisions (prises par défaut, contestables)
 
@@ -96,10 +96,12 @@ sur `main` (la 1.1.0 de C n'y est pas : code de C non fusionné, aucune PR ouver
   est à D) : une base de catalogue déjà semée garde sa 1.0.0 sans le droit et le signale au démarrage (« la copie
   diffère du manifeste publié ») ; une pile neuve sème la copie. Sans effet sur l'attribution (auth ne lit pas cette
   copie, la garde de `facturation` lit `/moi/droits`) ; information à D (« → D »).
-- **D-979-8 — La copie de `ged` 1.1.0 reste ouverte.** Au moment de coder (24/11), le code de C n'est pas fusionné
-  (`MNV-1087`, `a872c69`, sans PR) et la 1.1.0 n'est pas sur `main` : la demande de C est servie pour sa part d'auth,
-  la recopie attend le signal de fusion de C dans son journal. Elle se fera par la prochaine story de B qui touche le
-  catalogue après ce signal.
+- **D-979-8 — La copie de `ged` 1.1.0, dans la même story, après la fusion de C.** Au moment de coder (24/11), le
+  code de C n'était pas fusionné (`MNV-1087`, `a872c69`, sans PR) et la 1.1.0 n'était pas sur `main` : la part d'auth
+  s'est faite sans attendre. Au moment d'écrire les docs, C avait fusionné (document-service #30, `1db0a8f`) et signalé
+  la 1.1.0 sur `main` (`a86e461`, journal de C) : le catalogue l'a recopiée par une seconde PR (`MNV-979-ged`), après un
+  amendement du contrat annoncé avant sa fusion (stories #778). Les sept `ged:*` du cabinet que la 1.1.0 déclare sont
+  ceux qu'auth attribue : D-979-3 est vérifiée, aucun écart.
 - **D-979-9 — Sans Docker.** Aucun module Nest, aucune dépendance, aucun Dockerfile ne change : des listes de données,
   un rôle du socle réaligné au démarrage par `TenantRolesSeedService` (comme 902 et 960), une copie JSON semée au
   démarrage. La preuve est la suite des deux services (relancée par chemin, puis complète), le câblage du module racine
@@ -107,12 +109,59 @@ sur `main` (la 1.1.0 de C n'y est pas : code de C non fusionné, aucune PR ouver
 
 ## Livraison
 
-(à compléter à la fusion)
+Toutes fusionnées en « Rebase and merge », `merged = true`, `head.sha` = SHA poussé, arbre de la branche identique à
+`dev` après rejeu :
+
+- **auth #48** : **`c0f6243` sur `dev`** (tête de la PR `1878c5b`). Fichiers : `src/common/rbac/droits-hors-jeton.ts`,
+  `src/modules/rbac/table-d-acces-cabinet.ts`, `table-d-acces-distributeur.ts` (`AJOUTS_A_L_ANNEXE_B`),
+  `tenant-system-roles.ts` ; tests du catalogue, des deux tables d'accès, du socle des rôles, de la résolution et du
+  catalogue de composition.
+- **catalogue #68** : **`d7e67f1` sur `dev`** (tête `56150ff`) — `copies.json` depuis `prospera-stories@1561370`
+  (`facturation` : `droits[6]`).
+- **catalogue #69** : **`b75e34b` sur `dev`** (tête `fa0848d`) — `copies.json` depuis `prospera-stories@4fab396`
+  (`ged` 1.1.0).
+- Contrat annoncé avant la fusion : stories #777 (fiche, tracker, « ⚠ Contrats »), amendé par #778 (la copie de `ged`).
+- D prévenue directement (session du groupe D) avec les n° de PR et les SHA sur `dev`.
 
 ## Preuves
 
-(à compléter)
+- **Sans Docker** (D-979-9) : aucun module, aucune dépendance, aucun Dockerfile touchés ; verrou non pris.
+- **Auth, Node 25, tests relancés par chemin** : les suites des droits, des rôles, de l'administration, de
+  l'authentification, des invitations au réel et des comptes du jeu : **38 suites, 677/677**. Ce qu'elles vérifient :
+  - les huit codes au catalogue, hors du jeton, au format, ≤ 40 caractères, module et libellé écrits en toutes
+    lettres ; les droits `facturation` du catalogue sont les sept du manifeste, dans son ordre ; catalogue 164 codes
+    (24 + 140) ;
+  - `facturation:parametres:modifier` détenu par `DIST_DAF` et par lui seul (DAF : 44 droits de tenant) ; la
+    résolution le met dans `droitsHorsJeton` du DAF, ni dans `perms[]` ni dans `droits` ; le comptable, le DG et
+    l'administrateur ne l'ont pas ;
+  - la matrice §2.3 droit par droit (détenteurs exacts) ; l'associé (18 droits), le collaborateur (10) et l'archiviste
+    (7) écrits en toutes lettres ; l'archiviste n'a aucun droit hors de `ged`, aucun droit du jeton, n'est le rôle par
+    défaut d'aucun rôle du socle, couverture `partiel` ; un archiviste attribué reçoit ses sept droits dans
+    `droitsHorsJeton` et un jeton vide ;
+  - aucun rôle du distributeur ne reçoit un `ged:*` ; le catalogue de composition d'un rôle offre les codes neufs,
+    indisponibles tant que le module n'est pas souscrit.
+- **Auth, suite complète (Node 25)** : 102 suites, **1 445 passés**, 4 suites rouges connues (binding natif de
+  Confluent : `app-cablage.invariant.spec.ts` et les trois `src/kafka/*`). Le câblage du module racine joué avec le
+  binding doublé (`moduleNameMapper`) : **vert**. `tsc --noEmit`, lint des dix fichiers touchés et build : verts.
+- **Auth, mutations : 12/12 rouges sur assertion**, aucune par compilation : le droit de la facture à personne (4
+  tests), aussi au comptable (3), au DG au lieu du DAF (4) ; l'archiviste sans les pièces sensibles (3), le
+  collaborateur avec (3), l'archiviste dans `TOUS` (fiscalité et comptabilité, 12), l'associé qui numérise (3),
+  l'archiviste sans les originaux papier (5), l'archiviste rôle par défaut du `TENANT_USER` (3), « servi » (2), le
+  libellé changé (2), l'indexation à personne (3).
+- **Catalogue, Node 25** : `manifestes:garde` verte (48) après chaque copie, contre une extraction LF de `origin/main` ;
+  les deux copies (depuis le worktree en CRLF et depuis `git archive`) identiques hors la ligne `origine` ; catalogue
+  et essai 21/21 suites, 456/456 ; suite complète 100 suites vertes, **1 597 passés**, 3 suites rouges connues (binding
+  de Confluent).
+- **Copies à l'octet vérifiées entre dépôts** : le catalogue plateforme `permission.enum.ts` (17 codes, MNV-650) reste
+  identique dans auth, kyc, catalogue et BFF sur `origin/dev` (même SHA-256) — non touché. Le catalogue de tenant
+  n'est recopié nulle part (`tenant-permission.enum.ts`) : les codes lus par C (`DROITS_GED`) et par D (manifeste et
+  contrôleur des paramètres sur `dev` de ventes) sont identiques à ceux d'auth.
 
 ## Pour la suite
 
-(à compléter)
+- **D** : `PUT /api/v1/facturation/parametres` passe pour un `DIST_DAF` sur une image d'auth reconstruite depuis `dev`
+  (cache de 60 s compris). La version 1.0.0 de `facturation` : voir D-979-7 (« → D »).
+- **C** : les routes du cabinet de `ged` passent pour l'associé, le collaborateur et l'archiviste selon la matrice ;
+  un archiviste s'attribue par `tenantRole`. Ce que `ged` (ou un autre service) donne encore au rôle socle sans lire de
+  droit : D-979-5 (« → C »).
+- **A** : un rôle de plus (« Archiviste ») dans la liste des rôles d'un cabinet ; aucune forme ne change.
