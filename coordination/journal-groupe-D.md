@@ -191,7 +191,8 @@
     Docker libre au rituel ; pris à 15:19, une seule prise, rendu à 15:46** ; aucun conteneur, volume ni réseau `grp-d`
     ne reste.
   - **Suivante** : aucune dans le lot 6. Hors du lot : **STORY-1072** (la demande de B : le cabinet prévenu par e-mail
-    d'un renvoi KYC), placée ici, fiche à écrire juste avant de coder.
+    d'un renvoi KYC), placée ici, fiche à écrire juste avant de coder ; puis **STORY-1073** (la facture lit sa fiche
+    légale chez `dossier-service` et ses comptes chez `paiement`, Q-D-12 répondue le 2026-11-24 ; dépend de B).
 
 - **Le lot 6 de D est fini : 7 stories sur 7 (1065 → 1071), le 2026-11-24.** Trois de distributeur (1065 la facture
   juste (3), 1066 l'avoir, 1067 la commande (3)), quatre d'assurance (1068 → 1071) ; la passation à Dev A est mise à
@@ -642,6 +643,11 @@
       dossier KYC (modèle `kyc-dossier-renvoi-correction` dans `notification`, consommateur de
       `kyc.correction.requested@1` dans `prospera-expert-comptable`, preuve AC-5 dans mailhog) ; voir « Réponses aux
       demandes reçues ».
+    - **Placée** : **STORY-1073** — la facture lit sa fiche légale (Q-D-12 répondue par l'utilisateur, D-Q12-1) :
+      l'identité légale projetée du dossier propre de l'organisation (`dossier-service`), les coordonnées de paiement
+      des comptes d'encaissement de `paiement` ; le DAF ne choisit plus que le ou les comptes imprimés ; la fiche saisie
+      en 1065 n'est plus lue. **Dépend des deux demandes à B** (« Demandes aux autres groupes », fiche légale) ; fiche
+      à écrire juste avant de coder.
     - **Distributeur**, dans l'ordre : (a) **l'envoi de la facture par `notification`** (D-1065-14 (2) : le geste
       « envoyer », lien public, WhatsApp puis SMS, e-mail avec le PDF ; `ENVOYE` / `ECHEC`) ; (b) **l'avoir (2)**
       (D-1066-14 : la demande du comptable validée par le DAF, `IMPUTE` / `REMBOURSE` lus chez `paiement`, le retour en
@@ -953,6 +959,24 @@
     - **Recettes** : `scripts/recette/1068` → `1071` (piles `grp-d`, pilotes Python, mutations).
 
 ## Demandes aux autres groupes
+
+- **→ B (2026-11-24, après le lot 6 ; Q-D-12 répondue par l'utilisateur, D-Q12-1) : la fiche légale de l'organisation
+  et ses comptes d'encaissement, publiés pour la facture** — **ouverte**. Deux sources, aucune copie (voir « Questions à
+  l'utilisateur ou au PO », Q-D-12). Rien ne presse avant les stories du lot 6 de B ; STORY-1073 de D en dépend.
+  (1) **`dossier-service`** : ajouter à `DossierEtatV1` (`dossier.created` / `dossier.updated`), en **champs
+  facultatifs additifs** (`schemaVersion` inchangé, comme `secteur` ou `codeNaema`), ce que le dossier porte déjà :
+  `sigle`, `formeJuridique`, `nifSociete` (forme saisie), `rccm`, `numeroCnss`, `capitalSocial` (unités mineures XOF),
+  `adresse`, `telephone`, `email`, `regimeFiscal`. D lit le seul dossier `estLeCabinet: true` de l'organisation
+  (`facturation` le projette). Proposé : rejouer l'état courant des dossiers propres existants (un `dossier.updated` par
+  organisation) pour qu'une pile déjà semée ne reste pas sans fiche. Pour un distributeur, confirmer que le dossier
+  propre naît bien à l'organisation (aucun filtre de métier vu dans le consommateur d'`identity.org.created`).
+  (2) **`paiement`** : publier les comptes d'encaissement de l'organisation (un fait d'état par compte, clé `orgId`,
+  par exemple `paiement.compte-encaissement.changed@1`) ou, à défaut, une route de lecture réservée au service
+  `facturation`. Seulement ce qui s'imprime : `compteId`, nature (`BANCAIRE`, `MOBILE_MONEY`, `MARCHAND`, `PI_SPI`),
+  libellé, titulaire, banque ou opérateur, numéro affichable (RIB / IBAN ou numéro Mobile Money), devise, statut
+  (actif ou retiré) et révision ; **jamais un secret du coffre**. À grouper, si cela vous arrange, avec la story déjà
+  prévue dans `paiement` (le consommateur de `facturation.avoir.emis@1`, demande de 1066, point 3). Annonce « ⚠
+  Contrats » de votre côté avant le code, comme d'habitude ; D l'écoutera dans STORY-1073.
 
 - **→ C (2026-11-24, STORY-1069) : `sinistres.evaluation.arretee@1` est publié — information** (C tient
   `prospera-liaison-assureur-service`, consommateur nommé par la spine, AD-16). Schéma :
@@ -2061,6 +2085,22 @@
   avec le modèle `kyc-dossier-renvoi-correction` de `notification` (STORY-1072), le temps de cette story ; le dépôt ne
   change pas de titulaire pour autant. À trancher par l'utilisateur avant 1072 si un autre groupe doit le tenir.
 
+- **Q-D-12 — répondue par l'utilisateur le 2026-11-24 (après le lot 6), appliquée par STORY-1073.** « La fiche légale
+  de l'organisation est normalement renseignée lors de la création d'un dossier. » Vérifié sur `origin/dev` de
+  `dossier-service` : chaque organisation a son **dossier propre** (`estLeCabinet: true`, posé par le consommateur
+  d'`identity.org.created`, un seul par organisation, ni supprimable ni détachable, aucun filtre de métier) qui porte
+  `raisonSociale`, `sigle`, `formeJuridique`, `nifSociete`, `rccm`, `numeroCnss`, `capitalSocial`, `adresse`, `email`,
+  `telephone`, `regimeFiscal`, `systemeComptable`. Mais `dossier.created` / `dossier.updated` (`DossierEtatV1`) n'en
+  publient ni le NIF, ni le RCCM, ni la forme juridique, ni le capital, ni l'adresse ; et le RIB n'est dans aucun
+  dossier. **Décision de l'utilisateur (« fais-le comme tu le vois ») — D-Q12-1 : une seule source par donnée.**
+  L'identité légale vient du dossier propre de l'organisation (`dossier-service`) ; les coordonnées de paiement
+  imprimées (RIB, Mobile Money) viennent des **comptes d'encaissement** de `paiement` (STORY-242, FR-P01 → P03, NFR-1 :
+  titulaire identifié, saisie tracée, secrets au coffre), et non d'un champ neuf du dossier (un second registre de
+  comptes) ni de la saisie du DAF (une troisième copie ; le changement de RIB est la fraude classique de la facture).
+  Il ne reste au DAF que le choix du ou des comptes imprimés (un compte par défaut). La saisie de D-1065-2 devient ce
+  choix, et la fiche saisie en 1065 cesse d'être lue dès que les deux sources sont publiées. Demandes à B ci-dessus
+  (« Demandes aux autres groupes », 2026-11-24, fiche légale) ; story de D : **STORY-1073**, placée après 1072.
+  — Énoncé d'origine :
 - **Q-D-12 (2026-11-24, STORY-1065) — Qui tient la fiche légale de l'organisation (raison sociale, forme juridique,
   capital, siège, NIF, RCCM, régime fiscal, RIB, compte Mobile Money) qu'imprime chaque facture ?** FR-44 la veut « lue
   de la fiche de l'Organisation », mais aucun service ne la porte : `auth` publie le nom, le pays et le logo
