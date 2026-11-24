@@ -1936,15 +1936,18 @@ reserved_ranges:
       mutations rouges ; lint, tsc, build. Sans Docker (D-978-11) : la preuve de bout en bout est celle de la recette
       croisée complète de 1080. Lot 4 de B, n° 11 (EPIC-145). NON SLOTTÉE.
   - range: "STORY-979"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe B, lot 6 — les droits de la facture et des archives du cabinet au catalogue de tenant d'auth, hors du jeton : facturation:parametres:modifier au DIST_DAF seul (demande de D, STORY-1065, D-1065-13) ; les sept ged:* du cabinet et le rôle neuf CAB_ARCHIVISTE (demande de C, STORY-1087, PRD des services du cabinet §2.3) ; recopie des manifestes au catalogue (facturation ; ged 1.1.0 après la fusion de C) (prospera-auth-service, prospera-platform-catalog-service)"
     source_doc: "prospera-stories/stories/STORY-979.md"
     reserved_on: "2026-11-24"
     note: >
-      ⏳ SECONDE SUITE EN COURS le 2026-11-24 au soir (rouverte ; fiche, « Suite du 2026-11-24 (soir) », D-979-17 → 22) —
-      la demande de C (STORY-1088 puis 1100) : les manifestes ged 1.3.0 et comptabilite 0.5.0 recopiés au catalogue
-      depuis prospera-stories@f703671 (catalogue #74, contrat annoncé avant la fusion). Placée avant STORY-1116 par la
-      session du groupe B.
+      🏁 SECONDE SUITE DONE le 2026-11-24 au soir (rouverte, puis refermée ; fiche, « Suite du 2026-11-24 (soir) »,
+      D-979-17 → 22) — catalogue #74 (dev 1aa17ae) ; contrat annoncé avant la fusion (stories #843, main ada5b81). La
+      demande de C (STORY-1088 puis 1100) : les manifestes ged 1.3.0 et comptabilite 0.5.0 recopiés depuis
+      prospera-stories@f703671 (a525d76 en est un ancêtre ; sha256 vérifiés ; seuls ces deux manifestes changent ;
+      manifestes:garde verte, 48). Aucun droit ne change ; auth inchangé (les treize ged:* de l'assurance restent hors
+      d'auth, D-979-19). Node 25 : catalogue 1619 passés (3 suites rouges connues) ; lint, build ; 2/2 mutations
+      rouges. Sans Docker (D-979-21). Placée avant STORY-1116 par la session du groupe B.
       Première suite : 🏁 SUITE DONE le 2026-11-24 (rouverte, puis refermée ; fiche, « Suite du 2026-11-24 », D-979-10 → 16) — auth #49
       (dev b49d8ab), catalogue #71 (dev de988b1) ; contrat annoncé avant la fusion (stories #789, main a0f49f0). La
       demande de D (STORY-1066), points (1) et (2) : facturation:avoir:valider au DIST_DAF seul, hors du jeton

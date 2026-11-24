@@ -1,7 +1,7 @@
 # STORY-979 : les droits de la facture et des archives du cabinet au catalogue de tenant d'auth
 
-Status: in-progress (rouverte le 2026-11-24 au soir pour sa seconde suite : « Suite du 2026-11-24 (soir) », en fin de
-fiche ; rouverte et refermée le 2026-11-24 pour la première : « Suite du 2026-11-24 »)
+Status: done (rouverte et refermée deux fois le 2026-11-24 pour ses suites : « Suite du 2026-11-24 » et « Suite du
+2026-11-24 (soir) », en fin de fiche)
 
 **Complexité :** faible (huit droits neufs au catalogue de tenant, hors du jeton ; un rôle du socle neuf ; une ligne
 d'ajout à l'annexe B ; la copie des manifestes du catalogue ; aucun champ, aucune route, aucun topic)
@@ -349,8 +349,13 @@ le schéma du manifeste) et d'auth `d69e34c` (`droits-hors-jeton.ts`, `table-d-a
 
 ### Livraison de la suite (soir)
 
-- **catalogue #74** (branche `MNV-979-manifestes-ged-comptabilite`, tête `f22f6f9`) : `copies.json` depuis
-  `prospera-stories@f703671` ; `manifestes-seed.service.spec.ts`. Fusion après l'annonce du contrat.
+Fusionnée en « Rebase and merge », `merged = true`, `head.sha` = SHA poussé, arbre de la branche identique à `dev`
+après rejeu :
+
+- **catalogue #74** : **`1aa17ae` sur `dev`** (tête de la PR `f22f6f9`). Fichiers : `copies.json` depuis
+  `prospera-stories@f703671` ; `manifestes-seed.service.spec.ts`.
+- Contrat annoncé avant la fusion : stories #843 (fiche, tracker rouvert, « ⚠ Contrats »), `ada5b81` sur `main`.
+- C prévenue par son journal (« → C », journal de B).
 
 ### Preuves de la suite (soir)
 
@@ -366,3 +371,9 @@ le schéma du manifeste) et d'auth `d69e34c` (`droits-hors-jeton.ts`, `table-d-a
   comme avant).
 - **Mutations : 2/2 rouges sur assertion** (test de semis et garde) : `comptabilite` remis en 0.4.0 ;
   `comptabilite.facture.inscrite` retiré de ce que `ged` consomme.
+
+### Pour la suite (soir)
+
+- **C** : un catalogue neuf sème `ged` 1.3.0 et `comptabilite` 0.5.0 ; un catalogue déjà semé les reçoit à son prochain
+  démarrage, à côté des versions publiées (D-979-13). Les treize `ged:*` de l'assurance restent hors d'auth (D-979-19).
+- **B** : STORY-1116.
