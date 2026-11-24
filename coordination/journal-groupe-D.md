@@ -1178,6 +1178,46 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-24, STORY-1071) avant la fusion du code (prospera-plateforme `MNV-1071`, prospera-sinistres-service
+  `MNV-1071`). — `prospera-sinistres-service`, modules `expertises` et `sinistres` : la mission d'expertise et sa
+  machine unique (FR-61), un fait neuf `expertises.mission.changed@1` (schéma dans `prospera-plateforme`,
+  `contrats/assurance/expertises/`), et l'évaluation qui l'attend.** Fiche : `stories/STORY-1071.md` (D-1071-1 → 11).
+  **Ajouts seuls**, sauf un comportement qui change (⚠ plus bas) ; **aucun manifeste ne change** (les deux lectures
+  étaient déjà déclarées en lecture seule ; le fait est déjà en C5 `publie` d'`expertises` et `consomme` de `sinistres`).
+  - **Routes neuves** (module `expertises`, garde `EXPERTISES_NOT_ENTITLED`) : `POST /api/v1/expertises/missions` (201 ;
+    `{ dossierId, domaine, type, priorite?, objet, pointsATraiter?, elementsAExaminer?, roleExerce, cleIdempotence }` ;
+    GEST, RESP ; une mission `A_DESIGNER`) et `POST /api/v1/expertises/missions/{id}/actes` (200 ; `{ acte, versionLue,
+    roleExerce, cleIdempotence, motif?, expertId?, voie?, rapport?: { pieceId, versionPiece, chiffrage? }, decision?,
+    chiffrage? }` ; treize actes : `CONFIRMER`, `DESIGNER`, `ACCEPTER`, `DECLINER`, `TRANSMETTRE`, `COMMENCER`,
+    `EXAMINER`, `DEPOSER_RAPPORT`, `DEMANDER_COMPLEMENT`, `VALIDER`, `CONTESTER`, `ARBITRER`, `ANNULER`). Lectures
+    servies : `GET /api/v1/expertises/missions?roleExerce=&dossierId=` et `GET …/missions/{id}?roleExerce=` (GEST,
+    GREC, RESP, DG, DT, AUD ; EXPI et EXPE : leurs missions seulement). Refus : 400 `MISSION_INVALIDE`, `MOTIF_ECRIT`,
+    `EXPERT_REQUIS`, `PIECE_JOINTE_OBLIGATOIRE`, `CHIFFRAGE_INVALIDE` ; 403 `DROIT_INSUFFISANT`, `HORS_MISSION` ; 404
+    `MISSION_INTROUVABLE`, `EXPERT_INTROUVABLE` ; 409 `TRANSITION_MISSION_INTERDITE` (détails : `etat`, `actesPermis`),
+    `COMPLEMENT_EXPERT_RECU`, `EXPERT_NON_ELIGIBLE`, `EXPERTISE_EXTERNE_IMPOSEE`, `MISSION_MEDICALE_NON_SERVIE`, ceux du
+    référentiel (`AGREMENT_ECHU`, `AGREMENT_ABSENT`, `EXPERT_INACTIF`, `DOMAINE_NON_COUVERT`), `ETAT_PERIME`,
+    `CLE_REUTILISEE`.
+  - **Le fait** (topic `expertises.mission.changed`, sujet `expertises.mission.changed-value`, JSON Schema draft-07
+    fermé, BACKWARD, clé = organisation ; publié par l'outbox du service dans la transaction de chaque acte accepté et
+    de la création) : `missionId`, `dossierId`, `versionObjet` (la version de la mission : la plus haute fait foi),
+    `etat` (les treize), `type`, `bloquante` (ni `VALIDEE`, ni `ARBITREE`, ni `ANNULEE`), `chiffrage` et `devise`
+    (ensemble, seulement validée ou arbitrée avec un chiffrage), `changeeLe`. ⛔ Ni le domaine, ni l'objet, ni les points,
+    ni un motif, ni l'expert nommé. Neuf champs classés au registre `classification-sante` (module `expertises`).
+    **Consommateur** : `sinistres` (groupe `sinistres-service.missions`, spine AD-16).
+  - **`sinistres`** : le fait est rangé au dossier par une commande du système (version + 1, piste `MISSION_CHANGEE`,
+    `sinistres.dossier.changed@1`, sans contenu) ; `GET …/dossiers/{id}` gagne **`missions`** (`missionId`, `version`,
+    `etat`, `type`, `bloquante`, `chiffrage?`, `devise?`, `changeeLe`) ; `POST …/evaluations` gagne le refus **409
+    `EXPERTISE_VALIDEE`** (détails : `missions`, celles en attente et leur état) ; avec un chiffrage validé, c'est lui le
+    repère : un montant qui en diffère exige un motif (`MOTIF_ECRIT`, détails : `chiffrageDExpertise`), et l'évaluation
+    arrêtée porte **`chiffrageDExpertise`**.
+  - ⚠️ **Un comportement change : `EXPERTISE_VALIDEE` devient une condition calculée** par la machine du dossier
+    (transitions 7 et 22), sur les missions rangées au dossier. Le constat du même nom n'était posé par personne : la
+    transition 7 était refusée à tout dossier (échec fermé). Désormais **un dossier sans mission passe** (FR-61), un
+    dossier dont une mission est ouverte est refusé, la mission nommée (`details.missions`). Un constat
+    `EXPERTISE_VALIDEE` posé à la main n'est plus lu.
+  - ⚠️ **Pour un consommateur de `sinistres.dossier.changed@1`** (`liaison-assureur`, `notification`, `ged`) : chaque
+    mission lue fait avancer `versionEtat` d'un rang sans changer le statut (comme une pièce contrôlée, 1001).
+
 - **PUBLIÉ (2026-11-24, STORY-1070, prospera-sinistres-service#31, `dev` 6a0c28d) ; ANNONCÉ avant la fusion du code
   (prospera-stories #803, `main` 36d4acf), sans écart. — `prospera-sinistres-service`, module `sinistres` :
   lever une alerte bloquante du décompte (FR-55, D-1013-10).** Fiche : `stories/STORY-1070.md` (D-1070-1 → 11).
