@@ -25,18 +25,31 @@
      **Recette croisée complète sur pile neuve : 11/11 suites, 142/142 tests, 1 160 s**
      (`cabinet-moteur` 11/11). Verrou pris à 02:00, rendu à 03:26 ; aucun conteneur, volume ni réseau
      `grp-b` ne reste.
-  - **Suivante : STORY-1112** (le BFF relaie les essais d'un prospect, `/essais` ; AP-57). La demande de A du 24/11
-    (journal de A, « Lot 6 ») en donne le détail : relais de `POST /essais`, `GET /essais/{org}`, prolongation,
-    signature, jeu de démonstration, effacement, **et une liste** `GET /admin/essais` ; recommandé : `POST /admin/essais`
-    qui enchaîne la naissance et l'ouverture.
-  - **Trois demandes reçues le 24/11, hors des lignes du plan** (« Réponses ») : D (1065) `facturation:parametres:modifier`
+  - **Trois demandes reçues le 24/11, hors des lignes du plan** (**servies par STORY-979**, ci-dessous) (« Réponses ») : D (1065) `facturation:parametres:modifier`
     au `DAF` et la recopie du manifeste `facturation` ; C (1087) le rôle `CAB_ARCHIVISTE` et les droits `ged:*` des
     rôles du cabinet dans auth, puis la recopie du manifeste `ged` 1.1.0 après la fusion de C. Toutes dans auth et le
     catalogue, sans Docker : **une story neuve de la plage de B** (le dernier identifiant libre, **STORY-979**, vérifié
     libre sur `main` et dans les PR ouvertes le 24/11, non réservé ici), **à placer par la session de groupe**
     (recommandé : après 1112, avant 1113 ; la recopie de `ged` attend la fusion de 1087).
-  2. 🚧 **STORY-979** : placée **avant 1112** par la session de groupe (§1.1 : une demande adressée à B passe avant la
-     story suivante ; D-979-1, contre la proposition de 1080). Contrat annoncé avant la fusion (« ⚠ Contrats »).
+  2. ~~STORY-979~~ : **auth #48** (`c0f6243` sur `dev`), **catalogue #68** (`d7e67f1`) et **#69** (`b75e34b`) ;
+     contrat annoncé avant la fusion (stories #777, amendé par #778). Placée **avant 1112** par la session de groupe
+     (§1.1 : une demande adressée à B passe avant la story suivante ; D-979-1, contre la proposition de 1080).
+     - Auth : `facturation:parametres:modifier` au `DIST_DAF` seul (`AJOUTS_A_L_ANNEXE_B`) ; les sept `ged:*` du
+       cabinet selon la matrice §2.3 (associé : fonds, pièces, sensibles ; collaborateur : pièces) et le **rôle neuf
+       `CAB_ARCHIVISTE`** (les sept, rien d'autre ; partiel ; attribué, jamais par défaut). Hors du jeton ; catalogue
+       164 codes (24 + 140), borne inchangée.
+     - Catalogue : `facturation` recopiée (`droits[6]`, version 1.0.0 gardée par la source : D-979-7), puis **`ged`
+       1.1.0** après la fusion de C, dans la même story (D-979-8) ; `manifestes:garde` verte (48).
+     Node 25 : auth 38 suites 677/677, complète 1 445 passés (4 suites rouges connues), câblage vert (binding doublé) ;
+     catalogue 1 597 passés (3 connues) ; 12/12 mutations. **Sans Docker** (D-979-9) : verrou non pris.
+  - **Suivante : STORY-1112** (le BFF relaie les essais d'un prospect, `/essais` ; AP-57). La demande de A du 24/11
+    (journal de A, « Lot 6 ») en donne le détail : relais de `POST /essais`, `GET /essais/{org}`, prolongation,
+    signature, jeu de démonstration, effacement, **et une liste** `GET /admin/essais` ; recommandé : `POST /admin/essais`
+    qui enchaîne la naissance et l'ouverture.
+  - **Demande de A non servie, vue au rituel de 979** : `TICKET-BACKEND-financement-schema-valeur-indicateur` (bilan,
+    deux `ValeurIndicateurDto`, OpenAPI faux ; « Réponses »). Hors du périmètre de 979 ; **à placer par la session de
+    groupe** (§1.1 : avant 1112 ; correctif court, sans Docker : renommer le schéma Swagger de la dette et un garde
+    d'OpenAPI).
 
 ### Lot 4 (ouvert le 2026-11-18)
 
@@ -655,6 +668,15 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 
 ## Demandes aux autres groupes
 
+- **→ D (2026-11-24, STORY-979), information : le manifeste `facturation` est resté en 1.0.0** avec
+  `facturation:parametres:modifier` ajouté (D-979-7). Le semis du catalogue n'écrit pas une version déjà publiée : une
+  base de catalogue déjà semée garde sa 1.0.0 sans le droit (et le signale « divergente » au démarrage) ; une pile
+  neuve sème la copie. Sans effet sur l'attribution (auth, `/moi/droits`). Si un catalogue déployé doit voir le droit,
+  montez la version à la source : B recopiera. — information.
+- **→ C (2026-11-24, STORY-979), information : « l'archiviste ne lit rien d'autre du dossier »** est tenu par les
+  droits d'auth (aucun droit hors de `ged`). Ce qu'un service accorde encore au rôle socle (`TENANT_USER`) sans lire de
+  droit n'est pas dans auth : à vérifier dans `ged` le jour où un archiviste s'y connecte (D-979-5). — information.
+
 - **→ A (2026-11-24) : AP-55 débloquée par STORY-1080** (catalogue #67, BFF #38, recette #27). Le moteur installe le
   cabinet par `POST /installations` (six vérifications de balance et de bilan servies, `VERT`) ; la console peut
   quitter le `PUT …/entitlements/{module}` pour l'installation (AC-5 d'AP-55 : la condition « 1080 fusionnée et la
@@ -969,12 +991,24 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 - **← A (2026-11-21, STORY-1094) : recopier le manifeste `comptabilite` au catalogue** — **servie** par la session de C
   à la demande de l'utilisateur (catalogue `eb495b5` et `acfb751`, manifeste 0.4.0, `manifestes:garde` verte), constatée
   par STORY-1080 sur `origin/dev`. Rien à faire de plus.
-- **← D (2026-11-24, STORY-1065) : `facturation:parametres:modifier` au catalogue de tenant d'auth (DAF) et recopie
-  du manifeste `facturation`** — **lue, ouverte** : story neuve de la plage de B, à placer par la session de groupe
-  (« État », lot 6).
-- **← C (2026-11-24, STORY-1087) : le rôle `CAB_ARCHIVISTE` et les droits `ged:*` des rôles du cabinet dans auth ; la
-  recopie du manifeste `ged` 1.1.0 au catalogue après votre fusion** — **lues, ouvertes** : même story neuve que la
-  demande de D (« État », lot 6) ; la recopie attend votre signal de fusion.
+- **← A (2026-11-24, FE-140) : deux `ValeurIndicateurDto` dans bilan, l'OpenAPI des indicateurs de dette est faux**
+  (`tickets/TICKET-BACKEND-financement-schema-valeur-indicateur.md`) — **lue, ouverte** : vue au rituel de 979, hors
+  de son périmètre ; à placer par la session de groupe (« État », lot 6).
+- **← D (24/11) : `facturation:parametres:modifier` au catalogue de tenant d'auth (DAF) et recopie du manifeste
+  `facturation`** (STORY-1065) — **servie par STORY-979** (auth #48, `c0f6243` sur `dev` ; catalogue #68, `d7e67f1` ;
+  annonce : stories #777). Hors du jeton, servi par `GET /moi/droits` dans `droitsHorsJeton` ; au **`DIST_DAF` seul**
+  (libellé « Modifier les paramètres de la facture ») ; pas d'avance de `dv` (60 s de cache au plus). `copies.json`
+  depuis `prospera-stories@1561370`, `manifestes:garde` verte. D prévenue directement (session du groupe D). Information
+  (D-979-7) : votre manifeste est resté en 1.0.0 ; voir « → D ».
+- **← C (24/11) : le rôle `CAB_ARCHIVISTE` et les droits `ged:*` des rôles du cabinet dans auth** (STORY-1087) —
+  **servie par STORY-979** (auth #48, `c0f6243` sur `dev` ; annonce : stories #777). La matrice §2.3 à la lettre :
+  `CAB_ASSOCIE` ← `ged:fonds:gerer`, `ged:piece:consulter`, `ged:sensible:consulter` ; `CAB_COLLABORATEUR` ←
+  `ged:piece:consulter` ; `CAB_ARCHIVISTE` (rôle neuf du socle, vertical `cabinet`, couverture `partiel`) ← les sept,
+  aucun droit d'un autre module. Il n'est le rôle par défaut de personne : l'administrateur du cabinet l'attribue
+  (`tenantRole`). Les codes sont ceux de votre `DROITS_GED` et de la 1.1.0, à l'octet.
+- **← C (24/11) : recopier le manifeste `ged` 1.1.0 au catalogue après la fusion** (STORY-1087) — **servie par
+  STORY-979** (catalogue #69, `b75e34b` sur `dev` ; amendement annoncé : stories #778) : `copies.json` depuis
+  `prospera-stories@4fab396`, seul `ged` change (1.0.0 → 1.1.0), `manifestes:garde` verte (48).
 
 - **← D (2026-11-18, STORY-1064) : `comptes` dans `jeu-demonstration@1` et la pose des comptes par le catalogue** —
   **lue, gardée pour la remplaçante de B** (D-972-9, plan §3) ; pas dans STORY-975. La forme proposée (un `comptes`
@@ -1135,6 +1169,8 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
     `prospera-stories@4fab396`) : `ged` passe de 1.0.0 à **1.1.0** (version neuve semée à côté de l'ancienne), cinq
     droits du cabinet de plus, `routesLectureSeule` remises sur les routes réelles. Ses sept `ged:*` du cabinet sont
     ceux qu'auth attribue (D-979-3 vérifiée). Rien d'autre ne change.
+  - **Fusionné le 24/11** : auth #48 (`c0f6243` sur `dev`), catalogue #68 (`d7e67f1`) et #69 (`b75e34b`), sans écart
+    au contrat annoncé.
   - **Pour D** : `PUT /api/v1/facturation/parametres` passe pour un `DIST_DAF` dès le déploiement d'auth (cache de
     60 s compris). **Pour C** : les routes du cabinet de `ged` passent pour l'associé, le collaborateur et l'archiviste
     selon la matrice. **Pour A** : un rôle de plus dans la liste des rôles d'un cabinet (console, AP-38 et suivantes) ;
@@ -2336,6 +2372,16 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une demande « après la fusion de X » peut être servable avant la fin de la story** (STORY-979) : le code de C a
+  été fusionné entre le rituel et les docs. Relire le journal du demandeur et `origin/main` juste avant la PR de docs ;
+  la copie se fait alors dans la même story, après un amendement du contrat annoncé avant sa fusion.
+- **`npm run manifestes:copier` recopie TOUT `manifestes/`** et écrit dans `origine` le SHA du dossier source s'il est
+  un dépôt git : la lancer depuis `_wt-b-stories` en HEAD sur `origin/main` (CRLF sans effet sur les valeurs : la
+  copie faite depuis `git -c core.autocrlf=false archive` est identique hors `origine`), après `manifestes:garde` pour
+  voir d'abord ce qui change.
+- **Un manifeste amendé sans changer de version** (facturation 1.0.0, STORY-1065) n'atteint pas une base de catalogue
+  déjà semée (le semis n'écrit pas une version publiée) : le dire au propriétaire du manifeste.
 
 - **Une construction d'image peut tomber sur le téléchargement du binaire de Confluent** (19/11 : `npm ci` de
   `fiscal-service`, « Client network socket disconnected before secure TLS connection », `node-pre-gyp` puis
