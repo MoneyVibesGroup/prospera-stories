@@ -7,7 +7,11 @@ autour de `POST /installations`, le catalogue de la recette armé pour le moteur
 
 **Épic :** EPIC-145 (le moteur : installation, C13), EPIC-159 (le cabinet installé par le moteur, volet d)
 **Dépôts :** `MoneyVibesGroup/prospera-balance-service`, `MoneyVibesGroup/prospera-bilan-service`,
-`MoneyVibesGroup/prospera-recette` ; le catalogue n'est pas touché (la recette n'exige rien de lui).
+`MoneyVibesGroup/prospera-recette` ; **amendé le 24/11 (lot 6, reprise)** : `prospera-platform-catalog-service` et
+`prospera-admin-panel-service` (le BFF), pour débloquer AP-55 (D-1080-14 → 17).
+**Lot 6 :** ligne n° 1 de B au §5 de `PLAN-LOT-6-2026-11-23.md` (« Fini quand : contrat déjà annoncé (19/11) ;
+recette croisée verte sur pile neuve ; AP-55 débloquée »). balance #159 et bilan #182 sont fusionnés depuis le 19/11 ;
+la recette restait sur une branche locale non poussée (reprise le 24/11).
 **Plage :** reçue de A (lot 4, D-L4-1), ligne n° 10 et dernière du §3 du plan du lot 4.
 **Fini quand (plan) :** balance et bilan servent leurs six routes `…/verifications/…` (contrat
 `verification-installation@1`, comme la comptabilité à 975) ; `cabinet-moteur` installe par `POST /installations` (le
@@ -44,6 +48,7 @@ d'un module DÉJÀ installé (levée de sanction) ne rejoue aucune vérification
 | AC-5 | `cabinet-moteur` installe balance et bilan par `POST /installations` (six vérifications `VERT`, plan `TERMINE`, droit `moteur:<plan>`) ; le test D-929-1 s'inverse ; les six mesures restent `VERT` sur un cabinet qui tient des données (balance validée, jeu d'états validé) ; `conseil` (sans adresse) n'est toujours pas ouvert (FR-6) | recette |
 | AC-6 | Points ouverts soldés : 978 (deux organisations installées par `POST /installations` sans jeton posé à la main ; démarrage réel du catalogue avec `JetonsDuMoteur`) ; 974 (démarrage réel du module d'invitation d'auth et du fournisseur du catalogue) ; 1081 (parcours 923 joué par un collaborateur : son portefeuille, 404 hors portefeuille) ; 1082 (le dossier de démonstration créé par le moteur dans la recette d'essai) | recette |
 | AC-7 | Recette croisée complète verte sur pile neuve, jouée une fois ; tests relancés par chemin, lint, `tsc`, build, mutations rouges sur une assertion | « Preuves » |
+| AC-8 | **AP-55 débloquée (24/11)** : la console lit où en est une organisation qu'elle installe — le catalogue sert `GET /api/v1/console/etat-publie/{organisationId}` (`org:read`, le calcul du contrat sans `utilisateur`), le BFF le relaie en `GET /api/v1/admin/orgs/{orgId}/etat-publie` (projection typée, `org:read`) ; la recette installe une organisation par les relais du BFF (offre, installations, plan) et y lit `EN_SERVICE`, `SUSPENDU`, `NON_INSTALLE` | unitaires ; e2e ; OpenAPI ; recette |
 
 ## Décisions (recommandations appliquées, contestables)
 
@@ -108,6 +113,36 @@ d'un module DÉJÀ installé (levée de sanction) ne rejoue aucune vérification
 - **D-1080-13 — Aucune dépendance, aucun Dockerfile ne change** ; deux modules Nest importent des modules existants
   (balance : `ReadModelsModule`, `IdentiteDossierModule`, `ReferentielModule` ; bilan : `BilanModule`) : le démarrage
   réel est prouvé par la pile.
+
+- **D-1080-14 — (24/11) La console lit l'état publié par une route de plus du catalogue, pas par celle du contrat.**
+  AP-55 (AC-4) dit en une ligne où en est l'organisation ; A a demandé le relais de `GET /etat-publie/{org}` (journal de
+  A, 24/11). Or cette route est réservée à un MEMBRE de l'organisation ou à une identité de service limitée à elle
+  (`ORGANISATION_HORS_JETON`, contrat figé `contrat-etat-publie-v1`) : l'opérateur de Money Vibes n'est membre d'aucune
+  organisation qu'il installe. Plutôt que d'élargir le contrat figé, le catalogue sert
+  **`GET /api/v1/console/etat-publie/{organisationId}`**, de la surface plateforme comme l'offre et les plans
+  (`org:read`, le droit de `GET /offres/{org}`), qui rend **le même calcul** (`LectureEtatPublie`, une seule règle) :
+  la réponse du contrat **sans le bloc `utilisateur`** (l'opérateur n'a aucun droit dans l'instance du client) et sans
+  les `droits` des modules (FR-35) ; aucune double lecture (elle compare les droits d'un membre). Mêmes refus :
+  404 `ORGANISATION_INCONNUE`, 503 `HORLOGE_INDISPONIBLE`, 400 `ORGANISATION_ID_INVALIDE`.
+- **D-1080-15 — (24/11) Le BFF relaie `GET /api/v1/admin/orgs/{orgId}/etat-publie`** (`org:read`, à côté des relais de
+  l'offre et des plans), **projeté champ par champ** (anti-fuite, STORY-378) : `EtatPublieOrganisationDto`
+  (`schemaEtatPublie`, `versionMatrice`, `organisationId`, `espace`, `heureDeReference { instantUtc, statut }`,
+  `modules[] { code, libelle, etat, finLe?, effacementLe?, versionCode?, acquis? }`), publié à l'OpenAPI (A génère ses
+  types). Un état inconnu du BFF se lit `NON_INSTALLE` (règle du contrat pour tout consommateur : il ferme). 404
+  `ORGANISATION_INCONNUE` garde son code (la console propose d'installer) ; les autres refus passent par la traduction
+  générique ; un corps hors contrat ou d'une autre organisation que l'URL rend 503. Au passage, l'OpenAPI de
+  `POST /admin/orgs/{orgId}/installations` publie la forme de `referentiels` (une liste `{ code, version }` par module) :
+  sans elle, le générateur de la console le typait `Record<string, never>` (l'invariant de STORY-181 le voit dès que le
+  contrôleur entre au document).
+- **D-1080-16 — (24/11) La preuve du déblocage est la recette** : dans `cabinet-moteur`, la seconde organisation
+  s'installe **par les relais du BFF** (offre, `POST …/installations`, lecture du plan), et la console lit l'état publié
+  du cabinet (`EN_SERVICE`, puis `SUSPENDU` sous sanction, `EN_SERVICE` à la levée) et de la seconde organisation
+  (`balance` `EN_SERVICE`, `bilan` `NON_INSTALLE`) ; la route du contrat refuse toujours l'opérateur (403
+  `ORGANISATION_HORS_JETON`) et sert le même état au cabinet lui-même.
+- **D-1080-17 — (24/11) Fait dans 1080, pas dans une story neuve** : « AP-55 débloquée » est le « Fini quand » de la
+  ligne du plan, la demande de A passe avant la story, et le catalogue comme le BFF sont des dépôts de B. Leur démarrage
+  réel (un contrôleur de plus dans `EtatPublieModule` ; aucun module Nest, aucune dépendance, aucun Dockerfile neufs)
+  est prouvé par la recette croisée, images reconstruites depuis `origin/dev` après la fusion.
 
 ## Preuves
 
