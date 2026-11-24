@@ -645,9 +645,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1072.md"
     reserved_on: "2026-11-24"
     note: >
-      🚧 EN COURS (2026-11-24) — fiche écrite, contrat annoncé avant le code (journal de D, « ⚠ Contrats »). Demande de B
-      (STORY-1103, prospera-stories #805), placée par D le 24/11. Q-D-13 : D porte prospera-expert-comptable le temps de
-      la story (choix par défaut). Variables du modèle : texte, lienEspace (D-1072-2). NON SLOTTÉE.
+      🏁 DONE le 2026-11-24 — prospera-notification-service#92 (dev 7a11331, 749b3cd), prospera-expert-comptable#11
+      (dev 4154038, b540904) ; annonce « ⚠ Contrats » avant le code (docs #816, main af601d7) et complément D-1072-12
+      avant la fusion de #92 (docs #832, main a61893c). Modèle kyc-dossier-renvoi-correction (texte, lienEspace) ;
+      expert-comptable lit kyc.correction.requested (groupe expert-comptable-kyc) ; ESPACE_KYC_URL facultative. Le
+      journal d'une remise de notification rejoue ses conflits transitoires (D-1072-12 : plus de doublon). Node 24
+      notification 288/288 suites (4233 tests) ; expert-comptable 390 tests ; mutations 18/18, 4/4 et 5/5. Pile grp-d :
+      AC-5 de STORY-1103 vu dans mailhog, pilote 35/35. Demande de B (STORY-1103, #805) servie ; Q-D-13 : D a porté
+      prospera-expert-comptable le temps de la story. NON SLOTTÉE.
   - range: "STORY-1073"
     status: "RÉSERVÉ"
     owner: "Groupe D — la facture lit sa fiche légale : l'identité légale du dossier propre de l'organisation (dossier-service) et les coordonnées de paiement des comptes d'encaissement (paiement) ; le DAF ne choisit plus que le compte imprimé (prospera-ventes-service)"

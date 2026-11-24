@@ -206,6 +206,35 @@
   la passation du bilan ; **STORY-1073** attend B (Q-D-12). Les douze identifiants (1019 → 1023 de C, 1072 → 1078 de D)
   sont réservés au tracker ; la marque haute ne bouge pas.
 
+- **STORY-1072** ✅ 📨 — le cabinet prévenu par e-mail du renvoi de son dossier KYC (demande de B, STORY-1103)
+  (prospera-notification-service#92, `dev` 7a11331, 749b3cd ; prospera-expert-comptable#11, `dev` 4154038, b540904 ;
+  annonce « ⚠ Contrats » #816 avant le code, `main` af601d7, et complément D-1072-12 #832 avant la fusion de #92, `main`
+  a61893c). **`prospera-expert-comptable` porté par D le temps de la story** (Q-D-13, choix par défaut ; le dépôt garde
+  « aucun titulaire »). Rituel (2026-11-24) : la demande de B (#805) est celle-ci ; rien d'autre pour D chez A et C ; B a
+  écrit sa passation de `prospera-bilan-service` (« Passations » de B, dernier commit `7b53ff5`). « Fini quand » fixé par
+  la fiche (D-1072-1).
+  - **`notification`** : modèle système `kyc-dossier-renvoi-correction` (e-mail, `fr`/`en`), variables `texte` (recopié
+    tel quel, D-1103-5) et **`lienEspace`** (pas `lien`, nom réservé aux secrets, D-1072-2) ; `CLES_MESSAGES_KYC` à
+    quatre clés, seul `expert-comptable` le fait partir.
+  - **`expert-comptable`** : le groupe `expert-comptable-kyc` lit aussi `kyc.correction.requested` (aiguillage par
+    topic) ; enveloppe jugée par une fonction pure ; la file d'abord, le marqueur ensuite (D-1072-7) ; une demande par
+    administrateur actif ; `ESPACE_KYC_URL` facultative (absente : pas d'e-mail du renvoi, D-1072-9) ; schéma de kyc
+    copié à l'octet et confronté aux champs lus (D-1072-10).
+  - **Relevé sur la pile et corrigé à la cause (D-1072-12)** : le premier administrateur recevait l'e-mail deux fois — le
+    journal d'une remise déjà acceptée perdait sa transaction sur un conflit d'écriture transitoire avec la préparation
+    du second envoi (même compteur de période), BullMQ rejouait la remise. Le journal rejoue désormais sa transaction
+    (cinq essais) ; vaut pour tous les appelants de `notification`.
+  - Preuves : expert-comptable 390 tests (Node 25, kafkajs), notification **288/288 suites, 4233 tests sous Node 24** ;
+    mutations 18/18, 4/4 et 5/5. Pile `grp-d` (kyc d'`origin/dev`, notification, expert-comptable, Kafka, mailhog, faux
+    JWKS) : **AC-5 de STORY-1103 vu dans mailhog, pilote 35/35** (renvoi par les vraies routes de kyc, deux e-mails mot
+    pour mot 2,2 s après, rejeu muet, fait hors contrat écarté) ; arbres fusionnés identiques aux images testées.
+  - Décisions D-1072-1 → 12 (fiche) ; recette versionnée `expert-comptable/scripts/recette/1072/`. **Verrou Docker : pris
+    à 18:24 (image de kyc), rendu à 18:25 pendant les mutations ; repris à 18:38, rendu à 19:35 ; repris à 19:36, rendu à
+    20:06** (un passage du pilote perdu : Kafka `unhealthy` sous la charge de la suite Node 24 lancée en même temps,
+    piège 1072-2) ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+  - **Suivante : STORY-1076** (les seuils de l'analyse financière, `prospera-bilan-service` ; première story de bilan de
+    D : constater la passation de B, `7b53ff5`, dans « Passations »).
+
 ### Lot 4 (ouvert le 2026-11-18)
 
 - **Plan** : `PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §4 : **STORY-1060 → 1064**, le distributeur au backend (cinq stories ;
@@ -647,7 +676,7 @@
     `parametresVersion` ; un plan créé ailleurs qu'à l'import (EPIC-233) se datera par `dateDuPlanDeJournee`.
   - **Ce qui reste, dans l'ordre conseillé (mis à jour le 2026-11-24, fin du lot 6)** — les restes nommés par les
     fiches 1065 → 1071, puis la liste d'avant (qui garde son historique) :
-    - **Placée** : **STORY-1072** — la demande de B (STORY-1103) : le cabinet prévenu par e-mail d'un renvoi de son
+    - ~~**Placée** : **STORY-1072**~~ **livrée le 2026-11-24** (notification #92, expert-comptable #11) — la demande de B (STORY-1103) : le cabinet prévenu par e-mail d'un renvoi de son
       dossier KYC (modèle `kyc-dossier-renvoi-correction` dans `notification`, consommateur de
       `kyc.correction.requested@1` dans `prospera-expert-comptable`, preuve AC-5 dans mailhog) ; voir « Réponses aux
       demandes reçues ».
@@ -968,6 +997,11 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-24, STORY-1072) : `ESPACE_KYC_URL` sur expert-comptable, et l'e-mail du renvoi est servi** —
+  **information**. Votre STORY-1103 est servie (« Réponses aux demandes reçues ») : l'AC-5 est prouvé dans mailhog. Une
+  pile (recette, compose racine) qui veut l'e-mail du renvoi pose sur `expert-comptable` **`ESPACE_KYC_URL`** (la page
+  KYC de l'app du cabinet, ex. `http://localhost:3100/kyc`) ; absente, cet e-mail n'est pas envoyé (les trois autres,
+  si). Rien à faire dans `kyc-service`.
 - **→ B (2026-11-24, soir ; amendement du lot 6, D-L6-5) : la passation de `prospera-bilan-service` à D** — **ouverte**.
   Le plan amendé fait passer le bilan de B à D pour ce lot (STORY-1074 → 1078 ; 1080 ✅ était la dernière story de B
   dans ce dépôt). Demandé : écrire dans « Passations » du journal de B le dernier commit de B sur `dev`, les PR
@@ -1248,7 +1282,10 @@
 ## Réponses aux demandes reçues
 
 - **← B (2026-11-24, STORY-1103, prospera-stories #805) : consommer `kyc.correction.requested@1` pour prévenir le cabinet
-  par e-mail** — **lue au rituel de 1071 ; placée en STORY-1072** (plage de D, la première hors du lot 6 ; fiche écrite
+  par e-mail** — **servie par STORY-1072** (notification #92, `dev` 7a11331, 749b3cd ; expert-comptable #11, `dev`
+  4154038, b540904) : l'AC-5 de 1103 est prouvé dans mailhog (pilote 35/35, `expert-comptable/scripts/recette/1072/`) ;
+  la variable du lien s'appelle `lienEspace` (D-1072-2) ; une pile qui veut cet e-mail pose `ESPACE_KYC_URL` sur
+  expert-comptable. — Historique : **lue au rituel de 1071 ; placée en STORY-1072** (plage de D, la première hors du lot 6 ; fiche écrite
   juste avant de coder ; le plafond du tracker ne monte qu'à son écriture). Contenu retenu : (1) dans
   `prospera-notification-service` (tenu par D), le modèle **`kyc-dossier-renvoi-correction`** (variables `texte`, déjà
   composé par `kyc`, et `lien`, l'espace du cabinet), à côté des trois modèles KYC du socle ; (2) le **consommateur de
@@ -1332,8 +1369,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-24, STORY-1072) avant la fusion du code (prospera-notification-service `MNV-1072`,
-  prospera-expert-comptable `MNV-1072`). — Le cabinet prévenu par e-mail du renvoi de son dossier KYC (demande de B,
+- **PUBLIÉ (2026-11-24, STORY-1072, prospera-notification-service#92, `dev` 7a11331, 749b3cd ;
+  prospera-expert-comptable#11, `dev` 4154038, b540904) ; ANNONCÉ avant la fusion du code (prospera-stories #816, `main`
+  af601d7 ; complément D-1072-12 #832, `main` a61893c, avant la fusion de #92), sans autre écart. — Le cabinet prévenu par e-mail du renvoi de son dossier KYC (demande de B,
   STORY-1103).** Fiche : `stories/STORY-1072.md` (D-1072-1 → 11). **Ajouts seuls** : aucune clé, aucun texte, aucune
   variable, aucun topic, aucun groupe existant ne change ; `kyc-service` n'est pas touché.
   - **`notification`, modèle système neuf `kyc-dossier-renvoi-correction`** (e-mail seulement, `fr` et `en`), dans la
@@ -2127,6 +2165,8 @@
 
 ## Questions à l'utilisateur ou au PO
 
+- **Q-D-13 — choix par défaut appliqué par STORY-1072 (2026-11-24) : D a porté `prospera-expert-comptable` le temps de
+  la story (#11) ; le dépôt reste sans titulaire.** Énoncé d'origine :
 - **Q-D-13 (2026-11-24, STORY-1071, pour STORY-1072) — Qui tient `prospera-expert-comptable` ?** Le dépôt n'a pas de
   titulaire (plan maître §2) ; la demande de B (STORY-1103) y place le consommateur de `kyc.correction.requested@1`, à
   côté de celui de `kyc.status.changed` (les trois e-mails KYC du cabinet en partent). **Choix par défaut : D le porte**
@@ -2219,6 +2259,24 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1072** :
+  - (1) **Un e-mail envoyé deux fois à un seul des destinataires** : chercher le rejeu côté `notification`, pas chez
+    l'appelant. Le flux `notification:transactionnel:events` (Redis, `XRANGE`) le montre : le travail passe `delayed`
+    juste après une remise acceptée. Cause : une transaction écrite à la main (sans rejeu de
+    `TransientTransactionError`) qui partage un compteur avec une transaction concurrente ; patron :
+    `withTransaction`, ou rejouer sur l'étiquette (D-1072-12). Les journaux de `notification` ne disent rien de
+    l'échec intermédiaire (seul l'échec final est consigné).
+  - (2) **Une suite Node 24 complète lancée en même temps qu'une pile** fait passer Kafka `unhealthy` (son contrôle de
+    santé dépasse son délai) : `up` refuse de lever les services. Jouer la suite, puis la pile.
+  - (3) **L'objet d'un e-mail arrive en mots encodés RFC 2047** (`=?UTF-8?Q?…?= =?UTF-8?Q?…?=`) : l'espace entre deux
+    mots adjacents ne compte pas ; le corps texte est en quoted-printable (décoder en octets, puis UTF-8).
+  - (4) Une mutation qui compare un littéral sans recouvrement (`fait.schemaVersion === -1` sur un type `1`) ou qui
+    lit un champ hors du rétrécissement d'une union (`lecture.raison` dans la branche `lisible`) ne compile pas :
+    garder sur une autre variable (`&& corps.length < 0`). Un texte d'essai sans espaces autour rend la mutation
+    « rogné » équivalente : éprouver « tel quel » avec des espaces.
+  - (5) Un `python - <<'EOF'` qui écrit `\n` dans une chaîne Python d'un fichier CRLF y met des LF seuls (fichier
+    mixte) : passer par l'outil d'écriture ou convertir la fin de ligne du fichier.
 
 - **STORY-1071** :
   - (1) **Une condition de la machine du dossier peut n'être posée par personne** : `EXPERTISE_VALIDEE` était un constat

@@ -1,6 +1,6 @@
 # STORY-1072 : le cabinet prévenu par e-mail du renvoi de son dossier KYC — il lit le mot de l'opérateur et le motif de chaque pièce
 
-Status: in-progress
+Status: done (2026-11-24)
 
 **Demande de :** groupe B, STORY-1103 (prospera-stories #805 ; journal de B, « Demandes aux autres groupes » : « → D
 (2026-11-24, STORY-1103) : consommer `kyc.correction.requested@1` pour prévenir le cabinet ») · **Dépôts :**
@@ -94,7 +94,67 @@ l'e-mail lu dans l'API de mailhog.**
 
 Voir « ⚠ Contrats » du journal de D (2026-11-24, STORY-1072).
 
-## Où en est-on (pour une reprise après interruption)
+## Où en est-on
 
-- Fiche et annonce : cette PR de docs.
-- Code : branches `MNV-1072` de `prospera-notification-service` et `prospera-expert-comptable`.
+**Livrée le 2026-11-24.** Code fusionné en rebase sur `dev` ; docs : cette PR.
+
+## Décision ajoutée en cours de route
+
+- **D-1072-12 — Le journal d'une remise de `notification` rejoue sa transaction sur un conflit transitoire.** Relevé
+  au premier passage du pilote (31/35) : le premier administrateur recevait l'e-mail **deux fois**. Cause mesurée dans
+  la pile (flux d'événements BullMQ de la file `transactionnel`) : la remise du premier envoi, **déjà acceptée par le
+  relais**, passait en `delayed` aussitôt après, puis repartait 2 s plus tard ; le journal de la remise
+  (`JournalRemiseService.dansUneTransaction`, transaction écrite à la main) perdait sa transaction sur un conflit
+  d'écriture avec la préparation du second envoi (même compteur de période, `TransientTransactionError`), l'exécutant
+  échouait et BullMQ rejouait la remise. La préparation rejouait déjà ce conflit (`withTransaction`, mesuré le
+  2026-10-24) ; le journal, non. Corrigé à la cause : la transaction du journal (remise, échec, écart) est rejouée
+  entière sur l'étiquette `TransientTransactionError` (`errorLabels` ou `hasErrorLabel`), cinq essais au plus ; toute
+  autre erreur remonte comme avant. Annoncé avant la fusion (prospera-stories #832). Le défaut valait pour tous les
+  appelants à plusieurs destinataires (les trois e-mails KYC, le paiement, l'assurance).
+
+## Ce qui a été livré
+
+- **prospera-notification-service #92** (`dev` `7a11331`, `749b3cd` ; branche `91b6efb`, `2339228`, arbre identique) :
+  - modèle système **`kyc-dossier-renvoi-correction`** (e-mail, `fr` et `en`) dans la famille KYC du socle, après
+    `kyc-dossier-a-corriger` ; variables `texte` (recopié tel quel) et `lienEspace` (D-1072-2) ; `CLES_MESSAGES_KYC` à
+    quatre clés, seul `expert-comptable` le fait partir ; inventaire écrit en toutes lettres (31) ; spec neuve
+    `src/modules/modeles/socle/kyc-renvoi-correction.spec.ts` ;
+  - D-1072-12 : `src/modules/envois/journal-remise.service.ts` (rejeu du conflit transitoire), quatre tests neufs.
+- **prospera-expert-comptable #11** (`dev` `4154038`, `b540904` ; branche `d1b0847`, `7ad3184`, arbre identique) :
+  - `kyc.correction.requested` lu par le groupe `expert-comptable-kyc` (`kyc-events-consumer.bootstrap.ts`, aiguillage
+    par topic) ; `events/lire-correction-demandee.ts` (enveloppe, pure) ; `KycEventsProjectionService.signalerCorrection`
+    (la file d'abord, le marqueur ensuite) ; le travail `kyc-dossier-renvoi-correction` du worker (admins actifs, `texte`
+    tel quel, `lienEspace`) ;
+  - `ESPACE_KYC_URL` (facultative, `@IsUrl` avec protocole ; `.env.example`) ;
+  - le schéma de kyc copié à l'octet (`test/fixtures/kyc-contrat/`, blob `a1875d5` de `kyc-service` `9cef9cb`, vérifié
+    par le test) ;
+  - recette versionnée `scripts/recette/1072/` (pile, pilote, README ; la clé de l'opérateur reste hors du dépôt).
+- Aucun module, contrôleur, dépendance ni Dockerfile neuf ; `kyc-service` non touché.
+
+## Preuves
+
+| AC | Preuve |
+|---|---|
+| AC-1 | « ⚠ Contrats » du journal de D : #816 (`main` af601d7) avant le code, complément D-1072-12 #832 (`main` a61893c) avant la fusion de #92 |
+| AC-2 | `kyc-renvoi-correction.spec.ts` (contrat, canaux, périmètre : expert-comptable seul, clé normalisée ; rendu fr/en mot pour mot ; refus sans `texte` ou sans `lienEspace` ; un texte qui contient `{{lienEspace}}` reste du texte) ; gardes du socle (inventaire, tranche KYC, secrets) |
+| AC-3 | `notification.processor.spec.ts` (une demande par admin, variables exactes, clé d'idempotence par destinataire, texte tel quel espaces compris) ; pile : deux e-mails, un par administrateur, aucun au collaborateur |
+| AC-4 | `lire-correction-demandee.spec.ts` (23 cas écartés), `kyc-events.projection.correction.spec.ts` (ordre file → marqueur, rejeu, panne de file qui remonte), `kyc-events-consumer.aiguillage.spec.ts` (les deux topics, aiguillage, en-tête `eventId`) ; pile : rejeu du même fait muet, fait sans `texte` écarté et journalisé |
+| AC-5 (de 1103) | pile `grp-d`, **pilote 35/35** : le renvoi joué par les vraies routes de kyc (RCCM rejeté avec motif, Carte CFE sans motif, `request-correction` avec `If-Match`), les deux e-mails lus dans l'API de mailhog 2,2 s après : objet exact, le bloc `Merci de reprendre ces pièces avant vendredi.` / `— RCCM : <motif>` / `— Carte CFE` mot pour mot, le lien `/kyc` ; le texte du fait sur Kafka est celui de l'e-mail |
+| AC-6 | suites existantes vertes ; pile : `kyc.status.changed` (`PENDING_DOCUMENTS`) émis, aucun e-mail de plus |
+
+- **expert-comptable** (Node 25, kafkajs sans binding natif) : 40/40 suites, **390 tests** ; lint des fichiers
+  touchés 0 (le seul écart du dépôt est dans `main.ts`, non touché) ; `nest build` 0 ; **mutations 18/18** tuées sur une
+  assertion (deux reprises après une compilation, trois tests renforcés après trois survivantes : texte rogné en
+  projection et au worker, `ESPACE_KYC_URL` non lue).
+- **notification** (Node 24, étage `verification` de `2339228`) : **288/288 suites, 4233 tests** (1 ignoré), lint 0,
+  build 0 ; mutations 4/4 sur le socle (la cinquième, un canal in-app, rougit au chargement par la garde de cohérence)
+  et **5/5** sur le rejeu du journal.
+- **Pile `grp-d`** : kyc (image d'`origin/dev` `9cef9cb` par `git archive`), notification (`2339228`) et
+  expert-comptable (`d1b0847`, `src` identique à `dev`), Kafka, deux MongoDB, Redis, MinIO, mailhog, faux JWKS ;
+  `docker compose up` sain ; premier passage 31/35 (doublon D-1072-12, décodage d'objet du pilote), **35/35** après
+  correction (aucun travail rejoué au flux BullMQ, deux remises, deux messages). Les arbres fusionnés sur `dev` sont
+  ceux des images (`git diff` vide). Pile descendue avec ses volumes.
+
+## Ce qui reste
+
+- Aucune suite de la story. Une pile qui veut cet e-mail pose `ESPACE_KYC_URL` (information à B, journal de D).
