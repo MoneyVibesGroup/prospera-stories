@@ -15,7 +15,9 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
   n'avait changé).
 - ✅ STORY-1097 (comptabilite #17) et ✅ STORY-1098 (comptabilite #18), livrées le 23/11 (journal de A pour le détail).
 - **Ordre du lot 6 de C** (les dépendances de la fiche de 1100 — 1087, 1088 — passent devant elle) :
-  1. 🟡 **STORY-1099** la mémoire des choix dans les cahiers (balance) : contrat #758 fusionné, code en cours (`MNV-1099`) ;
+  1. ✅ **STORY-1099 DONE (24/11)** : balance-service **#160** (`0ff2402` sur `dev`), contrat #758. Unitaires Node 24
+     5555, intégration Mongo 10/10, e2e 253/253, mutation 5/5, gate `grp-c` vert, verrou pris à A et rendu. Écart au
+     contrat : la mémoire du cabinet est réservée à l'administrateur (D-1099-5, STORY-694) ;
   2. **STORY-1087** la GED s'ouvre au cabinet (document-service) ; Q-SC-5 (quota) : choix par défaut écrit dans la fiche ;
   3. **STORY-1088** l'original papier, et retrouver une pièce (document-service) ;
   4. **STORY-1100** les archives apprennent la façon de classer du cabinet, et reçoivent les factures comptabilisées ;
@@ -685,6 +687,17 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-1099, 24/11) balance-service** : ses sources sont en CRLF dans le checkout ; un script de remplacement doit
+  normaliser `\r\n` en `\n` avant de chercher son motif (sinon « 0 occurrence »), et `eslint --fix` réécrit en LF tout
+  un dossier : ne commiter que les fichiers dont `git diff --ignore-cr-at-eol` montre un vrai changement, **par leur nom**.
+- **(STORY-1099)** L'invariant STORY-694 (`portee-cabinet.invariant.spec.ts`) tient une **liste fermée** des contrôleurs
+  hors `/dossiers/:dossierId` : un contrôleur neuf au niveau du cabinet doit porter `@PorteeDuCabinet()` ET y être
+  inscrit.
+- **(STORY-1099)** Pas de banc sur vrai MongoDB dans balance : un test `*.mongo.spec.ts` sauté sans `MONGODB_URI_TEST`,
+  joué contre un `mongo:7` jetable (`docker run --rm -p 127.0.0.1:27031:27017 mongo:7`), suffit pour l'étanchéité.
+- **(STORY-1099)** Poste saturé (≈ 1 Go libre) : une seule construction d'image à la fois ; Mongo jetable, puis image de
+  vérification, puis gate, l'un après l'autre.
 
 - **Un schéma de fait avec `required` dans un `then`/`else` sans `properties` est refusé par Ajv strict**
   (`strictRequired`) côté service, pas côté plateforme si son test valide en non strict (vu en 1015) : déclarer les
