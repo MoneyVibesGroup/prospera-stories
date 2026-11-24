@@ -28,8 +28,8 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
   - **24/11, consigne de l'utilisateur relayée par A** : A prend `prospera-fiscal-service` pour 323, 320, 322, 328 et le
      rend à C à la fusion de 328 (passation au journal de A). C prend **326** avant 1101. Ordre de C : 1087, 1088, 1100,
      puis, à la reprise du fiscal, 326, 1101, 315, 316 ;
-  3. 🟡 **STORY-1088** l'original papier, et retrouver une pièce (document-service) : fiche écrite et contrat annoncé
-     le 24/11 (`stories/STORY-1088.md`) ;
+  3. ✅ **STORY-1088 DONE (24/11)** : document-service **#31** (`9d0cfd3` sur `dev`), fiche #811, manifeste `ged`
+     1.2.0 #814. Unitaires Node 24 1122, e2e GED 17/17, mutation 6/6, gate `grp-c` vert, verrou cédé par A et rendu ;
   4. **STORY-1100** les archives apprennent la façon de classer du cabinet, et reçoivent les factures comptabilisées ;
   5. **STORY-1101** les déclarations face à la liasse (fiscal) — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
   6. **STORY-315** puis **316** le calendrier fiscal (fiscal) — fiches écrites juste avant.
@@ -195,8 +195,9 @@ seulement.
   `ged:lot:numeriser`, `ged:piece:indexer`, `ged:versement:verser`, `ged:physique:gerer`, `ged:piece:consulter`,
   `ged:sensible:consulter` (et rien d'un autre module). Sans cela, seul un `TENANT_ADMIN` a ces droits (D-1087-4). —
   ouverte.
-- **→ B (24/11, STORY-1087)** : recopier au catalogue le manifeste `ged` **1.1.0** — **le code est fusionné**
-  (document-service #30, `1db0a8f`) ; source : `manifestes/ged.manifest.ts` (`a86e461`). — ouverte.
+- **→ B (24/11, STORY-1087 puis 1088)** : recopier au catalogue le manifeste `ged` — désormais **1.2.0** (code
+  fusionné : document-service #30 `1db0a8f` et #31 `9d0cfd3` ; source `manifestes/ged.manifest.ts`, `4d244e4`). La 1.1.0
+  n'a pas à être semée seule. — ouverte.
 
 - **→ B (2026-11-15) : la garde partagée (STORY-937) et `sinistres-service`** — **information**. Le squelette de
   `prospera-sinistres-service` garde ses modules par un port, `EtatDesModules`, alimenté aujourd'hui par
@@ -246,6 +247,12 @@ seulement.
   `GET /api/v1/sinistres/dossiers/{id}/evaluations`). Même remarque que ci-dessus. — ouverte
 
 ## Réponses aux demandes reçues
+
+- **← A (24/11, STORY-320) : `balance-service` sert la balance de référence de l'exercice, et un résumé sans lignes** —
+  **prise**, non bloquante pour A (le fiscal prend aujourd'hui la plus haute version validée et équilibrée). C la fait
+  après STORY-1100, avant de reprendre le fiscal : (1) une lecture de la balance que le moteur de balance retient pour un
+  exercice (la règle existante de sélection, sans que le fiscal lise l'origine, AD-14) ; (2) une vue résumée de la liste
+  (sans `lignes`), par un paramètre de lecture facultatif. Contrat annoncé avant le code, ici et dans une fiche.
 
 - **← A (24/11) : l'écriture de facture modifiable ligne à ligne** (ticket #762, FE-149) — **close** : livrée par
   comptabilite #19 (`979ed53`). Prise le 24/11 : contrat annoncé
