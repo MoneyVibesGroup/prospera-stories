@@ -630,10 +630,15 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1071.md"
     reserved_on: "2026-11-24"
     note: >
-      🚧 EN COURS le 2026-11-24 — fiche et annonce « ⚠ Contrats » avant le code (deux routes d'écriture neuves, un fait
-      neuf expertises.mission.changed@1, EXPERTISE_VALIDEE calculée, un champ ajouté au dossier et à l'évaluation ; aucun
-      manifeste ne change). Lot D, n° 7 du lot 6, dernière (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-208 ; FR-61, FR-62, FR-67,
-      FR-68, FR-75 ; remplaçante du plan de C). « Fini quand » fixé par la fiche (D-1071-1). NON SLOTTÉE.
+      🏁 DONE le 2026-11-24 — prospera-plateforme#39 (dev 2c96703), prospera-sinistres-service#33 (dev 9c9a997, 1c7b49a,
+      b327f18, 095e577) ; annonce « ⚠ Contrats » avant le code (docs #809, main 77bd6c4 ; aucun manifeste ne change). La
+      mission et sa machine unique en données (treize actes ; désignation par exigerDesignable ; saisi pour le cabinet ;
+      décisions motivées) ; expertises.mission.changed@1 (schéma fermé, neuf champs classés) lu par sinistres ;
+      EXPERTISE_VALIDEE calculée (un dossier sans mission n'est plus bloqué), jugée aussi à l'arrêt ; le chiffrage validé
+      est le repère du montant arrêté (chiffrageDExpertise). Node 24 : 1437 unitaires d'un trait sur MongoDB et Redis
+      réels, 37 e2e ; mutations 22/22 et 5/5 ; plateforme 657. Pile grp-d (Karapace) 27/27, rejouée depuis origin/dev.
+      Lot D, n° 7 du lot 6, dernière : le lot 6 de D est fini, 7/7 (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-208 ; FR-61,
+      FR-62, FR-67, FR-68, FR-75 ; remplaçante du plan de C). « Fini quand » fixé par la fiche (D-1071-1). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"

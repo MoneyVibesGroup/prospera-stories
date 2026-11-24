@@ -1,6 +1,6 @@
 # STORY-1071 : la mission d'expertise — sa machine d'états unique, et l'évaluation qui attend qu'elle soit close
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-208 (les experts et les missions d'expertise) ; **FR-61** (la mission a sa propre machine d'états ;
 `EXPERTISE_VALIDEE`), FR-62 (désigner, décliner), FR-67 (un complément non revenu bloque la validation), FR-68 (délai de
@@ -97,17 +97,86 @@ le fait relu au schéma du registre, l'arrêt refusé puis accepté), rejoué su
 - **D-1071-11 — La mission ne vérifie pas encore son dossier** : `expertises` ne consomme pas encore
   `sinistres.dossier.changed@1` (spine AD-16) ; le `dossierId` est celui donné. Un dossier inconnu de `sinistres` ignore
   le fait (sans effet) ; la portée de l'agent sur le dossier (AD-26) viendra avec ce consommateur : reste.
+- **D-1071-12 — Ce qui reste (la mission (2) et suivantes)**, dans l'ordre conseillé : (1) la contre-expertise qui ouvre
+  sa mission (FR-66 : `CONTRE_EXPERTISE_NON_AUTORISEE`, le cabinet du rapport contesté écarté, la contestée `ARBITREE` à
+  la validation de la contre-expertise) ; (2) le passage outre du `RESP` sur un complément non revenu (FR-67) ; (3) les
+  seuils et le classement de la désignation (FR-62, FR-59 : validation du `RESP` au-delà d'un seuil d'honoraires ou
+  d'enjeu, externe au-delà de 3 000 000, charge des experts) ; (4) `expertises` lit le dossier
+  (`sinistres.dossier.changed@1` : existence, volet, portée, D-1071-11) et la provision pour le budget indicatif
+  (D-1068-11, FR-185) ; (5) le rapport déposé dans `ged` par la mission (`expertises.rapport.depose@1`), les honoraires
+  (cinq montants, visa, FR-68, FR-182), le retard de rapport (FR-184) ; (6) la mission médicale (FR-63, FR-63a,
+  D-1071-5) ; (7) la proposition de l'IA (`SUGGEREE`, FR-58), le portail des cabinets (AD-15), les routes C13 et les
+  six vérifications du manifeste d'`expertises`, l'écran « Missions » du dossier. Le résidu du fil (D-1071-8) reste
+  nommé.
 
 ## Contrat annoncé avant le code
 
-Voir le journal de D, « ⚠ Contrats » (2026-11-24, STORY-1071).
+Voir le journal de D, « ⚠ Contrats » (2026-11-24, STORY-1071) : **annoncé** par prospera-stories #809 (`main` 77bd6c4)
+avant la fusion du code, **publié** sans écart.
 
 ## Où en est-on (pour une reprise après interruption)
 
 - [x] Rituel : plan, règles, journaux de A, B, C, D (une demande neuve de B à D : STORY-1103, placée en 1072) ; fiches
   1013, 1014, 1068 → 1070 ; FR-61 → 68, FR-75.
-- [ ] Plateforme : schéma et registre (`MNV-1071`).
-- [ ] Code : `prospera-sinistres-service` `MNV-1071`.
-- [ ] Preuves sans Docker (Node 25) ; annonce fusionnée avant le code.
-- [ ] Sous le verrou : Node 24, pile `grp-d`, mutations.
-- [ ] PR de code fusionnées ; rejeu sur `origin/dev` ; PR de docs finale.
+- [x] Plateforme : schéma et registre (`MNV-1071`) ; PR #39.
+- [x] Code : `prospera-sinistres-service` `MNV-1071` ; PR #33.
+- [x] Preuves sans Docker (Node 25) : specs pures et bancs mémoire, lint des fichiers touchés, `tsc`, mutations 22/22 ;
+  annonce fusionnée avant le code (#809, `main` 77bd6c4).
+- [x] Sous le verrou (pris à 15:19) : Node 24 (lint, unitaires d'un trait, e2e, build), plateforme sous Node 24,
+  mutations MongoDB 5/5, pile `grp-d` 27/27.
+- [x] PR de code fusionnées (plateforme #39, `dev` 2c96703 ; sinistres #33, `dev` 9c9a997 → 095e577) ; rejeu sur
+  `origin/dev` ; PR de docs finale.
+
+## Ce qui a été livré
+
+**2026-11-24** — trois PR fusionnées en « Rebase and merge » :
+
+- prospera-stories **#809** (`main` 77bd6c4) : la fiche, l'entrée du tracker et l'annonce « ⚠ Contrats », **avant le code**.
+- prospera-plateforme **#39** (`dev` **2c96703**) : `contrats/assurance/expertises/mission.changed.schema.json` (fermé :
+  `missionId`, `dossierId`, `versionObjet`, `etat`, `type`, `bloquante`, `chiffrage` et `devise` ensemble, `changeeLe`),
+  neuf champs classés au registre `classification-sante` (module `expertises`), `test/faits-mission.test.ts` (Ajv
+  strict), README.
+- prospera-sinistres-service **#33** (`dev` **9c9a997**, 1c7b49a, b327f18, 095e577) :
+  - `expertises/missions/` : `machine-des-missions-2026.1.json` (empreinte figée) ; `missions.ts` (pur : `jugerLaCreation`,
+    `refusDuRoleEtDuGraphe`, `jugerLActe`, `vueDeLaMission`, `chargeDuFaitDeMission`) ; `depot-missions.ts` (port et
+    mémoire) et `depot-missions.mongo.ts` (`expertises_missions`, `expertises_commandes_missions`, transaction + outbox) ;
+    `missions.service.ts` (rejeu reconnu d'abord ; rôle et graphe jugés avant le référentiel ; `exigerDesignable`) ;
+    `missions.controller.ts` (deux écritures, deux lectures) ; câblage dans `ExpertisesModule`.
+  - `kafka/outbox/topics.ts` : `ExpertisesTopic.MISSION_CHANGED` ; invariants `topics-publies` (le manifeste de chaque
+    module) et `faits-au-contrat` (le fait de la mission valide en Ajv strict) ; copie à l'octet du schéma
+    (`contrat/schemas/expertises.mission.changed.json`, origine `prospera-plateforme@2c96703`).
+  - `sinistres/missions/` : `missions-du-dossier.ts` (pur : lecture du fait, rangement, `missionsEnAttente`,
+    `expertiseValidee`, `chiffrageDExpertise`) et `consommateur-missions.service.ts` ; `DossiersService.appliquerMissionChangee`
+    (commande du système, piste `MISSION_CHANGEE`) ; `missions` au dossier (schéma `Mixed`, lecture) ; machine :
+    `EXPERTISE_VALIDEE` calculée, la raison nomme la mission ; arrêt : `EXPERTISE_VALIDEE` (409) et le repère
+    (`chiffrageDExpertise`).
+  - Tests : `missions.spec.ts` (24), `missions.service.spec.ts` (8 × 2 dépôts), `missions.invariant.spec.ts`,
+    `missions-du-dossier.spec.ts` (9), `expertise.spec.ts` (9), trois tests de service × 2 dépôts, quatre de la machine,
+    l'invariant de fait, `test/missions.e2e-spec.ts` (3) ; recette versionnée `scripts/recette/1071/`.
+
+## Preuves
+
+- **Node 25** (poste, sans Docker) : les specs neuves et les bancs mémoire verts ; la suite unitaire hors binding natif
+  1250/1250 ; lint des fichiers touchés (règle `endOfLine: auto`) 0 ; `tsc --noEmit` 0.
+- **Node 24** (étage `verification`, image depuis `git -c core.autocrlf=false archive` de la branche, MongoDB en jeu de
+  répliques et Redis réels) : lint 0 ; **suite unitaire complète d'un trait (`-w 2`) 1437/1437, 73/73 suites, 140 s, aucun
+  délai de crochet** ; e2e **37/37** (5 suites) ; build 0.
+- **Plateforme** (Node 24, `node:24-slim` sur l'export) : `npm test` 657 tests, 0 échec ; `typecheck` 0 ; mutation du
+  registre (`chiffrage` déclassé) : rouge.
+- **Mutations** (sur l'assertion ; trois réécrites qui ne compilaient pas, piège 1071-2) : **22/22** pures et bancs
+  mémoire (graphe, rôle, compte de l'expert, motif, expert décliné, externe imposé, complément, chiffrage retenu, délai,
+  chiffrage avant clôture, rejeu, fait publié, domaine jugé, lecture de l'expert, transition 7, arrêt, repère, copie du
+  repère, fait incohérent, version égale, annulée au repère, mission rangée) ; **5/5** sur MongoDB réel.
+- **Pile `grp-d`** (sinistres + Kafka + Karapace + MongoDB + Redis ; §1.5 : modules Nest changés) : `docker compose up`
+  sain ; **pilote 27/27** : six sujets enregistrés (BACKWARD), témoins compatible et incompatible, garde
+  `classification-sante` 0 refus ; la mission lue par `sinistres` en **0,3 s** ; arrêt refusé `EXPERTISE_VALIDEE` (la
+  mission nommée) ; sept actes jusqu'à `VALIDEE` (saisis pour le cabinet) ; arrêt au décompte refusé `MOTIF_ECRIT`
+  (repère 395 500), arrêt au chiffrage accepté et copié ; transition 7 sans constat posé ; un dossier sans mission passe
+  la transition 7 ; huit faits valides au schéma relu du registre ; ni domaine, ni texte, ni expert nommé ; outbox vide,
+  santé 200, journal sans erreur.
+- **Rejeu sur `origin/dev`** (`095e577`, images depuis l'export, `--no-cache`, volumes neufs) : lint 0, **unitaires 1437/1437 (73 suites) d'un trait, 0 délai, 73 s**, e2e 37/37, build 0 ; pile `grp-d` : `docker compose up` sain, **pilote 27/27** (mission lue en 0,8 s).
+- Verrou Docker : pris à 15:19, une seule prise, rendu à 15:46 ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+
+**Reste** (D-1071-12) : la contre-expertise qui ouvre sa mission, le passage outre du `RESP`, les seuils de la
+désignation, la lecture du dossier et de la provision par `expertises`, le rapport dans `ged` et les honoraires, la
+mission médicale, l'IA, le portail, les routes C13 et l'écran.
