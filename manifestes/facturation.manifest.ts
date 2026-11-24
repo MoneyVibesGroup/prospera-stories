@@ -1,3 +1,4 @@
+// Amendé le 2026-11-24 (STORY-1065) : C7, + `facturation:parametres:modifier` (les paramètres versionnés de la facture : fiche de l'émetteur, liste de travail des mentions légales, durée du lien public ; D-1065-2, D-1065-12).
 // Amendé le 2026-11-18 (STORY-1062) : C5, + `commande.commande.annulee@1` consommé (une commande annulée ne se facture plus, FR-35).
 // Amendé le 2026-11-17 (STORY-1059) : C5, + `facturation.serie.changed@1` publié (tête de la série des factures, AD-5) et + `commande.commande.chiffree@1` consommé (la facture d'une commande validée, AD-3, AD-29).
 // Amendé le 2026-11-14 : faits de l'IA commune (spine de l'IA commune, AD-14, AD-39, AD-47) : clause `ia` en `capacites` (`secteur/code@majeure`), fait `<module>.realite.constatee@1`, consommation de `ia.proposition.statut.change@1` et `ia.capacite.changed@1`.
@@ -112,6 +113,11 @@ export const MANIFESTE_FACTURATION = {
     'facturation:proforma:gerer', // créer, envoyer, relancer, convertir en commande (FR-54 → FR-56)
     'facturation:balance:consulter', // balance clients et balance âgée, lues chez `paiement` (FR-50, FR-51)
     'facturation:numerotation:administrer', // initialisation de la suite par la reprise, une fois ; droit restreint (FR-217)
+    // Droit propre, STORY-1065 (D-1065-12 ; absent de l'annexe B.2, comme commande:parametres:modifier et
+    // terrain:parametres:modifier) : changer les paramètres versionnés de `facturation` (AD-12) — la fiche de
+    // l'émetteur imprimée sur chaque facture, la liste de travail des mentions légales (FR-44, A-1), la durée du
+    // lien public (AD-33) et la durée de conservation (NFR-10). Rôle par défaut proposé : DAF.
+    'facturation:parametres:modifier',
   ],
 
   // C5 : faits publiés et consommés (annexe A.2). Chaque fait d'objet porte l'identifiant stable de l'objet,

@@ -538,6 +538,15 @@ reserved_ranges:
       reseau, vecteurs figés (générateur, ventes). Node 24 : plateforme 647 tests (646 pass, 1 sauté, 0 fail), générateur 48/48, jeu:verifier 3/3 ;
       ventes 58/58 suites, 602 tests ; mutations 11/11 et 3/3. Part de D de l accord de l utilisateur sur B8 (18/11) ; la pose par le
       catalogue reste à B. Lot D, n° 5 du lot 4, dernier (EPIC-226, FR-21). NON SLOTTÉE.
+  - range: "STORY-1065"
+    status: "RÉSERVÉ"
+    owner: "La facture juste (3) — les mentions légales de chaque facture (liste de travail jusqu'à A-1, paramètre versionné ; MENTION_OBLIGATOIRE_MANQUANTE sans numéro consommé), son PDF figé (asynchrone, déterministe, polices embarquées, empreinte SHA-256) et son lien public d'envoi (AD-33) (prospera-ventes-service, module facturation)"
+    source_doc: "prospera-stories/stories/STORY-1065.md"
+    reserved_on: "2026-11-24"
+    note: >
+      🚧 EN COURS le 2026-11-24 — annonce « ⚠ Contrats » avant le code (manifeste facturation amendé, C7 : +
+      facturation:parametres:modifier). Lot D, n° 1 du lot 6 (PLAN-LOT-6-2026-11-23.md §6 ; EPIC-230 ; FR-44, FR-46,
+      FR-47, AD-33). NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
