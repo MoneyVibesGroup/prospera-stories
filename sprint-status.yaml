@@ -680,11 +680,13 @@ reserved_ranges:
   - range: "STORY-1076"
     status: "RÉSERVÉ"
     owner: "Groupe D — les seuils de l'analyse financière, sourcés et versionnés dans le paquet (aucun dans @2.2 ni @2.3) : FE-141 affiche ses verdicts (prospera-bilan-service)"
-    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    source_doc: "prospera-stories/stories/STORY-1076.md"
     reserved_on: "2026-11-24"
     note: >
-      Amendement du lot 6 (24/11 soir, D-L6-5). Source : journal de A, 24/11 (FE-141) ; STORY-552. Fiche à écrire juste avant
-      de coder ; sans source, une question au PO avec le choix par défaut. Lot D, n° 8 du lot 6. NON SLOTTÉE.
+      🚧 EN COURS (2026-11-24) — fiche écrite, contrat annoncé avant le code (journal de D, « ⚠ Contrats »). Passation de
+      prospera-bilan-service constatée (origin/dev 7b53ff5). Trois repères sourcés (BCEAO, accords de classement, mars
+      2020) dans syscohada-revise@2.1, @2.2, @2.3 et zone-franche-togo@1.0 ; les seize autres indicateurs sans source :
+      Q-D-14 (défaut : aucun repère). Recopie dans balance-service demandée à C. Lot D, n° 8 du lot 6. NON SLOTTÉE.
   - range: "STORY-1077"
     status: "RÉSERVÉ"
     owner: "Groupe D — le contrôle « capitaux propres < ½ capital » (AUSCGIE 371-373 SARL, 664-669 SA) et son échéance légale (prospera-bilan-service)"

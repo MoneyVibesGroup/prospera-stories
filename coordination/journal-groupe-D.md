@@ -614,6 +614,16 @@
 
 ## Passations
 
+- **← B, `prospera-bilan-service`, constatée par D au rituel de 1076, le 2026-11-24** (lot 6 amendé, D-L6-5 ; passation
+  de B du 24/11, « Passations » de son journal, prospera-stories #820). Constat de la sous-session de 1076 :
+  `origin/dev` = **`7b53ff5`** (MNV-065), **exactement le SHA de la passation** ; `gh pr list --state open` : aucune PR
+  ; le checkout du poste (`bilan-service`) était sur `dev` à `7b53ff5`, propre hormis les deux brouillons connus
+  `cr-map.txt` et `cr-postes.txt` (non suivis, laissés). Repris de la passation : le garde des noms de schéma
+  (D-1084-17), le modèle de projection 1.14.0, la `version` de la liasse rouverte, les trois vérifications
+  d'installation ; les pièges (15 suites rouges connues sous Node 25, CRLF des JSON d'un worktree, fixture de
+  `bilan-export.e2e`, plan d'effacement C13, mutations longues). À reprendre (plan §6) : 1076 → 1077 → 1078 → 1074 →
+  1075.
+
 - **← C, `prospera-sinistres-service` et `prospera-assurance-service`, constatée par D au rituel de 1068, le 2026-11-24**
   (lot 6, D-L6-3 ; passation de C du 2026-11-23, « Passations » de son journal). Constat de la session de groupe à 11:06,
   revérifié par la sous-session de 1068 : `origin/dev` de sinistres = **`ea1a111`** (MNV-1016), d'assurance =
@@ -1002,7 +1012,14 @@
   pile (recette, compose racine) qui veut l'e-mail du renvoi pose sur `expert-comptable` **`ESPACE_KYC_URL`** (la page
   KYC de l'app du cabinet, ex. `http://localhost:3100/kyc`) ; absente, cet e-mail n'est pas envoyé (les trois autres,
   si). Rien à faire dans `kyc-service`.
-- **→ B (2026-11-24, soir ; amendement du lot 6, D-L6-5) : la passation de `prospera-bilan-service` à D** — **ouverte**.
+- **→ C (2026-11-24, STORY-1076) : recopier à l'octet dans `prospera-balance-service` les trois paquets SYSCOHADA
+  révisé** (`syscohada-revise-2.1/2.2/2.3.json`, bloc `seuils` peuplé, révision en place D-1076-2) et leurs empreintes
+  (registre, `ARTEFACTS_PARTAGES`) — **ouverte**. Ticket : `tickets/TICKET-BACKEND-balance-recopie-paquets-syscohada-seuils-1076.md`
+  (empreintes d'avant et d'après). `balance-service` ne lit pas `seuils` : rien ne casse en service ; sa garde « octets
+  identiques à ceux de bilan-service » rougit tant que la recopie n'est pas faite, sur un poste où les deux dépôts sont
+  côte à côte. D ne touche pas à `balance-service` (D-L6-5).
+- **→ B (2026-11-24, soir ; amendement du lot 6, D-L6-5) : la passation de `prospera-bilan-service` à D** — **servie**
+  (← B, 24/11, prospera-stories #820 ; constatée par STORY-1076, voir « Passations »).
   Le plan amendé fait passer le bilan de B à D pour ce lot (STORY-1074 → 1078 ; 1080 ✅ était la dernière story de B
   dans ce dépôt). Demandé : écrire dans « Passations » du journal de B le dernier commit de B sur `dev`, les PR
   ouvertes s'il y en a, et les pièges à lire ; B n'y touche plus pendant le lot 6. D commence par 1072 (hors bilan) et
@@ -1368,6 +1385,24 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-24, STORY-1076) avant la fusion du code (prospera-bilan-service `MNV-1076`). — Les seuils de
+  l'analyse financière, sourcés (BCEAO), dans les paquets SYSCOHADA révisé : FE-141 reçoit des verdicts.** Fiche :
+  `stories/STORY-1076.md` (D-1076-1 → 8, Q-D-14). **Aucune route, aucun champ, aucune valeur d'énumération ne change** :
+  le contrat de `GET|POST …/bilan/analyse` (STORY-552/553) est inchangé ; ce qui change, c'est son **contenu**.
+  - **Réponse d'analyse** (`/dossiers/{id}/bilan/analyse` et `…/analyse/dry-run`, paquets `syscohada-revise@2.1`,
+    `@2.2`, `@2.3`, `zone-franche-togo@1.0`) : trois indicateurs portent désormais `seuilApplique` (non `null`) et un
+    `verdict` (`BON` ou `RISQUE`, `motifVerdict: null` ; `VALEUR_INDETERMINEE` si la valeur est `null`) :
+    `POIDS_CAPITAUX_PROPRES` (RISQUE < 20 ≤ BON), `LIQUIDITE_GENERALE` (RISQUE < 1 ≤ BON), `MARGE_NETTE` (RISQUE < 0 ≤
+    BON), `secteurRetenu: "TOUS"`, `source` = la procédure BCEAO de mars 2020 (paragraphe, phrase, URL). Les **seize
+    autres** gardent `seuilApplique: null`, `AUCUN_REPERE_DECLARE` (Q-D-14). Aucune **valeur** ne change. Pour FE-141
+    (A) : les verdicts sont servis ; seuls deux niveaux sortent (D-1076-3) ; les repères d'exemple de la maquette
+    (D-M141-1) peuvent céder la place aux vrais sur ces trois lignes.
+  - **Empreintes des paquets** (révision en place, D-1076-2 ; liasse produite inchangée) : `syscohada-revise@2.1`
+    `abaffa01…`, `@2.2` `8b6255f7…`, `@2.3` `7a39c0da…`, `zone-franche-togo@1.0` `11f60ebc…`. Le `stamp` de l'analyse
+    les publie ; une liasse figée avant la story se relit avec `memePaquet: false` (comme après 552).
+  - **`balance-service` (C)** : recopie à l'octet des trois `syscohada-revise` demandée (« Demandes aux autres
+    groupes », ticket) ; sans effet en service.
 
 - **PUBLIÉ (2026-11-24, STORY-1072, prospera-notification-service#92, `dev` 7a11331, 749b3cd ;
   prospera-expert-comptable#11, `dev` 4154038, b540904) ; ANNONCÉ avant la fusion du code (prospera-stories #816, `main`
@@ -2164,6 +2199,16 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-14 (2026-11-24, STORY-1076) — Les repères de l'analyse financière sans source citable.** Seuls trois des 19
+  indicateurs ont une norme publiée par une source citable sur la même formule (BCEAO, accords de classement, mars
+  2020 : autonomie financière ≥ 20 %, liquidité générale ≥ 1, marge nette positive) ; ils sont livrés. **Choix par
+  défaut appliqués :** (1) les seize autres restent **sans repère** (« aucun repère déclaré ») jusqu'à une source
+  citable par indicateur (exigences écrites d'une banque, Q-SC-1 / STORY-1085 ; étude sectorielle BCEAO ou INSEED ;
+  validation écrite d'un expert-comptable inscrit) ; (2) **pas** de 20ᵉ indicateur « capacité de remboursement à la
+  formule BCEAO » (dettes financières / CAFG ≤ 4 ; l'indicateur publié divise par l'EBE, D-1076-8) ; (3) la norme de
+  liquidité s'applique **à tous les secteurs**, télécommunications comprises (la BCEAO cite leur « cas particulier »
+  sans le chiffrer). Détail : `stories/STORY-1076.md`.
 
 - **Q-D-13 — choix par défaut appliqué par STORY-1072 (2026-11-24) : D a porté `prospera-expert-comptable` le temps de
   la story (#11) ; le dépôt reste sans titulaire.** Énoncé d'origine :
