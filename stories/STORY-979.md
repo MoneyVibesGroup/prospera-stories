@@ -1,6 +1,6 @@
 # STORY-979 : les droits de la facture et des archives du cabinet au catalogue de tenant d'auth
 
-Status: in-progress (rouverte le 2026-11-24 pour sa suite : « Suite du 2026-11-24 », en fin de fiche)
+Status: done (rouverte et refermée le 2026-11-24 pour sa suite : « Suite du 2026-11-24 », en fin de fiche)
 
 **Complexité :** faible (huit droits neufs au catalogue de tenant, hors du jeton ; un rôle du socle neuf ; une ligne
 d'ajout à l'annexe B ; la copie des manifestes du catalogue ; aucun champ, aucune route, aucun topic)
@@ -232,3 +232,48 @@ aussi celle de `main`.
 - **D-979-16 — Aucun contrat ne change de forme.** Le jeton ne change pas ; `moi-droits` reste en 1.1.0 (seules les
   valeurs de `droitsHorsJeton` du DAF changent) ; `identity.droits.changed@1` ne porte aucun droit. Annoncé quand même
   dans « ⚠ Contrats » avant la fusion (valeur visible de D, droit neuf visible de la console).
+
+### Livraison de la suite
+
+Toutes fusionnées en « Rebase and merge », `merged = true`, `head.sha` = SHA poussé, arbre de la branche identique à
+`dev` après rejeu :
+
+- **auth #49** : **`b49d8ab` sur `dev`** (tête de la PR `b9732be`). Fichiers : `src/common/rbac/droits-hors-jeton.ts`,
+  `src/modules/rbac/table-d-acces-distributeur.ts` (`AJOUTS_A_L_ANNEXE_B`) ; tests du catalogue, de la table d'accès
+  du distributeur, de la résolution et du catalogue de composition.
+- **catalogue #71** : **`de988b1` sur `dev`** (tête `f9a4ecb`) — `copies.json` depuis `prospera-stories@24049e4`
+  (`facturation` 1.1.0, `droits[7]`).
+- Contrat annoncé avant la fusion : stories #789 (fiche, tracker rouvert, « ⚠ Contrats »), `a0f49f0` sur `main`.
+- D prévenue directement (session du groupe D) avec les n° de PR et les SHA sur `dev`.
+
+### Preuves de la suite
+
+- **Sans Docker** (D-979-15) : aucun module, aucune dépendance, aucun Dockerfile touchés ; verrou non pris.
+- **Auth, Node 25, tests relancés par chemin** (`src/common/rbac`, `src/modules/rbac`, `droits`,
+  `organization-roles`, `tenant-roles`, `admin`, `memberships`) : **36 suites, 592/592**. Ce qu'ils vérifient :
+  - `facturation:avoir:valider` au catalogue, hors du jeton, au format, 25 caractères, module et libellé écrits en
+    toutes lettres ; la section `facturation` du catalogue = les huit `droits` du manifeste 1.1.0, dans son ordre ;
+    catalogue 165 codes (24 + 141) ;
+  - le droit détenu par `DIST_DAF` et par lui seul, qui détient aussi `facturation:avoir:emettre` ; la résolution le
+    met dans `droitsHorsJeton` du DAF, ni dans `perms[]` ni dans `droits` ; le comptable, le DG et l'administrateur ne
+    l'ont pas ; un ajout n'est pas une ligne de l'annexe ;
+  - le catalogue de composition d'un rôle offre le code neuf, indisponible tant que le module n'est pas souscrit.
+- **Auth, suite complète (Node 25)** : 102 suites, **1 448 passés** (1 445 + 3), 4 suites rouges connues (binding
+  natif de Confluent : `app-cablage.invariant.spec.ts` et les trois `src/kafka/*`). `tsc --noEmit`, lint des six
+  fichiers touchés et build : verts.
+- **Auth, mutations : 5/5 rouges sur assertion**, aucune par compilation : le droit à personne (4 tests), aussi au
+  comptable (3), au DG au lieu du DAF (4), le libellé changé (2), le droit placé avant les paramètres (l'ordre du
+  manifeste, 2).
+- **Catalogue, Node 25** : `manifestes:garde` **rouge avant la copie** (`facturation` : `droits[7]`, `version`),
+  **verte après (48)**, contre `24049e4` puis contre `origin/main` (`a0f49f0`) ; sha256 du manifeste vérifié sur le
+  blob et sur l'extraction LF ; les deux copies (worktree en CRLF, `git archive`) identiques hors `origine` ;
+  catalogue, installation, entitlements, packs : 48 suites, 777/777 ; suite complète 104 suites, **1 607 passés**,
+  3 suites rouges connues (binding de Confluent).
+- **Copies entre dépôts** : le code lu par D (`DROIT_DE_VALIDATION_DE_L_AVOIR` sur `dev` de ventes, `adaa2bb`) est
+  celui d'auth, à l'octet.
+
+### Pour la suite
+
+- **D** : un avoir au-delà du seuil passe pour un `DIST_DAF` sur une image d'auth reconstruite depuis `dev` (cache de
+  60 s compris) ; un catalogue déjà semé reçoit `facturation` 1.1.0 à son prochain démarrage (D-979-13).
+- **B** : le consommateur de `facturation.avoir.emis@1` dans `paiement` (D-979-14), story neuve après le lot 6.
