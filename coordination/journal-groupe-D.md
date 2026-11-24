@@ -1332,6 +1332,26 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-24, STORY-1072) avant la fusion du code (prospera-notification-service `MNV-1072`,
+  prospera-expert-comptable `MNV-1072`). — Le cabinet prévenu par e-mail du renvoi de son dossier KYC (demande de B,
+  STORY-1103).** Fiche : `stories/STORY-1072.md` (D-1072-1 → 11). **Ajouts seuls** : aucune clé, aucun texte, aucune
+  variable, aucun topic, aucun groupe existant ne change ; `kyc-service` n'est pas touché.
+  - **`notification`, modèle système neuf `kyc-dossier-renvoi-correction`** (e-mail seulement, `fr` et `en`), dans la
+    famille KYC du socle, après `kyc-dossier-a-corriger`. Variables **obligatoires** : **`texte`** (le texte composé par
+    kyc, recopié tel quel, D-1103-5) et **`lienEspace`** (la page KYC de l'espace du cabinet ; **pas `lien`**, nom réservé
+    aux secrets dans ce service, D-1072-2). Aucun secret. **Route directe** (`POST /api/v1/service/envois`) : le périmètre
+    d'`expert-comptable` (`CLES_MESSAGES_KYC`) passe de trois à quatre clés ; aucun autre appelant ne la fait partir.
+    `CLES_MODELES_SYSTEME` passe de 30 à 31 (inventaire écrit en toutes lettres).
+  - **`expert-comptable`, consommateur** : le groupe existant **`expert-comptable-kyc`** s'abonne aussi à
+    **`kyc.correction.requested`** (v1, schéma de kyc ; `fromBeginning`), et rien ne change pour `kyc.status.changed`. Un
+    fait valide (`schemaVersion` 1, `eventId`, `orgId`, `texte` non vide, `occurredAt`) devient une demande d'envoi par
+    administrateur actif du cabinet (clé d'idempotence par destinataire, comme 590) ; un fait hors contrat est écarté et
+    journalisé ; un rejeu n'envoie rien de plus ; une panne de la file fait rejouer Kafka (D-1072-7). Marqueur
+    d'idempotence dans la collection existante `processed_kyc_events`.
+  - **`expert-comptable`, variable d'environnement neuve `ESPACE_KYC_URL`** (facultative ; URL avec protocole ; exemple
+    `http://localhost:3100/kyc`). **Absente : l'e-mail du renvoi n'est pas envoyé** (travail arrêté sur une erreur nommée)
+    ; les trois e-mails existants n'en dépendent pas (D-1072-9). Une pile qui veut cet e-mail la pose.
+
 - **PUBLIÉ (2026-11-24, STORY-1071, prospera-plateforme#39, `dev` 2c96703 ; prospera-sinistres-service#33, `dev`
   9c9a997, 1c7b49a, b327f18, 095e577) ; ANNONCÉ avant la fusion du code (prospera-stories #809, `main` 77bd6c4), sans
   écart ; schéma enregistré dans Karapace (sujet neuf, BACKWARD) et accepté par la garde `classification-sante`. —

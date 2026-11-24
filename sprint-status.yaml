@@ -642,11 +642,12 @@ reserved_ranges:
   - range: "STORY-1072"
     status: "RÉSERVÉ"
     owner: "Groupe D — le cabinet prévenu par e-mail d'un renvoi de son dossier KYC : modèle kyc-dossier-renvoi-correction (prospera-notification-service), consommateur de kyc.correction.requested@1 (prospera-expert-comptable), preuve AC-5 dans mailhog"
-    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    source_doc: "prospera-stories/stories/STORY-1072.md"
     reserved_on: "2026-11-24"
     note: >
-      Demande de B (STORY-1103, prospera-stories #805), placée par D le 24/11 (journal de D). Q-D-13 : qui tient
-      prospera-expert-comptable (défaut : D le porte). Fiche à écrire juste avant de coder. NON SLOTTÉE.
+      🚧 EN COURS (2026-11-24) — fiche écrite, contrat annoncé avant le code (journal de D, « ⚠ Contrats »). Demande de B
+      (STORY-1103, prospera-stories #805), placée par D le 24/11. Q-D-13 : D porte prospera-expert-comptable le temps de
+      la story (choix par défaut). Variables du modèle : texte, lienEspace (D-1072-2). NON SLOTTÉE.
   - range: "STORY-1073"
     status: "RÉSERVÉ"
     owner: "Groupe D — la facture lit sa fiche légale : l'identité légale du dossier propre de l'organisation (dossier-service) et les coordonnées de paiement des comptes d'encaissement (paiement) ; le DAF ne choisit plus que le compte imprimé (prospera-ventes-service)"
