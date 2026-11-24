@@ -42,6 +42,8 @@
        1.1.0** après la fusion de C, dans la même story (D-979-8) ; `manifestes:garde` verte (48).
      Node 25 : auth 38 suites 677/677, complète 1 445 passés (4 suites rouges connues), câblage vert (binding doublé) ;
      catalogue 1 597 passés (3 connues) ; 12/12 mutations. **Sans Docker** (D-979-9) : verrou non pris.
+  - 🟡 **STORY-1112 en cours (24/11)** : fiche `stories/STORY-1112.md`, contrat annoncé (« ⚠ Contrats ») avant le
+    code ; branches `MNV-1112` du BFF et du catalogue.
   - **Suivante : STORY-1112** (le BFF relaie les essais d'un prospect, `/essais` ; AP-57 ; rien d'autre n'est demandé à
     B au 24/11, après ce correctif). La demande de A du 24/11
     (journal de A, « Lot 6 ») en donne le détail : relais de `POST /essais`, `GET /essais/{org}`, prolongation,
@@ -1156,6 +1158,49 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-24, STORY-1112 (lot 6, n° 2) — les essais d'un prospect relayés à la console, annoncés AVANT la fusion du
+  code** (`prospera-platform-catalog-service` et `prospera-admin-panel-service`, branches `MNV-1112` ; fiche
+  `stories/STORY-1112.md`). **Ajouts seuls** : aucune route, aucun champ, aucun code existant ne change.
+  - **Catalogue, contrat `contrat/essai-prospect.openapi.json` 1.0.0 → 1.1.0** (deux lectures, `org:read`, aucune
+    vérification d'espace ; même solution que D-1080-14) :
+    - `GET /api/v1/essais?statut=OUVERT|SIGNE|EFFACE` → `{ essais: [...], tronquee }` : chaque essai à la forme de
+      `GET /essais/{organisationId}` (`EssaiProspect`), plus **`prospect { nom, vertical, pays? }`** lu dans sa
+      naissance de l'espace d'essai ; par `finLe` croissante, 200 au plus (`tronquee: true` au-delà) ;
+    - `GET /api/v1/jeux-demonstration` → `{ jeux: [{ code, version, verticale, titre, parts: [{ module,
+      enregistrements }] }] }` : les jeux chargés par le registre (`JEUX_DEMONSTRATION_DIR`), triés par code puis
+      version.
+  - **BFF, OpenAPI (A génère ses types de la console depuis lui)** — huit routes neuves sous **`/api/v1/admin/essais`**
+    (lire : `org:read` ; écrire : `entitlement:grant`) :
+    - `GET /admin/essais?statut=` → `EssaisDto { essais: EssaiDto[], tronquee }` ;
+    - **`POST /admin/essais`** (`OuvrirEssaiRequestDto` : `organisationId` 24 hexadécimaux choisi une fois par la
+      console, `nom`, `vertical`, `pays?`, `administrateur`, `commercial`, `langue?`, `avecJeu?` vrai par défaut) :
+      le jeu du métier choisi par le BFF (D-1112-4), `POST /naissances` puis `POST /essais` ; 201 ouvert par cet ordre,
+      200 rejoué → `EssaiDto` ;
+    - `GET /admin/essais/{orgId}` → `EssaiDto` ; `POST …/prolongation` (`ProlongerEssaiRequestDto { jours? }` de 1 à
+      30) → `EssaiDto` ; `POST …/signature` → `EssaiDto` ; `POST …/jeu-demonstration` → `EssaiDto` ;
+      `POST …/effacement` et `GET …/effacement` → `EffacementDto` (`planId`, `organisationId`, `espace`, `motif`,
+      `statut`, `demandeLe`, `declenchement` `AUTOMATIQUE`|`REPRISE`|`OPERATEUR` (sans l'identifiant de
+      l'opérateur), `proprietaires[{ module, statut, effaceLe?, enregistrements?, raison?, tentatives }]`, `effaceLe?`,
+      `derniereSauvegardeExpireLe?`, `enAttente?`, `certificat?{ jws, kid, numero, certificatDeCle? }`). Le `detail`
+      libre du catalogue (une part, un propriétaire) ne traverse pas.
+    - `EssaiDto` : `organisationId`, `statut` (`OUVERT`, `SIGNE`, `EFFACE`), `debutLe`, `finLe`, `effacementLe`,
+      `prolongations`, `prolongeLe?`, `signeLe?`, `effaceLe?`, `langue`, `destinataires[{ role, email }]`,
+      `avisEnvoyes[{ fin, echeanceLe, role }]` (la clé interne du catalogue décomposée), `jeu?{ code, version,
+      parts[{ module, statut, enregistrements?, raison?, importeLe? }] }`, `prospect?{ nom, vertical, pays? }`.
+    - **Refus traversant par leur code** (liste fermée, message du BFF) : 404 `ESSAI_INCONNU`,
+      `ORGANISATION_INCONNUE`, `EFFACEMENT_INCONNU` ; 409 `ESSAI_DIVERGENT`, `NAISSANCE_EN_COURS`,
+      `ESSAI_HORS_ESPACE_D_ESSAI`, `ESSAI_DEJA_PROLONGE`, `ESSAI_TERMINE`, `ESSAI_SIGNE`,
+      `DELAI_DE_SIGNATURE_ECOULE`, `ESSAI_SANS_JEU`, `ESSAI_EFFACE`, `EFFACEMENT_PREMATURE`, `NAISSANCE_DIVERGENTE` ;
+      422 `PROLONGATION_AU_DELA_DE_60_JOURS`, `JEU_DEMONSTRATION_INCONNU`, `NAISSANCE_REFUSEE`, et **le code neuf du
+      BFF `JEU_DEMONSTRATION_ABSENT`** (aucun jeu chargé pour ce métier, rien n'est écrit) ; 503
+      `HORLOGE_INDISPONIBLE`, `AUTH_INJOIGNABLE`. Tout autre échec : la traduction générique (503 si l'amont ne
+      répond pas).
+    - **Déploiement** : variable facultative `UPSTREAM_ESSAI_TIMEOUT_MS` (30 000 par défaut), le délai des écritures
+      d'essai (l'ouverture importe le jeu, l'effacement appelle chaque module). Le BFF parle au catalogue de SON
+      espace (`CATALOG_SERVICE_URL`) : face au réel, `ESSAI_HORS_ESPACE_D_ESSAI` (D-1112-6).
+  - **Pour A (AP-57, lot 7)** : régénérer les types de la console depuis l'OpenAPI du BFF ; la liste, la prochaine
+    action et le certificat se lisent dans ces DTO ; la table des refus de la maquette se branche sur `code`.
 
 - **2026-11-24, correctif de STORY-1084 (lot 6, ticket de A pour FE-140) — quatre noms de schéma de l'OpenAPI de
   bilan, annoncés AVANT la fusion du code** (`prospera-bilan-service`, branche `MNV-1084-schema` ; ticket
