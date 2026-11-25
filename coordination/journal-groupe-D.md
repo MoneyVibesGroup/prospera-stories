@@ -1812,6 +1812,12 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-25, STORY-346, avant le code)** — branche `MNV-346`. **Aucune migration** (aucune collection,
+  aucun index, aucun champ neuf : l'import écrit dans `bases_remuneration` et `lignes_remuneration` de 345), ni
+  `app.module.ts` (`RemunerationModule` est déjà monté), ni `package.json` (multer vient avec
+  `@nestjs/platform-express`), ni `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touché : **le contrat
+  OpenAPI**, une route neuve (« ⚠ Contrats »). Tout le reste est dans les dossiers de D (`remuneration`).
+  **→ C** : rien à faire.
 - **FUSIONNÉ (2026-11-25, prospera-fiscal-service#63, `dev` `cf8b583`, rebasée sur `origin/dev` `f1296ae` avant la
   fusion) ; ANNONCÉ (2026-11-25, STORY-560, avant le code)** — branche `MNV-560`. **Aucune migration** (deux collections
   neuves, `coffre_canaux` et `coffre_jetons`, index posés par Mongoose au démarrage), ni `package.json`, ni
@@ -1836,6 +1842,27 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-25, STORY-346, avant le code) — l'import d'un fichier de paie** (`prospera-fiscal-service`,
+  dossier `remuneration`). Fiche : `stories/STORY-346.md` (D-346-1 → 11, tableau « Contrat » ; Q-D-21).
+  - **Route neuve** : `POST /api/v1/dossiers/{dossierId}/remuneration/{periode}/import` (garde fiscale, rôle
+    `TENANT_ADMIN` | `TENANT_USER`, droit `fiscalite:declaration:preparer`, dossier dans la portée). Corps
+    `multipart/form-data`, un seul champ `fichier`, 2 Mio au plus, aucun autre champ. 201 `CREEE` | 200 `INCHANGEE`,
+    `{ statut, version, lignesLues }` (`version` : la `VersionDeBase` de 345, `provenance` `IMPORT` si elle est créée).
+  - **Le gabarit** (D-346-1 → 4) : CSV UTF-8 (BOM permis), `;`, `,` ou tabulation, guillemets RFC 4180 ; en-tête aux
+    noms des champs de la saisie, sans casse : `beneficiaireId`, `designation`, `typeBeneficiaire` (obligatoires),
+    `redevableId`, `periode`, `salaireDeBase`, `primes`, `gratifications`, `commissions`, `avantagesEnNature`,
+    `remboursementsDeFrais` (facultatives, vide ⇒ 0) ; toute autre colonne refuse le fichier. Montants : francs CFA
+    entiers, groupes de trois séparés par une espace permis ; point, virgule ou signe refusés.
+  - **Refus publiés** : 400 `FICHIER_ABSENT`, `MULTIPART_INVALIDE`, `ENCODAGE_INVALIDE`, `FICHIER_ILLISIBLE`,
+    `EN_TETE_INVALIDE` (`details.manquantes`, `inconnues`, `enDouble`), `BASE_TROP_GRANDE`, `PERIODE_INVALIDE` ; 404
+    `DOSSIER_INTROUVABLE` ; 409 `DOSSIER_ARCHIVE`, `BASE_CONCURRENTE` ; 413 `FICHIER_TROP_VOLUMINEUX` ; 422
+    **`IMPORT_REFUSE`** (`details.erreurs[] { ligne, code, message }` — les 100 premières —, `nombreErreurs`,
+    `lignesLues` ; tout ou rien, NFR-F16), `BASE_VIDE`. Codes d'une ligne : ceux de la saisie, plus
+    `COLONNES_EN_NOMBRE_INCORRECT` et `PERIODE_DISCORDANTE`.
+  - Aucune route existante ne change ; aucun topic, schéma de fait ni manifeste. **→ A** (écran du cabinet, plus tard) :
+    l'import et l'affichage du rapport d'erreurs ; l'en-tête du gabarit est dans la description OpenAPI (pas de route de
+    gabarit, D-346-10).
 
 - **PUBLIÉ (2026-11-25, STORY-560, prospera-fiscal-service#63, `dev` `cf8b583`) ; ANNONCÉ avant le code (#905), deux
   écarts** : (1) les révocations du cabinet (`…/mandat/revocation`, `…/secret/revocation`) n'ont **pas de corps** (le
@@ -2934,6 +2961,12 @@
     par B dans `prospera-plateforme/contrats/instance/`.
   - **La zone franche** : `zone-franche-togo@1.1`, qui reprend la correction des sous-totaux de `@2.2` (STORY-676, 678),
     se fera **au lot 7**.
+
+- **Q-D-21 (2026-11-25, STORY-346) — Quel outil de paie, et quel fichier en sort ?** C'est la question ouverte n° 2 du
+  PRD fiscalité ; la pièce n° 8 de `demande-pieces-fiscales-2026-08-03.md` (« un export de votre outil de paie ») n'a
+  jamais été reçue. **Choix par défaut appliqué (D-346-1)** : le gabarit CSV de Prospera, aux noms des champs de la
+  saisie ; le cabinet y verse la sortie de son outil. Un export réel reçu ⇒ une correspondance de colonnes devant le
+  même lecteur, sans rien changer d'autre.
 
 - **Q-D-20 (2026-11-25, STORY-1075) — Le contrat de `migrer`.** Le manifeste déclare `POST /api/v1/instance/bilan/migrer`
   et AD-33 dit « idempotent, additif, appelé par l'agent sous verrou », mais aucun schéma de la plateforme ne fixe la

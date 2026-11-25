@@ -7913,8 +7913,9 @@ sprints:
         epic: "EPIC-034"
         points: 8
         service: "fiscal-service"
-        status: "not_started"  # ⚠️ Dépend de la question ouverte n°2 du PRD : le format d'import de paie n'est pas connu.
-        assigned_to: null
+        source_doc: "prospera-stories/stories/STORY-346.md"
+        status: "in-progress"  # 🚧 2026-11-25 (lot 7 de D, n° 2) — fiche écrite avant le code (D-346-1 → 11), contrat annoncé (journal de D, ⚠ Contrats et ⚠ Communs). Le format réel d'un outil de paie reste inconnu (question ouverte n° 2 du PRD) : choix par défaut, le gabarit CSV de Prospera aux noms de champs de la saisie (Q-D-21). — Historique — ⚠️ Dépend de la question ouverte n°2 du PRD : le format d'import de paie n'est pas connu.
+        assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-347"
         title: "Saisie manuelle de la base de rémunération"
         epic: "EPIC-034"
