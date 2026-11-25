@@ -837,6 +837,13 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   dette (`TICKET-BACKEND-projection-remboursements-non-plafonnes.md`, accepté par l'utilisateur le 19/11) et liasse
   rouverte lue avec `version: null` (`TICKET-BACKEND-liasse-rouverte-version-null.md`) ; à placer après 1080 — ouverte.
 
+- → C (25/11, FE-158, `prospera-comptabilite-service`) — **ouverte, non bloquante** (l'écran tient sans) : (1) publier la tenue
+  proposée (aujourd'hui une règle de l'écran : SMT ⇒ cahiers, sinon journal) ; (2) publier les droits de l'utilisateur sur
+  comptabilite (`comptabilite:exercice:ouvrir`) pour griser le bouton d'avance ; (3) une route « exercice ouvert du dossier »
+  (l'écran le lit dans dossier-service) ; (4) un message pour `REFERENTIEL_NON_DECIDE`, `REFERENTIEL_INCONNU` et les 403 (le
+  serveur ne publie que le code) ; (5) `EXERCICE_NON_OUVERT` dès la sonde `GET …/lots` (aujourd'hui 200, le refus tombe au
+  dépôt). À placer au lot 7 de C quand l'utilisateur l'ouvre.
+- → B (25/11, AP-55) — **ouverte** : autoriser `Idempotency-Key` dans le CORS du BFF `admin-panel` (voir « Pièges », AP-55).
 ## Questions à l'utilisateur ou au PO
 
 - **Parcours réel du dossier de financement (2026-11-21), avec le choix retenu par défaut** (aucune ne bloque l'écriture des fiches) :
