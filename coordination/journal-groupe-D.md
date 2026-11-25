@@ -1676,6 +1676,34 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-25, STORY-1075, avant le code ; prospera-bilan-service, branche `MNV-1075`) — Les routes
+  d'instance `export`, `sante` et `migrer` du bilan.** Fiche : `stories/STORY-1075.md` (D-1075-1 → 12 ; Q-D-18 → 20,
+  choix par défaut). Aucun champ, aucun topic, aucune garde métier ne change ; le manifeste `bilan` (1.0.0) non plus.
+  - **Routes neuves** (contrôleur existant `instance/bilan`, identité `MOTEUR` seule, hors limite de débit, **dans les
+    deux espaces**) :
+    - `GET /api/v1/instance/bilan/{organisationId}/export` (limitée à l'organisation du chemin) : 200, une enveloppe JSON
+      `{ schemaVersion: 1, module: 'bilan', organisationId, espace, exporteLe, objets: [{ objet, nombre, enregistrements }] }`,
+      documents en MongoDB Extended JSON (relaxed) : `jeux_etats`, `snapshots_liasse`, `jeux_hypotheses`,
+      `versions_hypotheses`, `mapping_overrides`, `exercices`, `audit_events` (forme par défaut, **Q-D-19** : la
+      plateforme n'en publie aucune ; pas de CSV). État publié absent ou `NON_INSTALLE` ⇒ **403 `BILAN_NOT_ENTITLED`**,
+      aucune donnée ; tout autre état ⇒ 200 (`SUSPENDU` compris, C2). L'utilisateur détenteur de
+      `instance:donnees:exporter` n'est pas servi (**Q-D-18** : AD-37, l'export de l'écran passe par la partie A).
+    - `GET /api/v1/instance/bilan/{organisationId}/sante` (limitée à l'organisation du chemin) : 200 **`sante@1`**
+      (`OK`, ou `DEGRADE` + `raison` : MongoDB non connecté, consommateur hors groupe ou bloqué) ; jamais un refus pour
+      la santé ; quel que soit l'état publié. Copie à l'octet de `prospera-plateforme@contrats-instance-v1`
+      (`contrats/reprise/sante.schema.json`, sha256 `74b74a6c…`).
+    - `POST /api/v1/instance/bilan/migrer` (le moteur, quelle que soit l'organisation de son jeton ; sans corps) : joue
+      `dossiers-d8` (STORY-356/357, idempotente) ; 200 `{ schemaVersion: 1, module: 'bilan', statut: 'MIGRE',
+      migrations: [{ code, ...rapport }] }` ; orphelins ⇒ **409 `MIGRATION_INCOMPLETE`** avec le rapport (forme par
+      défaut, **Q-D-20**).
+  - **Refus** : jeton d'utilisateur ⇒ 403 `IDENTITE_DE_SERVICE_REQUISE` ; autre organisation ⇒ 403
+    `ORGANISATION_HORS_JETON` ; autre identité de service ⇒ 403 `IDENTITE_DE_SERVICE_REFUSEE` ; sans jeton 401. Deux codes
+    neufs à l'inventaire C13 : `BILAN_NOT_ENTITLED` (déjà celui de la garde de bilan), `MIGRATION_INCOMPLETE`.
+  - **L'aller-retour export → effacement → import** n'est pas possible pour `bilan` : l'import n'a aucun objet (D-928-5).
+  - **Pour B (catalogue, agent, recette)** : rien à recopier (manifeste inchangé) ; le moteur peut appeler les trois
+    routes aux chemins du manifeste ; publier un contrat d'export et de `migrer` dans `prospera-plateforme` tranchera
+    Q-D-19 et Q-D-20 (bilan suivra). **Pour A** : rien (aucune route d'écran).
+
 - **PUBLIÉ (2026-11-25, STORY-1074, prospera-bilan-service#191, `dev` 130f8a5, c0dc720) ; ANNONCÉ avant la fusion du
   code (prospera-stories #883, `main` bd83fda), sans écart. — La consolidation s'installe à part : sa garde propre et
   ses trois vérifications.** Fiche : `stories/STORY-1074.md` (D-1074-1 → 11).
@@ -2689,6 +2717,27 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-20 (2026-11-25, STORY-1075) — Le contrat de `migrer`.** Le manifeste déclare `POST /api/v1/instance/bilan/migrer`
+  et AD-33 dit « idempotent, additif, appelé par l'agent sous verrou », mais aucun schéma de la plateforme ne fixe la
+  demande, la réponse ni l'échec (et AD-33 parle d'un point d'entrée lancé « en conteneur dédié », le manifeste d'une
+  route). **Choix par défaut appliqué (D-1075-9)** : la route, sans corps, sous l'identité du moteur (n'importe quelle
+  organisation de son jeton : la migration vaut pour le service) ; 200 `{ schemaVersion: 1, module, statut: 'MIGRE',
+  migrations: [{ code, ...rapport }] }` ; des orphelins ⇒ 409 `MIGRATION_INCOMPLETE` avec le rapport. À trancher par
+  l'architecte du moteur (B) en publiant le contrat dans `prospera-plateforme/contrats/instance/`.
+
+- **Q-D-19 (2026-11-25, STORY-1075) — La forme de l'export C13 (et le CSV).** C13 point 7 dit « un export en CSV et
+  JSON » ; aucun schéma ne fixe le corps. **Choix par défaut appliqué (D-1075-6)** : du JSON seul, une enveloppe
+  `{ schemaVersion: 1, module, organisationId, espace, exporteLe, objets: [{ objet, nombre, enregistrements }] }`, les
+  documents en MongoDB Extended JSON (relaxed), aucun CSV (des documents imbriqués n'ont pas de CSV évident). À trancher
+  avec Q-D-20 (contrat publié par B) ; bilan suivra.
+
+- **Q-D-18 (2026-11-25, STORY-1075) — L'utilisateur détenteur de `instance:donnees:exporter` appelle-t-il la route
+  d'export du module, ou la partie A ?** Le tableau de C13 le nomme (« par le chemin public ») ; AD-37 fait passer
+  l'export de l'écran Administration par les commandes de la partie A, qui appelle le module sous l'identité du moteur.
+  **Choix par défaut appliqué (D-1075-3)** : le moteur seul ; un jeton d'utilisateur reçoit 403
+  `IDENTITE_DE_SERVICE_REQUISE` (le jeton que lit bilan ne projette pas `perms[]`). Si le PO retient le chemin public :
+  projeter `perms[]` dans la stratégie JWT du service et ouvrir la route au détenteur du droit, limité à son organisation.
 
 - **Q-D-17 (2026-11-25, placée par STORY-1078, pour STORY-1079 ; choix par défaut APPLIQUÉ par 1079, fiche D-1079-1 →
   4, toujours à confirmer) — Dans l'espace d'essai, la garde de `bilan-service` peut-elle sauter le palier KYC ?** Un prospect n'a pas de KYC (l'espace d'essai n'a ni `kyc-service` ni
