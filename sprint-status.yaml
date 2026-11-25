@@ -659,10 +659,15 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1073.md"
     reserved_on: "2026-11-24"
     note: >
-      🚧 EN COURS (2026-11-24) — fiche écrite, contrat annoncé avant le code (journal de D, « ⚠ Contrats ») : DossierEtatV1
-      + neuf champs facultatifs du dossier propre ; paiement.compte.changed@1 (sans secret) ; facturation les projette,
-      comptesImprimes ; manifestes facturation 1.2.0 et paiement 1.1.0 ; catalogue des faits v2.
-      Q-D-12 répondue par l'utilisateur le 24/11 (D-Q12-1, journal de D, #812). Portée élargie le 24/11 (soir) sur consigne de
+      🏁 DONE le 2026-11-25 — prospera-dossier-service#58 (dev 4352ac3), prospera-paiement-service#125 (dev e2be149),
+      prospera-ventes-service#16 (dev bc0f85c), prospera-plateforme#40 (dev de8f0d3, étiquette contrats-distributeur-v2) ;
+      annonce « ⚠ Contrats » avant le code (docs #845, main bd9340e : manifestes facturation 1.2.0 et paiement 1.1.0).
+      DossierEtatV1 + neuf champs facultatifs du dossier propre ; paiement.compte.changed@1 (état imprimable d'un compte,
+      jamais un secret, révision = rang de l'acte) ; facturation les projette (ventes-service.emetteur), comptesImprimes,
+      régime fiscal seul saisi ; un distributeur reçoit son dossier propre à sa naissance (prouvé). Node 24 : dossier 1896,
+      paiement 4719, ventes 708 + 204 + 24, plateforme 657 ; mutations 7/7, 7/7, 13/13 ; pile grp-d 29/29, rejouée 29/29
+      depuis origin/dev. Dossier et paiement rendus à B. Q-D-15 au PO. Q-D-12 répondue par l'utilisateur le 24/11
+      (D-Q12-1, journal de D, #812). NON SLOTTÉE. Portée élargie le 24/11 (soir) sur consigne de
       l'utilisateur : D fait aussi les deux côtés producteurs (DossierEtatV1 complété dans prospera-dossier-service ;
       comptes d'encaissement publiés par prospera-paiement-service), après une passation de B limitée à 1073. Ordre :
       après 1076. Fiche à écrire juste avant de coder. NON SLOTTÉE.

@@ -266,6 +266,39 @@
     a écrit leur passation limitée à 1073 (journal de B, `main` dde8f19 : dossier `2bf9dbd`, paiement `4684d22`) : la
     sous-session de 1073 la constate. Puis STORY-1077 (capitaux propres < ½ capital, `bilan-service`).
 
+- **STORY-1073** ✅ 🧾 — la facture lit sa fiche légale de ses deux sources, et D fait aussi les côtés producteurs
+  (consigne de l'utilisateur, 24/11 soir) : prospera-dossier-service#58 (`dev` **4352ac3**), prospera-paiement-service#125
+  (`dev` **e2be149**), prospera-ventes-service#16 (`dev` **bc0f85c**), prospera-plateforme#40 (`dev` **de8f0d3**, étiquette
+  **`contrats-distributeur-v2`**) ; annonce « ⚠ Contrats » #845 avant le code (`main` bd9340e : manifestes `facturation`
+  1.2.0 et `paiement` 1.1.0 à la source). **Passation de B constatée** au rituel (dossier `2bf9dbd`, paiement `4684d22`,
+  aucune PR ouverte) ; **dossier et paiement rendus à B** (« Passations »). « Fini quand » fixé par la fiche (D-1073-1).
+  - **`dossier-service`** : `DossierEtatV1` + neuf champs facultatifs (sigle, forme, NIF saisi, RCCM, CNSS, capital,
+    adresse, téléphone, e-mail) **sur le seul dossier propre** ; un dossier client inchangé ; ni le régime fiscal (axes
+    datés, D-1073-3). Le rejeu : `npm run republier:dossiers` (STORY-696) suffit (D-1073-10). **Un distributeur reçoit
+    son dossier propre à sa naissance** : prouvé (test du service sur un vrai document, et sur la pile : organisation née
+    par `identity.org.created`, dossier propre `AUTRE` projeté par `facturation` en 3,5 à 4,5 s).
+  - **`paiement`** : `paiement.compte.changed@1` (sans tiret : convention de `paiement`), état imprimable d'un compte,
+    **jamais un secret du coffre**, dans la transaction de la déclaration et de chaque vérification ; révision = rang de
+    l'acte au journal chaîné du compte (`EcritureDArgent` passe l'entrée consignée à `publier`) ; schéma fermé au registre
+    (BACKWARD). Le numéro complet ne s'imprime pas : **Q-D-15** au PO.
+  - **`ventes` (`facturation`)** : groupe `ventes-service.emetteur` ; mentions tirées des deux projections, figées ; le DAF
+    ne choisit plus que `comptesImprimes` et garde le régime fiscal (D-1073-4) ; `emetteur` facultatif au `PUT` ; forme
+    `AUTRE` non imprimée ; PDF : sigle, contacts, CNSS, un compte par ligne ; manifeste `facturation` 1.2.0 ; catalogue des
+    faits v2.
+  - Preuves : Node 24 — dossier 116/116 suites (1896 tests), e2e 395 ; paiement 348/348 suites (4719 tests, 2 ignorés),
+    Karapace 11/11 ; ventes 66/66 suites (708), intégration 18/18 suites (204, `fiche-legale.int-spec.ts` neuf), e2e
+    24/24 ; plateforme 657 (0 échec), `tsc` ; lint et build partout. Mutations 7/7 (dossier), 7/7 (paiement), 13/13
+    (ventes). **Pile `grp-d` (dossier, paiement, ventes, Kafka, Karapace) : pilote 29/29**, rejoué **29/29 sur les images
+    reconstruites depuis `origin/dev`** (volumes neufs) : un dossier propre mis à jour par `PATCH /dossiers/{id}` et un
+    compte déclaré par `POST /comptes-encaissement` apparaissent sur la facture émise et dans son PDF (texte lu par
+    pdfjs) ; ni l'identifiant en clair ni la saisie du DAF.
+  - Décisions D-1073-1 → 12 (fiche) ; Q-D-15 au PO ; → B (recopies des manifestes au catalogue, information sur le rejeu
+    des comptes) ; recette versionnée `prospera-ventes-service/scripts/recette/1073/`. **Verrou Docker : tenu par B
+    (1112) au rituel ; libre à 21:58, pris à 21:58, une seule prise, rendu le 25/11 à 00:31** — dont ≈ 1 h 50 perdues à une
+    coupure du réseau pendant les `docker build` (piège 1073-1) ; aucun conteneur, volume ni réseau `grp-d` ne reste.
+  - **Suivante : STORY-1077** (capitaux propres < ½ capital, `prospera-bilan-service` ; la forme juridique et le capital
+    d'un dossier client ne sont pas publiés par `dossier-service` : D-1073-2, à demander à B ou lire par route).
+
 ### Lot 4 (ouvert le 2026-11-18)
 
 - **Plan** : `PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §4 : **STORY-1060 → 1064**, le distributeur au backend (cinq stories ;
@@ -645,6 +678,13 @@
 
 ## Passations
 
+- **→ B (2026-11-25, fin de STORY-1073) : `prospera-dossier-service` et `prospera-paiement-service` sont RENDUS À B.**
+  Derniers commits de D sur `dev` : dossier **`4352ac3`** (MNV-1073, #58 ; avant lui `2bf9dbd` de B), paiement
+  **`e2be149`** (MNV-1073, #125 ; avant lui `4684d22` de B). **Aucune PR de D ouverte** dans ces deux dépôts. Checkouts
+  remis comme D les a trouvés : `dossier-service` sur `MNV-1082` (propre), `prospera-paiement-service` sur `dev` à jour
+  (`e2be149`), propre ; les branches locales `MNV-1073` supprimées (les distantes restent, fusionnées). Pièges vus :
+  « Pièges rencontrés », STORY-1073. D n'y écrit plus ; une demande passe par le journal de B.
+
 - **← B (2026-11-24, soir, prospera-stories #837, `main` dde8f19) : `prospera-dossier-service` et
   `prospera-paiement-service` prêtés à D pour STORY-1073 seule — constatée par STORY-1073** (rituel, 24/11) :
   `origin/dev` de dossier = **`2bf9dbd`** (MNV-1082), de paiement = **`4684d22`** (MNV-976), les SHA nommés par B ;
@@ -728,7 +768,7 @@
       dossier KYC (modèle `kyc-dossier-renvoi-correction` dans `notification`, consommateur de
       `kyc.correction.requested@1` dans `prospera-expert-comptable`, preuve AC-5 dans mailhog) ; voir « Réponses aux
       demandes reçues ».
-    - **Placée** : **STORY-1073** — la facture lit sa fiche légale (Q-D-12 répondue par l'utilisateur, D-Q12-1) :
+    - ~~**Placée** : **STORY-1073**~~ **livrée le 2026-11-24** (dossier #58, paiement #125, ventes #16, plateforme #40) — la facture lit sa fiche légale (Q-D-12 répondue par l'utilisateur, D-Q12-1) :
       l'identité légale projetée du dossier propre de l'organisation (`dossier-service`), les coordonnées de paiement
       des comptes d'encaissement de `paiement` ; le DAF ne choisit plus que le ou les comptes imprimés ; la fiche saisie
       en 1065 n'est plus lue. **D fait aussi les deux côtés producteurs** (consigne de l'utilisateur du 24/11 (soir) : « gère tout cela dans la story 1073 sans attendre la livraison de B ») :
@@ -1046,6 +1086,22 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-25, STORY-1073) : recopier au catalogue (`platform-catalog-service`) deux manifestes amendés à la
+  source** — **ouverte**. `manifestes/facturation.manifest.ts` **1.2.0** (C5 : + `dossier.created`, `dossier.updated`,
+  `paiement.compte.changed@1` consommés ; aucun droit, aucune route) et `manifestes/paiement.manifest.ts` **1.1.0** (C5 :
+  + `paiement.compte.changed@1` publié), tous deux à `main` **`bd9340e`** (prospera-stories #845) ; empreinte de
+  `facturation` : `b7b9e0c8…` (celle que `prospera-ventes-service` note dans `src/socle/manifestes/sources-des-manifestes.ts`).
+  Le catalogue des faits du distributeur v2 (`contrats-distributeur-v2`, `de8f0d3`) n'est copié que par les services de D.
+- **→ B (2026-11-25, STORY-1073) : `paiement` et `dossier-service` vous sont rendus — information** (trois points pour
+  vos prochaines stories). (1) `EcritureDArgent.executer` passe désormais l'entrée consignée à `publier(resultat,
+  entree)` : un double de test qui appelle `publier` avec un seul argument ne compile plus (cinq mis à jour,
+  `ENTREE_CONSIGNEE`). (2) Un compte d'encaissement déclaré avant le 25/11 n'a publié aucun `paiement.compte.changed@1` :
+  il le publie à sa prochaine vérification ; une commande de republication serait une écriture de plus dans l'inventaire
+  `ECRITURES_DARGENT` (D-1073-10) — à votre jugement si une pile semée en a besoin. (3) Q-D-15 : si le PO veut le RIB
+  complet imprimé, ce sera une donnée non secrète déclarée avec le compte chez vous, publiée par le même fait (ajout
+  facultatif, BACKWARD), jamais un déchiffrement. Rien à faire pour le consommateur de `facturation.avoir.emis@1` (votre
+  story suivante dans `paiement`).
+
 - **→ B (2026-11-24, STORY-1072) : `ESPACE_KYC_URL` sur expert-comptable, et l'e-mail du renvoi est servi** —
   **information**. Votre STORY-1103 est servie (« Réponses aux demandes reçues ») : l'AC-5 est prouvé dans mailhog. Une
   pile (recette, compose racine) qui veut l'e-mail du renvoi pose sur `expert-comptable` **`ESPACE_KYC_URL`** (la page
@@ -1070,7 +1126,7 @@
   écrivez la passation dans votre journal ; sans elle, D n'y touche pas.
 
 - **→ B (2026-11-24, soir) : passation de `prospera-dossier-service` et de `prospera-paiement-service`, limitée à
-  STORY-1073** — **ouverte**. Sur consigne de l'utilisateur du 24/11 (soir) : « gère tout cela dans la story 1073 sans attendre la livraison de B », **D fait lui-même les deux points
+  STORY-1073** — **servie** (← B, #837 ; constatée par 1073) **et les deux dépôts rendus à B le 2026-11-25** (« Passations »). Sur consigne de l'utilisateur du 24/11 (soir) : « gère tout cela dans la story 1073 sans attendre la livraison de B », **D fait lui-même les deux points
   ci-dessous dans STORY-1073** ; les deux stories que B avait placées pour eux sont retirées. B garde le consommateur de
   `facturation.avoir.emis@1` dans `paiement` (demande de 1066, point 3), à faire après que D lui a rendu le dépôt.
   Demandé : écrire la passation dans « Passations » du journal de B (dernier commit de B sur `dev` : vus `2bf9dbd`
@@ -1433,7 +1489,10 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-24, STORY-1073), avant la fusion du code — La facture lit sa fiche légale de ses deux sources ; D
+- **PUBLIÉ (2026-11-25, STORY-1073 : prospera-dossier-service#58, `dev` 4352ac3 ; prospera-paiement-service#125, `dev`
+  e2be149 ; prospera-ventes-service#16, `dev` bc0f85c ; prospera-plateforme#40, `dev` de8f0d3, étiquette
+  `contrats-distributeur-v2`) ; ANNONCÉ avant la fusion du code (prospera-stories #845, `main` bd9340e), sans écart. —
+  La facture lit sa fiche légale de ses deux sources ; D
   fait aussi les côtés producteurs (`dossier-service` et `paiement`, prêtés par B pour cette story, #837).** Fiche :
   `stories/STORY-1073.md` (D-1073-1 → 11, Q-D-15). **Ajouts seuls** : aucun champ, aucune route, aucun topic existant
   n'est renommé ni retiré ; trois PR de code et une de la plateforme.
@@ -2406,6 +2465,24 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1073** (D dans `dossier-service` et `paiement`, dépôts de B prêtés) :
+  - (1) **Une coupure du réseau pendant les `docker build`** (« lookup auth.docker.io: no such host », `npm ci` de 6 546 s,
+    binaire de Confluent introuvable sur GitHub) : 1 h 50 de verrou perdues sans qu'aucune commande n'échoue vite. Avant
+    un `docker build` sous le verrou : `curl -sS -o /dev/null -w '%{http_code}' https://registry.npmjs.org/` ; un build qui
+    dépasse 10 min est à regarder, pas à attendre.
+  - (2) **Karapace 500 juste après `healthy`, encore** (`PUT /config/<sujet>` du script `registre.mjs enregistrer`) : une
+    recette qui l'oublie lit un registre vide — et un fait validé contre le schéma relu **vide** (`{}`) passe toujours.
+    Enregistrer en boucle bornée (20 × 3 s) et vérifier le sujet avant de valider un fait.
+  - (3) **`dossier-service` en `NODE_ENV=staging` ne démarre pas sur son image runtime** (« unable to determine transport
+    target for pino-pretty ») : `production` sur une pile.
+  - (4) **`PATCH /dossiers/{id}` d'une SARL exige un dirigeant** (`400 DIRIGEANT_REQUIS`) : la forme juridique et les
+    dirigeants se posent ensemble.
+  - (5) **Changer la signature d'un rappel de `EcritureDArgent` rougit cinq suites à la compilation** (doubles qui appellent
+    `operation.publier?.(resultat)`), visibles seulement à la ligne `Test Suites:` (§1.5) : les autres doubles, typés
+    plus lâchement, passent.
+  - (6) **Un motif de mutation lu en JSON perd ses échappements** : `"\u00a0"` y devient le caractère insécable, et le
+    motif ne se trouve plus dans le source (qui porte les six caractères) ; l'écrire par Python (`chr(92)`).
 
 - **STORY-1076** (premier passage de D dans `bilan-service`) :
   - (1) **`prettier --write` sur un motif (`referentiel/*.spec.ts`) réécrit en LF tous les fichiers du dossier** du
