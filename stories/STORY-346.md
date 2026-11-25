@@ -1,6 +1,6 @@
 # STORY-346 : Import d'un fichier de paie, idempotent et versionné
 
-Status: ready-for-dev (2026-11-25 — fiche écrite juste avant le code ; lot 7 de D, n° 2)
+Status: done (2026-11-25 — prospera-fiscal-service#64, `dev` e4630f1 ; annonce avant le code #915 ; lot 7 de D, n° 2)
 
 **Épic :** EPIC-034 — Base de rémunération et obligations sociales
 **Points :** 8 · **Service :** `fiscal-service` (`:3012`), dossier de D `modules/remuneration` (D-L7-1)
@@ -131,14 +131,71 @@ Codes d'une ligne dans `erreurs` : ceux de la saisie (`BENEFICIAIRE_INVALIDE`, `
 
 ## Definition of Done
 
-- [ ] Domaine pur du fichier (lecture, en-tête, montants, diagnostic ligne par ligne) testé, et **mutations** :
+- [x] Domaine pur du fichier (lecture, en-tête, montants, diagnostic ligne par ligne) testé, et **mutations** :
       valeur par défaut `SALARIE` sur une cellule vide ; ligne fautive écartée au lieu de refuser la période ; colonne
       inconnue ignorée ; montant à virgule accepté ; guillemets ignorés ; `periode` non comparée — chacune **rougit sur
       l'assertion**.
-- [ ] Service : l'import passe par `constituer(…, 'IMPORT')` ; même fichier ⇒ `INCHANGEE` ; corrigé ⇒ version 2, la 1
+- [x] Service : l'import passe par `constituer(…, 'IMPORT')` ; même fichier ⇒ `INCHANGEE` ; corrigé ⇒ version 2, la 1
       lisible ; fichier fautif ⇒ rien d'écrit.
-- [ ] e2e (Node 24) : multipart réel, gardes avant lecture, 413, 400 multipart, 422 avec le rapport, 201 puis 200.
-- [ ] Conformité sur `mongo-fiscal` (jeu de répliques) : 1 000 lignes importées en une version ; le même fichier
+- [x] e2e (Node 24) : multipart réel, gardes avant lecture, 413, 400 multipart, 422 avec le rapport, 201 puis 200.
+- [x] Conformité sur `mongo-fiscal` (jeu de répliques) : 1 000 lignes importées en une version ; le même fichier
       réimporté et deux imports parallèles ⇒ une version ; 1 000 lignes dont une fautive ⇒ aucune écriture, la
       dernière version inchangée ; import et saisie du même contenu ⇒ le même document.
-- [ ] Lint des fichiers touchés, `tsc`, build ; `docker compose -p grp-d` du fiscal sain et la route montée.
+- [x] Lint des fichiers touchés, `tsc`, build ; `docker compose -p grp-d` du fiscal sain et la route montée.
+---
+
+## Livré (2026-11-25) — prospera-fiscal-service#64, `dev` `e4630f1`
+
+**Aucun écart au contrat annoncé** (prospera-stories#915). Un ajout, sans effet sur le contrat : la garde AD-13 de
+STORY-560 (`garde-ad13.spec.ts`, « une seule route reçoit un fichier ») admet désormais la route d'import, avec sa
+raison (D-346-12).
+
+- **Domaine pur** `domain/remuneration/fichier-de-paie.ts` : `decoderFichier` (UTF-8 fatal, BOM retiré),
+  `detecterSeparateur`, `decouper` (RFC 4180, numéro de ligne du fichier), `lireEnTete` (fermé), `lireMontant`,
+  `lireFichierDePaie` (rapport complet, puis `validerBase`). `EN_TETE_GABARIT` est l'en-tête publié.
+- **Domaine de 345** : `validerLigne` extraite de `validerBase` (la règle d'une ligne), `beneficiaireEnDouble` ; le
+  comportement de `validerBase` est inchangé (ses 33 tests verts).
+- **Application** : `RemunerationService.importer` ; `constituer` et `importer` passent par une seule écriture privée
+  (`ecrire`). Le dossier est vérifié dans la portée **avant** la lecture du fichier.
+- **HTTP** : la route `POST …/remuneration/{periode}/import`, `FileInterceptor` en mémoire avec les bornes complètes de
+  busboy (`import-paie.constants.ts`), `TraduireRefusMulterPaieInterceptor` (413 `FICHIER_TROP_VOLUMINEUX`, 400
+  `MULTIPART_INVALIDE`), `ResultatImportDto`. La description OpenAPI porte l'en-tête du gabarit.
+
+### Décision prise en codant
+
+- **D-346-12 — La garde AD-13 admet une troisième route de fichier.** La garde de 560 refusait toute route neuve qui
+  reçoit un fichier (critère 8 : pas de pièce jointe libre où glisser un identifiant de portail). Le fichier de paie y
+  entre parce que son en-tête est **fermé** : une colonne `motDePasse` ou `identifiantPortail` refuse le fichier entier
+  avant toute lecture de ses cellules (test dédié), et le fichier n'est gardé nulle part.
+
+## Preuves
+
+- **Node 24** (étage `verification`, archive LF) : sur `9c7fa84`, e2e **13/13 suites, 253 tests**
+  (`remuneration-import.e2e-spec.ts` 11) ; **`test:conformite` 18/18 suites, 114 tests** sur `mongo-fiscal` en jeu de
+  répliques (`import-paie.conformite-spec.ts` 5 : 1 000 lignes en une version et une trace ; même fichier réimporté et
+  trois imports parallèles ⇒ une version ; 1 000 lignes dont une fautive ⇒ aucune écriture, la version 1 reste la
+  dernière ; fichier corrigé ⇒ version 2, la 1 lisible, chaîne intacte et sans montant ni nom ; saisie puis import du
+  même contenu ⇒ `INCHANGEE`). Unitaires : sur `9c7fa84`, 199/200 suites — la garde AD-13 (critère 8) a vu la route
+  neuve, ce qui a donné D-346-12 ; sur `e402ba1`, 200/200 suites, 2 863 tests (sur e402ba1).
+- **Unitaires de la story** : fichier 43, service +4 (12), e2e 11, conformité 5.
+- **Mutations 16/16 tuées** (Node 25, sur l'assertion) : type vide ⇒ `SALARIE` ; ligne fautive écartée au lieu de
+  refuser ; colonne inconnue ignorée ; montant à point ou virgule accepté ; guillemets ignorés ; `periode` non comparée ;
+  doublon non jugé ligne par ligne ; BOM gardé (survivante au premier passage : `trim()` retire aussi U+FEFF ; tuée par
+  un test d'en-tête entre guillemets derrière le BOM) ; décodage non fatal ; rapport non borné ; colonnes sans nom de fin
+  refusées ; cellules en trop non vues ; import écrit en `SAISIE` ; fichier absent non refusé ; 413 et multipart non
+  traduits.
+- **§1.5 — le service démarre** (`docker compose -p grp-d … --profile fiscal up -d --build fiscal-service`, image
+  runtime de l'archive) : `/health` 200 (MongoDB `rs-fiscal`, audit, Kafka, Redis) ; la route
+  `…/remuneration/:periode/import, POST` est montée (journal de démarrage), aucune dépendance non résolue ; un import
+  sans jeton ⇒ 401.
+- Lint des fichiers touchés 0 ; `tsc` 0.
+- Verrou Docker : pris à 21:20 (première passe : unitaires, e2e, conformité, compose), rendu à 21:31 par le trap ; repris à 21:40 après C (seconde passe : unitaires de la tête corrigée), rendu à 21:47 ; B et C prévenus ; aucun conteneur, volume ni réseau grp-d.
+
+## Ce qui reste (nommé, hors de cette story)
+
+- **Q-D-21** : la correspondance avec le fichier d'un outil de paie réel, quand un export sera reçu (pièce n° 8).
+- **STORY-347** : la saisie doit aboutir « à l'identique » de l'import — c'est déjà le même chemin (`ecrire`) ; 347
+  vérifiera l'écran et la traçabilité de l'origine.
+- La reprise de la paie par `prospera-paie-service` (FR-24 du PRD des services du cabinet) : `constituer(…, 'IMPORT')`
+  de service à service, sans porteur au lot 7.
+- **→ A** (écran du cabinet) : l'import et l'affichage du rapport d'erreurs ; le gabarit à proposer au téléchargement.

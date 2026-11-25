@@ -7929,7 +7929,7 @@ sprints:
         points: 8
         service: "fiscal-service"
         source_doc: "prospera-stories/stories/STORY-346.md"
-        status: "in-progress"  # 🚧 2026-11-25 (lot 7 de D, n° 2) — fiche écrite avant le code (D-346-1 → 11), contrat annoncé (journal de D, ⚠ Contrats et ⚠ Communs). Le format réel d'un outil de paie reste inconnu (question ouverte n° 2 du PRD) : choix par défaut, le gabarit CSV de Prospera aux noms de champs de la saisie (Q-D-21). — Historique — ⚠️ Dépend de la question ouverte n°2 du PRD : le format d'import de paie n'est pas connu.
+        status: "done"  # 🏁 DONE le 2026-11-25 (lot 7 de D, n° 2) — prospera-fiscal-service#64 (dev e4630f1) ; annonce avant le code docs #915 (fiche D-346-1 → 11, ⚠ Contrats, ⚠ Communs, Q-D-21). Route POST /api/v1/dossiers/{dossierId}/remuneration/{periode}/import (PREPARER, multipart `fichier`, 2 Mio, mémoire seule) : le gabarit CSV de Prospera (UTF-8, ; , ou tabulation, RFC 4180, en-tête fermé aux noms de la saisie, montants entiers) ; tout ou rien (422 IMPORT_REFUSE, chaque ligne fautive nommée, rien d’écrit) ; même chemin que la saisie (provenance IMPORT, même document, même version ; même fichier ⇒ 200 INCHANGEE). D-346-12 : la garde AD-13 admet la route (en-tête fermé). Node 24 : unitaires 200/200 suites, 2 863 tests (sur e402ba1), e2e 13/13 (253), conformité 18/18 (114) ; mutations 16/16 ; compose grp-d sain, route montée. Q-D-21 : l’outil de paie réel (gabarit par défaut). — Historique — ⚠️ Dépend de la question ouverte n°2 du PRD : le format d'import de paie n'est pas connu.
         assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-347"
         title: "Saisie manuelle de la base de rémunération"
