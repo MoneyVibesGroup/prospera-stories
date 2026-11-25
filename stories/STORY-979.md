@@ -1,7 +1,7 @@
 # STORY-979 : les droits de la facture et des archives du cabinet au catalogue de tenant d'auth
 
-Status: in-progress (quatrième suite, « Quatrième suite (2026-11-25) », en fin de fiche ; rouverte et refermée trois
-fois pour ses suites : « Suite du 2026-11-24 », « Suite du 2026-11-24 (soir) » et « Suite du 2026-11-25 »)
+Status: done (rouverte et refermée quatre fois pour ses suites : « Suite du 2026-11-24 », « Suite du 2026-11-24
+(soir) », « Suite du 2026-11-25 » et « Quatrième suite (2026-11-25) », en fin de fiche)
 
 **Complexité :** faible (huit droits neufs au catalogue de tenant, hors du jeton ; un rôle du socle neuf ; une ligne
 d'ajout à l'annexe B ; la copie des manifestes du catalogue ; aucun champ, aucune route, aucun topic)
@@ -541,8 +541,15 @@ ajoutées, 1 retirée).
 
 ### Livraison de la quatrième suite (25/11)
 
-- **catalogue #76** (`MNV-979-manifeste-balance`, tête `64e4a62`) : `copies.json` depuis `prospera-stories@ac8e450` ;
-  `manifestes-seed.service.spec.ts`. À fusionner après l'annonce.
+Fusionnée en « Rebase and merge », `mergedAt` non nul, `headRefOid` = SHA poussé, arbre de la branche identique à
+`dev` après rejeu :
+
+- **catalogue #76** : **`66a4f6c` sur `dev`** (tête de la PR `64e4a62`, `mergedAt` `2026-11-25T20:46:55Z`). Fichiers :
+  `copies.json` depuis `prospera-stories@ac8e450` ; `manifestes-seed.service.spec.ts`.
+- Contrat annoncé avant la fusion : stories #913 (fiche, tracker rouvert, « ⚠ Contrats »), `0ee7144` sur `main`.
+- `main` a avancé pendant la suite (`df4b606`, `0ee7144`) sans toucher `manifestes/` : `manifestes:garde` contre
+  `0ee7144` verte (48) après la fusion.
+- C prévenue par le journal de B (« Réponses aux demandes reçues »).
 
 ### Preuves de la quatrième suite (25/11)
 
