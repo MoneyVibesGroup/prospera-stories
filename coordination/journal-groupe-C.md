@@ -36,6 +36,8 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
   4 bis. ✅ **STORY-1117 DONE (25/11)** (demande de A, STORY-320) : balance-service **#161** (`e968388`), fiscal **#58**
      (`b2efaa7`), contrat #842 ; D-320-5 levé. Node 24 : balance unitaires 5593 / e2e 1973, fiscal unitaires 2560 / e2e
      208 ; Mongo 8/8, mutation 3/3 ; verrou cédé par A et rendu ;
+  4 ter. 🟡 **STORY-326** les contrôles de cohérence d'une période, avec tolérances au paquet (fiscal, source du
+     paquet dans balance-service) : fiche écrite et contrat annoncé le 25/11 ;
   5. **STORY-1101** les déclarations face à la liasse (fiscal) — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
   6. **STORY-315** puis **316** le calendrier fiscal (fiscal) — fiches écrites juste avant.
 - **Docker** : verrou du poste principal (`MoneyVibes_Apps\.verrou-docker`) partagé avec A ; aucune pile de C ne tourne.
@@ -347,6 +349,8 @@ seulement.
   `etat-publie.changed.<espace>`, double lecture) dans une story de la plage de C, après STORY-990.
 
 ## ⚠ Contrats
+
+- **2026-11-25 (STORY-326), AVANT le code** : le paquet fiscal gagne un bloc `coherence.tolerances` (par code d'obligation : `absolue`, `relative?`), source `balance-service/scripts/referentiels/sources/`, artefacts régénérés. Le fiscal sert `POST /api/v1/obligations/{id}/coherence` → `{ controles: [...] }` et contrôle aussi à l'enregistrement du déclaré ; il lit `GET …/fiscal/tva` et `GET …/fiscal/acomptes` de balance-service. Anomalies neuves `TVA_ECART_COMPTABILITE` et `ACOMPTE_ECART_RESULTAT_N1` (bloquantes au dépôt, levables). **→ A** : écran à prévoir (le contrôle, l'anomalie). **→ copies du paquet** (`dossier-service`) : le bloc neuf ne les concerne pas ; leur octet diverge de la source, sans effet sur elles.
 
 - **2026-11-24 (STORY-1117), AVANT le code** : `balance-service` sert `GET /api/v1/dossiers/{dossierId}/balances/reference?au=AAAA-MM-JJ` → `{ balance: BalanceResumeDto | null }` (la dernière VALIDÉE complète dont l'exercice contient `au`, à défaut le dernier BROUILLON complet ; socles d'à-nouveaux et portefeuilles SFD exclus, provisionnée comprise) et `GET …/balances/resumes` (la liste, sans `lignes`). `BalanceResumeDto` = `BalanceResponseDto` sans `lignes`. Manifeste `balance` 1.1.0. Le fiscal lit la référence (D-320-5 levé), sans lire l'origine. **→ B** : copie du manifeste `balance` 1.1.0 au catalogue après la fusion. **→ A** : types de `balance-service` à régénérer si un écran les lit.
 
