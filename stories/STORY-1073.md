@@ -1,6 +1,6 @@
 # STORY-1073 : la facture lit sa fiche légale — l'identité du dossier propre, les coordonnées des comptes d'encaissement ; D fait aussi les deux côtés producteurs
 
-Status: in-progress
+Status: done
 
 **Plan :** `coordination/PLAN-LOT-6-2026-11-23.md` §6, amendement du 2026-11-24 (soir), juste après 1076 · **Dépôts :**
 `prospera-dossier-service` et `prospera-paiement-service` (**prêtés par B pour cette story seule**, passation du journal
@@ -45,9 +45,14 @@ portent ; un distributeur reçoit bien son dossier propre à sa naissance (prouv
   constatée : dossier `origin/dev` = `2bf9dbd`, paiement = `4684d22`, aucune PR ouverte ; le checkout `dossier-service`
   était sur `MNV-1082` de B, propre, déjà fusionnée : branche `MNV-1073` partie d'`origin/dev`, `MNV-1082` gardée).
 - [x] Code des trois dépôts et de la plateforme, preuves sous Node 25 (unitaires, lint, mutations).
-- [ ] Annonce « ⚠ Contrats » fusionnée avant le code.
-- [ ] Preuves Node 24 et pile `grp-d` ; PR de code fusionnées en rebase ; étiquette `contrats-distributeur-v2`.
-- [ ] PR de docs finale ; dossier et paiement rendus à B (journal de D).
+- [x] Annonce « ⚠ Contrats » fusionnée avant le code : prospera-stories **#845** (`main` **`bd9340e`** ; manifestes
+  `facturation` 1.2.0 et `paiement` 1.1.0 à la source).
+- [x] `prospera-plateforme` **#40** fusionnée en rebase (`dev` **`de8f0d3`**), étiquette **`contrats-distributeur-v2`**.
+- [x] `dossier-service` **#58** (`dev` **`4352ac3`**), `paiement` **#125** (`dev` **`e2be149`**), `ventes` **#16** (`dev`
+  **`bc0f85c`**), fusionnées en rebase ; arbres fusionnés identiques aux commits testés.
+- [x] Verrou Docker : tenu par B (1112) au rituel ; **pris à 21:58, une seule prise, rendu le 25/11 à 00:31** (≈ 1 h 50
+  perdues à une coupure du réseau pendant les `docker build`) ; aucun conteneur, volume ni réseau `grp-d`.
+- [x] PR de docs finale ; **dossier et paiement rendus à B** (journal de D, « Passations »).
 
 ## Décisions retenues par défaut (contestables)
 
@@ -104,6 +109,57 @@ portent ; un distributeur reçoit bien son dossier propre à sa naissance (prouv
 - **D-1073-11 — Ni `statut` (retiré) ni `libelle`** : `paiement` n'a ni geste de retrait ni libellé de compte ; les
   publier serait inventer. Ils viendront en ajouts facultatifs avec leur geste (BACKWARD, éprouvé au registre).
 
+- **D-1073-12 — Ce qui reste** (hors de cette story) : (1) **Q-D-15** — le numéro complet imprimé, si le PO le veut :
+  une donnée non secrète déclarée avec le compte (`paiement`, B) ; (2) la republication des comptes déclarés avant 1073
+  (D-1073-10, information à B) ; (3) l'écran des paramètres de la facture (choisir les comptes, le régime fiscal) — A ou
+  D, côté front ; (4) STORY-1077 : la forme juridique et le capital d'un **dossier client** ne sont pas publiés
+  (D-1073-2) — 1077 les demandera à B (même fonction, ajout facultatif) ou les lira par la route du dossier ; (5) le
+  statut d'un compte retiré et son libellé, avec leur geste chez `paiement` (D-1073-11) ; (6) les recopies des deux
+  manifestes au catalogue de `platform-catalog-service` (→ B).
+
 ## Contrat annoncé avant le code
 
-Voir « ⚠ Contrats » du journal de D (entrée STORY-1073).
+Voir « ⚠ Contrats » du journal de D (entrée STORY-1073, annoncée par #845, publiée sans écart).
+
+## Ce qui a été livré
+
+- **`prospera-dossier-service`** (#58) : `fiche-legale-publiee.util.ts` (`ficheLegalePubliee`, pure, lue nommément) ;
+  `DossierEtatV1` + neuf champs facultatifs ; `etatPublie` les ajoute pour le seul dossier propre. Rien d'autre : la
+  republication de 696 et le consommateur d'`identity.org.created` publient la même charge.
+- **`prospera-paiement-service`** (#125) : `contrat/schemas/paiement.compte.changed.json` ;
+  `application/comptes/etat-du-compte.ts` (`construireEtatDuCompte`, `faitDEtatDuCompte`) ; `publier` sur la
+  déclaration et la vérification ; `EcritureDArgent` passe l'entrée consignée à `publier`.
+- **`prospera-plateforme`** (#40) : `contrats/distributeur/catalogue-faits.json` v2 (130 faits) ; README.
+- **`prospera-ventes-service`** (#16) : `modules/facturation/emetteur/` (lecture des faits, projections, consommateur) ;
+  `mentions.ts` (`emetteurDeLaFacture`, `comptesAImprimer`, `capitalImprime`) ; `parametres` (`comptesImprimes`,
+  `emetteur` facultatif) ; `rendu.ts` (`coordonneesDePaiement`, `contactsDe`) ; `KAFKA_EMETTEUR_GROUP_ID` ; copies du
+  manifeste 1.2.0 et du catalogue v2 avec leurs empreintes ; recette `scripts/recette/1073/`.
+
+## Preuves
+
+| Où | Quoi | Résultat |
+|---|---|---|
+| dossier, Node 24 (étage `verification`) | suite unitaire complète ; e2e ; lint des fichiers touchés ; build | **116/116 suites, 1896 tests** ; **10/10, 395** ; 0 ; OK |
+| dossier, Node 25 | suite complète | 7 suites rouges connues (6 binding de Confluent, `registre-pays.coherence`), 1880 tests verts |
+| dossier, mutations | spread du document, fiche retirée, dossier client publié, capital négatif, capital non entier, vide publié, `null` publié | **7/7 tuées** sur l'assertion |
+| paiement, Node 24 | suite unitaire complète ; build | **348/348 suites, 4719 tests** (2 ignorés) ; OK |
+| paiement, Karapace | `npm run test:schemas` (sujets jetables) | **11/11** : le sujet neuf en BACKWARD, ajout facultatif compatible, requis ajouté et type changé incompatibles |
+| paiement, mutations | déclaration muette, vérification muette, révision figée, `verifie` trop large, destination non projetée, empreinte remplacée, entrée non passée | **7/7 tuées** |
+| plateforme, Node 24 | `npm test`, `tsc` | **657** (656 passés, 1 ignoré, 0 échec), OK |
+| ventes, Node 24 (MongoDB réel) | unitaires ; intégration ; e2e ; lint ; build | **66/66 suites, 708** ; **18/18 suites, 204** (`fiche-legale.int-spec.ts` : projections sous concurrence — vingt révisions dans le désordre, dix premiers états simultanés —, la facture tirée des deux sources, la précédente figée) ; **24/24** ; 0 ; OK |
+| ventes, mutations (Node 25) | devise non filtrée, défaut à plusieurs comptes, ordre du DAF perdu, PI-SPI par l'empreinte, forme `AUTRE` imprimée, RIB saisi relu, coordonnées jamais manquantes, régime fiche `ORGANISATION`, capital sans insécable, dossier client projeté, destination incohérente acceptée, compte en double accepté, PDF sans comptes | **13/13 tuées** |
+| pile `grp-d` (dossier, paiement, ventes, Kafka, Karapace, deux MongoDB, Redis), images de la branche | `recette-1073.py` | **29/29** |
+| même pile, **images reconstruites depuis `origin/dev`**, volumes neufs | `recette-1073.py` | **29/29** (un premier passage à 28/29 : Karapace 500 juste après `healthy`, schéma non enregistré ; pile relevée de neuf, enregistrement en boucle bornée) |
+
+Ce que le pilote établit, sur les vraies routes : (1) une organisation née par `identity.org.created` (un distributeur :
+l'événement ne porte aucun métier) reçoit son dossier propre, forme `AUTRE`, projeté par `facturation` en 3,5 à 4,5 s ;
+(2) sans fiche, la facture est refusée (forme, capital, adresse, NIF, RCCM — `ORGANISATION` ; coordonnées —
+`PARAMETRES`), sans numéro, la fiche saisie par le DAF n'étant pas lue ; (3) `PATCH /dossiers/{id}` (forme SARL, un
+dirigeant, NIF, RCCM, CNSS, capital, adresse, contacts) ⇒ `dossier.updated` v2 projeté en 2,3 à 2,9 s, ni régime ni
+dirigeants publiés ; (4) `POST /comptes-encaissement` (Mobile Money) ⇒ `paiement.compte.changed@1` valide au schéma relu
+du registre, projeté en 0,7 à 0,8 s ; ni l'identifiant en clair, ni le scellé sur Kafka ou dans l'outbox ; (5) le DAF
+choisit le compte imprimé ; **FAC-2026-000001** porte l'identité du dossier v2 et le compte, son PDF (texte lu par pdfjs)
+les imprime — « SARL au capital de 25 000 000 F », NIF, RCCM, CNSS, adresse, contacts, « Mobile Money — FEDAPAY — n°
+••••••••4521 — titulaire : … » —, jamais l'identifiant ni la saisie du DAF ; (6) une projection effacée revient entière
+par `npm run republier:dossiers` (même version), et FAC-2026-000002 porte la même fiche ; (7) `ventes-service.emetteur`
+sans retard, les trois services sains.
