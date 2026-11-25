@@ -42,6 +42,7 @@
   |:--:|---|---|
   | a | STORY-979 (3ᵉ suite) | recopies `facturation` 1.2.0, `paiement` 1.1.0 |
   | b | STORY-1073 (correctif) | `formeJuridique` sur les dossiers clients |
+  | c | STORY-1115 (correctif) | republier togo@2026 (`5c683d16…`) dans les deux buckets de la recette (← C) |
   | 1 | STORY-1119 | les archives ont valeur de preuve |
   | 2 | STORY-1120 | fin de mission et réversibilité |
   | 3 | STORY-1121 | la destruction proposée, puis visée |
@@ -62,6 +63,23 @@
   | 17 | STORY-1135 | mettre à jour sans peur, premier incrément |
   | 18 | STORY-1136 | le consommateur de `facturation.avoir.emis@1` dans `paiement` |
 
+- **D-L7B-6 — deux demandes de C placées par la session de groupe (25/11)** (§1.1 : une demande adressée à B passe
+  avant la story suivante ; aucun identifiant neuf) :
+  1. **Ordre « c »** (après « b », avant STORY-1119) : « → B (25/11, STORY-326, puis 1101) » du journal de C —
+     **republier le paquet `togo@2026` dans sa dernière version** (empreinte **`5c683d16…`**, balance-service #164,
+     après 1101 et 316 ; elle porte `rapprochementAnnuel` et l'échéance des sociétés par la forme juridique) dans les
+     **deux buckets de la recette** : `referentiel-packages` (le fiscal, `docker-compose.fiscal.yml:80`) et
+     `referentiel-packages-essai` (l'essai, `docker-compose.recette.yml:369`) ; puis vérifier que le contrôle de
+     cohérence ne rend plus `NON_EXECUTE` `TOLERANCE_ABSENTE`. **Correctif rattaché à STORY-1115** (recette #28,
+     `af13aac` : la story de B qui a monté le second bucket, `referentiel-packages-essai`, dans le profil de recette) ;
+     `referentiel-packages` est le bucket par défaut du catalogue (STORY-149), relié au fiscal de la recette par
+     `docker-compose.fiscal.yml` (STORY-901, A) — la sous-session le confirme en relisant le code avant d'écrire, et
+     cherche l'éditeur que C n'a pas trouvé (dans la recette, seul `zone-franche.recette.ts` publie un paquet fiscal,
+     lu dans le checkout de `balance-service`). Commits `MNV-1115(recette): …`.
+  2. **« → B (25/11, STORY-1020) »** — recopier `balance` **1.2.0** au catalogue : **dès que le code de C est fusionné
+     sur `dev` de `balance-service`**, comme une **quatrième suite de STORY-979**, entre deux stories ; **pas avant**
+     (D-979-24 : un manifeste ne précède pas son code au catalogue).
+
 - **Avancement** :
   - **a — troisième suite de STORY-979 (25/11) — faite** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
     catalogue depuis `prospera-stories@bd9340e` (← D, STORY-1073) ; `balance` 1.1.0 entraînée par la copie entière
@@ -69,7 +87,9 @@
     (`0425fef` sur `dev`) ; contrat annoncé avant la fusion (stories #891, `78c2268`). `manifestes:garde` verte (48)
     contre `bd9340e` ; catalogue 1 621 passés (3 suites rouges connues) ; 3/3 mutations. Sans Docker, verrou non pris.
     Tracker refermé.
-  - **Suivante : b — le correctif de STORY-1073** (`formeJuridique` sur les dossiers clients, `dossier-service`).
+  - **b — correctif de STORY-1073 (25/11) — en cours** : `formeJuridique` publiée sur tout dossier, client compris
+    (`dossier-service` #59, branche `MNV-1073-clients`) ; contrat annoncé avant la fusion (« ⚠ Contrats »).
+  - **Suivante : c — le correctif de STORY-1115** (togo@2026 dans les deux buckets de la recette, D-L7B-6).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1426,9 +1446,14 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   est rouge sur `balance` seul.
 
 - **← D (25/11, STORY-1077) : `formeJuridique` sur les dossiers CLIENTS aussi** (`dossier-service`) — **reçue pendant
-  STORY-1116, ouverte, à placer par la session de groupe** (D : « aucune urgence de démo »). Recommandé : un correctif
-  rattaché à STORY-1073 (D-1073-2 a posé la condition « dossier propre »), le seul champ sorti de la condition, puis
-  `npm run republier:dossiers` ; aucun schéma ne change.
+  STORY-1116**, placée par la session de groupe en **ordre « b » du lot 7** (D-L7B-2) : un correctif rattaché à
+  STORY-1073 (D-1073-2 a posé la condition « dossier propre »), le seul champ sorti de la condition, puis
+  `npm run republier:dossiers` ; aucun schéma ne change. **En cours** : `dossier-service` #59 (« ⚠ Contrats »).
+- **← C (25/11, STORY-326, puis 1101) : republier `togo@2026` (`5c683d16…`) dans les deux buckets de la recette** —
+  **reçue, placée par la session de groupe en ordre « c »** (D-L7B-6, correctif de STORY-1115).
+- **← C (25/11, STORY-1020) : recopier `balance` 1.2.0 au catalogue** — **reçue, placée par la session de groupe** en
+  quatrième suite de STORY-979, **servie dès la fusion du code de C** sur `dev` de `balance-service`, pas avant
+  (D-L7B-6) : dites-le ici à la fusion.
 - **← C (25/11, plan de B #848) : `document-service` passe à B au lot 7** — **lue** (dernier commit de C `0716a58`,
   rien en cours).
 - **← D (24/11, STORY-1072) : `ESPACE_KYC_URL` sur expert-comptable** — **lue** : la recette ne lève pas
@@ -1706,6 +1731,27 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-25, correctif de STORY-1073 — `formeJuridique` publiée sur les dossiers CLIENTS aussi, annoncé AVANT la
+  fusion du code** (`prospera-dossier-service`, branche `MNV-1073-clients`, PR #59 ; fiche `stories/STORY-1073.md`,
+  « Correctif du 2026-11-25 », D-1073-13 → 17 ; demande de D, STORY-1077). **Ajout seul** : aucun champ, aucune route,
+  aucun topic n'est renommé ni retiré.
+  - **`DossierEtatV1`** (`dossier.created`, `dossier.updated` ; `schemaVersion` **1 inchangé** ; aucun schéma de
+    registre) : **`formeJuridique`** (`SA`, `SARL`, `SAS`, `SUARL`, `EI`, `AUTRE`, telle qu'elle est stockée, `AUTRE`
+    compris) est désormais **présente sur tout dossier**, client compris — elle n'était publiée que sur le dossier
+    propre (`estLeCabinet: true`, D-1073-2). Clé absente, jamais `null` ni vide, si le dossier n'en porte pas (la base
+    l'exige : en pratique toujours présente). **Les huit autres champs de la fiche légale** (`sigle`, `nifSociete`,
+    `rccm`, `numeroCnss`, `capitalSocial`, `adresse`, `telephone`, `email`) **restent sur le seul dossier propre**.
+  - **Mêmes charges servies par HTTP** : les réponses du moteur de démonstration (`PUT
+    /api/v1/instance/dossier/{organisationId}/dossiers-de-demonstration/{dossierRef}` et `…/exercices`, STORY-1082)
+    portent `etatPublie` et gagnent donc la clé (D-1073-17). Aucune route du cabinet ni de la console ne change.
+  - **Rejeu** : `npm run republier:dossiers` (STORY-696) republie la forme des dossiers clients existants, à leur version
+    courante ; à jouer une fois sur un environnement durable après le déploiement (aucune pile semée sur ce poste,
+    D-1073-15).
+  - **Pour D (bilan)** : rien à changer ; un dossier client rend `formeJuridique.statut: CONNUE` dès son prochain
+    `dossier.*` (ou la republication). **Pour C (balance, comptabilité, fiscal, document)** et les autres consommateurs
+    de `dossier.*` (ventes, microfinance) : rien à faire, ils lisent nommément ; `facturation` ignore toujours un dossier
+    client. **Pour A** : rien à régénérer (aucune OpenAPI du BFF ni du cabinet ne change).
 
 - **2026-11-25, troisième suite de STORY-979 — les manifestes `facturation` 1.2.0, `paiement` 1.1.0 et `balance`
   1.1.0 publiés au catalogue, annoncés AVANT la fusion du code** (`prospera-platform-catalog-service`, branche
