@@ -28,7 +28,7 @@
 |:--:|---|---|---|---|---|
 | 1 | **PRA-06** | le registre, le menu, la garde unique, les écrans d'état de la coque | coque | — (technique) | S5 |
 | 2 | **AP-57** | ouvrir et suivre l'essai d'un prospect (créer, prolonger, signer, jeu de démonstration, effacement) | 1112 ✅ | ✅ validée (#34) | **avant la démo du 15/01** |
-| 3 | **AP-56** | mettre une organisation en service (naissance, répétition, mise en service, sorties de l'essai) | 1113 ✅ | ⏳ à faire | avant le 15/01 |
+| 3 | **AP-56** | mettre une organisation en service (naissance, répétition, mise en service, sorties de l'essai) | 1113 ✅ | ✅ validée (25/11, #35) | avant le 15/01 |
 | 4 | **AP-55** | installer l'offre en un clic, reprendre un plan inachevé, l'état publié ; l'octroi par `PUT` retiré | 1080 ✅ | ✅ validée (#34) | février |
 | 5 | **AP-59** | le métier de l'organisation, lu, filtré, changé en un geste | 1114 ✅ | ✅ validée (#34) | février |
 | 6 | **PRA-10** | le module d'écran `reseau` | coque | ⏳ à faire | S6 |
