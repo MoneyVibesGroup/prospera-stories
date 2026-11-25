@@ -1,8 +1,8 @@
 # Lot 7 du groupe B : les archives complètes, et le backend prêt pour janvier, février et après
 
-> **Date :** 2026-11-25 · **Statut :** proposition écrite par la session A (moneyvibes-apps-1b) sur consigne de
-> l'utilisateur, **en attente de validation par l'utilisateur**. En vigueur à la fusion de ce document ; la session B
-> la lit à son rituel et peut la contester dans son journal.
+> **Date :** 2026-11-25 · **Statut :** écrit par la session A (moneyvibes-apps-1b) sur consigne de l'utilisateur,
+> **validé par l'utilisateur le 2026-11-25** (« je valide », STORY-1116 placée à la fin de la deuxième partie). En
+> vigueur à la fusion de ce document ; la session B le lit à son rituel.
 > **Consigne de l'utilisateur (25/11) :** « C et D sont là pour terminer les modules Bilan et états financiers, Atelier
 > de balance, Conseil fiscal. Moi je veux que le groupe B se charge de ce qui va rester côté archives pour que ce soit
 > parfait, complet, un vrai process côté backend, et ajouter à cela faire les backend permettant d'être prêt pour
@@ -52,16 +52,16 @@ contrat annoncé avant le code, preuve sur une pile neuve.
 
 | # | Story | Dépôt | Date | Pourquoi |
 |:--:|---|---|---|---|
-| 9 | **STORY-1116** cinq essais simultanés, chacun dans son espace (si le lot 6 ne l'a pas finie) | recette, catalogue | **démo du 15/01** | la démo de vente |
-| 10 | **`referentiels` dans l'état publié** (champ facultatif) | catalogue | **avant le gel du 11/12** | C retire son consommateur de `entitlement.changed` (STORY-1006) |
-| 11 | **le contrat d'état publié figé** (EPIC-142), avec l'inventaire écrit de ce qui reste dans EPIC-142 → 147 et 159 | catalogue, plateforme | **11/12** | plus rien ne s'ajoute sans version neuve |
-| 12 | **le cabinet sur le moteur** (EPIC-144, 159) : les chemins d'octroi retirés après AP-55 (A), `PUT …/entitlements` gardé pour la sanction seule, recettes croisées réécrites | BFF, catalogue, recette | **18/12** | jalon « cabinet sur le moteur » |
-| 13 | **effacer le dossier de démonstration à la fin d'un essai** (D-1082-10) | dossier, catalogue | avant le certificat d'essai | effacement complet d'un essai |
-| 14 | **les restes d'EPIC-145, 146, 147** nommés par l'inventaire du n° 11 | catalogue, auth, BFF | 08/01 | l'état publié fait foi, deux espaces, essai du prospect |
-| 15 | **la licence signée** (EPIC-150), premier incrément : ouvrir, prolonger | auth, paiement, centrale | **08/01** | la mise en service vend une licence |
-| 16 | **l'interface de l'agent publiée** (EPIC-148) | agent-instance, centrale, plateforme | **08/01** | instance montée sur site en S10 (29/01) |
-| 17 | **l'instance garde la confiance, coupée de Money Vibes** (EPIC-149) | agent-instance, centrale | 15/01 | prérequis de la licence et des mises à jour |
-| 18 | **mettre à jour sans peur** (EPIC-151), premier incrément : essayer, promouvoir, revenir | agent, centrale, catalogue | 22/01 | la mise en service de février (S13, 19/02) |
+| 9 | **`referentiels` dans l'état publié** (champ facultatif) | catalogue | **avant le gel du 11/12** | C retire son consommateur de `entitlement.changed` (STORY-1006) |
+| 10 | **le contrat d'état publié figé** (EPIC-142), avec l'inventaire écrit de ce qui reste dans EPIC-142 → 147 et 159 | catalogue, plateforme | **11/12** | plus rien ne s'ajoute sans version neuve |
+| 11 | **le cabinet sur le moteur** (EPIC-144, 159) : les chemins d'octroi retirés après AP-55 (A), `PUT …/entitlements` gardé pour la sanction seule, recettes croisées réécrites | BFF, catalogue, recette | **18/12** | jalon « cabinet sur le moteur » |
+| 12 | **effacer le dossier de démonstration à la fin d'un essai** (D-1082-10) | dossier, catalogue | avant le certificat d'essai | effacement complet d'un essai |
+| 13 | **les restes d'EPIC-145, 146, 147** nommés par l'inventaire du n° 10 | catalogue, auth, BFF | 08/01 | l'état publié fait foi, deux espaces, essai du prospect |
+| 14 | **la licence signée** (EPIC-150), premier incrément : ouvrir, prolonger | auth, paiement, centrale | **08/01** | la mise en service vend une licence |
+| 15 | **l'interface de l'agent publiée** (EPIC-148) | agent-instance, centrale, plateforme | **08/01** | instance montée sur site en S10 (29/01) |
+| 16 | **l'instance garde la confiance, coupée de Money Vibes** (EPIC-149) | agent-instance, centrale | 15/01 | prérequis de la licence et des mises à jour |
+| 17 | **mettre à jour sans peur** (EPIC-151), premier incrément : essayer, promouvoir, revenir | agent, centrale, catalogue | 22/01 | la mise en service de février (S13, 19/02) |
+| 18 | **STORY-1116** cinq essais simultanés, chacun dans son espace (placée en fin de lot par l'utilisateur le 25/11 ; si le lot 6 l'a finie, la remplaçante prend sa place) | recette, catalogue | **démo du 15/01** | la démo de vente |
 
 **Remplaçantes** si une story bloque : le consommateur de `facturation.avoir.emis@1` dans `paiement` (après le retour
 de `paiement` par D) ; `ESPACE_KYC_URL` dans la pile de la recette ; consentements et indicateurs (EPIC-157).
@@ -79,11 +79,11 @@ de `paiement` par D) ; `ESPACE_KYC_URL` dans la pile de la recette ; consentemen
 ## 3. Risque à dire
 
 Le plan de février (R12) donnait déjà à Dev B 17 à 20 semaines de moteur pour 10 disponibles. Avec huit stories
-d'archives devant, les n° 14 à 18 glissent sur janvier : **les dates du 11/12 et du 18/12 passent avant les
-archives** si elles sont menacées (n° 10 → 12 avancés).
+d'archives devant, les n° 13 à 18 glissent sur janvier : **les dates du 11/12 et du 18/12 passent avant les
+archives** si elles sont menacées (n° 9 → 11 avancés).
 
 ## 4. Gestes réservés à l'utilisateur
 
-- Valider ce plan.
+- ~~Valider ce plan.~~ Fait le 25/11.
 - Dire qui tient `prospera-expert-comptable` (B a posé la question ; défaut écrit : D).
 - À l'arrivée de Dev A (04/12) : ce qu'il prend dans les dépôts de B.
