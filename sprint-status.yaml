@@ -706,11 +706,12 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1077.md"
     reserved_on: "2026-11-24"
     note: >
-      🚧 EN COURS (2026-11-25) — fiche écrite, contrat annoncé avant le code (journal de D, « ⚠ Contrats »). Articles de
-      l'AUSCGIE révisé relus au texte officiel (140, 309, 334, 348, 371-373, 548, 664-669, 853-3). Alerte dans la réponse
-      d'analyse, règle et délais en données sourcées du paquet (révision en place) ; forme juridique lue de dossier.* (publiée
-      pour le dossier propre seulement : demande à B pour les dossiers clients) ; Q-D-16 (lecture stricte des capitaux
-      propres). Lot D, n° 9 du lot 6. NON SLOTTÉE.
+      🏁 DONE le 2026-11-25 — prospera-bilan-service#187 (dev 9fed378) ; annonce « ⚠ Contrats » avant le code (docs #853,
+      main 4222321 ; complément #859). Articles de l'AUSCGIE révisé relus au texte officiel (140, 309, 334, 348, 371-373,
+      548, 664-669, 853-3). Bloc alerteCapitauxPropres de la réponse d'analyse (ATTEINTE / NON_ATTEINTE / INDETERMINEE /
+      NON_APPLICABLE, trois échéances, dateApprobation facultative) ; règle en données sourcées des quatre paquets SYSCOHADA
+      révisé (révision en place) ; formeJuridique lue de dossier.* (dossier client : constat sans échéance, demande à B) ;
+      Q-D-16. Node 24 : 351/351 suites (12 294 tests) ; e2e 591/591 ; mutations 22/22. Dette de preuve de 1076 soldée (Node 24). Lot D, n° 9 du lot 6. NON SLOTTÉE.
   - range: "STORY-1078"
     status: "RÉSERVÉ"
     owner: "Groupe D — les contrôles d'intégrité de la liasse (FRNG = BFR + trésorerie nette, caisse créditrice, amortissements > brut, perte de change sans provision) et la liasse rapprochée de sa balance par l'empreinte (STORY-1022) (prospera-bilan-service)"

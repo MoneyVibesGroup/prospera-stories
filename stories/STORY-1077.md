@@ -1,6 +1,6 @@
 # STORY-1077 : le contrôle « capitaux propres < ½ capital » et son échéance légale — à côté de l'analyse financière
 
-Status: in-progress
+Status: done
 
 **Plan :** `coordination/PLAN-LOT-6-2026-11-23.md` §6, amendement du 2026-11-24 (soir, D-L6-5), n° 9 · **Dépôt :**
 `prospera-bilan-service` (repris de B, passation constatée par STORY-1076 : `7b53ff5`) · **Plage :** groupe D (1074 → 1078
@@ -144,5 +144,46 @@ Voir « ⚠ Contrats » du journal de D (entrée STORY-1077).
 
 ## Preuves
 
-*(à écrire à la fin)* — dont la **dette de preuve de 1076** (suite unitaire complète de `bilan-service` sous Node 24 sur
-`origin/dev` `e4cee3e`, avant le code de cette story).
+**Livré :** prospera-bilan-service#187, fusionnée en rebase le 2026-11-25 (`head` `ac75133`, rejoué sur `dev` en
+**`9fed378`**, arbre identique) ; annonce « ⚠ Contrats » prospera-stories #853 (`main` 4222321) avant le code, complément
+#859 (`main` 9be68d5 : `pourcentageDuCapital`, `marqueursManquants`) avant la fusion du code.
+
+- **Dette de preuve de 1076 — suite unitaire complète sous Node 24 sur `origin/dev` `e4cee3e`** (étage `verification`,
+  image construite depuis `git -c core.autocrlf=false archive`, sous le verrou) : **349/349 suites vertes, 12 212 tests verts (5 ignorés), 641 s**, en `-w 4 --workerIdleMemoryLimit=700MB`, dans un conteneur nommé (sortie écrite dans le conteneur). Aucun rouge : rien à corriger dans les empreintes des paquets révisés par 1076, aucun commit séparé. Les 13 suites qui chargent le client Kafka natif passent sous Node 24. Un premier passage à 8 workers (01:45 → 02:24) avait saturé la VM Docker (6,7 Gio sur 7,6) : quatre workers tués (SIGKILL), un hook au-delà de 5 s (`meta-complete`), puis l'API de Docker en 500 et le conteneur `--rm` perdu avec sa sortie — non retenu comme preuve (piège 1077-2).
+- **Sources des paquets** : `_meta.alerte_capitaux_propres` et `capitaux_propres_stricts` des trois tables de passage
+  SYSCOHADA ; `node scripts/referentiels/build.mjs` : **seuls les quatre artefacts attendus bougent** ; chacun, marqueur et
+  bloc retirés, est égal à l'octet à celui de 1076 (AC-3). Empreintes (octets commités, `autocrlf=false`) : `@2.1`
+  `a1f6fd49…`, `@2.2` `bcbae17b…`, `@2.3` `fbdca0df…`, zone franche `5c910373…` ; registre et quatre specs à jour.
+- **Spec neuve `alerte-capitaux-propres.spec.ts`** (valeurs écrites dans le test, vrais paquets, vraie production) :
+  `ajouterMois` (dix cas : fin de mois, bissextile, 0 mois), marqueur et bloc dans les quatre paquets (AC-2), même bloc
+  partout, SFD / SMT / CIMA sans bloc ; constat (SARL en perte : 300 000 < 500 000, 30 % ; bornes 499 999 / 500 000 /
+  500 001 ; capitaux propres négatifs ; lecture large au-dessus de la moitié avec subventions et provisions ; résultat
+  au passif ; capital nul ⇒ `DENOMINATEUR_NUL` ; résultat des deux côtés ⇒ `RESULTAT_NON_AFFECTE`) ; régimes (SARL,
+  SUARL, SA, SAS ; EI ; inconnue ; AUTRE et GIE ; NON_ATTEINTE ; paquet sans bloc) ; échéances (30/06, au terme 30/10,
+  31/12/2027 ; approuvée le 20/05 ⇒ 20/09 ; SA non datable et exclusion 669 ; clôture inconnue) ; approbation avant ou
+  le jour de la clôture refusée.
+- **Garde de packaging `gardes-alerte-capitaux-propres.spec.ts`** (node fils) : vocabulaire TS = JSON partagé, bloc valide
+  normalisé, **23 refus** nommés (marqueur sans bloc et inversement, hors masse, sous-total, sans `CAPITAL`, code, clé
+  inconnue, fractions, source, régimes, formes en double, renvoi étranger, délais, citations, articles).
+- **Read-model** : `formeJuridique` projetée, rognée, `null` si absente ou mal typée sans écarter le message (six formes
+  éprouvées), survivant au casting du vrai schéma (`$set`), lue par le repository (fail-closed hors portée).
+- **Service** : la forme, la clôture (`exerciceN.fin` de la période, du jeu ou du dry-run) et la date d'approbation
+  passent à l'alerte ; refus avant la clôture.
+- **e2e (vrai HTTP, artefacts embarqués)** : `bilan-analyse` + `openapi-contract` **591/591** — SARL en perte servie
+  `ATTEINTE` avec ses trois dates, dossier client sans forme ⇒ constat sans échéance, `400 APPROBATION_AVANT_CLOTURE`
+  (dry-run et `GET`), `dateApprobation` non calendaire ⇒ `400` de validation, `GET` d'une SA ; une alerte ATTEINTE d'une SA
+  avec ses échéances **décrite exactement par le contrat OpenAPI**.
+- **Suite unitaire complète (Node 25, branche)** : 336 suites vertes sur 351, **12 056 tests verts** ; les 15 rouges sont
+  connues et sans lien (13 binding de Confluent, `dossier-scope.invariant` sur le CRLF, `homogeneisation.regles` sous la
+  charge — 73/73 seul) ; `analyse.agnosticisme` repasse au vert (chemins ramenés à `/`).
+- **Node 24 (branche)** : **suite unitaire complète de la branche (`ac75133`) sous Node 24** (étage `verification`, même protocole) : **351/351 suites vertes, 12 294 tests verts (5 ignorés), 646 s** — les 13 suites du binding de Confluent comprises, `dossier-scope.invariant` et `analyse.agnosticisme` verts.
+- **Mutations 22/22 tuées sur l'assertion** (une survivante au premier passage — la date d'un délai qui court de la
+  clôture lue depuis l'approbation — tuée après un test renforcé ; une syntaxe de mutation corrigée) : égalité à la
+  moitié, quantième non ramené, décision au terme depuis la clôture, forme sans capital ignorée, régime par la première
+  forme, motifs sans échéance inversés, approbation le jour de la clôture, résultat du compte de résultat oublié, capital
+  = tous les marqués, lecture large = stricte, colonne N-1 publiée, forme non rognée, forme vide gardée, clôture lue au
+  début (GET) et oubliée (dry-run), projection oubliée, quatre gardes de packaging, 400 non traduit (e2e).
+- Lint des fichiers `.ts` touchés 0 (les `.mjs` de `scripts/` sont hors du projet ESLint et de prettier, comme
+  `gardes-analyse.mjs`) ; `nest build` OK ; `git diff --stat` = `--ignore-cr-at-eol`.
+- **§1.5** : aucun module Nest, aucune dépendance, aucun Dockerfile ne change (le repository et le service existent) ⇒ pas de
+  `docker compose up` ; le comportement servi est prouvé par l'e2e HTTP. Docker seulement pour Node 24, sous le verrou.
