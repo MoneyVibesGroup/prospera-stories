@@ -1655,6 +1655,29 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-25, STORY-1074, avant la fusion du code : prospera-bilan-service#191) — La consolidation
+  s'installe à part : sa garde propre et ses trois vérifications.** Fiche : `stories/STORY-1074.md` (D-1074-1 → 11).
+  - **Ce qui change (comportement)** : chaque route de `dossiers/:dossierId/consolidation/…` (douze contrôleurs, 50
+    routes) exige l'état publié du module **`consolidation`** en plus de celui de `bilan` : une organisation qui a
+    `bilan` sans `consolidation` (état inconnu, `NON_INSTALLE`, `ESSAI_TERMINE`, `DESINSTALLE`, `SUSPENDU`) reçoit **403
+    `CONSOLIDATION_NOT_ENTITLED`** (code neuf), avant la portée du dossier et du groupe ; `LECTURE_SEULE` ⇒ les
+    lectures passent, une écriture rend 403 `ABONNEMENT_EXPIRE`. Dans l'espace d'essai, le KYC n'est pas lu (règle de
+    STORY-1079). **Aujourd'hui, aucun état n'est publié pour `consolidation` : toutes ces routes ferment.**
+  - **Route neuve** : `POST /api/v1/instance/consolidation/{organisationId}/verifications/{code}` (identité `MOTEUR`,
+    limitée à l'organisation du chemin ; `verification-installation@1`) : `perimetre-arrete`, `ecritures-equilibrees`,
+    `gate-consolidation` — telles que le manifeste M45 les déclare. 404 `VERIFICATION_INCONNUE` pour un autre code.
+  - **Collection neuve** : `etats_publies_consolidation` (projection de `etat-publie.changed.<espace>`, même enveloppe,
+    aucun topic neuf), effacée par le plan C13.
+  - **OpenAPI** : l'enum de `RefusConsolidationDto` gagne `CONSOLIDATION_NOT_ENTITLED` et `ABONNEMENT_EXPIRE` (ce
+    dernier était déjà rendu par la garde de bilan, non inventorié).
+  - **Ce qui ne change pas** : le manifeste `consolidation` (1.0.0, à la source et au catalogue : **aucune recopie
+    demandée**) ; les routes hors consolidation ; les rôles (les droits C7 `consolidation:*` ne sont pas lus).
+  - **Pour A (app, écrans de consolidation)** : régénérer les types (deux codes de plus) ; un cabinet sans le module voit
+    `CONSOLIDATION_NOT_ENTITLED` (proposer l'option), plus seulement `BILAN_NOT_ENTITLED`.
+  - **Pour B (catalogue, recette)** : pour ouvrir `consolidation` par le moteur, l'adresse de bilan-service pour ses
+    vérifications (comme `bilan`) et `consolidation` dans `INSTALLATION_SERVICES` de la recette quand une recette
+    l'installera ; rien à faire pour les recettes actuelles (aucune n'appelle une route de consolidation).
+
 - **PUBLIÉ (2026-11-25, STORY-1079, prospera-bilan-service#190, `dev` 7ed3335, 2d186b9) ; ANNONCÉ avant la fusion du
   code (prospera-stories #877, `main` 36ccec7), sans écart. — Dans l'espace d'essai, la garde de bilan (et celle du
   module `financement`) ne lit plus le KYC : l'état publié décide seul.** Fiche : `stories/STORY-1079.md` (D-1079-1 →
