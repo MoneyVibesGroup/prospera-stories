@@ -9,8 +9,8 @@
 - **Poste** : C a quitté le poste principal (plan §2 bis) ; il travaille sur l'autre poste (`C:\Users\USER\…`, session de
   groupe `moneyvibes-apps-86`, une sous-session neuve par story). **Verrou Docker partagé avec B et D**
   (`MoneyVibes_Apps\.verrou-docker`, pris par `noclobber`) ; piles `grp-c` seulement, descendues avec leurs volumes.
-- **Ordre** (amendement du 25/11, puis le tableau du §3) : **1020 → 1019 → 1021 → 1022 → 1023** (balance-service), puis
-  **564** → 317 → 318 → 319 → 321 → 324 → 325 → 327 → 329 → 339 → 338 → 340 → 341 → 342 → 343 → 344 → 350 → **566**
+- **Ordre** (amendement du 25/11, puis le tableau du §3 ; **amendé le 25/11 à 21:50, point 4** : 564 avant 1022) :
+  **1020 → 1019 → 1021 → 564 → 1022 → 1023**, puis 317 → 318 → 319 → 321 → 324 → 325 → 327 → 329 → 339 → 338 → 340 → 341 → 342 → 343 → 344 → 350 → **566**
   (fiscal, et comptabilité pour 338).
 - **Dépôts tenus au lot 7** : `prospera-balance-service` ; `prospera-fiscal-service`, **partagé par dossier avec D**
   (D-L7-1, passation ci-dessous) ; `prospera-comptabilite-service` (pour 338). `document-service` est passé à B (#848).
@@ -31,7 +31,18 @@
    `gate-conseil`. **← D servie** : sur `INSTANCE_ESPACE=ESSAI`, la garde de balance (et celle du conseil) ne lit plus le
    KYC. Manifeste `conseil` inchangé. Node 24 : unitaires 292/292 suites, 5645 ; e2e 37/37, 2283 ; mutations 21/21 ;
    pile `grp-c` 22/22 (REEL et ESSAI, états publiés par Kafka) ; verrou pris deux fois (20:01 → 20:15, 20:42 → 20:43). D-1019-1 → 12 dans la fiche. **→ B** : la recette `atelier-balance` doit octroyer `conseil`.
-3. **Suivante : STORY-1021** (n° 0c) : les routes d'instance `export`, `sante`, `migrer` de la balance.
+3. ✅ **STORY-1021 DONE (25/11)** : balance-service **#167** (`b52d262` routes, `465a308` garde STORY-529 ; `dev`
+   `465a308`), contrat #916 (annoncé avant le code). `GET /api/v1/instance/balance/{organisationId}/export` (JSON, 32
+   collections du module ; **CSV par objet**, `?format=csv&objet=`, réponse du PO à Q-D-19 ; 403 `BALANCE_NOT_ENTITLED`
+   en `NON_INSTALLE`), `GET …/sante` (`sante@1` : MongoDB et sonde Kafka), `POST /api/v1/instance/balance/migrer`
+   (`dossiers-d8` puis `profils-529` ; 409 `MIGRATION_INCOMPLETE` ; par la route, seuls les cabinets inconnus sont
+   republiés). Manifeste inchangé. Node 24 : unitaires 297/297 suites, 5691 ; e2e 37/37, 2291 ; mutations 32/32 ; pile
+   `grp-c` 37/37 (REEL et ESSAI, Kafka arrêté) ; verrou pris deux fois (21:31 → 21:40, 21:47 → 21:52). D-1021-1 → 18
+   dans la fiche. **→ D (information)** : balance sert le CSV par objet, bilan peut prendre la même forme.
+4. **Amendement d'ordre (25/11, 21:50, session de groupe de C, convenu avec D qui commence 347)** : après 1021,
+   **STORY-564** passe avant 1022 — l'ordre devient **1021 → 564 → 1022 → 1023 → 317 → 318 → …** (le reste du §3
+   inchangé). Raison : **348 de D attend 564**.
+5. **Suivante : STORY-564.**
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -459,7 +470,7 @@ seulement.
 
 ## ⚠ Contrats
 
-- **2026-11-25 (STORY-1021), AVANT le code** — les routes d'instance `export`, `sante` et `migrer` de la balance
+- **2026-11-25 (STORY-1021), PUBLIÉ** (balance-service #167, `465a308` sur `dev`) — **conforme à l'annonce** (#916, faite avant le code), sans écart de contrat ; l'import d'un enregistrement exporté tombe au schéma (`SCHEMA_NON_CONFORME`, D-1021-17). Annonce : les routes d'instance `export`, `sante` et `migrer` de la balance
   (`prospera-balance-service`), sur le patron de STORY-1075 (D, bilan). Fiche : `stories/STORY-1021.md` (D-1021-1 → 16).
   - **Routes neuves** (identité `MOTEUR` seule, hors des gardes métier, sans limite de débit, **deux espaces**) :
     - `GET /api/v1/instance/balance/{organisationId}/export` (limitée à l'organisation du chemin) : 200 JSON
@@ -962,6 +973,21 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-1021, 25/11) `fetch().text()` retire le BOM UTF-8** : un script de preuve qui vérifie le BOM d'un CSV doit lire
+  `arrayBuffer()` et comparer les trois premiers octets (`ef bb bf`) ; sinon il croit le BOM absent.
+- **(STORY-1021)** un enregistrement exporté (`_id`, enveloppes Extended JSON) est refusé par `import-c13-demande@1` au
+  schéma (`SCHEMA_NON_CONFORME`), avant le contrôle de l'objet : pour éprouver `OBJET_INCONNU`, n'envoyer que des champs
+  `^[a-z]…`.
+- **(STORY-1021)** la garde STORY-529 (`profil-societe/lecture-profil-par-dossier.spec.ts`) tient une **liste fermée et
+  comptée** des fichiers qui nomment `profils_societe` : un plan C13 neuf (export) doit y entrer. Elle n'est pas dans
+  `instance-c13/` : jouer **toute** la suite unitaire avant de prendre le verrou pour les e2e, pas seulement les dossiers
+  touchés.
+- **(STORY-1021)** l'outil d'écriture transforme `\uFEFF` en vrai caractère BOM dans le fichier écrit (un test qui compare un
+  CSV porte alors un BOM littéral) : réécrire l'échappement par `chr(92) + 'uFEFF'` en Python, puis vérifier par `grep -c`
+  des octets `ef bb bf`.
+- **(STORY-1021)** EJSON relaxed rend un `Long` en nombre JS (au-delà de 2^53, la précision se perd) : un test qui attend
+  `$numberLong` en relaxed rougit ; seul le mode canonique le garde.
 
 - **(STORY-1019, 25/11) un tour de verrou perdu sur un script de preuve jamais joué** : `createPublicKey(publicKey)` sur
   une clé déjà publique (`generateKeyPairSync` sans encodage rend des `KeyObject`) lève `ERR_CRYPTO_INVALID_KEY_OBJECT_TYPE`
