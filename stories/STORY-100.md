@@ -4,7 +4,8 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § AB-08 (contrôles & livraison) · `sprint-plan-atelier-balance-2026-07-12.md` § Coordination balance/bilan · patron e2e docker STORY-049 (chaîne KYC complète)
 **Priorité :** Must Have
 **Story Points :** 3
-**Statut :** Terminée (2026-11-14) — jalon Atelier PRONONÇABLE (réserves levées, défaut corrigé)
+**Statut :** Terminée (2026-11-14) — jalon Atelier PRONONÇABLE (réserves levées, défaut corrigé) ; correctif du
+2026-11-25 (le module `conseil` octroyé au cabinet, en fin de fiche)
 **Assigné à :** null
 **Créée le :** 2026-07-12
 **Sprint :** 19 (EXTENDED)
@@ -276,3 +277,93 @@ Les contrôles d'intégrité sont refusés dès le dépôt ; seul `EQUILIBRE_ACT
 **Recette croisée : 51/51, plus aucun `todo`**, avec balance-service reconstruit depuis la branche du correctif.
 
 ⚠️ La préparation de la recette fait un `up` sans `--build` : après un changement de service, il faut reconstruire son image.
+
+---
+
+## Correctif du 2026-11-25 — l'Atelier octroie `conseil` au cabinet (groupe B, lot 7, ordre « d »)
+
+**Demande :** C, « → B (2026-11-25, STORY-1019) : la recette `atelier-balance` doit octroyer `conseil` au cabinet »
+(journal de C, « Demandes », et « ⚠ Contrats », STORY-1019) ; placée par la session de groupe en ordre « d » du lot 7
+de B, avant STORY-1119 (D-L7B-8). **Aucun identifiant neuf.** **Dépôt :** `prospera-recette`, branche
+`MNV-100-conseil`, commits `MNV-100(recette): …` · **Exécutée par :** groupe B.
+
+**Pourquoi :** depuis balance-service **#166** (`ab4e468` sur `dev`, STORY-1019), les 8 routes des scénarios et de la
+justification (`dossiers/{dossierId}/fiscal/scenarios…`, `…/fiscal/dossier-justification`) exigent l'état publié du
+module **`conseil`**, vendu à part de `balance`. La garde passe avant la portée du dossier ; une organisation qui a
+`balance` sans `conseil` reçoit **403 `CONSEIL_NOT_ENTITLED`**. Le cabinet de l'Atelier ne recevait que `balance` et
+`bilan` (`octroyer`, écrit ici le 14/11, `0874cff` ; remis dans l'ordre des dépendances par STORY-917, `2debafe`). La
+chaîne commune rougissait donc à l'étape « conseil », sur ses deux profils.
+
+### Où en est-on
+
+- [x] Rituel : plan du lot 7, journaux de A, B, C, D (la demande de C du 25/11, placée en « d ») ; la recette était en
+  HEAD détachée sur `origin/dev` (**`cd62296`**), propre ; branche `MNV-100-conseil` partie d'`origin/dev`.
+- [x] Code relu avant d'écrire : la recette (toutes les suites), le profil de recette, la garde de balance
+  (`conseil-access.guard.ts`, `ab4e468`), le manifeste `conseil` 1.0.0 au catalogue (`copies.json`, `66a4f6c`).
+- [x] Code ; paquet de recette : `tsc`, `prettier`, unitaires 159/159 (16 suites).
+- [x] Recette sur pile neuve (`grp-b-recette`, images depuis `origin/dev`, balance `ab4e468`) : rouge sur `dev`, vert
+  sur la branche ; `cabinet-moteur` rejouée.
+- [x] PR de code fusionnée en rebase : `prospera-recette` **#33** (`dev` **`9ca8abc`**, `mergedAt`
+  `2026-11-25T21:15:55Z`, `headRefOid` `39d3bfb` = le commit testé, arbre identique).
+- [x] PR de docs (fiche, tracker, journal de B). Verrou rendu.
+
+### Décisions retenues par défaut (contestables)
+
+- **D-100-1 — Le correctif se rattache à STORY-100.** C'est elle qui a écrit `octroyer` et l'octroi des droits du
+  cabinet dans `atelier-balance` (`0874cff`, recette #14) ; STORY-917 (`2debafe`) n'a fait que remettre `balance`
+  avant `bilan` pour le point de décision unique (STORY-945), sans rien décider des modules du cabinet. La suite est
+  celle de STORY-100, et C la nomme ainsi.
+- **D-100-2 — `conseil` au seul cabinet de l'Atelier, avec le référentiel de `balance`, et la porte attendue.**
+  `octroyer(cabinet, 'conseil', [SYSCOHADA])`, après `balance` (dépendance dure du manifeste) : `syscohada-revise` est
+  dans les `referentielFamilies` de `conseil`, comme pour `balance` et `bilan`. L'état publié arrive par Kafka
+  (`etats_publies_conseil`) : le premier test attend que la porte du conseil s'ouvre, comme il attend déjà celle de
+  `balance` et les dossiers, pour que la chaîne commune ne lise pas un `403` de course.
+- **D-100-3 — Le voisin éprouve la porte.** Il a `balance` et `bilan`, pas `conseil` : un test neuf de « Transverse »
+  exige `403 CONSEIL_NOT_ENTITLED` sur `GET …/fiscal/scenarios`, `POST …/fiscal/scenarios` (corps vide : la garde
+  passe avant la validation) et `GET …/fiscal/dossier-justification`. Sans lui, la recette ne prouverait que le cas
+  ouvert ; le refus est ce que STORY-1019 a changé.
+- **D-100-4 — `conseil` n'entre pas dans `INSTALLATION_SERVICES` (option facultative de C, non retenue ici).**
+  Lui donner une adresse change deux autres suites : `cabinet-moteur` (FR-6 prend `conseil` pour le module « sans
+  adresse », à remplacer par `declarations`) et `abonnement` (le moteur installe `conseil` dans le pack : ses deux
+  vérifications seraient alors jouées). C'est une autre preuve, plus lourde (trois suites, une pile), qui revient à
+  **STORY-1129** (n° 11, « le cabinet sur le moteur ») : nommée dans son plan, pas faite ici.
+- **D-100-5 — `INSTANCE_ESPACE=ESSAI` sur le balance de l'essai : déjà vrai, rien à changer.** La recette n'a qu'un
+  `balance-service`, qui suit l'espace de la pile (`INSTANCE_ESPACE: ${RECETTE_ESPACE:-REEL}`, STORY-929, gardé par
+  `profil-de-recette.spec.ts`) ; l'espace d'essai de la pile ne porte qu'`auth-essai` et `catalogue-essai` (STORY-1115).
+  Une pile levée en `RECETTE_ESPACE=ESSAI` a donc déjà un balance « essai » ; aucun KYC à semer pour lui.
+- **D-100-6 — Aucune autre suite n'appelle ces routes ; aucun contrat ne change.** Inventaire de la recette :
+  seules les étapes de `atelier-balance` appellent les 8 routes. `cabinet-moteur` n'appelle que les vérifications de
+  bilan (`…/instance/bilan/…/verifications/gate-conseil`) et installe `balance` et `bilan` ; `abonnement` octroie
+  `conseil` sans appeler balance. Rien d'annoncé dans « ⚠ Contrats » : seule une suite de recette change.
+
+### Livré
+
+- **prospera-recette #33** (`9ca8abc` sur `dev`) — `paquets/recette-croisee/recette/atelier-balance.recette.ts` :
+  - `octroyer(cabinet, 'conseil', [SYSCOHADA])` après les droits `balance` et `bilan` des trois cabinets ;
+  - le premier test attend la porte du conseil (`GET …/fiscal/scenarios` sans `CONSEIL_NOT_ENTITLED`) ;
+  - test neuf « ⛔ gate — `balance` sans `conseil` » (D-100-3) ; en-tête de la suite à jour.
+
+### Preuves
+
+- **Paquet de recette (Node 25)** : `tsc --noEmit`, `prettier --check` verts ; unitaires **159/159** (16 suites).
+- **Pile `grp-b-recette` neuve** (volumes neufs), images construites depuis `git -c core.autocrlf=false archive
+  origin/dev` : auth `d69e34c`, kyc `9cef9cb`, catalogue `66a4f6c`, notification `749b3cd`, paiement `e2be149`,
+  dossier `645a699`, **balance `ab4e468`** (la garde `conseil-access.guard.js` vue dans l'image), bilan `4317dd2`,
+  document `0716a58`, BFF `0dfcf43`.
+- **Rouge sur `dev`** (recette `cd62296`) : `npm run recette -- atelier-balance` : **10 échecs, 41 passés** (403 s).
+  Les cinq étapes du conseil, sur les deux profils (A et B) : « ⛔ NFR-A04 » (400 attendu, 403 reçu), scénario,
+  simulation, comparatif, dossier de justification. Toutes en `403 CONSEIL_NOT_ENTITLED` (« Accès refusé : le module de
+  conseil fiscal n'est pas ouvert pour l'organisation. »). C'est aussi la mutation de l'octroi : sans lui, la suite
+  rougit.
+- **Vert sur la branche** (`39d3bfb`), même pile : `npm run recette -- atelier-balance cabinet-moteur` : **2/2 suites,
+  61 passés, 2 sautés**, 461 s. `atelier-balance` **52/52**, dont le test neuf du voisin (`403 CONSEIL_NOT_ENTITLED` sur
+  les trois routes) ; 409 `CONTROLES_BLOQUANTS` toujours éprouvé. `cabinet-moteur` **9 passés**, FR-6 compris
+  (`conseil` toujours « sans adresse », `SERVICE_NON_CONFIGURE`). Les 2 sautés sont la démonstration C13, jouée
+  seulement en `RECETTE_ESPACE=ESSAI`, comme avant.
+- **Verrou** : pris à 20:56, rendu à 21:15 après `down -v` (profil `recette`) ; aucun conteneur, volume ni réseau
+  `grp-b` ne reste.
+
+### Ce qui reste
+
+- **STORY-1129** (n° 11) : donner une adresse à `conseil` dans `INSTALLATION_SERVICES` et changer le module « sans
+  adresse » de FR-6 (`declarations`), avec `cabinet-moteur` et `abonnement` rejouées (D-100-4).
