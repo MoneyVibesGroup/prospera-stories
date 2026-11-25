@@ -7628,7 +7628,7 @@ sprints:
         epic: "EPIC-030"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        status: "in-progress"  # 2026-11-25 — groupe C, lot 6 : fiche + contrat avant le code (stories/STORY-315.md)
         assigned_to: null
       - story_id: "STORY-316"
         title: "Calcul des échéances depuis le paquet"
