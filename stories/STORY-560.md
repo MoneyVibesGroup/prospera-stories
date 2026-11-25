@@ -1,6 +1,6 @@
 # STORY-560 : AD-13 est amendé — un coffre-fort de secrets de canal, adossé au mandat écrit du client
 
-Status: in-progress (lot 7 de D, n° 1 — `PLAN-LOT-7-2026-11-24.md` §4 ; reprise le 2026-11-25)
+Status: done (2026-11-25 — prospera-fiscal-service#63, `dev` cf8b583 ; lot 7 de D, n° 1)
 
 **Épic :** EPIC-027 — Natures d'accès et habilitations graduées
 **Service :** `fiscal-service` (`:3012`) — socle
@@ -221,3 +221,56 @@ changé depuis l'émission). Aucun topic Kafka, aucun schéma de fait.
 raison), `src/domain/habilitations/natures-acces.ts` et son test (D-560-14), le contrat OpenAPI (routes neuves),
 `.env.example` (deux variables commentées, sans valeur). Ni `package.json`, ni migration, ni `read-models/`, ni copie
 du paquet. Des fichiers neufs dans `src/ports/` (préfixés `coffre-`).
+
+---
+
+## Livré (2026-11-25) — prospera-fiscal-service#63, `dev` `cf8b583`
+
+Annonce avant le code : prospera-stories #905 (`main` 0f4dae3 : fiche, AD-13 amendé dans la spine, « ⚠ Contrats »,
+« ⚠ Communs ») et #908 (`main` 5a2f26c : complément de « ⚠ Communs » avant la fusion, le filtre d'exceptions).
+
+- **Module `coffre-secrets`** (dossiers de D) : `src/domain/coffre-secrets/` (portée, mandat de canal, états, repli,
+  refus publiés, faits du journal ; `IdentifiantsDeCanal` masqués), `src/application/coffre-secrets/`
+  (`CoffreSecretsService`, qui implémente le port d'usage), `src/adapters/coffre-secrets/` (AES-256-GCM en
+  enveloppe, collections `coffre_canaux` et `coffre_jetons`, registre MongoDB transactionnel avec le journal chaîné),
+  `src/modules/coffre-secrets/` (deux contrôleurs, DTO, garde AD-13), `src/ports/coffre-*.ts`.
+- **Les huit routes du contrat** telles qu'annoncées, avec deux **écarts** : (1) les deux révocations du cabinet
+  (`…/mandat/revocation`, `…/secret/revocation`) n'ont **pas de corps** (le `motif` annoncé est retiré : un texte libre
+  de plus dans le journal du coffre, sans usage) ; idempotentes ; (2) un acte de plus au journal,
+  **`COFFRE_USAGE_TERMINE`** (`resultat` : `TERMINE` | `ECHEC`, jamais le message de l'erreur), écrit après le travail
+  du connecteur ; `COFFRE_SECRET_UTILISE` est écrit à la consommation du jeton, dans sa transaction.
+- **Code de refus neuf, commun à tout le service** : `CORPS_ILLISIBLE` (400) — D-560-15, dans
+  `common/filters/all-exceptions.filter.ts` : Nest traduit le `SyntaxError` de body-parser en
+  `BadRequestException(err.message)` hors route, et `JSON.parse` cite un extrait du corps (`Unexpected token 'Z',
+  ..."DePasse": Zq7…" is not valid JSON`, mesuré) ; le message devient constant.
+- **Le port `UsageSecretDeCanal`** (exporté par `CoffreSecretsModule`) : `emettre(acteur, { dossierId, canal, depotId,
+  acte })` → `{ jeton, idJeton, expireLe, avertissements }` ; `utiliser(jeton, depotId, travail)` — `travail` reçoit
+  `IdentifiantsDeCanal` et `controle.toujoursAutorise()`. **Pour 561** : la route qui appelle `emettre` porte
+  `@ExigeDroitFiscal(DroitFiscal.DEPOSER)` ; le connecteur appelle `toujoursAutorise()` entre deux étapes ; le code
+  `canal` doit être un canal déclaré par le paquet (331).
+- **Communs** (D-L7-2) : `app.module.ts`, `all-exceptions.filter.ts` (+ test), `natures-acces.ts` (+ test,
+  `COMPTE_DE_CANAL` → `COFFRE_SEUL`), `garde-routes-ecriture.spec.ts` (deux routes publiques), `.env.example`, contrat
+  OpenAPI. Ni migration, ni `package.json`, ni `read-models/`, ni copie du paquet, ni manifeste.
+
+## Preuves
+
+- **Node 24** (étage `verification`, image construite depuis `git archive` LF de `584b0fe`) : unitaires **199/199 suites, 2 816 tests** (1 ignoré) ; e2e **12/12 suites, 242 tests** (`coffre-secrets.e2e-spec.ts` 11) ; **`test:conformite` 17/17 suites, 109 tests** sur `mongo-fiscal` en jeu de répliques (`coffre-secrets.conformite-spec.ts` 7 : index uniques et TTL, base brute sans valeur ni jeton, cinq usages parallèles d'un jeton ⇒ un seul, trois dépôts parallèles par un lien ⇒ un seul, révocation qui efface le chiffré en base, piste chaînée intacte).
+- **Unitaires du coffre** : domaine 17, identifiants 4, chiffreur 6, service 29, garde AD-13 6, filtre d'exceptions +4.
+- **Mutations 15/15 tuées** (Node 25, sur l'assertion) : acte non vérifié, secret utilisable le jour de sa fin, préavis strict, dépôt de rattachement, chiffré non effacé, mandat non revérifié au dépôt, jetons non annulés, masquage JSON, corps illisible recopié, portée non authentifiée (chiffrement, déchiffrement), contrôle d'usage qui ne relit pas, résultat toujours TERMINE, lien sans expiration (survivante au premier passage ; test ajouté), mandat expiré accepté.
+- **§1.5 — le service démarre** (`docker compose -p grp-d … --profile fiscal up -d --build fiscal-service`, image runtime de l'archive, clé de test) : `/health` 200 (MongoDB, audit, Kafka, Redis) ; `POST /coffre/revocations` 404 `JETON_DE_REVOCATION_INVALIDE` ; `POST /coffre/depots` 404 `LIEN_DE_DEPOT_INVALIDE`, avec `codeMfa` 400, JSON sans guillemets 400 `CORPS_ILLISIBLE` ; route du cabinet sans jeton 401 ; journaux du conteneur (449 lignes) : **0** fragment du témoin ; clé maîtresse mal formée ⇒ le service **refuse de démarrer** (exit 1, message nommé, valeur non citée).
+- Lint des fichiers touchés 0 ; `tsc` 0. Sous Node 25 en local, les rouges sont ceux du client Kafka natif (installé `--ignore-scripts`) et des paquets de dépôt en CRLF, absents sous Node 24.
+- Verrou Docker : attendu (C puis B), pris à 20:29, une seule prise, rendu à 20:42 (script autonome, `trap EXIT`) ; aucun conteneur, volume ni réseau `grp-d`.
+
+## Ce qui reste (nommé, hors de cette story)
+
+- L'envoi du lien de dépôt au client par `notification` (le cabinet le remet lui-même) ; l'écran du coffre (A).
+- Une liste des échéances du coffre à l'échelle du cabinet, et sa notification (l'état du canal les signale déjà).
+- La rotation de la **clé maîtresse** : `cleId` est rangé avec chaque secret, mais une seule clé est lue ; un
+  rechiffrement sous une clé neuve est à écrire le jour où elle tourne.
+- La purge du chiffré d'un secret **expiré** non révoqué (il reste chiffré, inutilisable ; le client peut le faire
+  effacer par son jeton de révocation, valable 30 jours après la fin du secret).
+- La clé maîtresse d'un environnement réel : **geste de l'utilisateur** (aucun `.env` créé).
+- Le manifeste `declarations` dit encore « aucun secret de canal n'est stocké » : à corriger à sa prochaine version
+  (avec 561).
+- **Revue de sécurité** (fiche, « Notes ») : faite en interne par cette story (fuites par réponse, journal, corps
+  illisible, base brute, jetons) ; une relecture humaine reste recommandée avant la mise en service du connecteur.
