@@ -90,3 +90,5 @@ l'amortissement ; seul le rattachement manque (la cible d'une surcharge doit êt
 - Fiches : STORY-059 (convention miroir écartée, tech-spec B8), STORY-434, STORY-438, STORY-528 (§ Hors périmètre),
   STORY-548, STORY-1078 (D-1078-5).
 - Textes : AUDCIF 2017, art. 45-47 ; Guide d'application du SYSCOHADA révisé, p. 78 et 81 (ohada.com).
+
+- 2026-11-25 — **placé en STORY-1118** par la session de groupe de D (réservée au tracker, marque haute montée à STORY-1118) ; passe avant STORY-1079.
