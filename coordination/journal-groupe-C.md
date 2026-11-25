@@ -431,6 +431,30 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-25 (STORY-1019), AVANT le code** — le conseil s'installe à part (`prospera-balance-service`). Fiche :
+  `stories/STORY-1019.md` (D-1019-1 → 12).
+  - **Comportement** : les 8 routes des scénarios et de la justification (`dossiers/{dossierId}/fiscal/scenarios…`,
+    `…/fiscal/dossier-justification`) exigent l'état publié du module **`conseil`** en plus de celui de `balance` : une
+    organisation qui a `balance` sans `conseil` (état inconnu, `NON_INSTALLE`, `ESSAI_TERMINE`, `DESINSTALLE`,
+    `SUSPENDU`) reçoit **403 `CONSEIL_NOT_ENTITLED`** (code neuf), avant la portée du dossier ; `LECTURE_SEULE` ⇒ les
+    lectures et `simuler` passent, une écriture rend 403 `ABONNEMENT_EXPIRE`. **Aujourd'hui, aucun état n'est publié
+    pour `conseil` : ces routes ferment tant que le moteur ne l'a pas installé.**
+  - **Route neuve** : `POST /api/v1/instance/conseil/{organisationId}/verifications/{code}` (identité `MOTEUR`, limitée
+    à l'organisation du chemin, deux espaces ; `verification-installation@1`) : `aucun-scenario-applique`,
+    `gate-conseil`, telles que le manifeste M38 les déclare ; 404 `VERIFICATION_INCONNUE` pour un autre code.
+  - **Collection neuve** : `etats_publies_conseil` (projection de `etat-publie.changed.<espace>`, même enveloppe, aucun
+    topic neuf), effacée par le plan C13.
+  - **← D (Q-D-17 confirmée, STORY-1079)** : sur une instance `INSTANCE_ESPACE=ESSAI`, `@RequiresBalanceAccess` (et la garde du
+    conseil) ne lit plus le KYC ; e-mail vérifié et état publié restent exigés ; dans le réel, rien ne change. Aucun
+    code neuf.
+  - **Ce qui ne change pas** : le manifeste `conseil` (1.0.0, **aucune recopie au catalogue**) ; les autres routes ; les
+    rôles (droits C7 `conseil:*` non lus).
+  - **→ B (recette)** : `atelier-balance` (STORY-100) doit octroyer `conseil` au cabinet avant l'étape « conseil » (sinon
+    403 `CONSEIL_NOT_ENTITLED`) ; facultatif, `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES` (le
+    test FR-6 de `cabinet-moteur` prendra alors un autre module « sans adresse ») ; pour la recette de l'essai, poser
+    `INSTANCE_ESPACE=ESSAI` sur le `balance-service` de l'espace d'essai, aucun KYC à semer. **→ A** : un cabinet sans le
+    module voit `CONSEIL_NOT_ENTITLED` sur les scénarios (proposer l'option).
+
 - **2026-11-25 (STORY-1020), PUBLIÉ** (balance-service #165, `4d3408f` sur `dev`) — **conforme à l'annonce** ; seules les
   rubriques de l'équation sont écrites sans `=`, `+`, `-` initial (D-1020-10). Annonce : route neuve `GET /api/v1/dossiers/{dossierId}/rapprochement/etat/export`
   (paramètres de `…/etat` : `compteId`, `exerciceDebut`, `exerciceFin`, `au` ; plus `format` = `pdf` | `xlsx`, rien
