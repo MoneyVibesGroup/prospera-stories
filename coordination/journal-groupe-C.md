@@ -61,7 +61,8 @@
    `balance.created` remis à jour (tenu par Ajv). Node 24 : unitaires 298/298 suites, 5738 ; e2e 37/37, 2291 ;
    mutations 9/9 ; pile `grp-c` 12/12 (Kafka et outbox, empreinte recalculée hors du service). Verrou pris une fois
    (23:08 → 23:19). D-1022-1 → 6 dans la fiche. **D prévenu** (SHA, forme exacte ; D-1078-10 débloqué).
-7. **Suivante : STORY-1023** (fiche à écrire juste avant de coder).
+7. **STORY-1023 en cours (25/11)** : fiche écrite, contrat annoncé avant le code (« ⚠ Contrats » ci-dessous) — le
+   dossier déclaré dans les réponses des familles de la balance, trois routes de lecture plateforme (AD-P16).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -524,6 +525,31 @@ seulement.
   clés, plus celles de l'IRPP et de la CNSS (voir « ⚠ Contrats »).
 
 ## ⚠ Contrats
+
+- **2026-11-25 (STORY-1023), ANNONCÉ avant le code** — **les contrats de la balance complétés : le dossier déclaré
+  partout, la lecture inter-organisations de la plateforme** (`prospera-balance-service`, REST seulement). Fiche :
+  `stories/STORY-1023.md` (contrat, D-1023-1 → 10). Consommateurs : les écrans de A (FE-063 et suivants : confronter le
+  dossier reçu au dossier affiché) ; la console de la plateforme (B, quand elle lira la donnée métier).
+  - **Ajouté, requis, sans rien renommer** : `dossierId` (ObjectId hex) au niveau du corps de chaque réponse JSON 2xx des
+    routes `/api/v1/dossiers/{dossierId}/…` des familles `balances`, `balance` (rejets, à-nouveaux, affectation, import et
+    import Sage, agrégation des cahiers, provenance, comptes de ventilation), `exercices`, `imports`, `cahiers` (recettes,
+    dépenses, catégories, mémoire des choix), `pieces/ocr`, `rattachement`, `rapprochement`, `tresorerie` — sur chaque
+    élément quand le corps est une liste (39 schémas de réponse). Valeur : celle de la donnée pour une ressource d'un
+    dossier, celle du dossier de la route pour un corps calculé et pour un profil d'import (qui est de l'organisation).
+    Schéma neuf : `MemoireCahiersDuDossierDto` (`MemoireCahiersDto` inchangé). Hors de tout sceau.
+  - **Écartées, raison écrite** (le ticket reste ouvert pour elles) : `fiscal`, `immobilisations`, `inventaire`,
+    `devises`, `profil-societe` (en migration vers `dossier-service`), `referentiels`.
+  - **Trois routes neuves de lecture plateforme (AD-P16)**, `GET` seulement, `PLATFORM_ADMIN` seul, sous
+    `@PlatformReadOnly()` : `/api/v1/plateforme/balance/organisations/{orgId}/dossiers/{dossierId}/balances`
+    (`BalanceResumeDto[]`), `…/balances/{id}` (`BalanceResponseDto`), `/api/v1/plateforme/balance/organisations/{orgId}/lectures`
+    (le journal des lectures). En-tête **`X-Motif-Lecture`** obligatoire (10 à 500 caractères) ⇒ sinon **400
+    `MOTIF_LECTURE_REQUIS`** ; identifiant mal formé ⇒ **400 `IDENTIFIANT_INVALIDE`** ; rôle de cabinet ⇒ 403 ; identité
+    de service ⇒ 403 `IDENTITE_DE_SERVICE_REFUSEE`. Chaque lecture journalisée **avant** d'être servie
+    (`journal_lectures_plateforme` : opérateur, organisation, dossier, route, ressource, motif, date) ; journal exclu de
+    l'effacement C13 (il survit). `Cache-Control: no-store`.
+  - **Ce qui ne change pas** : aucune requête, aucun code de refus, aucune route existante, le manifeste `balance`, les
+    topics. Le contrat est tenu par **Ajv sur les corps réels** dans les e2e (leçon de 1022), et par un balayage du
+    document OpenAPI qui classe chaque chemin `/dossiers/…`.
 
 - **2026-11-25 (STORY-1022), PUBLIÉ** (balance-service #169, `d5878be` sur `dev`) — **conforme à l'annonce** (#927),
   sans écart ; le schéma JSON gagne aussi `CIMA` dans l'énumération des référentiels (déjà publié) et `dependentRequired`

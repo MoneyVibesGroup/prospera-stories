@@ -2536,12 +2536,13 @@ reserved_ranges:
       seule au manifeste. Node 24 : 1056 unitaires sur MongoDB réel, 24 e2e, build 0 ; pas de pile. Lot 3 de C, n° 5.
       NON SLOTTÉE.
   - range: "STORY-1023"
-    status: "RÉSERVÉ"
+    status: "in_progress"
     owner: "Groupe C — les contrats de la balance complétés : le dossier déclaré dans toutes les réponses (imports, cahiers, rejets, rapprochement) et la lecture inter-organisations de la plateforme (@PlatformReadOnly, AD-P16) (prospera-balance-service)"
-    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    source_doc: "prospera-stories/stories/STORY-1023.md"
     reserved_on: "2026-11-24"
     note: >
-      Amendement du lot 6 (24/11 soir, D-L6-5), consigne de l'utilisateur. Source : TICKET-BACKEND-balance-ne-declare-pas-son-dossier
+      EN COURS le 2026-11-25 (lot 7 de C, n° 0e) : fiche écrite, contrat annoncé avant le code (journal de C, ⚠ Contrats).
+      AVANT : Amendement du lot 6 (24/11 soir, D-L6-5), consigne de l'utilisateur. Source : TICKET-BACKEND-balance-ne-declare-pas-son-dossier
       (servi en partie par 906) ; spine balance §Non couvert. Fiche à écrire juste avant de coder. Lot C, n° 12 du lot 6. NON SLOTTÉE.
   - range: "STORY-1022"
     status: "done"
