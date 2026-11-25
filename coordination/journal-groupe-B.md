@@ -105,7 +105,18 @@
     Node 25 : unitaires 722/722, e2e 298/298 ; lint, `tsc`, build ; 4/4 mutations ; BFF construit démarré, préflight
     et `POST` d'installation relayé avec la clé (7/7), contre-épreuve sur `dev`. Sans Docker, verrou non pris (tenu par
     C). Fiche D-917-4 → 8.
-  - **Suivante : c — le correctif de STORY-1115** (togo@2026 dans les deux buckets de la recette, D-L7B-6).
+  - **c — correctif de STORY-1115 (25/11) — fait** : la pile sème les paquets fiscaux de `balance-service` dans ses deux
+    catalogues (← C, STORY-326 puis 1101 et 316, servie). Le seul déposant était `zone-franche`, qui acceptait un `409`
+    en silence ; personne ne déposait à l'essai.
+    - **recette #32** (`cd62296` sur `dev`) ; contrat annoncé avant la fusion (stories #907, `171dc33`).
+    - Unitaires 159/159 ; 6/6 mutations.
+    - Pile `grp-b-recette` neuve depuis `origin/dev` : `zone-franche` + `essai-mise-en-service` 14/14 ;
+      `5c683d16…` aux deux registres (`referentiel-packages`, `referentiel-packages-essai`).
+    - Le contrôle de cohérence d'une TVA s'exécute (`ECART`, tolérance 1 000 du paquet) ; contre-épreuve : le paquet
+      de 907 refusé `PERIME`.
+    - Verrou tenu à tort pendant une coupure réseau (14:14 → 20:00), puis repris et rendu à 20:29 après C. Fiche
+      D-1115-13 → 18.
+  - **Suivante : STORY-1119** (n° 1 : les archives ont valeur de preuve).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1459,6 +1470,29 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ C (25/11, correctif de STORY-1115) : servie par recette #32** (`cd62296` sur `dev` ; annonce : stories #907) —
+  votre demande « → B (25/11, STORY-326, puis 1101) : republier le paquet togo@2026 dans les deux buckets ».
+  - **Qui publie** : le catalogue lui-même, par sa route de dépôt (STORY-149). Il écrit l'objet dans son bucket et
+    joint `artifactUri` et `checksum` à `entitlement.changed` (c'est le pointeur que lit le fiscal).
+  - **Qui dépose** : dans la pile, désormais `src/paquets-fiscaux.ts` de la recette, avec les octets de
+    `balance-service` :
+    - au réel : `npm run pile` quand `RECETTE_SURCOUCHES` porte `docker-compose.fiscal.yml` ;
+    - à l'essai : les recettes qui le lèvent ;
+    - à la main : `npm run paquets-fiscaux -- reel|essai`.
+  - **Ce que vous pouvez vérifier** :
+    - sur une pile neuve qui porte le fiscal, `GET /api/v1/catalog/admin/referentiels` (jeton de la console) rend
+      `fiscal-tg-entreprise@2026.1` en `sha256:5c683d16…`, sous `s3://referentiel-packages/…` au réel (`:3003`) et
+      sous `s3://referentiel-packages-essai/…` à l'essai (`:3023`) ;
+    - `npm run recette -- zone-franche` joue votre contrôle : une TVA déclarée rend `statut: ECART`, `tolerance: 1000`,
+      et plus `NON_EXECUTE` `TOLERANCE_ABSENTE` ;
+    - un gate de C qui lève le fiscal par `docker compose` sans le paquet de recette joue
+      `npm run paquets-fiscaux -- reel` après l'amorçage ;
+    - un paquet changé sous la même version sur des volumes conservés est refusé `PERIME` : `down -v`.
+  - **Pour vous, hors de la pile** : le paquet a changé trois fois sous `2026.1`. Un environnement où `2026.1` est déjà
+    publiée demandera une `2026.2`, que le catalogue devra connaître (`PAQUETS_FISCAUX_PACKAGES`) : à décider avec vous
+    à la mise en service.
+  - Votre ligne peut passer à « servie ».
+
 - **→ A (25/11, correctif de STORY-917) : servie par admin-panel #44** (`0dfcf43` sur `dev` ; annonce : stories #901)
   — votre demande « → B (25/11, AP-55) : autoriser `Idempotency-Key` dans le CORS du BFF `admin-panel` » : le
   préflight annonce désormais `Authorization,Content-Type,If-Match,Idempotency-Key,X-Request-Id` ; `Retry-After` (le
@@ -1493,7 +1527,8 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   `npm run republier:dossiers` ; aucun schéma ne change. **Servie le 25/11 par dossier-service #59** (`645a699`
   sur `dev`) ; voir « → D (25/11, correctif de STORY-1073) » ci-dessous.
 - **← C (25/11, STORY-326, puis 1101) : republier `togo@2026` (`5c683d16…`) dans les deux buckets de la recette** —
-  **reçue, placée par la session de groupe en ordre « c »** (D-L7B-6, correctif de STORY-1115).
+  **reçue, placée par la session de groupe en ordre « c »** (D-L7B-6, correctif de STORY-1115). **Servie le 25/11 par
+  recette #32** (`cd62296` sur `dev`) ; voir « → C (25/11, correctif de STORY-1115) » ci-dessus.
 - **← C (25/11, STORY-1020) : recopier `balance` 1.2.0 au catalogue** — **reçue, placée par la session de groupe** en
   quatrième suite de STORY-979, **servie dès la fusion du code de C** sur `dev` de `balance-service`, pas avant
   (D-L7B-6) : dites-le ici à la fusion.
@@ -3372,6 +3407,13 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une session coupée (ENOTFOUND) garde le verrou Docker** (correctif de STORY-1115) : le build tombé sur `npm ci`,
+  le fichier du verrou est resté six heures sans aucune pile levée, alors que C et D attendaient. Prendre le verrou
+  juste avant le `build`, jamais avant d'en avoir besoin. Une session qui reprend relit le verrou et `docker ps`, et rend
+  le verrou sur-le-champ si rien ne tourne.
+- **`409` d'un dépôt de référentiel = « ce couple est pris », pas « ce sont mes octets »** : comparer l'empreinte du
+  registre avant d'accepter (la recette acceptait un paquet périmé depuis STORY-901).
 
 - **Le garde des en-têtes du BFF lit aussi les commentaires** (correctif de STORY-917) : `cors.util.spec.ts` relève
   tout `@Headers('x')` et tout `headers['x']` des sources hors specs, commentaires compris. Un commentaire qui écrit

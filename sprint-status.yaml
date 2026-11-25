@@ -2098,15 +2098,19 @@ reserved_ranges:
       10 ms ; une pièce KYC et une ouverture jamais arrivées), les trois suites rejouées seules sur pile neuve vertes
       (8/8, 8/8, 6/6). Node 25 : paquet 148/148 ; mutations 14/14. Lot 6 de B, n° 7 (le dernier). NON SLOTTÉE.
   - range: "STORY-1115"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe B, lot 6, n° 6 — la recette « essayer, puis mettre en service » : le second espace dans le profil de recette (auth-essai, catalogue-essai, leur Kafka et leur Redis ; le BFF à deux espaces ; une identité d'opérateur commune, clé tirée hors du dépôt) ; un cabinet prospect ouvre son essai, son administratrice y entre et invite un collègue, il signe, sort de l'essai et naît dans le réel sous le même identifiant, le moteur y installe balance et bilan, la mise en service les ouvre et invite les membres de l'essai, qui entrent dans le réel par le lien reçu (prospera-recette)"
     source_doc: "prospera-stories/stories/STORY-1115.md"
     reserved_on: "2026-11-24"
     note: >
-      🔧 CORRECTIF EN COURS le 2026-11-25 (groupe B, lot 7, ordre « c », D-L7B-6 ; fiche, « Correctif du 2026-11-25 »,
-      D-1115-13 → 18 ; demande de C, STORY-326 puis 1101 et 316) — prospera-recette#32 ouverte : la pile sème les
-      paquets fiscaux de balance-service dans ses deux catalogues (referentiel-packages, referentiel-packages-essai) ;
-      un 409 sur d'autres octets est un paquet PÉRIMÉ, refusé ; contrat annoncé avant la fusion.
+      🏁 CORRECTIF DONE le 2026-11-25 (groupe B, lot 7, ordre « c », D-L7B-6 ; fiche, « Correctif du 2026-11-25 »,
+      D-1115-13 → 18 ; demande de C, STORY-326 puis 1101 et 316, servie) — prospera-recette#32 (dev cd62296) ; contrat
+      annoncé avant la fusion (docs #907, main 171dc33). La pile sème les paquets fiscaux de balance-service dans ses
+      deux catalogues (referentiel-packages au réel quand elle porte le fiscal, referentiel-packages-essai quand une
+      recette lève l'essai ; npm run paquets-fiscaux -- reel|essai) ; un 409 sur d'autres octets est PÉRIMÉ, refusé.
+      Unitaires 159/159 ; 6/6 mutations ; pile neuve depuis origin/dev : zone-franche + essai-mise-en-service 14/14,
+      5c683d16 aux deux registres, contrôle de cohérence d'une TVA exécuté (ECART, tolérance 1 000 du paquet) ;
+      contre-épreuve : le paquet de 907 (e8e94c84) refusé PÉRIMÉ.
       Avant le correctif : 🏁 DONE le 2026-11-24 — prospera-recette #28 (dev af13aac) et #29 (dev b38b268, défaut révélé par la recette :
       une connexion par appel, D-1115-12) ; contrat annoncé avant la fusion (stories #808). Le second espace dans le
       profil (auth-essai 127.0.0.1:3021, catalogue-essai 127.0.0.1:3023, leur Kafka et leur Redis, à la demande) ; la
