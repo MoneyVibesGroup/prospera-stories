@@ -207,8 +207,8 @@
   (`dossier-service`, `paiement`), sur consigne de l'utilisateur du 24/11 (soir) : « gère tout cela dans la story 1073 sans attendre la livraison de B », après la passation de B limitée à
   1073. Les douze identifiants (1019 → 1023 de C, 1072 → 1078 de D)
   sont réservés au tracker ; la marque haute ne bouge pas. **Ordre de D mis à jour le 2026-11-25 (STORY-1118)** :
-  1072 ✅ → 1076 ✅ → 1073 ✅ → 1077 ✅ → 1078 ✅ → 1118 ✅ (les amortissements rattachés aux postes) → **1079** (la garde
-  de bilan dans l'essai, demande de B, Q-D-17) → 1074 → 1075.
+  1072 ✅ → 1076 ✅ → 1073 ✅ → 1077 ✅ → 1078 ✅ → 1118 ✅ (les amortissements rattachés aux postes) → 1079 ✅ (la garde
+  de bilan dans l'essai, demande de B, Q-D-17) → **1074** → 1075.
 
 - **STORY-1072** ✅ 📨 — le cabinet prévenu par e-mail du renvoi de son dossier KYC (demande de B, STORY-1103)
   (prospera-notification-service#92, `dev` 7a11331, 749b3cd ; prospera-expert-comptable#11, `dev` 4154038, b540904 ;
@@ -396,7 +396,29 @@
   `tickets/TICKET-BACKEND-modules-ouverts-dans-l-essai.md` (STORY-1116, D-1116-1) : dans l'espace d'essai, la garde de
   `bilan-service` (`requires-bilan-access`) ne lit pas le KYC, l'état publié décide seul. Dernier numéro de la plage
   1030 → 1079 de D ; Must de la démo du 15/01 ; fiche à écrire juste avant de coder ; choix par défaut en **Q-D-17**
-  (décision d'architecture, AD-15). Non codée.
+  (décision d'architecture, AD-15). **Livrée ci-dessous.**
+- **STORY-1079** ✅ 🧪 — dans l'espace d'essai, la garde de bilan ne lit pas le KYC : l'état publié décide seul
+  (prospera-bilan-service#190, `dev` `7ed3335`, `2d186b9` ; annonce « ⚠ Contrats » #877 avant le code, `main` 36ccec7).
+  Ticket `TICKET-BACKEND-modules-ouverts-dans-l-essai.md`, point 3 (bilan) **fait** ; Q-D-17 : choix par défaut
+  appliqué, à confirmer. Rituel (2026-11-25) : aucune demande neuve à D chez A, B et C.
+  - **Avant la story (commit séparé)** : les deux e2e rouges sur `dev` — `ecoute-stable` (alias `ecouter` de
+    `instance-c13.e2e-spec.ts`, STORY-928) et `bilan-dossier-portee-collaborateur` (25ᵉ contrôleur niché de STORY-1083,
+    `FinancementController`, compte resté à 24 ; la batterie reçoit `FinancementAccessGuard` à sa place d'`AppModule`) —
+    causes dans `bilan-service`, corrigées sans délai relevé.
+  - **Livré** : sur une instance `INSTANCE_ESPACE=ESSAI`, `@RequiresBilanAccess` saute le palier KYC sans lire le
+    read-model ; e-mail vérifié, organisation du jeton et état publié (garde partagée) restent exigés, même ordre. Même
+    règle pour `@RequiresFinancementAccess` (D-1079-4). Espace de l'instance par `EspaceDeLInstance` (STORY-928),
+    fourni par `AppModule` ; dépendance facultative : seul un `EspaceDeLInstance` fait l'essai, absent ou `{}` ⇒ réel
+    (fail-closed). Réel : rien ne change.
+  - Preuves : Node 24 **357/357 suites, 12 578 tests verts (5 ignorés), 1 073 s** ; e2e **45/45 suites, 3 497/3 497** (les deux anciennes rouges comprises), 250 s ; specs neuves 16/16 et 9/9, e2e `bilan-access-espace` 8/8 ; **mutations
+    12/12** ; pile `grp-d` (deux instances, essai et réel, mêmes faits Kafka, aucun KYC) : essai **200** (gate et liasses
+    du dossier), réel **403 `KYC_NOT_APPROVED`** (y compris avec en-tête et paramètre « essai »), témoin réel 200 après
+    `kyc.status.changed` `APPROVED`.
+  - Décisions D-1079-1 → 6 (fiche). **→ B et → C** : la même règle dans `dossier-service` et `balance-service`
+    (« Demandes aux autres groupes »). **Pour la recette (B)** : `INSTANCE_ESPACE=ESSAI` sur le bilan de l'essai.
+    **Verrou Docker : pris à 07:14 (libre, aucun conteneur `grp-b`), une seule prise, rendu à 08:02 ; aucun
+    conteneur, volume ni réseau `grp-d` ne reste.**
+  - **Suivante : STORY-1074** (la consolidation s'installe à part) — **ordre de D : 1079 ✅ → 1074 → 1075**.
 
 ### Lot 4 (ouvert le 2026-11-18)
 
@@ -1185,6 +1207,18 @@
 
 ## Demandes aux autres groupes
 
+- **→ B et → C (2026-11-25, STORY-1079) : dans l'espace d'essai, la garde de `dossier-service` (B) et celle de
+  `balance-service` (C, `@RequiresBalanceAccess`) ne lisent pas le KYC** — **ouverte** (ticket
+  `TICKET-BACKEND-modules-ouverts-dans-l-essai.md`, point 3 ; Q-D-17, choix par défaut). Bilan le fait depuis
+  STORY-1079 (fiche, « Ce que `dossier-service` et `balance-service` devront faire de même ») : (1) lire l'espace de
+  l'**instance** dans `INSTANCE_ESPACE` (`ESSAI` | `REEL`, validée au démarrage, absente ⇒ `REEL`), une fois, jamais
+  dans le jeton, la requête ni le message projeté ; (2) dans l'essai, sauter **le seul palier KYC** de la garde, sans
+  lire le read-model ; e-mail vérifié et état publié (garde partagée) restent exigés, dans le même ordre ; (3)
+  fail-closed : une garde sans espace fourni exige le KYC ; (4) preuves : un prospect sans KYC lit dans l'essai, la
+  même requête rend `403 KYC_NOT_APPROVED` sur une instance réelle, une mutation qui saute le KYC hors de l'essai
+  rougit. Pour `dossier-service` : vérifier d'abord quelle garde lit le KYC (le ticket dit « à vérifier »). À placer
+  par B et par C.
+
 - **→ B (2026-11-25, STORY-1077) : publier `formeJuridique` sur les dossiers CLIENTS aussi** — **ouverte**.
   `prospera-dossier-service` (rendu à B à la fin de 1073) ne publie la fiche légale que sur le dossier propre (D-1073-2).
   `bilan-service` lit désormais `formeJuridique` de `dossier.created` / `dossier.updated` pour l'alerte « capitaux
@@ -1621,7 +1655,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-25, STORY-1079, avant la fusion du code) — Dans l'espace d'essai, la garde de bilan (et celle du
+- **PUBLIÉ (2026-11-25, STORY-1079, prospera-bilan-service#190, `dev` 7ed3335, 2d186b9) ; ANNONCÉ avant la fusion du
+  code (prospera-stories #877, `main` 36ccec7), sans écart. — Dans l'espace d'essai, la garde de bilan (et celle du
   module `financement`) ne lit plus le KYC : l'état publié décide seul.** Fiche : `stories/STORY-1079.md` (D-1079-1 →
   6 ; Q-D-17, choix par défaut). **Aucun champ, aucune route, aucun code d'erreur, aucun topic ne change ; un
   comportement, si — et dans l'essai seulement.**
@@ -2610,8 +2645,8 @@
 
 ## Questions à l'utilisateur ou au PO
 
-- **Q-D-17 (2026-11-25, placée par STORY-1078, pour STORY-1079) — Dans l'espace d'essai, la garde de `bilan-service`
-  peut-elle sauter le palier KYC ?** Un prospect n'a pas de KYC (l'espace d'essai n'a ni `kyc-service` ni
+- **Q-D-17 (2026-11-25, placée par STORY-1078, pour STORY-1079 ; choix par défaut APPLIQUÉ par 1079, fiche D-1079-1 →
+  4, toujours à confirmer) — Dans l'espace d'essai, la garde de `bilan-service` peut-elle sauter le palier KYC ?** Un prospect n'a pas de KYC (l'espace d'essai n'a ni `kyc-service` ni
   `kyc.status.changed`) : aujourd'hui `requires-bilan-access` rend `403 KYC_NOT_APPROVED` même module installé (ticket
   `TICKET-BACKEND-modules-ouverts-dans-l-essai.md`, point 3). **Choix par défaut (appliqué par 1079 sans réponse) :
   `INSTANCE_ESPACE=ESSAI` ⇒ le palier KYC est sauté, l'état publié du module décide seul** (l'essai est déjà borné par
@@ -2740,6 +2775,21 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1079** (cinquième passage de D dans `bilan-service`) :
+  - (1) **`docker compose exec … /opt/kafka/bin/…` depuis Git Bash** : le chemin est réécrit en
+    `C:/Program Files/Git/opt/…` (« no such file ») ; poser `MSYS_NO_PATHCONV=1`.
+  - (2) **Deux instances du même service sur un même Kafka** se partagent les partitions si elles gardent les groupes
+    de consommateurs par défaut : donner à chacune ses `KAFKA_*_GROUP_ID` (dix variables dans bilan).
+  - (3) **Une mutation qui laisse un paramètre inutilisé ne compile pas** sous ts-jest (« Tests: 0 total », suites
+    rouges) : elle « meurt » sans rien prouver. Écrire des mutations qui gardent le paramètre lu
+    (`espace?.estEssai() === undefined`).
+  - (4) **Un script de mutation arrêté en cours laisse le fichier muté et son `.bak`** : indexer le code juste avant
+    (`git add`), puis restaurer par `git checkout --` depuis l'index.
+  - (5) **`useMocker(() => ({}))` fournit `{}` aussi aux dépendances `@Optional()`** : une garde qui fait
+    `dep?.methode()` lève un `TypeError` dans les batteries qui montent les contrôleurs ainsi
+    (`bilan-dossier-portee-collaborateur`) — vu seulement par la suite e2e complète ; rejouer l'e2e qu'on a réparé APRÈS
+    avoir codé. Tester `instanceof` de la classe attendue.
 
 - **STORY-1118** (quatrième passage de D dans `bilan-service`) :
   - (1) **Une balance de test générée des préfixes de la table** (`notes-syscohada-2.2.spec.ts`, `balances()`) change de

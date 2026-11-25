@@ -56,3 +56,10 @@ jouée à blanc comme 1115.
   STORY-1078, avant 1074 et 1075). Choix par défaut écrit en **Q-D-17** (journal de D) : `INSTANCE_ESPACE=ESSAI` ⇒ le
   palier KYC de la garde de bilan est sauté, l'état publié décide seul — décision d'architecture (AD-15) à confirmer.
   Non codé à ce jour. Points 1, 2 (B), 3 `balance-service` (C) et 3 `dossier-service` (B) : inchangés.
+- 2026-11-25 — **point 3, `bilan-service` : FAIT par STORY-1079** (prospera-bilan-service#190, `dev` 7ed3335, 2d186b9) : sur une
+  instance `INSTANCE_ESPACE=ESSAI`, `@RequiresBilanAccess` et `@RequiresFinancementAccess` ne lisent plus le KYC ;
+  e-mail vérifié et état publié restent exigés ; dans le réel, rien ne change. Prouvé sur pile `grp-d` : un prospect
+  sans KYC lit son bilan dans l'essai (200), la même requête sur une instance réelle rend `403 KYC_NOT_APPROVED`.
+  **Pour la recette (B)** : poser `INSTANCE_ESPACE=ESSAI` sur le `bilan-service` de l'espace d'essai, aucun KYC à
+  semer. Q-D-17 reste à confirmer (choix par défaut appliqué). La même règle est demandée à `balance-service` (C) et à
+  `dossier-service` (B) (journal de D, « Demandes aux autres groupes ») ; points 1, 2 (B) inchangés.
