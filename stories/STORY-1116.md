@@ -1,6 +1,6 @@
 # STORY-1116 : cinq essais simultanés tiennent sur la même pile, chacun dans son espace (démo du 15/01)
 
-Status: in-progress
+Status: done
 
 **Complexité :** moyenne (une recette croisée neuve, cinq prospects en parallèle ; des fonctions pures du paquet ; aucun
 service ne change si rien ne casse)
@@ -101,12 +101,70 @@ son correctif est annoncé dans « ⚠ Contrats » avant la fusion.
 
 ## Livré
 
-*(à remplir)*
+- **prospera-recette #31** (`MNV-1116`, rebase : `29256bb`, `8d4d88c` sur `dev` ; têtes poussées `d5a26bf`, `9080112`) :
+  - `recette/cinq-essais.recette.ts` (neuve, six tests) : AC-1 → AC-6 ci-dessus, par les vraies routes (BFF, auth et
+    catalogue de l'essai, sortie de messages de l'essai), sans aucune pose en base (la garde `recettes-sans-base` la lit).
+  - `src/cinq-essais.ts` et sa spec (10 tests) : `prospectsSimultanes`, `prospectDeLAdresse`, `fuitesDeLaSortie`,
+    `couplesOrdonnes`, `resumeDesDurees`, `chronometrer`, `avecPatience` (un `429` s'attend, D-1116-8).
+  - Second commit, trouvé en relisant avant la pile : la recette ne compte que les messages de SES essais (une remise
+    rejouée par la file d'auth d'une autre suite vers la même sortie n'est ni une fuite ni un message de trop).
+  - README : la section de la recette.
+- **Catalogue : inchangé** (D-1116-6) : rien n'a cassé sous cinq ouvertures parallèles ; aucune PR.
+- **Ticket** `TICKET-BACKEND-modules-ouverts-dans-l-essai.md` (D-1116-1), à placer par la session de groupe.
 
 ## Preuves
 
-*(à remplir)*
+- **Node 25** (paquet de recette) : `tsc`, `prettier --check` ; unitaires **148/148** (15 suites ; 10 neufs, et la garde
+  `recettes-sans-base` lit la recette neuve) ; **mutations 14/14** sur `src/cinq-essais.ts` (domaine de la passe,
+  identifiants égaux, sous-domaine, compte du jeu, chaque nature de fuite, couples, médiane, copie, patience : un seul
+  essai, rejouer un refus, `retry-after` ignoré ; une mutation qui ne compilait pas a été réécrite, piège de 1103).
+- **Pile `grp-b` neuve**, images construites depuis `git -c core.autocrlf=false archive origin/dev` de chaque service
+  (auth `d69e34c`, kyc `9cef9cb`, catalogue `1aa17ae`, notification `749b3cd`, paiement `4684d22`, dossier `2bf9dbd`,
+  document `0716a58`, balance `0ff2402`, bilan `e4cee3e`, BFF `911c450`, fiscal `0596fc4`, comptabilité `e4a53cc`),
+  volumes neufs ; `docker compose up` sain (17 conteneurs, tous `healthy` ou sans sonde) :
+  **`npm run recette -- cinq-essais` 6/6** (47,8 s ; recette `9080112`).
+  - **Temps** (`MESURES-1116`) : cinq ouvertures lancées au même instant, chacune **1 270 → 1 311 ms** (médiane
+    1 289 ms ; naissance chez l'auth de l'essai, essai, avis, effacement, interception de l'administratrice) ; cinq
+    reprises après la liste blanche **414 → 604 ms** (médiane 426 ms ; invitation envoyée) ; entrée de chaque
+    administratrice (acceptation, collègue, rôle, comptes du jeu, « en tant que ») **1 976 → 2 533 ms** (médiane
+    2 139 ms). Les 20 couples (60 refus et 20 relectures) : 4,5 s.
+  - **Mémoire** (`docker stats` toutes les 5 à 8 s ; VM Docker **7,6 Gio**) : pile de base et BFF ≈ **2,0 Gio**
+    (12 conteneurs) ; avec l'espace d'essai et les cinq essais ouverts, **2,9 Gio au plus** (17 conteneurs) ; l'espace
+    d'essai pèse ≈ **0,8 Gio** (Kafka de l'essai 369 Mio, auth 218, catalogue 216, Redis 6) ; les cinq essais eux-mêmes
+    ne se voient pas dans la mémoire (quelques documents par essai). **La pile tient**, avec ≈ 4,7 Gio de marge.
+  - Les cinq domaines restent en liste blanche de l'espace d'essai de la pile (effacés au `down -v`).
+- **Recette croisée complète** sur pile neuve (`down -v`), après la fusion (recette `8d4d88c`, arbre identique à
+  `9080112`), images depuis `origin/dev` — dont **dossier `4352ac3` et paiement `e2be149`**, fusionnés par D (STORY-1073)
+  pendant la story et reconstruits avant ce passage :
+  **10/13 suites vertes, 139 tests verts, 15 rouges, 2 sautés** (les deux C13 de `cabinet-moteur`, pile en `REEL`,
+  D-1115-10), 1 541 s. **Les trois suites rouges sont des `read ECONNRESET` entre le poste et la pile, cause prouvée par
+  les journaux des services** (D-1115-12) : (1) `renvoi-du-lien` (8 rouges en cascade du `beforeAll`) : auth a servi le
+  `GET /users/me` **200 en 10 ms** à 01:00:32, la réponse s'est perdue avant la recette ; (2) `essai-mise-en-service`
+  (1 rouge, test 6) : le dépôt d'une pièce KYC **n'est jamais arrivé** à kyc (aucun `POST /kyc/documents` à son journal
+  pendant la suite) ; (3) `cinq-essais` (6 rouges en cascade) : l'une des cinq ouvertures parallèles **n'est jamais
+  arrivée** au BFF (quatre `POST /admin/essais` à 01:19:48 à son journal, `201` en 842 → 861 ms ; la cinquième
+  organisation s'est ouverte `201` à la reprise de 01:20:20). Le relais de ports du poste coupe donc aussi des requêtes
+  **avant** le service, pas seulement des réponses. Aucun redémarrage, aucune erreur dans les services ; mémoire de la
+  pile au plus **4,5 Gio** (24 conteneurs) sur 7,6 : ce n'est pas la charge. **Rejouées seules, chacune sur une pile
+  neuve** (`down -v`, mêmes images) : `renvoi-du-lien` **8/8** (163 s), `essai-mise-en-service` **8/8** (93 s),
+  `cinq-essais` **6/6** (65 s ; ouvertures 2,5 → 2,8 s, reprises 0,6 → 0,9 s, entrées 3,2 → 3,7 s). Vertes aussi au
+  passage complet : `facturation`, `zone-franche`, `atelier-balance`, `distributeur`, `delegation`, `abonnement`,
+  `cabinet-moteur`, `pile`, `comptabilite`, `referentiel-par-dossier`. Aucun ticket : le défaut n'est dans aucun service.
+- Verrou : attendu de 00:09 à 00:31 (D le tenait depuis 21:58, STORY-1073), pris à 00:31, rendu à 01:41 (construction des images, `cinq-essais`, recette complète, trois rejeux) ; `down -v` à
+  chaque fois ; aucun conteneur, volume ni réseau `grp-b` ne reste.
 
 ## Ce qui reste
 
-*(à remplir)*
+- **Les modules dans l'essai** (D-1116-1) : `TICKET-BACKEND-modules-ouverts-dans-l-essai.md` — le jeu des verticales
+  chargé par le catalogue de l'essai, l'installation des modules dans l'essai, les gardes de balance et bilan (et
+  dossier ?) sans KYC dans l'essai. À placer par la session de groupe avant la démo du 15/01 ; puis la suite de
+  `cinq-essais` avec des données (et une mesure de mémoire avec trois services de plus).
+- **Une adresse par essai** (D-1116-4) : à dire aux commerciaux pour la démo ; un commercial qui ouvre cinq essais à son
+  propre nom n'entre que dans le premier (les quatre autres : `REFUSEE`, `MEMBRE_EN_CONFLIT`).
+- **L'invitation d'un collègue dans l'essai dit « votre cabinet »** et non le nom du prospect (`POST /users` d'auth ne
+  passe pas le nom de l'organisation au gabarit) ; cosmétique, chez B (auth), à placer si la démo l'exige.
+- **Les coupures du poste (D-1115-12)** : elles coupent aussi des requêtes avant le service. Correctif possible dans le
+  périmètre de B, non fait (règle de 1115 : un `POST` coupé n'est jamais rejoué) : rejouer sur `ECONNRESET` les appels
+  **idempotents par contrat** (lectures, `POST /admin/essais`, mises en service rejouées). À trancher par la session de
+  groupe si les coupures reviennent ; en déploiement, il n'y a pas ce relais.
+- **D-1113-2** reste ouverte (identité d'opérateur commune).

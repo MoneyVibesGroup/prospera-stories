@@ -181,9 +181,63 @@
        de l'assurance (depuis la 1.0.0) restent hors d'auth (D-979-19, « → C »).
      Node 25 : catalogue 1 619 passés (3 suites rouges connues) ; lint, build ; 2/2 mutations. **Sans Docker**
      (D-979-21) : verrou non pris.
-  - **Suivante : STORY-1116** (cinq essais simultanés sur la même pile, chacun dans son espace ; `prospera-recette`,
-    catalogue ; recette complète ; fiche à écrire juste avant de coder, identifiant réservé par le plan §8), après la
-    suite de 1112 et la seconde suite de 979 (ci-dessus).
+  13. ~~STORY-1116~~ : **recette #31** (`29256bb`, `8d4d88c` sur `dev`) ; aucun contrat ne bouge (aucune annonce). Le
+     catalogue n'a pas changé : rien n'a cassé sous cinq ouvertures parallèles (D-1116-6).
+     - **Recette `cinq-essais`** : cinq cabinets prospects ouverts au même instant par la console, chacun intercepté dans
+       SON essai hors liste blanche, puis invité par la sortie de l'essai au nom de SON cabinet ; les cinq
+       administratrices entrent en même temps par leur lien (collègue, rôle, comptes du jeu, « en tant que ») ; **20
+       couples** : aucun ne voit les membres, les comptes du jeu, les messages ni les destinataires d'un autre, et aucun
+       geste de l'un ne change rien chez l'autre (« en tant que » un compte d'un autre 404, suspendre 404, relancer 409) ;
+       contre-épreuve : une adresse administratrice d'un essai n'en tient pas un sixième (`REFUSEE`,
+       `MEMBRE_EN_CONFLIT`) — **une adresse par essai**, à dire aux commerciaux.
+     - **Essais à blanc** (D-1116-1, réponse à la question de 1115) : un prospect n'ouvrirait aucun module dans l'essai
+       (jeu non chargé par le catalogue de l'essai de la pile, rien n'installe dans l'essai, gardes de balance et bilan
+       au KYC) ⇒ `TICKET-BACKEND-modules-ouverts-dans-l-essai.md`, **à placer par la session de groupe avant le 15/01**.
+     - **Mesures** : ouverture de chacun des cinq en parallèle **1,27 → 1,31 s** ; reprise 0,41 → 0,60 s ; entrée d'une
+       administratrice 2,0 → 2,5 s. Mémoire (VM 7,6 Gio) : pile de base ≈ 2,0 Gio, **2,9 Gio** avec l'espace d'essai et
+       les cinq essais ; recette complète **4,5 Gio au plus** (24 conteneurs). **La pile tient.**
+     Node 25 : paquet 148/148 ; mutations 14/14. **Pile `grp-b` neuve** (images depuis `origin/dev`) : `cinq-essais`
+     **6/6** ; recette croisée complète sur pile neuve (après la fusion ; dossier `4352ac3` et paiement `e2be149`, fusionnés par D pendant la story, reconstruits) **10/13 suites, 139 tests verts, 15 rouges** sur trois `read ECONNRESET` poste ↔ pile prouvés par les journaux des services (auth a servi `GET /users/me` 200 en 10 ms ; un dépôt de pièce KYC et une des cinq ouvertures ne sont **jamais arrivés** au service), les trois suites rejouées seules sur pile neuve vertes (`renvoi-du-lien` 8/8, `essai-mise-en-service` 8/8, `cinq-essais` 6/6). Verrou attendu de 00:09 à 00:31 (D, STORY-1073), pris à 00:31,
+     rendu à 01:41 ; `down -v` à chaque fois ; aucun conteneur, volume ni réseau `grp-b` ne reste.
+- **Clôture du lot 6 de B (2026-11-25)** — les sept stories du plan (§5) sont livrées, fusionnées en rebase, et leurs
+  fiches sont `done` :
+
+  | # | Story | Ce qui est vrai | Dépôts (PR) | Écran débloqué |
+  |:--:|---|---|---|---|
+  | 1 | STORY-1080 | balance et bilan servent leurs six vérifications ; la recette installe le cabinet par le moteur | catalogue #67, BFF #38, recette #27 (balance #159, bilan #182) | AP-55 |
+  | 2 | STORY-1112 | le BFF relaie les essais d'un prospect ; **suite** : le premier membre d'un essai entre par de vraies routes | catalogue #70, #73 ; BFF #39, #43 ; auth #50 ; recette #30 | AP-57 |
+  | 3 | STORY-1113 | le BFF relaie la mise en service, les sorties de l'essai, les naissances (deux espaces) | catalogue #72, BFF #40 | AP-56 |
+  | 4 | STORY-1114 | le BFF relaie le métier des organisations | BFF #41 | AP-59 |
+  | 5 | STORY-1103 | renvoyer un dossier KYC pour correction ; `kyc.correction.requested@1` publié | kyc #29, BFF #42 | AP-62 |
+  | 6 | STORY-1115 | « essayer, puis mettre en service » de bout en bout sur pile neuve ; le second espace dans le profil | recette #28, #29 | — |
+  | 7 | STORY-1116 | cinq essais simultanés sur la même pile, aucun ne voit les données d'un autre | recette #31 | — |
+
+  **Hors des lignes du plan, servies pendant le lot** (demandes reçues, placées par la session de groupe, aucun
+  identifiant neuf sauf 979) : STORY-979 et ses deux suites (droits de facturation et `ged:*` dans auth, rôle
+  `CAB_ARCHIVISTE` ; manifestes `facturation` 1.0.0 → 1.1.0, `ged` 1.1.0 → 1.3.0, `comptabilite` 0.5.0 au catalogue :
+  auth #48, #49 ; catalogue #68, #69, #71, #74) ; correctif de STORY-1084 (bilan #183, garde des noms de schéma) ;
+  correctifs de STORY-483 et STORY-065 (bilan #184, #185 : remboursements plafonnés, version de la liasse rouverte).
+  `prospera-bilan-service` est passé à D (D-L6-5) ; dossier et paiement, prêtés à D pour 1073, sont revenus le 25/11.
+
+  **Ce qui reste ouvert à la fin du lot 6 de B** (dans l'ordre placé par la session de groupe) :
+  1. **Troisième suite de STORY-979** : recopier `facturation` 1.2.0 et `paiement` 1.1.0 au catalogue (← D, 1073 ;
+     placée juste après 1116, sans Docker). Le catalogue n'a pas bougé dans 1116 : rien ne l'attend.
+  2. **Le consommateur de `facturation.avoir.emis@1` dans `paiement`** (← D, 1066 ; D-979-14) : story neuve, identifiant
+     neuf à réserver à l'écriture de sa fiche ; tenir compte de `publier(resultat, entree)` (1073).
+  3. **← D (25/11, STORY-1077) : `formeJuridique` sur les dossiers CLIENTS aussi** (`dossier-service`) — **reçue,
+     à placer** (aucune urgence de démo). Recommandé : un correctif rattaché à STORY-1073 (D-1073-2 a posé la condition
+     « dossier propre »), un seul champ, déjà déclaré facultatif, puis `npm run republier:dossiers`.
+  4. **`TICKET-BACKEND-modules-ouverts-dans-l-essai.md`** (STORY-1116) — à placer par la session de groupe avant le
+     15/01 : B (jeux des verticales dans le catalogue de l'essai, installation dans l'essai), C (garde de balance), D
+     (garde de bilan) ; décision d'architecture sur le KYC dans l'essai.
+  5. **Lot 7 : `document-service` passe à B** (← C, 25/11, plan #848 ; dernier commit de C `0716a58`).
+  6. Questions ouvertes : D-1113-2 (identité d'opérateur commune, choix par défaut joué par la recette) ; D-1103-1
+     (servie de fait par D, STORY-1072 : l'e-mail du renvoi part, AC-5 de 1103 vu dans mailhog).
+  7. Cosmétique (STORY-1116) : dans l'essai, l'invitation d'un collègue (`POST /users` d'auth) dit « votre cabinet » et
+     non le nom du prospect.
+  - **Suivante (lot 7 de B, placée par la session de groupe)** : la troisième suite de STORY-979 (recopie de
+    `facturation` 1.2.0 et `paiement` 1.1.0 au catalogue), puis le consommateur de `facturation.avoir.emis@1` dans
+    `paiement` ; voir « Ce qui reste ouvert » ci-dessus.
   - **Reçue le 24/11, hors des lignes du plan : → B de A** (journal de A, fin du « Lot 6 ») — deux résultats faux de
     `bilan-service` visibles à la démo du 15/01 : la projection qui rembourse plus que la dette
     (`TICKET-BACKEND-projection-remboursements-non-plafonnes.md`, accepté par l'utilisateur le 19/11) et la liasse
@@ -914,6 +968,15 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ session de groupe (2026-11-25, STORY-1116) : un prospect n'ouvre aucun module dans son essai** —
+  **ouverte, à placer avant la démo du 15/01**. `TICKET-BACKEND-modules-ouverts-dans-l-essai.md` : (1) le catalogue de
+  l'essai ne charge que le jeu témoin (les jeux des verticales se montent à côté ; le profil de recette n'admet aucun
+  volume) ; (2) rien n'installe un module dans l'espace d'essai (l'ouverture n'installe rien ; le BFF ne relaie les
+  installations qu'au réel) ; (3) les gardes de `balance` (C) et de `bilan` (D) exigent un KYC `APPROVED` quel que soit
+  l'espace, et l'essai n'a pas de KYC. Choix proposés par défaut dans le ticket : jeux copiés dans l'image du catalogue,
+  l'ouverture installe les modules du jeu, garde sans palier KYC dans l'essai (décision d'architecture, AD-15). Ne
+  bloque pas 1116 (essais à blanc, D-1116-1).
+
 - ~~**→ B (2026-11-24, STORY-1115) : le premier membre d'un essai n'a pas de route**~~ — **servie le 24/11 par la
   suite de STORY-1112** (auth #50, catalogue #73, admin-panel #43, recette #30 ; « État » n° 11) ; ticket fermé. `TICKET-BACKEND-premier-membre-d-un-essai.md` :
   une organisation née par le moteur dans l'essai n'a aucun membre, et aucune route ne fait entrer son administrateur
@@ -1284,6 +1347,15 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   démarrer.
 
 ## Réponses aux demandes reçues
+
+- **← D (25/11, STORY-1077) : `formeJuridique` sur les dossiers CLIENTS aussi** (`dossier-service`) — **reçue pendant
+  STORY-1116, ouverte, à placer par la session de groupe** (D : « aucune urgence de démo »). Recommandé : un correctif
+  rattaché à STORY-1073 (D-1073-2 a posé la condition « dossier propre »), le seul champ sorti de la condition, puis
+  `npm run republier:dossiers` ; aucun schéma ne change.
+- **← C (25/11, plan de B #848) : `document-service` passe à B au lot 7** — **lue** (dernier commit de C `0716a58`,
+  rien en cours).
+- **← D (24/11, STORY-1072) : `ESPACE_KYC_URL` sur expert-comptable** — **lue** : la recette ne lève pas
+  `expert-comptable` ; à poser par la recette qui jouera l'e-mail du renvoi.
 
 - **→ C (24/11) : servie par catalogue #74** (`1aa17ae` sur `dev` ; seconde suite de STORY-979 ; annonce : stories
   #843) — vos demandes « → B (24/11, STORY-1087, 1088 puis 1100) » et « → B (24/11, STORY-1100) » : `copies.json`
@@ -3083,6 +3155,18 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Le relais de ports du poste coupe aussi des REQUÊTES, pas seulement des réponses** (STORY-1116, suite de
+  D-1115-12) : une des cinq ouvertures parallèles n'a jamais atteint le BFF (quatre `POST` à son journal), un dépôt de
+  pièce n'a jamais atteint kyc, une réponse 200 d'auth s'est perdue. Prouver par le journal du service visé (pino : la
+  ligne `request completed` et sa durée) avant d'accuser un service ; rejouer la suite seule sur pile neuve.
+- **Un heredoc NON quoté (`<<EOF`) exécute les accents graves** d'un texte Markdown : `npm run recette -- …` y est parti
+  du dossier racine (sans effet, ENOENT). Écrire un corps de PR par l'outil d'écriture, ou `<<'EOF'`.
+- **D fusionne `dossier` et `paiement` pendant une story de B** : relire `origin/dev` de chaque service juste avant la
+  recette complète et reconstruire ce qui a bougé (1116 : `4352ac3`, `e2be149`). Un `npm ci` coupé (`ECONNRESET`) pendant
+  `compose build` se relance : le cache garde ce qui est fait.
+- **La limite de débit d'auth (accept-invitation 5/min, global 100/min par adresse) et du BFF (100/min)** borne une
+  recette qui part d'une seule adresse : `avecPatience` (`src/cinq-essais.ts`) attend un `429` sans rien rejouer d'autre.
 
 - **`read ECONNRESET` (« fetch failed ») entre le poste et la pile** (STORY-1115) : 17 au premier passage complet,
   attribués à la connexion réutilisée après le `keepAliveTimeout` de Nest (la recette envoie désormais
