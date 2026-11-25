@@ -2530,11 +2530,15 @@ reserved_ranges:
       Amendement du lot 6 (24/11 soir, D-L6-5). Source : PRD Atelier FR-A17 ; FE-077 bloquée « aucune route d'export ».
       Fiche à écrire juste avant de coder. Lot C, n° 8 du lot 6 (première des cinq). NON SLOTTÉE.
   - range: "STORY-1019"
-    status: "RÉSERVÉ"
+    status: "in_progress"
     owner: "Groupe C — le conseil s'installe à part : sa garde propre (CONSEIL_NOT_ENTITLED) et ses deux vérifications (aucun-scenario-applique, gate-conseil) (prospera-balance-service)"
-    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    source_doc: "prospera-stories/stories/STORY-1019.md"
     reserved_on: "2026-11-24"
     note: >
+      EN COURS le 2026-11-25 (lot 7 de C, n° 0b, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite avant le code ; contrat
+      annoncé (« ⚠ Contrats » du journal de C) : CONSEIL_NOT_ENTITLED sur les scénarios et la justification,
+      POST /api/v1/instance/conseil/{organisationId}/verifications/{code}, collection etats_publies_conseil ; avec la
+      demande de D (STORY-1079, Q-D-17) : dans l'essai, la garde de balance ne lit plus le KYC. Manifeste conseil inchangé.
       Amendement du lot 6 (24/11 soir, D-L6-5). Source : manifestes/balance.manifest.ts, conseil.manifest.ts ; « Ce qui reste » de
       STORY-1080 ; vente à part (STORY-549, PO le 12/11). Fiche à écrire juste avant de coder. Lot C, n° 9 du lot 6. NON SLOTTÉE.
   - range: "STORY-1018"
