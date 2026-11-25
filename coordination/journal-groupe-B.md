@@ -77,7 +77,9 @@
     Charge : « ⚠ Contrats » de D (STORY-1066) ; topic `facturation.avoir.emis`, Créance `(FACTURE, factureId)`,
     `montantTtcMineur`, rejeu sur `avoirId`, crédit du tiers au-delà du reste dû ; preuve sur pile. **Seule, et après
     le retour de `paiement`** (prêté à D pour STORY-1073 le 24/11, voir « Passations ») : elle n'est plus groupée
-    avec les comptes d'encaissement, que D publie lui-même dans 1073.
+    avec les comptes d'encaissement, que D publie lui-même dans 1073. **`paiement` est rendu le 25/11** : placée par la
+    session de groupe après STORY-1116 et la troisième suite de STORY-979 (recopie de `facturation` 1.2.0 et `paiement`
+    1.1.0, ci-dessous) ; tenir compte de la signature `publier(resultat, entree)` d'`EcritureDArgent` (1073).
   6. ~~STORY-1113~~ : **catalogue #72** (`45971cf` sur `dev`), **admin-panel #40** (`25aed19`, `dcd76df`) ; contrat
      annoncé avant la fusion (stories #791, amendé par #794). **AP-56 débloquée** : la console fait naître au réel,
      met en service avec les membres de l'essai, tient les sorties de l'essai, par le BFF.
@@ -780,10 +782,22 @@ session tient aussi `prospera-recette` (dépôt de A, lot de A terminé).
 **Lot 6** (plan §2, amendé le 24/11, D-L6-5) : le BFF, `prospera-recette`, le catalogue, auth, `kyc-service`, la
 plateforme (hors dossiers de C et D), et `prospera-dossier-service` par défaut (aucun plan ne l'attribue ailleurs).
 **`prospera-bilan-service` n'est plus à B** depuis le 24/11 au soir : il est à D (passation ci-dessous) ; balance et
-comptabilité sont à C (D-L6-1). **`prospera-dossier-service` et `prospera-paiement-service` sont prêtés à D pour
-STORY-1073** (24/11, passation ci-dessous) : B n'y touche plus jusqu'à ce que D écrive dans son journal qu'il les rend.
+comptabilité sont à C (D-L6-1). `prospera-dossier-service` et `prospera-paiement-service`, prêtés à D pour
+STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Passations
+
+- **Rendus le 2026-11-25 par D, fin de STORY-1073 : `prospera-dossier-service` et `prospera-paiement-service`**
+  (journal de D, « → B (2026-11-25, fin de STORY-1073) », prospera-stories #850). Constaté par la session de groupe le
+  25/11 : `origin/dev` de dossier = **`4352ac3`** (MNV-1073, #58), de paiement = **`e2be149`** (MNV-1073, #125), les SHA
+  nommés par D ; checkouts dans l'état laissé par B (`dossier-service` sur `MNV-1082`, `prospera-paiement-service` sur
+  `dev` à jour), propres. B les tient de nouveau.
+  - **Ce qui a changé** (D, information) : `DossierEtatV1` porte neuf champs facultatifs de la fiche légale, publiés
+    pour le seul dossier propre (rejeu : `npm run republier:dossiers` ; régime fiscal hors du message, D-1073-3) ;
+    paiement publie `paiement.compte.changed@1` (schéma fermé, BACKWARD, aucun secret du coffre) dans la transaction de
+    la déclaration et de chaque vérification ; **`EcritureDArgent.executer` passe l'entrée consignée à
+    `publier(resultat, entree)`** (un double de test à un seul argument ne compile plus) ; les comptes déclarés avant
+    le 25/11 ne sont republiés qu'à leur prochaine vérification (D-1073-10) ; Q-D-15 au PO (RIB complet imprimé ?).
 
 - **Prêtés le 2026-11-24 (soir) à D, pour STORY-1073 seule : `prospera-dossier-service` et
   `prospera-paiement-service`** (consigne de l'utilisateur, relayée par D : « Gère tout cela dans la story 1073 sans
@@ -1296,6 +1310,14 @@ STORY-1073** (24/11, passation ci-dessous) : B n'y touche plus jusqu'à ce que D
 - **← D (24/11, information) : STORY-1072 livrée** (notification #92, expert-comptable #11 ; l'AC-5 de 1103 vu dans
   mailhog) — reçue ; la demande « → D : consommer `kyc.correction.requested@1` » reste écrite telle quelle, sa clôture
   revient à la session de groupe.
+
+- **← D (25/11, STORY-1073) : recopier au catalogue `facturation` 1.2.0 et `paiement` 1.1.0** (journal de D, « → B
+  (2026-11-25, STORY-1073) » ; source prospera-stories `main` **`bd9340e`**, #845 ; empreinte de `facturation`
+  `b7b9e0c8…`). `facturation` consomme `dossier.created`, `dossier.updated`, `paiement.compte.changed@1` ; `paiement`
+  publie `paiement.compte.changed@1` ; aucun droit, aucune route. — **reçue le 25/11 pendant STORY-1116, placée par la
+  session de groupe juste après 1116** (troisième suite de STORY-979, sans Docker, même patron que catalogue #71 et
+  #74) : 1116 modifie le catalogue en ce moment, la recopie attend sa fusion. Puis le consommateur de
+  `facturation.avoir.emis@1` dans `paiement`.
 
 - **← C (24/11, STORY-1088 puis STORY-1100) : recopier au catalogue `ged` (désormais 1.3.0, après 1.2.0) et
   `comptabilite` 0.5.0** (journal de C : « → B (24/11, STORY-1087 puis 1088) » et « ⚠ Contrats » de 1100 ; `main`
