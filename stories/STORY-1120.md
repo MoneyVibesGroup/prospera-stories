@@ -1,6 +1,7 @@
 # STORY-1120 : Fin de mission et réversibilité — le fonds se ferme, s'exporte en entier et se restitue contre signature
 
-Status: in_progress — fiche écrite le 2026-11-25 par la session du groupe B juste avant de la coder (lot 7, n° 2 de B,
+Status: done — **livrée le 2026-11-25** : document-service **#34** (`b92ac18` sur `dev`), catalogue **#78**
+(`ea10b51`) ; voir « Livraison ». Fiche écrite le 2026-11-25 par la session du groupe B juste avant de la coder (lot 7, n° 2 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, ligne 2 ; identifiant réservé D-L7B-1).
 
 **Service :** `document-service` (GitHub `prospera-ocr-service`, module `ged`) · **Points :** 8 · **Dépend de :**
@@ -139,6 +140,63 @@ neuf** (D-1120-6), **aucun fait Kafka publié**, aucune dépendance neuve. Le ch
   la fusion du code (D-979-24).
 - **→ A (FE-143)** : types à régénérer depuis l'OpenAPI de `document-service` quand l'écran viendra (DTO de réponse
   nommés par le module).
+
+## Livraison (2026-11-25)
+
+- **Code** : document-service (`prospera-ocr-service`) **#34**, `b92ac18` sur `dev` : `src/modules/ged/cabinet/`
+  `reversibilite.ts` (fermeture, export, lecture de `dossier.updated`, chemins, volumes, CSV, `LISEZMOI`),
+  `zip-stocke.ts` (archive ZIP stockée, sans dépendance), `depot-reversibilite.ts` (`ged_exports_fonds`),
+  `reversibilite.service.ts`, `reversibilite.controller.ts` (huit routes, DTO de réponse), `export.planificateur.ts`
+  (file `ged-exports`), `dossiers-clients-consumer.bootstrap.ts` (groupe `ged.dossiers-clients`) ; `exigerOuvert` dans
+  `CabinetService` (pièce, version, versement, reprise) et `PhysiqueService` (réception) ; les factures inscrites ne se
+  rangent que dans un fonds ouvert ; `IntegriteService.certifier` et `emettreDocument` (le certificat sans acteur HTTP,
+  le bordereau de restitution) ; `DepotGed.piecesDuFondsParPage`. Manifeste `ged` **1.5.0** recopié depuis
+  `prospera-stories@f3be71e` (#926), empreinte épinglée.
+- **Catalogue** : `platform-catalog-service` **#78**, `ea10b51` sur `dev` : `ged` 1.5.0 recopié depuis
+  `prospera-stories@28dc047` (seul manifeste qui change ; `manifestes:garde` verte, 48).
+- **Preuves** :
+  - Node 25 : unitaires 1243 passés (111 suites ; 2 rouges connues du poste, copies CRLF de `ged.service.spec`, chemins
+    Windows de `piece-conservation.spec`) ; e2e **213/213** (16 suites ; `ged-reversibilite` 4/4, recensement de
+    STORY-695 compris) ; lint des fichiers touchés, `tsc`, build.
+  - Node 24 (étage `verification`, image depuis `git -c core.autocrlf=false archive`) : unitaires 111/111 suites, 1250
+    passés ; e2e 213/213.
+  - Mutations **21/22** rouges sur assertion (fonds fermé : dépôt, versement, boîtes, facture ; fermer deux fois ;
+    fermeture hors transaction ; archivage ancien ; tout statut ; droit sensible ; écart de fichier ; quarantaine ; volume
+    altéré ; téléchargement sans trace ; bordereau avant fermeture ; deux bordereaux ; exemplaire deux fois ; rempart du
+    dépôt ; CSV ; CRC ; empreintes de l'index ; certificat sur écart) ; **1 équivalente** (export terminé rejoué : le
+    second rempart, `commencer()`, le refuse aussi). Catalogue 2/2.
+  - **Pile `grp-b` neuve** (image depuis l'archive ; Mongo rs0, Kafka, Redis, MinIO Chainguard ; doublure d'auth ; les
+    dossiers par `dossier.created`, l'état publié de `ged` par Kafka ; `GED_EXPORT_VOLUME_OCTETS=200`) : `healthy`,
+    aucune ligne d'erreur ; fonds A fermé à la main (200, `FERME`), 409 `FONDS_FERME` sur un dépôt et un versement, 409
+    `FONDS_DEJA_FERME` ; **dossier D2 archivé par `dossier.updated`** ⇒ fonds B fermé par `SYSTEME` en 0,1 s, dépôt
+    refusé (`DOSSIER_ARCHIVE`), message rejoué sans seconde `FERMETURE` ; export du fonds A **par la file** `TERMINE` en
+    0,6 s, certificat neuf `CERT-2026-00002`, volumes retéléchargés à l'octet (SHA-256 = export = `X-Empreinte-Sha256`),
+    **Python `zipfile` sans erreur et `sha256sum -c empreintes.sha256` : 12/12 OK** ; `BRN-2026-00001` émis, un seul,
+    PDF retéléchargé à l'octet ; exemplaire signé déposé puis retéléchargé ; journal du fonds : `FERMETURE`,
+    `DOCUMENT_EMIS` (certificat, bordereau), `EXPORT`, `EXPORT_TELECHARGE`, `EXEMPLAIRE_SIGNE`, chaîne vérifiée (14 rangs) ;
+    fonds B exporté sans certificat (`AUCUN_SCELLE`) ; index `un_numero_d_export`, `exports_du_fonds` créés. Verrou
+    23:37 → 23:44, `down -v`.
+- **Variable neuve** : `GED_EXPORT_VOLUME_OCTETS` (défaut 50 000 000).
+
+### Écarts au contrat, décidés au code
+
+- **D-1120-10** : ajouts seuls à la réponse : `fermeture.journalRang` (le rang de l'entrée `FERMETURE`) et
+  `exportNumero` d'un document probant (l'export que restitue un bordereau) ; `DocumentProbantDto.type` s'élargit à
+  `BORDEREAU_DE_RESTITUTION`.
+- **D-1120-11** : les huit routes ont leurs **DTO de réponse** nommés par le module (`…ReversibiliteDto`,
+  `ExemplaireSigneProbantDto`) : A génère ses types sans rien écrire.
+- **D-1120-12** : un fichier qui se déchiffre mais ne redonne plus son empreinte est **remis tel quel** dans l'export
+  (`empreinteConstatee` à l'index, écart `FICHIER_MODIFIE`) ; un fichier qui ne se déchiffre plus ou manque n'est pas
+  remis (`exclu`). Le client reçoit ce que le cabinet a, et sait ce qui a bougé.
+- **D-1120-13** : le bordereau et l'exemplaire sont refusés **avant** tout dépôt (aucun PDF orphelin) ; le conditionnel
+  sous la transaction (`lierBordereau`, `poserExemplaireSigne`) reste le second rempart d'une course. Le PDF d'un
+  document est déposé avant sa transaction, comme D-1119-16.
+- **D-1120-14** : la recette de l'Atelier (règle de `document-service`) n'est pas rejouée : le diff ne touche ni l'OCR,
+  ni les extractions, ni le module Nest commun (seul `GedModule` gagne des fournisseurs ; un invariant de `src/kafka`
+  compte un consommateur de plus) ; leurs e2e passent tels quels sous Node 24 et 25.
+- **D-1120-15** : deux exports simultanés d'un même fonds tournent l'un après l'autre (file à concurrence 1) et
+  émettent chacun leur certificat (vu sur la pile) ; un dépôt de pièce concurrent d'une fermeture peut passer dans la
+  fenêtre (le dépôt ne touche pas au fonds) : il est exporté comme toute pièce.
 
 ## Critères d'acceptation
 
