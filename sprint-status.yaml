@@ -2080,14 +2080,20 @@ reserved_ranges:
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
   - range: "STORY-1119"
-    status: "in_progress"
+    status: "done"
     owner: "Groupe B, lot 7, n° 1 — les archives ont valeur de preuve : journal d'intégrité chaîné par cabinet (versement, scellé, vérification, campagne, document émis, consultation d'une pièce sensible), contrôle périodique des empreintes (BullMQ, écarts nommés), attestation de numérisation et certificat d'intégrité d'un fonds, figés et téléchargeables (document-service, module ged)"
     source_doc: "prospera-stories/stories/STORY-1119.md"
     reserved_on: "2026-11-25"
     note: >
-      2026-11-25 : fiche écrite et contrat annoncé avant le code (journal de B, « ⚠ Contrats ») ; manifeste ged 1.4.0
-      (sept routes de lecture neuves) ; aucun droit neuf (D-1119-4), aucun fait Kafka neuf (D-1119-10), aucune
-      dépendance neuve. Lot 7 de B, n° 1. NON SLOTTÉE.
+      🏁 DONE le 2026-11-25 — document-service #33 (dev b7b3f91) et catalogue #77 (dev f4fcee0, ged 1.4.0 recopié) ;
+      contrat annoncé avant le code (stories #918, main 13e17a4). Journal d'intégrité chaîné par cabinet (versement,
+      scellé, vérification, campagne, document émis, consultation sensible ; atomique avec l'acte ; 503
+      JOURNAL_INDISPONIBLE), contrôle des empreintes par la file BullMQ (GED_CONTROLE_INTEGRITE_MOTIF, 0 3 * * * UTC ;
+      écarts neufs SCELLE_MODIFIE, LIEN_ROMPU ; JOURNAL_ROMPU), ATT- et CERT- figés, retéléchargés à l'octet. Aucun
+      droit neuf, aucun fait Kafka neuf. Node 25 : unitaires 1196, e2e 209/209 ; Node 24 : 1198, 209/209 ; mutations
+      15/15 (+2/2 catalogue) ; pile grp-b neuve : 20 consultations simultanées sans fourche, octet changé dans MinIO
+      nommé FICHIER_MODIFIE par la campagne périodique, entrée réécrite nommée EMPREINTE_FAUSSE au rang 5. D-1119-1 →
+      18. Lot 7 de B, n° 1. NON SLOTTÉE.
   # ── LOT 6 DE B (2026-11-24) : STORY-1112 → 1116, réservées par PLAN-LOT-6-2026-11-23.md §8 ; fiches écrites juste
   #    avant de coder, le story_id_high_water_mark monte au commit qui crée chacune.
   - range: "STORY-1117"

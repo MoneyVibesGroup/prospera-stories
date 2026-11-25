@@ -1,6 +1,7 @@
 # STORY-1119 : Les archives ont valeur de preuve — journal d'intégrité chaîné, contrôle périodique des empreintes, attestation et certificat
 
-Status: in-progress — fiche écrite le 2026-11-25 par la session du groupe B juste avant de la coder (lot 7, n° 1 de B,
+Status: done — **livrée le 2026-11-25** : document-service **#33** (`b7b3f91` sur `dev`), catalogue **#77** (`f4fcee0`) ;
+voir « Livraison ». Fiche écrite le 2026-11-25 par la session du groupe B juste avant de la coder (lot 7, n° 1 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, ligne 1 ; identifiant réservé D-L7B-1).
 
 **Service :** `document-service` (GitHub `prospera-ocr-service`, module `ged`, repris de C au commit `0716a58`) ·
@@ -130,6 +131,57 @@ GED, **retéléchargés à l'identique** ; leur SHA-256 est inscrit au journal (
 - Manifeste **`ged` 1.4.0** : les sept routes `GET` neuves en `routesLectureSeule` ; `droits`, `publie`, `consomme`
   inchangés. **Recopie au catalogue** par B après la fusion du code (suite de cette story, D-979-24).
 - **→ A (FE-143)** : types à régénérer depuis l'OpenAPI de `document-service` quand l'écran viendra.
+
+## Livraison (2026-11-25)
+
+- **Code** : document-service (`prospera-ocr-service`) **#33**, `b7b3f91` sur `dev` : `src/modules/ged/cabinet/`
+  `integrite.ts` (forme canonique, chaîne, écarts, documents), `depot-integrite.ts` (cinq collections, transaction et
+  tête de chaîne), `integrite.service.ts`, `integrite.controller.ts` (dix routes, DTO de réponse), `pdf-probants.ts`,
+  `controle-integrite.planificateur.ts` (file `ged-integrite`, planificateur, processeur) ; `CabinetService` inscrit
+  versement, scellé, vérification et consultation sensible, et gagne `controlerFonds` ; `DepotCabinet.changer` prend la
+  session. Manifeste `ged` **1.4.0** recopié depuis `prospera-stories@13e17a4` (#918), empreinte épinglée.
+- **Catalogue** : `platform-catalog-service` **#77**, `f4fcee0` sur `dev` : `ged` 1.4.0 recopié (seul manifeste qui
+  change ; `manifestes:garde` verte, 48).
+- **Preuves** :
+  - Node 25 : unitaires 1196 passés (2 suites rouges connues du poste : copies CRLF de `ged.service.spec`, chemins
+    Windows de `piece-conservation.spec` ; vertes sous Node 24) ; e2e **209/209** (15 suites ; `ged-integrite` 6/6,
+    recensement de STORY-695 compris) ; lint des fichiers touchés, `tsc`, build.
+  - Node 24 (étage `verification`, image depuis `git -c core.autocrlf=false archive`) : unitaires 108/108 suites, 1198
+    passés ; e2e 209/209.
+  - Mutations **15/15** rouges sur assertion (forme canonique, lien, rang manquant, fin de journal retirée, consultation
+    sensible non inscrite, servie sans trace, scellé et lien réécrits, atomicité acte-entrée, nature sensible nommée,
+    certificat sur écart, certificat sur journal rompu, document altéré servi, campagne terminée rejouée, `AUCUN`) ;
+    catalogue 2/2.
+  - **Pile `grp-b` neuve** (image depuis l'archive ; Mongo rs0, Kafka, Redis, MinIO Chainguard ; doublure d'auth :
+    JWKS et `/moi/droits` ; dossier client posé dans `dossiers_dossier`, état publié `ged` `EN_SERVICE` par Kafka ;
+    motif `* * * * *`) : `healthy`, 0 erreur au journal du service ; planificateur posé dans Redis ; fonds ouvert,
+    facture et bulletin de paie déposés, lus, contrôlés, versés, scellés ; **20 consultations simultanées** du bulletin
+    ⇒ rangs 1 → 24 sans trou ni doublon, chaîne vérifiée ; campagne demandée `TERMINEE` par la file ; `ATT-2026-00001` et
+    `CERT-2026-00001` émis, PDF retéléchargé à l'octet, SHA-256 = entrée `DOCUMENT_EMIS` = `X-Empreinte-Sha256`,
+    `attachment` ; **un octet changé dans MinIO** ⇒ la campagne PÉRIODIQUE suivante (12 s plus tard) nomme
+    `FICHIER_MODIFIE` (pièce, version, bordereau), le certificat est refusé 409 `INTEGRITE_EN_ECART`, le certificat déjà
+    émis se retélécharge ; **une entrée réécrite en base** ⇒ rupture `EMPREINTE_FAUSSE` au rang 5, nommée aussi par la
+    campagne suivante (`journal.ok: false`) ; index uniques créés. Verrou 22:14 → 22:23, `down -v`.
+- **Variable neuve** : `GED_CONTROLE_INTEGRITE_MOTIF` (défaut `0 3 * * *`, UTC).
+
+### Écarts au contrat, décidés au code
+
+- **D-1119-12** : le CORS du service **expose** `X-Empreinte-Sha256` et `Content-Disposition` (l'écran lit l'empreinte
+  et le nom d'un document téléchargé) ; ajout seul.
+- **D-1119-13** : les dix routes neuves ont leurs **DTO de réponse** à l'OpenAPI, nommés par le module
+  (`…IntegriteDto`, `DocumentProbantDto`) : A génère ses types sans rien écrire à la main. L'avertissement « Duplicate
+  DTO `ReceptionDto` » (STORY-1088) reste à renommer avant FE-143.
+- **D-1119-14** : la campagne vérifie la chaîne **après** les fonds et s'inscrit **même si la chaîne est rompue** (la
+  rupture est dans `journal` de la campagne et `journalOk: false` de l'entrée) : se taire sur un journal rompu serait
+  pire.
+- **D-1119-15** : un document probant dont l'objet ne se déchiffre plus, ou ne redonne plus son empreinte, n'est pas
+  servi : 409 `INTEGRITE_EN_ECART` (`details.document`).
+- **D-1119-16** : le PDF est déposé (chiffré) **avant** la transaction du document et de son entrée ; une panne entre
+  les deux perd le numéro et laisse un objet orphelin (rien ne se supprime). Rare, sans faux document : accepté.
+- **D-1119-17** : la recette de l'Atelier (règle §4 de `document-service`) n'est pas rejouée : le diff ne touche ni
+  l'OCR ni les extractions de pièces ; leurs e2e passent tels quels sous Node 24 et 25.
+- **D-1119-18** : au catalogue, le test de STORY-1100 ne fige plus la version de `ged` ; un test STORY-1119 fige 1.4.0,
+  les sept routes et les vingt droits.
 
 ## Critères d'acceptation
 
