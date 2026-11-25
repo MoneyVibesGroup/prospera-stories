@@ -5,7 +5,10 @@
 
 ## État
 
-### Lot 6 du groupe A (2026-11-24) — FE-140 ✅, FE-149 ✅
+### Lot 6 du groupe A (2026-11-24) — FE-140 ✅, FE-149 ✅, FE-141 ✅
+
+- ✅ **FE-141 DONE (25/11)** : prospera-frontend-expert-comptable **#60** (`64c5ecb` + `8ca3acd` sur `dev`), docs (cette PR). Bilan › Analyse : 19 indicateurs en quatre familles, N et N-1 du serveur, **verdicts du serveur seuls** (STORY-1076 : `POIDS_CAPITAUX_PROPRES`, `LIQUIDITE_GENERALE`, `MARGE_NETTE` sourcés BCEAO, BON et RISQUE ; les 16 autres « Aucun repère » en une phrase), ligne qui s'ouvre (formule, postes, repère et source), incalculable avec son motif traduit, non applicable, bloc « Si le prêt est accordé » **sans verdict** (D-141-3). Preuves : tsc, eslint, vitest 1 825/1 832 (7 délais de 5 s hors story, rejoués 30/30), build, e2e simulés 6/6, **gate réel vert** sur `grp-a` (bilan-service construit depuis `origin/dev` `e4cee3e` : BON sourcé, « Aucun repère », « Délai de rotation des stocks » incalculable, montant en francs, dette) et **gate FE-069 rejoué vert**. Écart à la maquette écrit dans la fiche : ses repères « exemple » ne sont pas repris. Pile `down -v`, verrou rendu, session C prévenue.
+- **Suite** : lot 6 de A restant : AP-55, AP-57, AP-59 (console) ; FE-150 quand STORY-1099 sera sur `dev`.
 
 - ✅ **FE-149 DONE (24/11)** : prospera-frontend-expert-comptable **#59** (`620b9bd` + `47f190c` sur `dev`), docs (cette PR). Atelier › Factures : déposer (vrai téléversement, « Voir » avant l'envoi), relire (champs modifiables, **écriture éditable dans son tableau**, **aperçu `POST …/apercu` à chaque modification après 400 ms**, aucun recalcul local), inscrire au brouillard, brouillard et journaux, valider avec confirmation, renvoi SMT. Preuves : tsc, eslint, vitest, build, e2e simulés 3/3 (+ suite 288/289, le rouge est `atelier-saisie`, regex d'URL antérieure), **gate réel vert** (deux vraies images lues par l'OCR, Q-209 ligne à ligne, déséquilibre dit par le serveur, validation AC-000001/2, étanchéité, zéro CORS) sur comptabilite construit depuis `origin/dev` **`979ed53`** ; **gate FE-069 rejoué vert**. Autres services de la pile : images `grp-a` existantes (écart écrit dans la fiche). Décisions D-149-1 à 6 dans la fiche. **Pile `down -v`, verrou rendu, session C prévenue.**
 - **Écart nommé (D-149-1)** : comptabilite refuse tout dépôt tant que l'exercice n'est pas ouvert à la comptabilité (`EXERCICE_NON_OUVERT`) ; le choix de la tenue (JOURNAL ou CAHIERS, définitif) n'a aucun écran : le gate l'ouvre par l'API. **Story à écrire : « Choisir la tenue de l'exercice »** (maquette d'abord).
@@ -29,6 +32,16 @@
 - **Testing Library replie les espaces fines insécables** des montants : comparer avec `/117\s000/`.
 - **Docker Desktop** : `docker_data.vhdx` resté attaché après un compactage ⇒ « unable to start » (geste de l'utilisateur, administrateur).
 - **Poste** : un seul `npm install`, un seul build d'image ; `vitest` en parallèle d'un build donne des délais de 5 s (rejouer les fichiers seuls).
+
+### Pièges du 25/11 (FE-141)
+
+- **`git archive` sous Windows convertit les fins de ligne** (`core.autocrlf=true`) : l'asset `syscohada-revise-2.3.json` change de sha256 (122 767 octets au lieu de 117 871) et bilan-service répond **502 « Référentiel non intègre (checksum invalide) »** à la création d'une liasse. Archiver avec `git -c core.autocrlf=false archive`.
+- **Prettier sur un dossier entier** (`prettier --write src/features/bilan`) réécrit des dizaines de fichiers existants : le cibler fichier par fichier.
+- **Deux `playwright test` en même temps dans le même dossier** se bloquent sur `.next/lock` (le second échoue sur « next build still in progress ») : un seul à la fois, `rm -rf .next` après un arrêt brutal.
+- **`getByText('Exercice précédent')` est insensible à la casse et prend les sous-chaînes** : « Comparé à l'exercice précédent » le trouve ; utiliser `{ exact: true }`.
+- **Montants de la liasse** : unités mineures, lues en francs par `formatMontantMineur` (÷ 100) ; sans cela l'écran affiche 100 fois trop.
+- **Gate** : la balance « validée » met quelques secondes à être lue par bilan-service (« La balance n'est pas validée » passager : rejouer le geste) ; une demande de prêt par l'API exige `exerciceReference` ; pour un incalculable, une balance sans achat (délais des stocks et des fournisseurs : « rien à diviser »).
+- **`npm run build` + `vitest` complet en parallèle** : 7 tests de 4 fichiers sans rapport dépassent 5 s ; rejouer ces fichiers seuls.
 
 ### Pièges du 24/11 (FE-140)
 
