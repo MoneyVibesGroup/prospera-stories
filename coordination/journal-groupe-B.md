@@ -42,6 +42,7 @@
   |:--:|---|---|
   | a | STORY-979 (3ᵉ suite) | recopies `facturation` 1.2.0, `paiement` 1.1.0 |
   | b | STORY-1073 (correctif) | `formeJuridique` sur les dossiers clients |
+  | c′ | STORY-917 (correctif) | CORS du BFF : `Idempotency-Key` annoncé (← A, AP-55 ; D-L7B-7) |
   | c | STORY-1115 (correctif) | republier togo@2026 (`5c683d16…`) dans les deux buckets de la recette (← C) |
   | 1 | STORY-1119 | les archives ont valeur de preuve |
   | 2 | STORY-1120 | fin de mission et réversibilité |
@@ -80,6 +81,12 @@
      sur `dev` de `balance-service`**, comme une **quatrième suite de STORY-979**, entre deux stories ; **pas avant**
      (D-979-24 : un manifeste ne précède pas son code au catalogue).
 
+- **D-L7B-7 — ordre « c′ » : la demande de A placée avant c** (25/11, session de groupe ; §1.1) : « → B (25/11,
+  AP-55) : autoriser `Idempotency-Key` dans le CORS du BFF `admin-panel` » (journal de A, « Pièges », AP-55). Demande
+  de A placée avant c : petite, sans Docker, elle débloque AP-55 déjà livrée. **Correctif rattaché à STORY-917**
+  (BFF #35, `f27d10a` : la story qui a ouvert le relais de `Idempotency-Key`, D-917-4) ; aucun identifiant neuf ;
+  commits `MNV-917(admin-panel): …`.
+
 - **Avancement** :
   - **a — troisième suite de STORY-979 (25/11) — faite** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
     catalogue depuis `prospera-stories@bd9340e` (← D, STORY-1073) ; `balance` 1.1.0 entraînée par la copie entière
@@ -92,6 +99,8 @@
     (`645a699` sur `dev`) ; contrat annoncé avant la fusion (stories #895, `6587f56`). Node 25 : 3/3 suites par
     chemin (208), complète 109/116 (7 rouges connues), e2e 10/10 (395) ; lint, build ; 6/6 mutations. Rejeu : `npm run
     republier:dossiers`, aucune pile semée sur ce poste (D-1073-15). Sans Docker, verrou non pris. Fiche D-1073-13 → 17.
+  - **c′ — correctif de STORY-917 (25/11) — en cours** : le CORS du BFF annonce `Idempotency-Key` et `X-Request-Id`,
+    expose `Retry-After` (← A, AP-55 ; BFF #44, branche `MNV-917-cors`) ; contrat annoncé avant la fusion (« ⚠ Contrats »).
   - **Suivante : c — le correctif de STORY-1115** (togo@2026 dans les deux buckets de la recette, D-L7B-6).
 
 ### Lot 6 (ouvert le 2026-11-24)
@@ -1455,6 +1464,9 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   code n'est pas fusionné (D-979-24) : demandez-la ici après la fusion ; d'ici là, `manifestes:garde` contre `main`
   est rouge sur `balance` seul.
 
+- **← A (25/11, AP-55) : autoriser `Idempotency-Key` dans le CORS du BFF `admin-panel`** — **reçue, placée par la
+  session de groupe en ordre « c′ »**, avant c (D-L7B-7) : correctif rattaché à STORY-917. **En cours** : BFF #44
+  (« ⚠ Contrats »).
 - **← D (25/11, STORY-1077) : `formeJuridique` sur les dossiers CLIENTS aussi** (`dossier-service`) — **reçue pendant
   STORY-1116**, placée par la session de groupe en **ordre « b » du lot 7** (D-L7B-2) : un correctif rattaché à
   STORY-1073 (D-1073-2 a posé la condition « dossier propre »), le seul champ sorti de la condition, puis
@@ -1742,6 +1754,23 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-25, correctif de STORY-917 — le CORS du BFF `admin-panel`, annoncé AVANT la fusion du code**
+  (`prospera-admin-panel-service`, branche `MNV-917-cors`, PR #44 ; fiche `stories/STORY-917.md`, « Correctif du
+  2026-11-25 », D-917-4 → 8 ; demande de A, AP-55). Le CORS fait partie du contrat que la console consomme. **Ajouts
+  seuls** : aucune route, aucun champ, aucun schéma OpenAPI ne change ; l'allowlist d'origines (`CORS_ALLOWED_ORIGINS`),
+  la liste vide ⇒ CORS non activé, `credentials: false` et les méthodes ne bougent pas.
+  - **`Access-Control-Allow-Headers`** : `Authorization,Content-Type,If-Match` ⇒
+    **`Authorization,Content-Type,If-Match,Idempotency-Key,X-Request-Id`**. `Idempotency-Key` : le lancement d'une
+    installation (`POST /api/v1/admin/orgs/{orgId}/installations`), relayé tel quel au catalogue (une clé déjà vue
+    rejoue le même plan, `200` ; une clé réemployée pour une autre demande : `409 CLE_IDEMPOTENCE_REUTILISEE`).
+    `X-Request-Id` : facultatif, il nomme la requête dans les journaux du BFF (sinon le BFF en tire un) ; il n'est pas
+    relayé aux amont.
+  - **`Access-Control-Expose-Headers: Retry-After`** (neuf) : posé par le garde de débit du BFF sur son propre `429`
+    (secondes) ; la console peut le lire par `response.headers.get('Retry-After')`. Les `X-RateLimit-*` restent
+    illisibles du navigateur (D-917-6). Un `429` d'un amont (le quota d'auth sur les relances) n'en porte toujours pas.
+  - **Pour A** : `Idempotency-Key` peut partir du navigateur (`installation-client.ts` le retire aujourd'hui, à cause
+    de ce refus) ; rien à régénérer (aucune OpenAPI ne change). **Pour C et D** : rien.
 
 - **2026-11-25, correctif de STORY-1073 — `formeJuridique` publiée sur les dossiers CLIENTS aussi, annoncé AVANT la
   fusion du code** (`prospera-dossier-service`, branche `MNV-1073-clients`, PR #59 ; fiche `stories/STORY-1073.md`,

@@ -65,3 +65,63 @@ dépendances du catalogue (balance → bilan → declarations ; reseau → micro
 (acquis à l'offre, puis installation). BFF : 527 unitaires sous Node 24 ; six routes d'installation relayées, codes du
 moteur en liste blanche. Recettes depuis `dev` vertes (87/87, `abonnement` 15/15 rejouée seule après une pile
 recréée). La demande de B (945) est close.
+
+## Correctif du 2026-11-25 — le CORS du BFF annonce `Idempotency-Key` (groupe B, lot 7, ordre « c′ »)
+
+**Demande :** A, AP-55 (journal de A, « → B (25/11, AP-55) : autoriser `Idempotency-Key` dans le CORS du BFF
+`admin-panel` », et « Pièges », AP-55 (1)) ; placée par la session de groupe en ordre « c′ » du lot 7 de B, avant c
+(D-L7B-7). **Aucun identifiant neuf.** **Dépôt :** `prospera-admin-panel-service` (le BFF), branche `MNV-917-cors`,
+commits `MNV-917(admin-panel): …` · **Exécutée par :** groupe B.
+
+**Pourquoi :** cette story a ouvert le relais de `Idempotency-Key` (`POST /admin/orgs/{orgId}/installations`,
+`@Headers('idempotency-key')`, relayé au catalogue) sans l'ajouter aux en-têtes annoncés par le CORS du BFF
+(`allowedHeaders: Authorization, Content-Type, If-Match`). La console appelle le BFF en cross-origin (`:3110` ⇒
+`:3010`) : le préflight d'un `fetch` qui porte l'en-tête est refusé, et le navigateur rend « échec réseau », sans code
+et sans une ligne au journal du BFF. Un `curl` ne le voit pas (il n'y a pas de préflight hors d'un navigateur) ; le gate
+réel d'AP-55 l'a trouvé, et la console a dû retirer l'en-tête (`installation-client.ts`). C'est le piège d'AP-26
+(`If-Match`), une deuxième fois dans ce BFF.
+
+### Où en est-on
+
+- [x] Rituel : plan du lot 7, journaux de A, B, C, D (la demande de A du 25/11 à B, placée en « c′ ») ; le BFF était en
+  HEAD détachée sur `origin/dev` (**`911c450`**), propre, sans worktree vivant ; branche `MNV-917-cors` partie
+  d'`origin/dev`. Verrou Docker tenu par C (STORY-1020) : non pris.
+- [x] Code relu avant d'écrire : `git log -S"idempotency-key"` ne désigne que `f27d10a` (MNV-917) ; inventaire des
+  en-têtes lus et émis par le BFF (D-917-6).
+- [x] Code, preuves sous Node 25 (unitaires, e2e, lint, `tsc`, build, mutations, BFF construit démarré).
+- [x] « ⚠ Contrats » du journal de B annoncé avant la fusion du code (cette PR de docs ; PR de code #44).
+- [ ] PR de code fusionnée en rebase ; SHA rejoué sur `dev`.
+- [ ] PR de docs finale (fiche, tracker, journal de B).
+
+### Décisions retenues par défaut (contestables)
+
+- **D-917-4 — Le correctif se rattache à STORY-917, pas à STORY-1080.** C'est 917 qui a ouvert le relais de l'en-tête
+  (`f27d10a` : `@Headers('idempotency-key')` au contrôleur, `lancerInstallation(…, cleIdempotence)` au client du
+  catalogue) ; STORY-1080 n'a ajouté qu'une lecture sans en-tête neuf (`GET …/etat-publie`). Même geste qu'AP-26 pour
+  `If-Match` : l'en-tête se corrige chez la story qui l'a fait lire.
+- **D-917-5 — La configuration CORS vit dans `configurerCors` (`src/common/utils/cors.util.ts`), que `main.ts` et les e2e
+  appellent tous les deux, et un garde lit les sources.** L'e2e de STORY-173 recopiait la configuration de `main.ts`
+  (« volontairement non factorisé », patron STORY-109 commun aux autres services) : une recopie peut s'écarter de ce qui
+  tourne sans que le test rougisse. Le patron de `configurerProxysDeConfiance` (STORY-133) est le bon : une fonction,
+  un appel dans `main.ts`, le même dans le test. Le garde (`cors.util.spec.ts`) relève tout `@Headers(nom)` d'un
+  contrôleur et tout `headers[nom]` d'un middleware : il rougit dès qu'un en-tête lu n'est pas annoncé. C'est ce qui
+  aurait arrêté 917. Les autres services gardent leur patron : rien n'y change.
+- **D-917-6 — Inventaire : deux en-têtes de requête et un en-tête de réponse de plus, rien d'autre.** Lus par le BFF
+  au 25/11 : `authorization` (56 lectures `@Headers`), `if-match` (3, KYC), `idempotency-key` (1, installation), `x-request-id`
+  (`ClsModule` et `nestjs-pino`, la corrélation des journaux). **`X-Request-Id` entre dans la liste** : le BFF le lit et
+  le garde dans ses journaux, la console peut vouloir nommer ses appels, et l'annoncer ne donne rien de plus qu'à un
+  appel serveur. Il n'est pas relayé aux amont, et rien ne change à ce sujet. Émis : les relais ne recopient **aucun**
+  en-tête d'un amont (`res.status` seulement, jamais `res.set`) ; le garde de débit du BFF (`@nestjs/throttler` 6.5,
+  `setHeaders` vrai par défaut) pose `X-RateLimit-Limit`, `-Remaining` et `-Reset` sur chaque réponse, et `Retry-After`
+  sur son `429`. **`Retry-After` est exposé** : c'est le seul moyen pour la console de dire « réessayez dans N s » au
+  lieu de deviner. **Les `X-RateLimit-*` ne le sont pas** : aucun lecteur, et un compteur par adresse IP, derrière des
+  proxys, n'a pas de sens pour l'opérateur. `ETag` est servi dans le corps (`etag`, STORY-182), pas en en-tête : rien à
+  exposer.
+- **D-917-7 — Sans Docker.** Aucun module Nest, aucune dépendance, aucun Dockerfile ne change. `main.ts` change, et le
+  test e2e ne le voit pas : la preuve est le BFF construit (`dist/main.js`), démarré localement contre un JWKS et un
+  faux catalogue, avec un préflight puis un `POST` d'installation qui porte l'en-tête, et une contre-épreuve sur
+  `origin/dev`. Verrou non pris (tenu par C).
+- **D-917-8 — Ce qui reste à A.** La console décide si elle remet `Idempotency-Key` sur le lancement d'une installation
+  (le catalogue déduplique la demande sans lui, journal de A) ; une clé par geste de l'opérateur, rejouée telle quelle
+  en cas de doute réseau, rend le même plan (`200`). Le `PUT` d'octroi unitaire reste côté console jusqu'au n° 11 de B
+  (journal de A) : ce correctif n'y touche pas.
