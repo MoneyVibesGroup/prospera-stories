@@ -39,7 +39,7 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
   4 ter. ✅ **STORY-326 DONE (25/11)** : balance-service **#162** (`8b154df`, le paquet), fiscal **#59** (`2aed546`,
      le contrôle), contrat #857. Node 24 : balance 5552 / 1973, fiscal 2602 / 216 ; mutation 6/6 ; gate `grp-c` vert
      (balance et fiscal `healthy`) ; verrou cédé par A et rendu ;
-  5. **STORY-1101** les déclarations face à la liasse (fiscal) — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
+  5. 🟡 **STORY-1101** les déclarations face à la liasse (fiscal) : contrat annoncé le 25/11 (fiche) ; — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
   6. **STORY-315** puis **316** le calendrier fiscal (fiscal) — fiches écrites juste avant.
 - **Docker** : verrou du poste principal (`MoneyVibes_Apps\.verrou-docker`) partagé avec A ; aucune pile de C ne tourne.
 
@@ -246,6 +246,13 @@ seulement.
   fusionné : document-service #30 `1db0a8f`, #31 `9d0cfd3`, #32 `0716a58` ; source `manifestes/ged.manifest.ts`,
   `f703671`). Les 1.1.0 et 1.2.0 n'ont pas à être semées seules. — ✅ **close le 25/11** : catalogue #74 `1aa17ae`
   (STORY-979).
+- **→ B (25/11, STORY-326, puis 1101)** : **republier le paquet togo@2026** dans les deux buckets de la recette
+  (`referentiel-packages` pour le fiscal, `docker-compose.fiscal.yml:80` ; `referentiel-packages-essai` pour l'essai,
+  `docker-compose.recette.yml:369`), puis vérifier que le contrôle de cohérence ne rend plus `NON_EXECUTE`
+  `TOLERANCE_ABSENTE`. Empreinte après 326 : `e2230569…` (balance-service #162) ; elle changera encore avec 1101
+  (`rapprochementAnnuel`). Ce n'est pas un script de C qui publie : `balance-service` n'écrit pas dans ce bucket, et le
+  fiscal lit le pointeur que lui donne l'événement de publication. C n'a pas trouvé l'éditeur ; `prospera-recette` est
+  à B. — ouverte.
 - **→ B (25/11, STORY-1117)** : recopier au catalogue le manifeste `balance` **1.1.0** (code fusionné :
   balance-service #161 `e968388` ; source `manifestes/balance.manifest.ts`, #842) : deux routes de lecture neuves
   (`…/balances/reference`, `…/balances/resumes`). — ouverte.
@@ -350,6 +357,8 @@ seulement.
   `etat-publie.changed.<espace>`, double lecture) dans une story de la plage de C, après STORY-990.
 
 ## ⚠ Contrats
+
+- **2026-11-25 (STORY-1101), AVANT le code** : `POST /obligations/{id}/montant-declare` accepte `assiette` (facultatif) ; route neuve `POST /api/v1/exercices/{exerciceId}/rapprochement-liasse` → `{ redevableId, defini, couples: [...] }` ; anomalie neuve `RAPPROCHEMENT_LIASSE_ECART` (bloquante au dépôt de la DSF, levable). Le paquet fiscal gagne `rapprochementAnnuel.couples` (Togo 2026 : `CA_TVA_LIASSE`), nouvelle empreinte. **→ A** : écran (lot 7 de A).
 
 - **2026-11-25 (STORY-326), AVANT le code** : le paquet fiscal gagne un bloc `coherence.tolerances` (par code d'obligation : `absolue`, `relative?`), source `balance-service/scripts/referentiels/sources/`, artefacts régénérés. Le fiscal sert `POST /api/v1/obligations/{id}/coherence` → `{ controles: [...] }` et contrôle aussi à l'enregistrement du déclaré ; il lit `GET …/fiscal/tva` et `GET …/fiscal/acomptes` de balance-service. Anomalies neuves `TVA_ECART_COMPTABILITE` et `ACOMPTE_ECART_RESULTAT_N1` (bloquantes au dépôt, levables). **→ A** : écran à prévoir (le contrôle, l'anomalie). **→ copies du paquet** (`dossier-service`) : le bloc neuf ne les concerne pas ; leur octet diverge de la source, sans effet sur elles.
 
