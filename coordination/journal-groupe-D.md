@@ -5,6 +5,33 @@
 
 ## État
 
+### Lot 7 (ouvert le 2026-11-25) — `PLAN-LOT-7-2026-11-24.md` §4
+
+- **Plan** : le dépôt, le social et le premier dépôt réel, **18 stories, 95 points**, dans l'ordre du tableau §4 :
+  **560** (le coffre des secrets de canal, amende AD-13) → 346 → 347 → 348 → 364 → 349 → 330 → 331 → 332 → 333 → 334 →
+  335 → 336 → 337 → 561 → 562 → 565 → **1102** (le premier dépôt réel). Attentes de C (plan §5) : 348 attend 564, 349
+  attend 319, 330 attend 325, 337 attend 338, 565 attend 341 — une story qui attend C s'écrit « → C : … — ouverte » et
+  la session de groupe décide de la suite. Aucun identifiant neuf (plan §7).
+- **Le fiscal partagé par dossier avec C** (D-L7-1 → 3) : dossiers de D `depots`, `livrables-depot`, `paquets-depot`,
+  `completude-depot`, `remuneration` et le coffre des secrets de canal (`coffre-secrets`, créé par 560) ; dossiers de
+  C : `echeances`, `obligations`, `familles`, `qualification`, `paquets`, `redevables`, le futur `reglement` et les
+  autres déjà là. **Fichiers communs** (`app.module.ts`, manifeste `declarations`, contrat OpenAPI, `package.json`,
+  migrations, `read-models/`, copies du paquet) : dits dans la PR, rebasée sur `origin/dev` juste avant la fusion, et
+  dans « ⚠ Communs » ci-dessous **avant** la fusion ; une seule migration en vol. Le paquet fiscal est à C (D-L7-3).
+- **Poste** : l'autre poste (`C:\Users\USER\…`), **B, C et D sur le même poste et le même verrou Docker**
+  (`MoneyVibes_Apps\.verrou-docker`, pris par `noclobber`, rendu par un `trap EXIT` dans un script autonome ; B et C
+  prévenus à chaque reddition). Le fiscal de D se travaille dans le worktree **`_wt-d-fiscal`** (jamais le checkout
+  `prospera-fiscal-service`, que C emploie), remis en HEAD détachée sur `origin/dev` à la fin de chaque story. Aucun
+  `.env` sur ce poste : les tests posent leurs variables. Une sous-session neuve par story (`REGLES-DES-GROUPES.md`
+  §1.2).
+- **Non placé des réponses du 25/11 — à placer par l'utilisateur** : `zone-franche-togo@1.1` (« au lot 7 », sans
+  numéro au tableau §4) ; Q-D-14 (les seuils des seize indicateurs, cherchés et modifiables) ; Q-D-15 (le numéro de
+  compte imprimable) ; Q-D-19 (l'export C13 aussi en CSV). Aucune story de ce lot ne les porte.
+- **STORY-560** 🔐 en cours — le coffre des secrets de canal, adossé au mandat écrit du client (amende AD-13). Rituel
+  (2026-11-25) : aucune demande neuve à D chez A, B et C ; passation de C constatée (« Passations ») ; aucune PR
+  ouverte sur le fiscal, aucune migration en vol chez C. Fiche mise à jour avant le code (D-560-1 → 15), contrat
+  annoncé (« ⚠ Contrats ») et communs annoncés (« ⚠ Communs »).
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
@@ -819,6 +846,10 @@
 
 ## Dépôts tenus
 
+- **Lot 7 (D-L7-1, ouvert par C le 2026-11-25, constaté au rituel de 560)** : `prospera-fiscal-service` (3012),
+  **partagé par dossier avec C**. Dossiers de D : `src/modules/` (et `application/`, `domain/`, `adapters/` du même
+  nom) `depots`, `livrables-depot`, `paquets-depot`, `completude-depot`, `remuneration`, `coffre-secrets` (560). Le
+  reste est à C ; les fichiers communs suivent D-L7-2 (« ⚠ Communs »). Worktree `_wt-d-fiscal`.
 - **Lot 6 (D-L6-3, reçus de C le 2026-11-23, constatés au rituel de 1068)** : `prospera-sinistres-service` (3409, modules
   `sinistres` et `expertises`) et `prospera-assurance-service` (3013, module `assurance`) ; dans `prospera-plateforme`,
   `contrats/assurance/`, `champs-sensibles/`, `classification-sante/`. `prospera-liaison-assureur-service` reste à C.
@@ -846,6 +877,16 @@
 - Lot 1 (frontend) : rien n'a été écrit ; `frontend-admin-panel` n'est tenu par personne pendant le lot 2.
 
 ## Passations
+
+- **← C, `prospera-fiscal-service` partagé par dossier, constatée par D au rituel de 560, le 2026-11-25** (lot 7,
+  D-L7-1 ; passation de C du 25/11, « Passations » de son journal). Constat : `origin/dev` = **`f1296ae`** (MNV-316,
+  fiscal #62), **exactement le SHA de la passation** ; `gh pr list --state open` : aucune PR ; aucune migration en vol
+  chez C (sa section « ⚠ Contrats » n'annonce que 316, 315, 1101, 326, fusionnées) ; worktree `_wt-d-fiscal` en HEAD
+  détachée sur `f1296ae`, propre, sans `node_modules`. Les deux worktrees « prunable » du checkout, venus de l'autre
+  poste, sont laissés. Repris de la passation : dossiers de D et de C, règle des communs, une seule migration en vol,
+  paquet à C ; pièges du fiscal (gate avec `prospera-recette/docker-compose.fiscal.yml` et une surcouche pointant
+  l'archive de la branche, `test:conformite` sur `mongo-fiscal` en jeu de répliques, scripts `mongo/` en LF, suite
+  unitaire en `-w 2`, `# syntax=` à retirer dans la copie archivée si la VM Docker n'a pas de DNS).
 
 - **→ B (2026-11-25, fin de STORY-1073) : `prospera-dossier-service` et `prospera-paiement-service` sont RENDUS À B.**
   Derniers commits de D sur `dev` : dossier **`4352ac3`** (MNV-1073, #58 ; avant lui `2bf9dbd` de B), paiement
@@ -1737,7 +1778,54 @@
 - ~~Créer les cinq dépôts du distributeur~~ : **faits** ; D y a posé `main` et `dev`. **Poser « Rebase and merge »
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
+## ⚠ Communs
+
+> Lot 7, D-L7-2 : un fichier commun de `prospera-fiscal-service` (`app.module.ts`, manifeste `declarations`, contrat
+> OpenAPI, `package.json`, migrations, `read-models/`, copies du paquet, et tout fichier d'un dossier de C) ne change
+> que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
+> Une seule migration en vol sur le service.
+
+- **ANNONCÉ (2026-11-25, STORY-560, avant le code)** — branche `MNV-560`. **Aucune migration** (deux collections
+  neuves, `coffre_canaux` et `coffre_jetons`, index posés par Mongoose au démarrage), ni `package.json`, ni
+  `read-models/`, ni copie du paquet, ni manifeste `declarations` (sa note « aucun secret de canal n'est stocké »
+  devient périmée : à corriger à la prochaine version du manifeste, avec 561, qui apporte la vraie ressource
+  extérieure). Touchés :
+  - `src/app.module.ts` : import de `CoffreSecretsModule` ;
+  - le contrat OpenAPI : huit routes neuves (« ⚠ Contrats ») ;
+  - `src/garde-routes-ecriture.spec.ts` : les deux routes publiques du client (`POST /coffre/depots`,
+    `POST /coffre/revocations`) entrent dans la liste des écritures sans droit fiscal, avec leur raison ;
+  - `src/domain/habilitations/natures-acces.ts` et son test (dossier de C) : `COMPTE_DE_CANAL` passe de
+    `JAMAIS_STOCKEE` à `COFFRE_SEUL` (D-560-14) ;
+  - `.env.example` : `COFFRE_CLE_MAITRE` et `COFFRE_CLE_ID`, commentées, sans valeur ;
+  - fichiers neufs dans `src/ports/` (`coffre-*.ts`).
+  **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
+
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-25, STORY-560, avant le code) — le coffre des secrets de canal** (`prospera-fiscal-service`,
+  module neuf `coffre-secrets`). Fiche : `stories/STORY-560.md` (D-560-1 → 15, tableau « Contrat »). **AD-13 est
+  amendé** (spine du fiscal, même PR de docs) : « aucun secret de canal n'entre hors du coffre, et aucun n'en sort en
+  clair ».
+  - **Routes du cabinet** (garde fiscale, dossier dans la portée de l'appelant, droit `fiscalite:declaration:deposer`
+    pour les écritures ; aucun droit neuf) : `GET /api/v1/dossiers/{dossierId}/coffre` et `…/coffre/{canal}` (l'état :
+    `chemin` `AUTOMATISABLE` | `ASSISTE`, `raison`, mandat et secret par leur état, dates, `joursRestants`,
+    `aRenouveler` à 15 jours ; **jamais une valeur**) ; `POST …/coffre/{canal}/mandat` (`reference`, `signeLe`,
+    `valableJusquAu`, `actes` ⊂ `DEPOSER`, `SUIVRE`) ; `POST …/mandat/revocation` ; `POST …/liens-de-depot` (jeton
+    rendu une fois, 72 h, usage unique) ; `POST …/secret/revocation`.
+  - **Routes publiques du client** (sans compte, jeton dans le corps, 10 par minute) : `POST /api/v1/coffre/depots`
+    (`jeton`, `identifiant`, `motDePasse`, `expireLe` ≤ 365 jours ; rend un jeton de révocation une fois ; tout autre
+    champ, un code MFA compris, est refusé) ; `POST /api/v1/coffre/revocations` (`jeton`).
+  - **Port en mémoire pour 561** : `UsageSecretDeCanal` — `emettre` (jeton d'usage de 5 minutes, à usage unique, lié à
+    un `depotId` et à un acte) et `utiliser(jeton, depotId, travail)` ; le clair n'existe que dans `travail`.
+  - **Refus publiés** : `CANAL_INVALIDE`, `MANDAT_DATES_INVALIDES`, `SECRET_EXPIRATION_INVALIDE` (400) ;
+    `DOSSIER_INTROUVABLE`, `LIEN_DE_DEPOT_INVALIDE`, `JETON_DE_REVOCATION_INVALIDE` (404) ; `DOSSIER_ARCHIVE`,
+    `COFFRE_CONCURRENT` (409) ; `MANDAT_ABSENT`, `MANDAT_EXPIRE`, `MANDAT_REVOQUE`, `MANDAT_NON_COUVRANT` (422) ;
+    `COFFRE_NON_CONFIGURE` (503) ; au port : `SECRET_ABSENT`, `SECRET_EXPIRE`, `SECRET_REVOQUE`, `JETON_USAGE_*`.
+  - **Variables** : `COFFRE_CLE_MAITRE` (32 octets en base64 ; absente ⇒ coffre `NON_CONFIGURE`, le service démarre ;
+    mal formée ⇒ refus de démarrer), `COFFRE_CLE_ID` (défaut `cle-1`). **Pour la recette (B)** : aucune variable
+    n'est exigée ; poser une clé de test pour jouer le coffre.
+  - Aucun topic, aucun schéma de fait, aucun manifeste ne change. **→ A** (écrans du cabinet, plus tard) : l'état du
+    coffre et l'émission du lien ; **→ B** : l'envoi du lien au client par `notification` est un reste, pas une demande.
 
 - **PUBLIÉ (2026-11-25, STORY-1075, prospera-bilan-service#192, `dev` `993b78f`, `4317dd2`) ; ANNONCÉ avant la fusion du
   code (prospera-stories #885, `main` b2eadd0), deux écarts écrits ci-dessous — Les routes d'instance `export`,

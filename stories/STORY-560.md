@@ -1,6 +1,6 @@
 # STORY-560 : AD-13 est amendé — un coffre-fort de secrets de canal, adossé au mandat écrit du client
 
-Status: ready-for-dev
+Status: in-progress (lot 7 de D, n° 1 — `PLAN-LOT-7-2026-11-24.md` §4 ; reprise le 2026-11-25)
 
 **Épic :** EPIC-027 — Natures d'accès et habilitations graduées
 **Service :** `fiscal-service` (`:3012`) — socle
@@ -106,3 +106,118 @@ lettre de mission générale. Il porte le canal, la portée, et la date.
 - ⚠️ **Mettre à jour la spine et le tracker.** AD-13 est amendé, NFR-F05 passe de « aucun secret
   n'est stocké en v1 » à ses exigences de mise en œuvre. Un document d'architecture périmé
   **encode l'ancienne vérité et la garde active** — ce dépôt l'a déjà payé quatre fois.
+
+---
+
+## Mise à jour du 2026-11-25 (lot 7 de D, avant le code)
+
+> Relue au rituel : l'entrée du tracker (`ready-for-dev`, même titre, mêmes arbitrages : mandat spécifique vérifié à
+> chaque usage, aucun facteur MFA, révocation souveraine, revue de sécurité) et cette fiche concordent. Le plan (§4)
+> fixe « Fini quand » : la fiche écrite, et la story est le **préalable de 561**. Dépôt : `prospera-fiscal-service`,
+> partagé par dossier avec C (D-L7-1) ; dossiers de D neufs : `src/{modules,application,domain,adapters}/coffre-secrets`.
+> Les décisions ci-dessous complètent le périmètre ; elles sont contestables et appliquées par défaut.
+
+### Décisions
+
+- **D-560-1 — « Fini quand »** : les huit critères d'acceptation ont chacun un témoin exécutable (tests unitaires,
+  e2e, MongoDB réel), l'amendement d'AD-13 est écrit dans la spine, et 561 trouve un port prêt à brancher
+  (`UsageSecretDeCanal`). Le connecteur, l'écran et l'envoi du lien au client n'en font pas partie.
+- **D-560-2 — Un module à part, `coffre-secrets`**, dans les dossiers de D. Les dépôts assistés (`depots`) n'en
+  dépendent pas : une garde vérifie qu'aucun fichier de `depots` n'importe le coffre (c'est ce qui rend la
+  révocation sans effet sur la capacité de déclarer, critère 4).
+- **D-560-3 — Le canal est un code opaque** (`^[a-z0-9]+(-[a-z0-9]+)*$`, 32 caractères au plus : le périmètre d’audit en tient 64), choisi par le cabinet
+  et porté par le chemin. Aucun nom de portail n'entre dans le code (AD-12) ; le coffre ne vérifie pas que le code est
+  déclaré par un paquet : 331 décrit les canaux comme une donnée, 561 refusera un code non déclaré. Portée du secret :
+  `{organisation, dossier, canal}`, jamais globale ni partagée entre dossiers (NFR-F06).
+- **D-560-4 — Le mandat de canal, spécifique** (patron STORY-301 : la référence de l'écrit signé, sa date) : il porte
+  le canal (par sa portée), les **actes** couverts (`DEPOSER`, `SUIVRE`, au moins un), la date de signature (pas dans
+  le futur) et la date de fin de validité (après aujourd'hui). Il est **attesté par le cabinet** (droit
+  `fiscalite:declaration:deposer`), révocable, renouvelable (une attestation neuve remplace la précédente, version + 1).
+  ⛔ Il est vérifié **à chaque usage** : à l'émission d'un lien de dépôt, au dépôt du secret, à l'émission d'un jeton
+  d'usage et à sa consommation. Le mandat de l'entreprise de STORY-301 ne suffit pas (il ne nomme ni canal ni acte).
+- **D-560-5 — Le secret est déposé par son propriétaire, sans compte** : le cabinet émet un **lien de dépôt** (jeton
+  de 256 bits, haché en base, rendu une seule fois, valable 72 h, à usage unique) qu'il remet au client hors du produit
+  (l'envoi par `notification` est un reste) ; le client poste `{ jeton, identifiant, motDePasse, expireLe }` sur une
+  route publique, le jeton **dans le corps**, jamais dans l'adresse (les journaux d'accès gardent les adresses). La
+  réponse lui rend, une seule fois, un **jeton de révocation**. Le collaborateur ne voit qu'un état.
+- **D-560-6 — Le chiffrement** : AES-256-GCM en enveloppe — une clé de données aléatoire par secret, elle-même chiffrée
+  par la **clé maîtresse `COFFRE_CLE_MAITRE`** (32 octets en base64, variable d'environnement, **jamais en base**) ;
+  données additionnelles authentifiées = `organisation|dossier|canal|version` (un chiffré déplacé sur une autre portée
+  ne se déchiffre pas) ; `COFFRE_CLE_ID` (défaut `cle-1`) est rangé avec chaque secret pour la rotation de la clé
+  maîtresse. **Sans clé, le service démarre** : le coffre est `NON_CONFIGURE` (503 `COFFRE_NON_CONFIGURE` au dépôt et
+  à l'usage), tout canal retombe sur l'assisté ; une clé mal formée **empêche le démarrage**. Aucun `.env` n'est créé :
+  les tests posent leur clé eux-mêmes ; la clé d'un environnement réel est un geste de l'utilisateur.
+- **D-560-7 — Le jeton d'usage** (port `UsageSecretDeCanal`, en mémoire du service, **aucune route HTTP**) : 256 bits,
+  haché, **5 minutes**, à usage unique, lié à un dépôt identifié (`depotId`) et à un acte, et aux versions du secret et
+  du mandat en vigueur à son émission. La consommation est atomique (une seule réussit) ; le rejeu, l'expiration, un
+  autre dépôt ou une version changée sont refusés par un code publié. Le clair n'existe que dans le rappel
+  `travail(identifiants, controle)` : le tampon déchiffré est mis à zéro après, et `IdentifiantsDeCanal` se masque
+  dans `JSON.stringify`, `util.inspect` et `String()`. `controle.toujoursAutorise()` relit la portée : une révocation
+  pendant l'usage l'arrête (critère 4 ; 561 l'appelle entre deux étapes).
+- **D-560-8 — La révocation** : par le **client** (jeton de révocation, route publique, toujours ouverte, quel que
+  soit l'état de l'abonnement du cabinet) ou par le **cabinet sur instruction du client** (droit `deposer`). Le chiffré
+  et la clé enveloppée sont **effacés** (seul reste un état `REVOQUE` daté), les jetons d'usage et liens non consommés
+  de la portée sont annulés, le canal passe `ASSISTE` (raison `SECRET_REVOQUE`). La révocation du mandat annule aussi
+  jetons et liens ; le secret reste, inutilisable.
+- **D-560-9 — L'expiration** : le propriétaire déclare la date de fin de son secret (365 jours au plus : la rotation
+  est forcée) ; à **15 jours** ou moins, l'état rend `aRenouveler: true` et `joursRestants` (de même pour le mandat).
+  Un secret expiré n'est plus utilisable et le canal passe `ASSISTE`. Le signal est lu dans l'état du canal ; une
+  liste du cabinet et une notification sont des restes.
+- **D-560-10 — Le journal** : chaque accès écrit au journal d'audit chaîné (AD-10, base `fiscal_service_audit`),
+  périmètre `coffre:<dossier>_<canal>`, dans la transaction de l'écriture : `COFFRE_MANDAT_ATTESTE`,
+  `COFFRE_MANDAT_REVOQUE`, `COFFRE_LIEN_EMIS`, `COFFRE_SECRET_DEPOSE`, `COFFRE_SECRET_REVOQUE`,
+  `COFFRE_JETON_EMIS`, `COFFRE_SECRET_UTILISE` (dépôt de rattachement, résultat), `COFFRE_USAGE_REFUSE` (code). ⛔
+  Aucune entrée ne porte la valeur, un fragment, ni un jeton (seul l'identifiant du lien ou du jeton).
+- **D-560-11 — La garde AD-13** (critère 8) est **structurelle** : hors du coffre, aucun DTO ni schéma MongoDB ne
+  nomme un champ d'accès (mot de passe, identifiant de portail, secret, certificat, code MFA…), toute route d'envoi de
+  fichier est connue, et la validation globale refuse un champ non déclaré (`forbidNonWhitelisted`). Elle ne lit pas
+  le **contenu** d'un champ libre : une détection par motif serait une fausse sûreté ; elle prouve que le service
+  n'offre aucun chemin pour un identifiant, ce que disait AD-13 (« y compris en champ libre »).
+- **D-560-12 — Aucun droit neuf** : le cabinet agit sous `fiscalite:declaration:deposer` (attester et révoquer le
+  mandat, émettre un lien, révoquer le secret, émettre un jeton d'usage) ; lire l'état du coffre demande l'accès
+  fiscal et le dossier dans la portée de l'appelant (même 404 hors portée). Le manifeste `declarations` et
+  `auth-service` ne changent pas ; la séparation des rôles (NFR-F05) tient par construction : le propriétaire dépose,
+  le cabinet déclenche, personne ne lit.
+- **D-560-13 — Stockage** : deux collections neuves, `coffre_canaux` (un document par portée, index unique) et
+  `coffre_jetons` (liens, révocations, usages ; empreinte unique ; purge TTL un jour après l'expiration). Index posés
+  par Mongoose au démarrage : **aucune migration**.
+- **D-560-14 — Les natures d'accès** (`domain/habilitations`, dossier de C : fichier commun) : `COMPTE_DE_CANAL` passe
+  de `JAMAIS_STOCKEE` à `COFFRE_SEUL` ; le certificat et l'accès bancaire restent `JAMAIS_STOCKEE`.
+- **D-560-15 — Les erreurs d'analyse du corps** sur les routes publiques ne recopient jamais le corps reçu : un JSON
+  mal formé rend un message constant (Node cite un extrait du texte dans son `SyntaxError`).
+
+### Contrat (annoncé avant le code ; journal de D, « ⚠ Contrats »)
+
+Sous `/api/v1`, garde fiscale et portée du dossier pour les routes du cabinet ; droit `deposer` pour les écritures :
+
+| Route | Qui | Rend |
+|---|---|---|
+| `GET /dossiers/{dossierId}/coffre` | cabinet | `{ canaux: [EtatCanal] }` |
+| `GET /dossiers/{dossierId}/coffre/{canal}` | cabinet | `EtatCanal` |
+| `POST /dossiers/{dossierId}/coffre/{canal}/mandat` | cabinet, `deposer` | 201 `EtatCanal` — `{ reference, signeLe, valableJusquAu, actes }` |
+| `POST /dossiers/{dossierId}/coffre/{canal}/mandat/revocation` | cabinet, `deposer` | 200 `EtatCanal` — `{ motif }` |
+| `POST /dossiers/{dossierId}/coffre/{canal}/liens-de-depot` | cabinet, `deposer` | 201 `{ jeton, expireLe }` (rendu une fois) |
+| `POST /dossiers/{dossierId}/coffre/{canal}/secret/revocation` | cabinet, `deposer` | 200 `EtatCanal` — `{ motif }` |
+| `POST /coffre/depots` | **public** (le client, par le lien) | 201 `{ expireLe, jetonDeRevocation }` — `{ jeton, identifiant, motDePasse, expireLe }` |
+| `POST /coffre/revocations` | **public** (le client) | 200 `{ revoque: true }` — `{ jeton }` |
+
+`EtatCanal` = `{ canal, chemin: AUTOMATISABLE | ASSISTE, raison, mandat: { etat: ABSENT | VALIDE | EXPIRE |
+REVOQUE, version, reference, signeLe, valableJusquAu, actes, joursRestants, aRenouveler }, secret: { etat: ABSENT |
+DEPOSE | EXPIRE | REVOQUE, version, deposeLe, expireLe, revoqueLe, joursRestants, aRenouveler }, lienDeDepot: {
+expireLe } | null }` — jamais une valeur. `raison` : `COFFRE_NON_CONFIGURE`, `MANDAT_ABSENT`, `MANDAT_EXPIRE`,
+`MANDAT_REVOQUE`, `MANDAT_NON_COUVRANT`, `SECRET_ABSENT`, `SECRET_EXPIRE`, `SECRET_REVOQUE`, ou `null`.
+
+Refus publiés : `CANAL_INVALIDE` (400), `MANDAT_DATES_INVALIDES` (400), `SECRET_EXPIRATION_INVALIDE` (400),
+`DOSSIER_INTROUVABLE` (404), `LIEN_DE_DEPOT_INVALIDE` (404 : inconnu, consommé ou expiré, sans distinction),
+`JETON_DE_REVOCATION_INVALIDE` (404), `DOSSIER_ARCHIVE` (409), `COFFRE_CONCURRENT` (409), `MANDAT_ABSENT`,
+`MANDAT_EXPIRE`, `MANDAT_REVOQUE`, `MANDAT_NON_COUVRANT` (422), `COFFRE_NON_CONFIGURE` (503). Au port d'usage (en
+mémoire) : les mêmes, plus `SECRET_ABSENT`, `SECRET_EXPIRE`, `SECRET_REVOQUE`, `JETON_USAGE_INCONNU`,
+`JETON_USAGE_CONSOMME`, `JETON_USAGE_EXPIRE`, `JETON_USAGE_AUTRE_DEPOT`, `JETON_USAGE_PERIME` (secret ou mandat
+changé depuis l'émission). Aucun topic Kafka, aucun schéma de fait.
+
+### Fichiers communs touchés (D-L7-2 ; journal de D, « ⚠ Communs »)
+
+`src/app.module.ts` (import du module), `src/garde-routes-ecriture.spec.ts` (les deux routes publiques, avec leur
+raison), `src/domain/habilitations/natures-acces.ts` et son test (D-560-14), le contrat OpenAPI (routes neuves),
+`.env.example` (deux variables commentées, sans valeur). Ni `package.json`, ni migration, ni `read-models/`, ni copie
+du paquet. Des fichiers neufs dans `src/ports/` (préfixés `coffre-`).
