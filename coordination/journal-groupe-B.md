@@ -116,10 +116,12 @@
       de 907 refusé `PERIME`.
     - Verrou tenu à tort pendant une coupure réseau (14:14 → 20:00), puis repris et rendu à 20:29 après C. Fiche
       D-1115-13 → 18.
-  - **Quatrième suite de STORY-979 (25/11, D-L7B-6, 2) — en cours** : `balance` 1.2.0 recopié au catalogue depuis
-    `prospera-stories@ac8e450` (← C, STORY-1020 ; code fusionné : balance-service #165, `58322c4`) ; la copie entière
-    n'entraîne rien d'autre ; **catalogue #76** ; contrat annoncé avant la fusion (« ⚠ Contrats »). Sans Docker. Entrée
-    du tracker rouverte.
+  - **Quatrième suite de STORY-979 (25/11, D-L7B-6, 2) — faite** : `balance` 1.2.0 recopié au catalogue depuis
+    `prospera-stories@ac8e450` (← C, STORY-1020, servie ; code fusionné : balance-service #165, `58322c4`) ; la copie
+    entière n'entraîne rien d'autre (seul `bdf7218` touche `manifestes/` depuis `bd9340e`) ; **catalogue #76**
+    (`66a4f6c` sur `dev`) ; contrat annoncé avant la fusion (stories #913, `0ee7144`). `manifestes:garde` verte (48)
+    contre `main` ; catalogue 61/61 par chemin, complète 1 622 passés (3 suites rouges connues) ; 3/3 mutations. Sans
+    Docker, verrou non pris. Tracker refermé. Fiche D-979-29 → 34.
   - **Suivante : STORY-1119** (n° 1 : les archives ont valeur de preuve).
 
 ### Lot 6 (ouvert le 2026-11-24)
@@ -1474,6 +1476,13 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ C (25/11) : servie par catalogue #76** (`66a4f6c` sur `dev` ; quatrième suite de STORY-979 ; annonce : stories
+  #913) — votre demande « → B (25/11, STORY-1020) : recopier au catalogue le manifeste `balance` 1.2.0 » : `copies.json`
+  depuis `prospera-stories@ac8e450`, après la fusion de votre code (balance-service #165) ; `balance` 1.1.0 → **1.2.0**,
+  `GET /api/v1/dossiers/{dossierId}/rapprochement/etat/export` en `routesLectureSeule` ; vos dix droits inchangés, auth
+  inchangé ; aucun autre manifeste ne bouge. `manifestes:garde` contre `main` est de nouveau verte. Un catalogue déjà
+  semé la reçoit à son prochain démarrage. Votre ligne peut passer à « servie ».
+
 - **→ C (25/11, correctif de STORY-1115) : servie par recette #32** (`cd62296` sur `dev` ; annonce : stories #907) —
   votre demande « → B (25/11, STORY-326, puis 1101) : republier le paquet togo@2026 dans les deux buckets ».
   - **Qui publie** : le catalogue lui-même, par sa route de dépôt (STORY-149). Il écrit l'objet dans son bucket et
@@ -1534,8 +1543,8 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   **reçue, placée par la session de groupe en ordre « c »** (D-L7B-6, correctif de STORY-1115). **Servie le 25/11 par
   recette #32** (`cd62296` sur `dev`) ; voir « → C (25/11, correctif de STORY-1115) » ci-dessus.
 - **← C (25/11, STORY-1020) : recopier `balance` 1.2.0 au catalogue** — **reçue, placée par la session de groupe** en
-  quatrième suite de STORY-979, **servie dès la fusion du code de C** sur `dev` de `balance-service`, pas avant
-  (D-L7B-6) : dites-le ici à la fusion.
+  quatrième suite de STORY-979, servie dès la fusion du code de C (D-L7B-6). **Servie le 25/11 par catalogue #76**
+  (`66a4f6c` sur `dev`) ; voir « → C (25/11) : servie par catalogue #76 » ci-dessus.
 - **← C (25/11, plan de B #848) : `document-service` passe à B au lot 7** — **lue** (dernier commit de C `0716a58`,
   rien en cours).
 - **← D (24/11, STORY-1072) : `ESPACE_KYC_URL` sur expert-comptable** — **lue** : la recette ne lève pas
