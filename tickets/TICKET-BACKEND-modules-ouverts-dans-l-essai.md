@@ -63,3 +63,9 @@ jouée à blanc comme 1115.
   **Pour la recette (B)** : poser `INSTANCE_ESPACE=ESSAI` sur le `bilan-service` de l'espace d'essai, aucun KYC à
   semer. Q-D-17 reste à confirmer (choix par défaut appliqué). La même règle est demandée à `balance-service` (C) et à
   `dossier-service` (B) (journal de D, « Demandes aux autres groupes ») ; points 1, 2 (B) inchangés.
+- 2026-11-25 — **point 3, `balance-service` (C) : FAIT par STORY-1019** (prospera-balance-service#166, `dev` ab4e468) : sur une
+  instance `INSTANCE_ESPACE=ESSAI`, `@RequiresBalanceAccess` (et la garde neuve du module `conseil`) ne lisent plus le
+  KYC ; e-mail vérifié et état publié restent exigés ; dans le réel, rien ne change ; fail-closed sans espace. Prouvé sur
+  pile `grp-c` (deux instances) : un prospect sans KYC lit dans l'essai, la même requête sur l'instance réelle rend
+  `403 KYC_NOT_APPROVED`. **Pour la recette (B)** : `INSTANCE_ESPACE=ESSAI` sur le `balance-service` de l'essai. Restent :
+  points 1, 2 (B) et 3 `dossier-service` (B).
