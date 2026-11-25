@@ -1991,13 +1991,21 @@ reserved_ranges:
       ✅ 2026-11-25 : DONE — balance-service #161 (`e968388`), fiscal #58 (`b2efaa7`) ; D-320-5 levé ; Node 24 : balance
       5593 / 1973, fiscal 2560 / 208 ; Mongo 8/8, mutation 3/3 ; D-1117-1 → 6 dans la fiche.
   - range: "STORY-1116"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe B, lot 6, n° 7 — cinq essais simultanés tiennent sur la même pile, chacun dans son espace (démo du 15/01) : recette cinq-essais (cinq cabinets prospects ouverts en parallèle par la console, leurs administrateurs entrés par leur lien, aucun ne voit les données d'un autre), mémoire et temps d'ouverture mesurés (prospera-recette ; le catalogue seulement si la recette y révèle un défaut)."
     source_doc: "prospera-stories/stories/STORY-1116.md"
     reserved_on: "2026-11-23"
     note: >
-      Fiche écrite le 2026-11-24 juste avant le code ; identifiant réservé par PLAN-LOT-6 §8. Lot 6 de B, n° 7.
-      NON SLOTTÉE.
+      🏁 DONE le 2026-11-25 — prospera-recette #31 (dev 29256bb, 8d4d88c) ; aucun contrat ne bouge ; catalogue inchangé
+      (rien n'a cassé sous cinq ouvertures parallèles). Recette cinq-essais : cinq cabinets prospects ouverts au même
+      instant par la console, leurs administratrices entrées en même temps par leur lien (aucune pose en base), 20
+      couples confrontés : aucun ne voit les membres, comptes du jeu, messages ni destinataires d'un autre ; une adresse
+      par essai (MEMBRE_EN_CONFLIT). Essais à blanc : TICKET-BACKEND-modules-ouverts-dans-l-essai.md (D-1116-1). Pile
+      grp-b neuve, images depuis origin/dev : cinq-essais 6/6 ; ouverture de chacun des cinq 1,27 → 1,31 s ; mémoire
+      2,0 Gio sans l'essai, 2,9 Gio avec les cinq, 4,5 Gio au plus en recette complète (VM 7,6). Recette complète 10/13
+      suites, 139 tests verts, 15 rouges sur trois read ECONNRESET poste ↔ pile prouvés par les journaux (auth 200 en
+      10 ms ; une pièce KYC et une ouverture jamais arrivées), les trois suites rejouées seules sur pile neuve vertes
+      (8/8, 8/8, 6/6). Node 25 : paquet 148/148 ; mutations 14/14. Lot 6 de B, n° 7 (le dernier). NON SLOTTÉE.
   - range: "STORY-1115"
     status: "done"
     owner: "Groupe B, lot 6, n° 6 — la recette « essayer, puis mettre en service » : le second espace dans le profil de recette (auth-essai, catalogue-essai, leur Kafka et leur Redis ; le BFF à deux espaces ; une identité d'opérateur commune, clé tirée hors du dépôt) ; un cabinet prospect ouvre son essai, son administratrice y entre et invite un collègue, il signe, sort de l'essai et naît dans le réel sous le même identifiant, le moteur y installe balance et bilan, la mise en service les ouvre et invite les membres de l'essai, qui entrent dans le réel par le lien reçu (prospera-recette)"
