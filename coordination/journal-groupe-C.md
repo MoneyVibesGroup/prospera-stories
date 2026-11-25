@@ -42,7 +42,8 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
   5. ✅ **STORY-1101 DONE (25/11)** : balance-service **#163** (`8fbdf6e`, les couples au paquet), fiscal **#60**
      (`0d353c2`, le rapprochement et l'assiette), contrat #862. Node 24 : fiscal 2642 / 223, conformité 93/93 sur le vrai
      `mongo-fiscal` ; mutation 6/6 ; gate `grp-c` vert ; — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
-  6. **STORY-315** puis **316** le calendrier fiscal (fiscal) — fiches écrites juste avant.
+  6. 🟡 **STORY-315** le calendrier fiscal du portefeuille (fiscal) : fiche et contrat annoncés le 25/11 ; puis **316**
+     (fiche écrite juste avant).
 - **Docker** : verrou du poste principal (`MoneyVibes_Apps\.verrou-docker`) partagé avec A ; aucune pile de C ne tourne.
 
 - **2026-11-14** : journal ouvert, lot pas encore commencé.
@@ -359,6 +360,8 @@ seulement.
   `etat-publie.changed.<espace>`, double lecture) dans une story de la plage de C, après STORY-990.
 
 ## ⚠ Contrats
+
+- **2026-11-25 (STORY-315), AVANT le code** : route neuve `GET /api/v1/obligations/calendrier` (filtres `annee`, `pays`, `responsable`, `taxe`, `periode`, `statut`, `dossierId`, tri, curseur) → `{ lignes: [...], suivant }`, portée par collaborateur lue dans la réplique des dossiers (`dossiers_fiscal` projette en plus `raisonSociale`, `estLeCabinet`, `responsableUserId`, `contributeursUserIds`), index neuf `{ orgId, annee, echeance, _id }`. **→ A** : écran du calendrier (lot 7 de A).
 
 - **2026-11-25 (STORY-1101), AVANT le code** : `POST /obligations/{id}/montant-declare` accepte `assiette` (facultatif) ; route neuve `POST /api/v1/exercices/{exerciceId}/rapprochement-liasse` → `{ redevableId, defini, couples: [...] }` ; anomalie neuve `RAPPROCHEMENT_LIASSE_ECART` (bloquante au dépôt de la DSF, levable). Le paquet fiscal gagne `rapprochementAnnuel.couples` (Togo 2026 : `CA_TVA_LIASSE`), nouvelle empreinte. **→ A** : écran (lot 7 de A).
 
