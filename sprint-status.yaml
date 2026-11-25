@@ -2079,6 +2079,18 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1120"
+    status: "in_progress"
+    owner: "Groupe B, lot 7, n° 2 — fin de mission et réversibilité : fermeture du fonds (à la main, ou avec le dossier client archivé par dossier.updated), refus de tout versement neuf, export complet en volumes ZIP (copies, index, bordereaux, empreintes, journal du fonds, certificat d'intégrité), bordereau de restitution numérique et son exemplaire signé (document-service, module ged)"
+    source_doc: "prospera-stories/stories/STORY-1120.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite et contrat annoncé avant le code (2026-11-25) : POST …/fonds/{n}/fermeture, 409 FONDS_FERME,
+      POST …/fonds/{n}/exports (202, file BullMQ ged-exports), GET …/exports/{n}, …/volumes/{rang}, POST
+      …/exports/{n}/bordereau-de-restitution (BRN-), POST/GET …/documents-probants/{n}/exemplaire-signe ; actes FERMETURE,
+      EXPORT, EXPORT_TELECHARGE, EXEMPLAIRE_SIGNE ; consomme dossier.updated (groupe ged.dossiers-clients) ; manifeste
+      ged 1.5.0. Aucun droit neuf, aucun fait publié, aucune dépendance neuve ; dossier-service inchangé. D-1120-1 → 9.
+      Lot 7 de B, n° 2. NON SLOTTÉE.
   - range: "STORY-1119"
     status: "done"
     owner: "Groupe B, lot 7, n° 1 — les archives ont valeur de preuve : journal d'intégrité chaîné par cabinet (versement, scellé, vérification, campagne, document émis, consultation d'une pièce sensible), contrôle périodique des empreintes (BullMQ, écarts nommés), attestation de numérisation et certificat d'intégrité d'un fonds, figés et téléchargeables (document-service, module ged)"
