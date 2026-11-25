@@ -745,9 +745,11 @@ reserved_ranges:
   - range: "STORY-1079"
     status: "RÉSERVÉ"
     owner: "Groupe D — dans l'espace d'essai, la garde de bilan ne lit pas le KYC : l'état publié décide seul (ticket « modules ouverts dans l'essai », point 3) (prospera-bilan-service)"
-    source_doc: "prospera-stories/tickets/TICKET-BACKEND-modules-ouverts-dans-l-essai.md"
+    source_doc: "prospera-stories/stories/STORY-1079.md"
     reserved_on: "2026-11-25"
     note: >
+      EN COURS le 2026-11-25 — fiche écrite avant le code ; contrat annoncé (« ⚠ Contrats » du journal de D) avant la
+      fusion du code. Ticket : TICKET-BACKEND-modules-ouverts-dans-l-essai.md, point 3.
       Placée le 2026-11-25 par STORY-1078 (demande de B, STORY-1116, D-1116-1). Must de la démo du 15/01. Choix par défaut :
       INSTANCE_ESPACE=ESSAI ⇒ palier KYC de requires-bilan-access sauté, l'état publié décide seul — décision d'architecture
       (AD-15) à confirmer : Q-D-17. Dernier numéro de la plage 1030 → 1079 de D. Fiche à écrire juste avant de coder. Ordre
