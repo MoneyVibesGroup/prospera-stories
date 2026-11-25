@@ -223,11 +223,12 @@ identifiant neuf.** **Dépôt :** `prospera-recette`, branche `MNV-1115-paquets-
   neuve à B) ; la recette était en HEAD détachée sur `origin/dev` (**`8d4d88c`**), propre ; branche
   `MNV-1115-paquets-fiscaux` partie d'`origin/dev`.
 - [x] Code relu avant d'écrire (recette, catalogue, fiscal, balance : ci-dessus).
-- [x] Code, unitaires (159/159), mutations (6/6), `npm run verifier` ; PR de code **#32** ouverte (`1c0aee4`).
-- [ ] Recette sur pile neuve (`grp-b-recette`, images depuis `origin/dev`).
+- [x] Code, unitaires (159/159), mutations (6/6), `npm run verifier` ; PR de code **#32** (`1c0aee4`).
+- [x] Recette sur pile neuve (`grp-b-recette`, images depuis `origin/dev`) : 14/14, contre-épreuve.
 - [x] « ⚠ Contrats » du journal de B annoncé avant la fusion du code (cette PR de docs).
-- [ ] PR de code fusionnée en rebase.
-- [ ] PR de docs finale (fiche, tracker, journal de B).
+- [x] PR de code fusionnée en rebase : `prospera-recette` **#32** (`dev` **`cd62296`**, arbre identique au commit
+  testé `1c0aee4`). Annonce : stories #907 (`main` `171dc33`).
+- [x] PR de docs finale (fiche, tracker, journal de B). Verrou rendu.
 
 ### Décisions retenues par défaut (contestables)
 
@@ -259,3 +260,60 @@ identifiant neuf.** **Dépôt :** `prospera-recette`, branche `MNV-1115-paquets-
   dossier de droit commun, enregistre un déclaré, appelle `POST …/obligations/{id}/coherence` et exige un motif autre
   que `TOLERANCE_ABSENTE` (la tolérance est lue AVANT le moteur : tout autre résultat prouve qu'elle est au paquet). Le
   moteur de la pile ne tient pas de comptabilité pour ce dossier : son motif à lui est admis.
+
+### Livré
+
+- **prospera-recette #32** (`cd62296` sur `dev`) :
+  - `src/paquets-fiscaux.ts` est le déposant unique (dépôt, lecture du registre après un `409`, `PERIME`, commande
+    `npm run paquets-fiscaux -- reel|essai`) ;
+  - le semis du réel est dans `src/pile.ts` (pile qui porte le fiscal), celui de l'essai dans `essai-mise-en-service` et
+    `cinq-essais` ;
+  - `zone-franche` compare l'empreinte du droit commun et joue le contrôle de cohérence ;
+  - le README a une section neuve.
+- Annonce avant la fusion : prospera-stories #907 (fiche, tracker, « ⚠ Contrats »).
+
+### Preuves
+
+- **Node 25** (paquet de recette) :
+  - `tsc` et `prettier --check` verts ;
+  - unitaires **159/159**, 16 suites, dont 11 tests neufs (`src/paquets-fiscaux.spec.ts`) ;
+  - **mutations 6/6** rouges sur une assertion : `409` accepté en silence, refus d'un paquet périmé désarmé, CRLF non
+    normalisé, fiscal toujours « porté », empreinte annoncée absente, `403` pris pour un `409`.
+- **Pile `grp-b-recette` neuve** :
+  - images construites depuis `git -c core.autocrlf=false archive origin/dev` : auth `d69e34c`, kyc `9cef9cb`,
+    catalogue `0425fef`, notification `749b3cd`, paiement `e2be149`, dossier `645a699`, balance `58322c4`, bilan
+    `4317dd2`, fiscal `f1296ae`, BFF `0dfcf43` ;
+  - recette `1c0aee4`, `RECETTE_SURCOUCHES` = `docker-compose.fiscal.yml` et la surcouche des archives,
+    `RECETTE_BALANCE_SERVICE` = l'archive de balance.
+- **`npm run recette -- zone-franche essai-mise-en-service`** : **2/2 suites, 14/14 tests**, 320 s.
+  - `npm run pile` sème le réel : `fiscal-tg-entreprise@2026.1` **PUBLIE `5c683d16…`**,
+    `fiscal-tg-entreprise-zone-franche@2026.1` PUBLIE `da92a432…`.
+  - `essai-mise-en-service` sème l'essai : les deux paquets PUBLIE, mêmes empreintes.
+  - `zone-franche` rejoue : `DEJA_PUBLIE` ×2. Les 29 obligations de la zone franche et celles du droit commun portent
+    les empreintes des octets lus.
+  - **Contrôle de cohérence** de la TVA `2026-01` du dossier de droit commun : prise en charge, déclaré 150 000, puis
+    `POST …/coherence` rend `{"code":"TVA","statut":"ECART","declare":150000,"attendu":0,"ecart":150000,"tolerance":1000}`.
+    Le contrôle **s'exécute** : la tolérance de 1 000 F vient du paquet, le moteur a été lu (attendu 0 : aucune
+    comptabilité pour ce dossier).
+- **Registres des deux catalogues** (`GET …/catalog/admin/referentiels`, jeton de la console) :
+  - au réel : `s3://referentiel-packages/referentiels/fiscal-tg-entreprise/…` `sha256:5c683d16…` ;
+  - à l'essai : `s3://referentiel-packages-essai/referentiels/fiscal-tg-entreprise/…` `sha256:5c683d16…` ;
+  - la zone franche `da92a432…` des deux côtés ; tout est `ACTIVE`.
+- **Contre-épreuve**, sur la même pile :
+  - `RECETTE_BALANCE_SERVICE` pointé sur les octets de `balance-service@7a885bb` (le paquet `e8e94c84…` de 907, sans
+    `coherence`), puis `npm run paquets-fiscaux -- reel` : `fiscal-tg-entreprise@2026.1 (reel) : PERIME, sha256
+    e8e94c84… — la pile porte sha256:5c683d16…`, sortie **1** ;
+  - avec les bons octets, `npm run paquets-fiscaux -- essai` rend `DEJA_PUBLIE` ×2, sortie **0**.
+- **Verrou** : pris à 14:14 ; tenu à tort pendant la coupure réseau de la session (ENOTFOUND : le build de
+  `dossier-service` est tombé sur `npm ci`) ; rendu à 20:00, sans aucune pile levée. Repris à 20:15 après C (STORY-1019),
+  rendu à 20:29. `down -v` (profils `recette` et `fiscal`) : aucun conteneur, volume ni réseau `grp-b` ne reste.
+
+### Ce qui reste
+
+- **Pour C et D** : un gate qui lève le fiscal par `docker compose`, sans le paquet de recette, joue
+  `npm run paquets-fiscaux -- reel` après l'amorçage (« ⚠ Contrats »).
+- **Hors de la pile** : le paquet `fiscal-tg-entreprise` a changé trois fois sous la même version `2026.1`. Un
+  environnement où `2026.1` aurait déjà été publiée (la procédure du journal de A la publie une fois, `e8e94c84…`) doit
+  recevoir le paquet d'aujourd'hui sous une **nouvelle version** (`2026.2`), et le catalogue
+  (`PAQUETS_FISCAUX_PACKAGES`) doit la connaître. Aucun tel environnement n'existe au 25/11. Nommé pour C (le paquet)
+  et pour la mise en service.
