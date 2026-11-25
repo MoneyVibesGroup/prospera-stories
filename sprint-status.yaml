@@ -748,8 +748,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1079.md"
     reserved_on: "2026-11-25"
     note: >
-      EN COURS le 2026-11-25 — fiche écrite avant le code ; contrat annoncé (« ⚠ Contrats » du journal de D) avant la
-      fusion du code. Ticket : TICKET-BACKEND-modules-ouverts-dans-l-essai.md, point 3.
+      🏁 DONE le 2026-11-25 — prospera-bilan-service#190 (dev 7ed3335, 2d186b9) ; annonce « ⚠ Contrats » avant le code
+      (docs #877, main 36ccec7). Sur une instance INSTANCE_ESPACE=ESSAI, @RequiresBilanAccess et
+      @RequiresFinancementAccess ne lisent plus le KYC ; e-mail vérifié et état publié restent exigés ; réel inchangé ;
+      espace de l'instance (EspaceDeLInstance), fail-closed. Commit séparé avant la story : les e2e ecoute-stable et
+      bilan-dossier-portee-collaborateur, rouges sur dev, rétablis (causes dans bilan-service). Node 24 357/357 suites
+      (12 578 tests), e2e 45/45 (3 497) ; mutations 12/12 ; pile grp-d : essai 200, réel 403 KYC_NOT_APPROVED. Q-D-17
+      appliquée par défaut, à confirmer ; même règle demandée à balance-service (C) et dossier-service (B). Ticket
+      TICKET-BACKEND-modules-ouverts-dans-l-essai.md, point 3 (bilan) fait. Suivante : STORY-1074.
       Placée le 2026-11-25 par STORY-1078 (demande de B, STORY-1116, D-1116-1). Must de la démo du 15/01. Choix par défaut :
       INSTANCE_ESPACE=ESSAI ⇒ palier KYC de requires-bilan-access sauté, l'état publié décide seul — décision d'architecture
       (AD-15) à confirmer : Q-D-17. Dernier numéro de la plage 1030 → 1079 de D. Fiche à écrire juste avant de coder. Ordre
