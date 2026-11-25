@@ -4,8 +4,8 @@
 **Ouvert par :** STORY-1078 (D, 2026-11-25), constat de D-1078-5, vérifié au code et sur un cas chiffré
 **Priorité :** **Must** avant toute liasse d'un client réel — rien ne plante, mais toute entité qui amortit un bien a une
 liasse `valide: false`, que le cabinet ne peut déposer sans poser des surcharges compte par compte
-**État :** ouvert — **non corrigé dans STORY-1078** (hors de son périmètre : la correction change chaque liasse SYSCOHADA
-produite)
+**État :** **corrigé** par STORY-1118 le 2026-11-25 — prospera-bilan-service#189, `dev` **`b6f2d49`** (tables, plans,
+garde) et **`5055933`** (e2e). Constat d'origine : STORY-1078 (D-1078-5), non corrigé dans 1078 (hors de son périmètre).
 
 ---
 
@@ -92,3 +92,8 @@ l'amortissement ; seul le rattachement manque (la cible d'une surcharge doit êt
 - Textes : AUDCIF 2017, art. 45-47 ; Guide d'application du SYSCOHADA révisé, p. 78 et 81 (ohada.com).
 
 - 2026-11-25 — **placé en STORY-1118** par la session de groupe de D (réservée au tracker, marque haute montée à STORY-1118) ; passe avant STORY-1079.
+- 2026-11-25 — **corrigé par STORY-1118** (prospera-bilan-service#189, `dev` `b6f2d49`, `5055933`) : les cinq tables
+  rattachent 28, 29, 39, 49 (hors 499) et 59 (hors 599) au poste de leur actif (subdivision « à l'image », Guide
+  p. 68) ; le cas chiffré ci-dessus rend `AM` 1 000 000 / 400 000 / 600 000, actif 800 000 = passif 800 000, aucun
+  compte non mappé, FRNG +200 000, identité du fonds de roulement `OK`. Révision en place (D-1118-5) ; garde de
+  packaging `gardes-nomenclature.mjs`. Recopie dans `balance-service` demandée à C (ticket de recopie de 1076).

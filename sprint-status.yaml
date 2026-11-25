@@ -730,14 +730,18 @@ reserved_ranges:
   - range: "STORY-1118"
     status: "RÉSERVÉ"
     owner: "Groupe D — les comptes d'amortissement et de dépréciation (28, 29, 39, 49, 59) rattachés à leurs postes dans les tables de passage des paquets SYSCOHADA révisé (@2.1, @2.2, @2.3, zone-franche-togo@1.0) et SMT (smt-togo@1.0) : la liasse d'une entité qui amortit sort équilibrée (prospera-bilan-service)"
-    source_doc: "prospera-stories/tickets/TICKET-BACKEND-bilan-amortissements-non-rattaches.md"
+    source_doc: "prospera-stories/stories/STORY-1118.md"
     reserved_on: "2026-11-25"
     note: >
-      Constat de D-1078-5, confirmé au code et sur un cas chiffré (2441 D 1 000 000, 28441 C 400 000 : AM net
-      1 000 000, bilan déséquilibré de 400 000, liasse valide: false, dépôt fermé). Must avant toute liasse réelle ;
-      placée par D avant STORY-1079. La plage 1030 → 1079 de D est épuisée : identifiant pris au-dessus de la
-      marque haute. Recopie des paquets à demander à C (balance-service). Fiche à écrire juste avant de coder.
-      NON SLOTTÉE.
+      🏁 DONE le 2026-11-25 — prospera-bilan-service#189 (dev b6f2d49, 5055933) ; annonce « ⚠ Contrats » avant le
+      code (docs #872, main 651d4d6). Les comptes 28, 29, 39, 49 (hors 499) et 59 (hors 599) rattachés au poste de
+      leur actif dans les tables de passage de syscohada-revise@2.1, @2.2, @2.3, zone-franche-togo@1.0 et
+      smt-togo@1.0 (subdivision « à l'image » : Guide d'application p. 68, 81, 329 ; AUDCIF art. 47) ; +117 comptes
+      officiels aux plans ; garde de packaging gardes-nomenclature.mjs ; révision en place (D-1118-5 : les liasses
+      figées restent figées), moteur inchangé. Cas du ticket : AM 1 000 000 / 400 000 / 600 000, bilan équilibré,
+      FRNG +200 000, identité OK. Node 24 : 355/355 suites (12 554 tests) ; e2e liasse et analyse 776/776 ;
+      mutations 18/18. Recopie de quatre artefacts demandée à C. Constat initial : ticket
+      TICKET-BACKEND-bilan-amortissements-non-rattaches.md (corrigé). Suivante : STORY-1079. NON SLOTTÉE.
   - range: "STORY-1079"
     status: "RÉSERVÉ"
     owner: "Groupe D — dans l'espace d'essai, la garde de bilan ne lit pas le KYC : l'état publié décide seul (ticket « modules ouverts dans l'essai », point 3) (prospera-bilan-service)"

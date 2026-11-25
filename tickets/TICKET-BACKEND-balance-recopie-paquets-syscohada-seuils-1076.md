@@ -77,5 +77,6 @@ Ce que la recopie change **dans `balance-service`** (à vérifier par C, qui tie
 le libellé « le plus spécifique » d'un compte `28x`, `29x`, `39x`, `49x`, `59x` change à l'import Sage
 (`sage-import.service.ts`, `libelleDuPlanLePlusSpecifique`) et dans les cahiers (`cahiers-depenses.service.ts`,
 `cahiers-recettes.service.ts`) ; `classeDuCompte` ne change pas (classes 2 à 5). Les règles fiscales qui lisent la
-table de passage (`liquidation.regles.ts`) ne lisent aucun des postes touchés. Le SHA de `dev` est écrit dans l'entrée
-« PUBLIÉ » de STORY-1118 du journal de D (« ⚠ Contrats »).
+table de passage (`liquidation.regles.ts`) ne lisent aucun des postes touchés. **Source de la recopie : `origin/dev`
+de `prospera-bilan-service` à `5055933`** (fusion de STORY-1118, prospera-bilan-service#189 ; les artefacts sont ceux
+de `b6f2d49`).

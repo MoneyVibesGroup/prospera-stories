@@ -1,6 +1,6 @@
 # STORY-1118 : les comptes d'amortissement et de dépréciation (28, 29, 39, 49, 59) rattachés au poste de leur actif — la liasse d'une entité qui amortit sort équilibrée
 
-Status: in-progress
+Status: done
 
 **Ticket :** `tickets/TICKET-BACKEND-bilan-amortissements-non-rattaches.md` (constat de D-1078-5, cas chiffré) · **Dépôt :**
 `prospera-bilan-service` (tenu par D au lot 6, D-L6-5 ; `origin/dev` au départ : `d2c65c6`, STORY-1078) · **Plage :**
@@ -170,4 +170,54 @@ Voir « ⚠ Contrats » du journal de D (entrée STORY-1118).
 
 ## Preuves
 
-(à compléter à la livraison)
+**Livré :** prospera-bilan-service#189, fusionnée en rebase le 2026-11-25 (`head` `55b126a`, rejoué sur `dev` en
+**`b6f2d49`** (tables, plans, garde, specs) et **`5055933`** (e2e), arbre identique au commit testé) ; annonce
+« ⚠ Contrats » prospera-stories #872 (`main` 651d4d6) avant le code.
+
+- **Suite unitaire complète sous Node 24 sur `2d31061`** (= `b6f2d49`, étage `verification`, image depuis
+  `git -c core.autocrlf=false archive`, `Dockerfile.local` sans la ligne `# syntax`, sous le verrou) : **355/355 suites,
+  12 554 tests verts (5 ignorés), 883 s**, en `-w 4 --workerIdleMemoryLimit=700MB`. Paquets en LF dans l'image,
+  empreintes égales à celles du registre.
+- **e2e complets sous Node 24 sur `55b126a`** : **3 486/3 488** ; les deux rouges (`ecoute-stable` : la batterie
+  `instance-c13.e2e-spec.ts` importe `ecouterPourSupertest` sous un alias ; `bilan-dossier-portee-collaborateur` : 25
+  contrôleurs gardés pour 24 attendus) **le sont déjà sur `dev` `d2c65c6`** (même image, construite depuis `dev` : 2/2
+  rouges) — hors de cette story, constat écrit au journal de D. **e2e de la liasse et de l'analyse** (`bilan-analyse`,
+  `openapi-contract`, `bilan-export`, `bilan-etats`, `bilan-controles`, `bilan-notes-annexes`, `bilan-tft`,
+  `bilan-jeu-etats`) : **776/776** ; le fixture de `bilan-export` n'avait pas à changer (aucun champ neuf).
+- **Spec neuve `amortissements-rattaches.spec.ts`** (vrais paquets, vraie chaîne table → Bilan → batterie → analyse,
+  valeurs écrites dans le test) : **196/196** — AC-2 à AC-5, dont 178 rattachements compte → poste sur les trois
+  familles de tables.
+- **Garde `gardes-nomenclature.mjs`** (spec en `node` fils) : **14/14** (chaque refus ; les cinq paquets embarqués
+  passent) ; jouée sur les artefacts de `d2c65c6` : **les cinq rougissent** (`28`, `29`, `39` sans poste).
+- **AC-7** : hors des préfixes ajoutés (78 sur 23 postes en `@2.1` et zone franche, 74 sur 20 en `@2.2`/`@2.3`, 34 sur
+  4 en SMT, toujours en fin de liste) et des 117 comptes du plan, chaque artefact est égal à celui de 1078 (comparaison
+  JSON) ; `build.mjs` ne change l'empreinte d'aucun autre paquet. Sur une balance sans compte de contrepartie, les
+  notes de `@2.1` sortent à l'octet comme avant (empreinte de `notes-syscohada-2.2.spec.ts`, mesurée avant STORY-559).
+- **Mutations : 18/18 rouges**, chacune sur sa preuve — six sur les sources (la garde refuse le paquet : `2845` hors
+  d'`AN`, `491` retiré ou rangé au passif, `391` retiré du SMT, `499` à l'actif, `590` retiré), quatre sur les
+  artefacts avec le registre réépinglé (la spec rougit sur l'assertion, jamais sur le checksum), huit sur la garde.
+  Mutation équivalente écartée et nommée : retirer `2844` d'`AM` en `@2.3` ne change rien (le résidu `284` le garde
+  en `AM`).
+- **Lint 0** (fichiers touchés), `node --check` des scripts. Sans `docker compose up` : aucun module, dépendance ni
+  Dockerfile ne change ; le bout en bout est prouvé en vrai HTTP sur les artefacts embarqués (e2e).
+
+**Tests et fixtures qui supposaient l'ancien comportement, mis à jour :**
+- `src/modules/bilan/etats/tft-production.service.spec.ts` — le témoin de STORY-434 « le référentiel packagé ne
+  rattache AUCUN amortissement » devient celui d'après : `2831` en `AK`, aucun compte non affecté, bilan équilibré,
+  `FG` −200 000 sur la variation brute.
+- `src/modules/bilan/consolidation/etats-consolides.regles.spec.ts` — le compte « qu'aucun poste ne reçoit » était
+  `281000` : c'est désormais `108000`.
+- `src/modules/bilan/referentiel/notes-syscohada-2.2.spec.ts` — la balance « exhaustive », générée des préfixes de la
+  table, écarte les préfixes de 1118 : elle reste celle d'avant, et ses empreintes et écarts mesurés gardent leur sens.
+- `test/openapi-contract.e2e-spec.ts` — le cas 1078 « trois anomalies et un INDETERMINE » s'équilibrait (`284100` en
+  `AM`) : le capital passe à 990 000 pour garder un `INDETERMINE` confronté au contrat.
+- `test/bilan-analyse.e2e-spec.ts` — commentaire corrigé (le déséquilibre du cas 1078 vient de la balance) ; un e2e
+  neuf : le cas du ticket en `dry-run`, FRNG +200 000, identité `OK`, écart 0.
+- Empreintes : registre et `referentiel-registry.spec.ts`, `referentiels-additionnels-coherence.spec.ts`,
+  `notes-syscohada-2.2.spec.ts`, `titres-rubriques-2.2.spec.ts` (commentaire « MAJ STORY-1118 » à chaque endroit).
+
+**Empreintes :** `syscohada-revise@2.1` `3880b6c2…`, `@2.2` `16071b45…`, `@2.3` `ea5798e9…`, `zone-franche-togo@1.0`
+`58e5bc99…`, `smt-togo@1.0` `5b614bd8…` (valeurs complètes : « ⚠ Contrats » du journal de D).
+
+**Verrou Docker :** pris à 04:51 (libre, aucun conteneur `grp-d`), une seule prise, rendu à 05:14 ; aucun conteneur,
+volume, réseau ni image `grp-d` ne reste.
