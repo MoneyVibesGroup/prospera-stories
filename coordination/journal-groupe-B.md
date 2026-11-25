@@ -136,8 +136,18 @@
     `CONSEIL_NOT_ENTITLED` ; vert `atelier-balance` 52/52 et `cabinet-moteur` 9 passés (2 sautés, essai seulement ; FR-6
     intact). `INSTALLATION_SERVICES` inchangé : `conseil` y entre avec STORY-1129 (D-100-4) ; `INSTANCE_ESPACE` du balance
     déjà réglé par `RECETTE_ESPACE` (D-100-5). Verrou 20:56 → 21:15, `down -v`. Fiche D-100-1 → 6.
-  - **STORY-1119 (n° 1) — en cours** : fiche écrite, contrat annoncé avant le code (« ⚠ Contrats »).
-  - **Suivante : STORY-1119** (n° 1 : les archives ont valeur de preuve). **Nommé pour STORY-1129** (n° 11) :
+  - **1 — STORY-1119 (25/11) — faite** : les archives du cabinet ont valeur de preuve. **document-service #33**
+    (`b7b3f91` sur `dev`) ; **catalogue #77** (`f4fcee0`, `ged` 1.4.0 recopié) ; contrat annoncé avant le code (stories
+    #918, `13e17a4`). Journal d'intégrité chaîné par cabinet (atomique avec l'acte ; consultation sensible sans trace =
+    503), contrôle des empreintes par la file BullMQ du service (`GED_CONTROLE_INTEGRITE_MOTIF`, écarts nommés, deux
+    neufs), attestation et certificat figés. Aucun droit neuf (auth inchangé), aucun fait Kafka neuf. Node 25 : unitaires
+    1196, e2e 209/209 ; Node 24 : 1198, 209/209 ; mutations 15/15 (+2/2) ; pile `grp-b` neuve (doublure d'auth) : 20
+    consultations simultanées sans fourche, octet changé dans MinIO nommé par la campagne périodique, entrée réécrite
+    nommée au rang 5. Verrou 22:14 → 22:23. Fiche D-1119-1 → 18. Passation de `document-service` lue au rituel (C,
+    `0716a58`) ; worktree prunable d'un autre poste retiré, branche locale `ocr-pdf` (équivalente à `dev`) supprimée.
+  - **Suivante : STORY-1120** (n° 2 : fin de mission et réversibilité ; l'export emporte le journal d'intégrité et les
+    documents probants, nommé par 1119). **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans
+    `dossier-service` quand C l'aura fusionnée (journal de C, lot 7, 5). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
     `cabinet-moteur` et `abonnement` rejouées (D-100-4).
 
@@ -1104,6 +1114,16 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-25) : FE-143 — les routes de la valeur de preuve des archives sont servies par STORY-1119**
+  (document-service #33, `b7b3f91` sur `dev`) : journal d'intégrité (`GET /api/v1/ged/cabinet/journal-integrite`,
+  `…/verification`), contrôles des empreintes (`POST`/`GET …/controles-integrite`, `GET …/controles-integrite/{campagneId}`,
+  `GET …/fonds/{numero}/controles-integrite`), documents probants (`POST …/fonds/{numero}/bordereaux/{rang}/attestation-de-numerisation`,
+  `POST …/fonds/{numero}/certificat-d-integrite`, `GET …/fonds/{numero}/documents-probants`, `GET
+  …/documents-probants/{numero}/pdf`). **Types à régénérer** depuis l'OpenAPI vivant de `document-service` quand l'écran
+  viendra (DTO de réponse nommés `…IntegriteDto`, `DocumentProbantDto`) ; le PDF se lit en `attachment`, son empreinte
+  dans `X-Empreinte-Sha256` (exposé au CORS). Rien n'est relayé par le BFF (l'app du cabinet appelle le service). —
+  information, rien à faire avant le lot 8.
+
 - **→ A (2026-11-25) : AP-55 débloquée par le correctif de STORY-917** (BFF #44 `0dfcf43`) : le `fetch` du lancement
   d'une installation (`POST /api/v1/admin/orgs/{orgId}/installations`) peut porter `Idempotency-Key` sans « échec
   réseau ». Le BFF construit l'a prouvé : il a reçu le préflight du navigateur (`204`, en-tête annoncé), puis le `POST`
@@ -1882,6 +1902,10 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
     `routesLectureSeule` ; recopié dans le service par le code, **puis au catalogue par B** après la fusion du code
     (suite de 1119). **→ A (FE-143)** : types à régénérer depuis l'OpenAPI de `document-service` quand l'écran viendra.
     **Pour C et D** : rien.
+  - **Livré le 25/11** : document-service #33 (`b7b3f91`), catalogue #77 (`f4fcee0`, `ged` 1.4.0 au catalogue : un
+    catalogue neuf le sème, un catalogue semé le reçoit à son prochain démarrage). Au code, deux ajouts au contrat
+    (D-1119-12, 13) : le CORS du service **expose** `X-Empreinte-Sha256` et `Content-Disposition` ; les dix routes
+    neuves ont leurs DTO de réponse à l'OpenAPI (`…IntegriteDto`, `DocumentProbantDto`).
 
 - **2026-11-25, quatrième suite de STORY-979 — le manifeste `balance` 1.2.0 publié au catalogue, annoncé AVANT la
   fusion du code** (`prospera-platform-catalog-service`, branche `MNV-979-manifeste-balance`, PR #76 ; fiche
@@ -3493,6 +3517,21 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Pile de preuve de `document-service` sans auth réel** (STORY-1119) : une doublure Node (JWKS RS256, `GET
+  /api/v1/moi/droits` par `sub`, `/jeton` pour le script) suffit ; le dossier client se pose dans `dossiers_dossier`
+  (mongosh) et l'état publié de `ged` (`EN_SERVICE`) part par `kafka-console-producer` sur `etat-publie.changed.reel` :
+  la garde s'ouvre en quelques secondes. Compose et script : `preuve1119/` de la session (non versionnés).
+- **Un `FormData` de Node sans type MIME** sur le fichier (`new Blob([octets])`) rend `400 FORMAT_NON_CONFORME` chez la
+  GED : donner `{ type: 'application/pdf' }` ou `image/png`.
+- **Une mutation sur une empreinte peut survivre derrière AES-GCM** (STORY-1119, M12) : un chiffré altéré ne se
+  déchiffre plus, le refus vient du déchiffrement et le contrôle d'empreinte n'est jamais mordu. Le tester par un objet
+  qui se déchiffre mais ne redonne pas l'empreinte gardée.
+- **`eslint --fix` retire `as DepotCabinetMemoire` d'un `app.get(DepotCabinet)`**, puis TS2339 : écrire
+  `app.get<DepotCabinet, DepotCabinetMemoire>(DepotCabinet)`.
+- **`document-service` sous Node 25 sur ce poste : 2 suites rouges connues** (`ged.service.spec` « copies à l'octet de
+  la plateforme », fichiers en CRLF ; `piece-conservation.spec`, chemins `\`) ; vertes dans l'étage `verification`
+  (Node 24, archive en LF). Le lint du dépôt exige `--max-warnings 0` : un avertissement `no-unsafe-argument` rougit.
 
 - **Une session coupée (ENOTFOUND) garde le verrou Docker** (correctif de STORY-1115) : le build tombé sur `npm ci`,
   le fichier du verrou est resté six heures sans aucune pile levée, alors que C et D attendaient. Prendre le verrou
