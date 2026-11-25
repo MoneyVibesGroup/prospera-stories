@@ -1113,9 +1113,12 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-917.md"
     reserved_on: "2026-11-16"
     note: >
-      🔧 CORRECTIF EN COURS le 2026-11-25 (groupe B, lot 7, ordre « c′ », D-L7B-7 ; fiche, « Correctif du 2026-11-25 »,
-      D-917-4 → 8 ; demande de A, AP-55) — le CORS du BFF annonce Idempotency-Key (relais d'installation de 917) et
-      X-Request-Id, expose Retry-After ; prospera-admin-panel-service#44 ; contrat annoncé avant la fusion.
+      🏁 CORRECTIF DONE le 2026-11-25 (groupe B, lot 7, ordre « c′ », D-L7B-7 ; fiche, « Correctif du 2026-11-25 »,
+      D-917-4 → 8 ; demande de A, AP-55, servie) — prospera-admin-panel-service#44 (dev 0dfcf43) ; contrat annoncé avant
+      la fusion (docs #901, main 000dddf). Le CORS du BFF annonce Idempotency-Key (relais d'installation de 917) et
+      X-Request-Id, expose Retry-After (429 du BFF) ; configurerCors partagé par main.ts et les e2e, garde des en-têtes
+      lus. Node 25 : unitaires 722/722 (50 suites), e2e 298/298 (17) ; lint, tsc, build ; 4/4 mutations ; BFF construit
+      démarré : préflight et POST d'installation relayé avec la clé (7/7), contre-épreuve sur dev. Sans Docker.
       Avant le correctif : 🏁 DONE le 2026-11-16 — prospera-recette#22 (dev 97cf8d7), prospera-admin-panel-service#35 (dev f27d10a). BFF 527/527 ;
       recettes depuis dev 87/87. Demande de B (945) close. Lot 2 de A, n° 13. NON SLOTTÉE.
   - range: "STORY-918"

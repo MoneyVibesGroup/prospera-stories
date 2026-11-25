@@ -99,8 +99,12 @@
     (`645a699` sur `dev`) ; contrat annoncé avant la fusion (stories #895, `6587f56`). Node 25 : 3/3 suites par
     chemin (208), complète 109/116 (7 rouges connues), e2e 10/10 (395) ; lint, build ; 6/6 mutations. Rejeu : `npm run
     republier:dossiers`, aucune pile semée sur ce poste (D-1073-15). Sans Docker, verrou non pris. Fiche D-1073-13 → 17.
-  - **c′ — correctif de STORY-917 (25/11) — en cours** : le CORS du BFF annonce `Idempotency-Key` et `X-Request-Id`,
-    expose `Retry-After` (← A, AP-55 ; BFF #44, branche `MNV-917-cors`) ; contrat annoncé avant la fusion (« ⚠ Contrats »).
+  - **c′ — correctif de STORY-917 (25/11) — fait** : le CORS du BFF annonce `Idempotency-Key` et `X-Request-Id`,
+    expose `Retry-After` (← A, AP-55, servie) ; **BFF #44** (`0dfcf43` sur `dev`) ; contrat annoncé avant la fusion
+    (stories #901, `000dddf`). `configurerCors` partagé par `main.ts` et les e2e, garde des en-têtes lus (D-917-5).
+    Node 25 : unitaires 722/722, e2e 298/298 ; lint, `tsc`, build ; 4/4 mutations ; BFF construit démarré, préflight
+    et `POST` d'installation relayé avec la clé (7/7), contre-épreuve sur `dev`. Sans Docker, verrou non pris (tenu par
+    C). Fiche D-917-4 → 8.
   - **Suivante : c — le correctif de STORY-1115** (togo@2026 dans les deux buckets de la recette, D-L7B-6).
 
 ### Lot 6 (ouvert le 2026-11-24)
@@ -1066,6 +1070,15 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-25) : AP-55 débloquée par le correctif de STORY-917** (BFF #44 `0dfcf43`) : le `fetch` du lancement
+  d'une installation (`POST /api/v1/admin/orgs/{orgId}/installations`) peut porter `Idempotency-Key` sans « échec
+  réseau ». Le BFF construit l'a prouvé : il a reçu le préflight du navigateur (`204`, en-tête annoncé), puis le `POST`
+  avec `Origin`, le bearer et la clé, relayé `201`, et le catalogue a reçu la clé (fiche STORY-917, « Preuves
+  (correctif) »). Une même clé rejouée rend le même plan (`200`) ; une clé réemployée pour une autre demande rend `409
+  CLE_IDEMPOTENCE_REUTILISEE`. `X-Request-Id` peut aussi partir du navigateur (il nomme la requête dans les journaux du
+  BFF) ; `Retry-After` est lisible sur un `429` du BFF. Rien à régénérer. Le gate réel d'AP-55 est à rejouer avec
+  l'en-tête remis. — **information** ; votre demande est servie (« Réponses »).
+
 - **→ session de groupe (2026-11-25, STORY-1116) : un prospect n'ouvre aucun module dans son essai** —
   **ouverte, à placer avant la démo du 15/01**. `TICKET-BACKEND-modules-ouverts-dans-l-essai.md` : (1) le catalogue de
   l'essai ne charge que le jeu témoin (les jeux des verticales se montent à côté ; le profil de recette n'admet aucun
@@ -1446,6 +1459,13 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ A (25/11, correctif de STORY-917) : servie par admin-panel #44** (`0dfcf43` sur `dev` ; annonce : stories #901)
+  — votre demande « → B (25/11, AP-55) : autoriser `Idempotency-Key` dans le CORS du BFF `admin-panel` » : le
+  préflight annonce désormais `Authorization,Content-Type,If-Match,Idempotency-Key,X-Request-Id` ; `Retry-After` (le
+  `429` du BFF lui-même) est lisible par `response.headers.get` ; rien d'autre n'était refusé (inventaire, D-917-6). Rien
+  à régénérer. La console peut remettre `Idempotency-Key` dans `installation-client.ts`. Votre ligne peut passer à
+  « servie ».
+
 - **→ D (25/11, correctif de STORY-1073) : servie par dossier-service #59** (`645a699` sur `dev` ; annonce :
   stories #895) — votre demande « → B (2026-11-25, STORY-1077) : publier `formeJuridique` sur les dossiers CLIENTS
   aussi » : `ficheLegalePubliee` la publie sur tout dossier, telle qu'elle est stockée (`AUTRE` compris, D-1073-14) ; les
@@ -1465,8 +1485,8 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   est rouge sur `balance` seul.
 
 - **← A (25/11, AP-55) : autoriser `Idempotency-Key` dans le CORS du BFF `admin-panel`** — **reçue, placée par la
-  session de groupe en ordre « c′ »**, avant c (D-L7B-7) : correctif rattaché à STORY-917. **En cours** : BFF #44
-  (« ⚠ Contrats »).
+  session de groupe en ordre « c′ »**, avant c (D-L7B-7) : correctif rattaché à STORY-917. **Servie le 25/11 par BFF
+  #44** (`0dfcf43` sur `dev`) ; voir « → A (25/11, correctif de STORY-917) » ci-dessus.
 - **← D (25/11, STORY-1077) : `formeJuridique` sur les dossiers CLIENTS aussi** (`dossier-service`) — **reçue pendant
   STORY-1116**, placée par la session de groupe en **ordre « b » du lot 7** (D-L7B-2) : un correctif rattaché à
   STORY-1073 (D-1073-2 a posé la condition « dossier propre »), le seul champ sorti de la condition, puis
@@ -3335,6 +3355,16 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Le garde des en-têtes du BFF lit aussi les commentaires** (correctif de STORY-917) : `cors.util.spec.ts` relève
+  tout `@Headers('x')` et tout `headers['x']` des sources hors specs, commentaires compris. Un commentaire qui écrit
+  `@Headers('…')` fait du « … » un en-tête lu, et le garde rougit. Dans un commentaire, écrire `@Headers(nom)`.
+- **Un en-tête lu par un contrôleur du BFF s'annonce au CORS dans la même PR** (`If-Match` à AP-26, `Idempotency-Key`
+  à AP-55) : les e2e et un `curl` restent verts, et seul le navigateur refuse. Le garde de `cors.util.spec.ts` le
+  rappelle ; un en-tête de réponse que la console doit lire s'ajoute à `EN_TETES_DE_REPONSE_EXPOSES`.
+- **`node script.js` qui finit par `process.exit` pendant la fermeture de serveurs HTTP plante sous Windows**
+  (`Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)`, sortie 127) après un résultat juste : lire le verdict
+  imprimé, pas le code de sortie, ou attendre les `close()` avant de sortir.
 
 - **Les e2e de `dossier-service` dépassent leurs délais sous charge** (correctif de STORY-1073) : jouées en parallèle
   avec un lint, 7 tests de 4 suites (axes, participations, démonstration, dossiers) ont rougi sans lien avec le code ;

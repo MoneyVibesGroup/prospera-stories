@@ -90,8 +90,9 @@ réel d'AP-55 l'a trouvé, et la console a dû retirer l'en-tête (`installation
   en-têtes lus et émis par le BFF (D-917-6).
 - [x] Code, preuves sous Node 25 (unitaires, e2e, lint, `tsc`, build, mutations, BFF construit démarré).
 - [x] « ⚠ Contrats » du journal de B annoncé avant la fusion du code (cette PR de docs ; PR de code #44).
-- [ ] PR de code fusionnée en rebase ; SHA rejoué sur `dev`.
-- [ ] PR de docs finale (fiche, tracker, journal de B).
+- [x] PR de code fusionnée en rebase : `prospera-admin-panel-service` **#44** (`dev` **`0dfcf43`**) ; arbre fusionné
+  identique au commit testé (`42db444`). Annonce : stories #901 (`main` `000dddf`).
+- [x] PR de docs finale (fiche, tracker, journal de B). Verrou Docker non pris.
 
 ### Décisions retenues par défaut (contestables)
 
@@ -125,3 +126,34 @@ réel d'AP-55 l'a trouvé, et la console a dû retirer l'en-tête (`installation
   (le catalogue déduplique la demande sans lui, journal de A) ; une clé par geste de l'opérateur, rejouée telle quelle
   en cas de doute réseau, rend le même plan (`200`). Le `PUT` d'octroi unitaire reste côté console jusqu'au n° 11 de B
   (journal de A) : ce correctif n'y touche pas.
+
+### Ce qui a été livré (correctif)
+
+- **`prospera-admin-panel-service`** (#44, `dev` `0dfcf43`) :
+  - `src/common/utils/cors.util.ts` (neuf) : `configurerCors(app, origines)` ; `EN_TETES_DE_REQUETE_AUTORISES`
+    (`Authorization`, `Content-Type`, `If-Match`, **`Idempotency-Key`**, **`X-Request-Id`**),
+    `EN_TETES_DE_REPONSE_EXPOSES` (**`Retry-After`**), `METHODES_AUTORISEES` (inchangées) ; liste d'origines vide ⇒
+    `enableCors` n'est pas appelé (inchangé) ;
+  - `src/main.ts` : l'appel `enableCors` en ligne devient `configurerCors(app, corsConfig.allowedOrigins)` ;
+  - `src/common/utils/cors.util.spec.ts` (neuf) : le garde des sources (D-917-5) et les deux listes écrites en clair ;
+  - `test/cors.e2e-spec.ts` : monte `configurerCors` (plus de recopie) ; préflight `OPTIONS
+    /api/v1/admin/orgs/org-1/installations` avec `Access-Control-Request-Headers:
+    authorization,content-type,idempotency-key` ⇒ `204`, origine exacte, les trois en-têtes annoncés ; préflight
+    `x-request-id` ; vrai `429` du garde de débit réel (`IpThrottlerGuard`, limite 1) ⇒ `Retry-After` en chiffres et
+    `Access-Control-Expose-Headers: Retry-After` ; la liste attendue de STORY-173 gagne les deux en-têtes.
+
+### Preuves (correctif)
+
+| Où | Quoi | Résultat |
+|---|---|---|
+| BFF, Node 25, par chemin | `cors.util.spec.ts`, `cors.e2e-spec.ts` | **4/4** et **11/11** |
+| BFF, Node 25 | suite unitaire complète | **50/50 suites, 722/722** |
+| BFF, Node 25 | e2e complets | **17/17 suites, 298/298** |
+| BFF | lint des fichiers touchés (`endOfLine: auto`) ; `tsc --noEmit` ; `nest build` | 0 ; 0 ; OK |
+| BFF, mutations | sans `Idempotency-Key` ; sans `X-Request-Id` ; sans `exposedHeaders` ; lecteur `@Headers` aveugle | **4/4 tuées** sur l'assertion (2+2, 2+2, 0+1, 1+0 tests rouges, unitaires + e2e) |
+| BFF construit (`dist/main.js`), sans Docker | démarré avec `CORS_ALLOWED_ORIGINS=http://localhost:3110`, un JWKS et un faux catalogue locaux : préflight du lancement d'une installation, puis `POST /api/v1/admin/orgs/org-1/installations` avec `Origin`, bearer `PLATFORM_ADMIN`, `Idempotency-Key: cle-ap55-1` | **7/7** : préflight `204`, origine exacte, `Authorization,Content-Type,If-Match,Idempotency-Key,X-Request-Id` ; `POST` relayé `201`, origine sur la réponse ; le catalogue reçoit `idempotency-key: cle-ap55-1` et `organisationId: org-1` |
+| BFF construit, garde de débit | `THROTTLE_LIMIT=2`, trois `GET /health` avec `Origin` | `200`, puis `429` avec `Retry-After: 60` et `Access-Control-Expose-Headers: Retry-After` |
+| Contre-épreuve sur `origin/dev` (`911c450`) | code mis de côté (`git stash -u`), rebuild, même préflight | `Access-Control-Allow-Headers: Authorization,Content-Type,If-Match`, aucun `Expose-Headers` : le navigateur refuse l'appel |
+
+Sans Docker (D-917-7) : aucun module Nest, aucune dépendance, aucun Dockerfile ne change. **Non prouvé ici** : le
+geste depuis la console elle-même. C'est le gate réel d'AP-55, à rejouer par A avec l'en-tête remis (D-917-8).
