@@ -440,6 +440,33 @@
     **Verrou Docker : pris à 08:51 (libre), une seule prise, rendu à 09:15 ; aucun conteneur, volume ni réseau `grp-d`.**
   - **Suivante : STORY-1075** (les routes d'instance `export`, `sante` et `migrer` du bilan) — **ordre de D : 1074 ✅ →
     1075 (la dernière)**.
+- **STORY-1075** ✅ 🛰️ — les routes d'instance `export`, `sante` et `migrer` du bilan (prospera-bilan-service#192,
+  `dev` `993b78f`, `4317dd2` ; annonce « ⚠ Contrats » #885 avant le code, `main` b2eadd0). Rituel (2026-11-25) : aucune
+  demande neuve à D chez A, B et C. Aucun service ne les servait encore : pas de patron à copier ; contrat de la santé
+  publié (`sante@1`), ceux de l'export et de `migrer` non (**Q-D-18 → 20**, défauts appliqués).
+  - **Livré** (contrôleur `instance/bilan`, identité `MOTEUR` seule, deux espaces) : `GET …/{org}/export` (JSON, plan
+    d'export qui couvre le plan d'effacement, objets au motif C13, Extended JSON relaxed ; matrice : `NON_INSTALLE` ou
+    absent ⇒ 403 `BILAN_NOT_ENTITLED`, `SUSPENDU` ⇒ 200) ; `GET …/{org}/sante` (`sante@1` copié à l'octet : MongoDB et la
+    sonde Kafka de `/health`) ; `POST /api/v1/instance/bilan/migrer` (`dossiers-d8`, idempotente ; orphelins ⇒ 409
+    `MIGRATION_INCOMPLETE`). Utilisateur ⇒ 403 `IDENTITE_DE_SERVICE_REQUISE`.
+  - Preuves : Node 24 **367/367 suites, 12 678 tests** ; e2e **45/45, 3 560** ; après le second commit, 42/42 suites
+    ciblées et e2e 45/45 suites, 3 560/3 560 ; **mutations 19/19 + 6/6** ; pile `grp-d` (réel et essai) : export de A 200 (ses seuls
+    documents, ni financement ni copie de voisin), B 403, `SUSPENDU` 200, `NON_INSTALLE` 403 ; santé OK puis DEGRADE
+    Kafka arrêté ; `migrer` 409 puis 200 puis rejouée sans effet ; export → effacement → export 403 → import 422
+    `OBJET_INCONNU` (l'aller-retour n'est pas possible pour bilan : aucun objet importable, D-928-5).
+  - Décisions D-1075-1 → 13 (fiche). **Verrou Docker : pris à 09:46 (libre), tenu pendant la suite Node 24, les mutations et une première pile ; la sous-session coupée par une erreur réseau vers 11:15, le verrou rendu orphelin par la session principale ; repris à 13:06, pile rejouée sur les images de `d28630b`, rendu à 13:09 après `down -v` ; aucun conteneur, volume ni réseau `grp-d`.**
+  - **Suivante** : aucune — **dernière story du lot 6 amendé de D**.
+
+- **Le lot 6 amendé de D est fini, le 2026-11-25 : seize stories.** Le lot 6 (1065 → 1071, sept, fini le 24/11), puis
+  l'amendement : **1072** (le cabinet prévenu d'un renvoi KYC), **1073** (la facture lit sa fiche légale, avec les deux
+  côtés producteurs), **1076** (les seuils de l'analyse financière), **1077** (capitaux propres < ½ capital), **1078**
+  (les quatre contrôles d'intégrité), **1118** (les amortissements rattachés aux postes), **1079** (la garde de bilan
+  dans l'essai), **1074** (la consolidation s'installe à part), **1075** (les routes d'instance du bilan). La passation à
+  Dev A est mise à jour (« Passations », D-L3-6, avant le 04/12).
+- **À placer (en attente de la décision de l'utilisateur)** : `zone-franche-togo@1.0` garde le défaut de cascade des
+  sous-totaux (STORY-678, corrigé en `@2.2` seulement) : une entité en zone franche n'a pas de liasse `valide: true`.
+  Proposé : une story `zone-franche-togo@1.1` qui reprend la correction de `@2.2`.
+
 
 ### Lot 4 (ouvert le 2026-11-18)
 
@@ -867,15 +894,21 @@
 - **← C, `prospera-assureur-fictif`, constatée par D au rituel de 1046, `dev` 78ad10c** (2026-11-17, plan du lot 3
   §5). C n'avait pas écrit sa passation (« Passations : aucune ») ; au rituel : aucune PR ouverte, dernier commit sur
   `dev` du 2026-11-16 (MNV-987). C est actif ailleurs (sinistres, 1001 → 1002), pas sur ce dépôt.
-- **→ Dev A (mise à jour complète le 2026-11-24, à la fin du lot 6 ; la précédente : 2026-11-17, fin du lot 3 ;
-  D-L2-5, D-L3-6 : avant le 04/12) : le distributeur, l'assurance reprise de C, et ce que D tient d'autre.** La synthèse
+- **→ Dev A (mise à jour complète le 2026-11-25, à la fin du lot 6 amendé ; les précédentes : 2026-11-24, fin du lot
+  6 ; 2026-11-17, fin du lot 3 ; D-L2-5, D-L3-6 : avant le 04/12) : le distributeur, l'assurance reprise de C, le
+  bilan repris de B, et ce que D tient d'autre.** La synthèse
   d'abord, puis le détail par sujet (les sous-points qui suivent).
   - **Dépôts tenus par D** : `reseau-service` (3419), `prospera-ventes-service` (3412 : `commande`, `facturation`,
     `approvisionnement`, `entrepot`), `prospera-terrain-service` (3413 : `terrain`, `conquete-objectifs`),
     `prospera-recouvrement-service` (3414), `prospera-pilotage-service` (3415), `prospera-croissance-service` (3416),
     `prospera-assureur-fictif` (3411, reçu de C), `prospera-notification-service` (3008, reçu de B), **et depuis le lot
     6 (D-L6-3) `prospera-sinistres-service` (3409, modules `sinistres` et `expertises`) et `prospera-assurance-service`
-    (3013)** ; dans `prospera-plateforme` : `series/`, `vocabulaires/`, `contrats/distributeur/`, `encours/`,
+    (3013)**, **et depuis le lot 6 amendé (D-L6-5) `prospera-bilan-service` (3004, modules `bilan`, `consolidation`,
+    `financement`), repris de B le 24/11 : il revient à la décision du prochain plan** (dernier commit de D sur `dev` :
+    `4317dd2`, aucune PR de D ouverte ; le checkout du poste garde les deux brouillons non suivis `cr-map.txt` et
+    `cr-postes.txt`, laissés) ; `prospera-expert-comptable` porté le temps de 1072 seulement (Q-D-13) ;
+    `prospera-dossier-service` et `prospera-paiement-service` prêtés pour 1073 et **rendus à B** ; dans
+    `prospera-plateforme` : `series/`, `vocabulaires/`, `contrats/distributeur/`, `encours/`,
     `contrats/objets/reseau/`, `jeux-demonstration/grossiste-golfe*/` et `assurance-compagnie-demo-reduite/`, **et
     `contrats/assurance/`, `champs-sensibles/`, `classification-sante/`** (repris de C ; `prospera-liaison-assureur-service`
     reste à C). Étiquettes : `series-v1`,
@@ -892,8 +925,12 @@
     tranche de `reseau`, les comptes du jeu ; **lot 6** (1065 → 1071) : la facture juste (3) (mentions légales, PDF
     figé, lien public), l'avoir, la commande (3) (modifier une commande transmise), puis l'assurance : `sinistres` lit
     la provision en vigueur (1068), publie `sinistres.evaluation.arretee@1` (1069), lève une alerte bloquante (1070), et
-    la mission d'expertise avec sa machine unique, l'évaluation qui l'attend (1071). Détail et SHA : « État », plus
-    haut.
+    la mission d'expertise avec sa machine unique, l'évaluation qui l'attend (1071) ; **lot 6 amendé** (le 24 et le
+    25/11) : le cabinet prévenu d'un renvoi KYC (1072), la facture qui lit sa fiche légale et ses comptes d'encaissement
+    (1073), puis le bilan : les seuils de l'analyse (1076), l'alerte « capitaux propres < ½ capital » (1077), les
+    contrôles d'intégrité de la liasse (1078), les amortissements rattachés aux postes (1118), la garde dans l'essai
+    (1079), la consolidation à part (1074), les routes d'instance `export`, `sante`, `migrer` (1075). Détail et SHA :
+    « État », plus haut.
   - **Mise en service d'un client qui quitte Sage** (réponse de l'utilisateur à Q-D-10, 2026-11-18) : la reprise du
     dernier numéro de facture (`facturation.suite-numerotation@1`, EPIC-244) se pose **avant sa première facture** ; à
     la liste de mise en service du distributeur de février.
@@ -904,8 +941,34 @@
     paramètre est `terrain_parametres` (`src/modules/terrain/parametres/`) : les distances et le géorepérage de `terrain`
     (AD-12) s'y ajoutent comme clés de plus (valeurs complètes à chaque version). Un plan de journée garde
     `parametresVersion` ; un plan créé ailleurs qu'à l'import (EPIC-233) se datera par `dateDuPlanDeJournee`.
-  - **Ce qui reste, dans l'ordre conseillé (mis à jour le 2026-11-24, fin du lot 6)** — les restes nommés par les
-    fiches 1065 → 1071, puis la liste d'avant (qui garde son historique) :
+  - **Ce qui reste, dans l'ordre conseillé (mis à jour le 2026-11-25, fin du lot 6 amendé)** — d'abord le bilan et les
+    demandes ouvertes, puis les restes nommés par les fiches 1065 → 1071 et la liste d'avant (qui garde son
+    historique) :
+    - **Bilan (`prospera-bilan-service`), dans l'ordre** : (a) **à placer** : `zone-franche-togo@1.1`, qui reprend la
+      correction de la cascade des sous-totaux de `@2.2` (STORY-678) — une entité en zone franche n'a pas de liasse
+      `valide: true` (constat de 1118 ; en attente de la décision de l'utilisateur) ; (b) le rapprochement de la liasse
+      et de sa balance par l'empreinte, dès que STORY-1022 (C) est livrée (D-1078-10) ; (c) les droits C7
+      `consolidation:*` au catalogue d'auth (B), puis un droit par route (D-1074-4), et `consolidation` dans
+      `INSTALLATION_SERVICES` de la recette (B) ; (d) les routes d'instance de `consolidation` et de `financement`
+      (export, import, effacement, santé, `migrer`), sur le patron de 1075 ; (e) les contrats d'export et de `migrer`,
+      quand B les publie (Q-D-19, Q-D-20) : recopie à l'octet, CSV, pagination de l'export ; les commentaires « à créer »
+      du manifeste `bilan` à sa prochaine révision ; (f) l'alerte « ½ capital » sur un dossier client, dès que B publie
+      sa forme juridique et son capital (D-1077) ; les seize indicateurs de l'analyse sans repère (Q-D-14) ; (g) le
+      consommateur de `fiscal.declaration.deposee` hors de la règle de l'essai (D-1079-5).
+    - **Facture (`ventes`), restes de 1073** (D-1073-12) : le numéro complet imprimé si le PO le veut (Q-D-15, une donnée
+      non secrète déclarée chez `paiement`, B) ; la republication des comptes déclarés avant 1073 (B) ; l'écran des
+      paramètres de la facture (A ou D, front) ; le statut et le libellé d'un compte retiré (`paiement`, B) ; 1072 : une
+      pile qui veut l'e-mail du renvoi KYC pose `ESPACE_KYC_URL`.
+    - **Demandes ouvertes chez B** : `dossier-service` — la règle de l'essai (KYC non lu, 1079) et la forme juridique
+      (et le capital) des dossiers clients publiés (1077) ; recette — `INSTANCE_ESPACE=ESSAI` sur le bilan de l'essai
+      (1079) ; `paiement` — le consommateur de `facturation.avoir.emis@1` (1066, rendu à B) ; catalogue — les recopies
+      des manifestes `facturation` 1.2.0 et `paiement` 1.1.0 (1073). **Chez C** : la recopie à l'octet des paquets
+      révisés par 1076, 1077, 1078 et 1118 (quatre artefacts, `smt-togo-1.0.json` compris) ; STORY-1022 (l'empreinte de
+      la balance, avec son algorithme et sa version) ; la règle de l'essai (KYC non lu) dans `balance-service`.
+    - **Questions au PO ouvertes** : Q-D-14 (repères de l'analyse sans source), Q-D-15 (numéro de compte imprimé), Q-D-16
+      (capitaux propres des art. 371 et 664), Q-D-17 (KYC sauté dans l'essai, AD-15), Q-D-18 → 20 (l'export de
+      l'utilisateur, la forme de l'export, le contrat de `migrer`) ; chacune a son défaut appliqué. Q-D-12 et Q-D-13 sont
+      répondues ou closes.
     - ~~**Placée** : **STORY-1072**~~ **livrée le 2026-11-24** (notification #92, expert-comptable #11) — la demande de B (STORY-1103) : le cabinet prévenu par e-mail d'un renvoi de son
       dossier KYC (modèle `kyc-dossier-renvoi-correction` dans `notification`, consommateur de
       `kyc.correction.requested@1` dans `prospera-expert-comptable`, preuve AC-5 dans mailhog) ; voir « Réponses aux
@@ -1676,9 +1739,13 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-25, STORY-1075, avant le code ; prospera-bilan-service, branche `MNV-1075`) — Les routes
-  d'instance `export`, `sante` et `migrer` du bilan.** Fiche : `stories/STORY-1075.md` (D-1075-1 → 12 ; Q-D-18 → 20,
-  choix par défaut). Aucun champ, aucun topic, aucune garde métier ne change ; le manifeste `bilan` (1.0.0) non plus.
+- **PUBLIÉ (2026-11-25, STORY-1075, prospera-bilan-service#192, `dev` `993b78f`, `4317dd2`) ; ANNONCÉ avant la fusion du
+  code (prospera-stories #885, `main` b2eadd0), deux écarts écrits ci-dessous — Les routes d'instance `export`,
+  `sante` et `migrer` du bilan.** Fiche : `stories/STORY-1075.md` (D-1075-1 → 13 ; Q-D-18 → 20, choix par défaut).
+  **Écarts à l'annonce, vus sur la pile** : (1) `DEGRADE` aussi quand **Kafka ne répond pas** (la santé lit la sonde
+  Kafka de `/health`, broker borné à 5 s : le registre des consommateurs seul ne voyait pas un broker arrêté) ; (2) les
+  objets de l'export sont nommés au **motif des objets C13** (`jeux-etats`, `snapshots-liasse`, … ; `collection` donne
+  le nom d'origine). Aucun champ, aucun topic, aucune garde métier ne change ; le manifeste `bilan` (1.0.0) non plus.
   - **Routes neuves** (contrôleur existant `instance/bilan`, identité `MOTEUR` seule, hors limite de débit, **dans les
     deux espaces**) :
     - `GET /api/v1/instance/bilan/{organisationId}/export` (limitée à l'organisation du chemin) : 200, une enveloppe JSON
@@ -2869,6 +2936,18 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1075** (septième passage de D dans `bilan-service`) :
+  - (1) **Une route de santé qui ne lit que le registre des consommateurs dit `OK` broker arrêté** : le client de
+    Confluent ne marque pas « hors groupe » quand Kafka tombe (mesuré : `OK` pendant 2 min, `/health` déjà 503). Lire la
+    sonde Kafka de `/health` (broker borné à 5 s), pas seulement le registre.
+  - (2) **Les noms d'objet C13 n'admettent pas `_`** (`^[a-z0-9][a-z0-9-]*$`) : un nom pris d'une collection
+    (`jeux_etats`) est refusé `SCHEMA_NON_CONFORME` par l'import avant même `OBJET_INCONNU`.
+  - (3) **Sous la charge du poste** (suite Node 24 dans la VM, build, mutations en local), une mutation a dépassé 400 s
+    (le script l'a abandonnée en restaurant le fichier) et une suite ciblée sous Node 25 a pris 100 s : lancer les
+    mutations après les suites Docker, avec un délai large.
+  - (4) **Les boucles d'attente au premier plan sont coupées vers 150-180 s** (passées en arrière-plan) : des boucles
+    courtes, ou `run_in_background` avec un seul observateur (arrêter les doublons).
 
 - **STORY-1074** (sixième passage de D dans `bilan-service`) :
   - (1) **La première sous-session s'est figée 600 s** (sans verrou, rien d'engagé), sur une commande de lecture sans

@@ -703,11 +703,17 @@ reserved_ranges:
       Amendement du lot 6 (24/11 soir, D-L6-5 : bilan passe de B à D). Source : consolidation.manifest.ts ; « Ce qui reste » de
       STORY-1080 ; vente à part (STORY-549). Fiche à écrire juste avant de coder. Lot D, n° 11 du lot 6. NON SLOTTÉE.
   - range: "STORY-1075"
-    status: "RÉSERVÉ"
+    status: "DONE"
     owner: "Groupe D — les routes d'instance export, sante et migrer du bilan (prospera-bilan-service)"
-    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    source_doc: "prospera-stories/stories/STORY-1075.md"
     reserved_on: "2026-11-24"
     note: >
+      🏁 DONE le 2026-11-25 — prospera-bilan-service#192 (dev `993b78f`, `4317dd2`) ; annonce « ⚠ Contrats » avant le code
+      (docs #885, main b2eadd0). GET /api/v1/instance/bilan/{org}/export (JSON, plan d'export qui couvre le plan
+      d'effacement ; 403 BILAN_NOT_ENTITLED en NON_INSTALLE), GET …/{org}/sante (sante@1 : MongoDB, sonde Kafka de
+      /health), POST /api/v1/instance/bilan/migrer (dossiers-d8 ; 409 MIGRATION_INCOMPLETE) ; identité du moteur seule,
+      deux espaces ; Q-D-18 → 20 (défauts). Node 24 367/367 suites (12 678 tests), e2e 45/45 ; mutations 19/19 + 6/6 ;
+      pile grp-d (réel et essai). Dernière story du lot 6 amendé de D.
       Amendement du lot 6 (24/11 soir, D-L6-5). Source : bilan.manifest.ts. Fiche à écrire juste avant de coder.
       Lot D, n° 12 du lot 6. NON SLOTTÉE.
   - range: "STORY-1076"
