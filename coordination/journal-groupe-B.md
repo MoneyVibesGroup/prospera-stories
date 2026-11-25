@@ -116,6 +116,10 @@
       de 907 refusé `PERIME`.
     - Verrou tenu à tort pendant une coupure réseau (14:14 → 20:00), puis repris et rendu à 20:29 après C. Fiche
       D-1115-13 → 18.
+  - **Quatrième suite de STORY-979 (25/11, D-L7B-6, 2) — en cours** : `balance` 1.2.0 recopié au catalogue depuis
+    `prospera-stories@ac8e450` (← C, STORY-1020 ; code fusionné : balance-service #165, `58322c4`) ; la copie entière
+    n'entraîne rien d'autre ; **catalogue #76** ; contrat annoncé avant la fusion (« ⚠ Contrats »). Sans Docker. Entrée
+    du tracker rouverte.
   - **Suivante : STORY-1119** (n° 1 : les archives ont valeur de preuve).
 
 ### Lot 6 (ouvert le 2026-11-24)
@@ -1809,6 +1813,19 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-25, quatrième suite de STORY-979 — le manifeste `balance` 1.2.0 publié au catalogue, annoncé AVANT la
+  fusion du code** (`prospera-platform-catalog-service`, branche `MNV-979-manifeste-balance`, PR #76 ; fiche
+  `stories/STORY-979.md`, « Quatrième suite (2026-11-25) », D-979-29 → 34 ; demande de C, STORY-1020). Aucune route,
+  aucun champ, aucun topic du catalogue ne change de forme ; aucun droit ne change.
+  - **`copies.json`** recopié depuis `prospera-stories@ac8e450` (sha256 de `manifestes/balance.manifest.ts` :
+    `44f89c99…d8fefe`) ; seul un manifeste change : **`balance` 1.1.0 → 1.2.0**, `GET
+    /api/v1/dossiers/{dossierId}/rapprochement/etat/export` en `routesLectureSeule` (servie par balance-service #165,
+    fusionné). Ses dix `droits` inchangés. La copie entière n'entraîne rien d'autre (seul `bdf7218` touche
+    `manifestes/` depuis `bd9340e`, la copie de #75).
+  - La garde contre `main` redevient verte (48) : la réserve de D-979-24 est levée.
+  - **Auth inchangé.** **Pour C** : un catalogue neuf sème la 1.2.0 ; un catalogue déjà semé la reçoit à son prochain
+    démarrage (D-979-13). **Pour A et D** : rien à régénérer.
 
 - **2026-11-25, correctif de STORY-1115 — la pile de recette sème ses paquets fiscaux, annoncé AVANT la fusion du
   code** (`prospera-recette`, branche `MNV-1115-paquets-fiscaux`, PR #32 ; fiche `stories/STORY-1115.md`, « Correctif
