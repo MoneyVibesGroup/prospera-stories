@@ -715,11 +715,14 @@ reserved_ranges:
   - range: "STORY-1078"
     status: "RÉSERVÉ"
     owner: "Groupe D — les contrôles d'intégrité de la liasse (FRNG = BFR + trésorerie nette, caisse créditrice, amortissements > brut, perte de change sans provision) et la liasse rapprochée de sa balance par l'empreinte (STORY-1022) (prospera-bilan-service)"
-    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    source_doc: "prospera-stories/stories/STORY-1078.md"
     reserved_on: "2026-11-24"
     note: >
-      Amendement du lot 6 (24/11 soir, D-L6-5). Source : analyse-pack-25-livres §7.2 ; referentiels/controles-balance-ohada.json.
-      Le rapprochement par l'empreinte attend STORY-1022 (C). Fiche à écrire juste avant de coder. Lot D, n° 10 du lot 6. NON SLOTTÉE.
+      🚧 EN COURS (2026-11-25) — fiche écrite, contrat annoncé avant la fusion du code (journal de D, « ⚠ Contrats »).
+      Quatre contrôles dans la réponse d'analyse (bloc controlesIntegrite), sourcés aux textes officiels (AUDCIF 2017 art.
+      45-48, 54, 56, 57 ; Guide d'application du SYSCOHADA révisé, Note 34) ; règles, comptes et sources en données des
+      quatre paquets SYSCOHADA révisé (révision en place). Rapprochement par l'empreinte de la balance REPORTÉ (STORY-1022
+      non livrée, D-1078-10). Lot D, n° 10 du lot 6. NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
