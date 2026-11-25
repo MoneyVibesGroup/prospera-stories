@@ -1,7 +1,7 @@
 # STORY-979 : les droits de la facture et des archives du cabinet au catalogue de tenant d'auth
 
-Status: done (rouverte et refermée deux fois le 2026-11-24 pour ses suites : « Suite du 2026-11-24 » et « Suite du
-2026-11-24 (soir) », en fin de fiche)
+Status: in-progress (troisième suite, « Suite du 2026-11-25 », en fin de fiche ; rouverte et refermée deux fois le
+2026-11-24 pour ses suites : « Suite du 2026-11-24 » et « Suite du 2026-11-24 (soir) »)
 
 **Complexité :** faible (huit droits neufs au catalogue de tenant, hors du jeton ; un rôle du socle neuf ; une ligne
 d'ajout à l'annexe B ; la copie des manifestes du catalogue ; aucun champ, aucune route, aucun topic)
@@ -377,3 +377,95 @@ après rejeu :
 - **C** : un catalogue neuf sème `ged` 1.3.0 et `comptabilite` 0.5.0 ; un catalogue déjà semé les reçoit à son prochain
   démarrage, à côté des versions publiées (D-979-13). Les treize `ged:*` de l'assurance restent hors d'auth (D-979-19).
 - **B** : STORY-1116.
+
+---
+
+## Suite du 2026-11-25 : les manifestes `facturation` 1.2.0, `paiement` 1.1.0 (et `balance` 1.1.0)
+
+**Demande servie :** journal de D, « → B (2026-11-25, STORY-1073) : recopier au catalogue (`platform-catalog-service`)
+deux manifestes amendés à la source » (`facturation` 1.2.0 et `paiement` 1.1.0, `main` `bd9340e`, #845) ; journal de
+B, « ← D (25/11, STORY-1073) ». **Entraînée par la copie entière :** journal de C, « → B (25/11, STORY-1117) :
+recopier au catalogue le manifeste `balance` 1.1.0 » (D-979-24).
+**Pourquoi 979 et pas une story neuve :** même patron que les deux premières suites (catalogue #71 et #74) : une
+recopie de manifestes, sans identifiant neuf. Branche `MNV-979-manifestes-facturation-paiement` (catalogue seul), docs
+`docs-979-facturation-paiement`.
+**Place :** lot 7 de B, **ordre « a »** (D-L7B-2 : les demandes reçues passent d'abord). Le tracker rouvre l'entrée de
+979 (`in-progress`) le temps de la suite et la referme (`done`) dans la PR de docs finale.
+**Sources lues :** journaux de D, de C et de B (les demandes, mot pour mot ; « ⚠ Contrats » de STORY-1073) ;
+`manifestes/facturation.manifest.ts` à `prospera-stories@bd9340e` (1.2.0, sha256
+`b7b9e0c83f8f1fba29868ab29545910b01051c06d2080ba0ae3b7912cf1bd933`, l'empreinte que D nomme), `manifestes/paiement.manifest.ts`
+(1.1.0, sha256 `11685333ec2a895b02fdf505be7f6ef66de72d92241783841edf931c7358ab2f`) et `manifestes/balance.manifest.ts`
+(1.1.0, sha256 `097fa17ea83ed268cf5f94a5a787a316feed9b049d982c720350975ee9cd6b0f`), vérifiés sur le blob et sur une
+extraction LF ; code relu sur `origin/dev` du catalogue `1aa17ae` (`copies.json`, `scripts/manifestes/`,
+`manifestes-seed.service.spec.ts`, `divergences.json` vide).
+
+**Ce qui existait déjà (relu avant le code) :** au catalogue, `facturation` en 1.1.0 (catalogue #71), `paiement` en
+1.0.0, `balance` en 1.0.0 ; aucune PR ouverte. `manifestes:garde` contre `bd9340e` : **rouge sur `balance`,
+`facturation` et `paiement` seuls** (`balance` : `version`, `routesLectureSeule[2 → 11]` ; `facturation` : `version`,
+`consomme[10 → 17]` ; `paiement` : `version`, `publie[15 → 27]` — des insertions, les index suivants glissent) ; aucun
+`droits` ne diffère. Entre `bd9340e` et `origin/main` (`bdf7218`), `manifestes/` n'a bougé que pour `balance` (1.2.0,
+STORY-1020 de C, contrat annoncé avant un code encore en cours).
+
+| Exigence | Fait |
+|---|---|
+| `facturation` 1.2.0 au catalogue | `copies.json` depuis `prospera-stories@bd9340e` : 1.1.0 → **1.2.0**, consomme `paiement.compte.changed@1`, `dossier.created`, `dossier.updated` ; ses huit `droits`, ses routes inchangés |
+| `paiement` 1.1.0 au catalogue | même copie : 1.0.0 → **1.1.0**, publie `paiement.compte.changed@1` ; aucun droit, aucune route neuve |
+| `balance` 1.1.0 (demande de C, entraînée) | même copie : 1.0.0 → **1.1.0**, `GET …/balances/reference` et `GET …/balances/resumes` ; la 1.2.0 de `main` n'est pas copiée (D-979-24) |
+| Aucun droit à poser dans auth | aucun `droits` ne change dans les trois (garde) ; auth inchangé (D-979-25) |
+| Rien d'autre ne change | garde rouge avant sur ces trois seuls ; verte après (48) contre `bd9340e` |
+
+### Décisions (prises par défaut, contestables)
+
+- **D-979-23 — Une troisième suite de 979, ordre « a » du lot 7 de B.** Décidée par la session du groupe B (D-L7B-2,
+  comme D-979-10 et D-979-17) : aucun identifiant neuf, même fichier, même voie. Les décisions commencent à D-979-23.
+- **D-979-24 — La copie depuis `bd9340e`, entière ; `balance` 1.1.0 y entre, pas la 1.2.0.** `npm run
+  manifestes:copier` lit tout `manifestes/` : lancé depuis `_wt-b-stories` en HEAD détachée sur `bd9340e`
+  (`origine` : `prospera-stories@bd9340e`), comparé à une copie faite depuis `git -c core.autocrlf=false archive
+  bd9340e manifestes` : identiques, sauf la ligne `origine`. À `bd9340e`, `balance` est déjà en **1.1.0** (STORY-1117
+  de C, source `398faa9`, code fusionné : balance-service #161) : C l'a demandée à B (« → B (25/11, STORY-1117) »,
+  ouverte). Une copie qui garderait `balance` en 1.0.0 demanderait un motif de divergence contre la demande de son
+  propriétaire : la demande, minuscule et dans un dépôt de B, est **servie ici**. Depuis, `main` porte `balance`
+  **1.2.0** (STORY-1020, `bdf7218`) : contrat annoncé, **code non fusionné** ; la copier offrirait au catalogue une
+  route que `balance-service` ne sert pas encore (même règle que D-979-8 : la copie suit la fusion du code). Elle n'est
+  pas copiée : **`manifestes:garde` contre `origin/main` est rouge sur `balance` seul** (`version`,
+  `routesLectureSeule[11, 12]`), et le restera jusqu'à la recopie de la 1.2.0, que C demandera après sa fusion.
+- **D-979-25 — Aucun droit à ajouter dans auth.** Les trois manifestes ne changent aucun `droits` (garde) : les huit
+  `facturation:*` de la 1.1.0 restent ceux d'auth (première suite) ; `paiement` et `balance` n'en gagnent aucun.
+- **D-979-26 — Le test de semis suit la copie.** Deux tests neufs dans `manifestes-seed.service.spec.ts` : `paiement`
+  1.1.0 publie `paiement.compte.changed@1`, que `facturation` 1.2.0 consomme avec `dossier.created` et
+  `dossier.updated` (ses huit droits inchangés) ; `balance` 1.1.0 porte ses deux routes de lecture neuves. Rouges sur
+  la copie d'avant (2 échecs), verts après. Aucune logique neuve : les mutations portent sur la copie.
+- **D-979-27 — Sans Docker** (comme D-979-15 et D-979-21). Aucun module Nest, aucune dépendance, aucun Dockerfile ne
+  change : une copie JSON semée au démarrage du catalogue. Le verrou n'est pas pris.
+- **D-979-28 — Contrats.** Trois manifestes publiés au catalogue changent de version ; aucune route, aucun champ,
+  aucun topic du catalogue ne change de forme. Une base déjà semée reçoit les trois versions neuves à son prochain
+  démarrage, à côté des publiées (D-979-13). `dossier.created` et `dossier.updated` sont écrits sans suffixe, comme le
+  code de `dossier-service` (le schéma du manifeste le permet). Annoncé dans « ⚠ Contrats » avant la fusion.
+
+### Livraison de la suite (25/11)
+
+En cours : **catalogue #75** (tête `d5f2b2e`). Fichiers : `copies.json` depuis `prospera-stories@bd9340e` ;
+`manifestes-seed.service.spec.ts`.
+
+### Preuves de la suite (25/11)
+
+- **Sans Docker** (D-979-27) : aucun module, aucune dépendance, aucun Dockerfile touchés ; verrou non pris.
+- **Catalogue, Node 25** : `manifestes:garde` **rouge avant la copie** (`balance`, `facturation`, `paiement` seuls),
+  **verte après (48)** contre `bd9340e` ; contre `origin/main` (`bdf7218`), rouge sur `balance` seul (la 1.2.0,
+  D-979-24) ; sha256 des trois manifestes vérifiés sur le blob et sur l'extraction LF ; les deux copies (worktree,
+  `git archive`) identiques hors `origine`.
+- **Tests relancés par chemin** : `src/modules/catalog/manifeste` 3 suites, **60/60** (les deux tests neufs rouges sur
+  la copie d'avant) ; **suite complète : 104 suites, 1 621 passés** (1 619 + 2), 3 suites rouges connues (binding
+  natif de Confluent sous Node 25 : `app-cablage.invariant.spec.ts`, `kafka-producer.service.spec.ts`,
+  `outbox-relay.service.spec.ts`).
+- **Lint** du spec touché (contenu en LF) et **build** : verts. `copies.json` est généré (ni lint ni prettier).
+- **Mutations : 3/3 rouges sur assertion** (test de semis et garde) : `paiement.compte.changed@1` retiré de ce que
+  `paiement` publie ; `facturation` remis en 1.1.0 ; la route `…/balances/resumes` retirée de `balance`.
+
+### Pour la suite (25/11)
+
+- **D** : un catalogue neuf sème `facturation` 1.2.0 et `paiement` 1.1.0 ; un catalogue déjà semé les reçoit à son
+  prochain démarrage (D-979-13). Le catalogue des faits du distributeur v2 n'est pas copié par le catalogue (D le dit).
+- **C** : `balance` 1.1.0 est au catalogue ; la 1.2.0 (STORY-1020) s'y recopie après la fusion de son code, sur
+  demande (D-979-24).
+- **B** : ordre « b » du lot 7, le correctif de STORY-1073 (`formeJuridique` sur les dossiers clients).

@@ -2012,12 +2012,17 @@ reserved_ranges:
       mutations rouges ; lint, tsc, build. Sans Docker (D-978-11) : la preuve de bout en bout est celle de la recette
       croisée complète de 1080. Lot 4 de B, n° 11 (EPIC-145). NON SLOTTÉE.
   - range: "STORY-979"
-    status: "done"
+    status: "in-progress"
     owner: "Groupe B, lot 6 — les droits de la facture et des archives du cabinet au catalogue de tenant d'auth, hors du jeton : facturation:parametres:modifier au DIST_DAF seul (demande de D, STORY-1065, D-1065-13) ; les sept ged:* du cabinet et le rôle neuf CAB_ARCHIVISTE (demande de C, STORY-1087, PRD des services du cabinet §2.3) ; recopie des manifestes au catalogue (facturation ; ged 1.1.0 après la fusion de C) (prospera-auth-service, prospera-platform-catalog-service)"
     source_doc: "prospera-stories/stories/STORY-979.md"
     reserved_on: "2026-11-24"
     note: >
-      🏁 SECONDE SUITE DONE le 2026-11-24 au soir (rouverte, puis refermée ; fiche, « Suite du 2026-11-24 (soir) »,
+      TROISIÈME SUITE EN COURS le 2026-11-25 (rouverte ; fiche, « Suite du 2026-11-25 », D-979-23 → 28 ; lot 7 de B,
+      ordre « a », D-L7B-2) — catalogue #75 ; contrat annoncé avant la fusion (« ⚠ Contrats » du journal de B). La
+      demande de D (STORY-1073) : les manifestes facturation 1.2.0 et paiement 1.1.0 recopiés depuis
+      prospera-stories@bd9340e ; balance 1.1.0 entraînée par la copie entière (demande de C, STORY-1117, servie) ; la
+      1.2.0 de balance (STORY-1020, code non fusionné) n'est pas copiée. Aucun droit ne change ; auth inchangé. Sans Docker.
+      Seconde suite : 🏁 SECONDE SUITE DONE le 2026-11-24 au soir (rouverte, puis refermée ; fiche, « Suite du 2026-11-24 (soir) »,
       D-979-17 → 22) — catalogue #74 (dev 1aa17ae) ; contrat annoncé avant la fusion (stories #843, main ada5b81). La
       demande de C (STORY-1088 puis 1100) : les manifestes ged 1.3.0 et comptabilite 0.5.0 recopiés depuis
       prospera-stories@f703671 (a525d76 en est un ancêtre ; sha256 vérifiés ; seuls ces deux manifestes changent ;
