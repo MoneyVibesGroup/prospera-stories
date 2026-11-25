@@ -53,8 +53,15 @@
    fiscal 201/201, 2905 ; e2e 13/13, 261 ; mutations 4/4 (garde) et 14/14 (calcul). Verrou pris deux fois (22:25 → 22:33,
    22:34 → 22:38). D-564-1 → 12 dans la fiche. **D prévenu** (SHA, empreinte, clés de 348) ; **→ B** : copie de
    `dossier-service` (ci-dessous).
-6. **En cours : STORY-1022** (la balance publie `soldesChecksum`) — fiche écrite avant le code
-   (`stories/STORY-1022.md`, D-1022-1 → 6), contrat annoncé ci-dessous (« ⚠ Contrats »).
+6. ✅ **STORY-1022 DONE (25/11)** : balance-service **#169** (`d5878be` sur `dev`), annonce #927 avant le code. La balance
+   publie l'empreinte de ses soldes, **`soldesChecksum`** + **`soldesChecksumVersion: 'soldes-v1'`**, facultatifs, sur
+   `balance.created` et `balance.etat.document.change` (aucun des deux pour une balance scellée en `v1`) ; SHA-256 de
+   `{ lignes }` projetées `{ compte, soldeDebiteur, soldeCrediteur }`, lignes nulles exclues, tri par point de code — la
+   canonisation du sceau réutilisée (`trierParCompte`, `hacherCanonique`), vecteur `49c4d3b1…49d8`. Schéma JSON de
+   `balance.created` remis à jour (tenu par Ajv). Node 24 : unitaires 298/298 suites, 5738 ; e2e 37/37, 2291 ;
+   mutations 9/9 ; pile `grp-c` 12/12 (Kafka et outbox, empreinte recalculée hors du service). Verrou pris une fois
+   (23:08 → 23:19). D-1022-1 → 6 dans la fiche. **D prévenu** (SHA, forme exacte ; D-1078-10 débloqué).
+7. **Suivante : STORY-1023** (fiche à écrire juste avant de coder).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -319,6 +326,11 @@ seulement.
 
 ## Demandes aux autres groupes
 
+- **→ D (2026-11-25, STORY-1022), information** : `soldesChecksum` / `soldesChecksumVersion` (`soldes-v1`) publiés sur
+  `balance.created` et `balance.etat.document.change` (balance-service `dev` `d5878be`) ; D-1078-10 peut se faire
+  (algorithme et vecteur dans « ⚠ Contrats » et `stories/STORY-1022.md`). Prévenu par message (session
+  `moneyvibes-apps-83`).
+
 - **→ B (2026-11-25, STORY-564) : recopier le paquet fiscal Togo 2026 dans `dossier-service`** — **ouverte** (plan du
   lot 7 §6 : à ta prochaine story sur le service, en LF). Source : prospera-balance-service `dev` `c9e94c6`,
   `src/modules/referentiel/assets/paquet-fiscal-togo-2026.json`, sha256 `bfcc3fc9…c065` ; cible :
@@ -513,7 +525,9 @@ seulement.
 
 ## ⚠ Contrats
 
-- **2026-11-25 (STORY-1022), ANNONCÉ avant le code** — **la balance publie l'empreinte de ses soldes**
+- **2026-11-25 (STORY-1022), PUBLIÉ** (balance-service #169, `d5878be` sur `dev`) — **conforme à l'annonce** (#927),
+  sans écart ; le schéma JSON gagne aussi `CIMA` dans l'énumération des référentiels (déjà publié) et `dependentRequired`
+  (l'un des deux champs exige l'autre). Annonce : **la balance publie l'empreinte de ses soldes**
   (`prospera-balance-service`, topics `balance.created` et `balance.etat.document.change`). Fiche :
   `stories/STORY-1022.md` (D-1022-1 → 6). Pour STORY-1078 de D (D-1078-10 : le rapprochement de la liasse avec sa
   balance).
@@ -1059,6 +1073,13 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-1022, 25/11) une mutation `x && false ? {…}` rougit par compilation** : TypeScript réduit la branche à
+  `never` et l'accès `x.champ` ne compile plus. Écrire `x && Date.now() < 0` pour une mutation qui doit rougir sur
+  l'assertion.
+- **(STORY-1022)** sur une pile `grp-c` semée à la main (état publié, KYC, dossier), le **rejet** d'une balance passe
+  mais la **validation** rend `403 BALANCE_NOT_ENTITLED` : l'écriture de validation exige aussi le read-model
+  d'abonnement. Le semer si une preuve doit valider.
 
 - **(STORY-564, 25/11) le paquet du 24/11 n'était pas dans la source** : la PR du plan du lot 7 a écrit le SMIG, la CNSS et
   `irpp.traitementsSalaires` dans `prospera-stories/referentiels/paquet-fiscal-togo-2026.json`, l'**amorce** (23 Ko), qui
