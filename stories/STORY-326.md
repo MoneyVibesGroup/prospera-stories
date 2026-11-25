@@ -1,7 +1,8 @@
 # STORY-326 : Les contrôles de cohérence d'une période, avec des tolérances lues au paquet
 
-Status: in-progress — **écrite le 2026-11-25** par la session du groupe C, juste avant de la coder (lot 6) ; contrat
-annoncé ci-dessous avant le code.
+Status: done — **livrée le 2026-11-25** : balance-service **#162** (`8b154df` sur `dev`, le paquet) et
+prospera-fiscal-service **#59** (`2aed546` sur `dev`, le contrôle) ; voir « Livraison ». Écrite le 2026-11-25 par la
+session du groupe C juste avant de la coder (lot 6) ; contrat #857 avant le code.
 
 **Epic :** EPIC-031 · **Points :** 5 · **FR :** FR-F62, FR-F63
 **Services :** `prospera-fiscal-service` (contrôle, signale) ; `balance-service` (sert les chiffres du moteur, et porte
@@ -62,6 +63,43 @@ déposer une déclaration qui sera rejetée.
   l'empreinte du fait (`declare`, `attendu`, la balance de référence) ; retirées (`retirer`) quand le contrôle redevient
   `CONFORME`. Un `NON_EXECUTE` ne signale ni ne retire rien.
 - Lecture avec le jeton de l'appelant (aucune identité machine) : `balance-service` applique sa portée (AC-5).
+
+### Livraison (2026-11-25)
+
+- **balance-service** (#162) : bloc `coherence` dans la source du paquet Togo 2026 et dans son schéma ; artefact
+  régénéré par `build.mjs`, empreinte **`e223056938cab1df7938fa7358d05965d6440d5101eaabf5b8eb4a062645ea21`** au registre
+  (`paquet-fiscal-registry.ts`, « seizième fois ») ; la surcouche zone franche en hérite (son empreinte ne bouge pas).
+- **fiscal** (#59) : `domain/obligations/coherence.ts` (règle pure), port `SourceMoteurFiscal` et adaptateur
+  `HttpSourceMoteurFiscal` (`contrat-moteur-fiscal.ts`), `CoherenceObligationsService`, route
+  `POST /api/v1/obligations/{id}/coherence`, deux codes au catalogue des anomalies (6 au lieu de 4), copie du paquet
+  dans `test/fixtures/paquet-fiscal/`. Codé par une sous-session ; paquet, revue, preuves et gate par C.
+- **Preuves** (Node 24) : balance-service unitaires **5552** (2 suites lentes rejouées seules, 46/46), e2e **36/36
+  suites, 1973** ; fiscal unitaires **2602** (2 suites lentes rejouées seules, 51/51), e2e **11/11 suites, 216** (dont 8
+  neufs : écart, levée, rouverture, retrait, acompte, tolérance absente, moteur muet, 403/404, jeton de l'appelant) ;
+  mutation **6/6** (égalité stricte, tolérance absente prise pour conforme, écart qui ne signale pas, conforme qui ne
+  retire pas, `theorique: null` pris pour 0, 403 amont devenu 5xx) ; gate `grp-c` (`docker compose up` de
+  balance-service et fiscal-service depuis l'archive de leurs branches) : les deux `healthy`, sans redémarrage ; la route
+  neuve et les trois routes du moteur lues par le fiscal répondent `401` sans jeton depuis le conteneur du fiscal.
+- `test:conformite` non rejoué : aucun adaptateur Mongo ne change (le signalement est celui de 328, déjà prouvé sur un
+  vrai Mongo).
+
+### Écarts au contrat, décidés au code
+
+- **D-326-6** : motifs de `NON_EXECUTE` ajoutés : `DECLARE_ABSENT`, `MOTEUR_REPONSE_INVALIDE` (réponse amont hors forme,
+  un 400 ou un 500 compris), `ATTENDU_INDISPONIBLE` (`theorique: null` sans motif ; avec motif, celui du moteur).
+- **D-326-7** : la version du paquet de l'obligation n'est plus octroyée ⇒ `TOLERANCE_ABSENTE`, pas une erreur.
+- **D-326-8** : une panne du contrôle à l'enregistrement du déclaré est journalisée ; la réponse reste celle de
+  l'enregistrement (avec l'anomalie posée ou retirée, si elle l'a été).
+- **D-326-9** : le signalement est fait par `systeme:coherence` ; empreinte `sha256(code | déclaré | attendu |
+  balanceId@version)`.
+- **D-326-10** : sous dérogation, le paquet de l'obligation est la surcouche seule : `PaquetsService` charge la version
+  exacte et la base, la tolérance se lit sur le paquet effectif (le bloc `coherence` survit à la fusion, prouvé).
+- **D-326-11** : la périodicité de la TVA n'est pas passée au moteur : le paquet Togo ne publie que `MENSUELLE`. Un
+  paquet qui publiera une périodicité trimestrielle devra la passer (sinon un faux écart).
+- **D-326-12** : l'exercice demandé au moteur : les bornes de la balance de référence, sinon l'année de l'obligation.
+- **D-326-13** : **le paquet publié sur MinIO** (bucket `referentiel-packages`, lu par le fiscal hors des tests) doit
+  être republié pour porter le bloc ; tant qu'il ne l'est pas, le contrôle rend `NON_EXECUTE` `TOLERANCE_ABSENTE`
+  (dégradation sûre, jamais un faux conforme). La copie de `dossier-service` diverge de la source, sans effet sur lui.
 
 ### Décisions prises au contrat (contestables)
 

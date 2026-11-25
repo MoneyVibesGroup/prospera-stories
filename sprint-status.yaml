@@ -7715,7 +7715,7 @@ sprints:
         epic: "EPIC-031"
         points: 5
         service: "fiscal-service"
-        status: "in-progress"  # 2026-11-25 — groupe C, lot 6 : fiche + contrat avant le code (stories/STORY-326.md)
+        status: "done"  # ✅ 2026-11-25 — groupe C, lot 6 : balance-service #162 (8b154df, tolérances au paquet), fiscal #59 (2aed546, POST /obligations/{id}/coherence, TVA_ECART_COMPTABILITE et ACOMPTE_ECART_RESULTAT_N1) ; Node 24 balance 5552/1973, fiscal 2602/216 ; mutation 6/6 ; gate grp-c vert ; D-326-1 → 13 dans la fiche
         assigned_to: null
       - story_id: "STORY-327"
         title: "Continuité inter-périodes"

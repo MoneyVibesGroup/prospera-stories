@@ -36,8 +36,9 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
   4 bis. ✅ **STORY-1117 DONE (25/11)** (demande de A, STORY-320) : balance-service **#161** (`e968388`), fiscal **#58**
      (`b2efaa7`), contrat #842 ; D-320-5 levé. Node 24 : balance unitaires 5593 / e2e 1973, fiscal unitaires 2560 / e2e
      208 ; Mongo 8/8, mutation 3/3 ; verrou cédé par A et rendu ;
-  4 ter. 🟡 **STORY-326** les contrôles de cohérence d'une période, avec tolérances au paquet (fiscal, source du
-     paquet dans balance-service) : fiche écrite et contrat annoncé le 25/11 ;
+  4 ter. ✅ **STORY-326 DONE (25/11)** : balance-service **#162** (`8b154df`, le paquet), fiscal **#59** (`2aed546`,
+     le contrôle), contrat #857. Node 24 : balance 5552 / 1973, fiscal 2602 / 216 ; mutation 6/6 ; gate `grp-c` vert
+     (balance et fiscal `healthy`) ; verrou cédé par A et rendu ;
   5. **STORY-1101** les déclarations face à la liasse (fiscal) — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
   6. **STORY-315** puis **316** le calendrier fiscal (fiscal) — fiches écrites juste avant.
 - **Docker** : verrou du poste principal (`MoneyVibes_Apps\.verrou-docker`) partagé avec A ; aucune pile de C ne tourne.
@@ -788,6 +789,15 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-326, 25/11) gate du fiscal** : pas de compose dans son dépôt ; `docker compose -p grp-c -f docker-compose.yml
+  -f prospera-recette/docker-compose.fiscal.yml -f <surcouche> --profile fiscal up -d --build balance-service
+  fiscal-service`, la surcouche pointant les deux `build.context` sur l'archive de la branche et
+  `mongo-fiscal.volumes: !override` sur son dossier `mongo/` ; `BALANCE_SERVICE_URL` à poser. Le paquet fiscal se
+  modifie dans **sa source** (`balance-service/scripts/referentiels/sources/`), puis `node
+  scripts/referentiels/build.mjs` et l'empreinte au registre : jamais l'artefact à la main. Les suites lentes
+  (`export-balance.cout`, `livrable-notes`, `plan-amortissement`) échouent sous la charge d'une suite entière et passent
+  seules.
 
 - **(STORY-1100, 24/11) document-service : jouer TOUS les e2e**, pas seulement `test/ged*` : le recensement de
   STORY-695 (`dossier-portee-collaborateur.e2e-spec.ts`) exige que chaque route de `src/` soit classée ; il rougissait
