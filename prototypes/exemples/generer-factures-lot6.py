@@ -133,6 +133,7 @@ SIGNAUX = {   # libelles de la maquette ; le serveur publie le code stable, le t
 
 REFUS = {   # refus nommes de STORY-1097 : titre court + ce qu'on peut faire
     'FACTURES_RESERVEES_AU_SYSTEME_NORMAL': 'Ce client tient ses cahiers (système minimal de trésorerie). Ses factures se déposent là-bas.',
+    'EXERCICE_NON_OUVERT': 'Cet exercice n’est pas encore ouvert à la comptabilité : choisissez d’abord comment le tenir, aux cahiers ou au journal.',
     'EXERCICE_CLOS': 'L’exercice 2025 est clos. Déposez ces factures dans l’exercice 2026.',
     'EXERCICE_INDETERMINE': 'Aucun exercice ouvert ne couvre la date de cette facture.',
     'AUTRE_EXERCICE': 'La date de cette facture désigne un autre exercice ouvert : déposez-la là.',
