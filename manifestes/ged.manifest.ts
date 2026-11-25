@@ -66,7 +66,9 @@ export const MANIFESTE_GED = {
   // et la recherche dans un fonds.
   // 1.3.0 (2026-11-24, STORY-1100) : la mémoire de classement du cabinet (suggestion, consultation, oubli) et les
   // factures comptabilisées rangées au fonds du client (`comptabilite.facture.inscrite`).
-  version: '1.3.0',
+  // 1.4.0 (2026-11-25, STORY-1119) : les archives du cabinet ont valeur de preuve (journal d'intégrité chaîné, contrôle
+  // périodique des empreintes, attestation de numérisation et certificat d'intégrité) ; sept routes de lecture neuves.
+  version: '1.4.0',
 
   // C1 : aucune dépendance dure. La GED reçoit, lit, classe, conserve et retrouve des pièces sans autre module ; une pièce
   // enregistrée sans dossier va dans la file « à rattacher » (FR-159, FR-166).
@@ -266,6 +268,13 @@ export const MANIFESTE_GED = {
     'GET /api/v1/ged/cabinet/pieces/{pieceId}/suggestion', // STORY-1100 : le classement que le cabinet a déjà choisi
     'GET /api/v1/ged/cabinet/fonds/{numero}/memoire-de-classement', // STORY-1100
     'GET /api/v1/ged/cabinet/memoire-de-classement', // STORY-1100 : la mémoire du cabinet, et le journal des oublis
+    'GET /api/v1/ged/cabinet/journal-integrite', // STORY-1119 : le journal d'intégrité chaîné du cabinet
+    'GET /api/v1/ged/cabinet/journal-integrite/verification', // STORY-1119 : la chaîne recalculée
+    'GET /api/v1/ged/cabinet/controles-integrite', // STORY-1119 : les campagnes de contrôle des empreintes
+    'GET /api/v1/ged/cabinet/controles-integrite/{campagneId}', // STORY-1119 : fonds par fonds, écarts nommés
+    'GET /api/v1/ged/cabinet/fonds/{numero}/controles-integrite', // STORY-1119
+    'GET /api/v1/ged/cabinet/fonds/{numero}/documents-probants', // STORY-1119 : attestations et certificats émis
+    'GET /api/v1/ged/cabinet/documents-probants/{numero}/pdf', // STORY-1119 : retéléchargé à l'identique (NFR-4)
     'GET /api/v1/instance/ged/{organisationId}/export',
   ],
 

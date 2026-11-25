@@ -136,6 +136,7 @@
     `CONSEIL_NOT_ENTITLED` ; vert `atelier-balance` 52/52 et `cabinet-moteur` 9 passés (2 sautés, essai seulement ; FR-6
     intact). `INSTALLATION_SERVICES` inchangé : `conseil` y entre avec STORY-1129 (D-100-4) ; `INSTANCE_ESPACE` du balance
     déjà réglé par `RECETTE_ESPACE` (D-100-5). Verrou 20:56 → 21:15, `down -v`. Fiche D-100-1 → 6.
+  - **STORY-1119 (n° 1) — en cours** : fiche écrite, contrat annoncé avant le code (« ⚠ Contrats »).
   - **Suivante : STORY-1119** (n° 1 : les archives ont valeur de preuve). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
     `cabinet-moteur` et `abonnement` rejouées (D-100-4).
@@ -1851,6 +1852,36 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-25, STORY-1119 — les archives ont valeur de preuve, annoncé AVANT le code** (`document-service`, GitHub
+  `prospera-ocr-service`, branche `MNV-1119` ; fiche `stories/STORY-1119.md`, D-1119-1 → 11). **Ajouts seuls**, sous
+  `/api/v1/ged/cabinet` ; le chemin de l'assurance ne change pas.
+  - **Journal d'intégrité chaîné, un par cabinet** : entrées `{ rang, le, acte, acteurId, fondsNumero?, pieceId?,
+    version?, details, precedente, empreinte }` (SHA-256 de la forme canonique ; 64 zéros avant la première). Actes :
+    `VERSEMENT`, `SCELLEMENT`, `VERIFICATION`, `CONTROLE_PERIODIQUE`, `CONSULTATION_SENSIBLE` (contenu ou texte lu d'une
+    nature sensible), `DOCUMENT_EMIS`. `GET …/journal-integrite?depuisRang=&limite=&fondsNumero=`, `GET
+    …/journal-integrite/verification` (`rupture: { rang, raison }`, raisons `EMPREINTE_FAUSSE`, `LIEN_ROMPU`,
+    `RANG_MANQUANT`). **Refus neuf** : `503 JOURNAL_INDISPONIBLE` sur le contenu ou le texte d'une pièce sensible quand
+    l'entrée ne peut pas s'écrire.
+  - **Contrôle périodique des empreintes** : file BullMQ `ged-integrite`, planificateur `ged-controle-integrite`,
+    variable neuve **`GED_CONTROLE_INTEGRITE_MOTIF`** (cron, défaut `0 3 * * *` UTC, `AUCUN` le coupe). `POST
+    …/controles-integrite` (202), `GET …/controles-integrite`, `GET …/controles-integrite/{campagneId}`, `GET
+    …/fonds/{numero}/controles-integrite`. Écarts nommés : `FICHIER_MODIFIE`, `FICHIER_ABSENT`, `VERSION_AJOUTEE`, et
+    **deux neufs** `SCELLE_MODIFIE`, `LIEN_ROMPU` (aussi dans la réponse de `POST …/fonds/{numero}/verification`, sans
+    `pieceId` ni `version`) ; `JOURNAL_ROMPU` au niveau d'une campagne.
+  - **Documents probants figés** (NFR-4) : `POST …/fonds/{numero}/bordereaux/{rang}/attestation-de-numerisation`
+    (`ATT-AAAA-NNNNN`), `POST …/fonds/{numero}/certificat-d-integrite` (`CERT-AAAA-NNNNN`), `GET
+    …/fonds/{numero}/documents-probants`, `GET …/documents-probants/{numero}/pdf` (`attachment`, `X-Empreinte-Sha256`).
+    Refus neufs : `409 BORDEREAU_NON_SCELLE`, `409 AUCUN_SCELLE`, `409 INTEGRITE_EN_ECART` (`details.ecarts`), `409
+    JOURNAL_ROMPU`.
+  - Collections neuves `ged_journal_integrite`, `ged_journal_integrite_tetes`, `ged_campagnes_integrite`,
+    `ged_controles_integrite`, `ged_documents_probants`. **Aucun droit neuf** (`ged:fonds:gerer` lit et émet,
+    `ged:versement:verser` lance un contrôle) : **auth et la table d'accès du cabinet inchangés**. **Aucun fait Kafka
+    neuf.** Aucune dépendance neuve.
+  - **Manifeste `ged` 1.4.0** (`manifestes/ged.manifest.ts`, cette PR) : sept routes `GET` neuves en
+    `routesLectureSeule` ; recopié dans le service par le code, **puis au catalogue par B** après la fusion du code
+    (suite de 1119). **→ A (FE-143)** : types à régénérer depuis l'OpenAPI de `document-service` quand l'écran viendra.
+    **Pour C et D** : rien.
 
 - **2026-11-25, quatrième suite de STORY-979 — le manifeste `balance` 1.2.0 publié au catalogue, annoncé AVANT la
   fusion du code** (`prospera-platform-catalog-service`, branche `MNV-979-manifeste-balance`, PR #76 ; fiche
