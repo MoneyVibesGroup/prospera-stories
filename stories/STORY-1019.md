@@ -1,6 +1,6 @@
 # STORY-1019 : le conseil s'installe à part — sa garde propre et ses deux vérifications
 
-Status: in_progress
+Status: done
 
 **Plan :** `coordination/PLAN-LOT-7-2026-11-24.md` §3, amendement du 2026-11-25, n° **0b** (ligne d'origine :
 `PLAN-LOT-6-2026-11-23.md` §4, amendement D-L6-5, n° 9 — « Fini quand : sans droit `conseil`, les routes des scénarios
@@ -108,7 +108,69 @@ collection neuve, règle de l'essai.
 
 ## Preuves
 
-À écrire à la livraison.
+**Livré :** prospera-balance-service#166, fusionnée en rebase le 2026-11-25 (`head` `5614129`, rejoué sur `dev` en **`ab4e468`**, arbre de `dev` identique au
+`head` poussé) ; annonce « ⚠ Contrats » prospera-stories #904 (`main` `eef44a4`) avant le code.
+
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive 5614129`) : unitaires
+  **292/292 suites, 5645 tests** (2 suites sautées, comme sur `dev`) — dont `app-cablage.invariant` (le graphe réel
+  d'`AppModule` : `EspaceDeLInstance`, `ConseilAccessGuard`, `DiscoveryModule`) ; e2e **37/37 suites, 2283 tests** ;
+  `nest build` 0. Lint des fichiers touchés : 0 ; `tsc --noEmit` 0.
+- **Specs neuves** : `conseil-access.guard.spec` (15 : paliers et ordre, quatre états fermés, état inconnu, lecture
+  seule et `@LectureSeule`, essai et fail-closed — sans espace, `{}`, objet qui imite) ; `balance-access.guard.espace.spec`
+  (11 : AC-6, données de la requête ignorées, lecture de `kafka.espace`) ; `conseil-access.invariant.spec` (2
+  contrôleurs gardés à la classe, aucun handler ne la retire, ordre dans `AppModule`, copie du manifeste à l'octet,
+  codes servis = manifeste) ; `verifications-conseil.spec` (19) ; `carte-des-routes.spec` (les vrais contrôleurs montés
+  par Nest : 8 routes, toutes gardées ; les 4 routes de lecture du manifeste y sont ; contrôleur oublié ⇒ ROUGE ;
+  garde hors `APP_GUARD` ⇒ ROUGE) ; `etat-publie-conseil.spec` (5 : projection, chaque module la sienne, rejeu ancien
+  ignoré, le consommateur applique les deux, plan C13).
+- **e2e** : `scenarios` (+10 : sans `conseil` — absent, `NON_INSTALLE`, `ESSAI_TERMINE`, `DESINSTALLE`, `SUSPENDU` —
+  chacune des 8 routes rend 403 `CONSEIL_NOT_ENTITLED`, rien d'écrit ni tracé ; même corps sur un dossier inexistant ;
+  sans `balance`, `BALANCE_NOT_ENTITLED` d'abord ; `LECTURE_SEULE` : lire et simuler passent, créer, modifier, supprimer
+  rendent `ABONNEMENT_EXPIRE` ; `PREAVIS` ouvert) ; `balance-dossier-portee-collaborateur` (841 : la chaîne réelle reçoit
+  la garde du conseil à sa place ; puis, pour `balance` sans `conseil` — aucun état, `NON_INSTALLE` —, route par route :
+  les 8 routes du conseil rendent 403 `CONSEIL_NOT_ENTITLED`, même corps sur un dossier inexistant, chaîne jamais
+  franchie ; toutes les autres routes franchissent la chaîne) ; `instance-c13` (+3 : les deux vérifications du conseil
+  dans les deux espaces, 401/403/404) ; **`balance-access-espace`** (6, neuf : deux instances côte à côte, le vrai
+  `EspaceDeLInstanceConfig` ; le même prospect sans KYC lit dans l'essai, 403 `KYC_NOT_APPROVED` dans le réel ; état
+  publié et e-mail restent exigés ; en-tête, paramètre ou claim « ESSAI » sur le réel : refus).
+- **Mutations 21/21 tuées** par une assertion (trois réécrites parce que leur première forme ne compilait pas :
+  import devenu inutile) : état inconnu ouvert, décision ignorée, sorte ignorée, e-mail non exigé, KYC sauté hors de
+  l'essai, objet qui imite l'espace, KYC jamais sauté, KYC jamais lu dans le réel, projection du conseil sur `balance`,
+  justification blanche acceptée, justification non vérifiée, chaîne globale ignorée, aucune route = vert, handler lu
+  sans la classe, garde vue hors `APP_GUARD`, dossier de justification oublié, garde retirée des scénarios (invariant
+  et e2e), garde après la portée du dossier, état publié du conseil non effacé, route du moteur ouverte à tout jeton.
+- **Pile `grp-c`** (mongo:7 `rs0`, Kafka 3.9.0, un IdP de test RS256, l'image `runtime` de `5614129` lancée deux fois :
+  `INSTANCE_ESPACE=REEL` et `ESSAI`, bases et groupes de consommateurs distincts ; `/api/v1/health` 200 des deux côtés ;
+  `InstanceConseilController` mappé). États publiés **par Kafka** (`etat-publie.changed.reel|essai`, `balance` et
+  `conseil`), KYC, dossiers et retraitements semés en base. **22/22 cas verts** :
+
+  | Instance | Cas | Réponse |
+  |---|---|---|
+  | réel | A (`balance` + `conseil`), `GET …/fiscal/scenarios/{inconnu}` | **404 `SCENARIO_INTROUVABLE`** (toutes les gardes franchies) |
+  | réel | B (`balance` seul), `GET …/scenarios`, `POST …/scenarios` | **403 `CONSEIL_NOT_ENTITLED`** |
+  | réel | B, `GET …/dossier-justification` d'un dossier inexistant | 403 `CONSEIL_NOT_ENTITLED` (avant la portée du dossier) |
+  | réel | B, `whoami/balance-access` | 200 (la balance reste ouverte) |
+  | réel | C (`conseil` `LECTURE_SEULE`) : lecture ; `POST …/scenarios` | 404 `SCENARIO_INTROUVABLE` ; **403 `ABONNEMENT_EXPIRE`** |
+  | réel | P (prospect sans KYC) | **403 `KYC_NOT_APPROVED`** |
+  | essai | P (sans KYC, `balance` + `conseil` `ESSAI_PROSPECT`) : `whoami`, `GET …/scenarios/{inconnu}` | **200** ; 404 `SCENARIO_INTROUVABLE` |
+  | essai | Q (sans KYC, `balance` seul) : `whoami` ; `GET …/scenarios` | 200 ; **403 `CONSEIL_NOT_ENTITLED`** |
+  | réel | moteur A : `aucun-scenario-applique` (un retraitement à base légale blanche semé) | 200 **ROUGE**, mesure 1, le dossier, l'exercice et le code 41 nommés |
+  | réel | moteur B : `aucun-scenario-applique` (retraitement fondé) | 200 **VERT**, mesure 0 |
+  | réel et essai | `gate-conseil` | 200 **VERT**, mesure 0, « 8 routes du conseil examinées, garde dans la chaîne globale » |
+  | réel | jeton d'utilisateur ; moteur d'une autre organisation ; code de balance | 403 `IDENTITE_DE_SERVICE_REQUISE` ; 403 `ORGANISATION_HORS_JETON` ; 404 `VERIFICATION_INCONNUE` |
+  | réel | moteur A : `balances-equilibrees` (vérification de balance) | 200 (toujours servie) |
+
+  `etats_publies_conseil` porte A (`EN_SERVICE`) et C (`LECTURE_SEULE`) dans le réel, P (`ESSAI_PROSPECT`) dans l'essai,
+  jamais B ni Q (l'état de `bilan` publié pour B n'a rien projeté). Le démarrage réel des deux instances vaut le
+  `docker compose up` du §1.5 (D-1019-12).
+- **Verrou Docker** : pris à 20:01 (vérification Node 24 et images), rendu à 20:15 ; la première preuve de pile a échoué
+  sur le script de l'IdP (piège au journal) ; repris à 20:42 (après B et D), rendu à 20:43:49. Aucun conteneur, réseau
+  ni image `grp-c` restant.
+- **« Recette du moteur verte »** : la recette `cabinet-moteur` (B) n'est pas rejouée — elle n'appelle aucune route du
+  conseil, et son test FR-6 (`conseil` sans adresse au catalogue n'est pas ouvert) reste vrai tant que
+  `INSTALLATION_SERVICES` ne nomme pas `conseil`. Les deux vérifications du moteur sont servies et prouvées sur la pile.
+  **La recette `atelier-balance` (STORY-100) appelle les scénarios** avec un cabinet qui n'a que `balance` et `bilan` :
+  elle rougira à l'étape « conseil » tant que B n'y octroie pas `conseil` (demande au journal de C).
 
 ## Ce qui reste
 

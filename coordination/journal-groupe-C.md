@@ -24,9 +24,14 @@
    1118 dans la même PR (← D servie) : plan à 291 / 296 comptes, trois gardes suivies (D-1020-11). Node 24 : unitaires
    286/286 suites, 5584 ; e2e 36/36, 1989 ; mutations 7/7 ; pas de compose (D-1020-9). Verrou pris deux fois (la première
    perdue sur une coupure réseau, rendue par la session de groupe), rendu à 13:43. D-1020-1 → 11 dans la fiche.
-2. **Suivante : STORY-1019** (n° 0b) : le conseil s'installe à part (`CONSEIL_NOT_ENTITLED`, `aucun-scenario-applique`,
-   `gate-conseil`) **et**, placée avec elle, la règle de l'essai pour la garde de balance (← D, STORY-1079 : KYC non lu
-   sur une instance `INSTANCE_ESPACE=ESSAI`).
+2. ✅ **STORY-1019 DONE (25/11)** : balance-service **#166** (`ab4e468` sur `dev`), contrat #904 (annoncé avant le code).
+   Les 8 routes des scénarios et de la justification exigent l'état publié de `conseil` (**403 `CONSEIL_NOT_ENTITLED`**
+   sinon ; `ABONNEMENT_EXPIRE` en écriture en lecture seule) ; `etats_publies_conseil` projeté du même topic, effacé par
+   le plan C13 ; `POST /api/v1/instance/conseil/{organisationId}/verifications/{code}` sert `aucun-scenario-applique` et
+   `gate-conseil`. **← D servie** : sur `INSTANCE_ESPACE=ESSAI`, la garde de balance (et celle du conseil) ne lit plus le
+   KYC. Manifeste `conseil` inchangé. Node 24 : unitaires 292/292 suites, 5645 ; e2e 37/37, 2283 ; mutations 21/21 ;
+   pile `grp-c` 22/22 (REEL et ESSAI, états publiés par Kafka) ; verrou pris deux fois (20:01 → 20:15, 20:42 → 20:43). D-1019-1 → 12 dans la fiche. **→ B** : la recette `atelier-balance` doit octroyer `conseil`.
+3. **Suivante : STORY-1021** (n° 0c) : les routes d'instance `export`, `sante`, `migrer` de la balance.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -291,6 +296,20 @@ seulement.
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-25, STORY-1019) : la recette `atelier-balance` doit octroyer `conseil` au cabinet** — **ouverte**.
+  Depuis balance-service #166 (`ab4e468`), les routes des scénarios et de la justification exigent l'état publié du
+  module `conseil` : l'étape « ⚡ conseil » de `paquets/recette-croisee/recette/atelier-balance.recette.ts` (STORY-100,
+  `POST …/fiscal/scenarios`, `…/simuler`, `…/comparatif`, `…/dossier-justification`) reçoit **403
+  `CONSEIL_NOT_ENTITLED`** avec un cabinet qui n'a que `balance` et `bilan`. Demandé : `await octroyer(cabinet, 'conseil')`
+  après `balance` (le `PUT` de la console diffère ses vérifications tant que `conseil` n'a pas d'adresse, comme
+  aujourd'hui). Facultatif : `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES` (ses deux vérifications
+  sont servies : `aucun-scenario-applique`, `gate-conseil`) — le test FR-6 de `cabinet-moteur`, qui prend `conseil` pour
+  module « sans adresse », devra alors en prendre un autre (`declarations`). Et pour l'essai : `INSTANCE_ESPACE=ESSAI` sur
+  le `balance-service` de l'espace d'essai (KYC non lu). Rien à recopier au catalogue (manifeste `conseil` inchangé).
+- **→ A (2026-11-25, STORY-1019), information** : un cabinet sans le module `conseil` reçoit `403 CONSEIL_NOT_ENTITLED`
+  sur les scénarios et le dossier de justification (proposer l'option), `ABONNEMENT_EXPIRE` en écriture s'il est en
+  lecture seule ; aucun type généré ne change de forme (descriptions 403 seulement).
+
 - **→ B (24/11, STORY-1087)** : dans `auth-service`, créer le rôle **`CAB_ARCHIVISTE`** et attribuer les droits `ged:*`
   selon la matrice du PRD des services du cabinet (§2.3) : `CAB_ASSOCIE` : `ged:fonds:gerer`, `ged:piece:consulter`,
   `ged:sensible:consulter` ; `CAB_COLLABORATEUR` : `ged:piece:consulter` ; `CAB_ARCHIVISTE` : `ged:fonds:gerer`,
@@ -309,7 +328,10 @@ seulement.
   version : `5c683d16…`** (balance-service #164, après 1101 et 316), qui porte aussi `rapprochementAnnuel` et
   l'échéance des sociétés par la forme juridique. Ce n'est pas un script de C qui publie : `balance-service` n'écrit pas dans ce bucket, et le
   fiscal lit le pointeur que lui donne l'événement de publication. C n'a pas trouvé l'éditeur ; `prospera-recette` est
-  à B. — ouverte.
+  à B. — ~~ouverte~~ **servie par B** (recette #32, `cd62296` sur `dev`, correctif de STORY-1115 ; lu au rituel de
+  STORY-1019) : la pile sème elle-même les paquets de balance-service dans les deux catalogues (`npm run pile` avec
+  `docker-compose.fiscal.yml`, recettes de l'essai) ; détail au journal de B. À revérifier côté C au prochain gate du
+  fiscal (contrôle de cohérence, plus de `TOLERANCE_ABSENTE`).
 - **→ B (25/11, STORY-1020)** : recopier au catalogue le manifeste `balance` **1.2.0** (source `manifestes/balance.manifest.ts`,
   contrat de STORY-1020) : une route d'export neuve en `routesLectureSeule` (`…/rapprochement/etat/export`). Elle contient
   la 1.1.0 ci-dessous : une seule recopie suffit. — ouverte.
@@ -378,9 +400,15 @@ seulement.
   non bloquante ; placée avec STORY-338** (la seule story du lot 7 de C qui ouvre la comptabilité), sauf demande de
   l'utilisateur de la passer avant.
 - **← D (25/11, STORY-1079) : dans l'espace d'essai, la garde de `balance-service` ne lit pas le KYC** (ticket « modules
-  ouverts dans l'essai », point 3 ; Q-D-17) — **notée, placée dans STORY-1019** (n° 0b du lot 7), qui touche déjà la
-  garde de balance (`CONSEIL_NOT_ENTITLED`) : `INSTANCE_ESPACE` lu une fois, le seul palier KYC sauté dans l'essai,
-  fail-closed sans espace, les preuves du patron de 1079. Sa fiche le dira.
+  ouverts dans l'essai », point 3 ; Q-D-17, confirmée par l'utilisateur le 25/11) — ✅ **servie par STORY-1019** :
+  balance-service #166 (`ab4e468` sur `dev`). `@RequiresBalanceAccess` (et la garde neuve du conseil) lisent l'espace de
+  l'instance (`EspaceDeLInstance`, de `INSTANCE_ESPACE`, fourni par `AppModule`) ; dans l'essai, le seul palier KYC est
+  sauté sans lire le read-model ; e-mail vérifié et état publié restent exigés, dans le même ordre ; une garde sans
+  espace (ou avec un double `{}`, un objet qui imite) exige le KYC. Preuves : un prospect sans KYC lit dans l'essai, la
+  même requête rend `403 KYC_NOT_APPROVED` sur l'instance réelle (e2e `balance-access-espace`, pile `grp-c`) ; trois
+  mutations (KYC sauté hors de l'essai, objet qui imite, KYC jamais sauté) rougissent. Hors périmètre : l'ingestion Kafka
+  des balances des verticaux (`ingestion.service.ts`) lit toujours le KYC (D-1019-10). Ticket : « Suivi » à jour.
+  **Pour la recette (B)** : `INSTANCE_ESPACE=ESSAI` sur le `balance-service` de l'espace d'essai, aucun KYC à semer.
 
 - **← A (24/11, passation pour STORY-1101, laissée par 322)** : lire `Obligation.montantDeclare.montant` par taxe et par
   période ; une période sans déclaré a `montantDeclare` à `null` : la nommer, ne jamais la compter pour zéro ;
@@ -431,7 +459,8 @@ seulement.
 
 ## ⚠ Contrats
 
-- **2026-11-25 (STORY-1019), AVANT le code** — le conseil s'installe à part (`prospera-balance-service`). Fiche :
+- **2026-11-25 (STORY-1019), PUBLIÉ** (balance-service #166, `ab4e468` sur `dev`) — **conforme à l'annonce** (#904,
+  faite avant le code), sans écart. — le conseil s'installe à part (`prospera-balance-service`). Fiche :
   `stories/STORY-1019.md` (D-1019-1 → 12).
   - **Comportement** : les 8 routes des scénarios et de la justification (`dossiers/{dossierId}/fiscal/scenarios…`,
     `…/fiscal/dossier-justification`) exigent l'état publié du module **`conseil`** en plus de celui de `balance` : une
@@ -908,6 +937,16 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-1019, 25/11) un tour de verrou perdu sur un script de preuve jamais joué** : `createPublicKey(publicKey)` sur
+  une clé déjà publique (`generateKeyPairSync` sans encodage rend des `KeyObject`) lève `ERR_CRYPTO_INVALID_KEY_OBJECT_TYPE`
+  — `publicKey.export({ format: 'jwk' })` suffit. `node --check` ne le voit pas : jouer le script de preuve (sa partie
+  IdP) en local **avant** de prendre le verrou. Le verrou rendu, B et D l'ont repris dans la minute : le tour suivant a
+  coûté 27 minutes.
+- **(STORY-1019)** une mutation qui retire un décorateur ou un appel laisse un import inutilisé : `ts-jest` rougit par
+  compilation (`Tests: 0 total`), ce qui ne prouve rien ; retirer aussi l'import (ou garder le symbole lu, `void x`).
+- **(STORY-1019)** un `jest.mock('@confluentinc/kafka-javascript', () => ({ KafkaJS: {} }))` en tête d'un spec permet
+  d'éprouver un consommateur sous Node 25 (il n'en lit que le type) ; `EtatConsommateursService` se double par un `Proxy`.
 
 - **(STORY-1020, 25/11) un PDF de pdfkit se relit en WinAnsi, pas en latin1** : le tiret cadratin et l'apostrophe
   typographique y sont `0x97` et `0x92` ; décodés en latin1 (ou par `TextDecoder('windows-1252')` de Node, qui fait
