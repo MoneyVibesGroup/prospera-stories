@@ -358,7 +358,7 @@
   - Décisions D-1078-1 → 11 (fiche) ; → C (recopie, ticket de 1076 mis à jour ; 1022 : l'empreinte avec son algorithme
     et sa version). **Verrou Docker : pris à 03:54 (libre, aucun conteneur `grp-d`), une seule prise, rendu à 04:07 (image de vérification construite depuis l'archive, suite Node 24 ; conteneur et image supprimés) ; aucun conteneur, volume ni réseau `grp-d` ne reste.**
   - **Suivante : STORY-1079** (dans l'espace d'essai, la garde de bilan ne lit pas le KYC ; Q-D-17) — **ordre de D mis à
-    jour : 1078 ✅ → 1079 → 1074 → 1075**.
+    jour : 1078 ✅ → 1079 → 1074 → 1075** ; **mis à jour le 2026-11-25 : 1078 ✅ → STORY-1118** (les amortissements rattachés aux postes, ticket `TICKET-BACKEND-bilan-amortissements-non-rattaches.md`, Must avant toute liasse réelle : toute entité qui amortit a aujourd'hui une liasse déséquilibrée) **→ 1079 → 1074 → 1075**.
 - **STORY-1079** 📌 placée le 2026-11-25 (par STORY-1078) — le point 3 du ticket de B
   `tickets/TICKET-BACKEND-modules-ouverts-dans-l-essai.md` (STORY-1116, D-1116-1) : dans l'espace d'essai, la garde de
   `bilan-service` (`requires-bilan-access`) ne lit pas le KYC, l'état publié décide seul. Dernier numéro de la plage
