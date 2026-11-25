@@ -1,7 +1,7 @@
 # Lot 7 du groupe A : la coque, la console de mise en service, les écrans cabinet de février
 
-> **Date :** 2026-11-25 · **Statut :** proposition de la session A (moneyvibes-apps-1b), **en attente de validation
-> par l'utilisateur**. Elle entre en vigueur à la fusion de ce document.
+> **Date :** 2026-11-25 · **Statut :** **validé par l'utilisateur le 2026-11-25** (« oui je valide ce plan »), avec un
+> ajout : la story « choisir la tenue de l'exercice » entre au lot 7 (§3). En vigueur à la fusion de ce document.
 > **Consigne de l'utilisateur (25/11) :** « essayons de planifier le lot 7 du groupe A ».
 > **Complète** `PLAN-LOT-7-2026-11-24.md`, qui ne couvre que C et D (« le lot 7 de A […] et celui de B restent à
 > écrire »). **Le lot 7 de B reste à écrire.**
@@ -22,7 +22,7 @@
 3. **La console est débloquée.** Les relais du BFF sont livrés par B : STORY-1080 (installation), 1112 (essais), 1113
    (mise en service), 1114 (métier). Les fiches AP-55, AP-56, AP-57 et AP-59 disent encore `blocked` : à réancrer.
 
-## 1. Le lot 7 de A : 21 stories, dans l'ordre
+## 1. Le lot 7 de A : 22 stories, dans l'ordre (la 22e : l'écran de la tenue de l'exercice, §3)
 
 | # | Story | Ce que voit l'utilisateur | Backend | Maquette | Quand |
 |:--:|---|---|---|---|---|
@@ -63,10 +63,13 @@ AP-61 (annuaire en lot), FE-147 (export du portefeuille).
 ## 3. Ce qu'il faut créer
 
 - **« Choisir la tenue de l'exercice »** (journal ou cahiers, définitif). Aucune story ni aucun écran ne la porte, et
-  sans elle tout dépôt de facture répond `EXERCICE_NON_OUVERT`. Le backend est dans `prospera-comptabilite-service`
-  (tenu par C) ; l'écran va à A. **Recommandation :** fiche écrite par A en tête du lot 7 (identifiant pris à
-  l'écriture, au-dessus du plafond du tracker), backend demandé à C dans son journal, écran ajouté au premier paquet
-  de maquettes.
+  sans elle tout dépôt de facture répond `EXERCICE_NON_OUVERT`. **Décision de l'utilisateur (25/11) : au lot 7.**
+  - **A écrit la fiche** en tête de son lot 7 (identifiant pris à l'écriture, au-dessus du plafond du tracker) et
+    **code l'écran** (story n° 22 du lot 7 de A, maquette dans le premier paquet, avec AP-56 et PRA-10).
+  - **C code le backend** dans `prospera-comptabilite-service`, qu'il tient : story ajoutée au lot 7 de C, en plus de
+    ses 18 fiscales, demandée dans le journal de C. L'écran se code quand la route est sur `dev`.
+- **Financement :** les stories backend 1104 → 1111 sont recommandées à Dev A (§2) ; la décision revient à
+  l'utilisateur à l'arrivée de Dev A, le 04/12.
 
 ## 4. Docker et postes
 
@@ -76,6 +79,6 @@ ensuite.
 
 ## 5. Gestes réservés à l'utilisateur
 
-- Valider ce plan.
+- ~~Valider ce plan.~~ Fait le 25/11.
 - Valider chaque paquet de maquettes avant le code.
-- Dire si les stories backend du financement (1104 → 1111) vont bien à Dev A.
+- Dire, à l'arrivée de Dev A (04/12), si les stories backend du financement (1104 → 1111) vont bien à lui.
