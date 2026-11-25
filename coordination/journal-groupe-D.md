@@ -206,7 +206,9 @@
   la passation du bilan ; **STORY-1073** juste après 1076 : D y fait aussi les deux côtés producteurs
   (`dossier-service`, `paiement`), sur consigne de l'utilisateur du 24/11 (soir) : « gère tout cela dans la story 1073 sans attendre la livraison de B », après la passation de B limitée à
   1073. Les douze identifiants (1019 → 1023 de C, 1072 → 1078 de D)
-  sont réservés au tracker ; la marque haute ne bouge pas.
+  sont réservés au tracker ; la marque haute ne bouge pas. **Ordre de D mis à jour le 2026-11-25 (STORY-1078)** :
+  1072 ✅ → 1076 ✅ → 1073 ✅ → 1077 ✅ → 1078 ✅ → **1079** (la garde de bilan dans l'essai, demande de B, Q-D-17) → 1074
+  → 1075.
 
 - **STORY-1072** ✅ 📨 — le cabinet prévenu par e-mail du renvoi de son dossier KYC (demande de B, STORY-1103)
   (prospera-notification-service#92, `dev` 7a11331, 749b3cd ; prospera-expert-comptable#11, `dev` 4154038, b540904 ;
@@ -328,6 +330,40 @@
     à jour). **Verrou Docker : tenu par B (1116) de 00:31 à 01:42 ; attendu par boucles bornées, pris à 01:42, une seule prise, rendu à 02:51 (suites Node 24 de la dette et de la branche, conteneurs supprimés) ; aucun conteneur, volume ni réseau `grp-d` ne reste.**
   - **Suivante : STORY-1078** (les quatre contrôles d'intégrité de la liasse et le rapprochement par l'empreinte de
     1022, `prospera-bilan-service`).
+
+
+- **STORY-1078** ✅ 🧮 — les quatre contrôles d'intégrité de la liasse dans la réponse d'analyse : FRNG = besoin de
+  financement global + trésorerie nette, écarts de conversion éliminés (Note 34 du SYSCOHADA révisé), caisse créditrice,
+  amortissements et dépréciations au-delà du brut (AUDCIF 45-47), perte de change latente sans provision (AUDCIF 54)
+  (prospera-bilan-service#188, `dev` **d2c65c6** ; annonce « ⚠ Contrats » #865 avant le code, `main` d206f38). Rituel
+  (2026-11-25) : aucune demande neuve à D chez A et C ; chez B, le ticket « modules ouverts dans l'essai » (point 3,
+  bilan) — **placé en STORY-1079** (ci-dessous). **STORY-1022 (C) non livrée** : le rapprochement par l'empreinte de la
+  balance est **reporté** (D-1078-10), la demande à C reste ouverte. « Fini quand » fixé par la fiche (D-1078-1).
+  - **Les sources** : les livres du pack (11, 12) cités par `controles-balance-ohada.json` sont remplacés par les textes
+    officiels relus le 25/11 — AUDCIF 2017 (art. 45-48, 54, 56, 57) et le Guide d'application du SYSCOHADA révisé
+    (ohada.com : Note 34 p. 393, Bilan p. 329, caisse p. 46, amortissements p. 78, dépréciations p. 81, provisions
+    p. 84-85, devises p. 207-210). La Note 34 dit le contrôle exact : « TRESORERIE NETTE (5) = (1) - (4) », écarts de
+    conversion éliminés — sans quoi l'identité rougirait sur toute liasse saine portant un écart (prouvé : 30 000 sur la
+    liasse témoin).
+  - **Livré** : liste `controlesIntegrite` (quatre entrées, termes, comptes ou groupes en cause, message, sources du
+    paquet) ; identité exacte en entiers, `INDETERMINE` (`BILAN_DESEQUILIBRE`) sur un bilan déséquilibré ; caisse
+    compte par compte (racine `57`) ; amortissements **sur les soldes**, sept groupes `21`…`27` face à `281`…`284` et
+    `291`…`297` (les tables de passage SYSCOHADA ne rattachent aucun compte `28`/`29` à un poste : relevé au code,
+    D-1078-5) ; perte de change : `478` hors `4788` (couverture), provisions `194`, `499`, `599`, provision partielle non
+    jugée (art. 56, 57). Bloc `controlesIntegrite` des quatre paquets SYSCOHADA révisé (révision en place, hors bloc
+    chaque artefact identique à l'octet), garde de packaging `gardes-controles-integrite.mjs`. Des signaux : ni `valide`
+    ni la liasse ne changent.
+  - Preuves : Node 24, branche `8bebeb5` : **353/353 suites, 12 344 tests verts (5 ignorés), 722 s** (étage `verification`, `-w 4`) ; specs neuves `controles-integrite` 25/25, garde de packaging 21/21, service d'analyse 25/25 ; e2e `bilan-analyse` + `openapi-contract` **594/594** (trois `ANOMALIE` décrites exactement par le contrat) ; **mutations 22/22** ; lint 0, build OK ; paquets en LF, empreintes du registre ; arbre fusionné identique au commit testé. Sans `docker compose up` (aucun module, dépendance ni Dockerfile ne change).
+  - **⛔ Constat vérifié, ticket ouvert (non corrigé ici)** : les tables de passage de `syscohada-revise@2.1`, `@2.2`, `@2.3`, `zone-franche-togo@1.0` et `smt-togo@1.0` ne rattachent **aucun** compte `28`/`29`/`39` (ni `49`/`59` hors `499`, `599`) — la règle `NET_ACTIF` du paquet les nomme, la table ne les câble pas. Cas chiffré (moteur réel) : matériel 1 000 000, amortissements 400 000, capital 800 000, caisse 200 000 ⇒ `AM` net 1 000 000, actif 1 200 000, passif 800 000, écart **400 000**, `EQUILIBRE_BILAN` et `COMPTES_NON_AFFECTES` bloquants ⇒ `valide: false` ; FRNG publié −200 000 au lieu de +200 000. Une surcharge `RACINE 2844 → BILAN_ACTIF|AM` le rétablit. Toute balance réelle amortie est touchée : `tickets/TICKET-BACKEND-bilan-amortissements-non-rattaches.md` (Must avant un client réel ; une story de `bilan-service` à placer).
+  - Décisions D-1078-1 → 11 (fiche) ; → C (recopie, ticket de 1076 mis à jour ; 1022 : l'empreinte avec son algorithme
+    et sa version). **Verrou Docker : pris à 03:54 (libre, aucun conteneur `grp-d`), une seule prise, rendu à 04:07 (image de vérification construite depuis l'archive, suite Node 24 ; conteneur et image supprimés) ; aucun conteneur, volume ni réseau `grp-d` ne reste.**
+  - **Suivante : STORY-1079** (dans l'espace d'essai, la garde de bilan ne lit pas le KYC ; Q-D-17) — **ordre de D mis à
+    jour : 1078 ✅ → 1079 → 1074 → 1075**.
+- **STORY-1079** 📌 placée le 2026-11-25 (par STORY-1078) — le point 3 du ticket de B
+  `tickets/TICKET-BACKEND-modules-ouverts-dans-l-essai.md` (STORY-1116, D-1116-1) : dans l'espace d'essai, la garde de
+  `bilan-service` (`requires-bilan-access`) ne lit pas le KYC, l'état publié décide seul. Dernier numéro de la plage
+  1030 → 1079 de D ; Must de la démo du 15/01 ; fiche à écrire juste avant de coder ; choix par défaut en **Q-D-17**
+  (décision d'architecture, AD-15). Non codée.
 
 ### Lot 4 (ouvert le 2026-11-18)
 
@@ -1548,7 +1584,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-25, STORY-1078, avant la fusion du code ; branche `MNV-1078` de prospera-bilan-service) — Les
+- **PUBLIÉ (2026-11-25, STORY-1078, prospera-bilan-service#188, `dev` d2c65c6) ; ANNONCÉ avant la fusion du code
+  (prospera-stories #865, `main` d206f38), sans écart. — Les
   quatre contrôles d'intégrité de la liasse, dans la réponse d'analyse.** Fiche : `stories/STORY-1078.md` (D-1078-1 →
   11). **Ajouts seuls** : aucun champ, aucune route, aucune valeur d'énumération existante ne change ni ne disparaît.
   - **Réponse d'analyse** (`GET /dossiers/{id}/bilan/analyse` et `POST …/analyse/dry-run`) : liste neuve
@@ -2616,6 +2653,19 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1078** (troisième passage de D dans `bilan-service`) :
+  - (1) **Un `git stash` / `git stash pop` dans `bilan-service` réécrit en CRLF les JSON des paquets** (`autocrlf` du
+    poste) : empreintes fausses, garde et registre rouges sans que le diff le montre. Ne pas stasher ; si c'est fait,
+    reconstruire les artefacts par `node scripts/referentiels/build.mjs` (ou `git -c core.autocrlf=false checkout --`),
+    puis vérifier `sha256sum` contre le registre.
+  - (2) **Le démon Docker ne résout pas `registry-1.docker.io`** pour la ligne `# syntax=docker/dockerfile:1` du
+    Dockerfile (téléchargement du frontend BuildKit) : contourné par un `Dockerfile.local` sans cette ligne, écrit dans
+    la copie d'archive (`tail -n +2 Dockerfile > Dockerfile.local`, `docker build -f Dockerfile.local --target
+    verification --load`) ; l'image `node:24-slim` en cache suffit.
+  - (3) **Les tables de passage SYSCOHADA ne rattachent aucun compte d'amortissement** : un jeu de test « réaliste »
+    qui porte un `28x` sort déséquilibré ; les contrôles qui doivent le voir lisent les soldes, pas la liasse (D-1078-5,
+    ticket ouvert).
 
 - **STORY-1077** (deuxième passage de D dans `bilan-service`) :
   - (1) **Un heredoc de Git Bash mange un antislash même entre apostrophes** (`<<'EOF'`) : `'\\'` d'un script Python y

@@ -1,6 +1,6 @@
 # STORY-1078 : les contrôles d'intégrité de la liasse — FRNG = BFR + trésorerie nette, caisse créditrice, amortissements > brut, perte de change sans provision ; le rapprochement par l'empreinte de la balance, reporté
 
-Status: in-progress
+Status: done
 
 **Plan :** `coordination/PLAN-LOT-6-2026-11-23.md` §6, amendement du 2026-11-24 (soir, D-L6-5), n° 10 · **Dépôt :**
 `prospera-bilan-service` (repris de B, passation constatée par STORY-1076 : `7b53ff5` ; `origin/dev` au départ :
@@ -100,6 +100,11 @@ contrôle est donc rattaché aux **textes officiels du SYSCOHADA révisé** :
   liasse **déséquilibrée** (comptes `28`/`29` non affectés, `COMPTES_NON_AFFECTES` de la batterie) tant qu'une
   surcharge de rattachement ne les place pas : l'identité du fonds de roulement y rend alors `INDETERMINE`
   (`BILAN_DESEQUILIBRE`), honnêtement. La « convention miroir » reste écartée depuis STORY-059 (P7).
+  **Constat vérifié le 2026-11-25 (moteur réel, quatre paquets)** : balance équilibrée `2441` D 1 000 000, `28441`
+  C 400 000, `101` C 800 000, `5711` D 200 000 ⇒ `AM` brut 1 000 000, amort. **0**, net 1 000 000 ; actif 1 200 000,
+  passif 800 000, `ecartN` **400 000**, `equilibreN` false, `comptesNonMappes` `["28441"]` (même défaut sur `smt-togo@1.0`) ;
+  avec une surcharge `RACINE 2844 → BILAN_ACTIF|AM` (STORY-400) : 1 000 000 / 400 000 / 600 000, équilibré. Ticket
+  `tickets/TICKET-BACKEND-bilan-amortissements-non-rattaches.md` (Must avant un client réel ; non corrigé ici).
 - **D-1078-6 — La perte de change se lit sur les soldes** : écart de conversion-actif = solde débiteur net des comptes
   `478` **hors `4788`** (différences compensées par couverture de change, qui n'appellent pas de provision) ; provisions
   = solde créditeur net des comptes `194`, `499`, `599` (AUDCIF 48 ; Guide p. 84-85). `ANOMALIE` si l'écart est positif
@@ -129,4 +134,22 @@ Voir « ⚠ Contrats » du journal de D (entrée STORY-1078).
 
 ## Preuves
 
-À écrire à la livraison.
+**Livré :** prospera-bilan-service#188, fusionnée en rebase le 2026-11-25 (`head` `8bebeb5`, rejoué sur `dev` en
+**`d2c65c6`**, arbre identique) ; annonce « ⚠ Contrats » prospera-stories #865 (`main` d206f38) avant le code.
+
+- **Suite unitaire complète sous Node 24 sur `8bebeb5`** (étage `verification`, image construite depuis
+  `git -c core.autocrlf=false archive`, `Dockerfile.local` sans la ligne `# syntax`, sous le verrou) : **353/353 suites, 12 344 tests verts (5 ignorés), 722 s**,
+  en `-w 4 --workerIdleMemoryLimit=700MB`. Paquets vérifiés en LF dans l'image (aucun CR) ; empreintes égales à celles
+  du registre : `@2.1` `a2da57d7…`, `@2.2` `65c9c9a9…`, `@2.3` `39bb9f99…`, zone franche `70c87a37…`.
+- **Spec neuve `controles-integrite.spec.ts`** (valeurs écrites dans le test, vrais paquets) : **25/25** (AC-4 → AC-7 ;
+  égalité au franc, groupes qui ne se compensent pas, `4788` exclu, provision partielle non jugée).
+- **Garde de packaging `gardes-controles-integrite.mjs`** (spec en `node` fils) : **21/21** (AC-2 : chaque refus).
+- **Service d'analyse** (soldes du jeu, de la version, du `dry-run`, AC-8) : **25/25**.
+- **e2e** `bilan-analyse` + `openapi-contract` (vrai HTTP, artefacts embarqués, AC-9) : **594/594** — liasse saine,
+  quatre `OK` ; balance à caisse créditrice, matériel amorti au-delà du brut et écart non provisionné, trois `ANOMALIE`
+  décrites exactement par le contrat.
+- **Mutations sur la logique neuve : 22/22 rouges.** Lint 0 (fichiers touchés), build OK. Sans `docker compose up`
+  (aucun module, dépendance ni Dockerfile ne change).
+- **AC-3** : hors du bloc `controlesIntegrite`, chaque artefact est égal à l'octet à celui de 1077 ; SMT, SFD, CIMA
+  rendent les quatre contrôles `NON_APPLICABLE`.
+- **Constat D-1078-5 vérifié** (cas chiffré ci-dessus) : ticket `tickets/TICKET-BACKEND-bilan-amortissements-non-rattaches.md`.
