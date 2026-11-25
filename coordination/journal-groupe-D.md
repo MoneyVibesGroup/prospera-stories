@@ -107,6 +107,12 @@
     paquet, et la recopie du paquet fiscal dans le service, plan §6) : 564 **en cours** chez C (fiche relue, D-564-1 → 12, et annonce avant le code, `main` 1d64753 ; branche `MNV-564` du fiscal, recopie du paquet comprise ; C préviendra D à la fusion). La session de groupe de D décide de la
     suite : les autres stories de D attendent 348 (364, 349) ou C (330 ← 325, puis 331 → 337 et 561 → 565).
 
+- **STORY-348** 🧮 **EN COURS** (2026-11-25) — le calcul des cotisations et des retenues, aiguillé sur le type de
+  bénéficiaire. Fiche relue et mise à jour **avant le code** (D-348-1 → 12, tableau « Contrat », Q-D-22 ; D-564-5
+  corrige « même barème ⇒ même base »). **← C : 564 — servie** (prospera-fiscal-service#66, `dev` `fd34834` ; paquet
+  recopié, sha256 `bfcc3fc9…c065` ; annonce de C #921). Annonce « ⚠ Contrats » et « ⚠ Communs » ci-dessous. Branche
+  `MNV-348` du fiscal (`_wt-d-fiscal`).
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
@@ -1407,8 +1413,17 @@
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-25, STORY-348) : la date de collecte des cotisations sociales au paquet fiscal Togo** — **ouverte**.
+  Le paquet 2026 ne porte la date de collecte de la CNSS (et de l'AMU, qu'elle collecte) qu'en texte
+  (`cnss.amu.collecte.versement` : « au plus tard le 15 du mois suivant ») ; la retenue d'IRPP l'a structurée
+  (`irpp.retenueALaSource.reversement` `{ jourLimite: 15, moisSuivant: true, article, millesime }`). Demandé : un bloc
+  **`cnss.collecte`** `{ jourLimite, moisSuivant, organisme, source }` (le texte qui fixe le 15 : Code de sécurité
+  sociale ou décret, à citer), dans la source de `balance-service` puis la recopie du fiscal. 348 le lit déjà : absent
+  ⇒ échéance `NON_DECLAREE` nommée (D-348-9) ; présent ⇒ le 15 du mois suivant, **sans livraison**. Sans urgence :
+  rien ne bloque 348 ni 364.
+
 - **→ C (2026-11-25, STORY-347, pour STORY-348) : STORY-564, le barème IRPP au paquet fiscal Togo, et la recopie du
-  paquet dans `prospera-fiscal-service`** — **ouverte**. État constaté au journal de C (`origin/main`, 25/11 au soir) :
+  paquet dans `prospera-fiscal-service`** — ~~ouverte~~ **← C : 564 — servie** (prospera-fiscal-service#66, `dev` `fd34834`, balance-service#168 `c9e94c6` ; annonce #921 ; paquet LF sha256 `bfcc3fc9…c065` recopié sous `test/fixtures/paquet-fiscal/`). État constaté au journal de C (`origin/main`, 25/11 au soir) :
   564 **en cours** chez C (fiche relue, D-564-1 → 12, et annonce avant le code, `main` 1d64753 ; branche `MNV-564` du fiscal, recopie du paquet comprise ; C préviendra D à la fusion). 348 lit le barème (`irpp.traitementsSalaires.ordreDeCalcul`), le SMIG (`cnss.assiette.smig`), la ventilation
   par branche et l'AMU dans la copie du paquet du service (D-L7-3 : la copie est à C ; plan §6 : recopiée au plus tard
   avant 348). La base que 348 lira est prête (`baseDuCalcul`, STORY-347). Prévenir D à la fusion de 564.
@@ -1866,6 +1881,13 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-25, STORY-348, avant le code)** — branche `MNV-348`. **Aucune migration** (un champ facultatif
+  `personnesACharge`, `null` par défaut, sur `lignes_remuneration` : une ligne déjà écrite se lit `null`), ni
+  `app.module.ts` (`RemunerationModule` est déjà monté), ni `package.json`, ni `read-models/`, ni copie du paquet, ni
+  manifeste `declarations`. Touché : **le contrat OpenAPI** (une route neuve, un champ facultatif : « ⚠ Contrats »).
+  **Lu, sans y écrire** : `src/domain/familles/irpp-traitements-salaires.ts` et `decimal-exact.ts` (dossier de C),
+  importés par le calcul de D (D-348-1). Tout le reste est dans les dossiers de D (`remuneration`). **→ C** : rien à
+  faire pour un rebase ; 350 lira `CalculRemunerationService` (exporté par `RemunerationModule`).
 - **FUSIONNÉ (2026-11-25, prospera-fiscal-service#64, `dev` `e4630f1`, rebasée sur `origin/dev` avant la fusion) ; ANNONCÉ (2026-11-25, STORY-346, avant le code)** — branche `MNV-346`. **Aucune migration** (aucune collection,
   aucun index, aucun champ neuf : l'import écrit dans `bases_remuneration` et `lignes_remuneration` de 345), ni
   `app.module.ts` (`RemunerationModule` est déjà monté), ni `package.json` (multer vient avec
@@ -1897,6 +1919,24 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-25, STORY-348, avant le code) — le calcul des cotisations et des retenues** (`prospera-fiscal-service`,
+  dossier `remuneration`). Fiche : `stories/STORY-348.md` (D-348-1 → 12, tableau « Contrat » ; Q-D-22).
+  - **Route neuve** : `GET /api/v1/dossiers/{dossierId}/remuneration/{periode}/calcul` (`?version=` facultative ;
+    garde fiscale, rôle `TENANT_ADMIN` | `TENANT_USER`, droit `fiscalite:declaration:preparer` : résultat par
+    bénéficiaire, AD-21 ; aucun corps). 200 `{ origine, paquet { code, version, checksum }, lignes[], totaux,
+    echeances[] }` ; une ligne : `{ beneficiaireId, typeBeneficiaire, cotisations, irpp }`, chacun `CALCULEE` (montants
+    en francs entiers, branches, AMU, retenue du mois et étapes de l'IRPP avec leurs articles) ou `BLOQUEE` (`motif`,
+    `manques[]`). Motifs : `REGIME_SOCIAL_NON_DETERMINE`, `PAQUET_INCOMPLET`, `PAQUET_INCOHERENT` (cotisations) ;
+    `REVENU_CATEGORIEL_NON_COUVERT`, `REVENU_CATEGORIEL_INCONNU`, `PAQUET_INCOMPLET` (de C),
+    `CHARGES_DE_FAMILLE_NON_RENSEIGNEES`, `COTISATIONS_NON_CALCULEES` (IRPP). Échéances `COTISATIONS_SOCIALES` et
+    `RETENUE_IRPP` : `DECLAREE` (`exigibleLe`, `source`) ou `NON_DECLAREE` (`manque`). Refus : 400 `PERIODE_INVALIDE`,
+    403, 404 `DOSSIER_INTROUVABLE` | `BASE_INTROUVABLE`, refus du paquet tels quels.
+  - **Champ ajouté, facultatif** : `personnesACharge` (entier 0 → 99) dans `lignes[]` du `PUT
+    …/remuneration/{periode}`, en colonne facultative du gabarit d'import (cellule vide ⇒ non renseigné), et dans
+    `lignes[]` du détail (`null` si non renseigné). Sans lui, la retenue d'IRPP de la ligne est bloquée ; une base
+    constituée avant 348 garde son empreinte.
+  - Rien n'est renommé ; aucun topic, schéma de fait ni manifeste. **→ A** (écrans du cabinet, plus tard) : le champ à
+    la saisie, le calcul de la période. **→ C** (350) : les totaux sans nom du calcul.
 - **PUBLIÉ (2026-11-25, STORY-346, prospera-fiscal-service#64, `dev` `e4630f1`) sans écart ; ANNONCÉ (2026-11-25, avant le code) — l'import d'un fichier de paie** (`prospera-fiscal-service`,
   dossier `remuneration`). Fiche : `stories/STORY-346.md` (D-346-1 → 11, tableau « Contrat » ; Q-D-21).
   - **Route neuve** : `POST /api/v1/dossiers/{dossierId}/remuneration/{periode}/import` (garde fiscale, rôle
@@ -3015,6 +3055,14 @@
     par B dans `prospera-plateforme/contrats/instance/`.
   - **La zone franche** : `zone-franche-togo@1.1`, qui reprend la correction des sous-totaux de `@2.2` (STORY-676, 678),
     se fera **au lot 7**.
+
+- **Q-D-22 (2026-11-25, STORY-348) — L'AMU : qui la collecte, et sa part salariale sort-elle de la base de l'IRPP ?**
+  Deux points laissés ouverts par le plan (§8, relecture du bloc `cnss` par un fiscaliste, geste de l'utilisateur).
+  **Choix par défaut appliqués (D-348-6, D-348-7, D-348-9)** : (1) **la CNSS** collecte l'AMU avec les cotisations, à
+  la même échéance (`cnss.amu.collecte.CNSS` : salariés relevant du Code du travail ; l'INAM ne vise que les agents
+  publics) ; (2) **la part salariale (5 %) est retranchée du brut** avant l'IRPP, au titre de l'Art. 26, 2°
+  (`cnss.amu.deductibiliteIRPP`). Le décret n° 2023-097/PR reste à lire. Une réponse contraire change le paquet (C), pas
+  le code, sauf pour (1) si l'AMU avait sa propre échéance (une échéance de plus au résultat).
 
 - **Q-D-21 (2026-11-25, STORY-346) — Quel outil de paie, et quel fichier en sort ?** C'est la question ouverte n° 2 du
   PRD fiscalité ; la pièce n° 8 de `demande-pieces-fiscales-2026-08-03.md` (« un export de votre outil de paie ») n'a
