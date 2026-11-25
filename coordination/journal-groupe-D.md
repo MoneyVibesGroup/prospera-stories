@@ -1791,6 +1791,13 @@
   devient périmée : à corriger à la prochaine version du manifeste, avec 561, qui apporte la vraie ressource
   extérieure). Touchés :
   - `src/app.module.ts` : import de `CoffreSecretsModule` ;
+  - **complément du 2026-11-25, avant la fusion (#905 ne le nommait pas)** —
+    `src/common/filters/all-exceptions.filter.ts` et son test (dossier transverse, donc commun) : une
+    `BadRequestException` née du `SyntaxError` de body-parser (hors route, message de `JSON.parse`) rend désormais un
+    message constant et le code **`CORPS_ILLISIBLE`** au lieu de recopier un extrait du corps reçu (D-560-15 : sur
+    `POST /coffre/depots`, l'extrait peut être le mot de passe du client). **Vaut pour toutes les routes du service** :
+    un client qui lisait le message de `JSON.parse` lit maintenant `code`. Aucun autre 400 ne change (un 400 levé par
+    une route garde son message) ;
   - le contrat OpenAPI : huit routes neuves (« ⚠ Contrats ») ;
   - `src/garde-routes-ecriture.spec.ts` : les deux routes publiques du client (`POST /coffre/depots`,
     `POST /coffre/revocations`) entrent dans la liste des écritures sans droit fiscal, avec leur raison ;
