@@ -299,6 +299,36 @@
   - **Suivante : STORY-1077** (capitaux propres < ½ capital, `prospera-bilan-service` ; la forme juridique et le capital
     d'un dossier client ne sont pas publiés par `dossier-service` : D-1073-2, à demander à B ou lire par route).
 
+- **STORY-1077** ✅ ⚖️ — l'alerte « capitaux propres < ½ capital » (AUSCGIE révisé 2014 : 371-373 SARL et SUARL, 664-669 SA
+  et SAS par 853-3) et ses échéances légales, dans la réponse d'analyse (prospera-bilan-service#187, `dev` **9fed378** ;
+  annonce « ⚠ Contrats » #853 avant le code, `main` 4222321, complément #859, `main` 9be68d5). Rituel (2026-11-25) :
+  aucune demande neuve à D pour le bilan chez A et C ; chez B, le ticket `TICKET-BACKEND-modules-ouverts-dans-l-essai.md`
+  (1116) nomme D pour la garde de bilan dans l'espace d'essai — **à placer par la session de groupe**, hors de cette story.
+  « Fini quand » fixé par la fiche (D-1077-1).
+  - **Les articles relus au texte officiel** (édition intégrale d'ohada.com, adoptée le 30/01/2014, JO OHADA du
+    04/02/2014) : 140, 309, 334, 348, 371-373, 548, 664-669, 853-3. Écart relevé dans `controles-balance-ohada.json` : le
+    renvoi de la SAS aux règles de la SA est l'article **853-3** (le référentiel disait « 853-1 et suivants ») ; SUARL →
+    SARL (309, 334) et SAS → SA confirmés.
+  - **La règle en données sourcées du paquet** (révision en place, D-1077-3, doctrine de D-1076-2) : marqueur
+    `capitauxPropresStricts` (`CAPITAL` sur le capital, `COMPOSANTE` sur les sept autres postes des capitaux propres
+    stricts ; ni subventions d'investissement ni provisions réglementées) et bloc `alerteCapitauxPropres` (fraction ½,
+    approbation 6 mois, deux régimes, délais, citations verbatim, URL) dans `syscohada-revise@2.1`, `@2.2`, `@2.3` et
+    `zone-franche-togo@1.0` ; garde de packaging `gardes-alerte-capitaux-propres.mjs` ; hors ajouts, chaque artefact
+    identique à l'octet. SMT, SFD, CIMA : `NON_APPLICABLE`.
+  - **L'alerte** (`alerteCapitauxPropres`, toujours présente) : colonne N, comparaison exacte en entiers (la moitié
+    atteinte ne déclenche pas), lecture large publiée à côté (**Q-D-16**) ; trois échéances : approbation (clôture + 6
+    mois), décision (approbation + 4 mois, datée par **`dateApprobation`** facultative, sinon « si approbation au terme
+    légal »), régularisation (SARL : clôture + 2 ans ; SA : non datable, art. 665) ; `400 APPROBATION_AVANT_CLOTURE`.
+  - **La forme juridique** projetée de `dossier.*` dans `dossiers_dossier` (D-1077-2 ; mal typée ⇒ `null`, message
+    gardé) ; publiée aujourd'hui pour le seul dossier propre : un dossier client rend le constat chiffré **sans échéance**
+    (`FORME_JURIDIQUE_INCONNUE`) jusqu'à la demande à B (reçue par B, à placer).
+  - **Dette de preuve de 1076 soldée** : suite unitaire complète de `bilan-service` sous Node 24 sur `origin/dev` `e4cee3e` (étage `verification`, image depuis `git -c core.autocrlf=false archive`, sous le verrou) **349/349 suites, 12 212 tests verts (5 ignorés), 641 s** en `-w 4 --workerIdleMemoryLimit=700MB` ; aucun rouge, rien à corriger dans les paquets de 1076 (un premier passage à 8 workers avait saturé la VM : quatre workers tués, piège 1077-2).
+  - Preuves de la story : Node 24, branche : **351/351 suites, 12 294 tests** ; Node 25 : 12 056 tests (15 suites rouges connues) ; specs neuves `alerte-capitaux-propres` (43 tests, dont `ajouterMois`, les quatre paquets, les bornes 499 999 / 500 000, les formes, les échéances) et garde de packaging (25 : 23 refus) ; e2e `bilan-analyse` + `openapi-contract` **591/591** (une alerte ATTEINTE d'une SA décrite exactement par le contrat) ; **mutations 22/22** ; lint 0, build OK ; arbre fusionné identique au commit testé. Sans `docker compose up` (aucun module, dépendance ni Dockerfile ne change).
+  - Décisions D-1077-1 → 13 (fiche) ; Q-D-16 au PO ; → B (forme des dossiers clients) ; → C (recopie, ticket de 1076 mis
+    à jour). **Verrou Docker : tenu par B (1116) de 00:31 à 01:42 ; attendu par boucles bornées, pris à 01:42, une seule prise, rendu à 02:51 (suites Node 24 de la dette et de la branche, conteneurs supprimés) ; aucun conteneur, volume ni réseau `grp-d` ne reste.**
+  - **Suivante : STORY-1078** (les quatre contrôles d'intégrité de la liasse et le rapprochement par l'empreinte de
+    1022, `prospera-bilan-service`).
+
 ### Lot 4 (ouvert le 2026-11-18)
 
 - **Plan** : `PLAN-4-SESSIONS-LOT-4-2026-11-18.md` §4 : **STORY-1060 → 1064**, le distributeur au backend (cinq stories ;
@@ -1123,7 +1153,10 @@
   (registre, `ARTEFACTS_PARTAGES`) — **ouverte** (bilan `dev` `e4cee3e`, prospera-bilan-service#186). Ticket : `tickets/TICKET-BACKEND-balance-recopie-paquets-syscohada-seuils-1076.md`
   (empreintes d'avant et d'après). `balance-service` ne lit pas `seuils` : rien ne casse en service ; sa garde « octets
   identiques à ceux de bilan-service » rougit tant que la recopie n'est pas faite, sur un poste où les deux dépôts sont
-  côte à côte. D ne touche pas à `balance-service` (D-L6-5).
+  côte à côte. D ne touche pas à `balance-service` (D-L6-5). **Mise à jour du 2026-11-25 (STORY-1077)** : les mêmes
+  trois artefacts sont révisés encore en place (marqueur `capitauxPropresStricts`, bloc `alerteCapitauxPropres`) :
+  recopier la version de 1077 (bilan `dev` `9fed378` ; empreintes `a1f6fd49…`, `bcbae17b…`, `fbdca0df…`), qui
+  contient celle de 1076 ; le ticket le dit.
 - **→ B (2026-11-24, soir ; amendement du lot 6, D-L6-5) : la passation de `prospera-bilan-service` à D** — **servie**
   (← B, 24/11, prospera-stories #820 ; constatée par STORY-1076, voir « Passations »).
   Le plan amendé fait passer le bilan de B à D pour ce lot (STORY-1074 → 1078 ; 1080 ✅ était la dernière story de B
@@ -1412,6 +1445,9 @@
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-25, STORY-1116, `TICKET-BACKEND-modules-ouverts-dans-l-essai.md`) : dans l'espace d'essai, la garde de
+  bilan ne lit pas le KYC (point 3, « D (bilan) »)** — **lue par STORY-1077, à placer par la session de groupe de D**
+  (hors du lot 6 amendé ; elle touche `requires-bilan-access` de `prospera-bilan-service`).
 - **← B (2026-11-24, STORY-1103, prospera-stories #805) : consommer `kyc.correction.requested@1` pour prévenir le cabinet
   par e-mail** — **servie par STORY-1072** (notification #92, `dev` 7a11331, 749b3cd ; expert-comptable #11, `dev`
   4154038, b540904) : l'AC-5 de 1103 est prouvé dans mailhog (pilote 35/35, `expert-comptable/scripts/recette/1072/`) ;
@@ -1500,7 +1536,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-25, STORY-1077, prospera-bilan-service) — l'alerte « capitaux propres inférieurs à la moitié du
+- **PUBLIÉ (2026-11-25, STORY-1077, prospera-bilan-service#187, `dev` 9fed378) ; ANNONCÉ avant la fusion du code
+  (prospera-stories #853, `main` 4222321 ; complément #859, `main` 9be68d5), sans autre écart. — L'alerte « capitaux
+  propres inférieurs à la moitié du
   capital social » (AUSCGIE 371-373, 664-669) et ses échéances légales, dans la réponse d'analyse.** Fiche :
   `stories/STORY-1077.md` (D-1077-1 → 13, Q-D-16). **Ajouts seuls** : aucun champ, aucune route, aucune valeur
   d'énumération existante ne change ni ne disparaît.
@@ -1534,7 +1572,8 @@
   - **Paquets** (révision en place, D-1077-3 ; liasse produite inchangée) : `syscohada-revise@2.1`, `@2.2`, `@2.3`,
     `zone-franche-togo@1.0` gagnent le marqueur de table de passage `capitauxPropresStricts` (`CAPITAL` | `COMPOSANTE`)
     et le bloc `alerteCapitauxPropres` (règle, délais, articles et citations de l'AUSCGIE) ; leurs empreintes changent
-    (valeurs dans l'entrée PUBLIÉ). SMT, SFD-BCEAO, CIMA : inchangés, alerte `NON_APPLICABLE`.
+    (`syscohada-revise@2.1` `a1f6fd49…`, `@2.2` `bcbae17b…`, `@2.3` `fbdca0df…`, `zone-franche-togo@1.0` `5c910373…`).
+    SMT, SFD-BCEAO, CIMA : inchangés, alerte `NON_APPLICABLE`.
   - **Pour A (FE-141)** : types à régénérer (`npm run gen:api -- bilan`) ; afficher `message` tel quel, les échéances
     datées, et la lecture large à côté quand elle diffère ; un écran qui ignore le bloc ne change rien.
   - **`balance-service` (C)** : la recopie à l'octet des trois `syscohada-revise` (ticket de 1076, mis à jour) prend la
@@ -2403,6 +2442,14 @@
 
 ## Questions à l'utilisateur ou au PO
 
+- **Q-D-16 (2026-11-25, STORY-1077) — Les capitaux propres des art. 371 et 664 de l'AUSCGIE comprennent-ils les
+  subventions d'investissement et les provisions réglementées ?** Le SYSCOHADA révisé les range dans « capitaux propres et
+  ressources assimilées ». **Choix par défaut appliqué (D-1077-4)** : l'alerte se juge sans eux (lecture stricte, plus
+  prudente : elle se déclenche plus tôt), la lecture large est publiée à côté avec son propre constat
+  (`atteinteSurRessourcesAssimilees`) et le message dit laquelle déclenche. Si la doctrine retient la lecture large :
+  poser `COMPOSANTE` sur les deux postes par une révision du paquet, rien à changer dans le code. Question à poser à un
+  expert-comptable inscrit à l'Ordre.
+
 - **Q-D-15 (2026-11-24, STORY-1073) — Le numéro complet d'un compte d'encaissement (RIB, IBAN, numéro Mobile Money)
   s'imprime-t-il sur la facture ?** Dans `paiement`, l'identifiant d'un compte est **scellé au coffre** (STORY-243, AD-14
   : « aucun chemin ne restitue ») ; seule son empreinte visible (« ••••4521 ») est en clair, avec la destination d'un
@@ -2516,6 +2563,20 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1077** (deuxième passage de D dans `bilan-service`) :
+  - (1) **Un heredoc de Git Bash mange un antislash même entre apostrophes** (`<<'EOF'`) : `'\\'` d'un script Python y
+    devient `'\'` (chaîne non fermée), et `split('\\')` d'un TypeScript y perd le sien. Écrire tout script qui porte un
+    antislash avec l'outil d'écriture, puis le lancer.
+  - (2) **La suite complète de bilan sous Node 24 sature la VM Docker** (8 cœurs, 7,6 Gio) : à 8 workers, quatre workers
+    tués (SIGKILL), des hooks au-delà de 5 s, puis l'API de Docker en 500 (« unexpected EOF » sur `docker run`, `docker ps`
+    qui ne répond plus) — le conteneur `--rm` tourne encore, et disparaît avec sa sortie. **Jouer la suite en `-w 4
+    --workerIdleMemoryLimit=700MB`, dans un conteneur nommé sans `--rm`, sortie écrite dans le conteneur** (`> /tmp/jest.txt`,
+    lue par `docker exec`), puis `docker rm -f`. Jamais une suite complète pendant qu'une pile tourne.
+  - (3) Les textes du paquet citent la loi avec l'apostrophe droite (`'`), le code du message la typographique (`’`) :
+    une attente de test qui recopie le message doit garder celle de la donnée.
+  - (4) `scripts/*.mjs` est hors du projet ESLint (« not found by the project service ») et hors de prettier, comme
+    `gardes-analyse.mjs` : `node --check` et la spec en `node` fils sont leurs preuves.
 
 - **STORY-1073** (D dans `dossier-service` et `paiement`, dépôts de B prêtés) :
   - (1) **Une coupure du réseau pendant les `docker build`** (« lookup auth.docker.io: no such host », `npm ci` de 6 546 s,
