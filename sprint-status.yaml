@@ -2491,11 +2491,13 @@ reserved_ranges:
       instance-c13.controller.ts ne sert que vérifications, import et effacement. Fiche à écrire juste avant de coder.
       Lot C, n° 10 du lot 6. NON SLOTTÉE.
   - range: "STORY-1020"
-    status: "RÉSERVÉ"
+    status: "EN COURS"
     owner: "Groupe C — l'état de rapprochement s'exporte (PDF / Excel) ; débloque FE-077 (prospera-balance-service)"
-    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    source_doc: "prospera-stories/stories/STORY-1020.md"
     reserved_on: "2026-11-24"
     note: >
+      EN COURS le 2026-11-25 (lot 7 de C, n° 0a, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite avant le code ; contrat
+      annoncé (« ⚠ Contrats » du journal de C) : GET …/rapprochement/etat/export?format=pdf|xlsx ; manifeste balance 1.2.0.
       Amendement du lot 6 (24/11 soir, D-L6-5). Source : PRD Atelier FR-A17 ; FE-077 bloquée « aucune route d'export ».
       Fiche à écrire juste avant de coder. Lot C, n° 8 du lot 6 (première des cinq). NON SLOTTÉE.
   - range: "STORY-1019"
