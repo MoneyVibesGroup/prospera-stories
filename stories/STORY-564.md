@@ -1,6 +1,6 @@
 # STORY-564 : Le barème IRPP entre au paquet fiscal Togo — aujourd'hui il est cité comme « présent dans le CGI » et rien ne le calcule
 
-Status: in-progress
+Status: done
 
 **Épic :** EPIC-029 — Familles de calcul et modificateurs
 **Service :** `fiscal-service` (`:3012`) · **paquet :** `paquet-fiscal-togo-2026`
@@ -159,6 +159,60 @@ de `autresImpotsTaxes.presentsDansCGI`, qui recopie encore un taux (« tranche h
 `autresImpotsTaxes` et le bloc `cnss`, porté de la copie de référence) ; son empreinte change ; la garde de packaging gagne
 R11. `fiscal-service` : un calcul neuf dans le domaine, **aucune route**, contrat OpenAPI inchangé ; fichier commun
 touché : la copie du paquet (`test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`).
+
+## Preuves
+
+**Livré :** prospera-balance-service#168, fusionnée en rebase le 2026-11-25 (`head` `dd4f630`, rejoué sur `dev` en
+**`c9e94c6`**, arbre identique) ; prospera-fiscal-service#66, rebasée sur `origin/dev` `4a1d938` (STORY-347 de D) avant la
+fusion, fusionnée en rebase (`head` `1aa4aeb`, rejoué sur `dev` en **`fd34834`**, arbre identique). Annonce « ⚠ Contrats »
+et « ⚠ Communs » avant le code : prospera-stories #921 (`main` `1d64753`). **Livré conforme à l'annonce.**
+
+- **Le paquet** : `node scripts/referentiels/build.mjs` passe (R1 → R11) ; artefact `paquet-fiscal-togo-2026.json`
+  **sha256 `bfcc3fc92603e4fa08c370e9a9da7b6634f3b7b2cca12972bbe3fbc6c258c065`** (avant : `5c683d16…149b`), réépinglé
+  (registre, `referentiel-registry.spec`, `referentiel.e2e-spec`) ; la surcouche zone franche ne bouge pas (`da92a432…0f74`).
+  Copie du fiscal à l'octet, même empreinte sur `dev`. Valeurs relues à la main contre le corpus (CGI Art. 74 p. 41, Art. 26 p. 25, Art. 72-73 p. 40-41, Art. 28 p. 26 ; LPF Art. 26-27 p. 223, Art. 43 p. 228).
+- **balance-service, Node 24** (étage `verification`, image de `git -c core.autocrlf=false archive` de `dd4f630`) :
+  **unitaires 297/297 suites, 5705 tests** (2 suites sautées, comme sur `dev`), **e2e 37/37 suites, 2291 tests**, `nest
+  build` 0. Specs neuves : `paquet-fiscal-schema.spec` « R11 » — le paquet réel (barème, base, périmètre, retenue, clés de
+  348, SMIG, mention sans taux, `aFaire`) et **douze refus nommés** provoqués par la vraie garde (tranche sans article, sans
+  millésime, forfait au millésime fait d'espaces, déduction du brut, rubrique sur justificatif, charges de famille, revenu
+  non couvert, retenue, barème vide, tranche qui n'est pas un objet, revenu à la fois couvert et non couvert, revenu sans
+  code) + toutes les fautes d'un coup (8). **Mutations de la garde 4/4** (règle retirée : 13 rouges ; chaîne vide admise ;
+  doublon admis ; liste vide admise).
+- **prospera-fiscal-service, Node 24** (image de l'archive de `1aa4aeb`, `# syntax=` retiré de la copie) : **unitaires
+  201/201 suites, 2905 tests** (1 sauté), **e2e 13/13 suites, 261 tests**, `nest build` 0. Spec neuve
+  `irpp-traitements-salaires.spec` (35 tests ; montants attendus calculés à la main depuis le texte) : 12 000 000 brut,
+  deux personnes ⇒ net 7 880 000, impôt **645 000**, solde 45 000, chaque étape avec son article ; 30 000 000 ⇒ 26 480 000,
+  **5 931 000** (35 % sur l'excédent de 20 M seulement), six personnes au plus, excédent de retenue 69 000 ; plafond de
+  6 % du 1° ; exactitude (74 074,02 ; 324 938,0344) jusqu'à l'arrondi ; 5°, 8°, 9° dans leurs limites ; refus nommés ;
+  **AC-1 : six témoins** (une tranche, le forfait, son plafond, les charges de famille, la limite du 1°, l'arrondi : le
+  résultat change sans code) et **garde par l'AST** (aucun littéral hors 0, 3, 12n dans le fichier du calcul) ; **AC-2 :
+  douze paquets incomplets ⇒ `PAQUET_INCOMPLET`** avec le manque nommé ; **AC-4** : gérant majoritaire, revenus fonciers
+  et capitaux mobiliers nommés d'un coup, revenu inconnu, revenu couvert par une autre base, périmètre en donnée ;
+  **AC-5/6** : retenues avec leur ligne, ligne en double refusée, résultat identique à l'octet, paquet et millésimes
+  publiés. Node 25 : `src/domain`, `application/obligations`, `application/qualification` 59/59 suites, 1214 tests (le
+  paquet neuf ne casse aucune spec qui lit la copie). **Mutations 14/14 tuées par une assertion** (limite du 1° ignorée,
+  plafond du forfait ignoré, personnes sans maximum, revenu non couvert pris pour inconnu, salaires calculés même non
+  couverts, ligne en double admise, tranche sans article admise, net négatif gardé, 8° sur le brut, excédent tu, limite du
+  9° ignorée, déduction inconnue admise, ligne de rémunération perdue, élément sans millésime admis).
+- Lint des fichiers touchés : 0 ; `tsc --noEmit` : rien de neuf (les erreurs locales du client Kafka natif, absent sous
+  Node 25, sont celles de `dev`). Pas de `docker compose up` ni de gate : aucun module Nest, dépendance ni Dockerfile ne
+  change, et aucun comportement de bout en bout (aucune route) (§1.5).
+- **Verrou Docker** : pris à 22:25:38, rendu à 22:33:58 (balance) ; repris à 22:34:05, rendu à 22:38:39 (fiscal), par le
+  `trap` de deux scripts autonomes ; aucun conteneur `grp-c` restant, images de vérification supprimées.
+
+## Ce qui reste
+
+- **→ B** : la copie de `dossier-service` (`src/modules/portefeuille/echeance/assets/paquet-fiscal-togo-2026.json`, à sa
+  prochaine story sur le service, en LF) — demandée au journal et par message.
+- L'exposition du calcul : **340** (montant net d'acomptes, de crédits et de retenues) et **566** (expliquer, options
+  chiffrées) ; la mensualisation de la retenue de l'employeur est à **348** (D).
+- Les revenus non couverts (pensions Art. 27, gérants Art. 28, fonciers, revenus d'affaires, capitaux mobiliers) : une
+  story de sourcing chacun, quand le PO les ouvrira ; le paquet les nomme dans `aFaire`.
+- La relecture par un fiscaliste togolais (barème, lectures D-564-9, imputation des retenues) avant figement, et celle du
+  bloc `cnss` (plan §8).
+- La copie de référence `prospera-stories/referentiels/paquet-fiscal-togo-2026.json` (l'amorce) reste en arrière de la
+  source : elle n'est la copie de personne ; à aligner ou à retirer quand l'utilisateur le décidera.
 
 ## Notes
 
