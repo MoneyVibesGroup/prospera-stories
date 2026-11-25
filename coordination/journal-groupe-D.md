@@ -59,6 +59,29 @@
   - **Suivante : STORY-346** (l'import d'un fichier de paie, idempotent et versionné ; `remuneration`, dossier de D ;
     fiche à écrire depuis `epics-fiscalite-2026-08-03.md` juste avant de coder).
 
+- **STORY-346** ✅ 📥 — l'import d'un fichier de paie, idempotent et versionné (prospera-fiscal-service#64, `dev`
+  `e4630f1` ; annonce avant le code #915 : fiche D-346-1 → 11, ⚠ Contrats, ⚠ Communs, Q-D-21). Rituel (2026-11-25) :
+  aucune demande neuve à D chez A, B et C ; aucune PR ouverte ni migration en vol sur le fiscal.
+  - **Livré** (dossier `remuneration`) : `POST /api/v1/dossiers/{dossierId}/remuneration/{periode}/import` (droit
+    `PREPARER`, multipart `fichier`, 2 Mio, mémoire seule) ; le **gabarit de Prospera** (`fichier-de-paie.ts`, pur) :
+    CSV UTF-8 (BOM), `;` `,` ou tabulation, guillemets RFC 4180, en-tête **fermé** aux noms des champs de la saisie,
+    montants en francs CFA entiers, colonne `periode` comparée ; **tout ou rien** : chaque ligne jugée par la règle de la
+    saisie (`validerLigne`, extraite de `validerBase`), une erreur ⇒ 422 `IMPORT_REFUSE` qui nomme chaque ligne (100 au
+    plus), rien d'écrit ; **le même chemin que la saisie** (`ecrire`, provenance `IMPORT`) : même fichier ⇒ 200
+    `INCHANGEE`, fichier corrigé ⇒ version suivante, l'antérieure lisible. Aucun écart au contrat annoncé.
+  - **D-346-12** : la garde AD-13 de 560 (« une seule route reçoit un fichier ») admet la route d'import, parce que
+    l'en-tête est fermé (une colonne `motDePasse` refuse le fichier avant toute lecture de cellule).
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI seul (une route neuve). Aucune migration.
+  - Preuves : Node 24 unitaires 200/200 suites, 2 863 tests (sur e402ba1), e2e **13/13, 253**, **`test:conformite` 18/18, 114** (import de paie : 5,
+    dont 1 000 lignes en une version, trois imports parallèles ⇒ une, 1 000 lignes dont une fautive ⇒ aucune écriture) ;
+    **mutations 16/16** ; `docker compose -p grp-d` du fiscal sain, route montée, import sans jeton 401. **Verrou
+    Docker** : pris à 21:20 (première passe : unitaires, e2e, conformité, compose), rendu à 21:31 par le trap ; repris à 21:40 après C (seconde passe : unitaires de la tête corrigée), rendu à 21:47 ; B et C prévenus ; aucun conteneur, volume ni réseau grp-d.
+  - **Q-D-21** (l'outil de paie réel) : choix par défaut, le gabarit. **→ A** (plus tard) : l'écran d'import et son
+    rapport d'erreurs.
+  - **Suivante : STORY-347** (la saisie manuelle de la base de rémunération ; `remuneration`, dossier de D ; fiche à
+    écrire depuis `epics-fiscalite-2026-08-03.md` juste avant de coder ; la saisie et l'import passent déjà par la même
+    écriture).
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
@@ -1812,7 +1835,7 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-25, STORY-346, avant le code)** — branche `MNV-346`. **Aucune migration** (aucune collection,
+- **FUSIONNÉ (2026-11-25, prospera-fiscal-service#64, `dev` `e4630f1`, rebasée sur `origin/dev` avant la fusion) ; ANNONCÉ (2026-11-25, STORY-346, avant le code)** — branche `MNV-346`. **Aucune migration** (aucune collection,
   aucun index, aucun champ neuf : l'import écrit dans `bases_remuneration` et `lignes_remuneration` de 345), ni
   `app.module.ts` (`RemunerationModule` est déjà monté), ni `package.json` (multer vient avec
   `@nestjs/platform-express`), ni `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touché : **le contrat
@@ -1843,7 +1866,7 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-25, STORY-346, avant le code) — l'import d'un fichier de paie** (`prospera-fiscal-service`,
+- **PUBLIÉ (2026-11-25, STORY-346, prospera-fiscal-service#64, `dev` `e4630f1`) sans écart ; ANNONCÉ (2026-11-25, avant le code) — l'import d'un fichier de paie** (`prospera-fiscal-service`,
   dossier `remuneration`). Fiche : `stories/STORY-346.md` (D-346-1 → 11, tableau « Contrat » ; Q-D-21).
   - **Route neuve** : `POST /api/v1/dossiers/{dossierId}/remuneration/{periode}/import` (garde fiscale, rôle
     `TENANT_ADMIN` | `TENANT_USER`, droit `fiscalite:declaration:preparer`, dossier dans la portée). Corps
@@ -3120,6 +3143,17 @@
 
 ## Pièges rencontrés
 
+- **STORY-346** (le fichier de paie) :
+  - (1) **Un échappement `\uXXXX` écrit par l'outil d'écriture arrive en caractère réel** dans le fichier (une espace
+    insécable dans une classe de regex, un BOM dans une chaîne de test) : `eslint` le voit (`no-irregular-whitespace`),
+    `tsc` non. Le repérer par `od -c`, le réécrire en échappement par un script Python **dans un fichier** (un heredoc
+    vers `python -` n'y arrive pas non plus).
+  - (2) **La garde AD-13 de 560 rougit pour toute route neuve qui reçoit un fichier** (`garde-ad13.spec.ts`,
+    critère 8) : la suite unitaire du seul module ne la voit pas. Lancer la suite complète (Node 25 suffit pour les
+    unitaires purs) **avant** de prendre le verrou ; sinon il faut une seconde passe Docker.
+  - (3) **`String.prototype.trim()` retire U+FEFF** : une mutation « BOM gardé » survit tant qu'aucun test ne place
+    un champ entre guillemets juste derrière le BOM.
+  - (4) Une mutation qui rend un import inutile ne compile pas (`noUnusedLocals`) : la garder lue (`void f;`).
 - **STORY-560** (premier passage de D dans `prospera-fiscal-service`, worktree `_wt-d-fiscal`) :
   - (1) **`npm ci` échoue sur ce poste** (le client Kafka de Confluent compile son binding sous Node 25, faute de
     binaire, et Visual Studio manque) : `npm ci --ignore-scripts`. Sous Node 25, 18 suites unitaires et 4 e2e rougissent
