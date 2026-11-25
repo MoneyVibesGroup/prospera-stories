@@ -206,9 +206,9 @@
   la passation du bilan ; **STORY-1073** juste après 1076 : D y fait aussi les deux côtés producteurs
   (`dossier-service`, `paiement`), sur consigne de l'utilisateur du 24/11 (soir) : « gère tout cela dans la story 1073 sans attendre la livraison de B », après la passation de B limitée à
   1073. Les douze identifiants (1019 → 1023 de C, 1072 → 1078 de D)
-  sont réservés au tracker ; la marque haute ne bouge pas. **Ordre de D mis à jour le 2026-11-25 (STORY-1078)** :
-  1072 ✅ → 1076 ✅ → 1073 ✅ → 1077 ✅ → 1078 ✅ → **1079** (la garde de bilan dans l'essai, demande de B, Q-D-17) → 1074
-  → 1075.
+  sont réservés au tracker ; la marque haute ne bouge pas. **Ordre de D mis à jour le 2026-11-25 (STORY-1118)** :
+  1072 ✅ → 1076 ✅ → 1073 ✅ → 1077 ✅ → 1078 ✅ → 1118 ✅ (les amortissements rattachés aux postes) → **1079** (la garde
+  de bilan dans l'essai, demande de B, Q-D-17) → 1074 → 1075.
 
 - **STORY-1072** ✅ 📨 — le cabinet prévenu par e-mail du renvoi de son dossier KYC (demande de B, STORY-1103)
   (prospera-notification-service#92, `dev` 7a11331, 749b3cd ; prospera-expert-comptable#11, `dev` 4154038, b540904 ;
@@ -359,6 +359,39 @@
     et sa version). **Verrou Docker : pris à 03:54 (libre, aucun conteneur `grp-d`), une seule prise, rendu à 04:07 (image de vérification construite depuis l'archive, suite Node 24 ; conteneur et image supprimés) ; aucun conteneur, volume ni réseau `grp-d` ne reste.**
   - **Suivante : STORY-1079** (dans l'espace d'essai, la garde de bilan ne lit pas le KYC ; Q-D-17) — **ordre de D mis à
     jour : 1078 ✅ → 1079 → 1074 → 1075** ; **mis à jour le 2026-11-25 : 1078 ✅ → STORY-1118** (les amortissements rattachés aux postes, ticket `TICKET-BACKEND-bilan-amortissements-non-rattaches.md`, Must avant toute liasse réelle : toute entité qui amortit a aujourd'hui une liasse déséquilibrée) **→ 1079 → 1074 → 1075**.
+- **STORY-1118** ✅ 📉 — les comptes d'amortissement et de dépréciation (28, 29, 39, 49 hors 499, 59 hors 599) rattachés
+  au poste de leur actif : la liasse d'une entité qui amortit sort équilibrée et validable (prospera-bilan-service#189,
+  `dev` **b6f2d49**, **5055933** ; annonce « ⚠ Contrats » #872 avant le code, `main` 651d4d6). Ticket
+  `TICKET-BACKEND-bilan-amortissements-non-rattaches.md` (constat de D-1078-5) **corrigé**. Rituel (2026-11-25) : aucune
+  demande neuve à D chez A, B et C. Identifiant réservé au tracker par la session de groupe (marque haute inchangée).
+  - **La règle** : la subdivision « à l'image » (Guide d'application du SYSCOHADA révisé, p. 68 : « Le compte principal 28
+    est subdivisé à l'image des comptes 21 à 24. Ses soldes créditeurs figureront à l'actif du Bilan, en soustraction » ;
+    p. 81, p. 329 ; AUDCIF art. 47) : `28xy`/`29xy` au poste de `2xy`, `39x` à celui de `3x`, `49x` à `4x`, `59x` à `5x` ;
+    490 → `BH`, 491 → `BI`, 492 → 497 → `BJ`, 498 → `BA`, 590 → `BQ`, 591 → `BR`, 592 → 594 → `BS` ; en-cours non
+    subdivisés (2919, 2939, 2949) au résidu de leur rubrique ; SMT : `AC1`, `AC2`, `AC3`, `AC5`. `499` et `599` vérifiés :
+    au passif, une fois. Dans les données des cinq paquets, jamais dans le moteur (P7) ; +117 comptes officiels aux plans.
+  - **Révision en place, sciemment** (D-1118-5) : seules changent les liasses qui portent un solde sur ces comptes, toutes
+    `valide: false` jusqu'ici (jamais figées ni déposées) ; une surcharge qui les rattachait l'emporte toujours. Les
+    liasses figées restent figées (tampon complet, ancienne empreinte) ; les brouillons se recalculent. `MOTEUR_VERSION`
+    inchangée.
+  - **Garde de packaging** `gardes-nomenclature.mjs` (tout paquet bâti sur `plan-comptable-syscohada*`) : aucun compte de
+    bilan de la nomenclature sans poste, chaque contrepartie à l'actif et au poste de son actif, 499/599 au passif ; les
+    tables d'avant la rougissent.
+  - Preuves : Node 24 **355/355 suites, 12 554 tests verts (5 ignorés), 883 s** ; e2e 3 486/3 488 (deux rouges **déjà sur
+    `dev` d2c65c6**, constat ci-dessous) ; e2e liasse et analyse **776/776** ; spec neuve 196/196, garde 14/14 ;
+    **mutations 18/18** ; lint 0. Cas du ticket : `AM` 1 000 000 / 400 000 / 600 000, équilibré, FRNG **+200 000**,
+    identité `OK` ; `valide: true` sous `@2.2`, `@2.3`, SMT (sous `@2.1` et la zone franche, seul reste
+    `CASCADE_SOUS_TOTAUX`, défaut connu de STORY-678). Tests mis à jour : fiche (« Preuves »).
+  - **Constat (non corrigé ici)** : deux e2e de `bilan-service` sont rouges sur `dev` depuis avant 1118 —
+    `ecoute-stable` (`instance-c13.e2e-spec.ts` importe `ecouterPourSupertest` sous l'alias `ecouter`, l'invariant cherche
+    le texte `ecouterPourSupertest(app)`) et `bilan-dossier-portee-collaborateur` (25 contrôleurs gardés, 24 attendus).
+    Vérifié dans une image de `dev` `d2c65c6`. À reprendre par une story de bilan de D (1079 peut les solder en commit
+    séparé avant son code).
+  - Décisions D-1118-1 → 10 (fiche) ; → C (recopie de **quatre** artefacts, `smt-togo-1.0.json` compris ; ticket de 1076
+    mis à jour). **Verrou Docker : pris à 04:51 (libre), une seule prise, rendu à 05:14 ; aucun conteneur, volume, réseau
+    ni image `grp-d` ne reste.**
+  - **Suivante : STORY-1079** (dans l'espace d'essai, la garde de bilan ne lit pas le KYC ; Q-D-17) — **ordre de D : 1118 ✅
+    → 1079 → 1074 → 1075**.
 - **STORY-1079** 📌 placée le 2026-11-25 (par STORY-1078) — le point 3 du ticket de B
   `tickets/TICKET-BACKEND-modules-ouverts-dans-l-essai.md` (STORY-1116, D-1116-1) : dans l'espace d'essai, la garde de
   `bilan-service` (`requires-bilan-access`) ne lit pas le KYC, l'état publié décide seul. Dernier numéro de la plage
@@ -1195,7 +1228,8 @@
   contient celle de 1076 ; le ticket le dit. **Mise à jour du 2026-11-25 (STORY-1118)** : les tables de passage et les plans des mêmes artefacts sont révisés
   encore en place (amortissements et dépréciations rattachés au poste de leur actif) — **cette fois la liasse change**
   pour une balance amortie, et **`smt-togo-1.0.json` est aussi à recopier** (quatre artefacts) ; recopier la version de
-  1118, qui contient celles de 1076 → 1078 (empreintes dans le ticket et dans « ⚠ Contrats », entrée STORY-1118).
+  1118, qui contient celles de 1076 → 1078 (empreintes dans le ticket et dans « ⚠ Contrats », entrée STORY-1118) :
+  bilan `dev` **`5055933`** (prospera-bilan-service#189).
 - **→ B (2026-11-24, soir ; amendement du lot 6, D-L6-5) : la passation de `prospera-bilan-service` à D** — **servie**
   (← B, 24/11, prospera-stories #820 ; constatée par STORY-1076, voir « Passations »).
   Le plan amendé fait passer le bilan de B à D pour ce lot (STORY-1074 → 1078 ; 1080 ✅ était la dernière story de B
@@ -1587,8 +1621,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-25, STORY-1118, avant la fusion du code ; prospera-bilan-service, branche `MNV-1118`) — Les
-  amortissements et les dépréciations rattachés au poste de leur actif : LES MONTANTS DES LIASSES CHANGENT.** Fiche :
+- **PUBLIÉ (2026-11-25, STORY-1118, prospera-bilan-service#189, `dev` b6f2d49, 5055933) ; ANNONCÉ avant la fusion du
+  code (prospera-stories #872, `main` 651d4d6), sans écart. — Les amortissements et les dépréciations rattachés au
+  poste de leur actif : LES MONTANTS DES LIASSES CHANGENT.** Fiche :
   `stories/STORY-1118.md` (D-1118-1 → 10). **Aucun champ, aucune route, aucune valeur d'énumération ne change ;
   les valeurs, si.**
   - **Ce qui change** : les tables de passage de `syscohada-revise@2.1`, `@2.2`, `@2.3`, `zone-franche-togo@1.0` et
@@ -2688,6 +2723,25 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1118** (quatrième passage de D dans `bilan-service`) :
+  - (1) **Une balance de test générée des préfixes de la table** (`notes-syscohada-2.2.spec.ts`, `balances()`) change de
+    rang — donc de sens et de montant pour CHAQUE compte — dès qu'on ajoute un préfixe à la table : ses empreintes et ses
+    écarts « mesurés à la main » rougissent sans rapport avec la règle touchée. Écarter les préfixes neufs du générateur
+    garde la balance d'avant (et prouve la non-régression), plutôt que de remesurer.
+  - (2) **Un compte « qu'aucun poste ne reçoit » dans un test** (`281000` en consolidation) cesse de l'être quand la
+    table s'étend : prendre un compte hors des classes 2 à 5, que la garde de nomenclature ne couvre pas (`108000`).
+  - (3) **Une mutation qui retire un préfixe long peut être équivalente** : le préfixe résiduel (`284` en `AM`) reprend le
+    compte (`2844`). Choisir le compte dont le résidu va ailleurs (`2845` : sans lui, `284` l'envoie en `AM` au lieu
+    d'`AN`).
+  - (4) **Muter un artefact sans réépingler le registre** fait rougir le checksum, pas l'assertion : réécrire l'empreinte
+    du registre dans la même mutation (script `muter_artefact`), puis tout restaurer par
+    `git -c core.autocrlf=false checkout --` et relancer `build.mjs`.
+  - (5) **Deux e2e sont rouges sur `dev` avant toute story** (`ecoute-stable`, `bilan-dossier-portee-collaborateur`) :
+    une suite e2e complète qui sort « 2 failed » n'accuse pas forcément la story — rejouer les deux sur une image de `dev`
+    avant de conclure.
+  - (6) `@2.1` et la zone franche ne rendent pas `valide: true` sur une balance réaliste, même équilibrée :
+    `CASCADE_SOUS_TOTAUX` (STORY-678) reste bloquant ; une attente « liasse valide » s'écrit sous `@2.2`/`@2.3`.
 
 - **STORY-1078** (troisième passage de D dans `bilan-service`) :
   - (1) **Un `git stash` / `git stash pop` dans `bilan-service` réécrit en CRLF les JSON des paquets** (`autocrlf` du
