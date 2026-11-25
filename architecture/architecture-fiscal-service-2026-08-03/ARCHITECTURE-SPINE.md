@@ -7,7 +7,7 @@ paradigm: 'hexagonal (ports & adaptateurs) sur un noyau métier pur, en relying-
 scope: 'micro-service fiscal-service (Module 3) — dossier fiscal, catalogue d''obligations dérivé, calendrier, cycle de vie déclaratif, dépôt assisté, preuve, règlement'
 status: final
 created: '2026-08-03'
-updated: '2026-08-15'
+updated: '2026-11-25'
 binds:
   - 'PRD Fiscalité v0.4 — FR-F01→F80, NFR-F01→F16 (v0.4 : FR-F27/F30 amendés, FR-F79/F80 créés — arbitrage PO du 2026-08-15)'
 sources:
@@ -212,13 +212,28 @@ strictement descendant, et les retours passent par le bus.
   rendre l'accusé dans l'appel — un humain le fournira plus tard — et un connecteur automatisé produira
   simplement ce fait immédiatement. Un port synchrone exclurait l'implémentation de la v1.
 
-### AD-13 — Aucun secret d'accès à un canal n'est stocké
+### AD-13 — Aucun secret de canal n'entre hors du coffre, et aucun n'en sort en clair
 
-- **Binds:** FR-F02, NFR-F05
-- **Prevents:** l'ouverture d'une surface de compromission avant qu'un connecteur ne l'exige
-- **Rule:** en v1, aucun identifiant ni mot de passe de portail administratif n'entre dans le service,
-  sous aucune forme, y compris en champ libre. L'introduction d'un coffre-fort est un amendement de cette
-  colonne vertébrale, pas une évolution de configuration.
+*Amendée le 2026-11-25 par STORY-560 (décision PO du 2026-08-28 : le dépôt automatisé est retenu).
+L'ancienne règle — « en v1, aucun identifiant ni mot de passe de portail administratif n'entre dans
+le service, sous aucune forme, y compris en champ libre » — tient toujours **hors du coffre**.*
+
+- **Binds:** FR-F02, NFR-F05, NFR-F06
+- **Prevents:** l'ouverture d'une surface de compromission plus large que le connecteur ne l'exige
+- **Rule:** un identifiant de portail n'entre dans le service que par le **coffre des secrets de
+  canal** (`coffre-secrets`), déposé par **son propriétaire** (le client, par un lien à usage unique),
+  pour une portée `{organisation, dossier, canal}` et sous un **mandat de canal spécifique** (canal,
+  actes, dates), vérifié à **chaque usage**. Hors du coffre, aucun champ, aucune note, aucune pièce
+  jointe ne l'accepte (garde structurelle).
+- **Rule (chiffrement) :** chiffré au repos en enveloppe (AES-256-GCM), sous une clé maîtresse qui
+  ne vit pas dans la base ; la portée est authentifiée avec le chiffré.
+- **Rule (usage) :** le secret ne sort jamais en clair vers une route, un journal, un export ou une
+  réponse d'erreur. Le connecteur reçoit un **jeton d'usage** court, à usage unique, lié à un dépôt ;
+  le clair n'existe que le temps de l'acte. Personne — collaborateur, administrateur, support — ne
+  le lit.
+- **Rule (révocation) :** le client révoque souverainement ; le secret est détruit, les usages en
+  cours s'arrêtent, et le canal retombe sur le **dépôt assisté** : la révocation change le chemin,
+  jamais la capacité de déclarer. Aucun facteur MFA n'est stocké.
 
 ### AD-14 — Le service est agnostique de la source de la balance
 
@@ -457,8 +472,8 @@ fiscal-service/
 
 ## Deferred
 
-- **Coffre-fort d'identifiants et connecteur automatisé.** Attend le premier canal dont le volume le
-  justifie. Amendement de AD-13, pas une évolution de configuration.
+- ~~**Coffre-fort d'identifiants et connecteur automatisé.**~~ Le coffre est livré par STORY-560
+  (AD-13 amendé le 2026-11-25) ; le connecteur automatisé reste à STORY-561, derrière le port d'AD-12.
 - **Familles `SPECIFIQUE_UNITE`, `PAR_ACTE`, `VALEUR_LOCATIVE`.** Déclarables, non calculables (AD-4).
   Leur arrivée n'ouvre pas de question d'architecture : une stratégie de plus dans le registre.
 - **Format d'import de la base de rémunération.** Aucune pièce réelle en main ; décider sans elle
