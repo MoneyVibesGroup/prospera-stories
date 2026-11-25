@@ -1086,6 +1086,17 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-25, STORY-1077) : publier `formeJuridique` sur les dossiers CLIENTS aussi** — **ouverte**.
+  `prospera-dossier-service` (rendu à B à la fin de 1073) ne publie la fiche légale que sur le dossier propre (D-1073-2).
+  `bilan-service` lit désormais `formeJuridique` de `dossier.created` / `dossier.updated` pour l'alerte « capitaux
+  propres < ½ capital » (AUSCGIE 371-373 SARL, 664-669 SA) : sans la forme d'un dossier client, l'alerte rend son
+  constat chiffré **sans échéance** (`FORME_JURIDIQUE_INCONNUE`). Demandé : (1) dans la fonction de STORY-1073 qui pose
+  la fiche légale, sortir **le seul `formeJuridique`** de la condition « dossier propre » (les autres champs gardent la
+  liste blanche « ni NIF, ni coordonnées ») — même champ, déjà déclaré facultatif dans `DossierEtatV1`, `schemaVersion`
+  inchangé, aucun schéma de registre ; (2) rejouer l'état courant par `npm run republier:dossiers` (STORY-696) sur les
+  piles semées. Rien à changer côté bilan. Le capital social n'est pas demandé : il sort de la liasse (poste du capital).
+  À placer par B (aucune urgence de démo : sans elle l'alerte se lit, sans date).
+
 - **→ B (2026-11-25, STORY-1073) : recopier au catalogue (`platform-catalog-service`) deux manifestes amendés à la
   source** — **ouverte**. `manifestes/facturation.manifest.ts` **1.2.0** (C5 : + `dossier.created`, `dossier.updated`,
   `paiement.compte.changed@1` consommés ; aucun droit, aucune route) et `manifestes/paiement.manifest.ts` **1.1.0** (C5 :
@@ -1488,6 +1499,43 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-25, STORY-1077, prospera-bilan-service) — l'alerte « capitaux propres inférieurs à la moitié du
+  capital social » (AUSCGIE 371-373, 664-669) et ses échéances légales, dans la réponse d'analyse.** Fiche :
+  `stories/STORY-1077.md` (D-1077-1 → 13, Q-D-16). **Ajouts seuls** : aucun champ, aucune route, aucune valeur
+  d'énumération existante ne change ni ne disparaît.
+  - **Réponse d'analyse** (`GET /dossiers/{id}/bilan/analyse` et `POST …/analyse/dry-run`) : bloc neuf
+    **`alerteCapitauxPropres`**, toujours présent (jamais `null`) — `code` (`CP_INFERIEURS_MOITIE_CAPITAL`), `statut`
+    (`ATTEINTE` | `NON_ATTEINTE` | `INDETERMINEE` | `NON_APPLICABLE`), `motif` (`PAQUET_SANS_ALERTE`,
+    `FORME_SANS_CAPITAL`, ou un motif d'indétermination des indicateurs : `DENOMINATEUR_NUL`, `DENOMINATEUR_NEGATIF`,
+    `RESULTAT_NON_AFFECTE`, `MONTANT_HORS_BORNES`…, sinon `null`), `fraction` (`{ numerateur: 1, denominateur: 2 }`),
+    `capitalSocial`, `capitauxPropres` (lecture stricte : sans subventions d'investissement ni provisions réglementées,
+    D-1077-4), `capitauxPropresEtRessourcesAssimilees` (lecture large, poste `CP`), `atteinteSurRessourcesAssimilees`
+    (booléen ou `null`), montants en unités mineures de la liasse ; `postes` (même forme que les postes d'un indicateur :
+    le capital en `DENOMINATEUR`, les capitaux propres stricts en `NUMERATEUR`) ; `formeJuridique` (`{ valeur, statut:
+    CONNUE | INCONNUE }`) ; `regime` (`null` ou `{ formes, articles, renvois, sanction, exclusion }`, articles et citations
+    du paquet) ; `dateCloture` et `dateApprobation` (`AAAA-MM-JJ` ou `null`) ; **`echeances`** (`null` ou trois entrées
+    `{ code: APPROBATION_DES_COMPTES | DECISION | REGULARISATION, quoi, delaiMois, pointDeDepart, dateLimite,
+    dateSiApprobationAuTerme, motifDate, articles, citation }`) et `motifSansEcheance` (`ALERTE_NON_CONSTATEE`,
+    `FORME_JURIDIQUE_INCONNUE`, `FORME_SANS_REGIME`, ou `null` quand les échéances sont servies) ; `message`, `source`
+    (`{ texte, url }`), `referentiel`. Les dix-neuf indicateurs ne changent pas.
+  - **Paramètre neuf, facultatif : `dateApprobation`** (`AAAA-MM-JJ`) — en requête du `GET`, dans le corps du `dry-run`.
+    Elle date la décision (approbation + 4 mois) ; **`400 APPROBATION_AVANT_CLOTURE`** si elle n'est pas postérieure à la
+    clôture de l'exercice analysé ; `400` de validation si elle est malformée. Sans elle, la décision porte `dateLimite:
+    null` et `dateSiApprobationAuTerme` (approbation le dernier jour des six mois légaux, + 4 mois).
+  - **Consommateur de `dossier.created` / `dossier.updated`** : `bilan-service` lit désormais **`formeJuridique`**
+    (facultatif depuis STORY-1073) et le projette dans `dossiers_dossier` (absent ⇒ `null`, état absolu ; mal typé ⇒
+    `null`, le message n'est pas écarté). Aucun changement de schéma côté producteur ; **demande à B** : le publier aussi
+    sur les dossiers clients (« Demandes aux autres groupes »). D'ici là, un dossier client rend `formeJuridique.statut:
+    INCONNUE` et le constat chiffré **sans échéance**.
+  - **Paquets** (révision en place, D-1077-3 ; liasse produite inchangée) : `syscohada-revise@2.1`, `@2.2`, `@2.3`,
+    `zone-franche-togo@1.0` gagnent le marqueur de table de passage `capitauxPropresStricts` (`CAPITAL` | `COMPOSANTE`)
+    et le bloc `alerteCapitauxPropres` (règle, délais, articles et citations de l'AUSCGIE) ; leurs empreintes changent
+    (valeurs dans l'entrée PUBLIÉ). SMT, SFD-BCEAO, CIMA : inchangés, alerte `NON_APPLICABLE`.
+  - **Pour A (FE-141)** : types à régénérer (`npm run gen:api -- bilan`) ; afficher `message` tel quel, les échéances
+    datées, et la lecture large à côté quand elle diffère ; un écran qui ignore le bloc ne change rien.
+  - **`balance-service` (C)** : la recopie à l'octet des trois `syscohada-revise` (ticket de 1076, mis à jour) prend la
+    version de 1077 ; sans effet en service.
 
 - **PUBLIÉ (2026-11-25, STORY-1073 : prospera-dossier-service#58, `dev` 4352ac3 ; prospera-paiement-service#125, `dev`
   e2be149 ; prospera-ventes-service#16, `dev` bc0f85c ; prospera-plateforme#40, `dev` de8f0d3, étiquette

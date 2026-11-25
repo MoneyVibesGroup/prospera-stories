@@ -35,3 +35,11 @@ d'ordinaire partie de la story qui révise, mais `balance-service` est tenu par 
 3. Vérifier que la garde « octets identiques à ceux de bilan-service » repasse au vert avec `bilan-service` à jour à côté.
 
 Aucun contrat de balance ne change.
+
+## Mise à jour (2026-11-25, STORY-1077, D)
+
+STORY-1077 révise **encore en place** les mêmes trois artefacts (doctrine de D-1076-2) : le marqueur de table de
+passage `capitauxPropresStricts` et le bloc `alerteCapitauxPropres` (alerte « capitaux propres < ½ capital »,
+AUSCGIE 371-373 et 664-669). `balance-service` ne lit ni l'un ni l'autre. **Recopier la version de STORY-1077**
+(elle contient celle de 1076) : le SHA de `dev` et les trois empreintes sont écrits dans l'entrée « PUBLIÉ » de
+STORY-1077 du journal de D (« ⚠ Contrats ») et dans la fiche `stories/STORY-1077.md` (« Preuves »).

@@ -703,11 +703,14 @@ reserved_ranges:
   - range: "STORY-1077"
     status: "RÉSERVÉ"
     owner: "Groupe D — le contrôle « capitaux propres < ½ capital » (AUSCGIE 371-373 SARL, 664-669 SA) et son échéance légale (prospera-bilan-service)"
-    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    source_doc: "prospera-stories/stories/STORY-1077.md"
     reserved_on: "2026-11-24"
     note: >
-      Amendement du lot 6 (24/11 soir, D-L6-5). Source : analyse-pack-25-livres-2026-11-23.md §3, §7.1 ; forme juridique lue de
-      dossier-service. Fiche à écrire juste avant de coder. Lot D, n° 9 du lot 6. NON SLOTTÉE.
+      🚧 EN COURS (2026-11-25) — fiche écrite, contrat annoncé avant le code (journal de D, « ⚠ Contrats »). Articles de
+      l'AUSCGIE révisé relus au texte officiel (140, 309, 334, 348, 371-373, 548, 664-669, 853-3). Alerte dans la réponse
+      d'analyse, règle et délais en données sourcées du paquet (révision en place) ; forme juridique lue de dossier.* (publiée
+      pour le dossier propre seulement : demande à B pour les dossiers clients) ; Q-D-16 (lecture stricte des capitaux
+      propres). Lot D, n° 9 du lot 6. NON SLOTTÉE.
   - range: "STORY-1078"
     status: "RÉSERVÉ"
     owner: "Groupe D — les contrôles d'intégrité de la liasse (FRNG = BFR + trésorerie nette, caisse créditrice, amortissements > brut, perte de change sans provision) et la liasse rapprochée de sa balance par l'empreinte (STORY-1022) (prospera-bilan-service)"
