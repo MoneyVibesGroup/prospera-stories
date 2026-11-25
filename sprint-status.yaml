@@ -723,6 +723,16 @@ reserved_ranges:
       45-48, 54, 56, 57 ; Guide d'application du SYSCOHADA révisé, Note 34) ; règles, comptes et sources en données des
       quatre paquets SYSCOHADA révisé (révision en place). Rapprochement par l'empreinte de la balance REPORTÉ (STORY-1022
       non livrée, D-1078-10). Lot D, n° 10 du lot 6. NON SLOTTÉE.
+  - range: "STORY-1079"
+    status: "RÉSERVÉ"
+    owner: "Groupe D — dans l'espace d'essai, la garde de bilan ne lit pas le KYC : l'état publié décide seul (ticket « modules ouverts dans l'essai », point 3) (prospera-bilan-service)"
+    source_doc: "prospera-stories/tickets/TICKET-BACKEND-modules-ouverts-dans-l-essai.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Placée le 2026-11-25 par STORY-1078 (demande de B, STORY-1116, D-1116-1). Must de la démo du 15/01. Choix par défaut :
+      INSTANCE_ESPACE=ESSAI ⇒ palier KYC de requires-bilan-access sauté, l'état publié décide seul — décision d'architecture
+      (AD-15) à confirmer : Q-D-17. Dernier numéro de la plage 1030 → 1079 de D. Fiche à écrire juste avant de coder. Ordre
+      de D : après 1078, avant 1074 et 1075. NON SLOTTÉE.
   - range: "FE-112 → FE-139 ; AP-38 → AP-49"
     status: "RÉSERVÉ"
     owner: "Groupe D — frontend : app expert-comptable (FE) et console (AP) (§6)"
