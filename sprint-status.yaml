@@ -7666,7 +7666,7 @@ sprints:
         epic: "EPIC-030"
         points: 5
         service: "fiscal-service"
-        status: "in-progress"  # 2026-11-25 — groupe C, lot 6 : fiche + contrat avant le code (stories/STORY-316.md)
+        status: "done"  # ✅ 2026-11-25 — groupe C, lot 6 : balance-service #164 (b78f500, échéance des sociétés par la forme juridique), fiscal #62 (f1296ae) ; fiscal 2739/231, conformité 102/102 ; mutation 4/4 ; gate grp-c vert ; D-316-1 → 9 dans la fiche
         assigned_to: null
       - story_id: "STORY-317"
         title: "Reports d'échéance administratifs"

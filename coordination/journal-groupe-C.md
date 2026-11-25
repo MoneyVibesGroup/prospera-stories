@@ -44,8 +44,13 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
      `mongo-fiscal` ; mutation 6/6 ; gate `grp-c` vert ; — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
   6. ✅ **STORY-315 DONE (25/11)** : fiscal **#61** (`7d97ae0`), contrat #867. Node 24 : 2618 / 230, conformité 102/102 ;
      NFR-F13 mesurée (60 ms, 24 ms, 157 ms sur 500 × 12) ; mutation 9/9 ; gate `grp-c` vert (Kafka réel) ;
-  7. 🟡 **STORY-316** les échéances viennent du paquet, dont le 30/04 des sociétés (fiscal, paquet dans balance-service) :
-     fiche et contrat annoncés le 25/11.
+  7. ✅ **STORY-316 DONE (25/11)** : balance-service **#164** (`b78f500`, le paquet), fiscal **#62** (`f1296ae`, la
+     dérivation), contrat #873. Fiscal 2739 / 231, conformité 102/102 ; mutation 4/4 ; gate `grp-c` vert.
+- 🏁 **LOT 6 DE C TERMINÉ (25/11)** : 1099, 1087, 1088, 1100, 1117 (demande de A), 326, 1101, 315, 316, toutes
+  fusionnées (code sur `dev`, docs sur `main`). Derniers commits de C sur `dev` : fiscal `f1296ae`, balance-service
+  `b78f500`, comptabilite `e4a53cc`, document-service `0716a58` (passé à B, #849). Aucune pile, aucun verrou, aucune
+  branche ouverte. **Le lot 7 attend la décision de l'utilisateur** (« tu termines le lot 6 ici, pour le lot 7 on verra
+  après », 25/11) ; PRA-02 cédée à A avec l'accord de C.
 - **Docker** : verrou du poste principal (`MoneyVibes_Apps\.verrou-docker`) partagé avec A ; aucune pile de C ne tourne.
 
 - **2026-11-14** : journal ouvert, lot pas encore commencé.
@@ -254,8 +259,9 @@ seulement.
 - **→ B (25/11, STORY-326, puis 1101)** : **republier le paquet togo@2026** dans les deux buckets de la recette
   (`referentiel-packages` pour le fiscal, `docker-compose.fiscal.yml:80` ; `referentiel-packages-essai` pour l'essai,
   `docker-compose.recette.yml:369`), puis vérifier que le contrôle de cohérence ne rend plus `NON_EXECUTE`
-  `TOLERANCE_ABSENTE`. Empreinte après 326 : `e2230569…` (balance-service #162) ; elle changera encore avec 1101
-  (`rapprochementAnnuel`). Ce n'est pas un script de C qui publie : `balance-service` n'écrit pas dans ce bucket, et le
+  `TOLERANCE_ABSENTE`. Empreinte après 326 : `e2230569…` (balance-service #162) ; **à republier dans sa dernière
+  version : `5c683d16…`** (balance-service #164, après 1101 et 316), qui porte aussi `rapprochementAnnuel` et
+  l'échéance des sociétés par la forme juridique. Ce n'est pas un script de C qui publie : `balance-service` n'écrit pas dans ce bucket, et le
   fiscal lit le pointeur que lui donne l'événement de publication. C n'a pas trouvé l'éditeur ; `prospera-recette` est
   à B. — ouverte.
 - **→ B (25/11, STORY-1117)** : recopier au catalogue le manifeste `balance` **1.1.0** (code fusionné :
