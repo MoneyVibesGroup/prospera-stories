@@ -1,7 +1,7 @@
 # STORY-979 : les droits de la facture et des archives du cabinet au catalogue de tenant d'auth
 
-Status: done (rouverte et refermée trois fois pour ses suites : « Suite du 2026-11-24 », « Suite du 2026-11-24
-(soir) » et « Suite du 2026-11-25 », en fin de fiche)
+Status: in-progress (quatrième suite, « Quatrième suite (2026-11-25) », en fin de fiche ; rouverte et refermée trois
+fois pour ses suites : « Suite du 2026-11-24 », « Suite du 2026-11-24 (soir) » et « Suite du 2026-11-25 »)
 
 **Complexité :** faible (huit droits neufs au catalogue de tenant, hors du jeton ; un rôle du socle neuf ; une ligne
 d'ajout à l'annexe B ; la copie des manifestes du catalogue ; aucun champ, aucune route, aucun topic)
@@ -474,3 +474,93 @@ Fusionnée en « Rebase and merge », `mergedAt` non nul, `headRefOid` = SHA pou
 - **C** : `balance` 1.1.0 est au catalogue ; la 1.2.0 (STORY-1020) s'y recopie après la fusion de son code, sur
   demande (D-979-24).
 - **B** : ordre « b » du lot 7, le correctif de STORY-1073 (`formeJuridique` sur les dossiers clients).
+
+---
+
+## Quatrième suite (2026-11-25) : le manifeste `balance` 1.2.0
+
+**Demande servie :** journal de C, « → B (25/11, STORY-1020) : recopier au catalogue le manifeste `balance` **1.2.0**
+(source `manifestes/balance.manifest.ts`, contrat de STORY-1020) : une route d'export neuve en `routesLectureSeule`
+(`…/rapprochement/etat/export`) » ; journal de B, « ← C (25/11, STORY-1020) », placée par la session de groupe
+(D-L7B-6, 2) : **dès la fusion du code de C** sur `dev` de `balance-service`, **pas avant** (D-979-24).
+**Pourquoi 979 et pas une story neuve :** même patron que les trois premières suites (catalogue #71, #74, #75) : une
+recopie de manifestes, sans identifiant neuf. Branche `MNV-979-manifeste-balance` (catalogue seul), docs
+`docs-979-balance`.
+**Place :** lot 7 de B, entre l'ordre « c » (correctif de STORY-1115, fait) et STORY-1119 (n° 1). Le tracker rouvre
+l'entrée de 979 (`in-progress`) le temps de la suite et la referme (`done`) dans la PR de docs finale.
+**Sources lues :** journaux de C et de B (la demande, mot pour mot ; « PUBLIÉ » de STORY-1020 au journal de C : route
+`GET /api/v1/dossiers/{dossierId}/rapprochement/etat/export`, mêmes gardes que `…/etat`) ;
+`manifestes/balance.manifest.ts` à `prospera-stories@ac8e450` (`origin/main`, 1.2.0, sha256
+`44f89c99dc923a75ae8963a8e4ef8a3eb1ff0bdc5e06c8c407417134f1d8fefe`, le même sur le blob et sur l'extraction LF) ;
+`git log bd9340e..ac8e450 -- manifestes/` ; code relu sur `origin/dev` du catalogue `0425fef` (`copies.json`,
+`scripts/manifestes/`, `manifestes-seed.service.spec.ts`, `divergences.json` vide).
+**Le code de C est fusionné (vérifié avant la copie) :** balance-service **#165** `MERGED`, `mergedAt`
+`2026-11-25T13:44:18Z`, base `dev`, commit de fusion `58322c4` ; `dev` de `balance-service` lui est identique
+(comparaison GitHub `58322c4...dev` : `identical`) ; `src/modules/rapprochement/rapprochement.controller.ts` sur
+`dev` sert `@Get('etat/export')` (`@SorteDeRoute('export')`).
+
+**Ce qui existait déjà (relu avant le code) :** au catalogue (`origin/dev` `0425fef`), `balance` en **1.1.0** (copie
+de `bd9340e`, catalogue #75) : **la 1.2.0 n'y est pas** ; aucune PR ouverte. `manifestes:garde` contre `ac8e450` :
+**rouge sur `balance` seul** (`version`, `routesLectureSeule[11, 12]` : une insertion, l'index suivant glisse). Entre
+`bd9340e` et `ac8e450`, `manifestes/` n'a bougé qu'une fois : `bdf7218` (STORY-1020, `balance.manifest.ts`, 3 lignes
+ajoutées, 1 retirée).
+
+| Exigence | Fait |
+|---|---|
+| `balance` 1.2.0 au catalogue | `copies.json` depuis `prospera-stories@ac8e450` : 1.1.0 → **1.2.0**, `GET /api/v1/dossiers/{dossierId}/rapprochement/etat/export` en `routesLectureSeule` ; ses dix `droits` inchangés |
+| Le code avant le manifeste | balance-service #165 fusionné sur `dev` (`58322c4`), la route servie (D-979-30) |
+| Rien d'autre n'entre avec la copie entière | un seul commit sur `manifestes/` depuis `bd9340e` ; garde rouge avant sur `balance` seul, verte après (48) (D-979-30) |
+| Aucun droit à poser dans auth | aucun `droits` ne change (garde) ; auth inchangé (D-979-32) |
+
+### Décisions (prises par défaut, contestables)
+
+- **D-979-29 — Une quatrième suite de 979, entre la « c » et STORY-1119.** Décidée par la session du groupe B
+  (D-L7B-6, 2 ; comme D-979-10, 17 et 23) : aucun identifiant neuf, même fichier, même voie. Les décisions commencent à
+  D-979-29.
+- **D-979-30 — La copie depuis `ac8e450`, entière ; elle n'entraîne rien d'autre.** `npm run manifestes:copier` lit
+  tout `manifestes/` : lancé avec `MANIFESTES_SOURCE` sur `_wt-b-stories` en HEAD détachée sur `ac8e450` (`origin/main`
+  au moment de la copie ; `origine` : `prospera-stories@ac8e450`), comparé à une copie faite depuis `git -c
+  core.autocrlf=false archive ac8e450 manifestes` : identiques, sauf la ligne `origine`. Ce que la copie entière
+  entraîne en plus de la demande : **rien**. Depuis `bd9340e` (la copie de #75), le seul commit qui touche
+  `manifestes/` est `bdf7218` (STORY-1020), sur `balance.manifest.ts` seul ; la garde rouge avant la copie ne nomme que
+  `balance`, et le diff de `copies.json` ne porte que `origine`, `version` et la route. Le code de cette route est
+  fusionné (balance-service #165, ci-dessus) : la règle de D-979-8 et D-979-24 (la copie suit la fusion du code) est
+  tenue. `src/module.manifest.ts` (le module `instance`, dont le catalogue est la source) ne change pas.
+- **D-979-31 — Le test de semis suit la copie.** Le test de STORY-1117 épinglait `balance` en 1.1.0 ; la 1.2.0 contient
+  la 1.1.0 (C : « une seule recopie suffit ») : il ne fige plus la version et garde ses deux routes. Un test neuf
+  épingle `balance` **1.2.0**, la route d'export à côté de `…/etat`, et ses dix droits. Rouge sur la copie d'avant
+  (1 échec), vert après. Aucune logique neuve : les mutations portent sur la copie.
+- **D-979-32 — Aucun droit à ajouter dans auth.** La 1.2.0 ne change aucun `droits` (garde) : la route d'export a
+  « mêmes gardes et refus que `…/etat` » (journal de C, « PUBLIÉ ») et ne demande aucun droit neuf. Auth inchangé.
+- **D-979-33 — Sans Docker** (comme D-979-15, 21 et 27). Aucun module Nest, aucune dépendance, aucun Dockerfile ne
+  change : une copie JSON semée au démarrage du catalogue. Le verrou n'est pas pris.
+- **D-979-34 — Contrats.** Un manifeste publié au catalogue change de version ; aucune route, aucun champ, aucun topic
+  du catalogue ne change de forme. Une base déjà semée reçoit `balance` 1.2.0 à son prochain démarrage, à côté de la
+  1.1.0 publiée (D-979-13). La garde contre `main` redevient verte : la réserve de D-979-24 est levée. Annoncé dans
+  « ⚠ Contrats » avant la fusion.
+
+### Livraison de la quatrième suite (25/11)
+
+- **catalogue #76** (`MNV-979-manifeste-balance`, tête `64e4a62`) : `copies.json` depuis `prospera-stories@ac8e450` ;
+  `manifestes-seed.service.spec.ts`. À fusionner après l'annonce.
+
+### Preuves de la quatrième suite (25/11)
+
+- **Sans Docker** (D-979-33) : aucun module, aucune dépendance, aucun Dockerfile touchés ; verrou non pris.
+- **Catalogue, Node 25** : `manifestes:garde` **rouge avant la copie** (`balance` seul : `version`,
+  `routesLectureSeule[11, 12]`), **verte après (48)** contre `ac8e450` ; sha256 de `balance.manifest.ts` vérifié sur le
+  blob et sur l'extraction LF ; les deux copies (worktree, `git archive`) identiques hors `origine`.
+- **Tests relancés par chemin** : `src/modules/catalog/manifeste` 3 suites, **61/61** (le test neuf rouge sur la copie
+  d'avant) ; **suite complète : 104 suites, 1 622 passés** (1 621 + 1), 3 suites rouges connues (binding natif de
+  Confluent sous Node 25 : `app-cablage.invariant.spec.ts`, `kafka-producer.service.spec.ts`,
+  `outbox-relay.service.spec.ts`).
+- **Lint** du spec touché (contenu en LF) et **build** : verts. `copies.json` est généré (ni lint ni prettier).
+- **Mutations : 3/3 rouges sur assertion** (test de semis et garde) : la route `…/rapprochement/etat/export` retirée
+  de `balance` ; `balance` remis en 1.1.0 ; un de ses droits retiré.
+
+### Pour la suite (25/11, quatrième suite)
+
+- **C** : `balance` 1.2.0 est au catalogue ; un catalogue déjà semé la reçoit à son prochain démarrage (D-979-13).
+- **A** : rien à régénérer (aucune OpenAPI du catalogue ni du BFF ne change ; FE-077 appelle la route de
+  `balance-service`).
+- **B** : STORY-1119 (n° 1 du lot 7).
