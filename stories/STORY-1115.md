@@ -181,3 +181,81 @@ d'auth existante », `POST /users`, qui exige un `TENANT_ADMIN` de l'organisatio
 - **D-1113-2** reste ouverte (identité d'opérateur commune : choix par défaut gardé, la recette le joue).
 - **Pour A (AP-56, AP-57)** : la pile de recette porte désormais les deux espaces ; le gate réel de leurs écrans s'y
   joue (`npm run recette -- essai-mise-en-service` en montre le chemin).
+
+---
+
+## Correctif du 2026-11-25 — les paquets fiscaux semés dans les deux catalogues de la pile (groupe B, lot 7, ordre « c »)
+
+**Demande :** C, « → B (25/11, STORY-326, puis 1101) » (journal de C, « Demandes ») : republier le paquet `togo@2026`
+dans sa dernière version (empreinte **`5c683d16…`**, balance-service #164, après 1101 et 316) dans les deux buckets de
+la recette — `referentiel-packages` (le fiscal, `docker-compose.fiscal.yml:80`) et `referentiel-packages-essai`
+(l'essai, `docker-compose.recette.yml:369`) —, puis vérifier que le contrôle de cohérence ne rend plus `NON_EXECUTE`
+`TOLERANCE_ABSENTE` (D-326-13). Placée par la session de groupe en ordre « c » du lot 7 de B (D-L7B-6). **Aucun
+identifiant neuf.** **Dépôt :** `prospera-recette`, branche `MNV-1115-paquets-fiscaux`, commits `MNV-1115(recette): …`
+· **Exécutée par :** groupe B.
+
+**Pourquoi :** C n'a pas trouvé qui écrit dans ces buckets : personne ne le faisait pour la pile. Relu sur `origin/dev`
+(recette `8d4d88c`, catalogue `0425fef`, fiscal `f1296ae`, balance `58322c4`) :
+
+- **le déposant est le catalogue** (STORY-149) : `POST /api/v1/catalog/admin/referentiels/{code}/{version}/artifact`
+  écrit l'objet dans **son** bucket (`MINIO_BUCKET`, `referentiel-packages` par défaut, `configuration.ts:591`), calcule
+  l'empreinte, crée la `ReferentielVersion` (`artifactUri: s3://<bucket>/referentiels/…`, `checksum`) ; un couple
+  `(code, version)` déjà pris rend **`409`** : une version publiée ne se réécrit jamais ;
+- **le pointeur part dans `entitlement.changed`** : à l'octroi de `declarations`, le catalogue joint à chaque
+  référentiel l'`artifactUri` et le `checksum` de sa version (`entitlement-events.service.ts:76-86`) ; le fiscal les
+  projette (`event-envelope.util.ts:326`), ne lit que sous `s3://<son bucket>/referentiels/`
+  (`minio-source-paquet-fiscal.ts`) et vérifie l'empreinte ;
+- **`balance-service` n'écrit dans aucun bucket** : il embarque ses paquets (`src/modules/referentiel/assets/`) ;
+- **dans la recette, le seul déposant était `zone-franche.recette.ts`** (STORY-901), qui lisait les octets dans
+  `balance-service` à côté de la pile et **acceptait un `409` sans regarder quels octets étaient là** ; il ne comparait
+  l'empreinte servie par le fiscal que pour la zone franche — le paquet qui n'a pas changé depuis le 15/11
+  (`da92a432…`) ; le droit commun a changé trois fois sous la même version `2026.1` (326 `e2230569…`, 1101 `183c8589…`,
+  316 `5c683d16…`). Aucune autre recette, ni `npm run pile`, ne déposait de paquet fiscal ; **personne ne déposait au
+  catalogue de l'essai**, monté par STORY-1115 avec son bucket et sans déposant.
+- **`TOLERANCE_ABSENTE`** (`coherence-obligations.service.ts:157`) : la tolérance se lit sur le paquet EXACT de
+  l'obligation (code, version, empreinte) tel qu'il est encore octroyé, puis dans son bloc `coherence.tolerances` ;
+  sans elle, le moteur n'est même pas lu. Une pile dont les volumes ont survécu garde le paquet de son premier dépôt
+  (`e8e94c84…`, STORY-907, sans le bloc) : le contrôle s'y tait.
+
+### Où en est-on
+
+- [x] Rituel : plan du lot 7, journaux de A, B, C, D (la demande de C du 25/11, placée en « c » ; aucune autre demande
+  neuve à B) ; la recette était en HEAD détachée sur `origin/dev` (**`8d4d88c`**), propre ; branche
+  `MNV-1115-paquets-fiscaux` partie d'`origin/dev`.
+- [x] Code relu avant d'écrire (recette, catalogue, fiscal, balance : ci-dessus).
+- [x] Code, unitaires (159/159), mutations (6/6), `npm run verifier` ; PR de code **#32** ouverte (`1c0aee4`).
+- [ ] Recette sur pile neuve (`grp-b-recette`, images depuis `origin/dev`).
+- [x] « ⚠ Contrats » du journal de B annoncé avant la fusion du code (cette PR de docs).
+- [ ] PR de code fusionnée en rebase.
+- [ ] PR de docs finale (fiche, tracker, journal de B).
+
+### Décisions retenues par défaut (contestables)
+
+- **D-1115-13 — Le correctif se rattache bien à STORY-1115 (rattachement de la session de groupe confirmé).** Le code
+  corrigé vit dans le dépôt de B ; il a deux origines : le dépôt du réel, dans `zone-franche` (STORY-901, de A,
+  quand la recette était à A), et la pile à deux espaces de **1115**, qui a monté `catalogue-essai` et
+  `referentiel-packages-essai` sans que rien n'y dépose. Le défaut commun — la pile ne sème pas ses paquets, chaque
+  suite les dépose ou non — se corrige à la pile, que 1115 a faite à deux espaces. Rien ne change dans les dépôts de C
+  (fiscal, balance) ni au catalogue : ils font ce qu'ils doivent.
+- **D-1115-14 — Un déposant unique, `src/paquets-fiscaux.ts`, appelé là où un espace naît.** Au **réel** :
+  `npm run pile` (le `globalSetup` de la recette) le joue **quand la pile porte le fiscal** (`docker-compose.fiscal.yml`
+  dans `RECETTE_SURCOUCHES`) — sans fiscal, personne ne lit ce bucket et le registre des autres recettes ne bouge pas ;
+  `zone-franche` le rejoue (`DEJA_PUBLIE`). À l'**essai** : les deux recettes qui lèvent l'essai
+  (`essai-mise-en-service`, `cinq-essais`), après ses sondes (la pile de base ne lève pas l'essai, D-1115-1). Pour une
+  pile levée à la main (un gate de groupe) : **`npm run paquets-fiscaux -- reel|essai`**.
+- **D-1115-15 — Un `409` n'est admis que sur la même empreinte.** Après un `409`, le registre du catalogue
+  (`GET …/admin/referentiels`) dit quels octets sont là : les mêmes ⇒ `DEJA_PUBLIE` ; d'autres, ou rien ⇒ **`PERIME`**,
+  et la pile est refusée avec la consigne (`down -v`, relever). Jamais un contrôle qui se tait.
+- **D-1115-16 — La recette ne fabrique pas de version.** Elle dépose le couple que le catalogue connaît
+  (`PAQUETS_FISCAUX_PACKAGES`, STORY-940 : `fiscal-tg-entreprise@2026.1`, `fiscal-tg-entreprise-zone-franche@2026.1`) ;
+  une pile neuve le reçoit à chaque fois. Une `2026.2` inventée ici divergerait du catalogue et de la procédure de
+  publication (journal de A, « Publier le paquet fiscal Togo »), où un paquet modifié **après** une publication entre
+  par une nouvelle version.
+- **D-1115-17 — Les octets sont ceux de `balance-service`, sans empreinte épinglée dans la recette.**
+  `RECETTE_BALANCE_SERVICE` (l'archive que l'image a construite), sinon le dépôt à côté de la pile, en LF : les octets
+  que l'image embarque. Épingler `5c683d16…` ici mentirait au prochain changement du paquet ; la recette compare
+  l'empreinte que le fiscal sert à celle des octets lus, pour les **deux** paquets désormais.
+- **D-1115-18 — Le contrôle de cohérence est joué par la recette.** `zone-franche` prend en charge une TVA mensuelle du
+  dossier de droit commun, enregistre un déclaré, appelle `POST …/obligations/{id}/coherence` et exige un motif autre
+  que `TOLERANCE_ABSENTE` (la tolérance est lue AVANT le moteur : tout autre résultat prouve qu'elle est au paquet). Le
+  moteur de la pile ne tient pas de comptabilité pour ce dossier : son motif à lui est admis.
