@@ -46,16 +46,13 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
      NFR-F13 mesurée (60 ms, 24 ms, 157 ms sur 500 × 12) ; mutation 9/9 ; gate `grp-c` vert (Kafka réel) ;
   7. ✅ **STORY-316 DONE (25/11)** : balance-service **#164** (`b78f500`, le paquet), fiscal **#62** (`f1296ae`, la
      dérivation), contrat #873. Fiscal 2739 / 231, conformité 102/102 ; mutation 4/4 ; gate `grp-c` vert.
-- ⚠️ **Correction du 25/11** : le lot 6 de C n'était **pas** terminé. L'amendement du 24/11 au soir (D-L6-5, plan §4)
-  lui ajoute cinq stories de `prospera-balance-service`, après 316 : **1020 → 1019 → 1021 → 1022 → 1023** (réservées au
-  tracker, sans fiche). C ne les avait pas vues (plan amendé non relu) ; signalé par A. Elles passent maintenant :
-  8. 🟡 **STORY-1020** l'état de rapprochement s'exporte (débloque FE-077 de A) ;
-  9. **STORY-1019** la garde du conseil ; 10. **STORY-1021** les routes d'instance de la balance ;
-  11. **STORY-1022** `soldesChecksum` (1078 de D le rapproche) ; 12. **STORY-1023** les contrats de la balance complétés.
-- **Les neuf premières du lot 6 de C (25/11)** : 1099, 1087, 1088, 1100, 1117 (demande de A), 326, 1101, 315, 316, toutes
+- **Décision de l'utilisateur du 25/11** (relayée par A, prospera-stories #887) : STORY-1020, 1019, 1021, 1022 et 1023
+  (balance-service, amendement D-L6-5 que C avait manqué) **sortent du lot 6 et passent en tête du lot 7 de C**, dans
+  l'ordre 1020 → 1019 → 1021 → 1022 → 1023. Rien n'en a été écrit ni codé.
+- 🏁 **LOT 6 DE C CLOS (25/11)** : 1099, 1087, 1088, 1100, 1117 (demande de A), 326, 1101, 315, 316, toutes
   fusionnées (code sur `dev`, docs sur `main`). Derniers commits de C sur `dev` : fiscal `f1296ae`, balance-service
   `b78f500`, comptabilite `e4a53cc`, document-service `0716a58` (passé à B, #849). Aucune pile, aucun verrou, aucune
-  branche ouverte. **Le lot 7 attend la décision de l'utilisateur, après les cinq stories ci-dessus** (« tu termines le lot 6 ici, pour le lot 7 on verra
+  branche ouverte. **Le lot 7 attend la décision de l'utilisateur** (il commencera par 1020 → 1023) (« tu termines le lot 6 ici, pour le lot 7 on verra
   après », 25/11) ; PRA-02 cédée à A avec l'accord de C.
 - **Docker** : verrou du poste principal (`MoneyVibes_Apps\.verrou-docker`) partagé avec A ; aucune pile de C ne tourne.
 
