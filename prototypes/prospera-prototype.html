@@ -3626,6 +3626,77 @@
   .tn-rig { display: flex; gap: 0.4rem 0.7rem; flex-wrap: wrap; align-items: center; margin-top: 0.6rem; font-size: 0.82rem; }
   [data-tn-ap].fin-ap { z-index: 99; }
   .tn-rig select { font: inherit; font-size: 0.82rem; padding: 0.25rem 0.4rem; border-radius: 0.4rem; border: 1px solid var(--border-strong); background: var(--card); color: var(--foreground); }
+  /* ═══ Lot 7, paquet 2 : FE-038 export de la liasse · FE-081 dépôt et accusé · FE-095 rejet · FE-096 classeur de dépôt ═══ */
+  .dp-wrap { display: flex; flex-direction: column; gap: 1rem; }
+  .dp-head { display: flex; gap: 0.5rem 1rem; flex-wrap: wrap; align-items: flex-start; }
+  .dp-head h3 { margin: 0; font-size: 1.1rem; }
+  .dp-head p { margin: 0.15rem 0 0; font-size: 0.82rem; color: var(--muted-fg); }
+  .dp-head .grow { flex: 1 1 auto; }
+  .dp-card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.8rem; }
+  .dp-card.warn { border-color: var(--warning); }
+  .dp-card.ko { border-color: var(--danger); background: color-mix(in srgb, var(--danger-soft) 40%, var(--card)); }
+  .dp-card.ok { border-color: var(--success); background: color-mix(in srgb, var(--success-soft) 45%, var(--card)); }
+  .dp-big { margin: 0; font-size: 1.05rem; font-weight: 700; line-height: 1.4; }
+  .dp-sub { margin: 0; font-size: 0.85rem; color: var(--muted-fg); line-height: 1.45; }
+  .dp-go { display: flex; gap: 0.7rem 1rem; align-items: center; flex-wrap: wrap; }
+  .dp-go .hint { font-size: 0.82rem; color: var(--muted-fg); }
+  .dp-lg { height: 2.8rem; padding: 0 1.4rem; font-size: 0.95rem; }
+  .dp-wrap .btn[disabled], .dp-box .btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+  .dp-link { font: inherit; font-size: 0.84rem; background: none; border: 0; padding: 0; color: var(--link); text-decoration: underline; cursor: pointer; }
+  .dp-link:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .dp-steps { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  .dp-steps span { display: inline-flex; gap: 0.4rem; align-items: center; font-size: 0.78rem; font-weight: 600; padding: 0.28rem 0.7rem; border-radius: 999px; border: 1px solid var(--border); color: var(--muted-fg); background: var(--card); }
+  .dp-steps span i { font-style: normal; font-size: 0.68rem; width: 1.1rem; height: 1.1rem; border-radius: 50%; display: grid; place-items: center; background: var(--hover-surface); }
+  .dp-steps span.now { background: var(--primary); color: var(--primary-fg); border-color: transparent; }
+  .dp-steps span.now i { background: rgb(0 0 0 / 0.12); }
+  .dp-steps span.done { color: var(--success); background: var(--success-soft); border-color: transparent; }
+  .dp-steps span.stop { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
+  .dp-pill { display: inline-flex; gap: 0.35rem; align-items: center; font-size: 0.76rem; font-weight: 700; padding: 0.22rem 0.65rem; border-radius: 999px; background: var(--hover-surface); border: 1px solid var(--border); white-space: nowrap; }
+  .dp-pill.todo { background: var(--warning-soft); border-color: transparent; }
+  .dp-pill.done { background: var(--success-soft); border-color: transparent; color: var(--success); }
+  .dp-pill.ko { background: var(--danger-soft); border-color: transparent; color: var(--danger); }
+  .dp-pill svg { width: 0.85rem; height: 0.85rem; }
+  .dp-motif { margin: 0; padding: 0.7rem 0.85rem; border-radius: 0.5rem; background: var(--card); border: 1px solid var(--danger); font: inherit; font-size: 0.86rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 14rem; overflow: auto; }
+  .dp-motif-k { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); margin: 0 0 0.25rem; }
+  .dp-tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 0.5rem; }
+  .dp-tbl th, .dp-tbl td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .dp-tbl th { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted-fg); }
+  .dp-tbl td.k { color: var(--muted-fg); white-space: nowrap; width: 11rem; }
+  .dp-tbl code { font-size: 0.78rem; overflow-wrap: anywhere; }
+  .dp-tbl select { max-width: 100%; }
+  @media (max-width: 36rem) { .dp-tbl td.k { white-space: normal; width: auto; } .dp-tbl td, .dp-tbl th { padding: 0.35rem 0.3rem; } }
+  .dp-gap { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; padding: 0.5rem 0.7rem; border: 1px dashed var(--border-strong); border-radius: 0.5rem; font-size: 0.82rem; color: var(--muted-fg); }
+  .dp-gap .dp-pill { background: var(--hover-surface); }
+  .dp-rig { display: flex; gap: 0.4rem 0.7rem; flex-wrap: wrap; align-items: center; margin-top: 0.6rem; font-size: 0.82rem; }
+  .dp-rig select { font: inherit; font-size: 0.82rem; padding: 0.25rem 0.4rem; border-radius: 0.4rem; border: 1px solid var(--border-strong); background: var(--card); color: var(--foreground); max-width: 100%; }
+  .dp-spin { display: inline-block; width: 0.95rem; height: 0.95rem; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: dpspin 0.8s linear infinite; }
+  @keyframes dpspin { to { transform: rotate(360deg); } }
+  .dp-box { width: min(34rem, 100%); }
+  .dp-box .dp-f { display: flex; flex-direction: column; gap: 0.9rem; padding: 1rem 1.1rem; overflow: auto; }
+  .dp-f label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.82rem; font-weight: 600; }
+  .dp-f label small { font-weight: 400; color: var(--muted-fg); }
+  .dp-f input[type="text"], .dp-f input[type="date"], .dp-f textarea { font: inherit; font-size: 0.9rem; padding: 0.5rem 0.6rem; border: 1px solid var(--border-strong); border-radius: 0.5rem; background: var(--card); color: var(--foreground); width: 100%; }
+  .dp-f textarea { min-height: 7rem; resize: vertical; }
+  .dp-f .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+  @media (max-width: 36rem) { .dp-f .row2 { grid-template-columns: 1fr; } }
+  .dp-bar { display: flex; height: 0.85rem; border-radius: 999px; overflow: hidden; border: 1px solid var(--border); background: var(--hover-surface); }
+  .dp-bar i { display: block; height: 100%; }
+  .dp-bar .c-P { background: var(--success); } .dp-bar .c-A { background: var(--warning); } .dp-bar .c-T { background: #f97316; }
+  .dp-bar .c-N { background: var(--danger); } .dp-bar .c-C { background: var(--border-strong); } .dp-bar .c-V { background: #64748b; }
+  .dp-chips { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  .dp-chip { font: inherit; font-size: 0.78rem; font-weight: 600; padding: 0.28rem 0.7rem; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--foreground); cursor: pointer; display: inline-flex; gap: 0.35rem; align-items: center; }
+  .dp-chip b { font-weight: 800; }
+  .dp-chip[aria-pressed="true"] { border-color: var(--border-strong); background: var(--hover-surface); box-shadow: var(--shadow-sm); }
+  .dp-chip:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .dp-chip .sq { width: 0.6rem; height: 0.6rem; border-radius: 2px; display: inline-block; }
+  .dp-chip .sq.c-P { background: var(--success); } .dp-chip .sq.c-A { background: var(--warning); } .dp-chip .sq.c-T { background: #f97316; } .dp-chip .sq.c-N { background: var(--danger); } .dp-chip .sq.c-C { background: var(--border-strong); } .dp-chip .sq.c-V { background: #64748b; }
+  .dp-sheets { max-height: 24rem; overflow: auto; border: 1px solid var(--border); border-radius: 0.5rem; }
+  .dp-sheets table { margin: 0; }
+  .dp-sheets tr.mo td { background: var(--hover-surface); font-size: 0.78rem; color: var(--muted-fg); }
+  .dp-sheets button.nm { font: inherit; background: none; border: 0; padding: 0; text-align: left; font-weight: 600; color: var(--foreground); cursor: pointer; }
+  .dp-sheets button.nm:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .dp-drop { border: 2px dashed var(--border-strong); border-radius: 0.9rem; padding: 1.3rem 1rem; text-align: center; background: var(--card); display: flex; flex-direction: column; gap: 0.5rem; align-items: center; }
+  .dp-drop p { margin: 0; font-size: 0.84rem; color: var(--muted-fg); max-width: 34rem; }
   /* ═══ Lot 6 : FE-149 factures → écritures, FE-150 « Repris de vos choix », FE-141 analyse financière ═══ */
   .fac-wrap { display: flex; flex-direction: column; gap: 1rem; }
   .fac-head { display: flex; gap: 0.5rem 1rem; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; }
@@ -12594,6 +12665,18 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/><path d="M3 12a9 9 0 0 1 9-9"/></svg>
                       Validation <span class="badge badge-new" data-note>FE-034</span>
                     </button>
+                    <button class="atl-tab" role="tab" data-bil-tab="export" aria-selected="false" title="FE-038 — remettre la liasse figée au client, en PDF ou en Excel">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+                      Export <span class="badge badge-new" data-note>FE-038</span>
+                    </button>
+                    <button class="atl-tab" role="tab" data-bil-tab="depot" aria-selected="false" title="FE-081 le dépôt et son accusé · FE-095 le rejet">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v6H4z"/><path d="M6 10v10h12V10"/><path d="M10 14h4"/></svg>
+                      Dépôt <span class="badge badge-new" data-note>FE-081 · FE-095</span>
+                    </button>
+                    <button class="atl-tab" role="tab" data-bil-tab="classeur" aria-selected="false" title="FE-096 — le classeur de dépôt, feuille par feuille">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+                      Classeur <span class="badge badge-new" data-note>FE-096</span>
+                    </button>
                     <button class="atl-tab" role="tab" data-bil-tab="analyse" aria-selected="false" title="FE-141 : les 19 indicateurs, leurs formules et leurs verdicts, tels que le serveur les sert.">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-5M12 16V7M17 16v-8"/></svg>
                       Analyse <span class="badge badge-new" data-note>FE-141</span>
@@ -12605,10 +12688,6 @@
                     <button class="atl-tab" role="tab" data-bil-tab="projection" aria-selected="false" title="FE-036 — projection 3 ans, plan de trésorerie 12 mois et scénarios comparés">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
                       Projection <span class="badge badge-new" data-note>FE-036</span>
-                    </button>
-                    <button class="atl-tab" role="tab" data-bil-tab="export" aria-selected="false" disabled title="FE-038 — export PDF / Excel fidèle au snapshot">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
-                      Export <span class="soon" data-note>FE-038</span>
                     </button>
                   </div>
 
@@ -15331,7 +15410,7 @@
   </div>
   <div class="go">
     <button class="btn btn-ghost" type="button" data-val-open="rouvrir">Rouvrir pour correction</button>
-    <button class="btn btn-ghost" type="button" disabled title="FE-038 — export PDF / Excel fidèle au snapshot">Exporter la liasse figée</button>
+    <button class="btn btn-ghost" type="button" data-dp-goto="export" title="FE-038 — remettre la liasse figée au client">Exporter la liasse figée</button>
   </div>
 </div>
                       <div class="coh">
@@ -15574,6 +15653,7 @@
                     </div>
                     <div data-bil-val-slot="v2" hidden data-val-bz="5 700 000" data-val-cj="200 000" data-val-courante="2" data-val-prochaine="3">
                       <div class="vfr"><span class="vfr-s done"><span class="n">1</span>Brouillon</span><span class="vfr-a">→</span><span class="vfr-s done"><span class="n">2</span>Contrôles bloquants</span><span class="vfr-a">→</span><span class="vfr-s now"><span class="n">3</span>Figée — version 2</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">4</span>Déposée (<code>DEPOSE</code>)</span><span style="flex:1"></span><span class="code" data-note>le dépôt est un acte à part : son écran est FE-081 · <b>STORY-446</b></span></div><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;padding:0.55rem 0.75rem;border:1px dashed var(--border-strong);border-radius:var(--radius);font-size:0.78rem;background:var(--content-bg)"><b>⏱️ Version 2 figée le 22/07/2026</b><span style="color:var(--muted-fg);flex:1;min-width:16rem">Exercice clos le <b>31/12/2025</b> ⇒ dépôt de la DSF attendu le <b>30/04/2026</b> — soit <b>83 jours de retard</b>. <b>Servi par l'API</b>&nbsp;: <code>echeanceDepot { date: 30/04/2026, joursRestants: −83 }</code> — signé, calculé à la lecture, jamais une date par défaut (<code>null</code> + <code>motif</code> si la clôture n'est pas au 31 décembre). <span class="code" data-note>livré · <b>STORY-453</b></span></span></div>
+                      <div class="tn-next" style="margin-top:0.5rem"><p><b>Étape suivante : remettre la liasse au client, ou la déposer.</b></p><button class="btn btn-ghost" type="button" data-dp-goto="export">Remettre au client</button><button class="btn btn-primary" type="button" data-dp-goto="depot">Déposer la liasse</button></div>
                       <div class="ref-card">
   <div class="ref-head">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -15667,7 +15747,7 @@
   </div>
   <div class="go">
     <button class="btn btn-ghost" type="button" data-val-open="rouvrir">Rouvrir pour correction</button>
-    <button class="btn btn-ghost" type="button" disabled title="FE-038 — export PDF / Excel fidèle au snapshot">Exporter la liasse figée</button>
+    <button class="btn btn-ghost" type="button" data-dp-goto="export" title="FE-038 — remettre la liasse figée au client">Exporter la liasse figée</button>
   </div>
 </div>
                       <div class="coh">
@@ -15878,7 +15958,7 @@
   <div class="go">
     <button class="btn btn-ghost" type="button" data-val-open="rouvrir">Rouvrir pour correction</button>
     <button class="btn btn-ghost" type="button" data-val-goto-exercice>Rouvrir l'exercice 2025</button>
-    <button class="btn btn-ghost" type="button" disabled title="FE-038 — export PDF / Excel fidèle au snapshot">Exporter la liasse figée</button>
+    <button class="btn btn-ghost" type="button" data-dp-goto="export" title="FE-038 — remettre la liasse figée au client">Exporter la liasse figée</button>
   </div>
 </div>
                       <div class="coh">
@@ -16033,6 +16113,102 @@
                        ASSERTÉES contre eux — la jointure est prouvée, pas affirmée.
                        Aucun montant n'est écrit à la main : ils sortent d'un script qui
                        transcrit le moteur, relu et asserté contre les voisins. -->
+                  <!-- ═════ LOT 7 (paquet 2) · FE-038 · EXPORT DE LA LIASSE ═════
+                       Un geste : télécharger. Le reste (version, contenu, empreinte) est derrière « Détails ».
+                       Les chiffres de la liasse sont ceux de FE-034 (version 2, exercice 2025). -->
+                  <div class="atl-panel atl-body" data-bil-panel="export" hidden>
+                    <div class="dp-wrap" data-ex-root></div>
+                    <div class="dc-note" data-note>
+                      <b>FE-038 · export de la liasse.</b> <code>GET /api/v1/dossiers/{dossierId}/bilan/export/etats/{jeuEtatsId}?format=pdf|xlsx&amp;version=</code> sur <code>bilan-service</code> (STORY-073, 416, 556 ; STORY-449 pour la règle du brouillon). Droits <code>TENANT_ADMIN</code> ou <code>TENANT_USER</code> + module <code>bilan</code>. <b>Génération synchrone</b> : le service n’a ni file d’attente ni lien de job, donc l’écran n’a qu’une attente (« Préparation du fichier »), jamais de barre de progression ni de relance. Sans <code>version</code> : un brouillon sort marqué « BROUILLON — NON FIGÉ » et nommé <code>liasse-2025-brouillon.pdf</code> ; un jeu figé rend sa dernière version, nommée <code>liasse-2025-v2.pdf</code>. Avec <code>version</code> : ce snapshot précis, à l’identique. <b>Limite 10 exports par minute</b> (429). Refus : <code>404 JEU_ETATS_INTROUVABLE</code>, <code>404 VERSION_INTROUVABLE</code>, <code>403 BILAN_NOT_ENTITLED</code> / <code>EMAIL_NOT_VERIFIED</code> / <code>KYC_NOT_APPROVED</code>.
+                      <div class="dp-gap" style="margin-top:0.5rem"><span class="dp-pill">écart</span><span><b>Logo et couleur du cabinet</b> (FE-023, <code>logoUrl</code> / <code>brandColor</code>) : le moteur d’export ne les lit pas. L’écran le dit dans « Détails » au lieu de promettre un document à l’en-tête du cabinet. <b>Porteur : D</b> (<code>bilan-service</code>).</span></div>
+                      <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b>Empreinte du document</b> : elle n’est écrite que dans la piste d’audit, pas dans la réponse. L’écran affiche l’empreinte de la <b>version figée</b> (<code>GET …/versions</code>), jamais celle du fichier. <b>Porteur : D</b>, si le cabinet veut l’empreinte du fichier remis.</span></div>
+                      <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">hors février</span><span><b>Le prévisionnel</b> (<code>GET …/export/previsionnel/{hypothesesId}</code>, livré) s’exporte depuis son onglet, avec FE-035 : une ligne grisée le dit.</span></div>
+                      <div class="dp-rig"><b>Banc d’essai (FE-038).</b>
+                        <button class="btn btn-ghost btn-sm" type="button" data-ex-bench="fige">Liasse figée (version 2)</button>
+                        <button class="btn btn-ghost btn-sm" type="button" data-ex-bench="brouillon">Brouillon en cours</button>
+                        <button class="btn btn-ghost btn-sm" type="button" data-ex-bench="vide">Aucune liasse</button>
+                        <label>Prochaine réponse du serveur :
+                          <select data-ex-rig aria-label="Prochaine réponse du serveur (export)">
+                            <option value="">200 · le fichier part</option>
+                            <option value="VERSION_INTROUVABLE">404 · VERSION_INTROUVABLE</option>
+                            <option value="JEU_ETATS_INTROUVABLE">404 · JEU_ETATS_INTROUVABLE</option>
+                            <option value="BILAN_NOT_ENTITLED">403 · BILAN_NOT_ENTITLED</option>
+                            <option value="KYC_NOT_APPROVED">403 · KYC_NOT_APPROVED</option>
+                            <option value="429">429 · plus de 10 exports par minute</option>
+                            <option value="reseau">Service injoignable</option>
+                          </select></label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ═════ LOT 7 (paquet 2) · FE-081 DÉPÔT ET ACCUSÉ · FE-095 REJET ═════
+                       Un seul écran, le même dépôt moment par moment (comme la validation de FE-034). Un geste principal par moment.
+                       « Rejetée » n'est pas un état final : il reste en tête et appelle une action. -->
+                  <div class="atl-panel atl-body" data-bil-panel="depot" hidden>
+                    <div class="dp-wrap" data-dp-root></div>
+                    <div class="dc-note" data-note>
+                      <b>FE-081 · le dépôt et son accusé.</b> Chaîne de dépôts de <code>fiscal-service</code> (STORY-538, 681, 682, 689, 691) : <code>GET /api/v1/depots?dossierId=&amp;jeuEtatsId=&amp;version=&amp;pays=TG&amp;etat=DSF</code> rend <code>depots[]</code>, <code>obligation { statut: A_DEPOSER | TRANSMISE | REJETEE_A_RETRANSMETTRE | ACCEPTEE, ouverte }</code>, <code>echeance { date, joursRestants }</code> relayée de <code>bilan-service</code> (négatif = retard) et <code>divergence</code>. <code>POST /depots</code> (multipart : fichier réellement transmis, <code>version</code>, <code>transmisLe</code>, <code>precedentId</code> pour une retransmission ; droit <code>fiscalite:declaration:deposer</code>), <code>POST /depots/{id}/accuse</code> (<code>accepteLe</code>, <code>numeroAccuse</code>, <code>signataire { nom, numeroOrdre }</code> exigé ; droit <code>deposer</code>), <code>POST /depots/{id}/rejet</code> (<code>rejeteLe</code>, <code>motif</code>, <code>referenceRejet?</code> ; droit <code>preparer</code>), <code>GET /depots/{id}/audit</code> (chaîne vérifiée), <code>GET /depots/{id}/fichier</code> (URL présignée éphémère). Tous les boutons se gardent sur le <b>droit lu dans le jeton</b>, jamais sur le rôle. <b>Le visa</b> : <code>POST /obligations/{id}/transition { vers: 'VALIDEE' }</code> (droit <code>valider</code>, donc l’associé) pose <code>visa { par, nom, le }</code> ; sans lui, <code>VALIDEE → A_DEPOSER</code> répond <code>409 VISA_REQUIS</code> (STORY-323). « Poser mon visa » enchaîne donc deux appels : <code>VALIDEE</code> puis <code>A_DEPOSER</code>. <b>L’écart de rapprochement</b> : <code>POST /exercices/{id}/rapprochement-liasse</code> (STORY-1101) ; un écart pose l’anomalie bloquante <code>RAPPROCHEMENT_LIASSE_ECART</code>, et <code>A_DEPOSER</code> répond <code>409 ANOMALIE_BLOQUANTE</code> tant qu’elle est ouverte (STORY-328).
+                      <br><b>⛔ Le produit ne dépose rien.</b> Il garde ce que le cabinet a transmis ; le canal est celui que déclare le paquet (<code>canal.mode: DECLARE</code>). <b>⛔ Un rejet ne clôt rien</b> : <code>obligation.ouverte</code> reste vraie, le retard continue (lire <code>obligation.ouverte</code>, jamais le déduire du dernier statut). <b>⛔ Le motif du rejet s’affiche tel que rendu</b>, sans troncature ni reformulation (<code>MOTIF_MAX</code> 4000, <code>motif</code> conservé à l’octet). Un rejet ne rend jamais la liasse modifiable : la correction produit une <b>nouvelle version</b> (rouvrir avec motif, corriger, figer), puis <code>POST /depots</code> avec <code>precedentId</code> : le dépôt rejeté n’est jamais écrasé. Refus lus : <code>DEPOT_EN_COURS</code>, <code>DEPOT_DEJA_ACCEPTE</code>, <code>RETRANSMISSION_NON_LIEE</code>, <code>VERSION_NON_SCELLEE</code>, <code>PAQUET_DEPOT_NON_PUBLIE</code>, <code>VERSION_FORMAT_ABSENTE</code>, <code>CLASSEUR_*</code>, <code>FICHIER_TROP_VOLUMINEUX</code> (15 Mo), <code>NUMERO_ACCUSE_EXIGE</code>, <code>MOTIF_INVALIDE</code>, <code>DROIT_FISCAL_REFUSE</code>.
+                      <div class="dp-gap" style="margin-top:0.5rem"><span class="dp-pill">écart</span><span><b>La photo de l’accusé</b> : aucune route n’accepte de pièce jointe pour l’accusé (seulement <code>numeroAccuse</code>). Ligne grisée « pas encore disponible ». <b>Porteurs : C et D</b> (<code>fiscal-service</code>).</span></div>
+                      <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b>La « correction proposée »</b> demandée par la salle du 19/11 (V11) n’existe pas : l’administration ne rend qu’un texte, et la fiche interdit de le reformuler (AC-3 de FE-095). L’écran garde le motif brut et le dit. <b>Question posée à l’utilisateur</b> (n° 4).</span></div>
+                      <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b>Le cycle de l’obligation ne suit pas la chaîne de dépôts</b> : <code>CORRESPONDANCE_DEPOT</code> existe en domaine, mais STORY-333 et 334 (relier les deux) ne sont pas livrées. L’écran lit donc la chaîne (<code>/depots</code>) pour le dépôt, et l’obligation pour le visa. <b>Porteurs : C et D.</b></span></div>
+                      <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b>Le fichier produit n’est pas gardé côté serveur</b> (<code>POST /livrables-depot</code> le renvoie sans le stocker) : le navigateur le garde le temps de la séance et le joint tout seul ; revenu plus tard, le cabinet le rejoint à la main. <b>Porteurs : C et D</b>, si on veut le joindre toujours.</span></div>
+                      <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">arbitrage</span><span><b>Deux chemins mènent à « déposée »</b> : la chaîne de <code>fiscal-service</code> (dessinée ici) quand le cabinet détient le module <code>declarations</code> ou <code>fiscalite</code>, le constat <code>POST /dossiers/{id}/bilan/etats/{id}/deposer</code> de <code>bilan-service</code> sinon (réservé à l’administrateur, <code>LIASSE_DEJA_DEPOSEE</code> sur un second dépôt). Recommandation de A : question n° 3.</span></div>
+                      <div class="dp-rig"><b>Banc d’essai (FE-081 · FE-095).</b>
+                        <label>Vous êtes :
+                          <select data-dp-rig-role aria-label="Votre rôle (démo)">
+                            <option value="associe">associé (Awa Diallo) : droits valider, préparer, déposer</option>
+                            <option value="collab">collaborateur (Kofi Santos) : droit préparer seul</option>
+                          </select></label>
+                        <label><input type="checkbox" data-dp-rig-ecart> un écart de rapprochement est ouvert</label>
+                        <label>Prochaine réponse du serveur :
+                          <select data-dp-rig aria-label="Prochaine réponse du serveur (dépôt)">
+                            <option value="">200 · l’acte est enregistré</option>
+                            <option value="DEPOT_EN_COURS">409 · DEPOT_EN_COURS</option>
+                            <option value="DEPOT_DEJA_ACCEPTE">409 · DEPOT_DEJA_ACCEPTE</option>
+                            <option value="VERSION_NON_SCELLEE">422 · VERSION_NON_SCELLEE</option>
+                            <option value="PAQUET_DEPOT_NON_PUBLIE">422 · PAQUET_DEPOT_NON_PUBLIE</option>
+                            <option value="VERSION_FORMAT_ABSENTE">422 · VERSION_FORMAT_ABSENTE</option>
+                            <option value="CLASSEUR_ILLISIBLE">422 · CLASSEUR_ILLISIBLE</option>
+                            <option value="FICHIER_TROP_VOLUMINEUX">413 · FICHIER_TROP_VOLUMINEUX</option>
+                            <option value="DROIT_FISCAL_REFUSE">403 · DROIT_FISCAL_REFUSE</option>
+                            <option value="SERVICE_AMONT_INDISPONIBLE">503 · SERVICE_AMONT_INDISPONIBLE</option>
+                          </select></label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ═════ LOT 7 (paquet 2) · FE-096 LE CLASSEUR DE DÉPÔT ═════
+                       La phrase d'en-tête dit combien de feuilles Prospera remplit ; le bouton porte ce chiffre.
+                       Jamais « prêt à déposer » tant qu'il reste des feuilles à faire. -->
+                  <div class="atl-panel atl-body" data-bil-panel="classeur" hidden>
+                    <div class="dp-wrap" data-cl-root></div>
+                    <div class="dc-note" data-note>
+                      <b>FE-096 · le classeur de dépôt.</b> Routes de <code>fiscal-service</code> : <code>GET /api/v1/livrables-depot/TG/DSF/completude?dossierId=&amp;jeuEtatsId=&amp;version=</code> (le décompte, STORY-556 ; 10 par minute) rend <code>paquet</code> (TG × DSF <b>1.3</b>), <code>referentiel</code> (<code>syscohada-revise@2.3</code>), <code>effectifs</code> et <b>six listes</b> : <code>produites</code>, <code>aCompleter</code>, <code>produitesNonTranscrites</code>, <code>declareesVides</code>, <code>nonModelisees</code>, <code>calculeesParLeClasseur</code>, plus <code>notesSansFeuille</code> et les 8 <code>controles</code> (2 couverts, 6 nommés non couverts). <code>POST /livrables-depot/TG/DSF</code> (multipart : le <b>classeur vierge</b> que le cabinet a téléchargé, <code>dossierId</code>, <code>jeuEtatsId</code>, <code>version</code>, <code>signataire[nom, qualite, dateSignature?]</code>, <code>expertComptable[nom, numeroOrdre]</code> ; droit <code>preparer</code> ; 5 par minute) rend le classeur rempli et les en-têtes de format, d’empreinte du paquet et d’empreinte du fichier. <code>POST …/trace</code> (la trace case par case, 10 par minute) existe aussi : hors de cette fiche.
+                      <br><b>Chiffres : le décompte mesuré sur TG × DSF 1.3 (STORY-701)</b> : 17 produites + 27 à compléter + 4 non transcrites + 0 vide + 36 non modélisées + 8 calculées = 92 (la liste des 92 feuilles est celle du paquet, relevée sur le classeur de référence). <b>La fiche d’août parlait de trois états</b> ; le contrat en a <b>six</b> (STORY-556, revue de code) : l’écran en garde six filtres, et la phrase d’en-tête les regroupe. ⛔ Une feuille non modélisée n’est jamais « vide » ; <code>declareesVides</code> reste à 0 et n’a pas de pastille tant qu’aucune feuille n’y tombe. Le bouton porte le décompte (« 17 feuilles sur 92 »), jamais « prêt à déposer ».
+                      <div class="dp-gap" style="margin-top:0.5rem"><span class="dp-pill">écart</span><span><b>Le classeur vierge n’est servi par aucune route</b> : le cabinet le télécharge sur GUDEF et le glisse ici ; le produit ne le retient pas (rien à pré-remplir). <b>Porteurs : C et D</b> (<code>fiscal-service</code>), si le paquet doit servir son propre gabarit.</span></div>
+                      <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b>Pas de clé de section dans le décompte</b> : la fiche voulait regrouper les 92 feuilles par section (identification, états, notes, partie fiscale, contrôles) ; seule la <code>nature</code> des feuilles produites est servie. L’écran filtre donc par liste. <b>Porteurs : C et D</b>.</span></div>
+                      <div class="dp-rig"><b>Banc d’essai (FE-096).</b>
+                        <button class="btn btn-ghost btn-sm" type="button" data-cl-bench="fige">Liasse figée, classeur à ajouter</button>
+                        <button class="btn btn-ghost btn-sm" type="button" data-cl-bench="pret">Classeur déjà ajouté</button>
+                        <button class="btn btn-ghost btn-sm" type="button" data-cl-bench="brouillon">Liasse en brouillon</button>
+                        <label>Prochaine réponse du serveur :
+                          <select data-cl-rig aria-label="Prochaine réponse du serveur (classeur)">
+                            <option value="">200 · le classeur est rempli</option>
+                            <option value="CLASSEUR_NON_RECONNU">422 · CLASSEUR_NON_RECONNU</option>
+                            <option value="CLASSEUR_CHIFFRE">422 · CLASSEUR_CHIFFRE</option>
+                            <option value="CLASSEUR_MACRO_INTERDITE">422 · CLASSEUR_MACRO_INTERDITE</option>
+                            <option value="NIF_DIVERGENT">422 · NIF_DIVERGENT</option>
+                            <option value="LIASSE_EN_ANOMALIE">422 · LIASSE_EN_ANOMALIE</option>
+                            <option value="LIASSE_NON_TRANSCRIPTIBLE">422 · LIASSE_NON_TRANSCRIPTIBLE</option>
+                            <option value="TEXTE_NON_INSCRIPTIBLE">422 · TEXTE_NON_INSCRIPTIBLE</option>
+                            <option value="429">429 · plus de 5 classeurs par minute</option>
+                            <option value="CLASSEURS_SATURES">503 · CLASSEURS_SATURES</option>
+                          </select></label>
+                      </div>
+                    </div>
+                  </div>
+
                   <!-- ═════ FE-141 · Analyse financière (lot 6) ═════ -->
                   <div class="atl-panel atl-body" data-bil-panel="analyse" hidden>
                     <div data-ana-root></div>
@@ -17811,6 +17987,13 @@
   </div>
 
 
+  <!-- Lot 7 (paquet 2) : fenêtres du dépôt — le visa, « j'ai déposé », « l'administration a répondu » (FE-081 · FE-095). Hors des pages pour rester visibles. -->
+  <div class="fin-ap" data-dp-ap hidden role="dialog" aria-modal="true" aria-label="Dépôt de la liasse">
+    <div class="fin-ap-box dp-box"><div class="fin-ap-h"><div><b data-dp-ap-titre></b><small data-dp-ap-sous></small></div></div>
+      <div class="dp-f" data-dp-ap-corps></div>
+      <div class="plan-ap-foot" style="justify-content:flex-end"><button class="btn btn-ghost btn-sm" type="button" data-dp-ap-fermer>Annuler</button><button class="btn btn-primary btn-sm" type="button" data-dp-ap-ok>Enregistrer</button></div></div>
+  </div>
+<script type="application/json" id="lot7p2Data">{"feuilles":[["Page de garde","P","page de garde du formulaire : le livrable v1.3 y écrit la date de clôture (E16) et la dénomination (E20), depuis la liasse et le dossier ; le NIF (F29) est pré-rempli et verrouillé par l'OTR ; « NOM COMMERCIAL » (E23) reste au cabinet (STORY-537, revue C2)"],["FICHE CONDITIONS","C","aucune case de saisie (0 cellule déverrouillée, aucune formule) : texte fixe des conditions de recevabilité"],["FICHE DEPOT","C","aucune case de saisie (0 cellule déverrouillée, 6 formules) : recopie de la page de garde (clôture, dénomination, sigle, adresse, NIF) — elle se remplit quand la page de garde l'est"],["NAEMA","C","aucune case de saisie (0 cellule déverrouillée, aucune formule) : table de référence de la nomenclature d'activités (code, désignation), sans saisie : le code d'activité se saisit dans la fiche d'identification"],["TABLE DES CODES","C","aucune case de saisie (0 cellule déverrouillée, aucune formule) : « NOTE 36 : TABLE DES CODES » — tables de codes de référence (forme juridique, pays…)"],["FICHE IDENTIFICATION 1","P","fiche d'identification : le livrable v1.3 y écrit 9 cases (début d'exercice, fin et durée N-1, dénomination, sigle, visa de l'expert-comptable, signataire) depuis la liasse, le dossier et la demande ; le reste de la fiche (activité, banques, effectifs…) reste au cabinet"],["FICHE IDENTIFICATION 2","N","renseignements divers d'identification (activités, capital, participations) (475 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["FICHE DIRIGEANTS","N","dirigeants et commissaires aux comptes (634 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["BILAN ACTIF","P","état produit par bilan-service (source BILAN_ACTIF) : le livrable v1.3 y écrit brut, amortissements, net et net N-1 ligne par ligne"],["BILAN PASSIF","P","état produit par bilan-service (source BILAN_PASSIF, résultat placé par la cascade) : le livrable v1.3 y écrit N et N-1 ligne par ligne"],["COMPTE DE RESULTAT","P","état produit par bilan-service (source COMPTE_RESULTAT) : le livrable v1.3 y écrit N et N-1 ligne par ligne, charges saisies négatives"],["TFT","P","état produit par bilan-service (source TFT) : le livrable v1.3 y écrit N et N-1 ligne par ligne"],["FR 4","N","« FICHE RÉCAPITULATIVE DES NOTES ANNEXES PRÉSENTÉES » : colonnes A / N/A à cocher note par note (90 cases de saisie) — aucun producteur ne la renseigne, aucune case au gabarit v1.3"],["NOTE 1","A","feuille de la note 1 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 111 case(s) de trame (lignes libres ou imprimées) ; 15 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 2","N","« NOTE 2 : INFORMATIONS OBLIGATOIRES » — note narrative (déclaration de conformité, règles et méthodes, dérogations : texte libre, 121 cases de saisie), hors référentiel par décision user du 2026-09-24 (STORY-559)"],["TABLEAU immo note 3A","A","feuille de la note 3A — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 96 case(s) de trame (lignes libres ou imprimées) ; 25 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["TABLEAU IMMO note 3 B","A","feuille de la note 3B — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 59 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 3C AMORTISSEMENT","A","feuille de la note 3C — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 44 case(s) de trame (lignes libres ou imprimées) ; 13 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 3D","A","feuille de la note 3D — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 36 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 3E","A","feuille de la note 3E — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 24 case(s) de trame (lignes libres ou imprimées) ; 4 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 4","A","feuille de la note 4 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 18 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 27 case(s) de trame (lignes libres ou imprimées) ; 42 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 5","P","feuille de la note 5 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 14 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 4 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 6","P","feuille de la note 6 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 9 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 13 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 7","A","feuille de la note 7 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 24 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 36 case(s) de trame (lignes libres ou imprimées) ; 16 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 8","A","feuille de la note 8 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 22 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 33 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 8A","A","feuille de la note 8A — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 97 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 9","P","feuille de la note 9 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 16 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 10","P","feuille de la note 10 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 14 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 11","P","feuille de la note 11 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 26 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 4 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 12","A","feuille de la note 12 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 90 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 13","A","feuille de la note 13 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 132 case(s) de trame (lignes libres ou imprimées) ; 49 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 14","P","feuille de la note 14 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 28 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 15 A","A","feuille de la note 15A — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 36 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 54 case(s) de trame (lignes libres ou imprimées) ; 6 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 15B","A","feuille de la note 15B — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 24 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 16A","A","feuille de la note 16A — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 56 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 81 case(s) de trame (lignes libres ou imprimées) ; 12 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 16 B","A","feuille de la note 16B — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 26 case(s) de trame (lignes libres ou imprimées) ; 18 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 16 B bis","A","feuille de la note 16Bbis — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 6 case(s) de trame (lignes libres ou imprimées) ; 18 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 16 C","A","feuille de la note 16C — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 113 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 17","A","feuille de la note 17 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 16 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 27 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 18","A","feuille de la note 18 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 28 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 70 case(s) de trame (lignes libres ou imprimées) ; 8 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 19","A","feuille de la note 19 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 36 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 54 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 20","P","feuille de la note 20 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 14 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 21","T","feuille de la note 21 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 43 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 22","T","feuille de la note 22 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 41 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 23 24","P","feuille de les notes 23 et 24 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 38 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 4 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 25","P","feuille de la note 25 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 10 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 26","T","feuille de la note 26 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 17 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 27A","P","feuille de la note 27A — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 12 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 3 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 27 B","A","feuille de la note 27B — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 72 case(s) de trame (lignes libres ou imprimées) ; 100 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 28","A","feuille de la note 28 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 91 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 29","P","feuille de la note 29 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 36 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 6 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 30","T","feuille de la note 30 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 91 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 31","A","feuille de la note 31 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 110 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 32","A","feuille de la note 32 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 378 case(s) de trame (lignes libres ou imprimées) ; 28 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 33","A","feuille de la note 33 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 468 case(s) de trame (lignes libres ou imprimées) ; 30 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 34","A","feuille de la note 34 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 120 case(s) de trame (lignes libres ou imprimées) ; 2 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 35","N","« NOTE 35 : LISTE DES INFORMATIONS SOCIALES, ENVIRONNEMENTALES ET SOCIÉTALES » (entités de plus de 250 salariés) — note narrative, aucune case de saisie dans le classeur : l'information se fournit hors formulaire ; hors référentiel par décision user du 2026-09-24 (STORY-559)"],["Page de garde Etats Comp","C","aucune case de saisie (0 cellule déverrouillée, 5 formules) : page de garde des états complémentaires, recopiée de la fiche de dépôt"],["Fiche recap Etat Comp","C","aucune case de saisie (0 cellule déverrouillée, aucune formule) : liste fixe des états complémentaires (pages 58 à 86)"],["Résultat fiscal","N","détermination du résultat fiscal (83 cases de saisie) — le référentiel déclare des postes RESULTAT_FISCAL, mais la liasse figée ne les produit pas (bilan, compte de résultat, TFT, notes et contrôles seulement) ; aucune case au gabarit v1.3"],["Détail Autres réintég.","N","détail des autres réintégrations fiscales (400 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Détail Autres déductions","N","détail des autres déductions fiscales (352 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Liquidation IS_IR_MP","N","liquidation de l'IS / IR / minimum de perception (19 cases de saisie) — le référentiel déclare des postes LIQUIDATION_IS, mais la liasse figée ne les produit pas ; aucune case au gabarit v1.3"],["Liquidation DP","N","liquidation de la taxe DP (4009 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Gestion défcits-Crédit et A","N","déficits reportables, crédits d’impôt et amortissements réputés différés (191 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Autres Renseig.","N","prélèvements et retenues à la source, terrains et bâtiments (1901 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P64 Détail des charges","N","état complémentaire : détail des charges (53 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P65 Détail des charges","N","état complémentaire : détail des charges (75 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P66 Détail des charges","N","état complémentaire : détail des charges (80 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P67 Détail des charges","N","état complémentaire : détail des charges (32 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P68 DETAIL PRODUITS","N","état complémentaire : détail des produits (79 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P69 Détail des produits","N","état complémentaire : détail des produits (37 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P70 Transactions intragroupe","N","état complémentaire : transactions avec les entreprises liées (4000 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P71 Analyse coût dachat","N","état complémentaire : analyse du coût d'achat (523 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P72 Analyse Production","N","état complémentaire : analyse de la production (462 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P73 Analyse des Ventes","N","état complémentaire : analyse des ventes (415 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P74 CA Fiscal","N","état complémentaire : chiffre d'affaires fiscal (183 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P75 Capro& DEFIRAS","N","état complémentaire : CAPRO et DEFIRAS (120 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P 76 Détail DETTES FISCALES","N","état complémentaire : détail des dettes fiscales (140 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P77 Détail CREANCES FISCALES","N","état complémentaire : détail des créances fiscales (140 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P78 Détail CREANCES CLIENTS ET","N","état complémentaire : détail des créances clients (185 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P79 TVA","N","état complémentaire : TVA (65 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P80 TVM","N","état complémentaire : TVM (6354 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P81 Provision const.","N","état complémentaire : provisions constituées (7999 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P82 Trait. fiscal des prov.","N","état complémentaire : traitement fiscal des provisions (36 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Liste principaux clients","N","liste des principaux clients (847 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Liste principaux fournisseurs","N","liste des principaux fournisseurs (858 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P85 Tableau des amort.","N","état complémentaire : tableau des amortissements (2251 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P86 Autres Renseignements Compl","N","état complémentaire : autres renseignements (20 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Balance (Optionnel)","N","balance jointe au dépôt, facultative (105 cases de saisie) — aucune case au gabarit v1.3 ; sa production est STORY-555"],["Contôle de Cohérence","C","aucune case de saisie (0 cellule déverrouillée, 296 formules) : le classeur juge ce qu'on y dépose : 8 contrôles intermontants (E12 à E36) et la cotation « si nombre » des postes — cf. `controles`"],["Type de Contôles","C","aucune case de saisie (0 cellule déverrouillée, 154 formules) : synthèse 0/1 des 8 contrôles intermontants (B13 à B20) et de la cotation des valeurs numériques — cf. `controles`"]],"controles":[[1,"Contrôle Egalité Actif du Bilan et Passif du Bilan en N","EQUILIBRE_BILAN"],[2,"Contrôle Egalité Résultat Net Comptable au CR et au Passif du Bilan en N","RESULTAT_NON_AFFECTE"],[3,"Contrôle Egalité Résultat Net Comptable au CR & au  Détermination Résultat Fiscal",null],[4,"Contrôle Egalité Résultat Fiscal au Détermination Résultat Fiscal & au Liquidation IR",null],[5,"Contrôle Egalité CA (CR) et CA (Liquidation IS_IR_MP)",null],[6,"Contrôle Egalité CA (Liquidation IS_IR_MP) et CA (Liquidation DP)",null],[7,"Equivalence Si un Numéro de Compte Bancaire est renseigné",null],[8,"Equivalence Effectifs Numéro de Compte Bancaire renseigné et Identité banque",null]],"paquet":{"pays":"TG","etat":"DSF","version":"1.3","checksum":"sha256:daababcc483587b11166466dc03beac28ecb43f915f466cb3404ee8ffc87147a"}}</script>
   <!-- FE-158 : confirmation du choix de la tenue (une phrase, le caractère définitif dit). -->
   <div class="fin-ap" data-tn-ap hidden role="alertdialog" aria-modal="true" aria-label="Confirmer la tenue de l’exercice">
     <div class="fin-ap-box tn-ap-box"><div class="fin-ap-h"><div><b data-tn-titre></b></div></div>
@@ -24775,6 +24958,427 @@
       }).observe(ho, { childList: true, characterData: true, subtree: true });
       window.__tn = function () { return { S: S }; };
       rendre();
+    })();
+
+    /* ═══════════════ LOT 7 (paquet 2) · FE-038 export · FE-081 dépôt · FE-095 rejet · FE-096 classeur ═══════════════
+       Trois écrans de l’onglet « Bilan » (Export, Dépôt, Classeur), sur la liasse déjà validée de FE-034 :
+       Ets Kossi Distribution, exercice 2025, version 2 figée le 22/07/2026 (échéance 30/04/2026).
+       Le JS ne connaît aucun montant de la liasse : il ne tient que des états, des dates et des phrases. Les codes de refus
+       sont ceux des services (bilan-service, fiscal-service) ; ils ne s’affichent jamais, l’écran dit une phrase et propose le geste suivant.
+       Les 92 feuilles et les 8 contrôles viennent du paquet TG × DSF 1.3 (relevé sur le classeur de référence). */
+    (function () {
+      var mod = document.querySelector('.page[data-page="bilan"]');
+      var exRoot = document.querySelector('[data-ex-root]'), dpRoot = document.querySelector('[data-dp-root]'), clRoot = document.querySelector('[data-cl-root]');
+      var ap = document.querySelector('[data-dp-ap]');
+      if (!mod || !exRoot || !dpRoot || !clRoot || !ap) return;
+      function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+      function ico(p) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">' + p + '</svg>'; }
+      var IC = {
+        dl: ico('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>'),
+        warn: ico('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/>'),
+        ok: ico('<path d="M20 6 9 17l-5-5"/>'),
+        lock: ico('<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'),
+        x: ico('<path d="M18 6 6 18M6 6l12 12"/>'),
+        file: ico('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>')
+      };
+      function goTab(n) { var t = mod.querySelector('[data-bil-tab="' + n + '"]'); if (t) { t.click(); var p = mod.querySelector('[data-bil-panel="' + n + '"]'); if (p && p.scrollIntoView) p.scrollIntoView({ block: 'start' }); } }
+      var DOS = 'Ets Kossi Distribution', EXO = '2025', VER = 2, FIGE = '22/07/2026', EMPR = 'sha256:c81e5a60…92de', ECH = '30/04/2026';
+      var DATA = JSON.parse(document.getElementById('lot7p2Data').textContent);
+      var REFUS_COMMUN = {
+        reseau: 'Le service ne répond pas. Rien n’a été enregistré : réessayez dans un instant.',
+        SERVICE_AMONT_INDISPONIBLE: 'Un service ne répond pas. Rien n’a été enregistré : réessayez dans un instant.',
+        DROIT_FISCAL_REFUSE: 'Votre rôle ne permet pas ce geste. Demandez-le à un associé du cabinet.',
+        BILAN_NOT_ENTITLED: 'Le module Bilan n’est pas ouvert pour ce cabinet.',
+        KYC_NOT_APPROVED: 'Le dossier d’identité du cabinet doit d’abord être approuvé.'
+      };
+      function sel(attr) { var s = document.querySelector('[' + attr + ']'); return s ? s.value : ''; }
+      function selReset(attr) { var s = document.querySelector('[' + attr + ']'); if (s) s.value = ''; }
+      function jours(d) { var p = d.split('/'); return Math.round((Date.UTC(+p[2], +p[1] - 1, +p[0]) - Date.UTC(2026, 3, 30)) / 86400000); }
+      function iso(d) { var p = d.split('/'); return p[2] + '-' + p[1] + '-' + p[0]; }
+      function fr(i) { var p = String(i || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : ''; }
+
+      /* ═══════════════ FE-038 · L’EXPORT DE LA LIASSE ═══════════════ */
+      var X = { src: 'fige', ver: 2, busy: null, done: null, err: null };
+      var EXREFUS = {
+        VERSION_INTROUVABLE: 'Cette version n’existe plus. Choisissez la dernière version figée.',
+        JEU_ETATS_INTROUVABLE: 'Cette liasse est introuvable pour ce dossier. Rechargez la page.',
+        429: 'Trop de téléchargements d’affilée. Patientez une minute, puis recommencez.'
+      };
+      function nomFichier(ext) { return 'liasse-' + EXO + (X.src === 'brouillon' ? '-brouillon' : '-v' + X.ver) + '.' + ext; }
+      function exRendre() {
+        var h = '<div class="dp-head"><div><h3>Remettre la liasse à votre client</h3><p>' + esc(DOS) + ' · exercice ' + EXO + '</p></div><span class="grow"></span></div>';
+        if (X.src === 'vide') {
+          h += '<div class="dp-card"><p class="dp-big">Il n’y a pas encore de liasse à exporter.</p><p class="dp-sub">Une liasse se construit dans l’onglet États, puis se fige dans l’onglet Validation.</p>'
+            + '<div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-ex-act="etats">Ouvrir les états</button></div></div>';
+        } else {
+          var brouillon = X.src === 'brouillon';
+          h += '<div class="dp-card' + (brouillon ? ' warn' : '') + '">';
+          h += brouillon
+            ? '<div><span class="dp-pill todo">' + IC.warn + ' Brouillon — non figé</span></div><p class="dp-big">Cette liasse est encore un brouillon.</p><p class="dp-sub">Le document sera marqué « BROUILLON — NON FIGÉ ». Pour remettre un document définitif, figez d’abord la liasse.</p>'
+            : '<div><span class="dp-pill done">' + IC.lock + ' Version ' + X.ver + ' · figée le ' + (X.ver === 2 ? FIGE : '21/07/2026') + '</span></div><p class="dp-big">' + (X.ver === 2 ? 'La version 2 est prête à remettre.' : 'Vous exportez la version 1, qui n’est plus la dernière.') + '</p><p class="dp-sub">Le document reproduit exactement la liasse que vous avez validée.</p>';
+          h += '<div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-ex-act="pdf"' + (X.busy ? ' disabled' : '') + '>' + (X.busy === 'pdf' ? '<span class="dp-spin"></span> Préparation du fichier…' : IC.dl + ' ' + (brouillon ? 'Télécharger le brouillon en PDF' : 'Télécharger le PDF')) + '</button>'
+            + '<button class="btn btn-ghost dp-lg" type="button" data-ex-act="xlsx"' + (X.busy ? ' disabled' : '') + '>' + (X.busy === 'xlsx' ? '<span class="dp-spin"></span> Préparation du fichier…' : IC.dl + ' Excel') + '</button>'
+            + '<span class="hint">Le PDF est pour votre client, l’Excel pour retraiter les chiffres.</span></div>';
+          if (brouillon) h += '<div class="dp-go"><button class="dp-link" type="button" data-ex-act="valider">Aller figer la liasse</button></div>';
+          h += '</div>';
+        }
+        if (X.err) h += '<div class="fin-notice ko" role="alert">' + IC.warn + '<span>' + esc(X.err) + '</span></div>';
+        if (X.done) {
+          h += '<div class="fin-notice okk" role="status">' + IC.ok + '<span><b>' + esc(X.done) + '</b> est téléchargé.</span></div>';
+          if (X.src === 'fige') h += '<div class="tn-next"><p><b>Étape suivante : déposer la liasse auprès de l’administration.</b></p><button class="btn btn-primary" type="button" data-ex-act="depot">Préparer le dépôt</button></div>';
+        }
+        if (X.src !== 'vide') {
+          h += '<div class="fin-notice">' + IC.file + '<span>Ce n’est pas le fichier que reçoit l’administration : pour elle, c’est le classeur de dépôt.</span><button class="btn btn-ghost btn-sm" type="button" data-ex-act="classeur">Ouvrir le classeur</button></div>';
+          h += '<details class="tn-more"><summary>Détails</summary><table class="dp-tbl"><tbody>'
+            + '<tr><td class="k">Version à exporter</td><td><select data-ex-ver aria-label="Version à exporter"' + (X.src === 'brouillon' ? ' disabled' : '') + '><option value="2"' + (X.ver === 2 ? ' selected' : '') + '>Version 2 — la dernière figée</option><option value="1"' + (X.ver === 1 ? ' selected' : '') + '>Version 1 — remplacée par la 2</option></select></td></tr>'
+            + '<tr><td class="k">Nom du fichier</td><td><code>' + esc(nomFichier('pdf')) + '</code> · <code>' + esc(nomFichier('xlsx')) + '</code></td></tr>'
+            + (X.src === 'fige' ? '<tr><td class="k">Empreinte de la version</td><td><code>' + (X.ver === 2 ? EMPR : 'sha256:7b30d9a1…41c6') + '</code></td></tr>' : '')
+            + '<tr><td class="k">Contenu</td><td>Bilan actif et passif, sous-totaux, compte de résultat, soldes intermédiaires de gestion, flux de trésorerie, notes annexes ; chaque état porte l’unité (FCFA).</td></tr>'
+            + '<tr><td class="k">Logo du cabinet</td><td><span class="dp-pill">pas encore disponible</span> Le document n’est pas encore à l’en-tête du cabinet.</td></tr>'
+            + '<tr><td class="k">Prévisionnel</td><td><span class="dp-pill">après février</span> Il s’exporte depuis son propre onglet.</td></tr>'
+            + '</tbody></table></details>';
+        }
+        exRoot.innerHTML = h;
+      }
+      function exTelecharger(fmt) {
+        var r = sel('data-ex-rig'); selReset('data-ex-rig');
+        X.err = null; X.done = null; X.busy = fmt; exRendre();
+        setTimeout(function () {
+          X.busy = null;
+          if (r) X.err = EXREFUS[r] || REFUS_COMMUN[r] || r;
+          else { X.done = nomFichier(fmt); notify('success', 'Fichier téléchargé', X.done); }
+          exRendre();
+        }, 900);
+      }
+      document.addEventListener('click', function (ev) {
+        var t = ev.target, b;
+        if ((b = t.closest && t.closest('[data-ex-act]')) && exRoot.contains(b)) {
+          var a = b.dataset.exAct;
+          if (a === 'pdf' || a === 'xlsx') exTelecharger(a);
+          else if (a === 'etats') goTab('etats');
+          else if (a === 'valider') goTab('validation');
+          else if (a === 'depot') goTab('depot');
+          else if (a === 'classeur') goTab('classeur');
+          return;
+        }
+        if ((b = t.closest && t.closest('[data-ex-bench]'))) { X = { src: b.dataset.exBench, ver: 2, busy: null, done: null, err: null }; selReset('data-ex-rig'); exRendre(); return; }
+        if ((b = t.closest && t.closest('[data-dp-goto]'))) { goTab(b.dataset.dpGoto); return; }
+      });
+      document.addEventListener('change', function (ev) { var t = ev.target; if (t.matches && t.matches('[data-ex-ver]')) { X.ver = +t.value; X.done = null; X.err = null; exRendre(); } });
+
+      /* ═══════════════ FE-081 · FE-095 · LE DÉPÔT, SON ACCUSÉ ET SON REJET ═══════════════ */
+      var MOM = {
+        visa: { auj: '22/07/2026', lib: 'Visa manquant' }, pret: { auj: '23/07/2026', lib: 'Prête à déposer' }, fichier: { auj: '24/07/2026', lib: 'Fichier prêt' },
+        transmise: { auj: '24/07/2026', lib: 'Transmise' }, acceptee: { auj: '25/07/2026', lib: 'Acceptée' }, rejetee: { auj: '27/07/2026', lib: 'Rejetée' }, retransmise: { auj: '29/07/2026', lib: 'Redéposée' }
+      };
+      var ORDRE = ['visa', 'pret', 'fichier', 'transmise', 'acceptee', 'rejetee', 'retransmise'];
+      var MOTIF_BRUT = 'REJET DSF 2025 — CONTROLE DE COHERENCE : LA NOTE 8 (CREANCES ET EMPLOIS ASSIMILES) NE CONCORDE PAS AVEC LE POSTE « CREANCES ET EMPLOIS ASSIMILES » DU BILAN ACTIF. MERCI DE CORRIGER LE CLASSEUR ET DE LE TRANSMETTRE A NOUVEAU.';
+      var D;
+      function dInit(m) {
+        var i = ORDRE.indexOf(m);
+        D = { m: m, role: (D && D.role) || 'associe', ecart: !!(D && D.ecart), visa: i >= 1 ? { nom: 'Awa Diallo', le: '23/07/2026' } : null, fichier: i >= 2 ? 'DSF-2025-v2.xlsx' : null,
+          reV: 3, rejMotif: MOTIF_BRUT, rejRef: 'REJ-2026-0042', pick: null, err: null, notice: null, sheet: null, redepot: false };
+      }
+      dInit('visa');
+      function can(droit) { return D.role === 'associe' ? true : droit === 'preparer'; }
+      function chaine() {
+        var m = D.m, c = [];
+        var t1 = { n: 1, v: 2, tr: '24/07/2026', st: 'TRANSMISE' };
+        if (m === 'transmise') c.push(t1);
+        if (m === 'acceptee') c.push({ n: 1, v: 2, tr: '24/07/2026', st: 'ACCEPTEE', rep: '25/07/2026', piece: 'accusé ACC-2026-004182' });
+        if (m === 'rejetee' || m === 'retransmise') c.push({ n: 1, v: 2, tr: '24/07/2026', st: 'REJETEE', rep: '27/07/2026', piece: D.rejRef ? 'rejet ' + D.rejRef : 'rejet' });
+        if (m === 'retransmise') c.push({ n: 2, v: D.reV, tr: '29/07/2026', st: 'TRANSMISE', prec: 1 });
+        return c;
+      }
+      var STLIB = { TRANSMISE: ['En attente', 'todo'], ACCEPTEE: ['Acceptée', 'done'], REJETEE: ['Rejetée', 'ko'] };
+      function pas(i) { /* ① visa ② fichier ③ déposé ④ réponse */
+        var m = D.m, st = [0, 0, 0, 0];
+        if (m === 'visa') st = ['now', '', '', ''];
+        else if (m === 'pret') st = ['done', 'now', '', ''];
+        else if (m === 'fichier') st = ['done', 'done', 'now', ''];
+        else if (m === 'transmise' || m === 'retransmise') st = ['done', 'done', 'done', 'now'];
+        else if (m === 'acceptee') st = ['done', 'done', 'done', 'done'];
+        else if (m === 'rejetee') st = ['done', 'done', 'done', 'stop'];
+        return st[i];
+      }
+      function dpRendre() {
+        var m = D.m, M = MOM[m], ch = chaine(), h = '';
+        var lab = ['Visa de l’associé', 'Fichier à déposer', 'Déposé sur GUDEF', m === 'rejetee' ? 'Rejetée' : 'Réponse'];
+        h += '<div class="dp-head"><div><h3>Déposer la liasse ' + EXO + '</h3><p>' + esc(DOS) + ' · version ' + (m === 'retransmise' ? D.reV : VER) + ' figée le ' + (m === 'retransmise' && D.reV === 3 ? '28/07/2026' : FIGE) + '</p></div><span class="grow"></span>'
+          + '<div class="atelier-demo" role="tablist" aria-label="Moment du dépôt (démo)"><span class="lbl">Le même dépôt, moment par moment</span>'
+          + ORDRE.map(function (k) { return '<button class="btn btn-ghost btn-sm" type="button" role="tab" data-dp-m="' + k + '" aria-selected="' + (k === m) + '">' + MOM[k].lib + '</button>'; }).join('') + '</div></div>';
+        h += '<div class="dp-steps" aria-label="Les étapes du dépôt">' + lab.map(function (l, i) { var s = pas(i); return '<span class="' + s + '"><i>' + (s === 'done' ? '✓' : s === 'stop' ? '!' : i + 1) + '</i>' + l + '</span>'; }).join('') + '</div>';
+        /* l’échéance : avant comme après */
+        var jr = jours(M.auj);
+        if (m === 'acceptee') h += '<div class="fin-notice okk">' + IC.ok + '<span>Échéance du ' + ECH + ' · déposée le 24/07/2026, acceptée le 25/07/2026.</span></div>';
+        else h += '<div class="fin-notice warn">' + IC.warn + '<span><b>À déposer avant le ' + ECH + ' : ' + jr + ' jours de retard.</b>' + '' + '</span></div>';
+        if (D.err) h += '<div class="fin-notice ko" role="alert">' + IC.warn + '<span>' + esc(D.err) + '</span></div>';
+        if (D.notice) h += '<div class="fin-notice okk" role="status">' + IC.ok + '<span>' + esc(D.notice) + '</span></div>';
+        /* la carte du geste principal */
+        var ouvert = (m === 'visa' || m === 'pret' || m === 'fichier');
+        var ecartBloque = D.ecart && ouvert;
+        if (ouvert) {
+          if (ecartBloque) h += '<div class="fin-notice warn">' + IC.warn + '<span><b>Un écart bloque le dépôt :</b> le chiffre d’affaires déclaré en TVA ne concorde pas avec la liasse (mars et avril ne sont pas déclarés).</span><button class="btn btn-ghost btn-sm" type="button" data-dp-act="ecart">Voir l’écart</button></div>';
+          else h += '<div class="fin-notice okk">' + IC.ok + '<span>Vos déclarations de l’exercice concordent avec la liasse.</span></div>';
+        }
+        var cls = m === 'rejetee' ? 'ko' : m === 'acceptee' ? 'ok' : (m === 'visa' ? 'warn' : '');
+        h += '<div class="dp-card ' + cls + '">';
+        var pill = '', big = '', sub = '', go = '';
+        if (m === 'visa') {
+          pill = '<span class="dp-pill todo">' + IC.warn + ' Visa manquant</span>'; big = 'Il manque le visa de l’associé.'; sub = 'Rien ne se dépose sans lui : un associé relit la liasse et la vise.';
+          go = can('valider') ? '<button class="btn btn-primary dp-lg" type="button" data-dp-act="visa">Poser mon visa</button>'
+            : '<button class="btn btn-primary dp-lg" type="button" disabled>Préparer le fichier à déposer</button><span class="hint">Le visa de l’associé manque : seul un associé peut le poser.</span>';
+        } else if (m === 'pret') {
+          pill = '<span class="dp-pill done">' + IC.ok + ' Visée</span>'; big = 'La liasse est visée. Il reste à la déposer.'; sub = 'Visée par ' + esc(D.visa.nom) + ' le ' + D.visa.le + '.';
+          go = '<button class="btn btn-primary dp-lg" type="button" data-dp-act="preparer"' + (ecartBloque ? ' disabled' : '') + '>Préparer le fichier à déposer</button>'
+            + (ecartBloque ? '<span class="hint">Levez d’abord l’écart ci-dessus.</span>' : '<button class="dp-link" type="button" data-dp-act="transmettre">J’ai déjà déposé sur GUDEF</button>');
+        } else if (m === 'fichier') {
+          pill = '<span class="dp-pill done">' + IC.ok + ' Fichier prêt</span>'; big = 'Le fichier est prêt. Déposez-le sur GUDEF, puis revenez ici.'; sub = 'Prospera ne dépose rien à votre place : il garde la trace de ce que vous avez transmis.';
+          go = '<button class="btn btn-primary dp-lg" type="button" data-dp-act="transmettre"' + (ecartBloque || !can('deposer') ? ' disabled' : '') + '>J’ai déposé sur GUDEF</button>'
+            + (!can('deposer') ? '<span class="hint">Votre rôle ne permet pas de consigner un dépôt.</span>' : ecartBloque ? '<span class="hint">Levez d’abord l’écart ci-dessus.</span>' : '<button class="dp-link" type="button" data-dp-act="preparer">Retélécharger le fichier</button>');
+        } else if (m === 'transmise' || m === 'retransmise') {
+          var d2 = m === 'retransmise' ? '29/07/2026' : '24/07/2026';
+          pill = '<span class="dp-pill todo">' + IC.warn + ' En attente de l’administration</span>';
+          big = (m === 'retransmise' ? 'Redéposée le ' + d2 + ' (version ' + D.reV + '). ' : 'Déposé le ' + d2 + '. ') + 'L’administration n’a pas encore répondu.';
+          sub = m === 'retransmise' ? 'Le premier dépôt, rejeté le 27/07/2026, reste dans l’historique.' : 'Quand elle répond, notez sa réponse ici.';
+          go = '<button class="btn btn-primary dp-lg" type="button" data-dp-act="reponse">L’administration a répondu</button>';
+        } else if (m === 'acceptee') {
+          pill = '<span class="dp-pill done">' + IC.ok + ' Acceptée</span>'; big = 'Déposée et acceptée le 25/07/2026.'; sub = 'Accusé n° ACC-2026-004182, signé par Awa Diallo (ONECCA-TG 123).';
+          go = '';
+        } else if (m === 'rejetee') {
+          pill = '<span class="dp-pill ko">' + IC.x + ' Rejetée</span>'; big = 'Rejetée par l’administration le 27/07/2026.'; sub = '';
+          go = '<button class="btn btn-primary dp-lg" type="button" data-dp-act="corriger"' + (can('valider') ? '' : ' disabled') + '>Corriger la liasse</button>'
+            + (can('valider') ? '<button class="dp-link" type="button" data-dp-act="redeposer">Le fichier seul était en cause ? Redéposer la même version</button>' : '<span class="hint">Seul un associé peut rouvrir la liasse.</span>');
+        }
+        h += '<div>' + pill + '</div><p class="dp-big">' + big + '</p>' + (sub ? '<p class="dp-sub">' + sub + '</p>' : '');
+        if (m === 'rejetee') {
+          h += '<div><p class="dp-motif-k">Motif, tel que l’administration l’a écrit</p><pre class="dp-motif">' + esc(D.rejMotif) + '</pre></div>'
+            + (D.rejRef ? '<p class="dp-sub">Référence du rejet : <b>' + esc(D.rejRef) + '</b></p>' : '')
+            + '<div class="fin-notice ko" style="margin:0">' + IC.warn + '<span><b>Ce n’est pas terminé.</b> L’échéance reste ouverte : le retard court et la pénalité continue de croître.</span></div>'
+            + '<p class="dp-sub">Prospera garde le motif tel quel. La version 2 reste figée : la correction fera une version 3.</p>';
+        }
+        if (go) h += '<div class="dp-go">' + go + '</div>';
+        if (m === 'acceptee') {
+          h += '<div class="tn-next"><p><b>Étape suivante : régler l’impôt de l’exercice.</b></p><button class="btn btn-primary" type="button" data-dp-act="calendrier">Ouvrir le calendrier</button></div>'
+            + '<details class="tn-more"><summary>Besoin de corriger après le dépôt ?</summary><p style="margin:0.5rem 0">Une correction après dépôt se fait par une déclaration rectificative. Rouvrir la liasse crée une version 3 ; la version 2 reste le dépôt daté, rien ne l’efface.</p>'
+            + '<button class="btn btn-ghost btn-sm" type="button" data-dp-act="corriger"' + (can('valider') ? '' : ' disabled') + '>Rouvrir la liasse</button></details>';
+        }
+        h += '</div>';
+        /* l’historique de la chaîne : le rejeté n’est jamais écrasé */
+        if (ch.length) {
+          h += '<details class="tn-more"' + (m === 'rejetee' || m === 'retransmise' ? ' open' : '') + '><summary>Historique des dépôts (' + ch.length + ')</summary><table class="dp-tbl"><thead><tr><th>N°</th><th>Version</th><th>Déposé le</th><th>Réponse</th><th>Pièce</th></tr></thead><tbody>'
+            + ch.map(function (r) { var s = STLIB[r.st]; return '<tr><td>' + r.n + '</td><td>' + r.v + '</td><td>' + r.tr + '</td><td><span class="dp-pill ' + s[1] + '">' + s[0] + '</span>' + (r.rep ? ' ' + r.rep : '') + '</td><td>' + (r.prec ? 'Remplace le dépôt n° ' + r.prec : esc(r.piece || '—')) + '</td></tr>'; }).join('')
+            + '</tbody></table></details>';
+        }
+        /* les détails : version, empreinte, format, canal, journal */
+        var vD = m === 'retransmise' ? D.reV : VER;
+        h += '<details class="tn-more"><summary>Détails</summary><table class="dp-tbl"><tbody>'
+          + '<tr><td class="k">Version déposée</td><td>Version ' + vD + ' · empreinte <code>' + (vD === 2 ? EMPR : 'sha256:7d09e3b2…41b6') + '</code></td></tr>'
+          + '<tr><td class="k">Canal</td><td>Téléservice GUDEF · déclaré par vous (Prospera ne se connecte à aucun portail)</td></tr>'
+          + '<tr><td class="k">Format du fichier</td><td><code>TG/DSF@1.3</code> · <code>sha256:daababcc…7147a</code></td></tr>'
+          + '<tr><td class="k">Fichier transmis</td><td>' + (D.fichier ? '<code>' + esc(D.fichier) + '</code> · conservé · ' : 'aucun pour le moment · ') + '<button class="dp-link" type="button" data-dp-act="relire"' + (ch.length ? '' : ' disabled') + '>Relire le fichier transmis</button></td></tr>'
+          + '<tr><td class="k">Journal du dépôt</td><td>' + (ch.length ? 'Intact : chaque inscription est vérifiée à la lecture.' : 'Pas encore de dépôt.') + '</td></tr>'
+          + '<tr><td class="k">Photo de l’accusé</td><td><span class="dp-pill">pas encore disponible</span> Seul le numéro d’accusé se garde.</td></tr>'
+          + '</tbody></table></details>';
+        dpRoot.innerHTML = h;
+      }
+
+      /* ── les fenêtres : visa, dépôt, réponse ── */
+      function apOuvrir(kind) {
+        D.sheet = kind; D.pick = D.pick && kind === 'reponse' ? D.pick : null;
+        var t = ap.querySelector('[data-dp-ap-titre]'), s = ap.querySelector('[data-dp-ap-sous]'), c = ap.querySelector('[data-dp-ap-corps]'), ok = ap.querySelector('[data-dp-ap-ok]');
+        if (kind === 'visa') {
+          t.textContent = 'Viser la liasse ' + EXO + ', version ' + VER + ' ?'; s.textContent = '';
+          c.innerHTML = '<p style="margin:0;font-size:0.9rem">Votre nom et la date seront gardés avec le dépôt. <b>Un visa engage le cabinet.</b></p>';
+          ok.textContent = 'Oui, je vise'; ok.disabled = false;
+        } else if (kind === 'transmettre') {
+          t.textContent = D.redepot || D.m === 'rejetee' ? 'J’ai redéposé sur GUDEF' : 'J’ai déposé sur GUDEF'; s.textContent = DOS + ' · version ' + VER;
+          c.innerHTML = '<label>Date du dépôt<input type="date" data-dp-f="date" value="' + iso(MOM[D.m === 'rejetee' ? 'retransmise' : 'transmise'].auj) + '"></label>'
+            + '<div>' + (D.fichier ? '<div class="fin-notice okk" style="margin:0">' + IC.ok + '<span>Le fichier est déjà joint : <b>' + esc(D.fichier) + '</b>.</span></div>'
+              : '<div class="dp-drop"><p>Ajoutez le fichier que vous avez déposé sur GUDEF. Prospera le garde comme preuve.</p><button class="btn btn-ghost btn-sm" type="button" data-dp-act="choisirfichier">Choisir le fichier</button></div>') + '</div>'
+            + '<p class="dp-sub" style="margin:0">Canal : téléservice GUDEF.' + (D.m === 'rejetee' ? ' Ce dépôt remplace le dépôt n° 1 rejeté ; le premier reste dans l’historique.' : '') + ' Prospera ne dépose rien : il garde la trace de ce que vous avez transmis.</p>'
+            + '<div data-dp-ap-err></div>';
+          ok.textContent = 'Enregistrer le dépôt'; ok.disabled = false;
+        } else if (kind === 'reponse') {
+          t.textContent = 'La réponse de l’administration'; s.textContent = 'Déposé le 24/07/2026';
+          apReponseCorps();
+        }
+        ap.hidden = false; var f = ap.querySelector('button'); if (f && f.focus) f.focus();
+      }
+      function apReponseCorps() {
+        var c = ap.querySelector('[data-dp-ap-corps]'), ok = ap.querySelector('[data-dp-ap-ok]'), p = D.pick;
+        var h = '<div class="tn-opts" role="group" aria-label="Réponse de l’administration">'
+          + '<button type="button" class="tn-opt" data-dp-pick="acceptee" aria-pressed="' + (p === 'acceptee') + '"' + (can('deposer') ? '' : ' disabled') + '><b>Acceptée</b><small>' + (can('deposer') ? 'L’administration a donné un accusé.' : 'Réservé à un associé.') + '</small></button>'
+          + '<button type="button" class="tn-opt" data-dp-pick="rejetee" aria-pressed="' + (p === 'rejetee') + '"><b>Rejetée</b><small>Elle a refusé le fichier.</small></button></div>';
+        if (p === 'acceptee') {
+          h += '<div class="row2"><label>Date de l’accusé<input type="date" data-dp-f="date" value="' + iso('25/07/2026') + '"></label>'
+            + '<label>Numéro d’accusé<input type="text" data-dp-f="num" placeholder="ACC-2026-004182" value="' + esc(D.num || '') + '" autocomplete="off"></label></div>'
+            + '<p class="dp-sub" style="margin:0">Signataire de la déclaration : <b>Awa Diallo</b>, ONECCA-TG 123 (le visa du 23/07/2026). <details class="tn-more" style="display:inline"><summary style="display:inline">Changer</summary><div class="row2" style="margin-top:0.5rem"><label>Nom<input type="text" data-dp-f="signom" value="Awa Diallo"></label><label>Numéro d’inscription à l’ordre<input type="text" data-dp-f="sigordre" value="ONECCA-TG 123"></label></div></details></p>'
+            + '<div class="dp-gap"><span class="dp-pill">pas encore disponible</span><span>Joindre la photo de l’accusé : seul son numéro se garde pour le moment.</span></div>';
+        } else if (p === 'rejetee') {
+          h += '<label>Date du rejet<input type="date" data-dp-f="date" value="' + iso('27/07/2026') + '"></label>'
+            + '<label>Le motif, tel que l’administration l’écrit<small>Collez-le tel quel : Prospera ne le reformule pas.</small><textarea data-dp-f="motif" placeholder="Collez ici le texte du rejet">' + esc(D.motif || '') + '</textarea></label>'
+            + '<label>Référence du rejet <small>(facultatif)</small><input type="text" data-dp-f="ref" placeholder="REJ-2026-0042" value="' + esc(D.ref || '') + '" autocomplete="off"></label>';
+        } else h += '<p class="dp-sub" style="margin:0">Choisissez la réponse reçue.</p>';
+        h += '<div data-dp-ap-err></div>';
+        c.innerHTML = h;
+        ok.textContent = p === 'rejetee' ? 'Enregistrer le rejet' : 'Enregistrer l’accusé'; ok.disabled = !p;
+      }
+      function apErr(txt) { var e = ap.querySelector('[data-dp-ap-err]'); if (e) e.innerHTML = txt ? '<div class="fin-notice ko" role="alert">' + IC.warn + '<span>' + esc(txt) + '</span></div>' : ''; }
+      function apFermer() { ap.hidden = true; D.sheet = null; }
+      var DPREFUS = {
+        DEPOT_EN_COURS: 'Un dépôt attend déjà la réponse de l’administration. Notez d’abord sa réponse.',
+        DEPOT_DEJA_ACCEPTE: 'Cette liasse est déjà acceptée : il n’y a plus rien à déposer.',
+        VERSION_NON_SCELLEE: 'Cette version a été figée avant l’empreinte. Rouvrez-la, corrigez-la et figez-la de nouveau.',
+        PAQUET_DEPOT_NON_PUBLIE: 'Le format de dépôt de ce pays n’est pas encore publié.',
+        VERSION_FORMAT_ABSENTE: 'Ce fichier ne vient pas de Prospera. Utilisez le classeur préparé dans l’onglet Classeur.',
+        CLASSEUR_ILLISIBLE: 'Ce fichier n’est pas un classeur lisible (abîmé, chiffré ou avec macros).',
+        FICHIER_TROP_VOLUMINEUX: 'Le fichier dépasse 15 Mo.'
+      };
+      function apValider() {
+        var kind = D.sheet, r = sel('data-dp-rig');
+        if (kind === 'visa') {
+          if (!can('valider')) { apErr(REFUS_COMMUN.DROIT_FISCAL_REFUSE); return; }
+          apFermer(); selReset('data-dp-rig');
+          if (r) { D.err = DPREFUS[r] || REFUS_COMMUN[r] || r; dpRendre(); return; }
+          D.err = null; D.visa = { nom: 'Awa Diallo', le: '23/07/2026' }; D.m = 'pret'; D.notice = 'Visa posé. Il reste à préparer le fichier.'; notify('success', 'Visa posé', 'La liasse est visée par Awa Diallo.'); dpRendre(); return;
+        }
+        if (kind === 'transmettre') {
+          if (!D.fichier) { apErr('Ajoutez le fichier que vous avez déposé : il est la preuve du dépôt.'); return; }
+          if (r) { apErr(DPREFUS[r] || REFUS_COMMUN[r] || r); selReset('data-dp-rig'); return; }
+          apFermer(); D.err = null; D.notice = 'Dépôt enregistré.'; D.m = D.m === 'rejetee' ? 'retransmise' : 'transmise'; if (D.redepot) { D.reV = 2; } notify('success', 'Dépôt enregistré', 'En attente de la réponse de l’administration.'); dpRendre(); return;
+        }
+        if (kind === 'reponse') {
+          var g = function (k) { var e = ap.querySelector('[data-dp-f="' + k + '"]'); return e ? e.value : ''; };
+          if (D.pick === 'acceptee') {
+            D.num = g('num');
+            if (!D.num.trim()) { apErr('Le téléservice rend toujours un numéro d’accusé : saisissez-le.'); return; }
+            if (r) { apErr(DPREFUS[r] || REFUS_COMMUN[r] || r); selReset('data-dp-rig'); return; }
+            apFermer(); D.err = null; D.m = 'acceptee'; D.notice = 'Accusé enregistré : la liasse est déposée.'; notify('success', 'Accusé enregistré', 'La liasse est déposée et acceptée.');
+          } else {
+            D.motif = g('motif'); D.ref = g('ref');
+            if (!D.motif.trim()) { apErr('Le motif est vide : collez le texte de l’administration.'); return; }
+            if (r) { apErr(DPREFUS[r] || REFUS_COMMUN[r] || r); selReset('data-dp-rig'); return; }
+            apFermer(); D.err = null; D.rejMotif = D.motif; D.rejRef = D.ref.trim(); D.m = 'rejetee'; D.notice = 'Rejet enregistré. L’obligation reste ouverte.'; notify('error', 'Rejet enregistré', 'L’échéance reste ouverte : corrigez, puis redéposez.');
+          }
+          selReset('data-dp-rig'); dpRendre();
+        }
+      }
+      document.addEventListener('click', function (ev) {
+        var t = ev.target, b;
+        if (!t.closest) return;
+        if ((b = t.closest('[data-dp-m]'))) { var role = D.role, ec = D.ecart; dInit(b.dataset.dpM); D.role = role; D.ecart = ec; selReset('data-dp-rig'); dpRendre(); return; }
+        if ((b = t.closest('[data-dp-act]'))) {
+          var a = b.dataset.dpAct;
+          if (a === 'choisirfichier') { D.fichier = 'DSF-2025-v2.xlsx'; apOuvrir('transmettre'); return; }
+          if (!dpRoot.contains(b)) return;
+          if (a === 'visa') apOuvrir('visa');
+          else if (a === 'preparer') goTab('classeur');
+          else if (a === 'transmettre') { D.redepot = false; apOuvrir('transmettre'); }
+          else if (a === 'reponse') { D.pick = null; apOuvrir('reponse'); }
+          else if (a === 'redeposer') { D.redepot = true; D.fichier = null; apOuvrir('transmettre'); }
+          else if (a === 'corriger') { goTab('validation'); notify('success', 'Retour à la validation', 'Rouvrez la liasse en disant pourquoi : la correction fera une nouvelle version.'); }
+          else if (a === 'calendrier') notify('success', 'Calendrier fiscal', 'Le calendrier du cabinet est une maquette à part (FE-094).');
+          else if (a === 'ecart') notify('success', 'Écart de rapprochement', 'Le détail de l’écart est une maquette à part (STORY-1101).');
+          else if (a === 'relire') notify('success', 'Fichier transmis', 'Le lien de téléchargement est éphémère : il s’ouvre pour vous seul.');
+          return;
+        }
+        if (ap.hidden) return;
+        if (t === ap || t.closest('[data-dp-ap-fermer]')) { apFermer(); return; }
+        if ((b = t.closest('[data-dp-pick]'))) { if (b.disabled) return; D.pick = b.dataset.dpPick; apReponseCorps(); return; }
+        if (t.closest('[data-dp-ap-ok]')) { apValider(); }
+      });
+      document.addEventListener('change', function (ev) {
+        var t = ev.target; if (!t.matches) return;
+        if (t.matches('[data-dp-rig-role]')) { D.role = t.value; dpRendre(); }
+        else if (t.matches('[data-dp-rig-ecart]')) { D.ecart = t.checked; dpRendre(); }
+      });
+      document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !ap.hidden) apFermer(); });
+
+      /* ═══════════════ FE-096 · LE CLASSEUR DE DÉPÔT ═══════════════ */
+      var LIST = {
+        P: { lib: 'Remplie par Prospera', court: 'Remplies', cls: 'done' }, A: { lib: 'À saisir dans Prospera', court: 'À saisir', cls: 'todo' }, T: { lib: 'À recopier à la main', court: 'À recopier', cls: 'todo' },
+        N: { lib: 'Pas prise en charge', court: 'Non prises en charge', cls: 'ko' }, C: { lib: 'Calculée par le classeur', court: 'Calculées', cls: '' }, V: { lib: 'Rien à déclarer', court: 'Vides', cls: '' }
+      };
+      var ORD = ['P', 'A', 'T', 'N', 'C', 'V'];
+      var K = { src: 'fige', vierge: null, filtre: 'all', busy: false, fait: false, err: null, ouvert: null, sign: { nom: 'Komlan Kossi', qualite: 'Gérant' }, exp: { nom: 'Awa Diallo', ordre: 'ONECCA-TG 123' } };
+      var EF = {}; ORD.forEach(function (c) { EF[c] = 0; }); DATA.feuilles.forEach(function (f) { EF[f[1]]++; });
+      var CLREFUS = {
+        CLASSEUR_NON_RECONNU: 'Ce n’est pas le classeur de dépôt attendu : une feuille ou une case de saisie manque. Prenez le fichier tel que GUDEF le fournit.',
+        CLASSEUR_CHIFFRE: 'Le classeur est protégé par un mot de passe. Retirez-le, puis ajoutez-le de nouveau.',
+        CLASSEUR_MACRO_INTERDITE: 'Le classeur contient des macros, que Prospera refuse. Prenez le fichier tel que GUDEF le fournit.',
+        NIF_DIVERGENT: 'Le NIF du classeur n’est pas celui du dossier. Vérifiez que c’est bien le classeur de ce client.',
+        LIASSE_EN_ANOMALIE: 'Un contrôle bloquant de la liasse est en anomalie. Corrigez la liasse d’abord, puis refaites une version figée.',
+        LIASSE_NON_TRANSCRIPTIBLE: 'Un poste porte un montant que le formulaire ne reçoit nulle part. Prospera refuse de l’écrire plutôt que de le perdre.',
+        TEXTE_NON_INSCRIPTIBLE: 'Un texte saisi commence par = + - ou @, ce que le classeur ne peut pas recevoir. Retirez ce caractère.',
+        429: 'Plus de 5 classeurs à la minute. Patientez un instant, puis recommencez.',
+        CLASSEURS_SATURES: 'Trop de classeurs sont en cours de lecture. Réessayez dans un instant.'
+      };
+      function clBar() { var tot = DATA.feuilles.length; return '<div class="dp-bar" role="img" aria-label="Les 92 feuilles par situation">' + ORD.filter(function (c) { return EF[c] > 0; }).map(function (c) { return '<i class="c-' + c + '" style="width:' + (EF[c] * 100 / tot).toFixed(2) + '%" title="' + LIST[c].court + ' : ' + EF[c] + '"></i>'; }).join('') + '</div>'; }
+      function clRendre() {
+        var tot = DATA.feuilles.length, h = '';
+        h += '<div class="dp-head"><div><h3>Le classeur à déposer sur GUDEF</h3><p>' + esc(DOS) + ' · liasse ' + EXO + ', version ' + VER + ' · formulaire TG × DSF ' + DATA.paquet.version + '</p></div><span class="grow"></span></div>';
+        if (K.src === 'brouillon') {
+          h += '<div class="dp-card warn"><p class="dp-big">Le classeur se remplit depuis une liasse figée.</p><p class="dp-sub">La liasse est encore un brouillon : figez-la, puis revenez ici.</p><div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-cl-act="valider">Aller figer la liasse</button></div></div>';
+          clRoot.innerHTML = h; return;
+        }
+        var reste = tot - EF.P - EF.C;
+        h += '<div class="dp-card"><p class="dp-big">Prospera remplit ' + EF.P + ' feuilles sur ' + tot + '.</p>'
+          + '<p class="dp-sub">Il vous en reste ' + reste + ' à faire vous-même : ' + EF.A + ' à saisir dans Prospera d’abord, ' + EF.T + ' à recopier, ' + EF.N + ' que Prospera ne prend pas encore en charge. Les ' + EF.C + ' dernières se calculent seules dans le classeur.</p>'
+          + clBar();
+        /* le geste : ajouter le classeur vierge, puis remplir */
+        if (K.fait) {
+          h += '<div class="fin-notice warn" style="margin:0">' + IC.warn + '<span><b>Ne le déposez pas tel quel :</b> ' + reste + ' feuilles restent à finir à la main.</span></div>'
+            + '<div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-cl-act="telecharger">' + IC.dl + ' Télécharger le classeur</button><span class="hint"><code>DSF-2025-v2.xlsx</code></span></div>'
+            + '<div class="tn-next"><p><b>Étape suivante : déposez-le sur GUDEF, puis notez le dépôt.</b></p><button class="btn btn-primary" type="button" data-cl-act="noter">Noter le dépôt</button></div>';
+        } else {
+          h += '<div class="dp-drop"><p><b>' + (K.vierge ? esc(K.vierge) : 'Ajoutez le classeur vierge') + '</b></p>'
+            + (K.vierge ? '<p>Le classeur téléchargé sur GUDEF. Prospera n’en remplit que les cases de saisie et garde toutes les formules.</p>' : '<p>Glissez ici le classeur vierge téléchargé sur GUDEF. Prospera le remplit depuis la liasse figée.</p>')
+            + '<div class="row" style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center"><button class="btn btn-ghost btn-sm" type="button" data-cl-act="vierge">' + (K.vierge ? 'Changer de classeur' : 'Choisir le classeur') + '</button></div></div>'
+            + '<p class="dp-sub" style="margin:0">Signataire : <b>' + esc(K.sign.nom) + '</b>, ' + esc(K.sign.qualite.toLowerCase()) + ' · Expert-comptable : <b>' + esc(K.exp.nom) + '</b> (' + esc(K.exp.ordre) + ')</p>'
+            + '<div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-cl-act="remplir"' + (!K.vierge || K.busy ? ' disabled' : '') + '>' + (K.busy ? '<span class="dp-spin"></span> Remplissage…' : 'Remplir le classeur : ' + EF.P + ' feuilles sur ' + tot) + '</button>'
+            + (!K.vierge ? '<span class="hint">Ajoutez d’abord le classeur vierge.</span>' : '') + '</div>';
+        }
+        h += '</div>';
+        if (K.err) h += '<div class="fin-notice ko" role="alert">' + IC.warn + '<span>' + esc(K.err) + '</span></div>';
+        /* les filtres et la liste des 92 feuilles */
+        h += '<div class="dp-chips" role="group" aria-label="Filtrer les feuilles"><button class="dp-chip" type="button" data-cl-f="all" aria-pressed="' + (K.filtre === 'all') + '">Toutes <b>' + tot + '</b></button>'
+          + ORD.filter(function (c) { return EF[c] > 0; }).map(function (c) { return '<button class="dp-chip" type="button" data-cl-f="' + c + '" aria-pressed="' + (K.filtre === c) + '"><span class="sq c-' + c + '"></span>' + LIST[c].court + ' <b>' + EF[c] + '</b></button>'; }).join('') + '</div>';
+        var rows = DATA.feuilles.filter(function (f) { return K.filtre === 'all' || f[1] === K.filtre; });
+        h += '<div class="dp-sheets"><table class="dp-tbl" style="margin:0"><thead><tr><th>Feuille du classeur</th><th>Ce qu’il en est</th></tr></thead><tbody>'
+          + rows.map(function (f) { var L = LIST[f[1]]; return '<tr><td><button class="nm" type="button" data-cl-mo="' + esc(f[0]) + '">' + esc(f[0]) + '</button></td><td><span class="dp-pill ' + L.cls + '">' + L.lib + '</span></td></tr>'
+            + (K.ouvert === f[0] ? '<tr class="mo"><td colspan="2">' + esc(f[2]) + '</td></tr>' : ''); }).join('') + '</tbody></table></div>';
+        /* les 8 contrôles */
+        h += '<details class="tn-more"><summary>Les 8 contrôles que l’administration applique</summary><p style="margin:0.5rem 0">Prospera en vérifie <b>2</b> sur la liasse. Les <b>6</b> autres se vérifient dans le classeur, après le remplissage.</p><table class="dp-tbl"><tbody>'
+          + DATA.controles.map(function (c) { return '<tr><td class="k">' + c[0] + '</td><td>' + esc(c[1]) + '</td><td>' + (c[2] ? '<span class="dp-pill done">' + IC.ok + ' vérifié</span>' : '<span class="dp-pill">à vérifier dans le classeur</span>') + '</td></tr>'; }).join('') + '</tbody></table></details>';
+        h += '<details class="tn-more"><summary>Détails</summary><table class="dp-tbl"><tbody>'
+          + '<tr><td class="k">Formulaire</td><td>TG × DSF ' + DATA.paquet.version + ' · <code>' + esc(DATA.paquet.checksum.slice(0, 18)) + '…</code></td></tr>'
+          + '<tr><td class="k">Référentiel de la liasse</td><td><code>syscohada-revise@2.3</code></td></tr>'
+          + '<tr><td class="k">Liasse décomptée</td><td>Version ' + VER + ' · empreinte <code>' + EMPR + '</code></td></tr>'
+          + '<tr><td class="k">Signataire</td><td><details class="tn-more" style="display:inline"><summary style="display:inline">Changer</summary><div class="dp-f" style="margin-top:0.5rem;padding:0"><div class="row2"><label>Nom du signataire<input type="text" value="' + esc(K.sign.nom) + '" data-cl-in="sn"></label><label>Qualité<input type="text" value="' + esc(K.sign.qualite) + '" data-cl-in="sq"></label></div></div></details></td></tr>'
+          + '</tbody></table></details>';
+        clRoot.innerHTML = h;
+      }
+      document.addEventListener('click', function (ev) {
+        var t = ev.target, b;
+        if (!t.closest) return;
+        if ((b = t.closest('[data-cl-bench]'))) { var k = b.dataset.clBench; K.err = null; K.busy = false; K.fait = false; K.filtre = 'all'; K.ouvert = null; K.src = k === 'brouillon' ? 'brouillon' : 'fige'; K.vierge = k === 'pret' ? 'DSF-vierge-TG-2025.xlsx' : null; selReset('data-cl-rig'); clRendre(); return; }
+        if (!(b = t.closest('[data-cl-act],[data-cl-f],[data-cl-mo]')) || !clRoot.contains(b)) return;
+        if (b.dataset.clF) { K.filtre = b.dataset.clF; clRendre(); return; }
+        if (b.dataset.clMo) { K.ouvert = K.ouvert === b.dataset.clMo ? null : b.dataset.clMo; clRendre(); return; }
+        var a = b.dataset.clAct;
+        if (a === 'vierge') { K.vierge = 'DSF-vierge-TG-2025.xlsx'; K.err = null; clRendre(); }
+        else if (a === 'valider') goTab('validation');
+        else if (a === 'remplir') {
+          var r = sel('data-cl-rig'); selReset('data-cl-rig'); K.err = null; K.busy = true; clRendre();
+          setTimeout(function () { K.busy = false; if (r) K.err = CLREFUS[r] || REFUS_COMMUN[r] || r; else { K.fait = true; notify('success', 'Classeur rempli', EF.P + ' feuilles écrites, ' + (DATA.feuilles.length - EF.P - EF.C) + ' à finir à la main.'); } clRendre(); }, 1000);
+        }
+        else if (a === 'telecharger') notify('success', 'Classeur téléchargé', 'DSF-2025-v2.xlsx : toutes les formules sont conservées, elles se recalculent à l’ouverture.');
+        else if (a === 'noter') { var role = D.role, ec = D.ecart; dInit('fichier'); D.role = role; D.ecart = ec; dpRendre(); goTab('depot'); }
+      });
+      document.addEventListener('input', function (ev) { var t = ev.target; if (t.matches && t.matches('[data-cl-in]')) { if (t.dataset.clIn === 'sn') K.sign.nom = t.value; else K.sign.qualite = t.value; } });
+      window.__lot7p2 = function () { return { X: X, D: D, K: K, EF: EF }; };
+      exRendre(); dpRendre(); clRendre();
     })();
 
   })();
