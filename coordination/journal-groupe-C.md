@@ -459,6 +459,31 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-25 (STORY-1021), AVANT le code** — les routes d'instance `export`, `sante` et `migrer` de la balance
+  (`prospera-balance-service`), sur le patron de STORY-1075 (D, bilan). Fiche : `stories/STORY-1021.md` (D-1021-1 → 16).
+  - **Routes neuves** (identité `MOTEUR` seule, hors des gardes métier, sans limite de débit, **deux espaces**) :
+    - `GET /api/v1/instance/balance/{organisationId}/export` (limitée à l'organisation du chemin) : 200 JSON
+      `{ schemaVersion: 1, module: 'balance', organisationId, espace, exporteLe, objets: [{ objet, collection, nombre,
+      enregistrements }] }` (Extended JSON relaxed ; 32 collections du module, ni `conseil`, ni copies des voisins) ;
+      **`?format=csv&objet=<objet>`** : un objet en `text/csv` (BOM, `;`, CRLF, cellules neutralisées — réponse du PO à
+      Q-D-19) ; `objet` filtre aussi le JSON. État publié absent ou `NON_INSTALLE` ⇒ **403 `BALANCE_NOT_ENTITLED`**
+      (tout autre état ouvre, `SUSPENDU` compris) ; 400 `FORMAT_NON_SERVI`, 400 `OBJET_REQUIS`, 422 `OBJET_INCONNU`.
+    - `GET /api/v1/instance/balance/{organisationId}/sante` : 200 **`sante@1`** (`OK` | `DEGRADE` + `raison` : MongoDB,
+      broker Kafka, consommateurs), copié à l'octet de `prospera-plateforme@contrats-instance-v1` ; jamais un refus.
+    - `POST /api/v1/instance/balance/migrer` (sans corps, sans organisation) : joue `dossiers-d8` puis `profils-529`,
+      idempotentes ; 200 `{ schemaVersion: 1, module: 'balance', statut: 'MIGRE', migrations: [{ code, ...rapport }] }` ;
+      un orphelin ou un profil non rattaché ⇒ **409 `MIGRATION_INCOMPLETE`** avec les rapports. Par la route, les profils
+      ne sont republiés (`profil.societe.consolide`) que pour les cabinets encore inconnus (D-1021-11) ; la commande
+      `npm run migrate:dossiers` reste inchangée.
+  - **Codes neufs** (`CODES_REFUS_C13`) : `BALANCE_NOT_ENTITLED` (déjà celui de la garde), `MIGRATION_INCOMPLETE`,
+    `FORMAT_NON_SERVI`, `OBJET_REQUIS`.
+  - **Ce qui ne change pas** : le manifeste `balance` (1.2.0, **aucune recopie au catalogue**, garde des manifestes
+    verte) ; les autres routes ; les routes d'instance du module `conseil` (pas dans cette story).
+  - **Aucune question neuve** : Q-D-18 → 20 (D) sont répondues par le PO et valent ici (l'export au moteur seul ; `migrer`
+    sans corps ; le CSV en plus). **→ B** : les contrats d'export et de `migrer` restent à publier dans
+    `prospera-plateforme/contrats/instance/` ; balance les recopiera. **→ D (information)** : balance sert le CSV par objet
+    (D-1021-7) ; bilan peut prendre la même forme. **→ A** : rien (aucune route d'écran).
+
 - **2026-11-25 (STORY-1019), PUBLIÉ** (balance-service #166, `ab4e468` sur `dev`) — **conforme à l'annonce** (#904,
   faite avant le code), sans écart. — le conseil s'installe à part (`prospera-balance-service`). Fiche :
   `stories/STORY-1019.md` (D-1019-1 → 12).
