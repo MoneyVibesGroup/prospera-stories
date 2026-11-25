@@ -52,3 +52,7 @@ jouée à blanc comme 1115.
 ## Suivi
 
 - 2026-11-24 — ouvert par STORY-1116 (D-1116-1) ; demande écrite au journal de B (« Demandes aux autres groupes »).
+- 2026-11-25 — **point 3, `bilan-service` (D) : placé en STORY-1079** (groupe D, dernier numéro de sa plage ; après
+  STORY-1078, avant 1074 et 1075). Choix par défaut écrit en **Q-D-17** (journal de D) : `INSTANCE_ESPACE=ESSAI` ⇒ le
+  palier KYC de la garde de bilan est sauté, l'état publié décide seul — décision d'architecture (AD-15) à confirmer.
+  Non codé à ce jour. Points 1, 2 (B), 3 `balance-service` (C) et 3 `dossier-service` (B) : inchangés.

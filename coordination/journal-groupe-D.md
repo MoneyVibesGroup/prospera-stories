@@ -1168,6 +1168,12 @@
   1019 → 1021 → 1022 → 1023. **STORY-1022** (l'empreinte des soldes) est lue par STORY-1078 de D : annoncez son contrat
   ici quand vous l'écrivez. Repli D-L6-6 : si vous préférez céder la balance à D pour une ou plusieurs de ces stories,
   écrivez la passation dans votre journal ; sans elle, D n'y touche pas.
+  **Mise à jour du 2026-11-25 (STORY-1078) — ouverte pour 1022** : au rituel de 1078, STORY-1022 n'est pas livrée
+  (aucune fiche, `balance-service` `origin/dev` = `8b154df` sans `soldesChecksum`, aucune PR). STORY-1078 a livré les
+  quatre contrôles d'intégrité et **reporté** le rapprochement de la liasse avec sa balance par l'empreinte (D-1078-10).
+  Demandé, quand vous écrirez 1022 : publier avec l'empreinte **son algorithme et sa version** (champ du type
+  `checksumVersion`), pour que le bilan la recalcule sur les soldes du jeu à l'identique ; annoncez le contrat ici. Une
+  story de D lira alors l'empreinte et publiera le constat à côté des quatre contrôles.
 
 - **→ B (2026-11-24, soir) : passation de `prospera-dossier-service` et de `prospera-paiement-service`, limitée à
   STORY-1073** — **servie** (← B, #837 ; constatée par 1073) **et les deux dépôts rendus à B le 2026-11-25** (« Passations »). Sur consigne de l'utilisateur du 24/11 (soir) : « gère tout cela dans la story 1073 sans attendre la livraison de B », **D fait lui-même les deux points
@@ -1446,8 +1452,14 @@
 ## Réponses aux demandes reçues
 
 - **← B (2026-11-25, STORY-1116, `TICKET-BACKEND-modules-ouverts-dans-l-essai.md`) : dans l'espace d'essai, la garde de
-  bilan ne lit pas le KYC (point 3, « D (bilan) »)** — **lue par STORY-1077, à placer par la session de groupe de D**
-  (hors du lot 6 amendé ; elle touche `requires-bilan-access` de `prospera-bilan-service`).
+  bilan ne lit pas le KYC (point 3, « D (bilan) »)** — **placée en STORY-1079 le 2026-11-25** (par STORY-1078, sur
+  consigne de la session de groupe de D) : le dernier numéro de la plage 1030 → 1079 de D, entrée du tracker `RÉSERVÉ`
+  (`source_doc` = le ticket), fiche à écrire juste avant de coder. **Ordre de D : après 1078, avant 1074 et 1075** —
+  c'est un Must de la démo du 15/01. Choix par défaut, contestable : `INSTANCE_ESPACE=ESSAI` ⇒ le palier KYC de
+  `requires-bilan-access` est sauté et l'état publié du module (`ESSAI_PROSPECT`) décide seul ; décision d'architecture
+  (AD-15, NFR-A01) à confirmer : **Q-D-17**. Les points 1 et 2 (jeux dans le catalogue de l'essai, installation des
+  modules à l'ouverture) restent à B ; le point 3 de `balance-service` reste à C, celui de `dossier-service` à B.
+  Historique : lue par STORY-1077, à placer par la session de groupe.
 - **← B (2026-11-24, STORY-1103, prospera-stories #805) : consommer `kyc.correction.requested@1` pour prévenir le cabinet
   par e-mail** — **servie par STORY-1072** (notification #92, `dev` 7a11331, 749b3cd ; expert-comptable #11, `dev`
   4154038, b540904) : l'AC-5 de 1103 est prouvé dans mailhog (pilote 35/35, `expert-comptable/scripts/recette/1072/`) ;
@@ -2473,6 +2485,15 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-17 (2026-11-25, placée par STORY-1078, pour STORY-1079) — Dans l'espace d'essai, la garde de `bilan-service`
+  peut-elle sauter le palier KYC ?** Un prospect n'a pas de KYC (l'espace d'essai n'a ni `kyc-service` ni
+  `kyc.status.changed`) : aujourd'hui `requires-bilan-access` rend `403 KYC_NOT_APPROVED` même module installé (ticket
+  `TICKET-BACKEND-modules-ouverts-dans-l-essai.md`, point 3). **Choix par défaut (appliqué par 1079 sans réponse) :
+  `INSTANCE_ESPACE=ESSAI` ⇒ le palier KYC est sauté, l'état publié du module décide seul** (l'essai est déjà borné par
+  `ESSAI_PROSPECT` et son effacement, AD-15) ; dans l'espace réel, rien ne change (e-mail vérifié, KYC `APPROVED`, état
+  publié). C'est une décision d'architecture (AD-15, NFR-A01) : à confirmer par l'architecte ou le PO avant la démo du
+  15/01. La même règle vaudra pour `balance-service` (C) et `dossier-service` (B).
 
 - **Q-D-16 (2026-11-25, STORY-1077) — Les capitaux propres des art. 371 et 664 de l'AUSCGIE comprennent-ils les
   subventions d'investissement et les provisions réglementées ?** Le SYSCOHADA révisé les range dans « capitaux propres et
