@@ -39,7 +39,9 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
   4 ter. ✅ **STORY-326 DONE (25/11)** : balance-service **#162** (`8b154df`, le paquet), fiscal **#59** (`2aed546`,
      le contrôle), contrat #857. Node 24 : balance 5552 / 1973, fiscal 2602 / 216 ; mutation 6/6 ; gate `grp-c` vert
      (balance et fiscal `healthy`) ; verrou cédé par A et rendu ;
-  5. 🟡 **STORY-1101** les déclarations face à la liasse (fiscal) : contrat annoncé le 25/11 (fiche) ; — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
+  5. ✅ **STORY-1101 DONE (25/11)** : balance-service **#163** (`8fbdf6e`, les couples au paquet), fiscal **#60**
+     (`0d353c2`, le rapprochement et l'assiette), contrat #862. Node 24 : fiscal 2642 / 223, conformité 93/93 sur le vrai
+     `mongo-fiscal` ; mutation 6/6 ; gate `grp-c` vert ; — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
   6. **STORY-315** puis **316** le calendrier fiscal (fiscal) — fiches écrites juste avant.
 - **Docker** : verrou du poste principal (`MoneyVibes_Apps\.verrou-docker`) partagé avec A ; aucune pile de C ne tourne.
 
@@ -798,6 +800,11 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-1101, 25/11) la VM Docker sans DNS** (`lookup registry-1.docker.io: no such host`) : un Dockerfile qui
+  commence par `# syntax=docker/dockerfile:1` (le fiscal) ne se construit plus. Retirer la ligne **dans la copie
+  archivée** (jamais dans le dépôt) : les couches npm en cache suffisent tant que `package.json` n'a pas changé.
+  Démonter d'abord une pile qui monte le dossier archivé (`mongo-fiscal`) avant de le recréer.
 
 - **(STORY-326, 25/11) gate du fiscal** : pas de compose dans son dépôt ; `docker compose -p grp-c -f docker-compose.yml
   -f prospera-recette/docker-compose.fiscal.yml -f <surcouche> --profile fiscal up -d --build balance-service

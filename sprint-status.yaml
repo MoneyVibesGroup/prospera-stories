@@ -1392,6 +1392,10 @@ reserved_ranges:
       Demande de l'utilisateur du 2026-11-19 (« ajoute ce qu'ils veulent qu'on leur valide dans les stories »).
       Points V1 → V11 ; blocs ajoutés à STORY-323, 324, 332, 333, 334, 335, 562, 565, 1086, 1088, 1097, 1100 et
       FE-081. V10 (hébergement, export complet) sans story. 1102 passe AVANT la première démarche commerciale. NON SLOTTÉES.
+      ✅ 2026-11-25 : **STORY-1101 DONE** (groupe C, lot 6) — balance-service #163 (`8fbdf6e`, couples au paquet), fiscal
+      #60 (`0d353c2`, POST /exercices/{id}/rapprochement-liasse, assiette au déclaré, RAPPROCHEMENT_LIASSE_ECART) ;
+      fiscal 2642/223, conformité 93/93 ; mutation 6/6 ; gate grp-c vert ; D-1101-1 → 15 dans la fiche. STORY-1102 (D)
+      reste à faire.
   - range: "STORY-930"
     status: "RÉSERVÉ"
     owner: "Le catalogue sur le socle du moteur — kafkajs remplacé par @confluentinc/kafka-javascript 1.11, Node 24, schéma de entitlement.changed au registre Karapace, compatibilité BACKWARD vérifiée (platform-catalog-service, prospera-recette)"

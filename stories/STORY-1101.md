@@ -1,8 +1,8 @@
 # STORY-1101 : Les douze mois déclarés sur dimana face à la liasse — le rapprochement que le contrôleur fait en premier
 
-Status: in-progress — **créée le 2026-11-19** depuis la salle des cabinets (point V4 de
-`salle-cabinets-validations-2026-11-19.md`). **Prise le 2026-11-25** par la session du groupe C (lot 6), après 326 ;
-contrat annoncé ci-dessous avant le code.
+Status: done — **livrée le 2026-11-25** : balance-service **#163** (`8fbdf6e` sur `dev`, les couples au paquet) et
+prospera-fiscal-service **#60** (`0d353c2` sur `dev`, le rapprochement) ; voir « Livraison ». Créée le 2026-11-19
+depuis la salle des cabinets (point V4), prise le 2026-11-25 par la session du groupe C (lot 6) ; contrat #862.
 
 **Service :** `prospera-fiscal-service` (lecture des liasses figées de `bilan-service`) · **Points :** 5
 **Dépend de :** STORY-322 (triplet calculé, déclaré, payé), STORY-326 (contrôles intra-période), STORY-328
@@ -102,6 +102,49 @@ demande d'enregistrer la base déclarée. Les trois autres couples sont nommés 
   rapprochement est non défini, jamais mélangé à celui de l'entreprise (AC-6).
 - **Libellés** (AC-7) : « Écarts entre vos déclarations et la liasse » ; jamais « garanti », « sans redressement » ni
   « conforme à 100 % ».
+
+### Livraison (2026-11-25)
+
+- **balance-service** (#163) : bloc `rapprochementAnnuel` dans la source du paquet Togo 2026 et dans son schéma ;
+  artefact régénéré, empreinte **`183c858939fb374df66d2c56d18b8d81ed887f1847f2dbb8fb0369690ebcaa4f`** au registre
+  (« dix-septième fois ») ; la surcouche zone franche en hérite.
+- **fiscal** (#60) : `domain/obligations/rapprochement-liasse.ts` (règle pure, la règle de 326 réutilisée),
+  `RapprochementLiasseService`, route `POST /api/v1/exercices/{exerciceId}/rapprochement-liasse`, champ `assiette` au
+  déclaré (DTO `MontantDeclareDto`, adaptateur Mongo, journal chaîné), anomalie `RAPPROCHEMENT_LIASSE_ECART`, copie du
+  paquet dans `test/fixtures/paquet-fiscal/`. Codé par une sous-session ; paquet, revue, preuves et gate par C.
+- **Preuves** (Node 24) : balance-service unitaires **5547** (4 suites lentes rejouées seules, 68/68), e2e **36/36,
+  1973** ; fiscal unitaires **2642** (une suite lente rejouée seule, 26/26), e2e **11/11, 223** (dont 7 neufs : douze mois
+  conformes, un écart avec dépôt refusé, levée puis rouverture, retrait, onze mois et le douzième nommé, assiette absente
+  sur un mois, paquet sans couple, dirigeant non défini) ; **`test:conformite` 15/15 suites, 93/93** sur le vrai
+  `mongo-fiscal` (`rs-fiscal`, compte applicatif), dont l'assiette écrite, relue dans le champ `Mixed`, survivant à une
+  re-dérivation et portée par l'acte du journal chaîné ; mutation **6/6** (période manquante comptée pour zéro, égalité
+  stricte, écart qui ne signale pas, conforme qui ne retire pas, mélange entreprise / dirigeant, poste oublié) ; AC-7 :
+  un test balaie les libellés de la story ; gate `grp-c` : `fiscal-service` `healthy`, sans redémarrage, la route neuve
+  en `401` sans jeton.
+- **Pas prouvé sur la pile** : la lecture d'un vrai jeu d'états de `bilan-service` (doublure dans les e2e) et le
+  rapprochement à deux cabinets sur la vraie pile.
+
+### Écarts au contrat, décidés au code
+
+- **D-1101-6** : la liasse se lit par **`SourceLiasseFigee`**, pas `SourceContenuLiasse` : le contenu ne porte aucun
+  montant par poste (c'est une vue de complétude) ; la liasse figée rend `compteResultat[].montantN`.
+- **D-1101-7** : un exercice sans obligation de la taxe du couple : le couple est `INCOMPLET`, `declare: null`, sans
+  période à nommer, et ne signale rien (un dossier sans TVA n'est pas bloqué à tort).
+- **D-1101-8** : l'anomalie est aussi posée quand le couple est `INCOMPLET` avec des périodes manquantes (AC-3) ; elle
+  n'est retirée que quand tous les couples sont `CONFORME`. Sur un couple incomplet, l'écart se calcule sur les périodes
+  déclarées, à titre indicatif.
+- **D-1101-9** : un couple mal formé, ou deux couples du même code, et tout le bloc se lit « pas de couple ». Seul
+  l'état `COMPTE_RESULTAT` est rapprochable aujourd'hui.
+- **D-1101-10** : un poste absent de la liasse compte zéro côté liasse ; `montantN` est ramené à l'unité de la devise
+  (exposant zéro pour le FCFA).
+- **D-1101-11** : `toleranceValide` est partagée avec 326 (`coherence.ts`), et la règle `juger` est la même.
+- **D-1101-12** : les couples se lisent sur le paquet du rattachement de l'exercice ; pour la zone franche, c'est la
+  base, qui porte le bloc.
+- **D-1101-13** : trois attendus d'existants changent par conséquence du contrat (le catalogue de 328, l'appel au
+  registre du triplet avec `assiette: null`).
+- **D-1101-14** : l'assiette n'entre dans l'acte `OBLIGATION_MONTANT_DECLARE` que si elle est donnée : l'empreinte d'un
+  fait sans base ne change pas (prouvé sur Mongo).
+- **D-1101-15** : l'assiette passe par un DTO dédié au déclaré, jamais accepté sur le payé.
 
 ### Décisions prises au contrat (contestables)
 
