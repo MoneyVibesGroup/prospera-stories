@@ -419,6 +419,27 @@
     **Verrou Docker : pris à 07:14 (libre, aucun conteneur `grp-b`), une seule prise, rendu à 08:02 ; aucun
     conteneur, volume ni réseau `grp-d` ne reste.**
   - **Suivante : STORY-1074** (la consolidation s'installe à part) — **ordre de D : 1079 ✅ → 1074 → 1075**.
+- **STORY-1074** ✅ 🧩 — la consolidation s'installe à part : sa garde propre et ses trois vérifications
+  (prospera-bilan-service#191, `dev` `130f8a5`, `c0dc720` ; annonce « ⚠ Contrats » #883 avant le code, `main` bd83fda).
+  Rituel (2026-11-25) : aucune demande neuve à D chez A, B et C. (Reprise après un gel de la première sous-session,
+  constaté à 08:32 : rien n'était engagé.)
+  - **Livré** : `ConsolidationAccessGuard`, garde globale opt-in (`@RequiresConsolidationAccess()` sur les douze
+    contrôleurs), après la garde de bilan et avant la portée : une organisation qui a `bilan` sans `consolidation` reçoit
+    **403 `CONSOLIDATION_NOT_ENTITLED`** sur chacune des 50 routes ; `LECTURE_SEULE` ⇒ `ABONNEMENT_EXPIRE` en
+    écriture ; essai : KYC non lu (règle de 1079). L'état publié de `consolidation` projeté
+    (`etats_publies_consolidation`, plan C13). `POST /api/v1/instance/consolidation/{org}/verifications/{code}` :
+    `perimetre-arrete` (🟠), `ecritures-equilibrees` (🔴), `gate-consolidation` (🔴, chaîne réelle lue par
+    `DiscoveryService`). Manifeste M45 copié à l'octet, **inchangé à la source** (aucune recopie au catalogue).
+  - Preuves : Node 24 **362/363 suites, 12 648 tests** (la rouge : le compte de l'invariant de portée, corrigé en
+    `c0dc720` et rejoué vert) ; e2e **45/45, 3 554** ; batterie de portée **550/550** (chaque route de consolidation
+    refusée, route par route ; les 13 autres contrôleurs inchangés) ; **mutations 19/19** ; pile `grp-d` (réel et
+    essai) : B et Q refusés `CONSOLIDATION_NOT_ENTITLED`, A et P 200, les trois vérifications par la route d'instance
+    (ORANGE 1 → VERT, ROUGE 1 → VERT, VERT sur 50 routes).
+  - Décisions D-1074-1 → 11 (fiche). Reste (fiche, « Ce qui reste ») : droits C7 `consolidation:*` (auth, B) ; autres
+    routes d'instance de `consolidation` ; `consolidation` dans `INSTALLATION_SERVICES` de la recette (B).
+    **Verrou Docker : pris à 08:51 (libre), une seule prise, rendu à 09:15 ; aucun conteneur, volume ni réseau `grp-d`.**
+  - **Suivante : STORY-1075** (les routes d'instance `export`, `sante` et `migrer` du bilan) — **ordre de D : 1074 ✅ →
+    1075 (la dernière)**.
 
 ### Lot 4 (ouvert le 2026-11-18)
 
@@ -1655,8 +1676,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-25, STORY-1074, avant la fusion du code : prospera-bilan-service#191) — La consolidation
-  s'installe à part : sa garde propre et ses trois vérifications.** Fiche : `stories/STORY-1074.md` (D-1074-1 → 11).
+- **PUBLIÉ (2026-11-25, STORY-1074, prospera-bilan-service#191, `dev` 130f8a5, c0dc720) ; ANNONCÉ avant la fusion du
+  code (prospera-stories #883, `main` bd83fda), sans écart. — La consolidation s'installe à part : sa garde propre et
+  ses trois vérifications.** Fiche : `stories/STORY-1074.md` (D-1074-1 → 11).
   - **Ce qui change (comportement)** : chaque route de `dossiers/:dossierId/consolidation/…` (douze contrôleurs, 50
     routes) exige l'état publié du module **`consolidation`** en plus de celui de `bilan` : une organisation qui a
     `bilan` sans `consolidation` (état inconnu, `NON_INSTALLE`, `ESSAI_TERMINE`, `DESINSTALLE`, `SUSPENDU`) reçoit **403
@@ -2798,6 +2820,24 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1074** (sixième passage de D dans `bilan-service`) :
+  - (1) **La première sous-session s'est figée 600 s** (sans verrou, rien d'engagé), sur une commande de lecture sans
+    `timeout`. Mettre `timeout` même aux lectures (`grep`, `find`, `git grep`).
+  - (2) **Un remplacement par script Python sur un checkout CRLF échoue en silence** (le motif écrit en LF ne correspond
+    pas) : normaliser en LF, remplacer, réécrire dans la fin de ligne d'origine, et exiger exactement une occurrence.
+  - (3) **Un contrôleur dont le chemin contient `consolidation`** (`instance/consolidation`) entre dans le balayage par
+    chemin de `portee-groupe.invariant` (13 au lieu de 12) et dans le compte de `dossier-scope.invariant` (29 → 30) :
+    exclusion justifiée des routes C13 dans le premier, compte relevé dans le second — le second vu seulement par la
+    suite complète.
+  - (4) **Importer `AppModule` dans une spec unitaire** charge le client Kafka natif : l'ordre des `APP_GUARD` se lit
+    sur le texte d'`app.module.ts`.
+  - (5) **Une sélection de suites sans `-w` dans le conteneur Node 24** : un worker tué par SIGKILL (mémoire) rend une
+    suite rouge sans rapport ; garder `-w 2` (ou `-w 4 --workerIdleMemoryLimit=700MB`) même pour une sélection.
+  - (6) **Mutations** : retirer un décorateur ou une constante laisse un import inutilisé ⇒ « Tests: 0 total » (la
+    mutation « survit » sans rien prouver) ; garder l'usage (`@(Decorateur(), (() => undefined) as ClassDecorator)`).
+    Un script Python qui imprime « Σ » sous la console cp1252 meurt après la première mutation :
+    `sys.stdout.reconfigure(encoding='utf-8')`.
 
 - **STORY-1079** (cinquième passage de D dans `bilan-service`) :
   - (1) **`docker compose exec … /opt/kafka/bin/…` depuis Git Bash** : le chemin est réécrit en

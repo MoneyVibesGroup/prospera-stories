@@ -672,13 +672,18 @@ reserved_ranges:
       comptes d'encaissement publiés par prospera-paiement-service), après une passation de B limitée à 1073. Ordre :
       après 1076. Fiche à écrire juste avant de coder. NON SLOTTÉE.
   - range: "STORY-1074"
-    status: "EN COURS"
+    status: "DONE"
     owner: "Groupe D — la consolidation s'installe à part : sa garde propre et ses trois vérifications (perimetre-arrete, ecritures-equilibrees, gate-consolidation) (prospera-bilan-service)"
     source_doc: "prospera-stories/stories/STORY-1074.md"
     reserved_on: "2026-11-24"
     note: >
-      EN COURS le 2026-11-25 — fiche écrite avant le code ; contrat annoncé (« ⚠ Contrats » du journal de D) avant la
-      fusion de prospera-bilan-service#191.
+      🏁 DONE le 2026-11-25 — prospera-bilan-service#191 (dev 130f8a5, c0dc720) ; annonce « ⚠ Contrats » avant le code
+      (docs #883, main bd83fda). ConsolidationAccessGuard : sans consolidation ouvert, 403 CONSOLIDATION_NOT_ENTITLED sur
+      les 50 routes de consolidation (bilan seul ne suffit plus) ; essai : KYC non lu (règle de 1079) ; état publié
+      projeté (etats_publies_consolidation). POST /api/v1/instance/consolidation/{org}/verifications/{code} :
+      perimetre-arrete, ecritures-equilibrees, gate-consolidation. Manifeste M45 inchangé (copie à l'octet). Node 24
+      362/363 suites (12 648 tests ; la rouge corrigée en c0dc720), e2e 45/45 (3 554) ; mutations 19/19 ; pile grp-d
+      (réel et essai). Suivante : STORY-1075.
       Amendement du lot 6 (24/11 soir, D-L6-5 : bilan passe de B à D). Source : consolidation.manifest.ts ; « Ce qui reste » de
       STORY-1080 ; vente à part (STORY-549). Fiche à écrire juste avant de coder. Lot D, n° 11 du lot 6. NON SLOTTÉE.
   - range: "STORY-1075"
