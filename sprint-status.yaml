@@ -1113,7 +1113,10 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-917.md"
     reserved_on: "2026-11-16"
     note: >
-      🏁 DONE le 2026-11-16 — prospera-recette#22 (dev 97cf8d7), prospera-admin-panel-service#35 (dev f27d10a). BFF 527/527 ;
+      🔧 CORRECTIF EN COURS le 2026-11-25 (groupe B, lot 7, ordre « c′ », D-L7B-7 ; fiche, « Correctif du 2026-11-25 »,
+      D-917-4 → 8 ; demande de A, AP-55) — le CORS du BFF annonce Idempotency-Key (relais d'installation de 917) et
+      X-Request-Id, expose Retry-After ; prospera-admin-panel-service#44 ; contrat annoncé avant la fusion.
+      Avant le correctif : 🏁 DONE le 2026-11-16 — prospera-recette#22 (dev 97cf8d7), prospera-admin-panel-service#35 (dev f27d10a). BFF 527/527 ;
       recettes depuis dev 87/87. Demande de B (945) close. Lot 2 de A, n° 13. NON SLOTTÉE.
   - range: "STORY-918"
     status: "RÉSERVÉ"
