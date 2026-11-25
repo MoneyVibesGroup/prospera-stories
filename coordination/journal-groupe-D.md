@@ -27,10 +27,37 @@
 - **Non placé des réponses du 25/11 — à placer par l'utilisateur** : `zone-franche-togo@1.1` (« au lot 7 », sans
   numéro au tableau §4) ; Q-D-14 (les seuils des seize indicateurs, cherchés et modifiables) ; Q-D-15 (le numéro de
   compte imprimable) ; Q-D-19 (l'export C13 aussi en CSV). Aucune story de ce lot ne les porte.
-- **STORY-560** 🔐 en cours — le coffre des secrets de canal, adossé au mandat écrit du client (amende AD-13). Rituel
-  (2026-11-25) : aucune demande neuve à D chez A, B et C ; passation de C constatée (« Passations ») ; aucune PR
-  ouverte sur le fiscal, aucune migration en vol chez C. Fiche mise à jour avant le code (D-560-1 → 15), contrat
-  annoncé (« ⚠ Contrats ») et communs annoncés (« ⚠ Communs »).
+- **STORY-560** ✅ 🔐 — le coffre des secrets de canal, adossé au mandat écrit du client, **AD-13 amendé**
+  (prospera-fiscal-service#63, `dev` `cf8b583` ; annonce avant le code #905, `main` 0f4dae3 : fiche D-560-1 → 15, AD-13
+  amendé dans la spine du fiscal ; communs complétés avant la fusion #908, `main` 5a2f26c). Rituel (2026-11-25) :
+  aucune demande neuve à D chez A, B et C ; passation de C constatée (« Passations ») ; aucune PR ouverte sur le
+  fiscal, aucune migration en vol chez C.
+  - **Livré** (module neuf `coffre-secrets`, dossiers de D) : le mandat de canal spécifique (actes `DEPOSER`, `SUIVRE`,
+    dates), vérifié à chaque usage ; le lien de dépôt (72 h, usage unique) que le cabinet remet au client ; le dépôt du
+    secret par le client sur une route publique (jeton dans le corps, tout autre champ refusé, un code MFA compris) ;
+    la révocation souveraine (client par son jeton, ou cabinet sur instruction) qui efface le chiffré, annule jetons et
+    liens et fait retomber le canal sur l'assisté ; l'état du canal (`AUTOMATISABLE` | `ASSISTE` et sa raison,
+    échéances à 15 jours). AES-256-GCM en enveloppe sous `COFFRE_CLE_MAITRE` (jamais en base ; absente :
+    `NON_CONFIGURE`, le service démarre ; mal formée : refus de démarrer). Port **`UsageSecretDeCanal`** pour 561 (jeton
+    d'usage 5 min, usage unique, lié à un dépôt ; le clair n'existe que dans le rappel). Journal chaîné
+    `coffre:<dossier>_<canal>` sans valeur, fragment ni jeton. Garde AD-13 structurelle ; le dépôt assisté n'importe
+    pas le coffre.
+  - **Communs** (D-L7-2, annoncés avant la fusion) : `app.module.ts`, `common/filters/all-exceptions.filter.ts`
+    (`CORPS_ILLISIBLE` : un `JSON.parse` en échec ne recopie plus un extrait du corps, pour tout le service),
+    `domain/habilitations/natures-acces.ts` (`COMPTE_DE_CANAL` → `COFFRE_SEUL`), `garde-routes-ecriture.spec.ts`,
+    `.env.example`, contrat OpenAPI. Aucune migration.
+  - Preuves : Node 24 (image de l'archive LF) unitaires **199/199 suites, 2 816 tests**, e2e **12/12, 242**,
+    **`test:conformite` 17/17, 109** (coffre : 7, dont usages et dépôts parallèles ⇒ un seul) ; **mutations 15/15** ;
+    `docker compose -p grp-d` du fiscal sain, routes du coffre jouées, 0 fragment du témoin dans 449 lignes de
+    journal, clé mal formée ⇒ refus de démarrer.
+  - Décisions D-560-1 → 15 (fiche ; « Ce qui reste » : envoi du lien par `notification`, liste des échéances du
+    cabinet, rotation de la clé maîtresse, purge du chiffré d'un secret expiré, la clé d'un environnement réel —
+    geste de l'utilisateur —, la note périmée du manifeste `declarations`). **Verrou Docker : attendu (C puis B), pris à
+    20:29, une seule prise, rendu à 20:42 par le `trap` du script autonome ; B et C prévenus ; aucun conteneur, volume
+    ni réseau `grp-d`.** (Une coupure réseau de l'API a interrompu la sous-session pendant le code, sans verrou tenu ;
+    reprise sans perte.)
+  - **Suivante : STORY-346** (l'import d'un fichier de paie, idempotent et versionné ; `remuneration`, dossier de D ;
+    fiche à écrire depuis `epics-fiscalite-2026-08-03.md` juste avant de coder).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1785,7 +1812,8 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-25, STORY-560, avant le code)** — branche `MNV-560`. **Aucune migration** (deux collections
+- **FUSIONNÉ (2026-11-25, prospera-fiscal-service#63, `dev` `cf8b583`, rebasée sur `origin/dev` `f1296ae` avant la
+  fusion) ; ANNONCÉ (2026-11-25, STORY-560, avant le code)** — branche `MNV-560`. **Aucune migration** (deux collections
   neuves, `coffre_canaux` et `coffre_jetons`, index posés par Mongoose au démarrage), ni `package.json`, ni
   `read-models/`, ni copie du paquet, ni manifeste `declarations` (sa note « aucun secret de canal n'est stocké »
   devient périmée : à corriger à la prochaine version du manifeste, avec 561, qui apporte la vraie ressource
@@ -1809,6 +1837,11 @@
 
 ## ⚠ Contrats
 
+- **PUBLIÉ (2026-11-25, STORY-560, prospera-fiscal-service#63, `dev` `cf8b583`) ; ANNONCÉ avant le code (#905), deux
+  écarts** : (1) les révocations du cabinet (`…/mandat/revocation`, `…/secret/revocation`) n'ont **pas de corps** (le
+  `motif` annoncé est retiré) et sont idempotentes ; (2) un acte de plus au journal, `COFFRE_USAGE_TERMINE`
+  (`resultat` `TERMINE` | `ECHEC`). Et un code commun neuf, `CORPS_ILLISIBLE` (400, tout le service : « ⚠ Communs »).
+  Annonce :
 - **ANNONCÉ (2026-11-25, STORY-560, avant le code) — le coffre des secrets de canal** (`prospera-fiscal-service`,
   module neuf `coffre-secrets`). Fiche : `stories/STORY-560.md` (D-560-1 → 15, tableau « Contrat »). **AD-13 est
   amendé** (spine du fiscal, même PR de docs) : « aucun secret de canal n'entre hors du coffre, et aucun n'en sort en
@@ -3053,6 +3086,25 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-560** (premier passage de D dans `prospera-fiscal-service`, worktree `_wt-d-fiscal`) :
+  - (1) **`npm ci` échoue sur ce poste** (le client Kafka de Confluent compile son binding sous Node 25, faute de
+    binaire, et Visual Studio manque) : `npm ci --ignore-scripts`. Sous Node 25, 18 suites unitaires et 4 e2e rougissent
+    alors (client Kafka natif absent, paquets de dépôt en CRLF) ; sous Node 24, sur l'archive LF, tout passe.
+  - (2) **`JSON.parse` cite un extrait du corps reçu** (`Unexpected token 'Z', ..."DePasse": Zq7…" is not valid JSON`),
+    et Nest le renvoie tel quel (`routes-resolver.js`, `mapExternalException`) : le filtre global le masque désormais
+    (`CORPS_ILLISIBLE`). Un témoin doit employer un corps qui produit CE message (une valeur sans guillemets) : `{…, oups}`
+    donne « Expected double-quoted property name », sans extrait, et ne prouve rien.
+  - (3) **`@nestjs/testing` tait les `warn` et `log` de Nest** : un test qui cherche une fuite dans les journaux doit
+    poser `.setLogger(new ConsoleLogger())` sur le module de test, et vérifier que la capture voit bien une ligne.
+  - (4) **Un assistant de test à paramètre par défaut** (`construire(cle = CLE)`) : `construire(undefined)` reprend le
+    défaut (piège déjà payé par C) ; passer `null`.
+  - (5) **Une mutation qui rend un paramètre inutile ne compile pas** (`noUnusedParameters`) : la garder lue
+    (`contexte.slice(0, 0)`, `&& acte === …`).
+  - (6) **Un `\n` écrit dans une chaîne Python par heredoc ou par l'outil d'écriture devient un vrai retour à la ligne** :
+    `chr(10)` ou une chaîne entre triples guillemets.
+  - (7) Le verrou a été tenu par C puis par B plus de 40 min : le script autonome réessayé par une boucle de relance
+    (huit prises de 9 min au plus) a pris la main sans intervention.
 
 - **STORY-1075** (septième passage de D dans `bilan-service`) :
   - (1) **Une route de santé qui ne lit que le registre des consommateurs dit `OK` broker arrêté** : le client de
