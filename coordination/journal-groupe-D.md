@@ -1621,6 +1621,23 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-25, STORY-1079, avant la fusion du code) — Dans l'espace d'essai, la garde de bilan (et celle du
+  module `financement`) ne lit plus le KYC : l'état publié décide seul.** Fiche : `stories/STORY-1079.md` (D-1079-1 →
+  6 ; Q-D-17, choix par défaut). **Aucun champ, aucune route, aucun code d'erreur, aucun topic ne change ; un
+  comportement, si — et dans l'essai seulement.**
+  - **Ce qui change** : sur une instance `INSTANCE_ESPACE=ESSAI`, `@RequiresBilanAccess` et `@RequiresFinancementAccess`
+    ne rendent plus `403 KYC_NOT_APPROVED` et ne lisent plus le read-model KYC ; l'e-mail vérifié (`EMAIL_NOT_VERIFIED`,
+    en premier) et l'état publié du module (`BILAN_NOT_ENTITLED` / `FINANCEMENT_NOT_ENTITLED` / `ABONNEMENT_EXPIRE`,
+    garde partagée) restent exigés, dans le même ordre ; le droit de la route du financement aussi.
+  - **Ce qui ne change pas** : sur une instance réelle (`INSTANCE_ESPACE=REEL` ou absente), rien. L'espace vient de la
+    configuration de l'instance, validée au démarrage — jamais du jeton, d'un en-tête, d'un paramètre ni du message
+    projeté. Une garde sans espace fourni exige le KYC (fail-closed).
+  - **Pour B (recette de l'essai, ticket point 3 puis « la recette lève `dossier`, `balance` et `bilan` »)** : poser
+    `INSTANCE_ESPACE=ESSAI` sur le `bilan-service` de l'espace d'essai de la pile (il lit déjà par là le topic
+    `etat-publie.changed.essai`) ; aucun KYC à semer.
+  - **Pour A (console, app)** : aucun type à régénérer ; dans l'essai, l'écran ne verra plus `KYC_NOT_APPROVED` sur le
+    bilan.
+
 - **PUBLIÉ (2026-11-25, STORY-1118, prospera-bilan-service#189, `dev` b6f2d49, 5055933) ; ANNONCÉ avant la fusion du
   code (prospera-stories #872, `main` 651d4d6), sans écart. — Les amortissements et les dépréciations rattachés au
   poste de leur actif : LES MONTANTS DES LIASSES CHANGENT.** Fiche :
