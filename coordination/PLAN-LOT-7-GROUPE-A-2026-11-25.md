@@ -66,8 +66,13 @@ AP-61 (annuaire en lot), FE-147 (export du portefeuille).
   sans elle tout dépôt de facture répond `EXERCICE_NON_OUVERT`. **Décision de l'utilisateur (25/11) : au lot 7.**
   - **A écrit la fiche** en tête de son lot 7 (identifiant pris à l'écriture, au-dessus du plafond du tracker) et
     **code l'écran** (story n° 22 du lot 7 de A, maquette dans le premier paquet, avec AP-56 et PRA-10).
-  - **C code le backend** dans `prospera-comptabilite-service`, qu'il tient : story ajoutée au lot 7 de C, en plus de
-    ses 18 fiscales, demandée dans le journal de C. L'écran se code quand la route est sur `dev`.
+  - ~~C code le backend~~ **Rectifié le 25/11 par C : le backend existe déjà** (STORY-959, sur `dev`) :
+    `POST /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ouverture`, corps `{ tenue: 'CAHIERS' | 'JOURNAL' }`,
+    droit `comptabilite:exercice:ouvrir` ; rejouer la même tenue rend 200 sans rien écrire, une autre rend
+    409 `TENUE_EXCLUSIVE` ; l'exercice doit être OUVERT dans `dossier-service`. Lecture : `GET …/exercices/{id}/tenue`
+    et `GET …/tenues`. Le `404 EXERCICE_NON_OUVERT` vient d'un exercice jamais ouvert par cette route. **Il ne manque
+    que l'écran** (appel direct à `comptabilite-service`, comme FE-149) ; un manque de contrat trouvé en le branchant
+    (droit absent d'un rôle du cabinet, champ, refus) s'écrit à C, qui le prend tôt.
 - **Financement :** les stories backend 1104 → 1111 sont recommandées à Dev A (§2) ; la décision revient à
   l'utilisateur à l'arrivée de Dev A, le 04/12.
 
