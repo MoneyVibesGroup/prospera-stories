@@ -42,9 +42,18 @@
 4. **Amendement d'ordre (25/11, 21:50, session de groupe de C, convenu avec D qui commence 347)** : après 1021,
    **STORY-564** passe avant 1022 — l'ordre devient **1021 → 564 → 1022 → 1023 → 317 → 318 → …** (le reste du §3
    inchangé). Raison : **348 de D attend 564**.
-5. **STORY-564 EN COURS (25/11)** : fiche relue et mise à jour avant le code (D-564-1 → 12), annonce « ⚠ Contrats » et
-   « ⚠ Communs » ci-dessous. Le paquet fiscal se modifie dans sa source (`balance-service`), puis les copies du fiscal (C)
-   et de `dossier-service` (→ B). **Prévenir D à la fusion** (348 lit `irpp.traitementsSalaires.ordreDeCalcul`).
+5. ✅ **STORY-564 DONE (25/11)** : balance-service **#168** (`c9e94c6` sur `dev`) et fiscal **#66** (`fd34834` sur `dev`,
+   rebasée sur `4a1d938` de D), annonce #921 avant le code. Le paquet fiscal Togo 2026 porte le barème de l'Art. 74
+   **sourcé élément par élément** (`article`, `millesime`), la base des traitements et salaires
+   (`irpp.traitementsSalaires`, `ordreDeCalcul`), le périmètre des revenus (`irpp.revenusCategoriels`), les retenues de
+   l'employeur (`irpp.retenueALaSource`, LPF Art. 26, 27, 43) et le bloc `cnss` du 24/11 ; garde **R11** au packaging ;
+   empreinte **`bfcc3fc9…c065`**. Fiscal : `domain/familles/irpp-traitements-salaires.ts`, calcul pur (BLOQUEE nommée pour un
+   revenu non couvert, retenues tracées jusqu'à leur ligne de rémunération), aucune route. La contradiction 30 % / 35 % était
+   celle de l'amorce : 30 % est la tranche 15-20 M (Art. 74). Node 24 : balance 297/297 suites, 5705 ; e2e 37/37, 2291 ;
+   fiscal 201/201, 2905 ; e2e 13/13, 261 ; mutations 4/4 (garde) et 14/14 (calcul). Verrou pris deux fois (22:25 → 22:33,
+   22:34 → 22:38). D-564-1 → 12 dans la fiche. **D prévenu** (SHA, empreinte, clés de 348) ; **→ B** : copie de
+   `dossier-service` (ci-dessous).
+6. **Suivante : STORY-1022** (la balance publie `soldesChecksum` ; fiche à écrire juste avant de coder).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -309,6 +318,19 @@ seulement.
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-25, STORY-564) : recopier le paquet fiscal Togo 2026 dans `dossier-service`** — **ouverte** (plan du
+  lot 7 §6 : à ta prochaine story sur le service, en LF). Source : prospera-balance-service `dev` `c9e94c6`,
+  `src/modules/referentiel/assets/paquet-fiscal-togo-2026.json`, sha256 `bfcc3fc9…c065` ; cible :
+  `src/modules/portefeuille/echeance/assets/paquet-fiscal-togo-2026.json` (la copie actuelle, `e8e94c84…dc6`, n'a déjà ni
+  `coherence` ni `rapprochementAnnuel`) ; `git -c core.autocrlf=false show origin/dev:<chemin> > <copie>`, puis son
+  empreinte notée s'il y en a une. Clés ajoutées seulement (IRPP, CNSS) ; textes de `aFaire` et de `_meta` changés.
+  Prévenu par message (session `moneyvibes-apps-5e`).
+- **→ D (2026-11-25, STORY-564), information** : 564 fusionnée, 348 débloquée (SHA, empreinte, chemins des clés envoyés
+  par message, session `moneyvibes-apps-83`). Un **gérant majoritaire** n'a pas la base d'un salarié (CGI Art. 28 : 20 %
+  sur la fraction ≤ 10 M, sans autre abattement ; seul le barème est commun, Art. 75) : le paquet le déclare non couvert
+  (`REMUNERATION_GERANT`) et le calcul le bloque (D-564-5). Le calcul annuel est réutilisable
+  (`domain/familles/irpp-traitements-salaires.ts`, dossier de C) ; la mensualisation de la retenue reste à 348.
+
 - **→ B (2026-11-25, STORY-1019) : la recette `atelier-balance` doit octroyer `conseil` au cabinet** — **ouverte**.
   Depuis balance-service #166 (`ab4e468`), les routes des scénarios et de la justification exigent l'état publié du
   module `conseil` : l'étape « ⚡ conseil » de `paquets/recette-croisee/recette/atelier-balance.recette.ts` (STORY-100,
@@ -477,7 +499,9 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-25, STORY-564, avant le code)** — branche `MNV-564` de `prospera-fiscal-service`. **Aucune
+- **FUSIONNÉ (2026-11-25, prospera-fiscal-service#66, `dev` `fd34834`, rebasée sur `origin/dev` `4a1d938` avant la
+  fusion), conforme à l'annonce ; ANNONCÉ (2026-11-25, STORY-564, avant le code, #921)** — branche `MNV-564` de
+  `prospera-fiscal-service`. **Aucune
   migration**, ni `app.module.ts`, ni `package.json`, ni `read-models/`, ni manifeste `declarations`, ni contrat OpenAPI.
   Touché : **la copie du paquet fiscal** `test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`, recopiée à l'octet
   (LF) de l'artefact de `balance-service` (empreinte au « ⚠ Contrats » ci-dessous). Tout le reste est dans les dossiers
@@ -488,7 +512,9 @@ seulement.
 
 ## ⚠ Contrats
 
-- **2026-11-25 (STORY-564), ANNONCÉ avant le code** — **le barème IRPP et la base des salaires entrent au paquet fiscal
+- **2026-11-25 (STORY-564), PUBLIÉ** (balance-service #168, `c9e94c6` ; fiscal #66, `fd34834`) — **conforme à l'annonce**
+  (#921), sans écart. **Empreinte du paquet : `bfcc3fc92603e4fa08c370e9a9da7b6634f3b7b2cca12972bbe3fbc6c258c065`**
+  (balance et fiscal) ; `dossier-service` : → B. Annonce : **le barème IRPP et la base des salaires entrent au paquet fiscal
   Togo 2026** (`prospera-balance-service`, source `scripts/referentiels/sources/paquet-fiscal-togo-2026.json` ; copies
   `balance-service`, `prospera-fiscal-service`, `dossier-service` par B). Fiche : `stories/STORY-564.md` (D-564-1 → 12).
   - **Rien n'est renommé**, aucune valeur existante ne bouge (hors ce qui suit) : `irpp.tranches[]` (`de`, `a`, `taux`),
@@ -1012,6 +1038,16 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-564, 25/11) le paquet du 24/11 n'était pas dans la source** : la PR du plan du lot 7 a écrit le SMIG, la CNSS et
+  `irpp.traitementsSalaires` dans `prospera-stories/referentiels/paquet-fiscal-togo-2026.json`, l'**amorce** (23 Ko), qui
+  n'est la copie de personne : rien n'était entré dans `balance-service/scripts/referentiels/sources/` ni dans les
+  artefacts. Avant de dire « le paquet porte … », comparer à la **source** de balance, pas à la copie de référence.
+- **(STORY-564)** la source du paquet est mise en forme à la main (objets courts sur une ligne) : un `json.dump` la
+  reformate entière (3 500 lignes de diff). L'éditer par remplacements textuels ancrés (une occurrence exactement), puis
+  `build.mjs`, qui produit l'artefact.
+- **(STORY-564)** la garde R4 se contente d'une `source` sur un ancêtre : `irpp.source` couvrait les huit tranches d'un coup.
+  Une exigence « élément par élément » demande sa propre règle (R11).
 
 - **(STORY-1021, 25/11) `fetch().text()` retire le BOM UTF-8** : un script de preuve qui vérifie le BOM d'un CSV doit lire
   `arrayBuffer()` et comparer les trois premiers octets (`ef bb bf`) ; sinon il croit le BOM absent.
