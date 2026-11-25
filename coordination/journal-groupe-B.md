@@ -5,6 +5,65 @@
 
 ## État
 
+### Lot 7 (ouvert le 2026-11-25)
+
+- **Plan** : `PLAN-LOT-7-GROUPE-B-2026-11-25.md` (validé par l'utilisateur le 25/11) — première partie : les archives,
+  complètes (`document-service`, n° 1 → 8) ; deuxième partie : le backend prêt pour janvier, février et après (moteur,
+  n° 9 → 18). Lancé par l'utilisateur le 25/11 à 10:00. Une sous-session neuve par story.
+- **Poste** : B, **C** (arrivé du poste principal, `PLAN-LOT-7-2026-11-24.md` §2) et D partagent ce poste et son verrou
+  `MoneyVibes_Apps\.verrou-docker` : une seule pile lourde à la fois (`grp-b`, `grp-c`, `grp-d`), `down -v` dès la
+  preuve faite ; d'abord les tests du service, une pile seulement quand la story l'exige.
+- **Dépôts de B au lot 7** : **`document-service`** (`prospera-ocr-service`, module `ged`, repris de C : dernier commit
+  de C `0716a58`, passation lue, « Réponses »), `platform-catalog-service`, `auth-service`, `admin-panel` (le BFF),
+  `prospera-recette`, `centrale-service`, `agent-instance`, la part « moteur » de `prospera-plateforme`, `kyc-service`,
+  `dossier-service` et `prospera-paiement-service` (rendus par D le 25/11, #852). **Pas à B** : balance, comptabilité,
+  fiscal (C ; fiscal partagé avec D par dossier, D-L7-1), bilan, notification, sinistres, assurance (D).
+- **D-L7B-1 — identifiants réservés d'un coup : STORY-1119 → 1137** (tracker, `reserved_ranges`). Le plan dit « pris à
+  l'écriture » ; trois groupes écrivent maintenant dans le même tracker depuis le même poste, et une réservation
+  évite deux fiches au même numéro (même geste que D pour 1118). Un numéro non employé reste à B.
+- **D-L7B-2 — les demandes reçues passent d'abord** (§1.1), sans identifiant neuf :
+  1. la **troisième suite de STORY-979** : recopier `facturation` 1.2.0 et `paiement` 1.1.0 au catalogue (← D, 1073 ;
+     sans Docker) ;
+  2. le **correctif de STORY-1073** : `formeJuridique` sur les dossiers CLIENTS aussi (`dossier-service`, ← D,
+     STORY-1077 ; un champ déjà déclaré facultatif, puis `npm run republier:dossiers`).
+- **D-L7B-3 — le n° 18 est la première remplaçante** : STORY-1116 est finie au lot 6 (recette #31) ; le n° 18 devient
+  **le consommateur de `facturation.avoir.emis@1` dans `paiement`** (← D, 1066, D-979-14 ; `paiement` est revenu ;
+  tenir compte de `publier(resultat, entree)` de 1073).
+- **D-L7B-4 — `TICKET-BACKEND-modules-ouverts-dans-l-essai.md` (part de B) = STORY-1137, placée après le n° 12** :
+  même terrain (le catalogue de l'essai), et la démo du 15/01 l'exige. La décision d'architecture sur le KYC dans
+  l'essai se prend par défaut dans sa fiche et s'écrit en question à l'utilisateur ; les gardes de balance (C) et de
+  bilan (D) leur sont demandées dans leurs journaux.
+- **D-L7B-5 — les dates passent avant l'ordre** (plan §3) : le n° 9 (`referentiels`, avant le gel du 11/12) est fusionné
+  au plus tard le 09/12, le n° 10 le 11/12, le n° 11 le 18/12. Si le n° 9 n'est pas commencé le 05/12, les n° 9 → 11
+  passent devant les archives restantes.
+- **Ordre et identifiants** :
+
+  | Ordre | Story | Ce que c'est |
+  |:--:|---|---|
+  | a | STORY-979 (3ᵉ suite) | recopies `facturation` 1.2.0, `paiement` 1.1.0 |
+  | b | STORY-1073 (correctif) | `formeJuridique` sur les dossiers clients |
+  | 1 | STORY-1119 | les archives ont valeur de preuve |
+  | 2 | STORY-1120 | fin de mission et réversibilité |
+  | 3 | STORY-1121 | la destruction proposée, puis visée |
+  | 4 | STORY-1122 | retrouver dans tous les fonds du cabinet |
+  | 5 | STORY-1123 | les alertes de l'archiviste |
+  | 6 | STORY-1124 | le circuit sans trou |
+  | 7 | STORY-1125 | l'archivage se mesure et se vend |
+  | 8 | STORY-1126 | la recette des archives de bout en bout |
+  | 9 | STORY-1127 | `referentiels` dans l'état publié |
+  | 10 | STORY-1128 | le contrat d'état publié figé, inventaire d'EPIC-142 → 147 et 159 |
+  | 11 | STORY-1129 | le cabinet sur le moteur |
+  | 12 | STORY-1130 | effacer le dossier de démonstration à la fin d'un essai |
+  | 12 bis | STORY-1137 | les modules s'ouvrent dans l'essai (ticket de 1116) |
+  | 13 | STORY-1131 | les restes d'EPIC-145, 146, 147 |
+  | 14 | STORY-1132 | la licence signée, premier incrément |
+  | 15 | STORY-1133 | l'interface de l'agent publiée |
+  | 16 | STORY-1134 | l'instance garde la confiance, coupée de Money Vibes |
+  | 17 | STORY-1135 | mettre à jour sans peur, premier incrément |
+  | 18 | STORY-1136 | le consommateur de `facturation.avoir.emis@1` dans `paiement` |
+
+- **Avancement** : (à remplir story par story)
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §5 (validé le 23/11) : B tient le **BFF** (`admin-panel-service`), la
