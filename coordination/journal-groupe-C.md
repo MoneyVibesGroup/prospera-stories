@@ -53,7 +53,8 @@
    fiscal 201/201, 2905 ; e2e 13/13, 261 ; mutations 4/4 (garde) et 14/14 (calcul). Verrou pris deux fois (22:25 → 22:33,
    22:34 → 22:38). D-564-1 → 12 dans la fiche. **D prévenu** (SHA, empreinte, clés de 348) ; **→ B** : copie de
    `dossier-service` (ci-dessous).
-6. **Suivante : STORY-1022** (la balance publie `soldesChecksum` ; fiche à écrire juste avant de coder).
+6. **En cours : STORY-1022** (la balance publie `soldesChecksum`) — fiche écrite avant le code
+   (`stories/STORY-1022.md`, D-1022-1 → 6), contrat annoncé ci-dessous (« ⚠ Contrats »).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -511,6 +512,26 @@ seulement.
   clés, plus celles de l'IRPP et de la CNSS (voir « ⚠ Contrats »).
 
 ## ⚠ Contrats
+
+- **2026-11-25 (STORY-1022), ANNONCÉ avant le code** — **la balance publie l'empreinte de ses soldes**
+  (`prospera-balance-service`, topics `balance.created` et `balance.etat.document.change`). Fiche :
+  `stories/STORY-1022.md` (D-1022-1 → 6). Pour STORY-1078 de D (D-1078-10 : le rapprochement de la liasse avec sa
+  balance).
+  - **Ajouté, facultatif, sur les deux topics** : `soldesChecksum` (SHA-256, 64 hex minuscules) et
+    `soldesChecksumVersion` (`'soldes-v1'`). Les deux voyagent **ensemble** pour toute balance scellée en `v2` ; une
+    balance scellée en `v1` (forme héritée `debit`/`credit`) n'en porte **aucun** (omis, jamais `null`).
+  - **Algorithme `soldes-v1`** : SHA-256 de `JSON.stringify({ lignes: L })`, `L` = les lignes dont un des deux soldes est
+    non nul, triées par `compte` en point de code (jamais `localeCompare`), projetées dans l'ordre
+    `{ compte, soldeDebiteur, soldeCrediteur }` (compte tel quel ; entiers en unités mineures de la devise de la balance).
+    Même canonisation que le sceau `checksum` (fonction partagée), projection propre. **Vecteur** : `521000` D 150000 ·
+    `101000` C 150000 · `401000` 0/0 ⇒ `49c4d3b1e9532da78c8bb6aad3d025dbe704c3338e74bab2198af3c6140349d8` ;
+    `{"lignes":[]}` ⇒ `5e296cc6…6265b2`.
+  - **Ce qui ne change pas** : `checksum` et `checksumVersion` (le sceau), `schemaVersion` (1), aucun champ requis de
+    plus, aucun renommage ; le REST ; les autres topics. `docs/schemas/balance.created.v1.schema.json` gagne les deux
+    propriétés en facultatif (et celles déjà publiées qu'il avait oubliées), `required` inchangé. Le consommateur de
+    bilan ignore déjà un champ inconnu (`balance-payload.util.ts`) : rien ne casse avant que D le lise.
+  - **→ D** : recalculer l'empreinte sur les soldes du jeu **sous `soldesChecksumVersion`** (une version inconnue ⇒
+    constat « non vérifiable », jamais un recalcul local au hasard).
 
 - **2026-11-25 (STORY-564), PUBLIÉ** (balance-service #168, `c9e94c6` ; fiscal #66, `fd34834`) — **conforme à l'annonce**
   (#921), sans écart. **Empreinte du paquet : `bfcc3fc92603e4fa08c370e9a9da7b6634f3b7b2cca12972bbe3fbc6c258c065`**

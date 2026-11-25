@@ -2532,11 +2532,14 @@ reserved_ranges:
       Amendement du lot 6 (24/11 soir, D-L6-5), consigne de l'utilisateur. Source : TICKET-BACKEND-balance-ne-declare-pas-son-dossier
       (servi en partie par 906) ; spine balance §Non couvert. Fiche à écrire juste avant de coder. Lot C, n° 12 du lot 6. NON SLOTTÉE.
   - range: "STORY-1022"
-    status: "RÉSERVÉ"
+    status: "in-progress"
     owner: "Groupe C — la balance publie l'empreinte de ses soldes (soldesChecksum), pour rapprocher la liasse de sa balance (prospera-balance-service)"
-    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    source_doc: "prospera-stories/stories/STORY-1022.md"
     reserved_on: "2026-11-24"
     note: >
+      EN COURS le 2026-11-25 (lot 7 de C, n° 0d du §3) — fiche écrite avant le code (D-1022-1 → 6) ; contrat annoncé
+      (« ⚠ Contrats » du journal de C) : soldesChecksum + soldesChecksumVersion 'soldes-v1', facultatifs, sur
+      balance.created et balance.etat.document.change. AVANT :
       Amendement du lot 6 (24/11 soir, D-L6-5). Source : stories/STORY-381.md (Écartés). Consommée par STORY-1078 (D, bilan).
       Fiche à écrire juste avant de coder ; contrat annoncé avant le code. Lot C, n° 11 du lot 6. NON SLOTTÉE.
   - range: "STORY-1021"
