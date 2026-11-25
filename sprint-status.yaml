@@ -2544,14 +2544,16 @@ reserved_ranges:
       Amendement du lot 6 (24/11 soir, D-L6-5), consigne de l'utilisateur. Source : TICKET-BACKEND-balance-ne-declare-pas-son-dossier
       (servi en partie par 906) ; spine balance §Non couvert. Fiche à écrire juste avant de coder. Lot C, n° 12 du lot 6. NON SLOTTÉE.
   - range: "STORY-1022"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe C — la balance publie l'empreinte de ses soldes (soldesChecksum), pour rapprocher la liasse de sa balance (prospera-balance-service)"
     source_doc: "prospera-stories/stories/STORY-1022.md"
     reserved_on: "2026-11-24"
     note: >
-      EN COURS le 2026-11-25 (lot 7 de C, n° 0d du §3) — fiche écrite avant le code (D-1022-1 → 6) ; contrat annoncé
-      (« ⚠ Contrats » du journal de C) : soldesChecksum + soldesChecksumVersion 'soldes-v1', facultatifs, sur
-      balance.created et balance.etat.document.change. AVANT :
+      🏁 DONE le 2026-11-25 — prospera-balance-service#169 (dev d5878be) ; annonce « ⚠ Contrats » avant le code (docs
+      #927, main c4ff743). soldesChecksum + soldesChecksumVersion 'soldes-v1', facultatifs, sur balance.created et
+      balance.etat.document.change (aucun pour une balance v1) ; canonisation du sceau réutilisée, vecteur 49c4d3b1…49d8.
+      Node 24 : 298/298 suites, 5738 tests ; e2e 37/37, 2291 ; mutations 9/9 ; pile grp-c 12/12. D prévenu (D-1078-10).
+      Suivante : STORY-1023. Lot 7 de C, n° 0d. AVANT :
       Amendement du lot 6 (24/11 soir, D-L6-5). Source : stories/STORY-381.md (Écartés). Consommée par STORY-1078 (D, bilan).
       Fiche à écrire juste avant de coder ; contrat annoncé avant le code. Lot C, n° 11 du lot 6. NON SLOTTÉE.
   - range: "STORY-1021"

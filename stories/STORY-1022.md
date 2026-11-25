@@ -1,6 +1,6 @@
 # STORY-1022 : la balance publie l'empreinte de ses soldes (`soldesChecksum`)
 
-Status: in-progress
+Status: done
 
 **Plan :** `coordination/PLAN-LOT-7-2026-11-24.md` §3, amendement du 2026-11-25, n° **0d** (ligne d'origine :
 `PLAN-LOT-6-2026-11-23.md` §4, amendement D-L6-5, n° 11 — « chaque balance validée porte son empreinte ; STORY-1078 (D)
@@ -94,6 +94,23 @@ soldesChecksumVersion = 'soldes-v1'
   tient désormais le mapper conforme. `balance.etat.document.change` n'a pas de schéma JSON publié : son contrat reste le
   type TypeScript et ses tests (inchangé).
 
+## Livraison
+
+**prospera-balance-service #169**, fusionnée en rebase : **`dev` `d5878be`** (branche `d956deb`). Annonce avant le
+code : prospera-stories #927 (`main` `c4ff743`). **Conforme à l'annonce, sans écart.** D prévenu par message (session
+`moneyvibes-apps-83`) : SHA, forme exacte, algorithme, vecteur.
+
+- `balance.checksum.ts` : `trierParCompte` et `hacherCanonique` extraits de `sceller` (les vecteurs `v1` et `v2` du sceau
+  passent inchangés) ; `computeSoldesChecksumV1`, `verifierSoldesChecksum` (une version inconnue ne se vérifie jamais),
+  `empreinteDesSoldes` (aucune pour une balance `v1`). `balance-canonique.ts` : `VERSIONS_SOLDES_CHECKSUM`,
+  `SOLDES_CHECKSUM_VERSION_COURANTE`.
+- Mappers `buildBalanceCreatedEvent` et `buildBalanceEtatDocumentChangeEvent` : les deux champs, ensemble ou aucun ;
+  `BalanceEventsService.etatDocumentChange` déclare `lignes` dans son type ; `marquerEtat` passe les lignes du document
+  relu dans la transaction. Les lignes ne voyagent pas.
+- `docs/schemas/balance.created.v1.schema.json` : `dossierId`, `exerciceId`, `devise`, `exposant`, `deviseDeclaree`,
+  `checksumVersion` (déjà publiés, que le schéma refusait), `CIMA` dans l'énumération des référentiels, les deux champs
+  neufs, `dependentRequired` (l'un exige l'autre) ; `required` inchangé. `INTEGRATION.md` à jour.
+
 ## Contrat annoncé avant le code
 
 « ⚠ Contrats » du journal de C (entrée STORY-1022) : deux champs facultatifs sur `balance.created` et
@@ -102,8 +119,25 @@ soldesChecksumVersion = 'soldes-v1'
 
 ## Preuves
 
-*(à la livraison)*
+| Preuve | Résultat |
+|---|---|
+| Node 24 (étage `verification`, archive du commit) — unitaires | **298/298 suites** (2 ignorées), **5738 tests** verts (21 ignorés), 226 s |
+| Node 24 — e2e | **37/37 suites, 2291 tests** |
+| `npm run build` (Node 24), `tsc` (deux configurations), lint des fichiers touchés | verts |
+| Node 25 — suites touchées (`balance`, `kafka`, `instance-c13`) | vertes, hors les 5 suites du client Kafka natif (rouges connues sous Node 25) |
+| Vecteur de référence (AC-3) | écrit en dur dans `balance.checksum.spec.ts`, `empreinte-des-soldes-events.spec.ts`, `balance-events.service.spec.ts` ; vecteurs `v1`/`v2` du sceau inchangés |
+| Ajv (AC-6) | l'événement construit (`v2`, `v1`, sans version) est conforme au schéma ; `required` inchangé ; l'un sans l'autre refusé |
+| Mutations | **9/9 tuées sur une assertion** : lignes nulles gardées, créditeur seul ignoré, tri retiré, ordre des clés inversé, empreinte publiée pour une `v1`, version inconnue vérifiée, `balance.created` sans empreinte, `balance.etat.document.change` sans empreinte, service qui ne passe pas les lignes |
+| Pile `grp-c` (mongo rs0, Kafka 3.9.0, balance REEL depuis l'image de l'archive, IdP de test) | **12/12** : B1 (`v2`) rejetée ⇒ sur Kafka **et** dans l'outbox, `soldesChecksum = 49c4d3b1…49d8`, **recalculé hors du service depuis le contrat écrit**, `soldesChecksumVersion: 'soldes-v1'`, sceau et `schemaVersion` inchangés, pas de lignes ; B2 (héritée `v1`) rejetée ⇒ aucun des deux champs ; `GET` de la balance : REST inchangé |
+| Docker | verrou pris à 23:08, rendu à 23:19 (`trap EXIT`), aucun conteneur `grp-c` restant |
+
+**Limite de la pile, écrite** : la validation de B3 y a rendu `403 BALANCE_NOT_ENTITLED` (la pile sème l'état publié mais
+pas le read-model d'abonnement qu'exige l'écriture de validation) ; la transition `VALIDÉE` passe par le même mapper et
+le même émetteur que le rejet, prouvés par les unitaires (`VALIDÉE` et `REJETÉE`) et par la pile (rejet).
 
 ## Ce qui reste
 
-*(à la livraison)*
+- **→ D** : lire l'empreinte et publier le constat à côté des quatre contrôles (D-1078-10), recalculée sous
+  `soldesChecksumVersion`.
+- `balance.etat.document.change` n'a toujours pas de schéma JSON publié (D-1022-6) ; le REST ne publie pas l'empreinte
+  (D-1022-5), à ajouter en facultatif si un écran la demande.
