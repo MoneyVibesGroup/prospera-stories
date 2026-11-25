@@ -42,7 +42,9 @@
 4. **Amendement d'ordre (25/11, 21:50, session de groupe de C, convenu avec D qui commence 347)** : après 1021,
    **STORY-564** passe avant 1022 — l'ordre devient **1021 → 564 → 1022 → 1023 → 317 → 318 → …** (le reste du §3
    inchangé). Raison : **348 de D attend 564**.
-5. **Suivante : STORY-564.**
+5. **STORY-564 EN COURS (25/11)** : fiche relue et mise à jour avant le code (D-564-1 → 12), annonce « ⚠ Contrats » et
+   « ⚠ Communs » ci-dessous. Le paquet fiscal se modifie dans sa source (`balance-service`), puis les copies du fiscal (C)
+   et de `dossier-service` (→ B). **Prévenir D à la fusion** (348 lit `irpp.traitementsSalaires.ordreDeCalcul`).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -468,7 +470,44 @@ seulement.
   `prospera-assurance-service` la copieront (étiquette `garde-etat-publie-v1`, empreinte, projection de
   `etat-publie.changed.<espace>`, double lecture) dans une story de la plage de C, après STORY-990.
 
+## ⚠ Communs
+
+> Lot 7, D-L7-2 : un fichier commun de `prospera-fiscal-service` (`app.module.ts`, manifeste `declarations`, contrat
+> OpenAPI, `package.json`, migrations, `read-models/`, copies du paquet, et tout fichier d'un dossier de D) ne change que
+> dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
+> migration en vol sur le service.
+
+- **ANNONCÉ (2026-11-25, STORY-564, avant le code)** — branche `MNV-564` de `prospera-fiscal-service`. **Aucune
+  migration**, ni `app.module.ts`, ni `package.json`, ni `read-models/`, ni manifeste `declarations`, ni contrat OpenAPI.
+  Touché : **la copie du paquet fiscal** `test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`, recopiée à l'octet
+  (LF) de l'artefact de `balance-service` (empreinte au « ⚠ Contrats » ci-dessous). Tout le reste est dans les dossiers
+  de C : `src/domain/familles/` (le calcul de l'IRPP des traitements et salaires) et deux commentaires qui citaient
+  « STORY-564 » comme manque (`domain/obligations/catalogue.ts`, `application/obligations/deriver-obligations.service.ts`).
+  **→ D** : rien à faire pour un rebase ; les specs de `remuneration` qui lisent la copie du paquet y trouvent les mêmes
+  clés, plus celles de l'IRPP et de la CNSS (voir « ⚠ Contrats »).
+
 ## ⚠ Contrats
+
+- **2026-11-25 (STORY-564), ANNONCÉ avant le code** — **le barème IRPP et la base des salaires entrent au paquet fiscal
+  Togo 2026** (`prospera-balance-service`, source `scripts/referentiels/sources/paquet-fiscal-togo-2026.json` ; copies
+  `balance-service`, `prospera-fiscal-service`, `dossier-service` par B). Fiche : `stories/STORY-564.md` (D-564-1 → 12).
+  - **Rien n'est renommé**, aucune valeur existante ne bouge (hors ce qui suit) : `irpp.tranches[]` (`de`, `a`, `taux`),
+    `irpp.arrondiAssiette`, `irpp.arrondiProduit`, `irpp.declarationAnnuelle`, le catalogue.
+  - **Ajouté à `irpp`** : `article` et `millesime` sur chaque tranche ; **`irpp.traitementsSalaires`** tel qu'écrit le
+    24/11 dans la copie de référence (`deductionsDuBrut[]`, `deductionForfaitaire` `{ taux, fractionAnnuelleMax }`,
+    `fraisReelsAlinea4`, `deductionsSurJustificatif.rubriques[]`, `chargesDeFamille`
+    `{ montantParPersonneParMois, personnesMax }`, `arrondiBase`, **`ordreDeCalcul`**), chaque élément avec `article` et
+    `millesime` ; **`irpp.revenusCategoriels`** `{ couverts[], nonCouverts[] }` (codes du questionnaire de 568) ;
+    **`irpp.retenueALaSource`** (LPF Art. 26, 27, 43).
+  - **`cnss`** : remplacé par le bloc de la copie de référence (24/11 : `assiette.smig`, `plafond: null`,
+    `deplafonnee`, `branches`, `amu`) ; ses clés d'avant (`tauxEmployeur`, `tauxSalarie`, `tauxTotal`, `assiette.inclus`,
+    `.exclus`, `.plancher`, `deductibiliteFiscale`, `aCompleter`) restent.
+  - **Changé** : `aFaire` (l'IRPP y entre nommément, la ligne CNSS est remplacée), `_meta.miseEnGarde`, `_meta.revision`,
+    la ligne IRPP de `autresImpotsTaxes.presentsDansCGI` (plus de taux). **L'empreinte du paquet change** (donnée à la
+    publication).
+  - **Garde de packaging** : **R11** — un élément du barème IRPP sans `article` ou sans `millesime` fait échouer le build.
+  - `fiscal-service` : aucun contrat d'API ne bouge (aucune route) ; un calcul neuf dans le domaine
+    (`src/domain/familles/irpp-traitements-salaires.ts`), que 340 et 566 exposeront.
 
 - **2026-11-25 (STORY-1021), PUBLIÉ** (balance-service #167, `465a308` sur `dev`) — **conforme à l'annonce** (#916, faite avant le code), sans écart de contrat ; l'import d'un enregistrement exporté tombe au schéma (`SCHEMA_NON_CONFORME`, D-1021-17). Annonce : les routes d'instance `export`, `sante` et `migrer` de la balance
   (`prospera-balance-service`), sur le patron de STORY-1075 (D, bilan). Fiche : `stories/STORY-1021.md` (D-1021-1 → 16).
