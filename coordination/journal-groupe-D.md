@@ -2785,6 +2785,28 @@
 
 ## Questions à l'utilisateur ou au PO
 
+- **Réponses de l'utilisateur du 2026-11-25 (après la clôture du lot 6 amendé de D), données à la session de groupe
+  de D.** Chaque question garde son énoncé ci-dessous ; la réponse fait foi. **Aucune story n'est créée ni placée pour
+  les suites** : l'utilisateur gère lui-même le lot 7 (« ne touche rien pour le lot 7, laisse-moi, je vais gérer ça »).
+  - **Q-D-17 — confirmée.** Dans l'espace d'essai, la garde saute le seul palier KYC et l'état publié décide
+    (D-1079-1 → 4 tels quels). La même règle vaudra pour `balance-service` (C) et `dossier-service` (B) : leurs demandes
+    (« Demandes aux autres groupes », STORY-1079) ne sont plus un choix par défaut.
+  - **Q-D-15 — un numéro imprimable.** Le DAF déclare avec le compte un numéro « à imprimer », non secret et tracé ;
+    `paiement` le publie avec le compte ; la facture et son PDF l'impriment en entier. Jamais un déchiffrement du
+    coffre. Le choix par défaut de D-1073-6 (l'empreinte visible seule) reste en service jusqu'à la story qui le fera.
+  - **Q-D-13 — personne.** `prospera-expert-comptable` reste sans titulaire ; chaque story qui en a besoin l'emprunte par
+    une passation écrite.
+  - **Q-D-16 — la lecture stricte est gardée** (D-1077-4 tel quel) : l'alerte se juge sans subventions d'investissement
+    ni provisions réglementées ; la lecture large reste publiée à côté.
+  - **Q-D-14 — chercher sur le web les seuils des seize autres indicateurs, modifiables ensuite.** Chaque seuil trouvé
+    porte sa source ; un seuil introuvable reste sans repère ; les seuils doivent pouvoir être modifiés après coup, sans
+    version neuve du moteur, et la modification doit être tracée.
+  - **Q-D-18 → 20 — validés, avec le CSV en plus.** L'export reste réservé au moteur (Q-D-18), la migration garde sa
+    route sans corps (Q-D-20), et l'export sort **aussi en CSV** (Q-D-19, C13 point 7). Les contrats restent à publier
+    par B dans `prospera-plateforme/contrats/instance/`.
+  - **La zone franche** : `zone-franche-togo@1.1`, qui reprend la correction des sous-totaux de `@2.2` (STORY-676, 678),
+    se fera **au lot 7**.
+
 - **Q-D-20 (2026-11-25, STORY-1075) — Le contrat de `migrer`.** Le manifeste déclare `POST /api/v1/instance/bilan/migrer`
   et AD-33 dit « idempotent, additif, appelé par l'agent sous verrou », mais aucun schéma de la plateforme ne fixe la
   demande, la réponse ni l'échec (et AD-33 parle d'un point d'entrée lancé « en conteneur dédié », le manifeste d'une
