@@ -145,7 +145,7 @@
     consultations simultanées sans fourche, octet changé dans MinIO nommé par la campagne périodique, entrée réécrite
     nommée au rang 5. Verrou 22:14 → 22:23. Fiche D-1119-1 → 18. Passation de `document-service` lue au rituel (C,
     `0716a58`) ; worktree prunable d'un autre poste retiré, branche locale `ocr-pdf` (équivalente à `dev`) supprimée.
-  - **Suivante : STORY-1120** (n° 2 : fin de mission et réversibilité ; l'export emporte le journal d'intégrité et les
+  - **En cours : STORY-1120** (n° 2 : fin de mission et réversibilité, contrat annoncé le 25/11 ; l'export emporte le journal d'intégrité et les
     documents probants, nommé par 1119). **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans
     `dossier-service` quand C l'aura fusionnée (journal de C, lot 7, 5). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
@@ -1872,6 +1872,42 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-25, STORY-1120 — fin de mission et réversibilité, annoncé AVANT le code** (`document-service`, GitHub
+  `prospera-ocr-service`, branche `MNV-1120` ; fiche `stories/STORY-1120.md`, D-1120-1 → 9). **Ajouts seuls**, sous
+  `/api/v1/ged/cabinet` ; le chemin de l'assurance ne change pas.
+  - **Fermeture du fonds** : `POST …/fonds/{numero}/fermeture` `{ motif: FIN_DE_MISSION | DEPART_DU_CLIENT,
+    observation? }` (`ged:fonds:gerer`) → le fonds ; **et avec le dossier client** : la GED consomme **`dossier.updated`**
+    (topic existant de `dossier-service`, groupe neuf `ged.dossiers-clients`) et ferme les fonds ouverts d'un dossier
+    `ARCHIVE` (motif `DOSSIER_ARCHIVE`). Irréversible. La vue d'un fonds gagne `etat` (`OUVERT` | `FERME`) et
+    `fermeture?` `{ le, par, motif, origine, observation? }`. **Refus neufs** : `409 FONDS_FERME` (`details: { fermeLe,
+    motif }`) sur `POST …/pieces`, `…/pieces/{id}/versions`, `…/fonds/{n}/versements`, `…/reprises`, `…/receptions` ;
+    `409 FONDS_DEJA_FERME`. Une facture inscrite par la comptabilité attend un fonds ouvert (`SANS_FONDS`).
+  - **Export complet** : `POST …/fonds/{numero}/exports` → 202 `{ numero: EXP-AAAA-NNNNN, etat, demandeLe }`, `GET
+    …/fonds/{numero}/exports`, `GET …/exports/{numero}`, `GET …/exports/{numero}/volumes/{rang}` (`application/zip`,
+    `attachment`, `X-Empreinte-Sha256`). Produire et télécharger : `ged:fonds:gerer` **et** `ged:sensible:consulter`.
+    File BullMQ neuve `ged-exports` ; variable neuve **`GED_EXPORT_VOLUME_OCTETS`** (défaut 50 000 000). Volumes ZIP
+    sans compression : les fichiers en clair, et un volume d'index (`index.json`, `index.csv`, `bordereaux.json`,
+    `journal-integrite.json`, `controle-integrite.json`, `originaux-papier.json`, documents probants, `empreintes.sha256`
+    pour `sha256sum -c`) ; un certificat d'intégrité neuf quand le fonds le permet. Refus neufs : `404 EXPORT_INCONNU`,
+    `VOLUME_INCONNU`, `409 EXPORT_NON_TERMINE`, `409 INTEGRITE_EN_ECART`, `503 FILE_INDISPONIBLE`, `503
+    JOURNAL_INDISPONIBLE`.
+  - **Bordereau de restitution** : `POST …/exports/{numero}/bordereau-de-restitution` `{ remisA, remisLe, moyen:
+    TELECHARGEMENT | SUPPORT_REMIS, observation? }` → 201, document probant de type neuf **`BORDEREAU_DE_RESTITUTION`**
+    (`BRN-AAAA-NNNNN`, PDF par `GET …/documents-probants/{numero}/pdf`) ; `POST …/documents-probants/{numero}/exemplaire-signe`
+    (multipart `fichier`, `signePar`, `signeLe`) → 201, `GET …/documents-probants/{numero}/exemplaire-signe`. Le document
+    probant gagne `exemplaireSigne?`. Refus neufs : `409 EXPORT_AVANT_FERMETURE`, `BORDEREAU_DEJA_EMIS`,
+    `EXEMPLAIRE_NON_ATTENDU`, `EXEMPLAIRE_DEJA_DEPOSE`, `404 EXEMPLAIRE_ABSENT`.
+  - **Journal d'intégrité** : actes neufs `FERMETURE`, `EXPORT`, `EXPORT_TELECHARGE`, `EXEMPLAIRE_SIGNE` (l'énumération
+    `acte` de l'OpenAPI s'élargit) ; `DOCUMENT_EMIS` porte aussi le bordereau de restitution.
+  - Collection neuve `ged_exports_fonds` ; champs neufs `fermeture` (`ged_fonds_cabinet`), `exemplaireSigne`
+    (`ged_documents_probants`). **Aucun droit neuf** : auth et la table d'accès du cabinet inchangés. **Aucun fait Kafka
+    publié** ; un topic existant consommé en plus. Aucune dépendance neuve. **`dossier-service` inchangé** (il publie
+    déjà `statut: ARCHIVE` sur `dossier.updated`).
+  - **Manifeste `ged` 1.5.0** (`manifestes/ged.manifest.ts`, cette PR) : `consomme` gagne `dossier.updated` ; quatre
+    routes `GET` neuves en `routesLectureSeule` ; recopié dans le service par le code, **puis au catalogue par B** après
+    la fusion du code. **→ A (FE-143)** : types à régénérer depuis l'OpenAPI de `document-service` quand l'écran
+    viendra. **Pour C et D** : rien.
 
 - **2026-11-25, STORY-1119 — les archives ont valeur de preuve, annoncé AVANT le code** (`document-service`, GitHub
   `prospera-ocr-service`, branche `MNV-1119` ; fiche `stories/STORY-1119.md`, D-1119-1 → 11). **Ajouts seuls**, sous

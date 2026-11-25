@@ -68,7 +68,10 @@ export const MANIFESTE_GED = {
   // factures comptabilisées rangées au fonds du client (`comptabilite.facture.inscrite`).
   // 1.4.0 (2026-11-25, STORY-1119) : les archives du cabinet ont valeur de preuve (journal d'intégrité chaîné, contrôle
   // périodique des empreintes, attestation de numérisation et certificat d'intégrité) ; sept routes de lecture neuves.
-  version: '1.4.0',
+  // 1.5.0 (2026-11-25, STORY-1120) : fin de mission et réversibilité (fermeture du fonds, avec le dossier client archivé
+  // par `dossier.updated` ; export complet en volumes ; bordereau de restitution et son exemplaire signé) ; quatre routes
+  // de lecture neuves.
+  version: '1.5.0',
 
   // C1 : aucune dépendance dure. La GED reçoit, lit, classe, conserve et retrouve des pièces sans autre module ; une pièce
   // enregistrée sans dossier va dans la file « à rattacher » (FR-159, FR-166).
@@ -144,6 +147,7 @@ export const MANIFESTE_GED = {
     'sinistres.acces-sante.retire@1',
     'reprise.cles-rattachement.publiees@1', // numéro de police, de sinistre, `DEC-`, numéro d'archivage d'origine (FR-215)
     'comptabilite.facture.inscrite', // STORY-1100 : une facture inscrite au brouillard, rangée en copie pré-indexée au fonds du client (si `comptabilite` est installé)
+    'dossier.updated', // STORY-1120 : un dossier client archivé (`statut: ARCHIVE`, état absolu publié par `dossier-service`) ferme ses fonds d'archives ouverts
     'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
     'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
   ],
@@ -275,6 +279,10 @@ export const MANIFESTE_GED = {
     'GET /api/v1/ged/cabinet/fonds/{numero}/controles-integrite', // STORY-1119
     'GET /api/v1/ged/cabinet/fonds/{numero}/documents-probants', // STORY-1119 : attestations et certificats émis
     'GET /api/v1/ged/cabinet/documents-probants/{numero}/pdf', // STORY-1119 : retéléchargé à l'identique (NFR-4)
+    'GET /api/v1/ged/cabinet/fonds/{numero}/exports', // STORY-1120 : les exports de réversibilité d'un fonds
+    'GET /api/v1/ged/cabinet/exports/{numero}', // STORY-1120 : un export, ses volumes et leurs empreintes
+    'GET /api/v1/ged/cabinet/exports/{numero}/volumes/{rang}', // STORY-1120 : un volume ZIP, retéléchargé à l'octet
+    'GET /api/v1/ged/cabinet/documents-probants/{numero}/exemplaire-signe', // STORY-1120 : le bordereau de restitution signé
     'GET /api/v1/instance/ged/{organisationId}/export',
   ],
 
