@@ -7699,7 +7699,7 @@ sprints:
         epic: "EPIC-031"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        status: "in-progress"  # 2026-11-25 — groupe C, lot 6 : fiche + contrat avant le code (stories/STORY-326.md)
         assigned_to: null
       - story_id: "STORY-327"
         title: "Continuité inter-périodes"
