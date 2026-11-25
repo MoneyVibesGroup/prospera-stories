@@ -1,7 +1,7 @@
 # STORY-315 : Le calendrier fiscal du portefeuille, en une page, avec filtres et tri
 
-Status: in-progress — **écrite le 2026-11-25** par la session du groupe C, juste avant de la coder (lot 6) ; contrat
-annoncé ci-dessous avant le code.
+Status: done — **livrée le 2026-11-25** : prospera-fiscal-service **#61** (`7d97ae0` sur `dev`) ; voir « Livraison ».
+Écrite le 2026-11-25 par la session du groupe C juste avant de la coder (lot 6) ; contrat #867 avant le code.
 
 **Epic :** EPIC-030 · **Points :** 5 · **FR :** FR-F16, FR-F17 · **NFR :** NFR-F13
 **Service :** `prospera-fiscal-service`. **Après :** STORY-305 (les obligations dérivées), STORY-319 (le responsable,
@@ -64,6 +64,34 @@ qui risque d'être en retard.
 - Index neuf sur les obligations, à l'appui du tri et des filtres : `{ orgId, annee, echeance, _id }`.
 - Une preuve sur un vrai MongoDB (suite `test:conformite`) : 500 dossiers × 12 obligations ; la première page tient
   sous 2 s et une page filtrée sous 500 ms, mesurées et écrites dans la livraison.
+
+### Livraison (2026-11-25)
+
+- **Code** (#61) : `domain/obligations/calendrier-portefeuille.ts`, `application/obligations/calendrier-portefeuille.service.ts`,
+  `modules/read-models/guards/portee-collaborateur.util.ts` (la règle de balance-service), `adapters/mongo/mongo-source-dossiers-calendrier.ts`,
+  deux méthodes du registre (`calendrierParEcheance`, `calendrierComplet`), la réplique `dossiers_fiscal` étendue, l'index
+  `calendrier_du_portefeuille`. Codé par une sous-session ; revue, preuves et gate par C.
+- **Preuves** (Node 24) : unitaires **2618** (3 suites lentes rejouées seules, 134/134), e2e **11/11, 230** (dont 7 neufs) ;
+  **`test:conformite` 16/16 suites, 102/102** sur le vrai `mongo-fiscal`. **NFR-F13 mesurée** (500 dossiers × 12 obligations) :
+  première page de 200 lignes en **60 ms**, page filtrée (pays + taxe + période) en **24 ms**, tri par dossier en **157 ms** ;
+  `explain` lit l'index ; le curseur parcourt les 6 000 lignes sans trou ni doublon ; portée sur de vrais ObjectId (admin,
+  collaborateur affecté, sans affectation, « Mon cabinet », archivé, autre cabinet) ; mutation **9/9** ; gate `grp-c` :
+  `fiscal-service` `healthy`, la route en `401` sans jeton, **un vrai `dossier.updated` publié sur Kafka** remplit la réplique
+  (raison sociale, « Mon cabinet », responsable, contributeurs).
+- Un attendu du test de portée filtrée par pays était faux (14 au lieu de 13 : deux dossiers du collaborateur sont au Bénin) ;
+  corrigé dans le test (`b106cb2`), le code n'avait pas tort.
+
+### Écarts au contrat, décidés au code
+
+- **D-315-5** : l'administrateur est `TENANT_ADMIN` sans `PLATFORM_ADMIN` (lecture stricte, comme balance-service) : un jeton
+  qui porte les deux tombe dans la branche restreinte.
+- **D-315-6** : les tris `DOSSIER` et `STATUT` se font en mémoire (au plus 20 000 lignes lues) ; l'index sert `ECHEANCE`.
+- **D-315-7** : `lireDossier` projette maintenant `raisonSociale` et `estLeCabinet` (devise et version ne passent toujours pas).
+- **D-315-8** : un dossier projeté avant cette story a `raisonSociale: ''` (jamais un nom deviné) ; un jeton sans organisation
+  voit une liste vide ; `redevableId` vaut `entreprise` pour l'entreprise.
+- **D-315-9** : au plus 5 000 dossiers lus par page.
+- **D-315-10** : la page par échéance se lit en deux temps (les échéances datées, puis les sans-date par `_id`), parce que
+  MongoDB range `null` avant toute chaîne. `pays` : deux lettres ; `taxe` libre (un code inconnu ne rend rien).
 
 ### Décisions prises au contrat (contestables)
 

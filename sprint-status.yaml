@@ -7653,14 +7653,14 @@ sprints:
         epic: "EPIC-030"
         points: 5
         service: "fiscal-service"
-        status: "in-progress"  # 2026-11-25 — groupe C, lot 6 : fiche + contrat avant le code (stories/STORY-315.md)
+        status: "done"  # ✅ 2026-11-25 — groupe C, lot 6 : fiscal #61 (7d97ae0), GET /obligations/calendrier, portée par collaborateur ; 2618/230, conformité 102/102, NFR-F13 60/24/157 ms sur 500 × 12 ; mutation 9/9 ; gate grp-c vert ; D-315-1 → 10 dans la fiche
         assigned_to: null
       - story_id: "STORY-316"
         title: "Calcul des échéances depuis le paquet"
         epic: "EPIC-030"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        status: "in-progress"  # 2026-11-25 — groupe C, lot 6 : fiche + contrat avant le code (stories/STORY-316.md)
         assigned_to: null
       - story_id: "STORY-317"
         title: "Reports d'échéance administratifs"
