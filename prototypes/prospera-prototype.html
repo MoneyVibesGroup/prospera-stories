@@ -3697,6 +3697,34 @@
   .dp-sheets button.nm:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
   .dp-drop { border: 2px dashed var(--border-strong); border-radius: 0.9rem; padding: 1.3rem 1rem; text-align: center; background: var(--card); display: flex; flex-direction: column; gap: 0.5rem; align-items: center; }
   .dp-drop p { margin: 0; font-size: 0.84rem; color: var(--muted-fg); max-width: 34rem; }
+  /* ═══ Lot 7 (paquet 3) : FE-112 les obligations fiscales de l'exercice ═══ */
+  .ob-list { display: flex; flex-direction: column; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+  .ob-grp { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-fg); margin: 0.5rem 0 0; display: flex; gap: 0.5rem; align-items: center; }
+  .ob-grp.late { color: var(--danger); }
+  .ob-row { border: 1px solid var(--border); border-radius: 0.6rem; background: var(--card); padding: 0.7rem 0.85rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .ob-row.late { border-left: 3px solid var(--danger); }
+  .ob-row.off { background: var(--hover-surface); }
+  .ob-top { display: flex; gap: 0.5rem 0.8rem; align-items: center; flex-wrap: wrap; }
+  .ob-t { flex: 1 1 15rem; min-width: 0; }
+  .ob-t b { font-size: 0.92rem; overflow-wrap: anywhere; }
+  .ob-t small { display: block; font-size: 0.78rem; color: var(--muted-fg); margin-top: 0.12rem; }
+  .ob-t small.late { color: var(--danger); font-weight: 600; }
+  .ob-seg { display: inline-flex; gap: 2px; vertical-align: middle; }
+  .ob-seg i { width: 0.65rem; height: 0.28rem; border-radius: 2px; background: var(--border-strong); display: block; }
+  .ob-seg i.on { background: var(--success); }
+  .ob-seg i.now { background: var(--primary); }
+  .ob-act { display: flex; gap: 0.5rem 0.7rem; align-items: center; flex-wrap: wrap; }
+  .ob-act .hint { font-size: 0.78rem; color: var(--muted-fg); }
+  .ob-why { margin: 0; font-size: 0.8rem; color: var(--muted-fg); }
+  .ob-tri { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
+  .ob-tri div { border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.4rem 0.55rem; font-size: 0.76rem; color: var(--muted-fg); }
+  .ob-tri b { display: block; font-size: 0.95rem; color: var(--foreground); font-variant-numeric: tabular-nums; }
+  @media (max-width: 36rem) { .ob-tri { grid-template-columns: 1fr; } .ob-act .btn { white-space: normal; height: auto; min-height: 2rem; padding-top: 0.35rem; padding-bottom: 0.35rem; } }
+  .ob-more { border-top: 1px dashed var(--border); padding-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .ob-more .dp-tbl { margin-top: 0; }
+  .ob-fold > summary { cursor: pointer; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-fg); margin: 0.5rem 0 0.4rem; }
+  [data-ob-root] .dp-lg { white-space: normal; height: auto; min-height: 2.8rem; padding-top: 0.4rem; padding-bottom: 0.4rem; max-width: 100%; }
+  .ob-ap-txt { margin: 0; font-size: 0.9rem; line-height: 1.5; }
   /* ═══ Lot 6 : FE-149 factures → écritures, FE-150 « Repris de vos choix », FE-141 analyse financière ═══ */
   .fac-wrap { display: flex; flex-direction: column; gap: 1rem; }
   .fac-head { display: flex; gap: 0.5rem 1rem; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; }
@@ -8691,6 +8719,7 @@
                       <button class="fis-t" role="tab" data-fis-tab="tpu" data-fis-only="SYNTHETIQUE" aria-selected="false" hidden>Taxe professionnelle unique</button>
                       <button class="fis-t" role="tab" data-fis-tab="taxes" aria-selected="false">Autres impôts et taxes</button>
                       <button class="fis-t" role="tab" data-fis-tab="provisions" aria-selected="false">Provisions à la balance</button>
+                      <button class="fis-t" role="tab" data-fis-tab="obligations" aria-selected="false" title="FE-112 — les obligations fiscales de l'exercice : ce qu'il y a à déclarer et où en est chacune">Obligations <span class="badge badge-new" data-note>FE-112</span></button>
                     </div>
 
                     <!-- ══════════════ SECTION : RÉSULTAT FISCAL (FE-050) ══════════════
@@ -9931,6 +9960,64 @@
                         </div>
                       </div>
                     </div><!-- /panel taxes -->
+
+                                        <!-- ═══════════════ SECTION : OBLIGATIONS DE L'EXERCICE (FE-112, lot 7 paquet 3) ═══════════════
+                         Ce que le dossier doit déclarer, et où en est chaque obligation. Un geste principal en tête ;
+                         le lot se traite en un clic ; le reste (montants, base, points à régler) est derrière « Détails ».
+                         Les états, champs et refus viennent de fiscal-service (STORY-305, 306, 314, 315, 316, 320, 322, 323, 326, 328, 563). -->
+                    <div class="fis-slot" data-fis-panel="obligations" hidden>
+                      <div class="dp-wrap" data-ob-root></div>
+                      <div class="dc-note" data-note style="margin-top:0.9rem">
+                        <b>FE-112 · les obligations de l’exercice.</b> Routes de <code>fiscal-service</code> (<code>:3012</code>, <code>/api/v1</code>) :
+                        <code>GET /exercices/{exerciceId}/obligations?inclureDesactivees=&amp;redevableId=</code> (la liste, triée par échéance ; <b>aucun droit fiscal</b> n’est exigé en lecture, STORY-300) ;
+                        <code>POST …/obligations/derivation</code> (droit <code>preparer</code>, rapport <code>nonDerivables</code>, <code>implantationsNonDerivees[]</code>, <code>derogations[]</code>, <code>redevablesSansObligation[]</code>, <code>422 PAQUET_FISCAL_NON_PUBLIE</code>) ;
+                        <code>POST /obligations/{id}/desactivation</code> et <code>/reactivation</code> (droit <code>valider</code>, motif de 3 à 500 caractères, STORY-306) ;
+                        <code>POST /obligations/{id}/transition</code> corps <code>{ vers }</code> (STORY-323 : onze états, <b>strictement séquentiels</b>, le droit dépend de la <b>cible</b> : <code>preparer</code> pour la prise en charge, l’envoi au contrôle, la préparation du dépôt, « à payer » et « payée » ; <code>valider</code> pour le passage « à valider », le visa et la clôture ; <code>deposer</code> pour « déposée » et « accusé reçu » ; la réponse porte <code>prochainEtat</code> et <code>droitRequis</code>, qui servent à griser le geste) ;
+                        <code>POST /obligations/{id}/bases</code> (STORY-320, un blocage est un <i>résultat</i> : <code>basesFiscales.statut = BLOQUEES</code>) ; <code>POST /obligations/{id}/coherence</code> (STORY-326, <code>CONFORME</code> / <code>ECART</code> / <code>NON_EXECUTE</code>) ;
+                        <code>POST /obligations/{id}/montant</code> (la saisie quand <code>montantASaisir</code>, STORY-314) ; <code>GET /exercices/{id}/obligations/ecarts</code> (le triplet calculé / déclaré / payé, STORY-322) ;
+                        <code>GET …/obligations/anomalies</code> et <code>POST /obligations/{id}/anomalies/{code}/levee</code> (STORY-328 : bloquante levée par <code>valider</code>, avertissement par <code>preparer</code>, motif obligatoire).
+                        Le calendrier de tout le portefeuille (<code>GET /obligations/calendrier</code>, STORY-315) est l’écran de <b>FE-094</b>, pas celui-ci.
+                        <br><b>Les dates viennent du paquet, jamais du code</b> (STORY-316) : la DSF d’une société au réel tombe le 30/04, celle d’une entreprise individuelle au réel n’a <b>pas de date</b> (<code>ECHEANCE_NON_CONSTATABLE</code>) et l’écran dit « date à confirmer », il n’en invente pas.
+                        <br><b>⛔ Un 404 n’est pas « aucune obligation »</b> : un dossier hors de la portée du collaborateur rend 404 ; l’écran le dit au lieu de montrer une liste vide.
+                        <b>⚡ Abonnement échu = lecture seule</b> (STORY-727) : la liste se lit, toute écriture rend 403.
+                        <b>⚠ Le jeton garde ses anciens droits jusqu’à 15 minutes</b> : un bouton affiché peut être refusé en 403 ; le refus se lit.
+                        <b>Les droits se lisent sur <code>perms</code></b> (<code>fiscalite:declaration:preparer|valider|deposer</code>), jamais sur le rôle.
+                        <br><b>Chiffres de la démo</b> : l’exercice, le dossier et la liasse sont ceux de FE-034 (Ets Kossi Distribution, exercice 2025, liasse version 2 figée le 22/07/2026) ; la date du jour est le 22/07/2026 comme dans l’onglet Dépôt. Les dates de la DSF (30/04) et des acomptes (31/01, 31/05, 31/07, 31/10) sont celles de STORY-316 ; <b>les autres dates et tous les montants sont illustratifs</b> et seront relus sur le paquet <code>togo@2026</code>.
+                        <div class="dp-gap" style="margin-top:0.5rem"><span class="dp-pill">écart</span><span><b>Pas de route « faire avancer plusieurs obligations »</b> : <code>POST /obligations/{id}/transition</code> n’en prend qu’une. Le lot « un clic » appelle la route une fois par obligation, sans transaction commune : si l’une est refusée, les autres sont déjà faites, et l’écran le dit ligne par ligne. Une route de lot (<code>POST /exercices/{id}/obligations/transitions</code>) serait plus sûre. Porté par <b>C et D</b>.</span></div>
+                        <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b>Pas de retour en arrière</b> : un visa donné ne se retire pas, le cycle est strictement séquentiel (STORY-325, « rectificatives versionnées », n’est pas commencée ; STORY-334 en dépend pour le retour d’une liasse rejetée à « à déposer »). L’écran le dit avant le visa. Porté par <b>C et D</b>.</span></div>
+                        <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b>Le cycle de l’obligation ne suit pas la chaîne de dépôts</b> (déjà signalé pour FE-081) : « déposée » et « accusé reçu » se posent à la main (droit <code>deposer</code>) ; STORY-333 (accusé) et 334 (rejet) ne sont pas commencées. Le bouton « Ouvrir le dépôt » mène à la chaîne de dépôts, qui reste la source pour la DSF. Porté par <b>C et D</b>.</span></div>
+                        <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b>Personne ne peut être nommé responsable</b> : le champ <code>responsable</code> existe (liste, calendrier, filtre <code>responsable=AUCUN</code>) mais <b>aucune route ne l’écrit</b>, il vaut toujours <code>null</code>. L’écran ne montre donc aucun responsable et ne propose aucune attribution ; dès qu’une route existe, une ligne « Confier à… » viendra derrière « Détails ». Porté par <b>C et D</b>.</span></div>
+                        <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b>Pas de motif lisible pour l’abonnement échu</b> : la fiche (STORY-727) promet un 403 sur toute écriture, mais aucun code n’est publié pour ce refus dans le contrat de <code>fiscal-service</code> : l’écran se fie au statut 403 et à l’état de l’abonnement lu ailleurs. À nommer par <b>C et D</b>.</span></div>
+                        <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">hors février</span><span><b>Implantations, redevables et mandats</b> (FE-113) : le blocage « mandat non attesté » se règle dans la fiche du redevable ; ici, le bouton y renvoie. <b>Le calendrier du portefeuille</b> (FE-094) et <b>le statut d’un barème</b> (FE-102) sont d’autres écrans.</span></div>
+                        <div class="dp-rig"><b>Banc d’essai (FE-112).</b>
+                          <button class="btn btn-ghost btn-sm" type="button" data-ob-bench="normal">Exercice en cours</button>
+                          <button class="btn btn-ghost btn-sm" type="button" data-ob-bench="vide">Rien de calculé encore</button>
+                          <button class="btn btn-ghost btn-sm" type="button" data-ob-bench="horsportee">Dossier hors portée (404)</button>
+                          <button class="btn btn-ghost btn-sm" type="button" data-ob-bench="echu">Abonnement échu (lecture seule)</button>
+                          <label>Vous êtes :
+                            <select data-ob-rig-role aria-label="Votre rôle (démo)">
+                              <option value="associe">associé (Awa Diallo) : droits préparer, valider, déposer</option>
+                              <option value="collab">collaborateur (Kofi Santos) : droit préparer seul</option>
+                            </select></label>
+                          <label>Prochaine réponse du serveur :
+                            <select data-ob-rig aria-label="Prochaine réponse du serveur (obligations)">
+                              <option value="">200 · l’acte est enregistré</option>
+                              <option value="TRANSITION_CONCURRENTE">409 · TRANSITION_CONCURRENTE</option>
+                              <option value="TRANSITION_NON_PREVUE">409 · TRANSITION_NON_PREVUE</option>
+                              <option value="VISA_REQUIS">409 · VISA_REQUIS</option>
+                              <option value="ANOMALIE_BLOQUANTE">409 · ANOMALIE_BLOQUANTE</option>
+                              <option value="OBLIGATION_DESACTIVEE">409 · OBLIGATION_DESACTIVEE</option>
+                              <option value="OBLIGATION_BLOQUEE">409 · OBLIGATION_BLOQUEE</option>
+                              <option value="MOTIF_ECART_REQUIS">409 · MOTIF_ECART_REQUIS</option>
+                              <option value="DROIT_FISCAL_REFUSE">403 · DROIT_FISCAL_REFUSE</option>
+                              <option value="OBLIGATION_INTROUVABLE">404 · OBLIGATION_INTROUVABLE</option>
+                              <option value="PAQUET_FISCAL_NON_PUBLIE">422 · PAQUET_FISCAL_NON_PUBLIE</option>
+                              <option value="SERVICE_AMONT_INDISPONIBLE">503 · SERVICE_AMONT_INDISPONIBLE</option>
+                              <option value="reseau">Service injoignable</option>
+                            </select></label>
+                        </div>
+                      </div>
+                    </div><!-- /panel obligations -->
 
                     <!-- ═══════════════ SECTION : PROVISIONS À LA BALANCE ═══════════════
                          ⚠ LE SEUL ENDROIT DU MODULE FISCAL QUI ECRIT. Les cinq autres
@@ -17993,6 +18080,12 @@
       <div class="dp-f" data-dp-ap-corps></div>
       <div class="plan-ap-foot" style="justify-content:flex-end"><button class="btn btn-ghost btn-sm" type="button" data-dp-ap-fermer>Annuler</button><button class="btn btn-primary btn-sm" type="button" data-dp-ap-ok>Enregistrer</button></div></div>
   </div>
+  <!-- Lot 7 (paquet 3) : fenêtres des obligations — visa, écarter, rétablir, lever un point, saisir un montant (FE-112). Hors des pages pour rester visibles. -->
+  <div class="fin-ap" data-ob-ap hidden role="dialog" aria-modal="true" aria-label="Obligation fiscale">
+    <div class="fin-ap-box dp-box"><div class="fin-ap-h"><div><b data-ob-ap-titre></b><small data-ob-ap-sous></small></div></div>
+      <div class="dp-f" data-ob-ap-corps></div>
+      <div class="plan-ap-foot" style="justify-content:flex-end"><button class="btn btn-ghost btn-sm" type="button" data-ob-ap-fermer>Annuler</button><button class="btn btn-primary btn-sm" type="button" data-ob-ap-ok>Enregistrer</button></div></div>
+  </div>
 <script type="application/json" id="lot7p2Data">{"feuilles":[["Page de garde","P","page de garde du formulaire : le livrable v1.3 y écrit la date de clôture (E16) et la dénomination (E20), depuis la liasse et le dossier ; le NIF (F29) est pré-rempli et verrouillé par l'OTR ; « NOM COMMERCIAL » (E23) reste au cabinet (STORY-537, revue C2)"],["FICHE CONDITIONS","C","aucune case de saisie (0 cellule déverrouillée, aucune formule) : texte fixe des conditions de recevabilité"],["FICHE DEPOT","C","aucune case de saisie (0 cellule déverrouillée, 6 formules) : recopie de la page de garde (clôture, dénomination, sigle, adresse, NIF) — elle se remplit quand la page de garde l'est"],["NAEMA","C","aucune case de saisie (0 cellule déverrouillée, aucune formule) : table de référence de la nomenclature d'activités (code, désignation), sans saisie : le code d'activité se saisit dans la fiche d'identification"],["TABLE DES CODES","C","aucune case de saisie (0 cellule déverrouillée, aucune formule) : « NOTE 36 : TABLE DES CODES » — tables de codes de référence (forme juridique, pays…)"],["FICHE IDENTIFICATION 1","P","fiche d'identification : le livrable v1.3 y écrit 9 cases (début d'exercice, fin et durée N-1, dénomination, sigle, visa de l'expert-comptable, signataire) depuis la liasse, le dossier et la demande ; le reste de la fiche (activité, banques, effectifs…) reste au cabinet"],["FICHE IDENTIFICATION 2","N","renseignements divers d'identification (activités, capital, participations) (475 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["FICHE DIRIGEANTS","N","dirigeants et commissaires aux comptes (634 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["BILAN ACTIF","P","état produit par bilan-service (source BILAN_ACTIF) : le livrable v1.3 y écrit brut, amortissements, net et net N-1 ligne par ligne"],["BILAN PASSIF","P","état produit par bilan-service (source BILAN_PASSIF, résultat placé par la cascade) : le livrable v1.3 y écrit N et N-1 ligne par ligne"],["COMPTE DE RESULTAT","P","état produit par bilan-service (source COMPTE_RESULTAT) : le livrable v1.3 y écrit N et N-1 ligne par ligne, charges saisies négatives"],["TFT","P","état produit par bilan-service (source TFT) : le livrable v1.3 y écrit N et N-1 ligne par ligne"],["FR 4","N","« FICHE RÉCAPITULATIVE DES NOTES ANNEXES PRÉSENTÉES » : colonnes A / N/A à cocher note par note (90 cases de saisie) — aucun producteur ne la renseigne, aucune case au gabarit v1.3"],["NOTE 1","A","feuille de la note 1 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 111 case(s) de trame (lignes libres ou imprimées) ; 15 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 2","N","« NOTE 2 : INFORMATIONS OBLIGATOIRES » — note narrative (déclaration de conformité, règles et méthodes, dérogations : texte libre, 121 cases de saisie), hors référentiel par décision user du 2026-09-24 (STORY-559)"],["TABLEAU immo note 3A","A","feuille de la note 3A — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 96 case(s) de trame (lignes libres ou imprimées) ; 25 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["TABLEAU IMMO note 3 B","A","feuille de la note 3B — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 59 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 3C AMORTISSEMENT","A","feuille de la note 3C — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 44 case(s) de trame (lignes libres ou imprimées) ; 13 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 3D","A","feuille de la note 3D — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 36 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 3E","A","feuille de la note 3E — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 24 case(s) de trame (lignes libres ou imprimées) ; 4 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 4","A","feuille de la note 4 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 18 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 27 case(s) de trame (lignes libres ou imprimées) ; 42 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 5","P","feuille de la note 5 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 14 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 4 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 6","P","feuille de la note 6 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 9 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 13 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 7","A","feuille de la note 7 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 24 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 36 case(s) de trame (lignes libres ou imprimées) ; 16 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 8","A","feuille de la note 8 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 22 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 33 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 8A","A","feuille de la note 8A — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 97 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 9","P","feuille de la note 9 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 16 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 10","P","feuille de la note 10 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 14 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 11","P","feuille de la note 11 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 26 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 4 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 12","A","feuille de la note 12 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 90 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 13","A","feuille de la note 13 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 132 case(s) de trame (lignes libres ou imprimées) ; 49 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 14","P","feuille de la note 14 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 28 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 15 A","A","feuille de la note 15A — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 36 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 54 case(s) de trame (lignes libres ou imprimées) ; 6 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 15B","A","feuille de la note 15B — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 24 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 16A","A","feuille de la note 16A — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 56 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 81 case(s) de trame (lignes libres ou imprimées) ; 12 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 16 B","A","feuille de la note 16B — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 26 case(s) de trame (lignes libres ou imprimées) ; 18 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 16 B bis","A","feuille de la note 16Bbis — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 6 case(s) de trame (lignes libres ou imprimées) ; 18 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 16 C","A","feuille de la note 16C — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 113 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 17","A","feuille de la note 17 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 16 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 27 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 18","A","feuille de la note 18 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 28 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 70 case(s) de trame (lignes libres ou imprimées) ; 8 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 19","A","feuille de la note 19 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 36 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 54 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 20","P","feuille de la note 20 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 14 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 21","T","feuille de la note 21 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 43 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 22","T","feuille de la note 22 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 41 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 23 24","P","feuille de les notes 23 et 24 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 38 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 4 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 25","P","feuille de la note 25 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 10 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 26","T","feuille de la note 26 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 17 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 27A","P","feuille de la note 27A — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 12 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 3 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 27 B","A","feuille de la note 27B — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 72 case(s) de trame (lignes libres ou imprimées) ; 100 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 28","A","feuille de la note 28 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 91 case(s) de trame (lignes libres ou imprimées) ; 1 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 29","P","feuille de la note 29 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 36 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 0 case(s) de trame (lignes libres ou imprimées) ; 6 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 30","T","feuille de la note 30 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 91 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 31","A","feuille de la note 31 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 n’y écrit aucune case : 110 case(s) de saisie tracée(s) non sourcée(s), motif à la trace (STORY-701)"],["NOTE 32","A","feuille de la note 32 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 378 case(s) de trame (lignes libres ou imprimées) ; 28 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 33","A","feuille de la note 33 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 468 case(s) de trame (lignes libres ou imprimées) ; 30 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 34","A","feuille de la note 34 — correspondance feuille ↔ note de STORY-559 ; le gabarit v1.3 y écrit 0 case(s) rattachée(s) aux comptes du plan SYSCOHADA révisé et 120 case(s) de trame (lignes libres ou imprimées) ; 2 autre(s) case(s) tracée(s) non sourcée(s) (STORY-701)"],["NOTE 35","N","« NOTE 35 : LISTE DES INFORMATIONS SOCIALES, ENVIRONNEMENTALES ET SOCIÉTALES » (entités de plus de 250 salariés) — note narrative, aucune case de saisie dans le classeur : l'information se fournit hors formulaire ; hors référentiel par décision user du 2026-09-24 (STORY-559)"],["Page de garde Etats Comp","C","aucune case de saisie (0 cellule déverrouillée, 5 formules) : page de garde des états complémentaires, recopiée de la fiche de dépôt"],["Fiche recap Etat Comp","C","aucune case de saisie (0 cellule déverrouillée, aucune formule) : liste fixe des états complémentaires (pages 58 à 86)"],["Résultat fiscal","N","détermination du résultat fiscal (83 cases de saisie) — le référentiel déclare des postes RESULTAT_FISCAL, mais la liasse figée ne les produit pas (bilan, compte de résultat, TFT, notes et contrôles seulement) ; aucune case au gabarit v1.3"],["Détail Autres réintég.","N","détail des autres réintégrations fiscales (400 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Détail Autres déductions","N","détail des autres déductions fiscales (352 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Liquidation IS_IR_MP","N","liquidation de l'IS / IR / minimum de perception (19 cases de saisie) — le référentiel déclare des postes LIQUIDATION_IS, mais la liasse figée ne les produit pas ; aucune case au gabarit v1.3"],["Liquidation DP","N","liquidation de la taxe DP (4009 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Gestion défcits-Crédit et A","N","déficits reportables, crédits d’impôt et amortissements réputés différés (191 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Autres Renseig.","N","prélèvements et retenues à la source, terrains et bâtiments (1901 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P64 Détail des charges","N","état complémentaire : détail des charges (53 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P65 Détail des charges","N","état complémentaire : détail des charges (75 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P66 Détail des charges","N","état complémentaire : détail des charges (80 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P67 Détail des charges","N","état complémentaire : détail des charges (32 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P68 DETAIL PRODUITS","N","état complémentaire : détail des produits (79 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P69 Détail des produits","N","état complémentaire : détail des produits (37 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P70 Transactions intragroupe","N","état complémentaire : transactions avec les entreprises liées (4000 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P71 Analyse coût dachat","N","état complémentaire : analyse du coût d'achat (523 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P72 Analyse Production","N","état complémentaire : analyse de la production (462 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P73 Analyse des Ventes","N","état complémentaire : analyse des ventes (415 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P74 CA Fiscal","N","état complémentaire : chiffre d'affaires fiscal (183 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P75 Capro& DEFIRAS","N","état complémentaire : CAPRO et DEFIRAS (120 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P 76 Détail DETTES FISCALES","N","état complémentaire : détail des dettes fiscales (140 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P77 Détail CREANCES FISCALES","N","état complémentaire : détail des créances fiscales (140 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P78 Détail CREANCES CLIENTS ET","N","état complémentaire : détail des créances clients (185 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P79 TVA","N","état complémentaire : TVA (65 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P80 TVM","N","état complémentaire : TVM (6354 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P81 Provision const.","N","état complémentaire : provisions constituées (7999 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P82 Trait. fiscal des prov.","N","état complémentaire : traitement fiscal des provisions (36 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Liste principaux clients","N","liste des principaux clients (847 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Liste principaux fournisseurs","N","liste des principaux fournisseurs (858 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P85 Tableau des amort.","N","état complémentaire : tableau des amortissements (2251 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["P86 Autres Renseignements Compl","N","état complémentaire : autres renseignements (20 cases de saisie) — matière hors liasse : ni la liasse figée de bilan-service ni le dossier ne la portent, aucune case au gabarit v1.3"],["Balance (Optionnel)","N","balance jointe au dépôt, facultative (105 cases de saisie) — aucune case au gabarit v1.3 ; sa production est STORY-555"],["Contôle de Cohérence","C","aucune case de saisie (0 cellule déverrouillée, 296 formules) : le classeur juge ce qu'on y dépose : 8 contrôles intermontants (E12 à E36) et la cotation « si nombre » des postes — cf. `controles`"],["Type de Contôles","C","aucune case de saisie (0 cellule déverrouillée, 154 formules) : synthèse 0/1 des 8 contrôles intermontants (B13 à B20) et de la cotation des valeurs numériques — cf. `controles`"]],"controles":[[1,"Contrôle Egalité Actif du Bilan et Passif du Bilan en N","EQUILIBRE_BILAN"],[2,"Contrôle Egalité Résultat Net Comptable au CR et au Passif du Bilan en N","RESULTAT_NON_AFFECTE"],[3,"Contrôle Egalité Résultat Net Comptable au CR & au  Détermination Résultat Fiscal",null],[4,"Contrôle Egalité Résultat Fiscal au Détermination Résultat Fiscal & au Liquidation IR",null],[5,"Contrôle Egalité CA (CR) et CA (Liquidation IS_IR_MP)",null],[6,"Contrôle Egalité CA (Liquidation IS_IR_MP) et CA (Liquidation DP)",null],[7,"Equivalence Si un Numéro de Compte Bancaire est renseigné",null],[8,"Equivalence Effectifs Numéro de Compte Bancaire renseigné et Identité banque",null]],"paquet":{"pays":"TG","etat":"DSF","version":"1.3","checksum":"sha256:daababcc483587b11166466dc03beac28ecb43f915f466cb3404ee8ffc87147a"}}</script>
   <!-- FE-158 : confirmation du choix de la tenue (une phrase, le caractère définitif dit). -->
   <div class="fin-ap" data-tn-ap hidden role="alertdialog" aria-modal="true" aria-label="Confirmer la tenue de l’exercice">
@@ -25379,6 +25472,460 @@
       document.addEventListener('input', function (ev) { var t = ev.target; if (t.matches && t.matches('[data-cl-in]')) { if (t.dataset.clIn === 'sn') K.sign.nom = t.value; else K.sign.qualite = t.value; } });
       window.__lot7p2 = function () { return { X: X, D: D, K: K, EF: EF }; };
       exRendre(); dpRendre(); clRendre();
+    })();
+
+
+    /* ═══════════════ LOT 7 (paquet 3) · FE-112 · Les obligations fiscales de l'exercice ═══════════════
+       Section « Obligations » du module Impôts et taxes (Atelier). Un geste principal en tête, le lot en un clic,
+       l'étape suivante proposée ; montants, base et points à régler restent derrière « Détails ».
+       Les onze états, les droits par cible et les refus viennent de fiscal-service (STORY-306, 320, 322, 323, 326, 328, 563) ;
+       les codes de refus ne s'affichent jamais : l'écran dit une phrase et propose le geste suivant.
+       Dossier : Ets Kossi Distribution, exercice 2025, date du jour 22/07/2026 (comme l'onglet Dépôt). Seules les dates
+       de la DSF (30/04) et des acomptes (31/01, 31/05, 31/07, 31/10) sont celles du paquet (STORY-316) ; les autres dates
+       et tous les montants sont illustratifs. */
+    (function () {
+      var root = document.querySelector('[data-ob-root]'), ap = document.querySelector('[data-ob-ap]');
+      if (!root || !ap) return;
+      function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+      function ico(p) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">' + p + '</svg>'; }
+      var IC = {
+        warn: ico('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/>'),
+        ok: ico('<path d="M20 6 9 17l-5-5"/>'),
+        lock: ico('<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>')
+      };
+      var DOS = 'Ets Kossi Distribution', EXO = '2025', AUJ = '22/07/2026', TODAY = '2026-07-22';
+      var CYC = ['A_PREPARER', 'EN_PREPARATION', 'A_CONTROLER', 'A_VALIDER', 'VALIDEE', 'A_DEPOSER', 'DEPOSEE', 'ACCUSE_RECU', 'A_PAYER', 'PAYEE', 'CLOTUREE'];
+      var LIB = { A_PREPARER: 'À préparer', EN_PREPARATION: 'En préparation', A_CONTROLER: 'À contrôler', A_VALIDER: 'À valider', VALIDEE: 'Validée', A_DEPOSER: 'À déposer', DEPOSEE: 'Déposée', ACCUSE_RECU: 'Accusé reçu', A_PAYER: 'À payer', PAYEE: 'Payée', CLOTUREE: 'Clôturée' };
+      /* le droit que chaque ÉTAT D'ARRIVÉE exige (STORY-323, D-323-8) */
+      var DROIT = { EN_PREPARATION: 'preparer', A_CONTROLER: 'preparer', A_VALIDER: 'valider', VALIDEE: 'valider', A_DEPOSER: 'preparer', DEPOSEE: 'deposer', ACCUSE_RECU: 'deposer', A_PAYER: 'preparer', PAYEE: 'preparer', CLOTUREE: 'valider' };
+      var VERBE = { EN_PREPARATION: 'Prendre en charge', A_CONTROLER: 'Envoyer au contrôle', A_VALIDER: 'Passer à l’associé', VALIDEE: 'Donner mon visa', A_DEPOSER: 'Préparer le dépôt', DEPOSEE: 'Noter le dépôt', ACCUSE_RECU: 'Noter l’accusé', A_PAYER: 'Passer au paiement', PAYEE: 'Noter le paiement', CLOTUREE: 'Clôturer' };
+      var ATTEND = { EN_PREPARATION: 'à prendre en charge', A_CONTROLER: 'prête pour le contrôle', A_VALIDER: 'prête à passer à l’associé', VALIDEE: 'attend le visa de l’associé', A_DEPOSER: 'prête pour la préparation du dépôt', DEPOSEE: 'à noter comme déposée', ACCUSE_RECU: 'en attente de son accusé', A_PAYER: 'à passer au paiement', PAYEE: 'à noter comme payée', CLOTUREE: 'à clôturer' };
+      var MOMENT = { VALIDEE: 'pret', A_DEPOSER: 'pret', DEPOSEE: 'transmise', ACCUSE_RECU: 'acceptee' };
+      var REFUS = {
+        TRANSITION_CONCURRENTE: 'Quelqu’un a fait avancer cette obligation entre-temps. La liste a été relue : vérifiez avant de recommencer.',
+        TRANSITION_NON_PREVUE: 'Cette étape n’est pas la suivante : le cycle ne saute rien. La liste a été relue.',
+        VISA_REQUIS: 'Rien ne se dépose sans le visa d’un associé.',
+        ANOMALIE_BLOQUANTE: 'Un point bloquant doit d’abord être réglé ou levé en motivant.',
+        OBLIGATION_DESACTIVEE: 'Cette obligation est écartée : elle ne progresse pas. Rétablissez-la d’abord.',
+        OBLIGATION_BLOQUEE: 'Le redevable est bloqué : réglez d’abord le manque indiqué sur la ligne.',
+        MOTIF_ECART_REQUIS: 'Un écart entre deux montants n’a pas de motif : ajoutez-le avant de continuer.',
+        DROIT_FISCAL_REFUSE: 'Votre rôle ne permet pas ce geste. Demandez-le à un associé. Si vos droits viennent de changer, reconnectez-vous : ils mettent jusqu’à 15 minutes à se mettre à jour.',
+        OBLIGATION_INTROUVABLE: 'Cette obligation n’est pas dans votre portée.',
+        PAQUET_FISCAL_NON_PUBLIE: 'Les règles fiscales de ce pays ne sont pas encore publiées : rien n’a été calculé.',
+        SERVICE_AMONT_INDISPONIBLE: 'Un service ne répond pas. Rien n’a été enregistré : réessayez dans un instant.',
+        reseau: 'Le service ne répond pas. Rien n’a été enregistré : réessayez dans un instant.',
+        echu: 'Votre abonnement est échu : le dossier reste consultable, mais rien ne s’enregistre.'
+      };
+      function sel(attr) { var s = document.querySelector('[' + attr + ']'); return s ? s.value : ''; }
+      function selReset(attr) { var s = document.querySelector('[' + attr + ']'); if (s) s.value = ''; }
+      function fr(i) { var p = String(i || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : ''; }
+      function nb(i) { return String(Math.round(i)).replace(/\B(?=(\d{3})+(?!\d))/g, String.fromCharCode(8239)) + String.fromCharCode(160) + 'F'; }
+      function jours(iso) { var a = iso.split('-'), b = TODAY.split('-'); return Math.round((Date.UTC(+a[0], +a[1] - 1, +a[2]) - Date.UTC(+b[0], +b[1] - 1, +b[2])) / 86400000); }
+      function idx(st) { return CYC.indexOf(st); }
+      function suivant(st) { var i = idx(st); return i < CYC.length - 1 ? CYC[i + 1] : null; }
+
+      /* ── le jeu d'essai : onze obligations de l'exercice ── */
+      function ano(code, grav, expl, action, bloque, levable) { return { code: code, gravite: grav, etat: 'OUVERTE', explication: expl, action: action, bloque: bloque, levable: levable, levee: null }; }
+      function jeu() {
+        return [
+          { id: 'dsf', court: 'DSF ' + EXO, lib: 'Déclaration statistique et fiscale ' + EXO, ech: '2026-04-30', st: 'A_VALIDER', liasse: true, active: true, red: 'L’entreprise',
+            pourquoi: 'Le dossier est une société au régime réel : la DSF est due chaque année, au plus tard le 30 avril.', canal: 'téléservice de l’administration', montants: null, visa: null, anomalies: [], blocage: null },
+          { id: 'irpp', court: 'IRPP de Kossi Mensah', lib: 'Déclaration d’IRPP de Kossi Mensah (gérant)', ech: '2026-03-31', st: 'A_PREPARER', active: true, red: 'Kossi Mensah, personne physique',
+            pourquoi: 'Le gérant est imposable à titre personnel sur sa rémunération.', canal: 'téléservice de l’administration', montants: null, visa: null, anomalies: [],
+            blocage: { motif: 'Le mandat de Kossi Mensah n’est pas attesté.', manque: 'Il faut déposer le mandat signé dans la fiche de cette personne.' } },
+          { id: 'tvaj', court: 'TVA juin 2026', lib: 'TVA de juin 2026', ech: '2026-07-15', st: 'A_VALIDER', active: true, red: 'L’entreprise', pourquoi: 'Le dossier est assujetti à la TVA : une déclaration par mois.', canal: 'téléservice de l’administration',
+            montants: { calcule: 1482000, origine: 'MOTEUR', declare: null, paye: null }, visa: null, coh: 'TVA',
+            anomalies: [ano('BASE_PROVISOIRE', 'BLOQUANTE', 'Les montants reposent sur une balance encore en brouillon (version 3).', 'Validez la balance de l’exercice, ou levez ce point en motivant de poursuivre sur une balance provisoire.', ['VALIDEE'], true)], blocage: null },
+          { id: 'ac3', court: 'Acompte d’impôt n° 3', lib: 'Acompte d’impôt sur les sociétés n° 3', ech: '2026-07-31', st: 'A_PREPARER', active: true, red: 'L’entreprise', pourquoi: 'Une société au réel verse quatre acomptes : 31/01, 31/05, 31/07 et 31/10.', canal: 'téléservice de l’administration',
+            montants: { calcule: 612500, origine: 'MOTEUR', declare: null, paye: null }, visa: null, coh: 'IS_ACOMPTE', anomalies: [], blocage: null },
+          { id: 'tvajl', court: 'TVA juillet 2026', lib: 'TVA de juillet 2026', ech: '2026-08-15', st: 'A_PREPARER', active: true, red: 'L’entreprise', pourquoi: 'Le dossier est assujetti à la TVA : une déclaration par mois.', canal: 'téléservice de l’administration',
+            montants: { calcule: null, origine: null, declare: null, paye: null }, visa: null, coh: 'TVA', anomalies: [], blocage: null },
+          { id: 'ac4', court: 'Acompte d’impôt n° 4', lib: 'Acompte d’impôt sur les sociétés n° 4', ech: '2026-10-31', st: 'A_PREPARER', active: true, red: 'L’entreprise', pourquoi: 'Une société au réel verse quatre acomptes : 31/01, 31/05, 31/07 et 31/10.', canal: 'téléservice de l’administration',
+            montants: { calcule: 612500, origine: 'MOTEUR', declare: null, paye: null }, visa: null, coh: 'IS_ACOMPTE', anomalies: [], blocage: null },
+          { id: 'cnss', court: 'Cotisations CNSS de juin', lib: 'Cotisations CNSS de juin 2026', ech: null, motifNonDatee: 'Le paquet fiscal ne publie pas encore cette date.', st: 'A_PREPARER', active: true, red: 'L’entreprise', pourquoi: 'Le dossier emploie du personnel déclaré à la CNSS.', canal: 'portail de la CNSS',
+            montants: { calcule: null, origine: null, declare: null, paye: null }, aSaisir: true, visa: null, anomalies: [], blocage: null },
+          { id: 'rsh', court: 'Retenue sur salaires', lib: 'Retenue sur salaires de juillet 2026', ech: '2026-07-15', st: 'A_PREPARER', active: false, red: 'L’entreprise', pourquoi: 'Une retenue est due quand le dossier verse des salaires.', canal: 'téléservice de l’administration', montants: null, visa: null, anomalies: [], blocage: null,
+            desactivation: { motif: 'Le client n’emploie aucun salarié : la taxe ne s’applique pas.', par: 'Awa Diallo', le: '18/06/2026' } },
+          { id: 'ac1', court: 'Acompte d’impôt n° 1', lib: 'Acompte d’impôt sur les sociétés n° 1', ech: '2026-01-31', st: 'CLOTUREE', active: true, red: 'L’entreprise', pourquoi: 'Une société au réel verse quatre acomptes.', canal: 'téléservice de l’administration',
+            montants: { calcule: 612500, origine: 'MOTEUR', declare: 612500, paye: 612500 }, visa: { nom: 'Awa Diallo', le: '28/01/2026' }, anomalies: [], blocage: null },
+          { id: 'ac2', court: 'Acompte d’impôt n° 2', lib: 'Acompte d’impôt sur les sociétés n° 2', ech: '2026-05-31', st: 'CLOTUREE', active: true, red: 'L’entreprise', pourquoi: 'Une société au réel verse quatre acomptes.', canal: 'téléservice de l’administration',
+            montants: { calcule: 612500, origine: 'MOTEUR', declare: 612500, paye: 612500 }, visa: { nom: 'Awa Diallo', le: '27/05/2026' }, anomalies: [], blocage: null },
+          { id: 'tvam', court: 'TVA mai 2026', lib: 'TVA de mai 2026', ech: '2026-06-15', st: 'CLOTUREE', active: true, red: 'L’entreprise', pourquoi: 'Le dossier est assujetti à la TVA : une déclaration par mois.', canal: 'téléservice de l’administration',
+            montants: { calcule: 1395000, origine: 'MOTEUR', declare: 1395000, paye: 1395000 }, visa: { nom: 'Awa Diallo', le: '12/06/2026' }, anomalies: [], blocage: null }
+        ];
+      }
+      var O = { mode: 'normal', role: 'associe', rows: jeu(), notice: null, err: null, suite: null, open: {}, fold: {}, busy: false, sheet: null, derive: null };
+      function has(d) { return O.role === 'associe' ? true : d === 'preparer'; }
+      function lectureSeule() { return O.mode === 'echu'; }
+      function ouvertes(r) { return r.anomalies.filter(function (a) { return a.etat === 'OUVERTE'; }); }
+      function bloquantePourSuivante(r) {
+        var n = suivant(r.st);
+        return ouvertes(r).filter(function (a) { return a.gravite === 'BLOQUANTE' && a.bloque.indexOf(n) >= 0; })[0] || null;
+      }
+      function retard(r) { return r.active && r.ech && idx(r.st) < idx('DEPOSEE') && jours(r.ech) < 0; }
+      /* le geste de la ligne : une seule chose à faire, ou une raison claire de ne pas pouvoir */
+      function geste(r) {
+        if (!r.active) return { k: 'ecartee' };
+        var n = suivant(r.st);
+        if (!n) return { k: 'fini' };
+        if (r.blocage) return { k: 'bloque' };
+        if (r.liasse && idx(r.st) >= idx('A_DEPOSER')) return { k: 'depot', label: 'Ouvrir le dépôt' };
+        if (bloquantePourSuivante(r)) return { k: 'lever', label: 'Régler le point' };
+        if (!has(DROIT[n])) return { k: 'attente', vers: n };
+        return { k: 'transition', vers: n, label: VERBE[n] };
+      }
+      function groupe(r) {
+        if (!r.active) return 'ecartees';
+        if (r.st === 'CLOTUREE') return 'terminees';
+        if (!r.ech) return 'sansdate';
+        return retard(r) ? 'retard' : 'avenir';
+      }
+      function pill(st) {
+        var i = idx(st), c = i >= idx('DEPOSEE') ? 'done' : (st === 'A_CONTROLER' || st === 'A_VALIDER' || st === 'A_DEPOSER' || st === 'A_PAYER') ? 'todo' : '';
+        return '<span class="dp-pill ' + c + '">' + (c === 'done' ? IC.ok + ' ' : '') + LIB[st] + '</span>';
+      }
+      function seg(st) {
+        var i = idx(st), h = '<span class="ob-seg" role="img" aria-label="Étape ' + (i + 1) + ' sur 11">';
+        for (var k = 0; k < 11; k++) h += '<i class="' + (k < i ? 'on' : k === i ? 'now' : '') + '"></i>';
+        return h + '</span>';
+      }
+      function echeanceTxt(r) {
+        if (!r.active) return 'Écartée le ' + r.desactivation.le + ' par ' + esc(r.desactivation.par) + ' : ' + esc(r.desactivation.motif);
+        if (!r.ech) return 'Date à confirmer : ' + esc(r.motifNonDatee);
+        var j = jours(r.ech);
+        if (r.st === 'CLOTUREE') return 'Échéance du ' + fr(r.ech) + ' · clôturée';
+        if (idx(r.st) >= idx('DEPOSEE')) return 'Échéance du ' + fr(r.ech) + ' · déposée';
+        if (j < 0) return 'Échéance du ' + fr(r.ech) + ' · ' + (-j) + ' jour' + (-j > 1 ? 's' : '') + ' de retard';
+        if (j === 0) return 'Échéance aujourd’hui';
+        return 'Échéance du ' + fr(r.ech) + ' · dans ' + j + ' jour' + (j > 1 ? 's' : '');
+      }
+      /* le lot : tout ce que je peux faire avancer d'un cran, sauf le visa (il engage le cabinet, il se donne un à un) */
+      function lotDe() { return O.rows.filter(function (r) { var g = geste(r); return g.k === 'transition' && g.vers !== 'VALIDEE'; }); }
+      function dis() { return lectureSeule() ? ' disabled' : ''; }
+
+      /* ── une ligne ── */
+      function ligne(r) {
+        var g = geste(r), late = retard(r), h = '<li class="ob-row' + (late ? ' late' : '') + (!r.active ? ' off' : '') + '" data-ob-id="' + r.id + '">';
+        h += '<div class="ob-top"><div class="ob-t"><b>' + esc(r.lib) + '</b><small' + (late ? ' class="late"' : '') + '>' + echeanceTxt(r) + '</small></div>';
+        if (r.active) h += pill(r.st);
+        h += '<div class="ob-act">';
+        if (g.k === 'transition') h += '<button class="btn btn-ghost btn-sm" type="button" data-ob-act="go" data-ob-id="' + r.id + '"' + dis() + '>' + g.label + '</button>';
+        else if (g.k === 'depot') h += '<button class="btn btn-ghost btn-sm" type="button" data-ob-act="depot" data-ob-id="' + r.id + '">' + g.label + '</button>';
+        else if (g.k === 'lever') h += '<button class="btn btn-ghost btn-sm" type="button" data-ob-act="lever" data-ob-id="' + r.id + '">' + g.label + '</button>';
+        else if (g.k === 'attente') h += '<span class="hint">' + IC.lock + ' Un associé doit passer cette étape.</span>';
+        else if (g.k === 'bloque') h += '<span class="dp-pill ko">' + IC.warn + ' Bloquée</span>';
+        else if (g.k === 'ecartee') h += '<button class="btn btn-ghost btn-sm" type="button" data-ob-act="retablir" data-ob-id="' + r.id + '"' + (has('valider') && !lectureSeule() ? '' : ' disabled') + '>Rétablir</button>' + (has('valider') ? '' : '<span class="hint">Réservé à un associé.</span>');
+        h += '</div></div>';
+        if (r.active) {
+          h += '<div class="ob-act">' + seg(r.st);
+          if (g.k === 'bloque') h += '<span class="hint">' + esc(r.blocage.motif) + ' ' + esc(r.blocage.manque) + '</span><button class="dp-link" type="button" data-ob-act="fiche" data-ob-id="' + r.id + '">Ouvrir la fiche de cette personne</button>';
+          else if (g.k === 'lever') h += '<span class="dp-pill ko">' + IC.warn + ' Un point bloque le visa</span>';
+          else if (ouvertes(r).length) h += '<span class="dp-pill todo">' + IC.warn + ' ' + ouvertes(r).length + ' point à lire</span>';
+          h += '<button class="dp-link" type="button" data-ob-act="det" data-ob-id="' + r.id + '" aria-expanded="' + !!O.open[r.id] + '">' + (O.open[r.id] ? 'Masquer les détails' : 'Détails') + '</button></div>';
+        } else {
+          h += '<div class="ob-act"><span class="hint">Une mise à jour des obligations ne la rétablit jamais : seul un associé peut le faire, ici.</span><button class="dp-link" type="button" data-ob-act="det" data-ob-id="' + r.id + '" aria-expanded="' + !!O.open[r.id] + '">' + (O.open[r.id] ? 'Masquer les détails' : 'Détails') + '</button></div>';
+        }
+        if (r.err) h += '<div class="fin-notice ko" role="alert">' + IC.warn + '<span>' + esc(r.err) + '</span></div>';
+        if (O.open[r.id]) h += details(r);
+        return h + '</li>';
+      }
+      function details(r) {
+        var h = '<div class="ob-more">';
+        h += '<table class="dp-tbl"><tbody>'
+          + '<tr><td class="k">Pourquoi elle s’applique</td><td>' + esc(r.pourquoi) + '</td></tr>'
+          + '<tr><td class="k">Pour qui</td><td>' + esc(r.red) + '</td></tr>'
+          + '<tr><td class="k">Date limite</td><td>' + (r.ech ? fr(r.ech) + ' <span class="dp-sub">lue dans le paquet fiscal Togo 2026, jamais écrite dans le code</span>' : 'À confirmer : ' + esc(r.motifNonDatee)) + '</td></tr>'
+          + '<tr><td class="k">Où la déposer</td><td>' + esc(r.canal) + '</td></tr>'
+          + '<tr><td class="k">Où elle en est</td><td>' + LIB[r.st] + (r.visa ? ' · visa de ' + esc(r.visa.nom) + ' le ' + r.visa.le : (idx(r.st) >= idx('VALIDEE') ? ' · visa de l’associé posé' : ' · pas encore visée')) + '</td></tr>';
+        if (r.active && suivant(r.st)) h += '<tr><td class="k">Étape suivante</td><td>' + LIB[suivant(r.st)] + ' · ' + (has(DROIT[suivant(r.st)]) ? 'vous pouvez la passer' : 'réservée à un associé') + '</td></tr>';
+        h += '</tbody></table>';
+        if (r.montants) {
+          var m = r.montants;
+          h += '<div class="ob-tri"><div>Calculé<b>' + (m.calcule == null ? (r.aSaisir ? 'à saisir' : 'pas encore') : nb(m.calcule)) + '</b>' + (m.calcule != null ? (m.origine === 'SAISI' ? 'saisi par le cabinet' : 'par Prospera, depuis la balance') : r.aSaisir ? 'Prospera ne calcule pas cette taxe' : 'le mois n’est pas fini') + '</div>'
+            + '<div>Déclaré<b>' + (m.declare == null ? '—' : nb(m.declare)) + '</b>' + (m.declare == null ? 'pas encore déclaré' : 'dans la déclaration') + '</div>'
+            + '<div>Payé<b>' + (m.paye == null ? '—' : nb(m.paye)) + '</b>' + (m.paye == null ? 'pas encore payé' : 'à l’administration') + '</div></div>';
+          if (m.declare != null && m.calcule != null && m.declare !== m.calcule) h += '<div class="fin-notice warn">' + IC.warn + '<span>Le montant déclaré diffère du montant calculé : l’écart doit être expliqué avant le visa.</span></div>';
+          if (r.aSaisir && m.calcule == null) h += '<div class="ob-act"><button class="btn btn-ghost btn-sm" type="button" data-ob-act="saisir" data-ob-id="' + r.id + '"' + (has('preparer') && !lectureSeule() ? '' : ' disabled') + '>Saisir le montant calculé</button><span class="hint">Prospera ne calcule pas cette taxe : saisissez le montant que vous avez calculé.</span></div>';
+        }
+        ouvertes(r).concat(r.anomalies.filter(function (a) { return a.etat === 'LEVEE'; })).forEach(function (a) {
+          h += '<div class="fin-notice ' + (a.etat === 'LEVEE' ? '' : a.gravite === 'BLOQUANTE' ? 'ko' : 'warn') + '">' + IC.warn + '<span><b>' + (a.etat === 'LEVEE' ? 'Point levé le ' + a.levee.le + ' : ' : a.gravite === 'BLOQUANTE' ? 'Point bloquant : ' : 'À lire : ') + '</b>' + esc(a.explication) + ' ' + (a.etat === 'LEVEE' ? 'Motif : « ' + esc(a.levee.motif) + ' »' : esc(a.action)) + '</span></div>';
+        });
+        if (r.active) {
+          h += '<div class="ob-act">';
+          h += '<button class="btn btn-ghost btn-sm" type="button" data-ob-act="bases" data-ob-id="' + r.id + '"' + (has('preparer') && !lectureSeule() ? '' : ' disabled') + '>Revérifier la balance</button>';
+          if (r.coh) h += '<button class="btn btn-ghost btn-sm" type="button" data-ob-act="coherence" data-ob-id="' + r.id + '"' + (has('preparer') && !lectureSeule() ? '' : ' disabled') + '>Comparer avec la comptabilité</button>';
+          if (r.st !== 'CLOTUREE') h += '<button class="btn btn-ghost btn-sm" type="button" data-ob-act="ecarter" data-ob-id="' + r.id + '"' + (has('valider') && !lectureSeule() ? '' : ' disabled') + '>Écarter cette obligation</button>' + (has('valider') ? '' : '<span class="hint">Réservé à un associé.</span>');
+          h += '</div>';
+        }
+        return h + '</div>';
+      }
+
+      /* ── l'écran ── */
+      function rendre() {
+        var h = '<div class="dp-head"><div><h3>Ce qu’il y a à déclarer</h3><p>' + esc(DOS) + ' · exercice ' + EXO + ' · au ' + AUJ + '</p></div><span class="grow"></span>';
+        if (O.mode !== 'horsportee') h += '<button class="btn btn-ghost btn-sm" type="button" data-ob-act="deriver"' + (has('preparer') && !lectureSeule() ? '' : ' disabled') + '>Mettre à jour la liste</button>';
+        h += '</div>';
+        if (lectureSeule()) h += '<div class="fin-notice warn">' + IC.lock + '<span><b>Lecture seule.</b> Votre abonnement est échu : vous pouvez tout lire, rien ne s’enregistre.</span></div>';
+        if (O.err) h += '<div class="fin-notice ko" role="alert">' + IC.warn + '<span>' + esc(O.err) + '</span></div>';
+        if (O.notice) h += '<div class="fin-notice okk" role="status">' + IC.ok + '<span>' + O.notice + '</span></div>';
+        if (O.suite) h += '<div class="tn-next"><p><b>' + esc(O.suite.txt) + '</b></p><button class="btn btn-primary" type="button" data-ob-act="depot" data-ob-id="' + O.suite.id + '">' + esc(O.suite.btn) + '</button></div>';
+        if (O.mode === 'horsportee') {
+          h += '<div class="dp-card ko"><p class="dp-big">Ce dossier n’est pas dans votre portefeuille.</p><p class="dp-sub">Vous ne voyez que les dossiers dont vous êtes responsable ou contributeur.</p>'
+            + '<div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-ob-act="portefeuille">Retour à mes dossiers</button></div></div>';
+          root.innerHTML = h; return;
+        }
+        if (O.mode === 'vide') {
+          h += '<div class="dp-card"><p class="dp-big">Aucune obligation n’est encore calculée pour cet exercice.</p><p class="dp-sub">Prospera les déduit du type d’entreprise et du régime fiscal du dossier.</p>'
+            + '<div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-ob-act="deriver"' + (has('preparer') && !lectureSeule() ? '' : ' disabled') + '>Calculer les obligations</button>'
+            + (has('preparer') ? '' : '<span class="hint">Votre rôle ne permet pas de les calculer.</span>') + '</div></div>';
+          root.innerHTML = h; return;
+        }
+        var act = O.rows.filter(function (r) { return r.active && r.st !== 'CLOTUREE'; }), nRet = act.filter(retard).length;
+        var elig = lotDe();
+        var memeVerbe = elig.length > 0 && elig.every(function (r) { return geste(r).vers === geste(elig[0]).vers; });
+        var prem = null;
+        ['retard', 'avenir', 'sansdate'].forEach(function (gr) { O.rows.forEach(function (r) { if (!prem && groupe(r) === gr && ['transition', 'depot', 'lever'].indexOf(geste(r).k) >= 0) prem = r; }); });
+        var attente = O.rows.filter(function (r) { return r.active && geste(r).k === 'attente' && retard(r); })[0];
+        /* la carte du geste principal */
+        h += '<div class="dp-card' + (prem && retard(prem) ? ' warn' : '') + '">';
+        if (prem) {
+          var gp = geste(prem);
+          h += '<div>' + pill(prem.st) + '</div>';
+          if (gp.k === 'transition') h += '<p class="dp-big">' + esc(prem.court) + ' : ' + ATTEND[gp.vers] + '.</p>';
+          else if (gp.k === 'depot') h += '<p class="dp-big">' + esc(prem.court) + ' est prête : il reste à la déposer.</p>';
+          else h += '<p class="dp-big">' + esc(prem.court) + ' : un point doit d’abord être réglé.</p>';
+          h += '<p class="dp-sub">' + echeanceTxt(prem) + '.</p>';
+          h += '<div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-ob-act="' + (gp.k === 'transition' ? 'go' : gp.k) + '" data-ob-id="' + prem.id + '"' + (gp.k === 'transition' ? dis() : '') + '>' + gp.label + '</button>';
+          if (elig.length > 1) h += '<button class="btn btn-ghost dp-lg" type="button" data-ob-act="lot"' + dis() + '>' + (memeVerbe ? VERBE[geste(elig[0]).vers] + ' les ' : 'Faire avancer d’un cran les ') + elig.length + ' obligations</button>' + (O.rows.some(function (r) { var g = geste(r); return g.k === 'transition' && g.vers === 'VALIDEE'; }) ? '<span class="hint">Un visa se donne toujours un à un.</span>' : '');
+          h += '</div>';
+          if (attente && attente !== prem) h += '<p class="dp-sub">' + esc(attente.court) + ' attend le visa d’un associé : ' + 'vous ne pouvez pas le donner.</p>';
+        } else {
+          h += '<p class="dp-big">Rien ne demande votre geste pour le moment.</p><p class="dp-sub">' + (attente ? esc(attente.court) + ' attend le visa d’un associé.' : 'Tout ce que vous pouvez faire avancer est à jour.') + '</p>';
+        }
+        h += '<p class="dp-sub">' + act.length + ' obligation' + (act.length > 1 ? 's' : '') + ' ouverte' + (act.length > 1 ? 's' : '') + (nRet ? ', dont ' + nRet + ' en retard' : '') + '.</p></div>';
+        /* les groupes */
+        var G = [['retard', 'En retard'], ['avenir', 'À venir'], ['sansdate', 'Sans date']];
+        G.forEach(function (g) {
+          var l = O.rows.filter(function (r) { return groupe(r) === g[0]; });
+          if (!l.length) return;
+          h += '<p class="ob-grp' + (g[0] === 'retard' ? ' late' : '') + '">' + g[1] + ' · ' + l.length + '</p><ul class="ob-list">' + l.map(ligne).join('') + '</ul>';
+        });
+        [['terminees', 'Terminées'], ['ecartees', 'Écartées']].forEach(function (g) {
+          var l = O.rows.filter(function (r) { return groupe(r) === g[0]; });
+          if (!l.length) return;
+          h += '<details class="ob-fold" data-ob-fold="' + g[0] + '"' + (O.fold[g[0]] ? ' open' : '') + '><summary>' + g[1] + ' · ' + l.length + '</summary><ul class="ob-list">' + l.map(ligne).join('') + '</ul></details>';
+        });
+        /* détails du calcul de la liste */
+        if (O.derive) {
+          var d = O.derive;
+          h += '<details class="tn-more" open><summary>Détails de la dernière mise à jour</summary><table class="dp-tbl"><tbody>'
+            + '<tr><td class="k">Nouvelles</td><td>' + d.creees + '</td></tr><tr><td class="k">Mises à jour</td><td>' + d.actualisees + '</td></tr>'
+            + '<tr><td class="k">Sans date</td><td>' + d.nonDerivables + ' : le paquet fiscal ne publie pas leur date.</td></tr>'
+            + '<tr><td class="k">Implantations non déduites</td><td>' + d.implantationsNonDerivees + '</td></tr>'
+            + '<tr><td class="k">Régimes dérogatoires</td><td>' + d.derogations + '</td></tr>'
+            + '<tr><td class="k">Personnes sans obligation</td><td>' + d.redevablesSansObligation + '</td></tr>'
+            + '<tr><td class="k">Écartées, non rétablies</td><td>' + d.ecartees + '</td></tr></tbody></table></details>';
+        }
+        h += '<div class="fin-notice">' + IC.ok + '<span>Les échéances de tout le cabinet sont dans le calendrier. Ici : ce dossier seul.</span></div>';
+        root.innerHTML = h;
+      }
+
+      /* ── les gestes ── */
+      function phraseRefus(c) { return REFUS[c] || c; }
+      function relire() { /* après un 409 : la liste est relue, rien ne change dans la démo */ }
+      function appliquer(r, vers) {
+        r.st = vers; r.err = null;
+        if (vers === 'VALIDEE') r.visa = { nom: 'Awa Diallo', le: AUJ };
+      }
+      function transitionner(r, vers, code) {
+        if (lectureSeule()) return { ok: false, c: 'echu' };
+        if (code) return { ok: false, c: code };
+        if (vers === 'VALIDEE' && bloquantePourSuivante(r)) return { ok: false, c: 'ANOMALIE_BLOQUANTE' };
+        appliquer(r, vers); return { ok: true };
+      }
+      function one(id) { return O.rows.filter(function (r) { return r.id === id; })[0]; }
+      function avancer(id) {
+        var r = one(id), g = geste(r); if (!r || g.k !== 'transition') return;
+        var code = sel('data-ob-rig'); selReset('data-ob-rig');
+        O.err = null; O.notice = null; O.suite = null; O.busy = true; rendre();
+        setTimeout(function () {
+          O.busy = false;
+          var res = transitionner(r, g.vers, code);
+          if (!res.ok) { r.err = phraseRefus(res.c); O.err = null; relire(); }
+          else {
+            var n = suivant(r.st);
+            O.notice = '<b>' + esc(r.court) + '</b> est maintenant « ' + LIB[r.st] + ' ».' + (r.visa && r.st === 'VALIDEE' ? ' Visa de ' + esc(r.visa.nom) + ' gardé.' : '') + (n ? ' Prochaine étape : ' + VERBE[n].toLowerCase() + '.' : '');
+            if (r.liasse && r.st === 'A_DEPOSER') O.suite = { id: r.id, txt: 'Étape suivante : déposer la liasse auprès de l’administration.', btn: 'Ouvrir le dépôt' };
+            notify('success', 'Obligation mise à jour', esc(r.court) + ' : ' + LIB[r.st] + '.');
+          }
+          rendre();
+        }, 600);
+      }
+      function lot() {
+        var l = lotDe();
+        if (!l.length) return;
+        var code = sel('data-ob-rig'); selReset('data-ob-rig');
+        O.err = null; O.notice = null; O.suite = null; rendre();
+        setTimeout(function () {
+          var fait = [], refus = [];
+          l.forEach(function (r, i) {
+            var g = geste(r), res = transitionner(r, g.vers, i === 0 ? code : '');
+            if (res.ok) { fait.push(r); r.err = null; } else { r.err = phraseRefus(res.c); refus.push(r); }
+          });
+          O.notice = '<b>' + fait.length + ' obligation' + (fait.length > 1 ? 's ont avancé' : ' a avancé') + ' d’un cran.</b>' + (refus.length ? ' ' + refus.length + ' refusée' + (refus.length > 1 ? 's' : '') + ' : voir la ligne' + (refus.length > 1 ? 's' : '') + ' concernée' + (refus.length > 1 ? 's' : '') + ' ; les autres sont déjà enregistrées.' : '');
+          if (refus.length === l.length) { O.err = phraseRefus(code || 'reseau'); O.notice = null; }
+          else notify('success', 'Lot traité', fait.length + ' obligation' + (fait.length > 1 ? 's' : '') + ' mise' + (fait.length > 1 ? 's' : '') + ' à jour.');
+          rendre();
+        }, 700);
+      }
+      function deriver() {
+        var code = sel('data-ob-rig'); selReset('data-ob-rig');
+        O.err = null; O.notice = null; O.suite = null; O.busy = true; rendre();
+        setTimeout(function () {
+          O.busy = false;
+          if (lectureSeule()) { O.err = REFUS.echu; rendre(); return; }
+          if (code) { O.err = phraseRefus(code); rendre(); return; }
+          var neuf = O.mode === 'vide';
+          if (neuf) { O.rows = jeu(); O.mode = 'normal'; }
+          O.derive = { creees: neuf ? 11 : 0, actualisees: neuf ? 0 : 11, nonDerivables: 1, implantationsNonDerivees: 0, derogations: 0, redevablesSansObligation: 0, ecartees: O.rows.filter(function (r) { return !r.active; }).length };
+          O.notice = neuf ? '<b>11 obligations calculées</b> pour l’exercice ' + EXO + '. Une n’a pas de date : le paquet fiscal ne la publie pas encore.' : '<b>La liste est à jour.</b> Rien n’a changé pour votre travail : les obligations écartées restent écartées.';
+          notify('success', 'Obligations à jour', neuf ? '11 obligations calculées.' : 'La liste est à jour.');
+          rendre();
+        }, 700);
+      }
+
+      /* ── les fenêtres ── */
+      function apOuvrir(kind, id) {
+        var r = one(id); if (!r) return;
+        O.sheet = { kind: kind, id: id };
+        var t = ap.querySelector('[data-ob-ap-titre]'), s = ap.querySelector('[data-ob-ap-sous]'), c = ap.querySelector('[data-ob-ap-corps]'), ok = ap.querySelector('[data-ob-ap-ok]');
+        s.textContent = DOS + ' · exercice ' + EXO; ok.disabled = false; ok.className = 'btn btn-primary btn-sm';
+        var motif = function (qui, aide) { return '<p class="ob-ap-txt">' + aide + '</p><label>' + qui + '<small>Entre 3 et 500 caractères. Le motif est gardé avec votre nom et la date.</small><textarea data-ob-f="motif" maxlength="500" autocomplete="off"></textarea></label><div data-ob-ap-err></div>'; };
+        if (kind === 'visa') {
+          t.textContent = 'Donner votre visa pour ' + r.court + ' ?';
+          c.innerHTML = '<p class="ob-ap-txt">Votre nom et la date seront gardés avec l’obligation. <b>Un visa engage le cabinet et ne se retire pas.</b></p><div data-ob-ap-err></div>';
+          ok.textContent = 'Oui, je donne mon visa';
+        } else if (kind === 'ecarter') {
+          t.textContent = 'Écarter ' + r.court + ' ?';
+          c.innerHTML = motif('Pourquoi l’écartez-vous ?', 'Elle ne sera plus suivie. <b>Une mise à jour de la liste ne la rétablit jamais</b> : vous pourrez la rétablir ici.');
+          ok.textContent = 'Écarter'; ok.disabled = true; ok.className = 'btn btn-danger btn-sm';
+        } else if (kind === 'retablir') {
+          t.textContent = 'Rétablir ' + r.court + ' ?';
+          c.innerHTML = motif('Pourquoi la rétablissez-vous ?', 'Elle reprendra son suivi à l’étape où elle s’était arrêtée.');
+          ok.textContent = 'Rétablir'; ok.disabled = true;
+        } else if (kind === 'lever') {
+          var a = ouvertes(r).filter(function (x) { return x.gravite === 'BLOQUANTE'; })[0] || ouvertes(r)[0];
+          O.sheet.code = a.code;
+          t.textContent = 'Un point bloque ' + r.court;
+          c.innerHTML = '<div class="fin-notice ko">' + IC.warn + '<span>' + esc(a.explication) + '</span></div><p class="ob-ap-txt"><b>Quoi faire :</b> ' + esc(a.action) + '</p>'
+            + (has(a.gravite === 'BLOQUANTE' ? 'valider' : 'preparer') ? '<label>Si vous poursuivez quand même, dites pourquoi<small>Entre 3 et 500 caractères. Le motif est gardé avec votre nom.</small><textarea data-ob-f="motif" maxlength="500" autocomplete="off"></textarea></label>' : '<p class="dp-sub">Seul un associé peut lever un point bloquant.</p>')
+            + '<div data-ob-ap-err></div>';
+          ok.textContent = 'Lever ce point'; ok.disabled = true;
+        } else if (kind === 'saisir') {
+          t.textContent = 'Saisir le montant de ' + r.court;
+          c.innerHTML = '<p class="ob-ap-txt">Prospera ne calcule pas cette taxe. Saisissez le montant que vous avez calculé : il sera gardé comme « saisi par le cabinet ».</p><label>Montant en FCFA<input type="text" inputmode="numeric" data-ob-f="montant" placeholder="418 000" autocomplete="off"></label><div data-ob-ap-err></div>';
+          ok.textContent = 'Enregistrer le montant'; ok.disabled = true;
+        }
+        ap.hidden = false; var f = c.querySelector('textarea,input'); if (f && f.focus) f.focus(); else ok.focus();
+      }
+      function apErr(txt) { var e = ap.querySelector('[data-ob-ap-err]'); if (e) e.innerHTML = txt ? '<div class="fin-notice ko" role="alert">' + IC.warn + '<span>' + esc(txt) + '</span></div>' : ''; }
+      function apFermer() { ap.hidden = true; O.sheet = null; }
+      function apOk() {
+        var S = O.sheet; if (!S) return;
+        var r = one(S.id), code = sel('data-ob-rig'), f = function (k) { var e = ap.querySelector('[data-ob-f="' + k + '"]'); return e ? e.value.trim() : ''; };
+        if (lectureSeule()) { apErr(REFUS.echu); return; }
+        if (S.kind === 'visa') {
+          if (!has('valider')) { apErr(REFUS.DROIT_FISCAL_REFUSE); return; }
+          selReset('data-ob-rig'); apFermer(); O.err = null; O.suite = null;
+          var res = transitionner(r, 'VALIDEE', code);
+          if (!res.ok) { r.err = phraseRefus(res.c); O.notice = null; } else { r.err = null; O.notice = '<b>Visa donné</b> pour ' + esc(r.court) + '. Prochaine étape : préparer le dépôt.'; notify('success', 'Visa donné', esc(r.court) + ' est validée.'); }
+          rendre(); return;
+        }
+        if (S.kind === 'ecarter' || S.kind === 'retablir') {
+          var m = f('motif');
+          if (m.length < 3) { apErr('Le motif doit faire au moins 3 caractères.'); return; }
+          if (!has('valider')) { apErr(REFUS.DROIT_FISCAL_REFUSE); return; }
+          if (code) { apErr(phraseRefus(code)); selReset('data-ob-rig'); return; }
+          apFermer();
+          if (S.kind === 'ecarter') { r.active = false; r.desactivation = { motif: m, par: 'Awa Diallo', le: AUJ }; O.notice = '<b>' + esc(r.court) + '</b> est écartée. Elle ne sera plus suivie ni rétablie par une mise à jour.'; O.fold.ecartees = true; }
+          else { r.active = true; r.desactivation = null; O.notice = '<b>' + esc(r.court) + '</b> est rétablie : elle reprend à « ' + LIB[r.st] + ' ».'; }
+          O.err = null; O.suite = null; notify('success', S.kind === 'ecarter' ? 'Obligation écartée' : 'Obligation rétablie', esc(r.court) + '.'); rendre(); return;
+        }
+        if (S.kind === 'lever') {
+          var mo = f('motif'), a = r.anomalies.filter(function (x) { return x.code === S.code; })[0];
+          if (!has(a.gravite === 'BLOQUANTE' ? 'valider' : 'preparer')) { apErr(REFUS.DROIT_FISCAL_REFUSE); return; }
+          if (mo.length < 3) { apErr('Le motif doit faire au moins 3 caractères.'); return; }
+          if (code) { apErr(phraseRefus(code)); selReset('data-ob-rig'); return; }
+          apFermer(); a.etat = 'LEVEE'; a.levee = { motif: mo, le: AUJ }; O.err = null; O.suite = null;
+          O.notice = '<b>Point levé</b> pour ' + esc(r.court) + '. Vous pouvez maintenant donner le visa.'; notify('success', 'Point levé', esc(r.court) + '.'); rendre(); return;
+        }
+        if (S.kind === 'saisir') {
+          var v = f('montant').replace(/[^0-9]/g, '');
+          if (!v) { apErr('Saisissez un montant en chiffres.'); return; }
+          if (code) { apErr(phraseRefus(code)); selReset('data-ob-rig'); return; }
+          apFermer(); r.montants.calcule = +v; r.montants.origine = 'SAISI'; r.aSaisir = false; O.err = null;
+          O.notice = '<b>Montant gardé</b> pour ' + esc(r.court) + ' : ' + nb(+v) + ', saisi par le cabinet.'; notify('success', 'Montant gardé', esc(r.court) + ' : ' + nb(+v) + '.'); rendre();
+        }
+      }
+
+      /* ── vers le dépôt : même obligation, même moment ── */
+      function allerDepot(r) {
+        var n = document.querySelector('.nav-item[data-page="bilan"]'); if (n) n.click();
+        var t = document.querySelector('[data-bil-tab="depot"]'); if (t) t.click();
+        var rs = document.querySelector('[data-dp-rig-role]'); if (rs) { rs.value = O.role; rs.dispatchEvent(new Event('change', { bubbles: true })); }
+        var m = MOMENT[r.st] || 'visa', b = document.querySelector('[data-dp-m="' + m + '"]'); if (b) b.click();
+        var p = document.querySelector('[data-bil-panel="depot"]'); if (p && p.scrollIntoView) p.scrollIntoView({ block: 'start' });
+      }
+
+      document.addEventListener('click', function (ev) {
+        var t = ev.target, b;
+        if (!t.closest) return;
+        if ((b = t.closest('[data-ob-bench]'))) {
+          var k = b.dataset.obBench; O.mode = k; O.notice = null; O.err = null; O.suite = null; O.derive = null; O.open = {}; O.fold = {};
+          O.rows = jeu(); selReset('data-ob-rig'); rendre(); return;
+        }
+        if ((b = t.closest('[data-ob-ap-fermer]')) && ap.contains(b)) { apFermer(); return; }
+        if ((b = t.closest('[data-ob-ap-ok]')) && ap.contains(b)) { apOk(); return; }
+        if (!(b = t.closest('[data-ob-act]')) || !root.contains(b)) return;
+        var a = b.dataset.obAct, id = b.dataset.obId, r = id ? one(id) : null;
+        if (a === 'go') {
+          if (!r) return;
+          if (geste(r).vers === 'VALIDEE') apOuvrir('visa', id); else avancer(id);
+        }
+        else if (a === 'lot') lot();
+        else if (a === 'deriver') deriver();
+        else if (a === 'depot') allerDepot(r);
+        else if (a === 'lever') apOuvrir('lever', id);
+        else if (a === 'ecarter') apOuvrir('ecarter', id);
+        else if (a === 'retablir') apOuvrir('retablir', id);
+        else if (a === 'saisir') apOuvrir('saisir', id);
+        else if (a === 'det') { O.open[id] = !O.open[id]; rendre(); }
+        else if (a === 'fiche') notify('success', 'Fiche de la personne', 'Le mandat se règle dans la fiche du redevable (écran FE-113).');
+        else if (a === 'portefeuille') { var n = document.querySelector('.nav-item[data-page="dossiers"]'); if (n) n.click(); }
+        else if (a === 'bases') {
+          var c1 = sel('data-ob-rig'); selReset('data-ob-rig'); r.err = null;
+          if (c1) { r.err = phraseRefus(c1); O.notice = null; }
+          else O.notice = '<b>Balance revérifiée</b> pour ' + esc(r.court) + ' : ' + (ouvertes(r).filter(function (x) { return x.code === 'BASE_PROVISOIRE'; }).length ? 'elle est toujours un brouillon, le point reste ouvert.' : 'rien à signaler.');
+          rendre();
+        }
+        else if (a === 'coherence') {
+          var c2 = sel('data-ob-rig'); selReset('data-ob-rig'); r.err = null;
+          if (c2) { r.err = phraseRefus(c2); O.notice = null; }
+          else O.notice = r.montants && r.montants.declare != null ? '<b>Conforme</b> : ce que vous avez déclaré concorde avec la comptabilité.' : '<b>Pas encore possible</b> : aucun montant n’est déclaré pour ' + esc(r.court) + '.';
+          rendre();
+        }
+      });
+      document.addEventListener('input', function (ev) {
+        var t = ev.target, ok = ap.querySelector('[data-ob-ap-ok]');
+        if (!t.matches || !t.matches('[data-ob-f]') || !O.sheet) return;
+        if (t.dataset.obF === 'montant') { var v = t.value.replace(/[^0-9]/g, ''); t.value = v ? v.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''; ok.disabled = !v; }
+        else ok.disabled = t.value.trim().length < 3;
+      });
+      document.addEventListener('change', function (ev) { var t = ev.target; if (t.matches && t.matches('[data-ob-rig-role]')) { O.role = t.value; O.notice = null; O.err = null; rendre(); } });
+      root.addEventListener('toggle', function (ev) { var d = ev.target; if (d && d.dataset && d.dataset.obFold) O.fold[d.dataset.obFold] = d.open; }, true);
+      document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !ap.hidden) apFermer(); });
+      window.__lot7p3 = function () { return O; };
+      rendre();
     })();
 
   })();
