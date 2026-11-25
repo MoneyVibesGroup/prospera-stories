@@ -2080,11 +2080,16 @@ reserved_ranges:
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
   - range: "STORY-1120"
-    status: "in_progress"
+    status: "done"
     owner: "Groupe B, lot 7, n° 2 — fin de mission et réversibilité : fermeture du fonds (à la main, ou avec le dossier client archivé par dossier.updated), refus de tout versement neuf, export complet en volumes ZIP (copies, index, bordereaux, empreintes, journal du fonds, certificat d'intégrité), bordereau de restitution numérique et son exemplaire signé (document-service, module ged)"
     source_doc: "prospera-stories/stories/STORY-1120.md"
     reserved_on: "2026-11-25"
     note: >
+      🏁 DONE le 2026-11-25 — document-service #34 (dev b92ac18) et catalogue #78 (dev ea10b51, ged 1.5.0 recopié) ;
+      contrat annoncé avant le code (stories #926, main f3be71e). Node 25 : unitaires 1243, e2e 213/213 ; Node 24 : 1250,
+      213/213 ; mutations 21/22 (+1 équivalente) et 2/2 catalogue ; pile grp-b neuve : fonds fermé à la main et par
+      dossier.updated (0,1 s), export par la file (0,6 s), zipfile et sha256sum -c 12/12 OK, BRN et exemplaire signé.
+      D-1120-1 → 15. Contrat d'origine :
       Fiche écrite et contrat annoncé avant le code (2026-11-25) : POST …/fonds/{n}/fermeture, 409 FONDS_FERME,
       POST …/fonds/{n}/exports (202, file BullMQ ged-exports), GET …/exports/{n}, …/volumes/{rang}, POST
       …/exports/{n}/bordereau-de-restitution (BRN-), POST/GET …/documents-probants/{n}/exemplaire-signe ; actes FERMETURE,

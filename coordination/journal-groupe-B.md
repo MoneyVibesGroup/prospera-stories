@@ -145,9 +145,21 @@
     consultations simultanées sans fourche, octet changé dans MinIO nommé par la campagne périodique, entrée réécrite
     nommée au rang 5. Verrou 22:14 → 22:23. Fiche D-1119-1 → 18. Passation de `document-service` lue au rituel (C,
     `0716a58`) ; worktree prunable d'un autre poste retiré, branche locale `ocr-pdf` (équivalente à `dev`) supprimée.
-  - **En cours : STORY-1120** (n° 2 : fin de mission et réversibilité, contrat annoncé le 25/11 ; l'export emporte le journal d'intégrité et les
-    documents probants, nommé par 1119). **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans
-    `dossier-service` quand C l'aura fusionnée (journal de C, lot 7, 5). **Nommé pour STORY-1129** (n° 11) :
+  - **2 — STORY-1120 (25/11) — faite** : fin de mission et réversibilité. **document-service #34** (`b92ac18` sur
+    `dev`) ; **catalogue #78** (`ea10b51`, `ged` 1.5.0 recopié) ; contrat annoncé avant le code (stories #926, `f3be71e`).
+    Fermeture d'un fonds à la main ou **avec son dossier client archivé** (la GED consomme `dossier.updated`, déjà publié
+    par `dossier-service`, groupe `ged.dossiers-clients` ; `dossier-service` inchangé), 409 `FONDS_FERME` sur tout
+    versement neuf ; export complet en volumes ZIP par la file `ged-exports` (index, bordereaux, journal du fonds,
+    contrôle, certificat neuf ou sa raison, originaux papier, `empreintes.sha256`) ; bordereau de restitution `BRN-` et
+    exemplaire signé. Aucun droit neuf, aucun fait publié, aucune dépendance neuve. Node 25 : unitaires 1243, e2e
+    213/213 ; Node 24 : 1250, 213/213 ; mutations 21/22 (+1 équivalente) ; pile `grp-b` neuve : fermeture par le dossier
+    en 0,1 s, export en 0,6 s, `sha256sum -c` 12/12 OK. Verrou 23:37 → 23:44. Fiche D-1120-1 → 15. **La recopie du
+    paquet fiscal de STORY-564 dans `dossier-service` (← C) n'est pas faite** : 1120 n'a pas touché ce dépôt (D-1120-9) ;
+    elle reste ouverte pour la prochaine story de B sur `dossier-service` (n° 12, STORY-1130, au plus tard), sauf si la
+    session de groupe la place avant.
+  - **Suivante : STORY-1121** (n° 3 : la destruction proposée, puis visée ; s'inscrit au journal d'intégrité ; un fonds
+    fermé reste concerné par la conservation). **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans
+    `dossier-service` (servable : balance-service `c9e94c6` est sur `dev`). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
     `cabinet-moteur` et `abonnement` rejouées (D-100-4).
 
@@ -1114,6 +1126,15 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-25) : FE-143 — fin de mission et réversibilité servies par STORY-1120** (document-service #34,
+  `b92ac18` sur `dev`) : `POST /api/v1/ged/cabinet/fonds/{numero}/fermeture` (la vue d'un fonds gagne `etat` et
+  `fermeture`), `POST`/`GET …/fonds/{numero}/exports`, `GET …/exports/{numero}`, `GET …/exports/{numero}/volumes/{rang}`
+  (`application/zip`, `attachment`, `X-Empreinte-Sha256`), `POST …/exports/{numero}/bordereau-de-restitution`, `POST`/`GET
+  …/documents-probants/{numero}/exemplaire-signe` (multipart `fichier`, `signePar`, `signeLe`). Refus à afficher :
+  `409 FONDS_FERME` (`details: { fermeLe, motif }`) sur les dépôts et versements d'un fonds fermé. **Types à régénérer**
+  depuis l'OpenAPI vivant de `document-service` quand l'écran viendra (DTO `…ReversibiliteDto`). Rien n'est relayé par le
+  BFF. — information, rien à faire avant le lot 8.
+
 - **→ A (2026-11-25) : FE-143 — les routes de la valeur de preuve des archives sont servies par STORY-1119**
   (document-service #33, `b7b3f91` sur `dev`) : journal d'intégrité (`GET /api/v1/ged/cabinet/journal-integrite`,
   `…/verification`), contrôles des empreintes (`POST`/`GET …/controles-integrite`, `GET …/controles-integrite/{campagneId}`,
@@ -1908,6 +1929,9 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
     routes `GET` neuves en `routesLectureSeule` ; recopié dans le service par le code, **puis au catalogue par B** après
     la fusion du code. **→ A (FE-143)** : types à régénérer depuis l'OpenAPI de `document-service` quand l'écran
     viendra. **Pour C et D** : rien.
+  - **Livré le 25/11** : document-service #34 (`b92ac18`), catalogue #78 (`ea10b51`, `ged` 1.5.0 au catalogue). Au code,
+    ajouts seuls (D-1120-10, 11) : `fermeture.journalRang`, `exportNumero` d'un document probant ; DTO de réponse
+    `…ReversibiliteDto`, `ExemplaireSigneProbantDto`.
 
 - **2026-11-25, STORY-1119 — les archives ont valeur de preuve, annoncé AVANT le code** (`document-service`, GitHub
   `prospera-ocr-service`, branche `MNV-1119` ; fiche `stories/STORY-1119.md`, D-1119-1 → 11). **Ajouts seuls**, sous
@@ -3553,6 +3577,18 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une mutation sur une empreinte survit derrière AES-GCM, encore** (STORY-1120, M10 et M12, après M12 de 1119) : un
+  test qui « altère » un objet en changeant un octet du chiffré prouve le refus du déchiffrement, jamais la comparaison
+  d'empreinte. Remplacer l'objet par un **autre clair, bien chiffré** avec la clé du test (`chiffrer(autre, clé)`).
+- **Un refus « avant » doublé d'un conditionnel « sous la transaction »** (STORY-1120, M15 → M17) : retirer l'un laisse
+  l'autre refuser, la mutation survit. Prouver le premier par ce qu'il évite (aucun objet déposé, aucun numéro pris),
+  le second en appelant le dépôt directement ; une garde vraiment redondante se dit équivalente (M18).
+- **`/health` de la doublure ne suffit pas à ouvrir un fonds** : le read-model des dossiers clients arrive par
+  `dossier.created` (quelques secondes après le dépôt du message) ; un script de preuve réessaie l'ouverture du fonds
+  (`404 DOSSIER_INCONNU` d'abord). Messages de la preuve : `preuve1120/messages.sh` de la session (non versionné).
+- **Un script de preuve qui compte « le premier EXPORT » du journal se trompe dès que deux exports tournent** (l'associé
+  et l'archiviste en ont demandé un chacun) : chercher l'entrée par `details.export`.
 
 - **Pile de preuve de `document-service` sans auth réel** (STORY-1119) : une doublure Node (JWKS RS256, `GET
   /api/v1/moi/droits` par `sub`, `/jeton` pour le script) suffit ; le dossier client se pose dans `dossiers_dossier`
