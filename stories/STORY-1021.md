@@ -1,12 +1,12 @@
 # STORY-1021 : les routes d'instance `export`, `sante` et `migrer` de la balance
 
-Status: in-progress
+Status: done
 
 **Plan :** `coordination/PLAN-LOT-7-2026-11-24.md` §3, amendement du 2026-11-25, n° **0c** (ligne d'origine :
 `PLAN-LOT-6-2026-11-23.md` §4, amendement D-L6-5, n° 10 — « Fini quand : les trois routes répondent au contrat du moteur ;
 la garde des manifestes reste verte »). **Dépôt :** `prospera-balance-service` (tenu par C ; `origin/dev` au départ :
 `ab4e468`, STORY-1019) · **Plage :** groupe C, 1021 (réservée au tracker) · **Ordre de C :** 1020 ✅ → 1019 ✅ → **1021**
-→ 1022 → 1023.
+→ 564 → 1022 → 1023 (564 avancée le 25/11 à 21:50 : 348 de D l'attend).
 **Sources :** `manifestes/balance.manifest.ts` (1.2.0 : `routesInstance.export`, `.sante`, `migrer`, `routesLectureSeule`,
 C7 « l'export de l'organisation reste réservé à `instance:donnees:exporter` ») ; `CONTRAT-DE-MODULE-2026-11-09.md` C2
 (« l'export passe toujours », seul `NON_INSTALLE` le refuse) et C13 (points 3 et 7) ; spine du moteur AD-21 (santé
@@ -121,6 +121,14 @@ STORY-1075, sur la forme par défaut que le PO vient de valider (JSON seul ; le 
   reste verte. Écrit dans « Ce qui reste ».
 - **D-1021-15 — Les routes d'instance du module `conseil`** (export, import, effacement, santé, `migrer`) ne sont pas dans
   cette ligne du plan (D-1019-6) : écrit dans « Ce qui reste ».
+- **D-1021-17 — L'aller-retour, vu sur la pile** (complète D-1021-12) : un enregistrement exporté tel quel (`_id`,
+  enveloppes Extended JSON) n'a pas la forme d'un enregistrement C13 (`import-c13-demande@1` n'admet que des champs
+  `^[a-z][A-Za-z0-9_]*$`) : 422 `SCHEMA_NON_CONFORME` ; réduit à des champs admis, l'objet `balances` n'est pas importable :
+  422 `OBJET_INCONNU`. L'export sert la restitution des données du client, pas une réinstallation.
+- **D-1021-18 — La garde STORY-529** (`lecture-profil-par-dossier.spec.ts`, liste fermée des fichiers qui nomment
+  `profils_societe`) admet `plan-d-export.ts` (balayage par nature, au filtre de l'effacement), comme
+  `plan-d-effacement.ts` : la liste passe de 7 à 8. *Vu sous Node 24* : la suite entière l'a rougie au premier passage
+  (second commit).
 - **D-1021-16 — Docker :** `MigrationModule` exporte ses deux services, importé par `InstanceC13Module`, avec
   `TerminusModule` et `KafkaHealthIndicator` (un module Nest change) ; aucune dépendance ni Dockerfile. Le démarrage réel
   et le comportement de bout en bout sont prouvés sur une pile `grp-c` (deux instances, `REEL` et `ESSAI`), qui vaut le
@@ -133,7 +141,62 @@ codes de refus neufs, une copie de contrat neuve (`sante@1`) ; aucune question n
 
 ## Preuves
 
-À venir.
+**Livré :** prospera-balance-service#167, fusionnée en rebase le 2026-11-25 (`head` `735ff8a`, rejoué sur `dev` en
+**`b52d262`** (les trois routes) et **`465a308`** (la garde STORY-529 admet le plan d'export), arbre de `dev` identique au
+`head` poussé) ; annonce « ⚠ Contrats » prospera-stories #916 (`main` `728c34e`) avant le code.
+
+- **Node 24** (étage `verification`, image construite depuis `git -c core.autocrlf=false archive`) : sur `6676abc`,
+  unitaires 296/297 suites (la garde STORY-529 rouge, D-1021-18), **e2e 37/37 suites, 2291 tests**, `nest build` 0 ; sur
+  `735ff8a`, **unitaires 297/297 suites, 5691 tests** (2 suites sautées, comme sur `dev`). Lint des fichiers touchés : 0 ;
+  `tsc --noEmit` 0.
+- **Specs neuves** : `export-c13.spec` (état absent, `NON_INSTALLE`, état inconnu, version de matrice inconnue ⇒ 403 sans
+  rien lire ; les huit autres états ⇒ 200 dans les deux espaces ; l'enveloppe, l'ordre, les noms d'objet ; `objet` filtre ;
+  le CSV et son nom ; les refus de la demande avant toute lecture ; le lecteur MongoDB : les deux formes d'identifiant,
+  l'organisation seule, tri, Extended JSON relaxed) ; `export-csv.spec` (BOM, `;`, CRLF, colonnes dans l'ordre
+  d'apparition, sous-documents aplatis, tableaux en JSON, valeurs Extended JSON d'un vrai document en feuilles, texte
+  neutralisé puis échappé, nombres jamais neutralisés) ; `plan-d-export.invariant.spec` (le plan d'export couvre le plan
+  d'effacement ; rien du conseil, des voisins, de l'état publié ni de l'outbox) ; `sante-c13.spec` (la vraie sonde Kafka,
+  broker doublé : OK, broker injoignable, consommateur hors groupe, bloqué, MongoDB en cours de connexion ; raison bornée ;
+  `sante@1` relu par Ajv) ; `migrer-c13.spec` (ordre, mode `CABINETS_INCONNUS`, 409 sur orphelins ou profils non
+  rattachés, les deux jouées) ; `dossiers-migration.service.spec` (+4 : `TOUS` par défaut, `CABINETS_INCONNUS`, base
+  convergée, organisation en chaîne) ; `copie.invariant.spec` (six copies, `sante.schema.json` à l'octet) ; e2e
+  `instance-c13` : 36 tests (8 neufs : export JSON et CSV, refus, états, santé, `migrer`, 401/403, autre organisation,
+  hors limite de débit).
+- **Mutations : 32/32 tuées par une assertion** (aucune par compilation) : NON_INSTALLE ouvert, décision ignorée, version
+  de matrice ignorée, espace inversé, nombre faux, tri inversé, filtre de l'organisation effacé, EJSON strict, un objet de
+  moins, le conseil exporté, CSV sans objet admis, objet ignoré, nom d'objet = collection, CSV non neutralisé, décimal
+  neutralisé, nombre neutralisé, tableau aplati, valeur EJSON aplatie, MongoDB ignoré, Kafka ignoré, raison non bornée,
+  orphelins ignorés, profils non rattachés ignorés, profils non joués, publication `TOUS` par la route, mode de publication
+  ignoré, cabinet comparé sans forme texte, `migrer` sans identité, export sans moteur, santé sans organisation, moteur
+  sans organisation, export mis en cache.
+- **Pile `grp-c`** (mongo:7 `rs0`, Kafka 3.9.0, un IdP de test RS256, l'image `runtime` lancée deux fois :
+  `INSTANCE_ESPACE=REEL` et `ESSAI`, bases et groupes distincts ; `/api/v1/health` 200 des deux côtés ; états publiés par
+  Kafka). **37/37 cas verts** (seconde passe, images de `735ff8a`) :
+
+  | Instance | Cas | Réponse |
+  |---|---|---|
+  | réel et essai | `GET …/{org}/sante` (A, B sans état publié, P) | **200** `{"etat":"OK"}` |
+  | réel | `GET …/A/export`, A `EN_SERVICE` | **200**, 32 objets : `balances` 3 (identifiant ObjectId et chaîne), `retraitements-fiscaux` 1, `profils-societe` 1 ; ni la balance ni le retraitement de B, ni le scénario de A (`conseil`), ni la copie des dossiers ; `Cache-Control: no-store` |
+  | réel | B (aucun état) ; D `NON_INSTALLE` | **403 `BALANCE_NOT_ENTITLED`** |
+  | réel | C `SUSPENDU` ; F `LECTURE_SEULE` | **200** |
+  | réel | `?format=csv&objet=retraitements-fiscaux` | **200** `text/csv; charset=utf-8`, BOM, pièce jointe `export-balance-retraitements-fiscaux-<A>.csv` ; colonnes `_id;orgId;dossierId;exercice.debut;exercice.fin;code;sens;montant;baseLegale;justification;parUserId;createdAt` ; la justification `=HYPERLINK(…)` écrite `'=HYPERLINK(…)` |
+  | réel | `?objet=balances` ; `?format=xml` ; `?format=csv` ; `?objet=scenarios-fiscaux` | 200 (un objet) ; **400 `FORMAT_NON_SERVI`** ; **400 `OBJET_REQUIS`** ; **422 `OBJET_INCONNU`** |
+  | réel | les trois routes : sans jeton ; administrateur de A ; administrateur de la plateforme | **401** ; **403 `IDENTITE_DE_SERVICE_REQUISE`** ; **403 `IDENTITE_DE_SERVICE_REQUISE`** |
+  | réel | moteur de B sur l'export et la santé de A ; 12 santés d'affilée | **403 `ORGANISATION_HORS_JETON`** ; 12 × 200 |
+  | réel | `migrer` (moteur de B) ; rejouée | **200 `MIGRE`** : `dossiers-d8` `CABINETS_INCONNUS`, 0 profil publié, `balances` 1 rattachée ; `profils-529` 1 rattaché ; rejouée : 0, 0, 0 (1 déjà rattaché) |
+  | essai | `migrer`, P sans dossier « Mon cabinet » | **409 `MIGRATION_INCOMPLETE`** : 1 balance orpheline, 1 profil publié (le seul cabinet inconnu), 1 profil non rattaché |
+  | essai | export de P ; effacement ; export après | **200** (`balances` 1, `profils-societe` 1) ; **200 `EFFACE`** (4) ; **403 `BALANCE_NOT_ENTITLED`** |
+  | essai | import des balances exportées ; d'un objet `balances` à champs admis | **422 `SCHEMA_NON_CONFORME`** ; **422 `OBJET_INCONNU`** (D-1021-17) |
+  | réel | Kafka arrêté : santé ; export | **200 `DEGRADE`** « Kafka : Local: Broker transport failure. » ; **200** (le module reste ouvert) |
+
+  En base après la preuve : aucune balance sans dossier dans le réel, le profil de A rattaché à « Mon cabinet », aucun
+  message en attente dans l'outbox du réel (rien n'a été republié). La première passe (images de `6676abc`) avait deux
+  cas rouges, tous deux du script de preuve : `fetch().text()` retire le BOM, et l'import des balances exportées tombe au
+  schéma avant l'objet (D-1021-17). Le démarrage réel des deux instances vaut le `docker compose up` du §1.5 (D-1021-16).
+- **Garde des manifestes** : aucun fichier de `manifestes/` ne change (AC-8).
+- **Verrou Docker** : pris à 21:31:31 (après D, 346), rendu à 21:40:18 (images, unitaires, e2e, build, première pile) ;
+  repris à 21:47:07, rendu à 21:52:05 (unitaires sur le second commit, pile). Aucun conteneur, réseau ni image
+  `grp-c-*1021*` restant.
 
 ## Ce qui reste
 
