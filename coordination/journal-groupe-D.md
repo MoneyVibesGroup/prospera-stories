@@ -1510,9 +1510,12 @@
     `FORME_SANS_CAPITAL`, ou un motif d'indétermination des indicateurs : `DENOMINATEUR_NUL`, `DENOMINATEUR_NEGATIF`,
     `RESULTAT_NON_AFFECTE`, `MONTANT_HORS_BORNES`…, sinon `null`), `fraction` (`{ numerateur: 1, denominateur: 2 }`),
     `capitalSocial`, `capitauxPropres` (lecture stricte : sans subventions d'investissement ni provisions réglementées,
-    D-1077-4), `capitauxPropresEtRessourcesAssimilees` (lecture large, poste `CP`), `atteinteSurRessourcesAssimilees`
+    D-1077-4), `capitauxPropresEtRessourcesAssimilees` (lecture large, poste `CP`), **`pourcentageDuCapital`**
+    (capitaux propres stricts / capital × 100, au centième, ou `null` ; complément du 2026-11-25 avant la fusion du
+    code), `atteinteSurRessourcesAssimilees`
     (booléen ou `null`), montants en unités mineures de la liasse ; `postes` (même forme que les postes d'un indicateur :
-    le capital en `DENOMINATEUR`, les capitaux propres stricts en `NUMERATEUR`) ; `formeJuridique` (`{ valeur, statut:
+    le capital en `DENOMINATEUR`, les capitaux propres stricts en `NUMERATEUR`) et **`marqueursManquants`** (liste de
+    chaînes, comme un indicateur ; complément du 2026-11-25) ; `formeJuridique` (`{ valeur, statut:
     CONNUE | INCONNUE }`) ; `regime` (`null` ou `{ formes, articles, renvois, sanction, exclusion }`, articles et citations
     du paquet) ; `dateCloture` et `dateApprobation` (`AAAA-MM-JJ` ou `null`) ; **`echeances`** (`null` ou trois entrées
     `{ code: APPROBATION_DES_COMPTES | DECISION | REGULARISATION, quoi, delaiMois, pointDeDepart, dateLimite,
