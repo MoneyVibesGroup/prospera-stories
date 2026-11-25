@@ -1982,12 +1982,14 @@ reserved_ranges:
   # ── LOT 6 DE B (2026-11-24) : STORY-1112 → 1116, réservées par PLAN-LOT-6-2026-11-23.md §8 ; fiches écrites juste
   #    avant de coder, le story_id_high_water_mark monte au commit qui crée chacune.
   - range: "STORY-1117"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe C, lot 6 — la balance de référence d'un exercice (GET …/balances/reference?au=) et la liste sans lignes (GET …/balances/resumes), servies par balance-service ; le fiscal les lit (D-320-5 levé)."
     source_doc: "prospera-stories/stories/STORY-1117.md"
     reserved_on: "2026-11-24"
     note: >
       Demande de A (STORY-320, D-320-5), journal C. Contrat annoncé avant le code ; manifeste balance 1.1.0.
+      ✅ 2026-11-25 : DONE — balance-service #161 (`e968388`), fiscal #58 (`b2efaa7`) ; D-320-5 levé ; Node 24 : balance
+      5593 / 1973, fiscal 2560 / 208 ; Mongo 8/8, mutation 3/3 ; D-1117-1 → 6 dans la fiche.
   - range: "STORY-1115"
     status: "done"
     owner: "Groupe B, lot 6, n° 6 — la recette « essayer, puis mettre en service » : le second espace dans le profil de recette (auth-essai, catalogue-essai, leur Kafka et leur Redis ; le BFF à deux espaces ; une identité d'opérateur commune, clé tirée hors du dépôt) ; un cabinet prospect ouvre son essai, son administratrice y entre et invite un collègue, il signe, sort de l'essai et naît dans le réel sous le même identifiant, le moteur y installe balance et bilan, la mise en service les ouvre et invite les membres de l'essai, qui entrent dans le réel par le lien reçu (prospera-recette)"

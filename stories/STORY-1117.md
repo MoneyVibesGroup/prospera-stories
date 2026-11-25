@@ -1,7 +1,8 @@
 # STORY-1117 : La balance de référence d'un exercice, servie par le moteur de balance — et sa liste sans les lignes
 
-Status: in-progress — **écrite le 2026-11-24** par la session du groupe C, à la demande de A (journal C, « Réponses aux
-demandes reçues », STORY-320, D-320-5) ; contrat annoncé ci-dessous avant le code.
+Status: done — **livrée le 2026-11-25** : balance-service **#161** (`e968388` sur `dev`) et prospera-fiscal-service
+**#58** (`b2efaa7` sur `dev`) ; voir « Livraison ». Écrite le 2026-11-24 par la session du groupe C, à la demande de A
+(STORY-320, D-320-5) ; contrat #842 avant le code.
 
 **Services :** `balance-service` (sert) ; `prospera-fiscal-service` (lit ; rendu à C à la fusion de 328).
 **Suite de :** STORY-320 (les bases fiscales viennent de la balance), STORY-087 (la balance de clôture d'un exercice).
@@ -49,6 +50,34 @@ la servir.
   l'obligation ; `BROUILLON` ⇒ bases `PROVISOIRES`, `VALIDÉE` ⇒ `ALIMENTEES`, déséquilibrée ⇒ `BALANCE_DESEQUILIBREE`,
   `null` ⇒ `resumes?etat=REJETÉE` pour dire pourquoi (`BALANCE_REJETEE` ou `BALANCE_ABSENTE`). Il ne lit toujours pas
   l'origine (AD-14). Aucune route du fiscal ne change.
+
+### Livraison (2026-11-25)
+
+- **balance-service** (#161, `e968388`) : `BalanceRepository.trouverReference`, `BalanceService.reference`, deux routes
+  dans `BalanceController` (déclarées avant `:id`), `dto/balance-resume.dto.ts` (`BalanceResumeDto` =
+  `OmitType(BalanceResponseDto, ['lignes'])`, `BalanceDeReferenceResponseDto`, `?au=` en `AAAA-MM-JJ` réel).
+- **fiscal** (#58, `b2efaa7`) : `SourceBalances.reference` (port), `interpreterReference` (une rejetée servie, ou un
+  exercice qui ne contient pas le jour : `502 BALANCE_AMONT_INVALIDE`), `BasesObligationsService.resoudre` lit la
+  référence ; `retenirLaSource` retirée. **D-320-5 est levé.** L'origine n'est toujours pas lue (AD-14).
+- **Preuves, balance-service** (Node 24) : unitaires **5593** (3 suites coupées par un arrêt du poste, rejouées seules :
+  44/44), e2e **36/36 suites, 1973/1973** ; dépôt sur un vrai MongoDB **8/8** (socle et portefeuille SFD jamais
+  retenus, provisionnée comprise, VALIDÉE avant BROUILLON, REJETÉE jamais, bornes au jour, deux cabinets) ; mutation
+  **3/3** (socle admis, rejetée admise, tri par la seule version).
+- **Preuves, fiscal** (Node 24) : unitaires **2560** (2 suites lentes, rejouées seules : 51/51), e2e **11/11 suites,
+  208/208**.
+- **Manifeste `balance` 1.1.0** (#842) : copie au catalogue demandée à B.
+
+### Écarts au contrat, décidés au code
+
+- **D-1117-4** : le résumé lit toujours les lignes en base (`anteriorite` se dérive des lignes servies, STORY-557) ;
+  seule la réponse s'allège.
+- **D-1117-5** : pas de `docker compose up` : aucun module, fournisseur ni injection neufs dans les deux services (des
+  méthodes, un DTO, deux routes) ; les e2e montent les vrais contrôleurs.
+- **D-1117-6** : deux tests déjà rouges sur `dev`, corrigés au passage :
+  - le garde-fou du recensement STORY-694 de balance-service comptait 34 contrôleurs gardés ; il y en a 35 depuis 1099
+    (la mémoire des cahiers) ;
+  - le test du cycle de STORY-323 du fiscal clôturait sans montant déclaré, ce que STORY-328 refuse depuis
+    (`DECLARE_ABSENT_AU_DEPOT`) : il l'enregistre pendant la préparation.
 
 ### Décisions prises au contrat (contestables)
 

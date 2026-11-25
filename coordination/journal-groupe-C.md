@@ -33,8 +33,9 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
   4. ✅ **STORY-1100 DONE (24/11)** : comptabilité **#20** (`e4a53cc`), document-service **#32** (`0716a58`), contrat
      #822, manifestes `comptabilite` 0.5.0 #826 et `ged` 1.3.0 #831. Socle comptabilité 334/334, e2e GED 203/203,
      mutation 8/8, gate `grp-c` vert (vrai fait sur Kafka, rejeu sans double) ; verrou cédé par A et rendu ;
-  4 bis. 🟡 **STORY-1117** (demande de A, STORY-320) la balance de référence d'un exercice et la liste sans lignes
-     (`balance-service`, puis le fiscal qui la lit) : contrat annoncé le 24/11 (fiche) ;
+  4 bis. ✅ **STORY-1117 DONE (25/11)** (demande de A, STORY-320) : balance-service **#161** (`e968388`), fiscal **#58**
+     (`b2efaa7`), contrat #842 ; D-320-5 levé. Node 24 : balance unitaires 5593 / e2e 1973, fiscal unitaires 2560 / e2e
+     208 ; Mongo 8/8, mutation 3/3 ; verrou cédé par A et rendu ;
   5. **STORY-1101** les déclarations face à la liasse (fiscal) — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
   6. **STORY-315** puis **316** le calendrier fiscal (fiscal) — fiches écrites juste avant.
 - **Docker** : verrou du poste principal (`MoneyVibes_Apps\.verrou-docker`) partagé avec A ; aucune pile de C ne tourne.
@@ -242,6 +243,9 @@ seulement.
   fusionné : document-service #30 `1db0a8f`, #31 `9d0cfd3`, #32 `0716a58` ; source `manifestes/ged.manifest.ts`,
   `f703671`). Les 1.1.0 et 1.2.0 n'ont pas à être semées seules. — ✅ **close le 25/11** : catalogue #74 `1aa17ae`
   (STORY-979).
+- **→ B (25/11, STORY-1117)** : recopier au catalogue le manifeste `balance` **1.1.0** (code fusionné :
+  balance-service #161 `e968388` ; source `manifestes/balance.manifest.ts`, #842) : deux routes de lecture neuves
+  (`…/balances/reference`, `…/balances/resumes`). — ouverte.
 - **→ B (24/11, STORY-1100)** : recopier au catalogue le manifeste `comptabilite` **0.5.0** (code fusionné :
   comptabilite-service #20 `e4a53cc` ; source `manifestes/comptabilite.manifest.ts`, `a525d76`) : il publie
   `comptabilite.facture.inscrite`, aucune route neuve. — ✅ **close le 25/11** : catalogue #74 `1aa17ae` (STORY-979).
@@ -300,7 +304,8 @@ seulement.
   `GET /exercices/{id}/obligations/ecarts` existe (fiscal #56, `990256a`). — **notée**, pour 1101.
 
 - **← A (24/11, STORY-320) : `balance-service` sert la balance de référence de l'exercice, et un résumé sans lignes** —
-  **prise : STORY-1117** (contrat du 24/11), non bloquante pour A (le fiscal prend aujourd'hui la plus haute version validée et équilibrée). C la fait
+  ✅ **close le 25/11 : STORY-1117 livrée** (balance #161, fiscal #58 ; D-320-5 levé). Prise : STORY-1117 (contrat du
+  24/11), non bloquante pour A (le fiscal prend aujourd'hui la plus haute version validée et équilibrée). C la fait
   après STORY-1100, avant de reprendre le fiscal : (1) une lecture de la balance que le moteur de balance retient pour un
   exercice (la règle existante de sélection, sans que le fiscal lise l'origine, AD-14) ; (2) une vue résumée de la liste
   (sans `lignes`), par un paramètre de lecture facultatif. Contrat annoncé avant le code, ici et dans une fiche.
