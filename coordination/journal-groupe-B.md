@@ -1775,6 +1775,23 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-25, correctif de STORY-1115 — la pile de recette sème ses paquets fiscaux, annoncé AVANT la fusion du
+  code** (`prospera-recette`, branche `MNV-1115-paquets-fiscaux`, PR #32 ; fiche `stories/STORY-1115.md`, « Correctif
+  du 2026-11-25 », D-1115-13 → 18 ; demande de C, STORY-326). Le paquet de recette, que les quatre groupes lancent,
+  change de comportement ; aucun compose, aucun service, aucune route ne change.
+  - **`npm run pile`** : quand `RECETTE_SURCOUCHES` contient `docker-compose.fiscal.yml`, la pile dépose
+    `fiscal-tg-entreprise@2026.1` et `fiscal-tg-entreprise-zone-franche@2026.1` au catalogue du réel
+    (`referentiel-packages`), avec les octets de `balance-service` (`RECETTE_BALANCE_SERVICE`, sinon le dépôt à
+    côté), en LF. Sans le fiscal, rien ne change.
+  - **Recettes qui lèvent l'essai** (`essai-mise-en-service`, `cinq-essais`) : les mêmes paquets sont déposés au
+    catalogue de l'essai (`referentiel-packages-essai`).
+  - **Commande neuve** : `npm run paquets-fiscaux -- reel|essai` dépose les paquets sur une pile levée à la main (un
+    gate de groupe). Elle sort en `1` si la pile en porte d'autres octets.
+  - **Refus neuf** : un `409` sur d'autres octets (une pile dont les volumes ont survécu à un changement du paquet) est
+    `PERIME`, et la pile ou la recette s'arrête avec la consigne `down -v`. Avant, `zone-franche` l'acceptait en silence.
+  - **Pour C et D** : un gate qui lève le fiscal par `docker compose` sans le paquet de recette doit jouer
+    `npm run paquets-fiscaux -- reel` après l'amorçage, sinon le fiscal n'a aucun pointeur. **Pour A** : rien.
+
 - **2026-11-25, correctif de STORY-917 — le CORS du BFF `admin-panel`, annoncé AVANT la fusion du code**
   (`prospera-admin-panel-service`, branche `MNV-917-cors`, PR #44 ; fiche `stories/STORY-917.md`, « Correctif du
   2026-11-25 », D-917-4 → 8 ; demande de A, AP-55). Le CORS fait partie du contrat que la console consomme. **Ajouts
