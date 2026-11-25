@@ -179,6 +179,36 @@ seulement.
 
 ## Passations
 
+- **→ B (2026-11-25, lot 7, plan de B #848) : `document-service` (= `prospera-ocr-service`, module `ged`)** — décision de
+  l'utilisateur du 25/11. Dernier commit de C sur `dev` : **`0716a58`** (STORY-1100, document-service #32). C n'y touche
+  plus : aucune story du reste de son lot 6 (1117, 326, 1101, 315, 316) ne l'ouvre. **Rien en cours** : ni branche
+  ouverte, ni PR, ni pile Docker.
+  - **Livré par C** : STORY-1087 (#30, fonds d'archives du cabinet, plan de classement PERMANENT / ANNUEL, droits
+    `ged:*`, chiffrement des pièces du cabinet, quota), STORY-1088 (#31, l'original papier : réceptions, boîtes et
+    cotes, sorties, récolement, restitution, recherche dans un fonds), STORY-1100 (#32, mémoire de classement, factures
+    comptabilisées rangées au fonds par `comptabilite.facture.inscrite`). Manifeste `ged` **1.3.0**
+    (`prospera-stories@f703671`, empreinte épinglée dans `src/socle/manifestes/sources-des-manifestes.ts`).
+  - **Demandes encore ouvertes, à B lui-même** (section « Demandes aux autres groupes ») : rôle `CAB_ARCHIVISTE` et
+    attribution des droits `ged:*` aux rôles du cabinet chez `auth-service` (D-1087-4 : sans elle, seul un
+    `TENANT_ADMIN` a les droits) ; copie du manifeste `ged` 1.3.0 au catalogue.
+  - **Nommé pour plus tard** (décisions des fiches, à reprendre dans le lot 7 de B) :
+    - destruction approuvée et inscrite au registre (1087 : `conservationAns` est affichée seulement) ;
+    - quota de 20 Go par cabinet en alerte seulement, Q-SC-5 encore à l'utilisateur (D-1087-5) ;
+    - recherche dans **tous** les fonds du cabinet (D-1088-4) ; pas d'index texte, le texte lu étant chiffré au repos :
+      la recherche déchiffre en mémoire 500 pièces au plus, un très gros fonds demandera un index chiffrable (D-1088-6) ;
+    - notification par e-mail d'une sortie en retard (l'alerte se lit seulement, `GED_RETARD_TOLERANCE_JOURS`) ;
+    - création d'une réception et de ses boîtes non transactionnelle ; deux sorties concurrentes d'une même pièce non
+      verrouillées (D-1088-11) ;
+    - fin d'exercice prise au 31/12 de l'année de l'exercice, faute de date d'exercice dans la GED (D-1088-7) ;
+    - fait de **désinscription** d'une facture : un brouillard abandonné laisse sa copie au fonds (D-1100-3) ;
+    - `conservationAns` jamais retenue par la mémoire de classement (D-1100-6) ; une clé par étage, NIF sinon nom
+      (D-1100-7).
+  - **Pièges** : jouer **tous** les e2e (le recensement de STORY-695, `test/dossier-portee-collaborateur.e2e-spec.ts`,
+    tient la liste fermée `PORTEE_DU_CABINET` des 44 routes du cabinet) ; au gate, `minio: ports: !reset []` (port 9001
+    pris sur le poste principal) et `mc mb kyc-documents` sur un MinIO neuf (D-1087-14) ; l'empreinte du manifeste se
+    calcule sur les octets LF ; avertissement Swagger « Duplicate DTO `ReceptionDto` » à renommer avant de générer des
+    types pour un écran.
+
 - **← A (2026-11-24, à la fusion de 328) : `prospera-fiscal-service`** — rendu à C sur `dev` **`0596fc4`** (fiscal #57,
   docs #841 `d38b268`). Patron des anomalies pour 326 et 1101 : code `SIGNALEE` au `CATALOGUE`
   (`domain/obligations/anomalies.ts`), `AnomaliesObligationsService.signaler(...)` / `retirer`, empreinte du fait (la
