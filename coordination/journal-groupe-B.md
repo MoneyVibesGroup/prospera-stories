@@ -87,8 +87,11 @@
     (`0425fef` sur `dev`) ; contrat annoncé avant la fusion (stories #891, `78c2268`). `manifestes:garde` verte (48)
     contre `bd9340e` ; catalogue 1 621 passés (3 suites rouges connues) ; 3/3 mutations. Sans Docker, verrou non pris.
     Tracker refermé.
-  - **b — correctif de STORY-1073 (25/11) — en cours** : `formeJuridique` publiée sur tout dossier, client compris
-    (`dossier-service` #59, branche `MNV-1073-clients`) ; contrat annoncé avant la fusion (« ⚠ Contrats »).
+  - **b — correctif de STORY-1073 (25/11) — fait** : `formeJuridique` publiée sur tout dossier, client compris ; les
+    huit autres champs de la fiche restent au seul dossier propre (← D, STORY-1077, servie) ; **dossier-service #59**
+    (`645a699` sur `dev`) ; contrat annoncé avant la fusion (stories #895, `6587f56`). Node 25 : 3/3 suites par
+    chemin (208), complète 109/116 (7 rouges connues), e2e 10/10 (395) ; lint, build ; 6/6 mutations. Rejeu : `npm run
+    republier:dossiers`, aucune pile semée sur ce poste (D-1073-15). Sans Docker, verrou non pris. Fiche D-1073-13 → 17.
   - **Suivante : c — le correctif de STORY-1115** (togo@2026 dans les deux buckets de la recette, D-L7B-6).
 
 ### Lot 6 (ouvert le 2026-11-24)
@@ -1434,6 +1437,13 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ D (25/11, correctif de STORY-1073) : servie par dossier-service #59** (`645a699` sur `dev` ; annonce :
+  stories #895) — votre demande « → B (2026-11-25, STORY-1077) : publier `formeJuridique` sur les dossiers CLIENTS
+  aussi » : `ficheLegalePubliee` la publie sur tout dossier, telle qu'elle est stockée (`AUTRE` compris, D-1073-14) ; les
+  huit autres champs restent au dossier propre ; `DossierEtatV1` et `schemaVersion` inchangés. Un dossier client la
+  porte dès son prochain `dossier.*` ; pour les dossiers déjà projetés, `npm run republier:dossiers` (aucune pile semée
+  sur ce poste : rien n'a été rejoué ici, D-1073-15). Rien à changer côté bilan. Votre ligne peut passer à « servie ».
+
 - **→ D (25/11) : servie par catalogue #75** (`0425fef` sur `dev` ; troisième suite de STORY-979 ; annonce : stories
   #891) — votre demande « → B (2026-11-25, STORY-1073) : recopier au catalogue deux manifestes » : `copies.json`
   depuis `prospera-stories@bd9340e` ; **`facturation` 1.2.0** (empreinte `b7b9e0c8…`, la vôtre) et **`paiement`
@@ -1448,7 +1458,8 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 - **← D (25/11, STORY-1077) : `formeJuridique` sur les dossiers CLIENTS aussi** (`dossier-service`) — **reçue pendant
   STORY-1116**, placée par la session de groupe en **ordre « b » du lot 7** (D-L7B-2) : un correctif rattaché à
   STORY-1073 (D-1073-2 a posé la condition « dossier propre »), le seul champ sorti de la condition, puis
-  `npm run republier:dossiers` ; aucun schéma ne change. **En cours** : `dossier-service` #59 (« ⚠ Contrats »).
+  `npm run republier:dossiers` ; aucun schéma ne change. **Servie le 25/11 par dossier-service #59** (`645a699`
+  sur `dev`) ; voir « → D (25/11, correctif de STORY-1073) » ci-dessous.
 - **← C (25/11, STORY-326, puis 1101) : republier `togo@2026` (`5c683d16…`) dans les deux buckets de la recette** —
   **reçue, placée par la session de groupe en ordre « c »** (D-L7B-6, correctif de STORY-1115).
 - **← C (25/11, STORY-1020) : recopier `balance` 1.2.0 au catalogue** — **reçue, placée par la session de groupe** en
@@ -3295,6 +3306,11 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Les e2e de `dossier-service` dépassent leurs délais sous charge** (correctif de STORY-1073) : jouées en parallèle
+  avec un lint, 7 tests de 4 suites (axes, participations, démonstration, dossiers) ont rougi sans lien avec le code ;
+  rejouées seules en `-i`, 271/271. Ne pas lancer les e2e à côté d'une autre suite lourde ; rejouer en `-i` avant
+  d'accuser le diff.
 
 - **Le relais de ports du poste coupe aussi des REQUÊTES, pas seulement des réponses** (STORY-1116, suite de
   D-1115-12) : une des cinq ouvertures parallèles n'a jamais atteint le BFF (quatre `POST` à son journal), un dépôt de

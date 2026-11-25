@@ -188,8 +188,9 @@ forme manque à tout dossier client : l'alerte y rend son constat chiffré **san
   seul point à changer, `ficheLegalePubliee`.
 - [x] Code, preuves sous Node 25 (unitaires, lint, build, mutations).
 - [x] « ⚠ Contrats » du journal de B annoncé avant la fusion du code (cette PR de docs ; PR de code #59).
-- [ ] PR de code fusionnée en rebase ; SHA rejoué sur `dev`.
-- [ ] PR de docs finale (fiche, tracker, journal de B).
+- [x] PR de code fusionnée en rebase : `dossier-service` **#59** (`dev` **`645a699`**) ; arbre fusionné identique au
+  commit testé.
+- [x] PR de docs finale (fiche, tracker, journal de B). Verrou Docker non pris.
 
 ### Décisions retenues par défaut (contestables)
 
@@ -217,3 +218,24 @@ forme manque à tout dossier client : l'alerte y rend son constat chiffré **san
   (STORY-1082) rendent `etatPublie` (« la forme exacte de `dossier.created` », D-1082-6) : la forme y entre
   pour le dossier de démonstration. `balance-service` (C) la type en `DossierEtatV1` et projette nommément : rien à
   faire chez lui (dit dans « ⚠ Contrats »).
+
+### Ce qui a été livré (correctif)
+
+- **`prospera-dossier-service`** (#59, `dev` `645a699`) : `fiche-legale-publiee.util.ts` — la forme juridique lue
+  avant la condition « dossier propre » et rendue seule pour un client ; `dossier-events.ts` et `etat-publie.util.ts`
+  (commentaires du contrat). Specs : `fiche-legale-publiee.util.spec.ts` (client : six formes, forme vide, nulle ou
+  absente, `estLeCabinet` douteux), `dossiers.service.spec.ts` (la liste blanche commune gagne `formeJuridique` ; un
+  client ne publie qu'elle ; sa forme corrigée par `PATCH` part sur `dossier.updated`), `republication-dossiers.service.spec.ts`
+  (la commande de 696 republie la forme d'un client existant sur un vrai document, et rien d'autre de sa fiche).
+
+### Preuves (correctif)
+
+| Où | Quoi | Résultat |
+|---|---|---|
+| dossier, Node 25, par chemin | fiche légale, `DossiersService`, republication | **3/3 suites, 208/208** |
+| dossier, Node 25 | suite unitaire complète | **109/116 suites** ; les 7 rouges connues (6 binding de Confluent, `registre-pays.coherence`), identiques à 1073 ; 1 890 tests verts |
+| dossier, Node 25 | e2e | **10/10 suites, 395** (4 suites rejouées seules en `-i` après des dépassements de délai sous charge, piège du journal) |
+| dossier | lint des fichiers touchés (`endOfLine: auto`) ; build | 0 ; OK |
+| dossier, mutations | forme retirée du client, fiche entière publiée au client, forme brute sans filtre (`null`/vide), condition lâche (`!estLeCabinet`), spread du document dans `etatPublie`, une autre clé (NIF) qui fuit au client | **6/6 tuées** sur l'assertion |
+
+Sans Docker (D-1073-16) ; rejeu par `npm run republier:dossiers` sans pile à rejouer sur ce poste (D-1073-15).
