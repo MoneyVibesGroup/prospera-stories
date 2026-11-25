@@ -42,8 +42,10 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
   5. ✅ **STORY-1101 DONE (25/11)** : balance-service **#163** (`8fbdf6e`, les couples au paquet), fiscal **#60**
      (`0d353c2`, le rapprochement et l'assiette), contrat #862. Node 24 : fiscal 2642 / 223, conformité 93/93 sur le vrai
      `mongo-fiscal` ; mutation 6/6 ; gate `grp-c` vert ; — fiche dans #730, à fusionner avant (geste de l'utilisateur) ;
-  6. 🟡 **STORY-315** le calendrier fiscal du portefeuille (fiscal) : fiche et contrat annoncés le 25/11 ; puis **316**
-     (fiche écrite juste avant).
+  6. ✅ **STORY-315 DONE (25/11)** : fiscal **#61** (`7d97ae0`), contrat #867. Node 24 : 2618 / 230, conformité 102/102 ;
+     NFR-F13 mesurée (60 ms, 24 ms, 157 ms sur 500 × 12) ; mutation 9/9 ; gate `grp-c` vert (Kafka réel) ;
+  7. 🟡 **STORY-316** les échéances viennent du paquet, dont le 30/04 des sociétés (fiscal, paquet dans balance-service) :
+     fiche et contrat annoncés le 25/11.
 - **Docker** : verrou du poste principal (`MoneyVibes_Apps\.verrou-docker`) partagé avec A ; aucune pile de C ne tourne.
 
 - **2026-11-14** : journal ouvert, lot pas encore commencé.
@@ -360,6 +362,8 @@ seulement.
   `etat-publie.changed.<espace>`, double lecture) dans une story de la plage de C, après STORY-990.
 
 ## ⚠ Contrats
+
+- **2026-11-25 (STORY-316), AVANT le code** : le paquet fiscal Togo 2026 change le mode de l'échéance `societe` de `depot.echeances` (`NON_CONSTATABLE` → `FORME_JURIDIQUE`, `formesJuridiques: [SA, SARL, SAS, SUARL]`) et l'entrée `DSF` du réel gagne une condition de forme juridique ; nouvelle empreinte. Le fiscal lit la `formeJuridique` du dossier (`GET /dossiers/{id}` de dossier-service, déjà lu). Une DSF de société au réel rend désormais son 30/04 ; une EI au réel reste `ECHEANCE_NON_CONSTATABLE`. **→ B** : la copie du paquet dans `dossier-service` diverge un peu plus (sans effet sur son code, qui ne lit pas ce mode).
 
 - **2026-11-25 (STORY-315), AVANT le code** : route neuve `GET /api/v1/obligations/calendrier` (filtres `annee`, `pays`, `responsable`, `taxe`, `periode`, `statut`, `dossierId`, tri, curseur) → `{ lignes: [...], suivant }`, portée par collaborateur lue dans la réplique des dossiers (`dossiers_fiscal` projette en plus `raisonSociale`, `estLeCabinet`, `responsableUserId`, `contributeursUserIds`), index neuf `{ orgId, annee, echeance, _id }`. **→ A** : écran du calendrier (lot 7 de A).
 
