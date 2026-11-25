@@ -82,6 +82,31 @@
     écrire depuis `epics-fiscalite-2026-08-03.md` juste avant de coder ; la saisie et l'import passent déjà par la même
     écriture).
 
+- **STORY-347** ✅ ✍️ — la saisie manuelle de la base de rémunération (prospera-fiscal-service#65, `dev` `4a1d938` ;
+  fiche écrite juste avant le code, D-347-1 → 6 ; aucune annonce : ni contrat ni fichier commun ne bouge). Rituel
+  (2026-11-25) : aucune demande neuve à D chez A, B et C (une information de C, D-1021-7 : balance sert l'export d'instance
+  en CSV par objet, bilan pourra prendre la même forme) ; aucune PR ouverte ni migration en vol sur le fiscal.
+  - **Ce qui existait déjà** (345, 346) : la route de saisie `PUT …/remuneration/{periode}`, l'écriture unique `ecrire`
+    (saisie `SAISIE`, import `IMPORT`), le document sans provenance, la provenance par version servie aux lectures.
+    **Pas de route neuve** (D-347-1, AD-20 : un seul chemin d'écriture).
+  - **Livré** (dossier `remuneration`) : la désignation en **NFC** pour les deux chemins (D-347-2 : un nom saisi en NFD
+    et le même importé en NFC font le même document) ; **`RemunerationService.baseDuCalcul`** : la base qu'un calcul
+    lit, jamais des lignes sans leur `origine` (`version`, `provenance`, `empreinte`, `constitueeLe` ; ni auteur ni nom),
+    que 348 recopiera (D-347-4) ; l'origine est celle du contenu (une saisie égale à un import reste `IMPORT`,
+    D-347-5) ; **l'e2e de la saisie**, qui n'existait pas (gardes, 201 / 200 / version 2, 422, 400 hors contrat,
+    parité avec l'import dans les deux sens et en NFD, provenance au détail, aux versions et aux totaux) ; la
+    conformité (import puis saisie ⇒ une version ; `baseDuCalcul` ⇒ `IMPORT` puis `SAISIE`, empreintes des en-têtes).
+  - **Communs** : aucun. Aucune migration.
+  - Preuves : Node 24 unitaires 200/200 suites, 2 870 tests (1 ignoré), e2e 13/13 suites, 261 tests, **`test:conformite` 18/18 suites, 115 tests** ; Node 25 : domaine et service 95/95,
+    e2e de la base 19/19 ; **mutations 7/7** ; lint, `tsc`, build 0 ; pas de compose (§1.5 : aucun module, dépendance ni
+    Dockerfile). **Verrou Docker** : pris à 22:08 (une seule passe : unitaires, e2e, conformité), rendu à 22:13 par le trap du script autonome ; B et C prévenus ; aucun conteneur, volume ni réseau grp-d.
+  - **→ A** (plus tard) : l'écran de saisie part de la dernière version et renvoie la base entière (D-347-6), les types
+    par une liste (D-347-3).
+  - **Suivante : STORY-348** (le calcul des cotisations et des retenues, aiguillé sur le type de bénéficiaire ; fiche à
+    relire et mettre à jour ; elle lit la base par `baseDuCalcul`). **Elle attend STORY-564 de C** (le barème IRPP au
+    paquet, et la recopie du paquet fiscal dans le service, plan §6) : 564 **en cours** chez C (fiche relue, D-564-1 → 12, et annonce avant le code, `main` 1d64753 ; branche `MNV-564` du fiscal, recopie du paquet comprise ; C préviendra D à la fusion). La session de groupe de D décide de la
+    suite : les autres stories de D attendent 348 (364, 349) ou C (330 ← 325, puis 331 → 337 et 561 → 565).
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
@@ -1381,6 +1406,12 @@
     - **Recettes** : `scripts/recette/1068` → `1071` (piles `grp-d`, pilotes Python, mutations).
 
 ## Demandes aux autres groupes
+
+- **→ C (2026-11-25, STORY-347, pour STORY-348) : STORY-564, le barème IRPP au paquet fiscal Togo, et la recopie du
+  paquet dans `prospera-fiscal-service`** — **ouverte**. État constaté au journal de C (`origin/main`, 25/11 au soir) :
+  564 **en cours** chez C (fiche relue, D-564-1 → 12, et annonce avant le code, `main` 1d64753 ; branche `MNV-564` du fiscal, recopie du paquet comprise ; C préviendra D à la fusion). 348 lit le barème (`irpp.traitementsSalaires.ordreDeCalcul`), le SMIG (`cnss.assiette.smig`), la ventilation
+  par branche et l'AMU dans la copie du paquet du service (D-L7-3 : la copie est à C ; plan §6 : recopiée au plus tard
+  avant 348). La base que 348 lira est prête (`baseDuCalcul`, STORY-347). Prévenir D à la fusion de 564.
 
 - **→ B et → C (2026-11-25, STORY-1079) : dans l'espace d'essai, la garde de `dossier-service` (B) et celle de
   `balance-service` (C, `@RequiresBalanceAccess`) ne lisent pas le KYC** — **ouverte** (ticket
@@ -3143,6 +3174,12 @@
 
 ## Pièges rencontrés
 
+- **STORY-347** (la saisie de la paie) :
+  - (1) Le piège (6) de 560 vaut aussi pour **`'\r\n'` dans un script Python passé par heredoc** : le fichier TS reçoit
+    un vrai CRLF au milieu d'une chaîne (`Unterminated string literal`). Écrire le script par l'outil d'écriture, ou
+    `bytes([92])` pour la barre oblique inverse.
+  - (2) **L'e2e de la base de rémunération tourne sous Node 25** (il ne monte que `RemunerationController`, sans
+    `AppModule` ni client Kafka) : les mutations du contrôleur s'y jouent sans Docker ni verrou.
 - **STORY-346** (le fichier de paie) :
   - (1) **Un échappement `\uXXXX` écrit par l'outil d'écriture arrive en caractère réel** dans le fichier (une espace
     insécable dans une classe de regex, un BOM dans une chaîne de test) : `eslint` le voit (`no-irregular-whitespace`),

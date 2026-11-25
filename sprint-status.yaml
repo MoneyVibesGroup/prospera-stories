@@ -7937,8 +7937,9 @@ sprints:
         epic: "EPIC-034"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        source_doc: "prospera-stories/stories/STORY-347.md"
+        status: "done"  # 🏁 DONE le 2026-11-25 (lot 7 de D, n° 3) — prospera-fiscal-service#65 (dev 4a1d938). La route de saisie PUT …/remuneration/{periode} (345) et l’écriture unique de 346 étaient déjà là : pas de route neuve (D-347-1). Livré : la désignation en NFC pour les deux chemins (D-347-2) ; RemunerationService.baseDuCalcul, les lignes jamais sans leur origine (version, provenance, empreinte) pour 348 (D-347-4) ; e2e de la saisie (gardes, 201/200, 422, 400, parité avec l’import dans les deux sens, provenance servie) ; conformité (import puis saisie ⇒ une version, origine IMPORT puis SAISIE). Aucun contrat ni fichier commun. Node 24 : unitaires 200/200 suites, 2 870 tests (1 ignoré), e2e 13/13 suites, 261 tests, conformité 18/18 suites, 115 tests ; mutations 7/7.
+        assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-348"
         title: "Calcul des cotisations et des retenues, aiguillé sur le type de bénéficiaire"
         epic: "EPIC-034"
