@@ -44,6 +44,7 @@
   | b | STORY-1073 (correctif) | `formeJuridique` sur les dossiers clients |
   | c′ | STORY-917 (correctif) | CORS du BFF : `Idempotency-Key` annoncé (← A, AP-55 ; D-L7B-7) |
   | c | STORY-1115 (correctif) | republier togo@2026 (`5c683d16…`) dans les deux buckets de la recette (← C) |
+  | d | STORY-100 (correctif) | `atelier-balance` octroie `conseil` au cabinet (← C, STORY-1019 ; D-L7B-8 : demande de C placée avant 1119) |
   | 1 | STORY-1119 | les archives ont valeur de preuve |
   | 2 | STORY-1120 | fin de mission et réversibilité |
   | 3 | STORY-1121 | la destruction proposée, puis visée |
@@ -87,6 +88,12 @@
   (BFF #35, `f27d10a` : la story qui a ouvert le relais de `Idempotency-Key`, D-917-4) ; aucun identifiant neuf ;
   commits `MNV-917(admin-panel): …`.
 
+- **D-L7B-8 — ordre « d » : la demande de C placée avant 1119** (25/11, session de groupe ; §1.1) : « → B
+  (2026-11-25, STORY-1019) : la recette `atelier-balance` doit octroyer `conseil` au cabinet » (journal de C). Petite,
+  dans la recette de B, et la suite de l'Atelier rougit sans elle. **Correctif rattaché à STORY-100** (la story qui a
+  écrit l'octroi des droits du cabinet dans `atelier-balance`, `0874cff`) ; aucun identifiant neuf ; commits
+  `MNV-100(recette): …`.
+
 - **Avancement** :
   - **a — troisième suite de STORY-979 (25/11) — faite** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
     catalogue depuis `prospera-stories@bd9340e` (← D, STORY-1073) ; `balance` 1.1.0 entraînée par la copie entière
@@ -122,7 +129,16 @@
     (`66a4f6c` sur `dev`) ; contrat annoncé avant la fusion (stories #913, `0ee7144`). `manifestes:garde` verte (48)
     contre `main` ; catalogue 61/61 par chemin, complète 1 622 passés (3 suites rouges connues) ; 3/3 mutations. Sans
     Docker, verrou non pris. Tracker refermé. Fiche D-979-29 → 34.
-  - **Suivante : STORY-1119** (n° 1 : les archives ont valeur de preuve).
+  - **d — correctif de STORY-100 (25/11, D-L7B-8) — fait** : `atelier-balance` octroie `conseil` au cabinet après
+    `balance`, attend la porte du conseil (Kafka), et le voisin (`balance` sans `conseil`) éprouve `403
+    CONSEIL_NOT_ENTITLED` (← C, STORY-1019, servie) ; **recette #33** (`9ca8abc` sur `dev`) ; aucun contrat touché.
+    Pile `grp-b-recette` neuve depuis `origin/dev` (balance `ab4e468`) : rouge sur `dev` 10 échecs / 51, tous
+    `CONSEIL_NOT_ENTITLED` ; vert `atelier-balance` 52/52 et `cabinet-moteur` 9 passés (2 sautés, essai seulement ; FR-6
+    intact). `INSTALLATION_SERVICES` inchangé : `conseil` y entre avec STORY-1129 (D-100-4) ; `INSTANCE_ESPACE` du balance
+    déjà réglé par `RECETTE_ESPACE` (D-100-5). Verrou 20:56 → 21:15, `down -v`. Fiche D-100-1 → 6.
+  - **Suivante : STORY-1119** (n° 1 : les archives ont valeur de preuve). **Nommé pour STORY-1129** (n° 11) :
+    `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
+    `cabinet-moteur` et `abonnement` rejouées (D-100-4).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1475,6 +1491,19 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   démarrer.
 
 ## Réponses aux demandes reçues
+
+- **→ C (25/11, correctif de STORY-100) : servie par recette #33** (`9ca8abc` sur `dev`) — votre demande « → B
+  (2026-11-25, STORY-1019) : la recette `atelier-balance` doit octroyer `conseil` au cabinet » :
+  `octroyer(cabinet, 'conseil', [SYSCOHADA])` après `balance` ; le premier test attend que la porte du conseil s'ouvre ;
+  un test neuf exige `403 CONSEIL_NOT_ENTITLED` du voisin (`balance` sans `conseil`) sur `GET`/`POST …/fiscal/scenarios`
+  et `GET …/fiscal/dossier-justification`. Sur une pile neuve depuis `origin/dev` (balance `ab4e468`) : 52/52 ;
+  `cabinet-moteur` verte (FR-6 intact). Aucune autre suite n'appelle ces routes. Vos deux options : `conseil` dans
+  `INSTALLATION_SERVICES` attend STORY-1129 (il change `cabinet-moteur` et `abonnement`, D-100-4) ; `INSTANCE_ESPACE`
+  du balance de la recette suit déjà `RECETTE_ESPACE` (une pile en `ESSAI` a un balance d'essai, aucun KYC à semer ;
+  D-100-5). Pour rejouer l'Atelier : `npm run recette -- atelier-balance`. Votre ligne peut passer à « servie ».
+- **← C (25/11, STORY-1019) : `atelier-balance` doit octroyer `conseil` au cabinet** — **reçue, placée par la session
+  de groupe en ordre « d »** (D-L7B-8, correctif de STORY-100). **Servie le 25/11 par recette #33** (`9ca8abc` sur
+  `dev`) ; voir « → C (25/11, correctif de STORY-100) » ci-dessus.
 
 - **→ C (25/11) : servie par catalogue #76** (`66a4f6c` sur `dev` ; quatrième suite de STORY-979 ; annonce : stories
   #913) — votre demande « → B (25/11, STORY-1020) : recopier au catalogue le manifeste `balance` 1.2.0 » : `copies.json`
