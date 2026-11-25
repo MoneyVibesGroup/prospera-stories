@@ -1536,6 +1536,38 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-25, STORY-1078, avant la fusion du code ; branche `MNV-1078` de prospera-bilan-service) — Les
+  quatre contrôles d'intégrité de la liasse, dans la réponse d'analyse.** Fiche : `stories/STORY-1078.md` (D-1078-1 →
+  11). **Ajouts seuls** : aucun champ, aucune route, aucune valeur d'énumération existante ne change ni ne disparaît.
+  - **Réponse d'analyse** (`GET /dossiers/{id}/bilan/analyse` et `POST …/analyse/dry-run`) : liste neuve
+    **`controlesIntegrite`**, toujours présente, **quatre entrées dans cet ordre** : `IDENTITE_FRNG_BFR_TRESORERIE`
+    (FRNG = besoin de financement global + trésorerie nette, écarts de conversion éliminés : Note 34 du SYSCOHADA
+    révisé), `CAISSE_CREDITRICE`, `AMORTISSEMENTS_SUPERIEURS_AU_BRUT` (AUDCIF 45-47), `PERTE_CHANGE_SANS_PROVISION`
+    (AUDCIF 54). Chaque entrée : `code`, `libelle`, `statut` (`OK` | `ANOMALIE` | `INDETERMINE` | `NON_APPLICABLE`),
+    `motif` (`PAQUET_SANS_CONTROLE`, `CONTROLE_NON_DECLARE`, `BILAN_DESEQUILIBRE`, ou un motif d'indétermination des
+    indicateurs : `MARQUEUR_ABSENT`, `MONTANT_HORS_BORNES`…, sinon `null`), **`termes`** (`{ code, libelle, montant }` ;
+    codes `FRNG`, `BFR`, `TRESORERIE_NETTE`, `ECART_CONVERSION_ACTIF`, `ECART_CONVERSION_PASSIF`, `ECART`,
+    `ECART_EQUILIBRE_BILAN`, `SOLDES_CREDITEURS_CAISSE`, `EXCEDENT_AMORTISSEMENTS`, `PROVISIONS` ; montants en unités
+    mineures, colonne N, `null` si non mesuré), **`elements`** (`{ nature: COMPTE | GROUPE_DE_COMPTES, ref, libelle,
+    brut, amortissements, montant }` : la caisse créditrice et son solde, l'écart de conversion non provisionné, le
+    groupe d'immobilisations amorti au-delà de son brut avec l'excédent), `message` (affichable tel quel, ou `null`),
+    **`sources`** (`{ texte, citation, url }`, lues du paquet ; `[]` quand le contrôle n'est pas déclaré). **Des
+    signaux** : ni `valide`, ni la batterie des contrôles de cohérence, ni la liasse ne changent.
+  - **Les soldes lus** : ceux de la liasse servie (soldes du jeu ; ceux de la version figée quand `version` est
+    demandée ; ceux du corps du `dry-run`).
+  - **Paquets** (révision en place ; liasse produite inchangée, chaque artefact identique à l'octet hors du bloc) :
+    `syscohada-revise@2.1`, `@2.2`, `@2.3`, `zone-franche-togo@1.0` gagnent le bloc **`controlesIntegrite`** (racines de
+    caisse `57` ; sept groupes d'immobilisations `21`…`27` face à `281`…`284` et `291`…`297` ; écarts de conversion-actif
+    `478` hors `4788` ; provisions `194`, `499`, `599` ; sources). Empreintes : `syscohada-revise@2.1` `a2da57d7…`,
+    `@2.2` `65c9c9a9…`, `@2.3` `39bb9f99…`, `zone-franche-togo@1.0` `70c87a37…`. SMT, SFD-BCEAO, CIMA : inchangés, les
+    quatre contrôles `NON_APPLICABLE`.
+  - **Non livré : le rapprochement de la liasse avec sa balance par l'empreinte des soldes** (STORY-1022 de C non
+    livrée, D-1078-10) ; il s'ajoutera à côté, sans changer ce qui précède.
+  - **Pour A (FE-141)** : types à régénérer (`npm run gen:api -- bilan`) ; afficher `message` et `sources` tels quels,
+    les `elements` en liste ; un écran qui ignore la liste ne change rien.
+  - **`balance-service` (C)** : la recopie à l'octet des trois `syscohada-revise` (ticket de 1076, mis à jour) prend la
+    version de 1078 ; sans effet en service.
+
 - **PUBLIÉ (2026-11-25, STORY-1077, prospera-bilan-service#187, `dev` 9fed378) ; ANNONCÉ avant la fusion du code
   (prospera-stories #853, `main` 4222321 ; complément #859, `main` 9be68d5), sans autre écart. — L'alerte « capitaux
   propres inférieurs à la moitié du

@@ -43,3 +43,14 @@ passage `capitauxPropresStricts` et le bloc `alerteCapitauxPropres` (alerte « c
 AUSCGIE 371-373 et 664-669). `balance-service` ne lit ni l'un ni l'autre. **Recopier la version de STORY-1077**
 (elle contient celle de 1076) : le SHA de `dev` et les trois empreintes sont écrits dans l'entrée « PUBLIÉ » de
 STORY-1077 du journal de D (« ⚠ Contrats ») et dans la fiche `stories/STORY-1077.md` (« Preuves »).
+
+## Mise à jour (2026-11-25, STORY-1078, D)
+
+STORY-1078 révise **encore en place** les mêmes trois artefacts : le bloc `controlesIntegrite` (les quatre contrôles
+d'intégrité de la liasse, leurs comptes et leurs sources). `balance-service` ne le lit pas. **Recopier la version de
+STORY-1078** (elle contient celles de 1076 et 1077). Empreintes de STORY-1078 : `syscohada-revise-2.1.json`
+`a2da57d7732881165266db2dbd56a3c54ac409a2ecd9b7650a88adf4c9b466b7`, `syscohada-revise-2.2.json`
+`65c9c9a9e48f2ad66e8fc966e1b1bab8625d83e40a73a33119344db99922ba08`, `syscohada-revise-2.3.json`
+`39bb9f9954b161bf6cd2fa28e20fab405f8d91d99f1db1a0e49b591fbf0ed833` (`zone-franche-togo-1.0.json`, non recopié :
+`70c87a37618ea5beddfe0bf1543f47b3b7d75636c9879c3344d59c70bb2da0a0`). Le SHA de `dev` est écrit dans l'entrée « PUBLIÉ »
+de STORY-1078 du journal de D (« ⚠ Contrats »).
