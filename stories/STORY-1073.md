@@ -163,3 +163,57 @@ les imprime — « SARL au capital de 25 000 000 F », NIF, RCCM, CNSS, adresse,
 ••••••••4521 — titulaire : … » —, jamais l'identifiant ni la saisie du DAF ; (6) une projection effacée revient entière
 par `npm run republier:dossiers` (même version), et FAC-2026-000002 porte la même fiche ; (7) `ventes-service.emetteur`
 sans retard, les trois services sains.
+
+## Correctif du 2026-11-25 — la forme juridique sur les dossiers CLIENTS aussi (groupe B, lot 7, ordre « b »)
+
+**Demande :** D, STORY-1077 (journal de D, « → B (2026-11-25, STORY-1077) : publier `formeJuridique` sur les dossiers
+CLIENTS aussi ») ; journal de B, « Ce qui reste ouvert à la fin du lot 6 de B », point 3 ; placée par la session de
+groupe en ordre « b » du lot 7 de B (D-L7B-2). **Aucun identifiant neuf** : la condition « dossier propre » est née ici
+(D-1073-2), et D-1073-12 (4) nommait cet élargissement « par la même fonction ». **Dépôt :** `prospera-dossier-service`
+(rendu à B par D à la fin de cette story), branche `MNV-1073-clients`, commits `MNV-1073(dossier): …` · **Exécutée par :**
+groupe B.
+
+**Pourquoi :** `bilan-service` lit `formeJuridique` de `dossier.created` / `dossier.updated` pour dater l'alerte
+« capitaux propres < ½ capital » (AUSCGIE 371-373 SARL, 664-669 SA, STORY-1077). Publiée sur le seul dossier propre, la
+forme manque à tout dossier client : l'alerte y rend son constat chiffré **sans échéance** (`FORME_JURIDIQUE_INCONNUE`).
+
+### Où en est-on
+
+- [x] Rituel : plan du lot 7, journaux de A, B, C, D (deux demandes de C à B reçues le 25/11, placées par la session de
+  groupe : ordre « c » et quatrième suite de STORY-979, journal de B) ; `dossier-service` trouvé sur `MNV-1082`, propre,
+  fusionnée (#57, arbre identique à `2bf9dbd`) ; `origin/dev` = **`4352ac3`** (1073 de D), aucune PR ouverte ; branche
+  `MNV-1073-clients` partie d'`origin/dev`.
+- [x] Code relu avant d'écrire (piège payé) : la forme est **requise en base** (`@Prop({ required: true })`, enum
+  `FormeJuridique`) ; trois chemins publient `etatPublie` (routes, republication de 696, réponses du moteur de 1082) ; un
+  seul point à changer, `ficheLegalePubliee`.
+- [x] Code, preuves sous Node 25 (unitaires, lint, build, mutations).
+- [x] « ⚠ Contrats » du journal de B annoncé avant la fusion du code (cette PR de docs ; PR de code #59).
+- [ ] PR de code fusionnée en rebase ; SHA rejoué sur `dev`.
+- [ ] PR de docs finale (fiche, tracker, journal de B).
+
+### Décisions retenues par défaut (contestables)
+
+- **D-1073-13 — La forme juridique, et elle seule, sort de la condition « dossier propre ».** `ficheLegalePubliee` la
+  publie sur **tout** dossier (client compris), lue nommément, telle qu'elle est stockée ; les huit autres champs de la
+  fiche (sigle, NIF, RCCM, CNSS, capital, adresse, téléphone, courriel) gardent la condition : un dossier client garde la
+  liste blanche de STORY-301 / 529 (« ni NIF, ni coordonnées ») — la forme n'est ni un identifiant ni une coordonnée.
+  Clé **absente** (jamais `null` ni vide) quand le dossier n'en porte pas (écrit hors Mongoose) ; un `estLeCabinet` qui
+  n'est pas exactement `true` est un client. Le capital n'est pas demandé (bilan le lit dans la liasse). `DossierEtatV1`
+  ne change pas de forme : le champ y est déjà déclaré facultatif, `schemaVersion` reste 1, aucun schéma de registre.
+- **D-1073-14 — `AUTRE` est publiée telle quelle sur un dossier client.** Le lecteur décide de ce qu'elle vaut : bilan
+  n'y trouve aucun régime (`FORME_SANS_REGIME`), la facture ne l'imprime pas (D-1073-8). Ne pas la publier ferait passer
+  une forme déclarée pour une forme inconnue.
+- **D-1073-15 — Le rejeu : la commande de STORY-696, sans une ligne de plus, et aucune pile à rejouer sur ce poste.**
+  `npm run republier:dossiers` publie `etatPublie` à la version courante : elle republie la forme de chaque dossier
+  client existant (prouvé sur un vrai document, `republication-dossiers.service.spec.ts`). Aucune pile semée ne vit sur
+  ce poste (`docker ps` : aucune ; les recettes naissent sur volumes neufs et publient la forme dès la création du
+  dossier) : il n'y a rien à rejouer aujourd'hui. Sur un environnement durable, l'opérateur la joue une fois après le
+  déploiement de `dev` (aucun en production). Bilan projette l'état absolu sans garde de version : la même version
+  republiée réécrit la forme.
+- **D-1073-16 — Sans Docker.** Aucun module Nest, aucune dépendance, aucun Dockerfile ne change ; la pile de 1073 (D) a
+  déjà prouvé que la republication rend une projection effacée entière. Verrou non pris.
+- **D-1073-17 — Les réponses du moteur de démonstration portent la forme aussi.** `PUT
+  /api/v1/instance/dossier/{organisationId}/dossiers-de-demonstration/{dossierRef}` et `…/{dossierRef}/exercices`
+  (STORY-1082) rendent `etatPublie` (« la forme exacte de `dossier.created` », D-1082-6) : la forme y entre
+  pour le dossier de démonstration. `balance-service` (C) la type en `DossierEtatV1` et projette nommément : rien à
+  faire chez lui (dit dans « ⚠ Contrats »).
