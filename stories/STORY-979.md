@@ -1,7 +1,7 @@
 # STORY-979 : les droits de la facture et des archives du cabinet au catalogue de tenant d'auth
 
-Status: in-progress (troisième suite, « Suite du 2026-11-25 », en fin de fiche ; rouverte et refermée deux fois le
-2026-11-24 pour ses suites : « Suite du 2026-11-24 » et « Suite du 2026-11-24 (soir) »)
+Status: done (rouverte et refermée trois fois pour ses suites : « Suite du 2026-11-24 », « Suite du 2026-11-24
+(soir) » et « Suite du 2026-11-25 », en fin de fiche)
 
 **Complexité :** faible (huit droits neufs au catalogue de tenant, hors du jeton ; un rôle du socle neuf ; une ligne
 d'ajout à l'annexe B ; la copie des manifestes du catalogue ; aucun champ, aucune route, aucun topic)
@@ -444,8 +444,13 @@ STORY-1020 de C, contrat annoncé avant un code encore en cours).
 
 ### Livraison de la suite (25/11)
 
-En cours : **catalogue #75** (tête `d5f2b2e`). Fichiers : `copies.json` depuis `prospera-stories@bd9340e` ;
-`manifestes-seed.service.spec.ts`.
+Fusionnée en « Rebase and merge », `mergedAt` non nul, `headRefOid` = SHA poussé, arbre de la branche identique à
+`dev` après rejeu :
+
+- **catalogue #75** : **`0425fef` sur `dev`** (tête de la PR `d5f2b2e`). Fichiers : `copies.json` depuis
+  `prospera-stories@bd9340e` ; `manifestes-seed.service.spec.ts`.
+- Contrat annoncé avant la fusion : stories #891 (fiche, tracker rouvert, « ⚠ Contrats »), `78c2268` sur `main`.
+- D et C prévenues par le journal de B (« → D », « → C », « Réponses aux demandes reçues »).
 
 ### Preuves de la suite (25/11)
 
