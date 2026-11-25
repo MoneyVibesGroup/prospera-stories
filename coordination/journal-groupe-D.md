@@ -1192,7 +1192,10 @@
   côte à côte. D ne touche pas à `balance-service` (D-L6-5). **Mise à jour du 2026-11-25 (STORY-1077)** : les mêmes
   trois artefacts sont révisés encore en place (marqueur `capitauxPropresStricts`, bloc `alerteCapitauxPropres`) :
   recopier la version de 1077 (bilan `dev` `9fed378` ; empreintes `a1f6fd49…`, `bcbae17b…`, `fbdca0df…`), qui
-  contient celle de 1076 ; le ticket le dit.
+  contient celle de 1076 ; le ticket le dit. **Mise à jour du 2026-11-25 (STORY-1118)** : les tables de passage et les plans des mêmes artefacts sont révisés
+  encore en place (amortissements et dépréciations rattachés au poste de leur actif) — **cette fois la liasse change**
+  pour une balance amortie, et **`smt-togo-1.0.json` est aussi à recopier** (quatre artefacts) ; recopier la version de
+  1118, qui contient celles de 1076 → 1078 (empreintes dans le ticket et dans « ⚠ Contrats », entrée STORY-1118).
 - **→ B (2026-11-24, soir ; amendement du lot 6, D-L6-5) : la passation de `prospera-bilan-service` à D** — **servie**
   (← B, 24/11, prospera-stories #820 ; constatée par STORY-1076, voir « Passations »).
   Le plan amendé fait passer le bilan de B à D pour ce lot (STORY-1074 → 1078 ; 1080 ✅ était la dernière story de B
@@ -1583,6 +1586,38 @@
   seul** sur chacun (squash et commit de fusion encore permis), comme sur `reseau-service`.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-25, STORY-1118, avant la fusion du code ; prospera-bilan-service, branche `MNV-1118`) — Les
+  amortissements et les dépréciations rattachés au poste de leur actif : LES MONTANTS DES LIASSES CHANGENT.** Fiche :
+  `stories/STORY-1118.md` (D-1118-1 → 10). **Aucun champ, aucune route, aucune valeur d'énumération ne change ;
+  les valeurs, si.**
+  - **Ce qui change** : les tables de passage de `syscohada-revise@2.1`, `@2.2`, `@2.3`, `zone-franche-togo@1.0` et
+    `smt-togo@1.0` rattachent les comptes `28`, `29`, `39`, `49` (hors `499`) et `59` (hors `599`) au poste de leur
+    actif (subdivision « à l'image », Guide d'application du SYSCOHADA révisé p. 68, 81, 329 ; AUDCIF art. 47) : `2845`
+    → `AN`, `28441` → `AM`, `391` → `BB`, `491` → `BI`, `590` → `BQ`… (table complète : fiche, D-1118-2 ; SMT : `AC1`,
+    `AC2`, `AC3`, `AC5`). **Pour toute balance qui porte l'un de ces comptes** : la colonne « Amort./Dépréc. » de
+    l'actif se remplit, le net baisse d'autant, le bilan s'équilibre, `comptesNonMappes` et `COMPTES_NON_AFFECTES` ne
+    les nomment plus, `EQUILIBRE_BILAN` passe `OK`, la liasse devient validable ; les indicateurs d'analyse (FRNG,
+    BFR, poids des capitaux propres, liquidité…) et l'identité du fonds de roulement de 1078 (`OK` au lieu
+    d'`INDETERMINE`) suivent. Cas du ticket : `AM` net 1 000 000 → **600 000**, FRNG −200 000 → **+200 000**. Une
+    balance sans ces comptes : rien ne bouge.
+  - **Plans de comptes** : +117 comptes officiels (281 → 2848, 291 → 2978, 391 → 398, 490 → 4983, 590 → 594) dans les
+    cinq paquets (libellés servis par la route catalogue).
+  - **Révision EN PLACE** (D-1118-5), les versions ne bougent pas : les liasses validées ou figées restent figées
+    (snapshot et tampon complet, ancienne empreinte), jamais reproduites ; les brouillons se recalculent avec la table
+    corrigée. `MOTEUR_VERSION` inchangée (`bilan-engine@1.24.0`).
+  - **Empreintes** : `syscohada-revise@2.1` `3880b6c2b9ccef9cc063258489f8df1d130a77adb02b4da2616d9ae7e1c05c8b`, `@2.2`
+    `16071b45406637e9714c2ee58860536c88915649efa53b75939e8d7b78237df5`, `@2.3`
+    `ea5798e908f6e3f3cb5576ce04dbaa66543e2a571d2c3fa28e26ed917540f5d0`, `zone-franche-togo@1.0`
+    `58e5bc9962bcfc41286f3621538b34eaeb22dcfad1f794d9d8ac0085a220d5eb`, `smt-togo@1.0`
+    `5b614bd829b06c73b3b5988e18f1f778e208d71e8468544ffc35ef220e1d37b4`. Aucun autre paquet ne bouge.
+  - **Garde de packaging** neuve (`scripts/referentiels/gardes-nomenclature.mjs`) : un paquet bâti sur le plan SYSCOHADA
+    qui laisse un compte de bilan sans poste, ou range une contrepartie hors du poste de son actif, ne se package plus.
+  - **Pour A (FE-141, écrans de la liasse)** : aucun type à régénérer ; les montants affichés changent pour une balance
+    amortie (et deviennent justes).
+  - **`balance-service` (C)** : recopie à l'octet de **quatre** artefacts (`syscohada-revise-2.1/2.2/2.3.json` et
+    `smt-togo-1.0.json`), ticket de recopie de 1076 mis à jour ; effet en balance : libellés plus précis des comptes
+    `28x`… (le plan s'enrichit), aucune classe ne change.
 
 - **PUBLIÉ (2026-11-25, STORY-1078, prospera-bilan-service#188, `dev` d2c65c6) ; ANNONCÉ avant la fusion du code
   (prospera-stories #865, `main` d206f38), sans écart. — Les

@@ -54,3 +54,28 @@ STORY-1078** (elle contient celles de 1076 et 1077). Empreintes de STORY-1078 : 
 `39bb9f9954b161bf6cd2fa28e20fab405f8d91d99f1db1a0e49b591fbf0ed833` (`zone-franche-togo-1.0.json`, non recopié :
 `70c87a37618ea5beddfe0bf1543f47b3b7d75636c9879c3344d59c70bb2da0a0`). Le SHA de `dev` est écrit dans l'entrée « PUBLIÉ »
 de STORY-1078 du journal de D (« ⚠ Contrats »).
+
+## Mise à jour (2026-11-25, STORY-1118, D)
+
+STORY-1118 révise **encore en place** les tables de passage et les plans de comptes, et **cette fois la liasse
+produite change** pour toute balance qui porte un compte `28`, `29`, `39`, `49` (hors `499`) ou `59` (hors `599`) :
+ces comptes sont rattachés au poste de leur actif (colonne « Amort./Dépréc. »), et le plan de comptes gagne 117 comptes
+officiels (281 → 2848, 291 → 2978, 391 → 398, 490 → 4983, 590 → 594). **Quatre artefacts à recopier cette fois**, car
+`balance-service` embarque aussi `smt-togo-1.0.json`, révisé par la même story. **Recopier la version de STORY-1118**
+(elle contient celles de 1076, 1077 et 1078) :
+
+| Artefact | Empreinte de STORY-1078 | Empreinte de STORY-1118 |
+|---|---|---|
+| `syscohada-revise-2.1.json` | `a2da57d7…` | `3880b6c2b9ccef9cc063258489f8df1d130a77adb02b4da2616d9ae7e1c05c8b` |
+| `syscohada-revise-2.2.json` | `65c9c9a9…` | `16071b45406637e9714c2ee58860536c88915649efa53b75939e8d7b78237df5` |
+| `syscohada-revise-2.3.json` | `39bb9f99…` | `ea5798e908f6e3f3cb5576ce04dbaa66543e2a571d2c3fa28e26ed917540f5d0` |
+| `smt-togo-1.0.json` | `00335c03…` | `5b614bd829b06c73b3b5988e18f1f778e208d71e8468544ffc35ef220e1d37b4` |
+
+(`zone-franche-togo-1.0.json`, non recopié : `58e5bc9962bcfc41286f3621538b34eaeb22dcfad1f794d9d8ac0085a220d5eb`.)
+
+Ce que la recopie change **dans `balance-service`** (à vérifier par C, qui tient le dépôt) : le plan s'enrichit, donc
+le libellé « le plus spécifique » d'un compte `28x`, `29x`, `39x`, `49x`, `59x` change à l'import Sage
+(`sage-import.service.ts`, `libelleDuPlanLePlusSpecifique`) et dans les cahiers (`cahiers-depenses.service.ts`,
+`cahiers-recettes.service.ts`) ; `classeDuCompte` ne change pas (classes 2 à 5). Les règles fiscales qui lisent la
+table de passage (`liquidation.regles.ts`) ne lisent aucun des postes touchés. Le SHA de `dev` est écrit dans l'entrée
+« PUBLIÉ » de STORY-1118 du journal de D (« ⚠ Contrats »).
