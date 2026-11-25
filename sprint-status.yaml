@@ -672,11 +672,13 @@ reserved_ranges:
       comptes d'encaissement publiés par prospera-paiement-service), après une passation de B limitée à 1073. Ordre :
       après 1076. Fiche à écrire juste avant de coder. NON SLOTTÉE.
   - range: "STORY-1074"
-    status: "RÉSERVÉ"
+    status: "EN COURS"
     owner: "Groupe D — la consolidation s'installe à part : sa garde propre et ses trois vérifications (perimetre-arrete, ecritures-equilibrees, gate-consolidation) (prospera-bilan-service)"
-    source_doc: "prospera-stories/coordination/PLAN-LOT-6-2026-11-23.md"
+    source_doc: "prospera-stories/stories/STORY-1074.md"
     reserved_on: "2026-11-24"
     note: >
+      EN COURS le 2026-11-25 — fiche écrite avant le code ; contrat annoncé (« ⚠ Contrats » du journal de D) avant la
+      fusion de prospera-bilan-service#191.
       Amendement du lot 6 (24/11 soir, D-L6-5 : bilan passe de B à D). Source : consolidation.manifest.ts ; « Ce qui reste » de
       STORY-1080 ; vente à part (STORY-549). Fiche à écrire juste avant de coder. Lot D, n° 11 du lot 6. NON SLOTTÉE.
   - range: "STORY-1075"
