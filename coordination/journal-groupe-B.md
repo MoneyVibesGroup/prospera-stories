@@ -62,7 +62,11 @@
   | 17 | STORY-1135 | mettre à jour sans peur, premier incrément |
   | 18 | STORY-1136 | le consommateur de `facturation.avoir.emis@1` dans `paiement` |
 
-- **Avancement** : (à remplir story par story)
+- **Avancement** :
+  - **a — troisième suite de STORY-979 (25/11) — en cours** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
+    catalogue depuis `prospera-stories@bd9340e` (← D, STORY-1073) ; `balance` 1.1.0 entraînée par la copie entière
+    (← C, STORY-1117, servie ici ; la 1.2.0 de STORY-1020 attend la fusion de son code, D-979-24) ; **catalogue #75** ;
+    contrat annoncé avant la fusion (« ⚠ Contrats »). Sans Docker. Entrée du tracker rouverte.
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1687,6 +1691,22 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-25, troisième suite de STORY-979 — les manifestes `facturation` 1.2.0, `paiement` 1.1.0 et `balance`
+  1.1.0 publiés au catalogue, annoncés AVANT la fusion du code** (`prospera-platform-catalog-service`, branche
+  `MNV-979-manifestes-facturation-paiement`, PR #75 ; fiche `stories/STORY-979.md`, « Suite du 2026-11-25 »,
+  D-979-23 → 28). Aucune route, aucun champ, aucun topic du catalogue ne change de forme ; aucun droit ne change.
+  - **`copies.json`** recopié depuis `prospera-stories@bd9340e` (sha256 de `manifestes/facturation.manifest.ts` :
+    `b7b9e0c8…1bd933`, celle que D nomme ; de `paiement.manifest.ts` : `11685333…58ab2f` ; de `balance.manifest.ts` :
+    `097fa17e…cd6b0f`) ; seuls trois manifestes changent :
+    - **`facturation` 1.1.0 → 1.2.0** : consomme `paiement.compte.changed@1`, `dossier.created`, `dossier.updated`.
+      Ses huit `droits`, ses routes inchangés.
+    - **`paiement` 1.0.0 → 1.1.0** : publie `paiement.compte.changed@1`. Ses droits, ses routes inchangés.
+    - **`balance` 1.0.0 → 1.1.0** (← C, STORY-1117) : `GET /api/v1/dossiers/{dossierId}/balances/reference` et
+      `…/balances/resumes`. La **1.2.0** de `main` (STORY-1020, code non fusionné) n'est pas copiée : la garde contre
+      `main` reste rouge sur `balance` seul jusqu'à sa recopie (D-979-24).
+  - **Auth inchangé.** **Pour D et C** : un catalogue neuf sème ces versions ; un catalogue déjà semé les reçoit à son
+    prochain démarrage (D-979-13). **Pour A** : rien à régénérer.
 
 - **2026-11-24 au soir, seconde suite de STORY-979 — les manifestes `ged` 1.3.0 et `comptabilite` 0.5.0 publiés au
   catalogue, annoncés AVANT la fusion du code** (`prospera-platform-catalog-service`, branche
