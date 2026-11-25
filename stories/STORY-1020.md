@@ -1,6 +1,7 @@
 # STORY-1020 : L'état de rapprochement s'exporte (PDF / Excel) — la pièce que le cabinet verse au dossier de révision
 
-Status: in-progress — fiche et contrat écrits le 2026-11-25 par le groupe C (lot 7, n° 0a), **avant le code**.
+Status: done — **livrée le 2026-11-25** : balance-service **#165** (`f6d3f8f`, `4d3408f`, `58322c4` sur `dev`) ; voir
+« Livraison ». Fiche et contrat écrits le 2026-11-25 par le groupe C (lot 7, n° 0a), **avant le code** (#890).
 
 **Épic :** AB-05 (rapprochement) · **FR :** FR-A17 (PRD Atelier : « production de l'état de rapprochement bancaire et de la
 situation du compte en fin d'exercice ») · **Service :** `prospera-balance-service`
@@ -98,6 +99,52 @@ D-L6-5, décision de l'utilisateur) a retenu **B** : c'est cette story.
   qui ne le pose pas, garde sa feuille « Balance » et son empreinte).
 - **D-1020-8** : la recopie à l'octet des trois paquets SYSCOHADA révisé et du SMT (demande de D, ticket de 1076 → 1118)
   entre dans la même PR, en commit séparé : c'est une demande adressée à C, qui passe avant la story.
+
+## Livraison (2026-11-25)
+
+- **balance-service #165**, trois commits rejoués sur `dev` :
+  - `f6d3f8f` — recopie à l'octet de `syscohada-revise-2.1/2.2/2.3.json` et `smt-togo-1.0.json` depuis bilan-service
+    `dev` (`b6f2d49`, STORY-1076 → 1118) : empreintes `3880b6c2…`, `16071b45…`, `ea5798e9…`, `5b614bd8…` au registre
+    (`referentiel-registry.ts`), dans `ARTEFACTS_PARTAGES` et dans les e2e (D-1020-8) ;
+  - `4d3408f` — l'export : `rapprochement/export/` (`modele-etat-rapprochement.ts`, pur ; `export-etat-rapprochement.ts` ;
+    `export-etat-query.dto.ts`), `RapprochementService.vueExportable` (et `avecDecisions`, partagé avec `listerEcarts`),
+    la route `GET …/rapprochement/etat/export` dans `RapprochementController`, inscrite à `ROUTES_D_EXPORT_ET_D_ETATS` ;
+    `DocumentExport.feuille` facultatif (D-1020-7) ;
+  - `58322c4` — trois gardes suivent la recopie (D-1020-11).
+- **Manifeste `balance` 1.2.0** (#890) : copie au catalogue demandée à B.
+
+### Preuves
+
+- **Node 24** (étage `verification`, archive `git -c core.autocrlf=false archive`) : unitaires **286/286 suites, 5584
+  tests** (2 suites sautées, comme sur `dev`) ; e2e **36/36 suites, 1989 tests** ; `nest build` 0. Verrou Docker pris à
+  13:38, rendu à 13:43.
+- **e2e de l'export** (`test/rapprochement.e2e-spec.ts`, vrai service, vraie chaîne de gardes, vrais rendus, classeur
+  relu) : PDF en pièce jointe (`%PDF-`, nom, empreinte, `no-store`) ; classeur = équation de `…/etat`, balance nommée,
+  lignes du compte seulement (ni l'autre compte du dossier, ni la recette sans encaissement), total = en-cours ; même
+  empreinte sur deux tirages, une autre après une qualification, dont le motif figure ; ligne appariée absente ; VALIDÉE ⇒
+  ni mention ni suffixe ; sans balance ⇒ PROVISOIRE et solde vide ; `au` arrête l'état ; `400` sans format, en `csv`,
+  avec `provisoire=false`, sans compte ; `404 COMPTE_TRESORERIE_INTROUVABLE` sur le compte d'un autre cabinet.
+- **Unitaires** (`modele-etat-rapprochement.spec.ts`, `export-etat-rapprochement.spec.ts`) : 29 tests (découpe, PROVISOIRE par
+  fermeture, plafond de 3 000, motifs entiers, mentions sur une ligne, garde d'échelle, texte du PDF relu en WinAnsi,
+  classeur relu : feuille, montants numériques, aucune formule).
+- **Mutations 7/7** tuées par une assertion : PROVISOIRE ouvert au brouillon, total sur les seules lignes imprimées,
+  empreinte après la datation, mot long non coupé, lignes appariées gardées, décisions humaines ignorées, borne `au`
+  ignorée.
+- Lint des fichiers touchés : 0. La garde « octets identiques à ceux de bilan-service » est verte en local (bilan-service
+  à côté) ; dans l'image, elle se déclare sautée (dépôt absent), comme toujours.
+
+### Écarts et décisions prises au code
+
+- **D-1020-9** : pas de `docker compose up` : aucun module, fournisseur, dépendance ni Dockerfile neuf (une route, un
+  service, des fonctions pures) ; les e2e montent le vrai contrôleur (patron D-1117-5).
+- **D-1020-10** : aucune rubrique de l'équation ne commence par `=`, `+` ou `-` (« Moins : …», « Plus : … ») : le classeur
+  neutralise ces cellules d'une apostrophe (`neutraliserFormule`), et la rubrique s'y lirait « '= Solde… ». L'équation
+  elle-même est écrite en mention.
+- **D-1020-11** : la recopie de 1118 change ce que trois gardes mesuraient (la story de D le prévoyait) : le plan servi
+  compte **291** comptes (@2.1) et **296** (@2.2, @2.3) au lieu de 174 et 179 ; le canevas d'inventaire écarte aussi
+  391 → 398 (`COMPTE_DE_DEPRECIATION`, déjà le motif de `39`) ; la garde « créances réévaluables = comptes du poste BI »
+  compare aux seuls comptes de **valeur** du poste (`491`, dépréciation rattachée à `BI` par 1118, n'est pas une créance
+  en devise). Aucune règle du service ne change.
 
 ## Hors périmètre
 

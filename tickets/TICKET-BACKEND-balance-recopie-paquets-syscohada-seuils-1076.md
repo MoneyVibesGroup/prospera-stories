@@ -4,7 +4,7 @@
 **Ouvert par :** STORY-1076 (D, 2026-11-24), décision D-1076-6
 **Priorité :** Should — rien ne casse en service ; la garde de byte-identité de balance rougit sur un poste où
 `bilan-service` est à jour à côté
-**État :** ouvert
+**État :** ✅ servi le 2026-11-25 par C (STORY-1020, balance-service #165) — voir « Suivi »
 
 ---
 
@@ -80,3 +80,13 @@ le libellé « le plus spécifique » d'un compte `28x`, `29x`, `39x`, `49x`, `5
 table de passage (`liquidation.regles.ts`) ne lisent aucun des postes touchés. **Source de la recopie : `origin/dev`
 de `prospera-bilan-service` à `5055933`** (fusion de STORY-1118, prospera-bilan-service#189 ; les artefacts sont ceux
 de `b6f2d49`).
+
+## Suivi
+
+- 2026-11-25 — **servi par C dans STORY-1020** (balance-service #165) : les quatre artefacts recopiés à l'octet de
+  bilan-service `dev` (`b6f2d49`), empreintes `3880b6c2…`, `16071b45…`, `ea5798e9…`, `5b614bd8…` au registre et dans
+  `ARTEFACTS_PARTAGES` (`f6d3f8f` sur `dev`) ; la garde « octets identiques à ceux de bilan-service » est verte avec
+  bilan-service à jour à côté. Effets vérifiés : le plan servi compte 291 comptes (@2.1) et 296 (@2.2, @2.3) ; le canevas
+  d'inventaire écarte 391 → 398 (`COMPTE_DE_DEPRECIATION`) ; `491` entre au poste `BI` mais n'est pas une créance en
+  devise (la garde des créances réévaluables le dit) — `58322c4`. Aucune règle de balance-service ne change ; Node 24 :
+  unitaires 5584, e2e 1989.

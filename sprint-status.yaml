@@ -2511,13 +2511,16 @@ reserved_ranges:
       instance-c13.controller.ts ne sert que vérifications, import et effacement. Fiche à écrire juste avant de coder.
       Lot C, n° 10 du lot 6. NON SLOTTÉE.
   - range: "STORY-1020"
-    status: "EN COURS"
+    status: "done"
     owner: "Groupe C — l'état de rapprochement s'exporte (PDF / Excel) ; débloque FE-077 (prospera-balance-service)"
     source_doc: "prospera-stories/stories/STORY-1020.md"
     reserved_on: "2026-11-24"
     note: >
       EN COURS le 2026-11-25 (lot 7 de C, n° 0a, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite avant le code ; contrat
       annoncé (« ⚠ Contrats » du journal de C) : GET …/rapprochement/etat/export?format=pdf|xlsx ; manifeste balance 1.2.0.
+      ✅ 2026-11-25 : DONE — balance-service #165 (`f6d3f8f`, `4d3408f`, `58322c4`) ; recopie des paquets SYSCOHADA révisé
+      et SMT de 1118 dans la même PR (demande de D) ; Node 24 : unitaires 5584, e2e 1989 ; mutations 7/7 ; FE-077 débloquée ;
+      D-1020-1 → 11 dans la fiche.
       Amendement du lot 6 (24/11 soir, D-L6-5). Source : PRD Atelier FR-A17 ; FE-077 bloquée « aucune route d'export ».
       Fiche à écrire juste avant de coder. Lot C, n° 8 du lot 6 (première des cinq). NON SLOTTÉE.
   - range: "STORY-1019"

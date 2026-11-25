@@ -17,8 +17,16 @@
   Le paquet fiscal Togo est à C (D-L7-3).
 - **Fichiers `.env`** : aucun sur ce poste (seulement les `.env.example`) ; leur dépôt est un geste de l'utilisateur (plan
   §2 bis, 5). Les tests et les gates posent leurs variables eux-mêmes.
-- **STORY-1020 EN COURS (25/11)** : l'export de l'état de rapprochement (PDF / Excel), contrat annoncé ci-dessous ; la
-  recopie des paquets SYSCOHADA révisé et du SMT demandée par D (ticket de 1076 → 1118) entre dans la même PR.
+1. ✅ **STORY-1020 DONE (25/11)** : balance-service **#165** (`f6d3f8f` recopie, `4d3408f` export, `58322c4` gardes),
+   contrat #890, manifeste `balance` 1.2.0. `GET …/rapprochement/etat/export?format=pdf|xlsx` : équation, balance de
+   référence, avertissements, situation, lignes non rapprochées et justifications, PROVISOIRE tant que la balance n'est
+   pas VALIDÉE, empreinte du contenu non daté. **FE-077 débloquée (→ A).** Recopie des paquets SYSCOHADA révisé et SMT de
+   1118 dans la même PR (← D servie) : plan à 291 / 296 comptes, trois gardes suivies (D-1020-11). Node 24 : unitaires
+   286/286 suites, 5584 ; e2e 36/36, 1989 ; mutations 7/7 ; pas de compose (D-1020-9). Verrou pris deux fois (la première
+   perdue sur une coupure réseau, rendue par la session de groupe), rendu à 13:43. D-1020-1 → 11 dans la fiche.
+2. **Suivante : STORY-1019** (n° 0b) : le conseil s'installe à part (`CONSEIL_NOT_ENTITLED`, `aucun-scenario-applique`,
+   `gate-conseil`) **et**, placée avec elle, la règle de l'essai pour la garde de balance (← D, STORY-1079 : KYC non lu
+   sur une instance `INSTANCE_ESPACE=ESSAI`).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -362,9 +370,13 @@ seulement.
 ## Réponses aux demandes reçues
 
 - **← D (24/11 → 25/11, STORY-1076 → 1118) : recopier à l'octet les paquets SYSCOHADA révisé 2.1, 2.2, 2.3 et le SMT** —
-  **prise dans STORY-1020** (commit à part dans la même PR) : les quatre artefacts de `bilan-service` `dev` (`b6f2d49`,
-  empreintes `3880b6c2…`, `16071b45…`, `ea5798e9…`, `5b614bd8…`, celles du ticket), registre et `ARTEFACTS_PARTAGES` à
-  jour.
+  ✅ **servie par STORY-1020** : balance-service #165, `f6d3f8f` sur `dev` (plus `58322c4` : trois gardes qui comptaient
+  le plan ou le poste `BI`) ; les quatre artefacts de `bilan-service` `dev` (`b6f2d49`, empreintes `3880b6c2…`,
+  `16071b45…`, `ea5798e9…`, `5b614bd8…`, celles du ticket), registre et `ARTEFACTS_PARTAGES` à jour. Ticket : « Suivi ».
+- **← A (25/11, FE-158, `prospera-comptabilite-service`) : tenue proposée publiée, droits de l'utilisateur, route
+  « exercice ouvert du dossier », messages des refus, `EXERCICE_NON_OUVERT` dès la sonde `GET …/lots`** — **notée,
+  non bloquante ; placée avec STORY-338** (la seule story du lot 7 de C qui ouvre la comptabilité), sauf demande de
+  l'utilisateur de la passer avant.
 - **← D (25/11, STORY-1079) : dans l'espace d'essai, la garde de `balance-service` ne lit pas le KYC** (ticket « modules
   ouverts dans l'essai », point 3 ; Q-D-17) — **notée, placée dans STORY-1019** (n° 0b du lot 7), qui touche déjà la
   garde de balance (`CONSEIL_NOT_ENTITLED`) : `INSTANCE_ESPACE` lu une fois, le seul palier KYC sauté dans l'essai,
@@ -419,7 +431,8 @@ seulement.
 
 ## ⚠ Contrats
 
-- **2026-11-25 (STORY-1020), AVANT le code** : route neuve `GET /api/v1/dossiers/{dossierId}/rapprochement/etat/export`
+- **2026-11-25 (STORY-1020), PUBLIÉ** (balance-service #165, `4d3408f` sur `dev`) — **conforme à l'annonce** ; seules les
+  rubriques de l'équation sont écrites sans `=`, `+`, `-` initial (D-1020-10). Annonce : route neuve `GET /api/v1/dossiers/{dossierId}/rapprochement/etat/export`
   (paramètres de `…/etat` : `compteId`, `exerciceDebut`, `exerciceFin`, `au` ; plus `format` = `pdf` | `xlsx`, rien
   d'autre) → pièce jointe `etat-rapprochement-<arrêté>[-provisoire].<ext>`, en-tête `X-Empreinte-Document` (SHA-256 du
   contenu non daté), `Cache-Control: no-store` ; mêmes gardes et refus que `…/etat`, `@SorteDeRoute('export')`, 10 par
@@ -871,6 +884,19 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-1020, 25/11) un PDF de pdfkit se relit en WinAnsi, pas en latin1** : le tiret cadratin et l'apostrophe
+  typographique y sont `0x97` et `0x92` ; décodés en latin1 (ou par `TextDecoder('windows-1252')` de Node, qui fait
+  pareil) ils deviennent des caractères de contrôle et un test croit le texte perdu. Table à la main dans le test.
+- **(STORY-1020)** le classeur neutralise toute cellule de texte qui commence par `=`, `+`, `-`, `@` : un libellé de
+  rubrique « = Solde… » s'y lit « '= Solde… ». Écrire les rubriques sans ce premier caractère.
+- **(STORY-1020)** recopier un paquet SYSCOHADA de bilan-service change aussi ce que des gardes de balance comptent
+  (taille du plan dans `referentiel.e2e-spec`, canevas d'inventaire, comptes du poste `BI`) : jouer **toute** la suite
+  e2e en Node 24 après une recopie, pas seulement `src/modules/referentiel`.
+- **(STORY-1020)** coupure réseau en tenant le verrou : lancer la preuve Docker par **un script autonome** (`nohup`) qui
+  prend le verrou par `noclobber`, construit (`npm ci` réessayé : il échoue sur une coupure, `ENOTFOUND`), joue
+  unitaires, e2e et build, puis rend le verrou par un `trap EXIT` — une session coupée ne laisse ainsi aucun verrou
+  orphelin.
 
 - **(STORY-1101, 25/11) la VM Docker sans DNS** (`lookup registry-1.docker.io: no such host`) : un Dockerfile qui
   commence par `# syntax=docker/dockerfile:1` (le fiscal) ne se construit plus. Retirer la ligne **dans la copie
