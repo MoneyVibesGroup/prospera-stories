@@ -4,6 +4,22 @@
 
 ## État
 
+### Lot 7 (ouvert le 2026-11-25) — `PLAN-LOT-7-2026-11-24.md` §3
+
+- **Poste** : C a quitté le poste principal (plan §2 bis) ; il travaille sur l'autre poste (`C:\Users\USER\…`, session de
+  groupe `moneyvibes-apps-86`, une sous-session neuve par story). **Verrou Docker partagé avec B et D**
+  (`MoneyVibes_Apps\.verrou-docker`, pris par `noclobber`) ; piles `grp-c` seulement, descendues avec leurs volumes.
+- **Ordre** (amendement du 25/11, puis le tableau du §3) : **1020 → 1019 → 1021 → 1022 → 1023** (balance-service), puis
+  **564** → 317 → 318 → 319 → 321 → 324 → 325 → 327 → 329 → 339 → 338 → 340 → 341 → 342 → 343 → 344 → 350 → **566**
+  (fiscal, et comptabilité pour 338).
+- **Dépôts tenus au lot 7** : `prospera-balance-service` ; `prospera-fiscal-service`, **partagé par dossier avec D**
+  (D-L7-1, passation ci-dessous) ; `prospera-comptabilite-service` (pour 338). `document-service` est passé à B (#848).
+  Le paquet fiscal Togo est à C (D-L7-3).
+- **Fichiers `.env`** : aucun sur ce poste (seulement les `.env.example`) ; leur dépôt est un geste de l'utilisateur (plan
+  §2 bis, 5). Les tests et les gates posent leurs variables eux-mêmes.
+- **STORY-1020 EN COURS (25/11)** : l'export de l'état de rapprochement (PDF / Excel), contrat annoncé ci-dessous ; la
+  recopie des paquets SYSCOHADA révisé et du SMT demandée par D (ticket de 1076 → 1118) entre dans la même PR.
+
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
 Session du groupe C sur le poste principal : `moneyvibes-apps-dc`. Elle a ouvert, sur consigne de l'utilisateur du 23/11,
@@ -196,6 +212,25 @@ seulement.
 
 ## Passations
 
+- **→ D (2026-11-25, lot 7, D-L7-1) : `prospera-fiscal-service` s'ouvre à D, partagé par dossier** — SHA de départ :
+  `origin/dev` **`f1296ae`** (STORY-316, fiscal #62). **Rien en cours chez C** dans ce dépôt : aucune branche ouverte, aucune
+  PR, aucune migration en vol, aucune pile.
+  - **Dossiers de D** (`src/modules/…` et leurs `application/`, `domain/`, `adapters/` du même nom) : `depots`,
+    `livrables-depot`, `paquets-depot`, `completude-depot`, `remuneration`, et le futur coffre des secrets de canal
+    (STORY-560). C n'y écrit pas.
+  - **Dossiers de C** : `echeances`, `obligations`, `familles`, `qualification`, `paquets`, `redevables`, le futur
+    `reglement` ; et, faute d'être nommés par le plan, les autres dossiers déjà là (`auth`, `diagnostics`, `exercices`,
+    `habilitations`, `implantations`, `invitations`, `rattachements`, `read-models` hors fichiers communs) : D qui doit y
+    toucher le traite comme un fichier commun.
+  - **Fichiers communs** (D-L7-2) : `app.module.ts`, le manifeste `declarations`, le contrat OpenAPI, `package.json`, les
+    migrations, `read-models/`, les copies du paquet fiscal. Un changement se dit dans la description de la PR, rebasée sur
+    `origin/dev` juste avant la fusion, et dans « ⚠ Communs » du journal du groupe **avant** la fusion. **Une seule
+    migration en vol** : celui qui en ouvre une le dit, l'autre attend sa fusion.
+  - **Paquet fiscal** (D-L7-3) : à C. D demande la recopie ici (le SMIG pour 348), ou la fait dans sa PR en le disant.
+  - **Pièges** (voir « Pièges rencontrés ») : gate avec `prospera-recette/docker-compose.fiscal.yml` et une surcouche
+    pointant l'archive de la branche ; `test:conformite` sur `mongo-fiscal` en jeu de répliques (scripts `mongo/` en LF) ;
+    suite unitaire en `-w 2` ; Dockerfile `# syntax=` à retirer dans la copie archivée quand la VM Docker n'a pas de DNS.
+
 - **→ B (2026-11-25, lot 7, plan de B #848) : `document-service` (= `prospera-ocr-service`, module `ged`)** — décision de
   l'utilisateur du 25/11. Dernier commit de C sur `dev` : **`0716a58`** (STORY-1100, document-service #32). C n'y touche
   plus : aucune story du reste de son lot 6 (1117, 326, 1101, 315, 316) ne l'ouvre. **Rien en cours** : ni branche
@@ -267,6 +302,9 @@ seulement.
   l'échéance des sociétés par la forme juridique. Ce n'est pas un script de C qui publie : `balance-service` n'écrit pas dans ce bucket, et le
   fiscal lit le pointeur que lui donne l'événement de publication. C n'a pas trouvé l'éditeur ; `prospera-recette` est
   à B. — ouverte.
+- **→ B (25/11, STORY-1020)** : recopier au catalogue le manifeste `balance` **1.2.0** (source `manifestes/balance.manifest.ts`,
+  contrat de STORY-1020) : une route d'export neuve en `routesLectureSeule` (`…/rapprochement/etat/export`). Elle contient
+  la 1.1.0 ci-dessous : une seule recopie suffit. — ouverte.
 - **→ B (25/11, STORY-1117)** : recopier au catalogue le manifeste `balance` **1.1.0** (code fusionné :
   balance-service #161 `e968388` ; source `manifestes/balance.manifest.ts`, #842) : deux routes de lecture neuves
   (`…/balances/reference`, `…/balances/resumes`). — ouverte.
@@ -323,6 +361,15 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← D (24/11 → 25/11, STORY-1076 → 1118) : recopier à l'octet les paquets SYSCOHADA révisé 2.1, 2.2, 2.3 et le SMT** —
+  **prise dans STORY-1020** (commit à part dans la même PR) : les quatre artefacts de `bilan-service` `dev` (`b6f2d49`,
+  empreintes `3880b6c2…`, `16071b45…`, `ea5798e9…`, `5b614bd8…`, celles du ticket), registre et `ARTEFACTS_PARTAGES` à
+  jour.
+- **← D (25/11, STORY-1079) : dans l'espace d'essai, la garde de `balance-service` ne lit pas le KYC** (ticket « modules
+  ouverts dans l'essai », point 3 ; Q-D-17) — **notée, placée dans STORY-1019** (n° 0b du lot 7), qui touche déjà la
+  garde de balance (`CONSEIL_NOT_ENTITLED`) : `INSTANCE_ESPACE` lu une fois, le seul palier KYC sauté dans l'essai,
+  fail-closed sans espace, les preuves du patron de 1079. Sa fiche le dira.
+
 - **← A (24/11, passation pour STORY-1101, laissée par 322)** : lire `Obligation.montantDeclare.montant` par taxe et par
   période ; une période sans déclaré a `montantDeclare` à `null` : la nommer, ne jamais la compter pour zéro ;
   `GET /exercices/{id}/obligations/ecarts` existe (fiscal #56, `990256a`). — **notée**, pour 1101.
@@ -371,6 +418,14 @@ seulement.
   `etat-publie.changed.<espace>`, double lecture) dans une story de la plage de C, après STORY-990.
 
 ## ⚠ Contrats
+
+- **2026-11-25 (STORY-1020), AVANT le code** : route neuve `GET /api/v1/dossiers/{dossierId}/rapprochement/etat/export`
+  (paramètres de `…/etat` : `compteId`, `exerciceDebut`, `exerciceFin`, `au` ; plus `format` = `pdf` | `xlsx`, rien
+  d'autre) → pièce jointe `etat-rapprochement-<arrêté>[-provisoire].<ext>`, en-tête `X-Empreinte-Document` (SHA-256 du
+  contenu non daté), `Cache-Control: no-store` ; mêmes gardes et refus que `…/etat`, `@SorteDeRoute('export')`, 10 par
+  minute. Mention **PROVISOIRE** tant que la balance de référence n'est pas `VALIDÉE`. **Manifeste `balance` 1.2.0** (la
+  route en `routesLectureSeule`). **→ A** : FE-077 appelle cette route. **→ B** : recopie du manifeste au catalogue
+  (« Demandes aux autres groupes »).
 
 - **2026-11-25 (STORY-316), AVANT le code** : le paquet fiscal Togo 2026 change le mode de l'échéance `societe` de `depot.echeances` (`NON_CONSTATABLE` → `FORME_JURIDIQUE`, `formesJuridiques: [SA, SARL, SAS, SUARL]`) et l'entrée `DSF` du réel gagne une condition de forme juridique ; nouvelle empreinte. Le fiscal lit la `formeJuridique` du dossier (`GET /dossiers/{id}` de dossier-service, déjà lu). Une DSF de société au réel rend désormais son 30/04 ; une EI au réel reste `ECHEANCE_NON_CONSTATABLE`. **→ B** : la copie du paquet dans `dossier-service` diverge un peu plus (sans effet sur son code, qui ne lit pas ce mode).
 

@@ -48,7 +48,8 @@ export const MANIFESTE_BALANCE = {
   code: 'balance',
   // 1.1.0 (2026-11-24, STORY-1117) : la balance de référence d'un exercice et la liste sans lignes (deux routes de
   // lecture).
-  version: '1.1.0',
+  // 1.2.0 (2026-11-25, STORY-1020) : l'export de l'état de rapprochement (PDF / Excel), une route d'export.
+  version: '1.2.0',
 
   // Le module est la source : il ne dépend d'aucun autre module. Le référentiel comptable et le paquet
   // fiscal sont des artefacts du catalogue (STORY-078), pas des modules.
@@ -159,6 +160,7 @@ export const MANIFESTE_BALANCE = {
     'GET /api/v1/dossiers/{dossierId}/fiscal/resultat-fiscal/export',
     'GET /api/v1/dossiers/{dossierId}/fiscal/liquidation',
     'GET /api/v1/dossiers/{dossierId}/rapprochement/etat', // état de rapprochement de fin d'exercice (FR-A17)
+    'GET /api/v1/dossiers/{dossierId}/rapprochement/etat/export', // STORY-1020 : l'état exporté (PDF / Excel)
     'GET /api/v1/dossiers/{dossierId}/immobilisations',
   ],
 
