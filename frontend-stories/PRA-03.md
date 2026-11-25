@@ -1,6 +1,6 @@
 # Story PRA-03 : La session, la configuration d'exécution, la sécurité du serveur Next
 
-Status: ready-for-dev — **créée le 2026-11-24** (plan `coordination/PLAN-COQUE-EPIC-265-2026-11-24.md`).
+Status: done — 🏁 **2026-11-25**, **hors les écrans de `(auth)`** : `MoneyVibesGroup/prospera-app` **#3** (`dev` `647d336`) ; tsc 0, lint 0, Vitest 9 fichiers / 61 tests, CI verte, budget `/accueil` 146 901 octets gzip (budget 152 123), 13 mutations rouges, e2e 3/3 sur la pile réelle. **AC-0 et AC-7, périmètre 0 et 6 NON faits** : les écrans attendent une maquette validée par l'utilisateur (story de suite à nommer). Voir « Livraison » en bas de fiche. *(Créée le 2026-11-24, plan `coordination/PLAN-COQUE-EPIC-265-2026-11-24.md`.)*
 
 **Epic :** EPIC-265 — Coque `prospera-app` · **Groupe :** A · **Semaine visée :** S4 · **Points :** 5
 **Dépôt :** `prospera-app` (dossiers `src/app/(auth)/`, `src/app/coque/`, `src/coque/securite/`)
@@ -70,3 +70,53 @@ configuration » (PRA-05).
 ## Fini quand
 
 AC-0 → AC-8 prouvés, PR fusionnée, fiche à `done`, journal de A à jour avec PRA-04.
+
+---
+
+## Livraison (2026-11-25)
+
+**Code :** `MoneyVibesGroup/prospera-app` **#3**, fusionnée en Rebase and merge (`headRefOid` `f9161f0`, `mergedAt` 2026-11-25T03:51:51Z) ; `dev` = `647d336`. CI verte (lint, tsc, Vitest, build, budget).
+
+**Posé.** `src/proxy.ts` (CSP à nonce, HSTS, nosniff, Referrer-Policy) ; `src/app/coque/session/{ouvrir,rafraichir,fermer,accepter-invitation}/route.ts` (POST seulement) ; `src/app/coque/config` et `sante` ; `src/coque/securite/` : `constantes`, `entetes`, `csrf` (en-tête `x-prospera-coque: 1` + contrôle d'`Origin`), `cookie-refresh` (`prospera_refresh`), `amont-auth` (seul appel sortant : `auth` par `PROSPERA_PROXY_URL_INTERNE`, `/api/auth/v1/auth/*`), `session-serveur`, `configuration`, et côté navigateur `gestionnaire-jeton` (access en mémoire, rafraîchissement sérialisé, plafond du `setTimeout`), `claims`, `client-session`, `fournisseur-session` (`FournisseursCoque` = `QueryClientProvider` + session, monté dans le layout racine). `.env.example` : `PROSPERA_ESPACE`, `PROSPERA_DEPLOIEMENT_ID`, `PROSPERA_AUTRE_ESPACE_URL`, `PROSPERA_PROXY_URL_INTERNE`.
+
+### Preuves
+
+| AC | Preuve |
+|:--:|---|
+| AC-0 | **NON FAIT** : aucune maquette `prototypes/prospera-app-prototype.html`, rien de validé. Accord de la session principale (25/11) : livrer la mécanique sans les écrans, ne pas inventer de maquette. |
+| AC-1 | e2e Playwright `e2e/session.spec.ts` sur la pile `grp-a` (Traefik :8080, vrai `auth-service`) : connexion par `essai.localhost:8080/coque/session/ouvrir` ; cookie `prospera_refresh` : `httpOnly`, `secure`, `sameSite=Strict`, `path=/coque/session`, domaine `essai.localhost` (sans point : pas de `Domain`), expiration à 7 jours ; la réponse ne contient pas `refreshToken` ; ni l'access ni le cookie ne sont dans `localStorage`, `sessionStorage` ni `document.cookie` ; `reel.localhost` n'a pas le cookie. Vitest : mêmes attributs sur `cookies().set`. |
+| AC-2 | `gestionnaire-jeton.test.ts` : trois `rafraichirJeton()` simultanés = **un** `fetch`. |
+| AC-3 | `routes.test.ts` : chaque route n'exporte que `POST` (Next répond 405) ; sans l'en-tête (ou avec une valeur fausse, ou une `Origin` étrangère) : 403, `auth` non appelé, aucun cookie. Par :8080 : `GET` 405, `POST` sans en-tête 403. |
+| AC-4 | Vitest : `User-Agent` du navigateur dans l'appel à `auth` (connexion et acceptation d'invitation). **Pile réelle** : `GET /api/auth/v1/users/me/sessions` rend un `userAgent` contenant `Chrome`, pas `node`. |
+| AC-5 | **Un seul build**, deux processus `next start` (`PROSPERA_ESPACE=ESSAI` sur :3200, `REEL` sur :3201) : `curl essai.localhost:8080/coque/config` rend `{"espace":"ESSAI","autreEspaceUrl":"http://reel.localhost:8080/","deploiementId":"dep-essai"}` ; `reel.localhost:8080` rend `{"espace":"REEL","deploiementId":"dep-reel"}` (sans `autreEspaceUrl`). |
+| AC-6 | `curl -D` sur `essai.localhost:8080/accueil` et sur `/coque/config` : `Content-Security-Policy` (nonce, `frame-ancestors 'none'`), `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`. En production : 0 balise `<script>` sans nonce dans le HTML de `/accueil`. **Pas sur « la connexion »** : l'écran n'existe pas. |
+| AC-7 | **NON FAIT** (pas d'écran de connexion). |
+| AC-8 | `fournisseur-session.test.tsx` : la fermeture, l'ouverture d'une session d'une autre organisation et l'expiration (401) vident le cache (`queryClient.clear()`) ; la fermeture purge le jeton. e2e : fermeture → 204, cookie effacé, `rafraichir` suivant → 401, après rotation du cookie au rafraîchissement. |
+
+**Chiffres :** `tsc` 0 ; `eslint` 0 ; Vitest **9 fichiers / 61 tests** (suite complète rejouée sur `f9161f0`) ; `next build --webpack` vert (toutes les routes `ƒ`) ; budget **146 901 octets gzip** pour 152 123 (6 scripts) : TanStack Query et la session au layout racine coûtent 8,6 Ko.
+
+**Mutations** (violation posée, rouge constaté, retirée) : CSRF non exigé (5 tests rouges) ; origine étrangère acceptée ; cookie sans `Secure` ; `SameSite=Lax` ; `Path=/` ; `unsafe-inline` dans `script-src` ; `frame-ancestors` retiré ; HSTS retiré ; `User-Agent` non reporté ; rafraîchissement non sérialisé ; fermeture sans `cache.clear()` ; `GET` exporté sur `ouvrir` ; `refreshToken` renvoyé au navigateur. **13/13 rouges** (1 à 5 tests rouges chacune).
+
+### Écarts et ce qui n'est pas prouvé
+
+- **Les écrans `(auth)`** (connexion, invitation, mot de passe, marque d'essai, titre `[ESSAI]`) **ne sont pas faits** : ils attendent une maquette validée par l'utilisateur. Story de suite à nommer. Les routes se prouvent par l'API (e2e) ; la logique de session est prête à être appelée par un écran (`useSession().ouvrir`, `accepterInvitation`, `fermer`).
+- **AC-5 par Traefik** : le profil de PRA-02 route les deux hôtes vers le même :3200. Pour la preuve, une COPIE de `dynamique.yml` (hors dépôt) envoyait `reel.localhost` vers :3201. Le dépôt n'est pas modifié : un déploiement réel = un processus par espace.
+- **Budget** : `/accueil` est rendue à la demande (la CSP à nonce l'exige : un HTML prérendu ne peut pas porter de nonce). `outils/budget/budget.mjs` ne lit donc plus `.next/server/app/accueil.html` mais le HTML servi par `next start` (port 3299). Budget inchangé.
+- **CSP** : `style-src-attr 'unsafe-inline'` (les attributs `style=""` de Radix et Floating UI ne portent pas de nonce) ; les balises `<style>` exigent le nonce en production. En dev : `unsafe-eval` et `unsafe-inline` (outil de Next).
+- **Déconnexion** : la route `fermer` transmet le jeton d'accès à `auth` (`/auth/logout` exige un jeton ; le modèle de l'app expert-comptable l'appelait sans et la révocation échouait en silence). Si l'access est déjà expiré, la révocation échoue (au mieux) mais le cookie est effacé.
+- **Pas de page technique** : la preuve passe par `fetch` depuis une page de la coque, aucun écran ajouté.
+- `Secure` partout, y compris en dev : Chromium le pose sur `http://*.localhost`. Non essayé sous Firefox ni Safari.
+- **Pile du gate** : images `grp-a` existantes (`up --no-build`, VM Docker sans DNS ce soir), aucun build.
+- Rien de prouvé sur `next dev` derrière Traefik (HMR sous CSP) : prouvé en `next start` seulement.
+- Le poste a un `node_modules` en JONCTION vers `_wt-a-pra01` : `next dev` (Turbopack) refuse (« Symlink node_modules is invalid ») ; `next dev --webpack` marche.
+
+### Ce que PRA-04 doit savoir
+
+- Le jeton : `lireJeton()`, `rafraichirJeton()` (sérialisé ; rend `null` si 401 ou panne), `surExpiration()` dans `src/coque/securite/gestionnaire-jeton.ts`. Sur un 401 d'un service : appeler `rafraichirJeton()` UNE fois, rejouer la requête avec le nouveau jeton ; un `null` après 401 = la session est finie (`FournisseurSession` passe à `deconnecte` et vide le cache).
+- `FournisseursCoque` (layout racine) monte un `QueryClient` SANS réglage : PRA-04 y règle la fraîcheur. `useSession()` donne `etat` (`chargement`, `connecte`, `deconnecte`), `utilisateur` (`sub`, `org`, `roles`, `perms`), `ouvrir`, `accepterInvitation`, `fermer`.
+- Les clés de requête commencent par le code du module ; `['coque', …]` est réservé ; `cache.clear()` est déjà branché.
+- Toute l'API passe par l'origine de la coque (`connect-src 'self'`) : le client appelle `/api/<code>/v1/…` en chemin relatif, jamais une autre origine.
+- Le serveur Next n'appelle que `auth` (`PROSPERA_PROXY_URL_INTERNE`) ; il lit la configuration à chaque requête : `/coque/config` est `force-dynamic`.
+- Le layout racine lit `headers()` (nonce) : toutes les pages sont dynamiques ; le budget se mesure sur `next start`.
+- En dev : `.env.local` avec `PROSPERA_ESPACE`, `PROSPERA_DEPLOIEMENT_ID`, `PROSPERA_PROXY_URL_INTERNE=http://127.0.0.1:8080` (voir `.env.example`).
+- L'IdP limite la connexion à 5 par minute ; l'inscription exige `vertical` (`cabinet`) ; trois inscriptions du même e-mail en parallèle donnent un 500 : l'e2e est en série.
