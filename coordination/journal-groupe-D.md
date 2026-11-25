@@ -107,11 +107,32 @@
     paquet, et la recopie du paquet fiscal dans le service, plan §6) : 564 **en cours** chez C (fiche relue, D-564-1 → 12, et annonce avant le code, `main` 1d64753 ; branche `MNV-564` du fiscal, recopie du paquet comprise ; C préviendra D à la fusion). La session de groupe de D décide de la
     suite : les autres stories de D attendent 348 (364, 349) ou C (330 ← 325, puis 331 → 337 et 561 → 565).
 
-- **STORY-348** 🧮 **EN COURS** (2026-11-25) — le calcul des cotisations et des retenues, aiguillé sur le type de
-  bénéficiaire. Fiche relue et mise à jour **avant le code** (D-348-1 → 12, tableau « Contrat », Q-D-22 ; D-564-5
-  corrige « même barème ⇒ même base »). **← C : 564 — servie** (prospera-fiscal-service#66, `dev` `fd34834` ; paquet
-  recopié, sha256 `bfcc3fc9…c065` ; annonce de C #921). Annonce « ⚠ Contrats » et « ⚠ Communs » ci-dessous. Branche
-  `MNV-348` du fiscal (`_wt-d-fiscal`).
+- **STORY-348** ✅ 🧮 — le calcul des cotisations et des retenues, aiguillé sur le type de bénéficiaire
+  (prospera-fiscal-service#67, `dev` `bc0c09f` ; annonce avant le code #925, `main` 20705a8 : fiche D-348-1 → 12,
+  ⚠ Contrats, ⚠ Communs, Q-D-22). Rituel (2026-11-25) : aucune demande neuve à D chez A, B et C ; aucune PR ouverte ni
+  migration en vol sur le fiscal. **← C : 564 — servie** (prospera-fiscal-service#66, `dev` `fd34834` ;
+  balance-service#168 `c9e94c6` ; annonce #921, clôture e2dc974 ; paquet LF sha256 `bfcc3fc9…c065`).
+  - **Livré** (dossier `remuneration`) : `calcul-social.ts` (pur) — les trois branches de `cnss.branches.salarie`
+    contrôlées contre `cnss.tauxEmployeur` / `tauxSalarie`, **le plancher SMIG** du paquet, **aucun plafond** (le paquet
+    le dit ; un plafond chiffré s'appliquerait sans livraison), **l'AMU** (5 % + 5 %, sur le brut) ; la **retenue
+    d'IRPP du mois** par `calculerIrppTraitementsSalaires` de C (importé, non modifié), le mois annualisé puis ÷ 12
+    (D-348-7) ; les échéances lues au paquet (retenue d'IRPP au 15 du mois suivant ; cotisations `NON_DECLAREE` tant
+    que `cnss.collecte` manque). Aiguillage : `DIRIGEANT` / `ASSOCIE` jamais au régime salarié, IRPP sur
+    `REMUNERATION_GERANT` non couvert (D-564-5). `personnesACharge` facultatif sur la ligne (saisie, import, détail,
+    stockage `null`) : sans lui, retenue `CHARGES_DE_FAMILLE_NON_RENSEIGNEES` ; empreinte d'avant 348 inchangée.
+    `CalculRemunerationService` (exporté pour 350) et `GET …/remuneration/{periode}/calcul` (`PREPARER`). Aucun écart
+    au contrat annoncé.
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI seul. Aucune migration. Lus sans écriture :
+    `domain/familles/irpp-traitements-salaires.ts`, `decimal-exact.ts` (C).
+  - Preuves : Node 24 unitaires 203/203 suites, 2 947 tests (1 ignoré), e2e 13/13 suites, 272 tests, **`test:conformite` 18/18 suites, 116 tests** ; Node 25 : rémunération 137/137, e2e de
+    la base 30/30 ; **mutations 15/15** ; cas chiffré à la main (500 000, 2 personnes : 112 500 / 45 000, retenue
+    11 008) ; §1.5 : `docker compose -p grp-d` du fiscal (image runtime de l'archive LF) sain, `GET …/calcul` montée, 401 sans jeton, 0 `UnknownDependencies` sur 444 lignes de journal. **Verrou Docker** : attendu (C, STORY-1022), pris à 23:19 (une seule passe : unitaires, e2e, conformité, compose), rendu à 23:30 par le trap du script autonome ; B et C prévenus ; aucun conteneur, volume ni réseau grp-d.
+  - **→ C : `cnss.collecte` au paquet — ouverte** (« Demandes aux autres groupes »). **Q-D-22** (AMU : collecte par la
+    CNSS, part salariale hors base de l'IRPP) : choix par défaut appliqué. **→ A** (plus tard) : l'écran du calcul et
+    `personnesACharge` à la saisie.
+  - **Suivante : STORY-364** (un dirigeant dont le régime social n'est pas déterminable sort BLOQUÉ, jamais approximé ;
+    fiche à relire et mettre à jour ; elle remplace le motif `REGIME_SOCIAL_NON_DETERMINE` de 348 par le refus sourcé
+    au paquet, `cnss.aCompleter`, et le déblocage sans livraison ; le calcul est dans `domain/remuneration/calcul-social.ts`).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1502,6 +1523,8 @@
   Demandé, quand vous écrirez 1022 : publier avec l'empreinte **son algorithme et sa version** (champ du type
   `checksumVersion`), pour que le bilan la recalcule sur les soldes du jeu à l'identique ; annoncez le contrat ici. Une
   story de D lira alors l'empreinte et publiera le constat à côté des quatre contrôles.
+  **← C : 1022 — servie ; D-1078-10 débloqué (bilan), à placer par l'utilisateur** (balance-service#169, `dev`
+  `d5878be`, annonce #927 : `soldesChecksum` publié ; noté le 2026-11-25 par STORY-348, rien codé dans le bilan).
 
 - **→ B (2026-11-24, soir) : passation de `prospera-dossier-service` et de `prospera-paiement-service`, limitée à
   STORY-1073** — **servie** (← B, #837 ; constatée par 1073) **et les deux dépôts rendus à B le 2026-11-25** (« Passations »). Sur consigne de l'utilisateur du 24/11 (soir) : « gère tout cela dans la story 1073 sans attendre la livraison de B », **D fait lui-même les deux points
@@ -1881,7 +1904,7 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-25, STORY-348, avant le code)** — branche `MNV-348`. **Aucune migration** (un champ facultatif
+- **FUSIONNÉ (2026-11-25, prospera-fiscal-service#67, `dev` `bc0c09f`, rebasée sur `origin/dev` avant la fusion) ; ANNONCÉ (2026-11-25, STORY-348, avant le code)** — branche `MNV-348`. **Aucune migration** (un champ facultatif
   `personnesACharge`, `null` par défaut, sur `lignes_remuneration` : une ligne déjà écrite se lit `null`), ni
   `app.module.ts` (`RemunerationModule` est déjà monté), ni `package.json`, ni `read-models/`, ni copie du paquet, ni
   manifeste `declarations`. Touché : **le contrat OpenAPI** (une route neuve, un champ facultatif : « ⚠ Contrats »).
@@ -1919,7 +1942,7 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-25, STORY-348, avant le code) — le calcul des cotisations et des retenues** (`prospera-fiscal-service`,
+- **PUBLIÉ (2026-11-25, STORY-348, prospera-fiscal-service#67, `dev` `bc0c09f`) sans écart ; ANNONCÉ (2026-11-25, avant le code, prospera-stories#925) — le calcul des cotisations et des retenues** (`prospera-fiscal-service`,
   dossier `remuneration`). Fiche : `stories/STORY-348.md` (D-348-1 → 12, tableau « Contrat » ; Q-D-22).
   - **Route neuve** : `GET /api/v1/dossiers/{dossierId}/remuneration/{periode}/calcul` (`?version=` facultative ;
     garde fiscale, rôle `TENANT_ADMIN` | `TENANT_USER`, droit `fiscalite:declaration:preparer` : résultat par
@@ -3221,6 +3244,18 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-348** (le calcul des cotisations et des retenues) :
+  - (1) **Un heredoc de plus de ~180 lignes vers `python -`** échoue (« unexpected EOF while looking for matching `'` »)
+    sans rien écrire : script par l'outil d'écriture, le bloc de texte inséré passé dans un second fichier.
+  - (2) **`pgrep` n'existe pas dans Git Bash** : une attente `until [ -s f ] || ! pgrep …` sort aussitôt. Attendre sur
+    le seul fichier de résultat (`timeout … bash -c "until [ -s f ]; do sleep 15; done"`).
+  - (3) **Rien sur le worktree pendant un script de mutations** : un `prettier`, un `tsc` ou un `jest` lancé à côté lit
+    le fichier muté (et `prettier --write` le réécrirait). Attendre la fin du script.
+  - (4) **`npm run build` échoue en local** sur le `prebuild` (paquets de dépôt en CRLF, `PAQUET_DEPOT_INTEGRITE`) :
+    `npx nest build` prouve la compilation ; l'image de l'archive LF passe le `prebuild`.
+  - (5) **Une mutation `if (true)` sur une condition qui rétrécit le type ne compile pas** (`p` devient `never` plus
+    bas) : muter l'affectation (`plafond = null`) ou garder la variable lue (`typeof x === 'boolean'`).
 
 - **STORY-347** (la saisie de la paie) :
   - (1) Le piège (6) de 560 vaut aussi pour **`'\r\n'` dans un script Python passé par heredoc** : le fichier TS reçoit

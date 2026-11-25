@@ -1,6 +1,6 @@
 # STORY-348 : Calcul des cotisations et des retenues, aiguillé sur le type de bénéficiaire
 
-Status: in-progress (2026-11-25 — fiche relue et mise à jour avant le code ; lot 7 de D, n° 4)
+Status: done (2026-11-25 — prospera-fiscal-service#67, `dev` bc0c09f ; lot 7 de D, n° 4)
 
 **Épic :** EPIC-034 — Base de rémunération et obligations sociales
 **Points :** 5 · **Service :** `fiscal-service` (`:3012`), dossier de D `modules/remuneration` (D-L7-1)
@@ -223,16 +223,47 @@ ou un spécialiste de la paie est un **geste de l'utilisateur**, avant la mise e
 
 ## Definition of Done
 
-- [ ] **Mutation de l'aiguillage** : forcer le régime salarié pour un `DIRIGEANT` ⇒ le test « les cotisations du
+- [x] **Mutation de l'aiguillage** : forcer le régime salarié pour un `DIRIGEANT` ⇒ le test « les cotisations du
       dirigeant sortent bloquées » rougit.
-- [ ] **Mutation du sourcing** : remplacer `cnss.tauxEmployeur` (ou un taux de branche) par sa valeur en dur ⇒ un test
+- [x] **Mutation du sourcing** : remplacer `cnss.tauxEmployeur` (ou un taux de branche) par sa valeur en dur ⇒ un test
       rougit (paquet de test aux taux changés).
-- [ ] **Mutations du plancher et du plafond** (plancher retiré ; plafond supposé absent sans lire le paquet), **de
+- [x] **Mutations du plancher et du plafond** (plancher retiré ; plafond supposé absent sans lire le paquet), **de
       l'AMU** (retirée du calcul, ou de la base de l'IRPP), **des personnes à charge** (défaut 0) et **de l'échéance**
       (15 en dur) ⇒ chacune rougit sur une assertion.
-- [ ] Le calcul est rejoué à deux dates différentes sur la même version de base et de paquet et rend le même résultat
+- [x] Le calcul est rejoué à deux dates différentes sur la même version de base et de paquet et rend le même résultat
       (NFR-F03).
-- [ ] Montants en francs entiers, arithmétique exacte (NFR-F09) : aucun flottant entre le taux et l'arrondi.
-- [ ] La retenue d'un cas chiffré à la main (écrit dans le test, jamais relu de la constante testée) est égale.
-- [ ] e2e de la route (gardes, 200, version demandée, 404, refus du paquet) ; e2e et conformité de `personnesACharge`
+- [x] Montants en francs entiers, arithmétique exacte (NFR-F09) : aucun flottant entre le taux et l'arrondi.
+- [x] La retenue d'un cas chiffré à la main (écrit dans le test, jamais relu de la constante testée) est égale.
+- [x] e2e de la route (gardes, 200, version demandée, 404, refus du paquet) ; e2e et conformité de `personnesACharge`
       (saisie, import, stockage, empreinte inchangée sans le champ).
+
+## Livraison (2026-11-25)
+
+- **Code** : prospera-fiscal-service#67, fusionnée en rebase sur `dev` (`bc0c09f`). Annonce avant le code :
+  prospera-stories#925 (`main` 20705a8). **Aucun écart au contrat annoncé.**
+- **Fichiers** (dossier `remuneration` de D) : `domain/remuneration/calcul-social.ts` (pur) et son test ;
+  `application/remuneration/calcul-remuneration.service.ts` et son test ; `modules/remuneration/dto/calcul-remuneration.dto.ts` ;
+  la route dans `remuneration.controller.ts`, le service exporté par `remuneration.module.ts` ; `personnesACharge` dans
+  `ligne-de-remuneration.ts`, `fichier-de-paie.ts`, `remuneration.dto.ts`, `base-remuneration.schema.ts`,
+  `mongo-registre-remuneration.ts` ; `pays` ajouté à `BaseDuCalcul`. **Lus, sans écriture** (dossier de C) :
+  `domain/familles/irpp-traitements-salaires.ts`, `decimal-exact.ts`.
+- **Communs** (D-L7-2) : le contrat OpenAPI seul. Aucune migration.
+- **Preuves** :
+  - Node 24 (image `verification` de l'archive LF) : unitaires 203/203 suites, 2 947 tests (1 ignoré) ; e2e 13/13 suites, 272 tests ; **`test:conformite` 18/18 suites, 116 tests**
+    (dont `personnesACharge` écrit, relu, une ligne d'avant 348 lue `null`, 100 refusé par le schéma).
+  - Node 25 : domaine et service de la rémunération 137/137 (5 suites), e2e de la base 30/30 (dont 5 du calcul et 7 de
+    `personnesACharge`) ; la suite complète ne rougit que des 18 suites connues (client Kafka natif, paquets de dépôt
+    en CRLF), aucune de la rémunération.
+  - **Mutations 15/15 rouges sur une assertion** : aiguillage (dirigeant au régime salarié), `cnss.tauxEmployeur` en
+    dur, taux de l'AMU en dur, plancher retiré, plafond chiffré ignoré, plafond supposé absent sans lire `deplafonnee`,
+    AMU retirée de la base de l'IRPP, AMU retirée du calcul, personnes à charge à zéro par défaut, échéance au 15 en
+    dur, parts au franc inférieur, retenue au franc supérieur, cohérence des branches non contrôlée, IRPP du dirigeant
+    sur la base des salariés, `personnesACharge` toujours porté au document.
+  - Cas chiffré à la main (500 000 par mois, 2 personnes à charge) : cotisations 112 500 employeur / 45 000 salarié
+    (dont AMU 25 000 + 25 000) ; IRPP annuel 132 100, retenue du mois 11 008 ; plancher : 40 000 ⇒ 52 500 cotisables.
+    Témoin d'empreinte : la base d'avant 348 garde `sha256:690bbda8…95ce` (calculée par le code d'`origin/dev`).
+  - §1.5 : `docker compose -p grp-d` du fiscal (image runtime de l'archive LF) sain, `GET …/calcul` montée, 401 sans jeton, 0 `UnknownDependencies` sur 444 lignes de journal
+  - Lint des fichiers touchés, `tsc`, `nest build` : 0.
+- **Ce qui reste** : `cnss.collecte` au paquet (→ C, D-348-9) ; le refus sourcé du dirigeant (STORY-364, la suivante) ;
+  Q-D-22 et la relecture du bloc `cnss` par un fiscaliste (geste de l'utilisateur, plan §8) ; l'écran du calcul et le
+  champ à la saisie (→ A, plus tard) ; les totaux pour 350 (C).
