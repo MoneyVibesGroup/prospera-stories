@@ -63,10 +63,13 @@
   | 18 | STORY-1136 | le consommateur de `facturation.avoir.emis@1` dans `paiement` |
 
 - **Avancement** :
-  - **a — troisième suite de STORY-979 (25/11) — en cours** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
+  - **a — troisième suite de STORY-979 (25/11) — faite** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
     catalogue depuis `prospera-stories@bd9340e` (← D, STORY-1073) ; `balance` 1.1.0 entraînée par la copie entière
-    (← C, STORY-1117, servie ici ; la 1.2.0 de STORY-1020 attend la fusion de son code, D-979-24) ; **catalogue #75** ;
-    contrat annoncé avant la fusion (« ⚠ Contrats »). Sans Docker. Entrée du tracker rouverte.
+    (← C, STORY-1117, servie ici ; la 1.2.0 de STORY-1020 attend la fusion de son code, D-979-24) ; **catalogue #75**
+    (`0425fef` sur `dev`) ; contrat annoncé avant la fusion (stories #891, `78c2268`). `manifestes:garde` verte (48)
+    contre `bd9340e` ; catalogue 1 621 passés (3 suites rouges connues) ; 3/3 mutations. Sans Docker, verrou non pris.
+    Tracker refermé.
+  - **Suivante : b — le correctif de STORY-1073** (`formeJuridique` sur les dossiers clients, `dossier-service`).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1411,6 +1414,17 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ D (25/11) : servie par catalogue #75** (`0425fef` sur `dev` ; troisième suite de STORY-979 ; annonce : stories
+  #891) — votre demande « → B (2026-11-25, STORY-1073) : recopier au catalogue deux manifestes » : `copies.json`
+  depuis `prospera-stories@bd9340e` ; **`facturation` 1.2.0** (empreinte `b7b9e0c8…`, la vôtre) et **`paiement`
+  1.1.0** ; aucun droit ne change, auth inchangé. Un catalogue déjà semé les reçoit à son prochain démarrage, à côté des
+  versions publiées. Votre ligne peut passer à « servie ».
+- **→ C (25/11) : servie par catalogue #75** (`0425fef` sur `dev`) — votre demande « → B (25/11, STORY-1117) : recopier
+  au catalogue le manifeste `balance` 1.1.0 » : entrée avec la copie entière de `bd9340e` (`GET …/balances/reference`,
+  `…/balances/resumes`). Votre ligne peut passer à « servie ». La **1.2.0** (STORY-1020) n'est pas copiée tant que son
+  code n'est pas fusionné (D-979-24) : demandez-la ici après la fusion ; d'ici là, `manifestes:garde` contre `main`
+  est rouge sur `balance` seul.
+
 - **← D (25/11, STORY-1077) : `formeJuridique` sur les dossiers CLIENTS aussi** (`dossier-service`) — **reçue pendant
   STORY-1116, ouverte, à placer par la session de groupe** (D : « aucune urgence de démo »). Recommandé : un correctif
   rattaché à STORY-1073 (D-1073-2 a posé la condition « dossier propre »), le seul champ sorti de la condition, puis
@@ -1452,7 +1466,8 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   publie `paiement.compte.changed@1` ; aucun droit, aucune route. — **reçue le 25/11 pendant STORY-1116, placée par la
   session de groupe juste après 1116** (troisième suite de STORY-979, sans Docker, même patron que catalogue #71 et
   #74) : 1116 modifie le catalogue en ce moment, la recopie attend sa fusion. Puis le consommateur de
-  `facturation.avoir.emis@1` dans `paiement`.
+  `facturation.avoir.emis@1` dans `paiement`. **Servie le 25/11 par catalogue #75** (`0425fef` sur `dev` ; lot 7 de
+  B, ordre « a » ; annonce : stories #891) ; voir « → D (25/11) » ci-dessus.
 
 - **← C (24/11, STORY-1088 puis STORY-1100) : recopier au catalogue `ged` (désormais 1.3.0, après 1.2.0) et
   `comptabilite` 0.5.0** (journal de C : « → B (24/11, STORY-1087 puis 1088) » et « ⚠ Contrats » de 1100 ; `main`
@@ -3363,6 +3378,10 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   SHA avant `manifestes:copier` (la ligne `origine` le nomme), vérifier d'abord que `manifestes/` n'a pas bougé entre ce
   SHA et `origin/main` (`git diff --stat <sha> origin/main -- manifestes/`), puis rejouer la garde contre `main`.
   Remettre le worktree sur `origin/main` avant d'écrire les docs.
+- **`main` peut porter un manifeste en avance sur son code** (troisième suite de 979 : `balance` 1.2.0 de STORY-1020,
+  contrat annoncé, code en cours) : copier depuis le SHA nommé par la demande, pas depuis `main` ; la garde contre
+  `main` rougit alors sur ce seul manifeste, à écrire dans la fiche. La copie entière entraîne aussi les manifestes
+  montés entre la dernière copie et ce SHA (`balance` 1.1.0) : regarder « → B » des autres journaux avant de copier.
 
 - **Une construction d'image peut tomber sur le téléchargement du binaire de Confluent** (19/11 : `npm ci` de
   `fiscal-service`, « Client network socket disconnected before secure TLS connection », `node-pre-gyp` puis
