@@ -190,7 +190,8 @@ seulement.
     (`prospera-stories@f703671`, empreinte épinglée dans `src/socle/manifestes/sources-des-manifestes.ts`).
   - **Demandes encore ouvertes, à B lui-même** (section « Demandes aux autres groupes ») : rôle `CAB_ARCHIVISTE` et
     attribution des droits `ged:*` aux rôles du cabinet chez `auth-service` (D-1087-4 : sans elle, seul un
-    `TENANT_ADMIN` a les droits) ; copie du manifeste `ged` 1.3.0 au catalogue.
+    `TENANT_ADMIN` a les droits) ; copie du manifeste `ged` 1.3.0 au catalogue. — ✅ **toutes deux servies** (vérifié
+    le 25/11 : auth #48/#49, catalogue #74 `1aa17ae`) ; rien d'ouvert ne passe à B.
   - **Nommé pour plus tard** (décisions des fiches, à reprendre dans le lot 7 de B) :
     - destruction approuvée et inscrite au registre (1087 : `conservationAns` est affichée seulement) ;
     - quota de 20 Go par cabinet en alerte seulement, Q-SC-5 encore à l'utilisateur (D-1087-5) ;
@@ -235,13 +236,15 @@ seulement.
   `ged:sensible:consulter` ; `CAB_COLLABORATEUR` : `ged:piece:consulter` ; `CAB_ARCHIVISTE` : `ged:fonds:gerer`,
   `ged:lot:numeriser`, `ged:piece:indexer`, `ged:versement:verser`, `ged:physique:gerer`, `ged:piece:consulter`,
   `ged:sensible:consulter` (et rien d'un autre module). Sans cela, seul un `TENANT_ADMIN` a ces droits (D-1087-4). —
-  ouverte.
+  ✅ **close le 25/11** : servie par B en STORY-979 (auth #48 `c0f6243`, #49 `b49d8ab`) ; matrice relue par C dans le
+  diff (les sept `ged:*`, `CAB_ARCHIVISTE`, hors du jeton).
 - **→ B (24/11, STORY-1087, 1088 puis 1100)** : recopier au catalogue le manifeste `ged` — désormais **1.3.0** (code
   fusionné : document-service #30 `1db0a8f`, #31 `9d0cfd3`, #32 `0716a58` ; source `manifestes/ged.manifest.ts`,
-  `f703671`). Les 1.1.0 et 1.2.0 n'ont pas à être semées seules. — ouverte.
+  `f703671`). Les 1.1.0 et 1.2.0 n'ont pas à être semées seules. — ✅ **close le 25/11** : catalogue #74 `1aa17ae`
+  (STORY-979).
 - **→ B (24/11, STORY-1100)** : recopier au catalogue le manifeste `comptabilite` **0.5.0** (code fusionné :
   comptabilite-service #20 `e4a53cc` ; source `manifestes/comptabilite.manifest.ts`, `a525d76`) : il publie
-  `comptabilite.facture.inscrite`, aucune route neuve. — ouverte.
+  `comptabilite.facture.inscrite`, aucune route neuve. — ✅ **close le 25/11** : catalogue #74 `1aa17ae` (STORY-979).
 
 - **→ B (2026-11-15) : la garde partagée (STORY-937) et `sinistres-service`** — **information**. Le squelette de
   `prospera-sinistres-service` garde ses modules par un port, `EtatDesModules`, alimenté aujourd'hui par
