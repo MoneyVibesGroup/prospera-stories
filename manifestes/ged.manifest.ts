@@ -76,7 +76,10 @@ export const MANIFESTE_GED = {
   // neuves ; `ged:destruction:proposer` et `ged:destruction:viser` (déjà déclarés) attribués au cabinet par auth.
   // 1.7.0 (2026-11-26, STORY-1122) : retrouver dans tous les fonds du cabinet (un index aveugle à jetons, sans mot en
   // clair) ; une route de lecture neuve.
-  version: '1.7.0',
+  // 1.8.0 (2026-11-26, STORY-1123) : les alertes de l'archiviste (retour d'un original en retard, échéance de
+  // conservation proche, quota dépassé, écart d'intégrité) et les étapes d'une destruction, publiées ; cinq faits neufs ;
+  // la liste des pièces échues de tout le cabinet (une route de lecture neuve).
+  version: '1.8.0',
 
   // C1 : aucune dépendance dure. La GED reçoit, lit, classe, conserve et retrouve des pièces sans autre module ; une pièce
   // enregistrée sans dossier va dans la file « à rattacher » (FR-159, FR-166).
@@ -137,6 +140,14 @@ export const MANIFESTE_GED = {
     'ged.dossier.reconstitue@1',
     'ged.destruction.decidee@1',
     'ged.stockage.alerte@1', // sauvegarde en échec, NAS à 80 %
+    // STORY-1123 : les alertes de l'archiviste du cabinet (cloche et e-mail : `notification`). Clés, numéros, comptes, dates
+    // et destinataires (identifiants d'utilisateur) seulement ; jamais un contenu de pièce (ni tiers, ni NIF, ni montant,
+    // ni texte lu), ni le motif ou l'emprunteur d'une sortie, ni la raison sociale du client.
+    'ged.original.retour-en-retard@1', // une sortie non rentrée, à 1, 7 et 30 jours de retard
+    'ged.conservation.echeance-proche@1', // les pièces d'un fonds qui entrent dans l'horizon d'échéance (ou déjà échues)
+    'ged.quota.depasse@1', // le volume du cabinet passe au-dessus de son quota (une fois par franchissement)
+    'ged.integrite.ecart@1', // une campagne de contrôle d'intégrité qui trouve un écart ou un journal rompu
+    'ged.destruction.changed@1', // les étapes d'une destruction du cabinet (proposée, visée, refusée, accordée, abandonnée, exécutée)
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] export, effacement refusé
     'ged.realite.constatee@1', // [AD-14, spine IA] classement ou lecture d'une pièce confirmé ou corrigé par la personne au contrôle (issue : CONFIRMEE, CORRIGEE ; `definitive` à la clôture du dossier, valeur retenue en fin de dossier) ; AUCUNE valeur de champ, AUCUN contenu de pièce, JAMAIS de donnée de santé sur le bus ; charge : `capacite`, `objetRef` (pseudonyme), `issue`, `definitive`, `echeance`, `constateLe`, `evenementSource`, `eventId` ; consommé par `ia` seul
   ],
@@ -295,6 +306,7 @@ export const MANIFESTE_GED = {
     'GET /api/v1/ged/cabinet/destructions/{numero}/pieces', // STORY-1121 : ses pièces, par pages
     'GET /api/v1/ged/cabinet/registre-des-destructions', // STORY-1121 : le registre des destructions du cabinet
     'GET /api/v1/ged/cabinet/recherche', // STORY-1122 : retrouver une pièce dans tous les fonds du cabinet
+    'GET /api/v1/ged/cabinet/pieces-echues', // STORY-1123 : les pièces échues (ou proches de l'être) de tout le cabinet
     'GET /api/v1/instance/ged/{organisationId}/export',
   ],
 
