@@ -591,6 +591,18 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-324, avant le code)** — branche `MNV-324` de `prospera-fiscal-service`. **Aucune
+  migration** (deux collections neuves, `validations_client` et `exigences_validation_client`, index posés par Mongoose
+  au démarrage ; un champ facultatif `validationClient` sur `obligations`, absent ⇒ `null`). Ni `app.module.ts`, ni
+  `package.json`, ni `read-models/` (la réplique des dossiers est **lue** pour la portée, comme en 319), ni copie du
+  paquet, ni manifeste `declarations`. Touché : **le contrat OpenAPI** (quatre routes neuves, un champ : « ⚠ Contrats »).
+  Tout le reste dans les dossiers de C (`domain/obligations`, `application/obligations`, `modules/obligations`,
+  `adapters/mongo` des obligations et des validations, `ports/`, `test/utils`, e2e et conformité des obligations) et une
+  garde neuve à la racine de `src/` (`garde-acces-client.spec.ts`, AC-3 : liste fermée des routes `@Public()`, celles de
+  D comprises — coffre du client, sans y toucher). Rien dans les dossiers de D. **→ D** : rien à faire pour un rebase ;
+  **à savoir pour 333** : `A_DEPOSER → DEPOSEE` refuse désormais sans l'accord du client
+  (`VALIDATION_CLIENT_REQUISE`, `VALIDATION_CLIENT_PERIMEE`) ; une voie de D qui passerait une obligation à `DEPOSEE`
+  passe par `CycleObligationsService.transitionner` (D-324-7).
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#72, `dev` `493a817`, sur `origin/dev` `0cc79a7`)** — conforme à l'annonce
   (contrat OpenAPI, `lecture-amont.ts` au 409 facultatif ; aucune migration). **→ D** : rien à faire pour un rebase ; toute
   la suite (unitaires, e2e, conformité) est verte en Node 24 ; la spec chronométrée `libelle-imprime.spec.ts` (dossier de D)
@@ -669,6 +681,32 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-324), ANNONCÉ avant le code** — **la validation du client capturée comme pièce**
+  (`prospera-fiscal-service`, REST). Fiche : `stories/STORY-324.md` (D-324-1 → 13). Consommateurs : l'écran du dossier
+  de dépôt (A, FE-081) ; STORY-325 (C, rectificatives) ; STORY-333 et 336 (D). **Ajouts seuls**, plus une précision de
+  comportement (la porte de « Déposée »). Aucun droit neuf, aucun événement, manifeste inchangé, rien chez
+  `document-service` (le fichier est rangé par le cabinet dans sa GED, le fiscal n'en garde que la référence et
+  l'empreinte : D-324-2, D-324-3).
+  - **Route neuve** : **`POST /api/v1/obligations/validations-client`** (droit `fiscalite:declaration:preparer`) `{
+    obligationIds (1 à 50, un même dossier), nature: DOCUMENT_SIGNE | COURRIEL | CAPTURE_MESSAGERIE | MENTION_MANUELLE,
+    recueLe?: AAAA-MM-JJ, reference?: { gedPieceId, gedVersion } | { libre }, empreinte?: <sha256 hex>, mention?: texte }`
+    — un document exige `reference` et `empreinte`, une mention exige `mention` (le service en calcule l'empreinte) →
+    `201 { validation: ValidationClientDto, obligations: ObligationResponseDto[] }`, tout ou rien. `consigneeLe` et `par`
+    posés par le serveur. Refus : `400 VALIDATION_CLIENT_INVALIDE` (`details.champ`), `403 DROIT_FISCAL_REFUSE`, `404
+    OBLIGATION_INTROUVABLE`, `409 OBLIGATION_DESACTIVEE` / `VALIDATION_CLIENT_TARDIVE` (déjà déposée) /
+    `VALIDATION_CLIENT_CONCURRENTE`, `422 VALIDATION_CLIENT_DOSSIERS_MULTIPLES` / `VALIDATION_CLIENT_DATEE_DANS_LE_FUTUR`.
+  - **Routes neuves de lecture et de réglage** : **`GET /api/v1/obligations/{id}/validations-client`** → `{ obligationId,
+    exigence, pieces: ValidationClientDto[] }` (la plus récente d'abord) ; **`GET` et `PUT
+    /api/v1/obligations/validation-client/exigences/{dossierId}`** → `{ dossierId, exigee, parDefaut, motif, par, le }` ;
+    `PUT` (droit `fiscalite:declaration:valider`) `{ exigee, motif (10 à 500) }`, `404 DOSSIER_INTROUVABLE` hors portée.
+    **Un dossier exige la validation par défaut** (PRD §3.1 N2, V6 ; D-324-6).
+  - **Comportement** : `POST /obligations/{id}/transition` `vers: DEPOSEE` sur un dossier qui l'exige : **`409
+    VALIDATION_CLIENT_REQUISE`** (aucune pièce) ou **`409 VALIDATION_CLIENT_PERIMEE`** (`details { valide, declare }` : le
+    déclaré a changé depuis l'accord). Aucune autre transition ne change.
+  - **Champ neuf** `ObligationResponseDto.validationClient` (`null` tant qu'aucune pièce) : `{ pieceId, nature, empreinte,
+    declare, recueLe, consigneeLe, par }`, la pièce courante.
+  - **Journal chaîné** : actes neufs `OBLIGATION_VALIDATION_CLIENT_CONSIGNEE` (`obligation:<id>`, sans texte libre) et
+    `VALIDATION_CLIENT_EXIGENCE_CHANGEE` (`dossier:<id>`). **→ A (FE-081)** : types à régénérer à la publication.
 - **2026-11-26 (STORY-321), PUBLIÉ** (fiscal #72, `493a817`) — **conforme à l'annonce** (#955). **→ A (FE-081)** : types à
   régénérer (`calculMoteur`, `triplet.calcule.motif`, route `…/calcul`). Annonce :
 - **2026-11-26 (STORY-321), ANNONCÉ avant le code** — **le calculé d'une obligation vient du moteur de `balance-service`**
