@@ -131,12 +131,21 @@
    cliente). Node 24 : unitaires 220 suites, 3187 ; e2e 13/13, 304 ; conformité 24/24, 151 ; mutations 22/22 et 7/7 MongoDB ;
    pile `grp-c` saine. Verrou pris trois fois (09:59 → 10:03, arrêté pour rebaser sur 349 ; 10:08 → 10:17 ; 10:18 → 10:21).
    D-324-1 → 13 dans la fiche. **→ B** (GED, information, ci-dessous) ; **D prévenu** (la porte de « Déposée », pour 333).
-15. 🚧 **STORY-325 en cours (26/11)** (rectificatives versionnées, immuabilité et clôture, EPIC-031 ; **330 de D l'attend**) :
-   fiche `stories/STORY-325.md` écrite avant le code (D-325-1 → 13), contrat et communs annoncés ci-dessous. La version est
-   scellée au dépôt dans `versions_declaration` (jamais récrite : port sans écriture, schéma qui refuse toute mise à jour,
-   garde AST) ; `POST /obligations/{id}/rectificatives` (à partir de `DEPOSEE`, `CLOTUREE` comprise : version n + 1 en
-   préparation, visa retiré, pièce du client à `null`) ; `POST /obligations/{id}/retour` (motif obligatoire) ;
-   `GET /obligations/{id}/versions` ; toute autre écriture d'une obligation `CLOTUREE` ⇒ `409 OBLIGATION_CLOTUREE`.
+15. ✅ **STORY-325 DONE (26/11)** : fiscal **#75** (`7e2bff8` sur `dev`, sur `060c85c`), annonce #971 avant le code.
+   **Le dépôt scelle** la version courante (`A_DEPOSER → DEPOSEE`, même transaction que l'état) dans **`versions_declaration`** :
+   contenu déclaré (identité, numéro, déclaré et assiette) et son **empreinte** canonique, puis les attestations (déclaré
+   complet, calculé retenu, visa, pièce du client, ouverture de la rectificative) ; le déclaré lu entre dans la
+   comparaison-échange. **Jamais récrite** (AC-2) : port sans écriture, **schéma Mongoose qui refuse toute réécriture** (aussi
+   sur `validations_client`, D-324-12 (5)), garde AST. **`POST /obligations/{id}/rectificatives`** (droit `preparer`, à partir de
+   `DEPOSEE`, `CLOTUREE` comprise) : version n + 1 en préparation, visa retiré, calculé défigé, pièce du client à `null`, la n
+   inchangée ; reprise d'une déposée avant 325. **`POST /obligations/{id}/retour`** (motif obligatoire ; droit de l'état quitté,
+   `valider` pour retirer le visa ; jamais avant `DEPOSEE` une fois déposée) ; **`GET /obligations/{id}/versions`** ;
+   `versionCourante` au DTO. **AC-3** : `409 OBLIGATION_CLOTUREE` sur chaque écriture d'une close (liste fermée des routes, e2e
+   route par route) ; la re-dérivation et les signalements laissent une close telle quelle. Node 24 : unitaires 225 suites,
+   3248 ; e2e 13/13, 308 ; conformité 25/25, 160 ; mutations 30/30 et 11/11 MongoDB ; pile `grp-c` saine. Verrou pris une fois
+   (11:30 → 11:39). D-325-1 → 13 dans la fiche. **D prévenu** (SendMessage : 330 débloquée, ce qu'elle emploie, D-325-11).
+16. **Suivante : STORY-327** (la continuité d'une période à l'autre, EPIC-031 ; fiche à écrire juste avant de coder ; dépend
+   de 326 ✅).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -622,7 +631,11 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-26, STORY-325, avant le code)** — branche `MNV-325` de `prospera-fiscal-service`. **Aucune
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#75, `dev` `7e2bff8`, sur `origin/dev` `060c85c`)** — conforme à l'annonce :
+  seul le contrat OpenAPI parmi les communs ; aucun fichier de D touché. **→ D** : rien à faire pour un rebase ; toute la suite
+  (unitaires, e2e, conformité) est verte en Node 24 ; un banc qui nettoie `validations_client` ou `versions_declaration` par le
+  modèle (`deleteMany`) échoue désormais : nettoyer par `modele.collection`.
+  **ANNONCÉ (2026-11-26, STORY-325, avant le code)** — branche `MNV-325` de `prospera-fiscal-service`. **Aucune
   migration** (une collection neuve, `versions_declaration`, index unique posé par Mongoose au démarrage ; un champ
   facultatif `versionCourante` sur `obligations`, absent ⇒ la version 1 en cours). Ni `app.module.ts`, ni `package.json`,
   ni `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touché : **le contrat OpenAPI** (trois routes
@@ -730,6 +743,8 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-325), PUBLIÉ** (fiscal #75, `7e2bff8`) — **conforme à l'annonce** (#971), sans écart. **→ A (FE-081)** :
+  types à régénérer (`versionCourante`, les trois routes, `OBLIGATION_CLOTUREE`). **→ D (330)** : prévenu. Annonce :
 - **2026-11-26 (STORY-325), ANNONCÉ avant le code** — **les rectificatives versionnées, l'immuabilité et la clôture**
   (`prospera-fiscal-service`, REST). Fiche : `stories/STORY-325.md` (D-325-1 → 13). Consommateurs : l'écran du dossier de
   dépôt (A, FE-081) ; **STORY-330 de D** (le livrable sur une version : D-325-11) ; 334 et 336 (D) ; 329 et 340 (C).
@@ -1483,6 +1498,16 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-325, 26/11) un schéma rendu immuable fait rougir le nettoyage des bancs** : `afterAll` de la conformité de 324
+  supprimait les pièces par `modele.deleteMany` ; les crochets de `rendreImmuable` le refusent (`ReecritureInterdite`).
+  Nettoyer par `modele.collection.deleteMany` (le banc n'est pas un chemin applicatif).
+- **(STORY-325)** un constructeur d'adaptateur qui gagne un paramètre casse tous les bancs qui l'instancient (15 fichiers,
+  dont un de D) : le rendre facultatif et le prendre de la connexion par défaut, plutôt que de toucher les bancs des autres.
+- **(STORY-325)** le fixture `base()` de `cycle-obligations.service.spec.ts` n'avait ni `annee` ni `taxe` : l'empreinte
+  canonique refuse une valeur indéfinie. Un fixture partiel `as Obligation` cache ce que le code neuf lit.
+- **(STORY-325)** un e2e qui fait confier une obligation (`/obligations/affectation`) signe un jeton dont le `sub` est un
+  `ObjectId`, et le dossier de la réplique doit avoir un `responsableUserId` en `ObjectId` (sinon `400 IDENTIFIANT_MALFORME`).
 
 - **(STORY-324, 26/11) la garde `aucune-date-en-dur` (316) lit aussi les exemples Swagger des DTO** : un `example: 'Courriel
   du 20/11/2026…'` l'a rougie (seule la suite entière l'a vu). Écrire les exemples sans date `JJ/MM`.
