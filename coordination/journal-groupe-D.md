@@ -27,6 +27,13 @@
 - **Non placé des réponses du 25/11 — à placer par l'utilisateur** : `zone-franche-togo@1.1` (« au lot 7 », sans
   numéro au tableau §4) ; Q-D-14 (les seuils des seize indicateurs, cherchés et modifiables) ; Q-D-15 (le numéro de
   compte imprimable) ; Q-D-19 (l'export C13 aussi en CSV). Aucune story de ce lot ne les porte.
+- **Amendement du 26/11** (consigne de l'utilisateur, plan §4 bis) : D-1078-10, Q-D-14, Q-D-19 et Q-D-15 entrent au lot 7
+  de D, ce qui fait **22 stories**. Ce sont **STORY-1138** (le rapprochement liasse ↔ balance par l'empreinte, bilan),
+  **1139** (les repères des seize indicateurs, sourcés et modifiables, bilan), **1140** (l'export C13 aussi en CSV,
+  bilan ; → B : le contrat) et **1141** (le numéro de compte imprimable : paiement par une passation de B limitée à la
+  story, puis ventes). Elles passent pendant que D attend C (349 attend 319, 330 attend 325). Dès qu'une des deux est
+  fusionnée, D reprend le tableau §4. `zone-franche-togo@1.1` reste à placer par l'utilisateur.
+  **→ B : passation de `prospera-paiement-service` limitée à STORY-1141 — ouverte.**
 - **STORY-560** ✅ 🔐 — le coffre des secrets de canal, adossé au mandat écrit du client, **AD-13 amendé**
   (prospera-fiscal-service#63, `dev` `cf8b583` ; annonce avant le code #905, `main` 0f4dae3 : fiche D-560-1 → 15, AD-13
   amendé dans la spine du fiscal ; communs complétés avant la fusion #908, `main` 5a2f26c). Rituel (2026-11-25) :
