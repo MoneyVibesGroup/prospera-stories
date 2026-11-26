@@ -1,6 +1,6 @@
 # STORY-1141 : le numéro de compte imprimable sur la facture (Q-D-15)
 
-Status: in-progress
+Status: done
 
 **Plan :** `coordination/PLAN-LOT-7-2026-11-24.md` §4 bis (amendement du 26/11), n° **5d** · **Dépôts :**
 `prospera-paiement-service` (à **B**, **prêté à D pour cette story seule** : passation du journal de B, « Passations »,
@@ -144,6 +144,11 @@ sa déclaration, hors la vérification et la clef de notification.
   lue (`mentions.emetteur.comptes[]`) : `numero` peut être le numéro déclaré, en entier ; + **`origineDuNumero`** (sur
   les factures émises depuis 1141). Aucune route, aucun droit, aucun topic neuf ; manifeste `facturation` inchangé.
 
+- **D-1141-12 — Une limite de Karapace, constatée au gate** (comme celle de 965 sur les énumérations) : contre la
+  version de 1141, où `numeroImprimable` existe déjà, la rendre **requise** passe pour compatible au registre. Contre
+  celle de 1073, où elle n'existe pas, le registre la refuse. `test:schemas` juge donc ce cas contre la version 1. La
+  facultativité est gardée par `etat-du-compte.spec.ts`.
+
 ## Question au PO
 
 - **Q-D-26 (2026-11-26, STORY-1141) — Un compte `MARCHAND` (ou `PI_SPI`) peut-il porter un numéro imprimable ?**
@@ -153,10 +158,86 @@ sa déclaration, hors la vérification et la clef de notification.
 
 ## Où en est-on (pour une reprise après interruption)
 
-- [x] Rituel (passation de B constatée, aucune demande neuve, 325 de C non fusionnée).
-- [x] Fiche écrite avant le code (cette PR de docs, qui annonce aussi le contrat et porte le manifeste `paiement` 1.2.0).
-- [ ] Code `paiement` (branche `MNV-1141`) puis `ventes` (branche `MNV-1141`).
-- [ ] Preuves : unitaires et e2e sous Node 24, `test:schemas` (Karapace), mutations, lint et `tsc` ; pile `grp-d`
-  (paiement, ventes, dossier, Kafka, Karapace) sous le verrou.
-- [ ] PR de code fusionnées en rebase, `paiement` d'abord.
-- [ ] PR de docs finale ; paiement rendu à B (journal de D, « Passations »).
+- [x] Rituel : la passation de B est constatée, aucune demande neuve n'est arrivée, et 325 de C n'est pas fusionnée.
+- [x] Fiche écrite et contrat annoncé avant le code : prospera-stories **#967** (`main` **`6a5d3ab`**), avec le
+  manifeste `paiement` 1.2.0.
+- [x] `paiement` **#126** fusionnée en rebase (`dev` **`f6a4800`**, **`64b5838`**). L'arbre fusionné est identique au
+  commit poussé `83338a1`.
+- [x] `ventes` **#17** fusionnée en rebase (`dev` **`dcb5d3b`**). L'arbre fusionné est identique au commit testé
+  `3db0431`.
+- [x] Verrou Docker pris à 10:51 (une seule prise) et rendu à 11:22 par le `trap` du script autonome. B et C ont été
+  prévenus. Il ne reste aucun conteneur, volume ni réseau `grp-d`.
+- [x] PR de docs finale. Paiement est rendu à B (journal de D, « Passations »).
+
+## Ce qui a été livré
+
+- **`prospera-paiement-service`** (#126) :
+  - `domain/comptes/numero-imprimable.ts` : `preparerNumeroImprimable` (la nature, la forme, le rapprochement avec
+    l'empreinte) et `empreinteDuNumeroImprimable`.
+  - `construireCompte` prend `numeroImprimable`.
+  - `ComptesDEncaissement.declarerLeNumeroImprimable` passe par `EcritureDArgent`, avec un filtre sur l'avant.
+  - La déclaration consigne `empreinteNumeroImprimable`.
+  - `construireEtatDuCompte` publie le numéro sur une nature servie.
+  - Le schéma du compte porte la nature, la forme et la longueur ; la vue du compte, le DTO et le DTO neuf
+    `DeclarerNumeroImprimableDto` suivent.
+  - Deux routes `PUT …/numero-imprimable` : celle de l'organisation et celle de la surface déléguée.
+  - La phrase du signalement au client pour l'acte délégué.
+  - `contrat/schemas/paiement.compte.changed.json` gagne la propriété facultative.
+  - `test/notifications-webhook.e2e-spec.ts` est recompilé : `publier` prend deux arguments depuis 1073, et la suite
+    ne compilait plus.
+- **`prospera-ventes-service`** (#17) :
+  - `emetteur/faits-lus.ts` lit `numeroImprimable` et écarte un numéro invalide ou incohérent.
+  - La projection `facturation_comptes_lus` gagne le champ, et `fichesLues` le relaie.
+  - `mentions/mentions.ts` : `numeroImprime` et `origineDuNumero`.
+  - Recette `scripts/recette/1141/` (pilote et README), sur la pile de 1073.
+
+## Preuves
+
+| Où | Quoi | Résultat |
+|---|---|---|
+| paiement, Node 24 (image `verification` de l'archive LF `c668fbb`) | suite unitaire complète ; build | **351/351 suites, 4 776 tests** (2 ignorés) ; OK |
+| paiement, Node 24 | e2e | **28/30 suites, 355 tests verts**. Les deux suites rouges, `health` (`admin.listTopics` absent du double, MNV-957) et `notifications-webhook` (`EtatsDeCreance` absent du module de test, MNV-965), **le sont aussi sur `e2be149`**, rejouées dans la même image avec `src` et `test` de `dev`. 1141 ne touche aucune des deux, hormis la recompilation. `comptes-encaissement` et `delegation-comptes` sont verts. |
+| paiement, Karapace de la pile | `test:schemas` | **14/14**. Le schéma de 1141 est compatible avec celui de 1073 et s'y enregistre en version 2. Le numéro rendu requis est incompatible avec la version 1 (D-1141-12). Un premier passage, pendant la recette, a rendu 4 rouges transitoires ; les deux passages suivants sont verts. |
+| paiement, Node 25 | domaine, comptes, contrôleurs, signalement ; lint des fichiers touchés ; `tsc` | 93/93 suites, 1 602 tests ; 0 ; 0 |
+| paiement, mutations | 19 mutations (liste ci-dessous) | **19/19 tuées** sur une assertion ; six ont été réécrites, leur première forme ne compilait pas |
+| ventes, Node 24 (image `verification` de l'archive LF `3db0431`) | unitaires ; e2e ; build | **66/66 suites, 720** ; **2/2, 24** ; OK |
+| ventes, Node 24, MongoDB réel (jeu de répliques) | intégration | **18/18 suites, 206** (`fiche-legale.int-spec.ts` : le numéro imprimé puis retiré, la facture d'avant qui le garde, une projection d'avant 1141) |
+| ventes, Node 25 | facturation ; lint ; `tsc` | 13/13 suites, 212 ; 0 ; 0 |
+| ventes, mutations | 8 mutations (liste ci-dessous) | **8/8 tuées** ; une a été réécrite, sa première forme ne compilait pas |
+| pile `grp-d` : paiement et ventes (archives de la branche), dossier (`origin/dev` `645a699`), deux MongoDB, Redis, Kafka, Karapace, l'émetteur de jetons | `recette-1141.py` | **38/38**, 0 `UnknownDependencies` dans les journaux de la pile |
+
+**Mutations de paiement (19)** : nature non contrôlée ; rapprochement retiré ; identifiant court accepté ; casse
+comparée ; numéro non mis en majuscules ; tiret accepté ; borne de 80 retirée ; `construireCompte` qui ignore le
+numéro ; clair au journal à la déclaration ; même numéro réécrit ; avant non reposé en filtre ; avant et après
+inversés ; changement non publié ; acte de la déclaration à la place du sien ; fait sans filtre de nature ; `null`
+publié ; vue sans le numéro ; schéma sans garde de nature ; DTO qui refuse `null`.
+
+**Mutations de ventes (8)** : forme non contrôlée ; PI-SPI accepté avec un numéro ; numéro jamais lu ; l'empreinte
+avant le numéro ; le numéro avant la destination PI-SPI ; numéro vide imprimé ; origine mal nommée ; origine omise.
+
+Ce que la pile établit, sur les vraies routes :
+1. Le sujet `paiement.compte.changed-value` porte deux versions, en BACKWARD : celle de 1073, enregistrée d'abord,
+   puis celle de 1141.
+2. Un numéro discordant est refusé en 422, et le refus ne le recopie pas. Un compte marchand qui porte un numéro est
+   refusé en 422 `…_NON_SERVI`. Ni l'un ni l'autre ne publie rien.
+3. Un compte Mobile Money déclaré avec « +228 90  12 45 21 » range le numéro normalisé. Le fait de la révision 1 le
+   porte et reste valide au schéma relu du registre, et `facturation` le projette. Le journal n'en garde que
+   l'empreinte SHA-256.
+4. FAC-2026-000001 imprime « Mobile Money — FEDAPAY — n° +228 90 12 45 21 — titulaire : … », d'après le texte du PDF
+   lu par `pdfjs`.
+5. Le `PUT` écrit un acte de rang 2, avec l'empreinte de l'avant, celle de l'après et l'auteur. La révision 2 est
+   projetée. FAC-2026-000002 imprime le nouveau numéro, et le PDF de FAC-2026-000001 ne change pas d'un octet.
+6. Reposer le même numéro ne crée ni acte ni fait. Un numéro discordant rend 422 sans rien écrire, et un corps vide
+   rend 400.
+7. `null` publie la révision 3 sans la clé, et FAC-2026-000003 imprime l'empreinte.
+8. L'identifiant scellé (`MM22890124521`) n'apparaît ni sur Kafka, ni dans l'outbox, ni au journal, ni dans les PDF,
+   ni dans les journaux des services.
+9. Le groupe `ventes-service.emetteur` a un lag de 0, et les trois services sont sains.
+
+## Ce qui reste
+
+- **→ B** : recopier le manifeste `paiement` 1.2.0 au catalogue (`platform-catalog-service`, `copies.json`). La note
+  du catalogue des faits du distributeur (`prospera-plateforme`) dit encore « manifeste paiement 1.1.0 » ; aucune
+  garde ne la lit.
+- **→ A (plus tard)** : l'écran des comptes d'encaissement (le numéro à imprimer, son changement, son retrait).
+- Q-D-26 au PO.

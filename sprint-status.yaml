@@ -150,20 +150,22 @@ reserved_ranges:
       pile grp-d 15/15. Lot 7 de D, n° 5c (§4 bis). Détachée de la plage 1140 → 1141 (entrée propre). Suivante :
       STORY-349 (319 de C fusionnée).
   - range: "STORY-1141"
-    status: "in_progress"
-    owner: "Groupe D — le numéro de compte imprimable sur la facture (Q-D-15 ; prospera-paiement-service, prêté par B, et prospera-ventes-service)"
+    status: "DONE"
+    owner: "Groupe D — le numéro de compte imprimable sur la facture (Q-D-15 ; prospera-paiement-service, prêté par B pour la story, et prospera-ventes-service)"
     source_doc: "prospera-stories/stories/STORY-1141.md"
     reserved_on: "2026-11-26"
     note: >-
-      Consigne de l'utilisateur du 26/11 (plan §4 bis). 1138 = le rapprochement de la liasse avec sa balance par
-      l'empreinte des soldes (D-1078-10, après STORY-1022 de C) ; 1139 = les repères des seize indicateurs, sourcés et
-      modifiables (Q-D-14) ; 1140 = l'export C13 aussi en CSV (Q-D-19) ; 1141 = le numéro de compte imprimable sur la
-      facture (Q-D-15 ; paiement par une passation de B limitée à la story). Les fiches sont écrites juste avant de
-      coder ; chaque story met à jour sa ligne (ou s'en détache en entrée propre, au choix de la story).
-      MAJ 2026-11-26 : 1138 s'en est détachée en entrée propre (DONE, ci-dessus) ; la plage garde 1139 → 1141.
-      MAJ 2026-11-26 : 1139 s'en est détachée à son tour (entrée propre, ci-dessus) ; la plage garde 1140 → 1141.
-      MAJ 2026-11-26 : 1140 s'en est détachée à son tour (entrée propre, ci-dessus) ; la plage garde 1141.
-      MAJ 2026-11-26 : 1141 ouverte (fiche écrite avant le code, contrat annoncé) — in_progress.
+      🏁 DONE le 2026-11-26 — prospera-paiement-service#126 (dev f6a4800, 64b5838) et prospera-ventes-service#17 (dev
+      dcb5d3b) ; annonce « ⚠ Contrats » avant le code (docs #967, main 6a5d3ab, manifeste paiement 1.2.0). Le DAF
+      déclare avec le compte (BANCAIRE, MOBILE_MONEY) un numéro « à imprimer », non secret, ou le pose, le remplace ou le
+      retire par PUT …/comptes-encaissement/{compteId}/numero-imprimable (et sa route déléguée). Le numéro est rapproché
+      de l'empreinte visible, jamais du coffre. Chaque changement est un acte du journal chaîné du compte (empreintes
+      SHA-256 de l'avant et de l'après) ; paiement.compte.changed@1 le publie (numeroImprimable facultatif, BACKWARD
+      prouvé au registre). La facture et son PDF l'impriment en entier (origineDuNumero) ; D-1073-6 reste le repli.
+      Node 24 : paiement unitaires 351/351 suites (4 776), e2e 28/30 (les deux rouges le sont aussi sur dev), test:schemas
+      14/14 ; ventes unitaires 66/66 (720), e2e 2/2, intégration 18/18 (206). Mutations 19/19 et 8/8 ; pile grp-d 38/38.
+      Q-D-26. Plage 1138 → 1141 vidée : chaque story y a désormais son entrée propre. Lot 7 de D, n° 5d (§4 bis).
+      Suivante : D attend STORY-325 de C (330 → 337) ; 561 et 562 en dépendent aussi.
   # ── COMPLÉMENTS DE LA COMPTABILITÉ TENUE (2026-11-26) : epics-comptabilite-complements-2026-11-26.md, tiré du livre
   #    « La Boîte à Outils du Comptable » et de ses 50 modèles, croisés avec le code de origin/dev.
   - range: "EPIC-270 → EPIC-276"
