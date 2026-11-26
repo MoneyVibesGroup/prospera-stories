@@ -136,9 +136,20 @@ reserved_ranges:
       Node 24 : unitaires 372/372 suites (deux passes --shard), e2e 45/45 (43 sur f1266a1 + 4 sur 850c127) ; vrai MongoDB
       4/4 ; mutations 22/22 ; pile grp-d saine. Q-D-23 au PO. Lot 7 de D, n° 5b (§4 bis). Détachée de la plage 1139 →
       1141 (entrée propre). Suivante : STORY-1140.
-  - range: "STORY-1140 → STORY-1141"
+  - range: "STORY-1140"
+    status: "in_progress"
+    owner: "Groupe D — l'export C13 du bilan aussi en CSV, à la forme par objet de balance (Q-D-19 ; prospera-bilan-service ; contrat à publier par B)"
+    source_doc: "prospera-stories/stories/STORY-1140.md"
+    reserved_on: "2026-11-26"
+    note: >-
+      Fiche écrite et contrat annoncé avant le code (« ⚠ Contrats » du journal de D) : ?format=json|csv et ?objet= sur
+      GET /api/v1/instance/bilan/{organisationId}/export, un objet par fichier CSV (BOM, ;, CRLF, neutralisation),
+      FORMAT_NON_SERVI et OBJET_REQUIS, Cache-Control: no-store ; → B : le contrat dans
+      prospera-plateforme/contrats/instance/ (ouverte). Lot 7 de D, n° 5c (§4 bis). Détachée de la plage 1140 → 1141
+      (entrée propre).
+  - range: "STORY-1141"
     status: "RÉSERVÉ"
-    owner: "Groupe D — lot 7, amendement du 26/11 : bilan (1140), facture et paiement (1141)"
+    owner: "Groupe D — lot 7, amendement du 26/11 : facture et paiement (1141)"
     source_doc: "prospera-stories/coordination/PLAN-LOT-7-2026-11-24.md"
     reserved_on: "2026-11-26"
     note: >-
@@ -149,6 +160,7 @@ reserved_ranges:
       coder ; chaque story met à jour sa ligne (ou s'en détache en entrée propre, au choix de la story).
       MAJ 2026-11-26 : 1138 s'en est détachée en entrée propre (DONE, ci-dessus) ; la plage garde 1139 → 1141.
       MAJ 2026-11-26 : 1139 s'en est détachée à son tour (entrée propre, ci-dessus) ; la plage garde 1140 → 1141.
+      MAJ 2026-11-26 : 1140 s'en est détachée à son tour (entrée propre, ci-dessus) ; la plage garde 1141.
   # ── COMPLÉMENTS DE LA COMPTABILITÉ TENUE (2026-11-26) : epics-comptabilite-complements-2026-11-26.md, tiré du livre
   #    « La Boîte à Outils du Comptable » et de ses 50 modèles, croisés avec le code de origin/dev.
   - range: "EPIC-270 → EPIC-276"
