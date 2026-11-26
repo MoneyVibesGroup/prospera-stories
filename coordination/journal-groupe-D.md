@@ -505,6 +505,80 @@
     réalignement que 333 (plan §4, n° 11) : 538 porte déjà le rejet du dépôt de liasse. Garder la version scellée, en
     sceller une de plus à la retransmission ; l'accusé de 333 est par version.
 
+- **STORY-334** ✅ 📨 — le rejet administratif d'un dépôt engagé : consigné une fois par version, avec son motif à
+  l'octet, sa cause en clair et la correction proposée ; la reprise dans le produit ; la version déposée intacte. Code :
+  prospera-fiscal-service#82, `dev` `69d7e65`. Annonce avant le code : #1004, `main` 9bcdf01 (fiche D-334-1 → 15, ⚠
+  Contrats, ⚠ Communs, → C, Q-D-31, Q-D-32). Plan §4, n° 11.
+  - **Réalignement** (fiche, avant le code) : 334 n'était **pas** couverte. 538 couvre le rejet du **dépôt de liasse**
+    (l'ancien modèle, qui reste) ; manquaient le rejet de la **déclaration** (le dépôt engagé de 330, la version scellée
+    de 325), sa cause en clair et sa reprise, et le retour de l'obligation à « À déposer » (dans un fichier de C, D-325-9).
+    537, 539, 688, 690 et 691 sont sans rapport. 334 complète sans réécrire 538.
+  - **Livré** (dossier `depots` de D) :
+    - **`POST /api/v1/depots-declaration/{depotId}/rejet`** (droit `preparer`, D-538-8 ; JSON : `rejeteLe`, `motif`,
+      `reference?`, `cause?: { feuille?, cellule?, regle? }`, `correctionProposee?`) :
+      - sur une déclaration exactement « Déposée », dont la version déposée est celle du dépôt engagé
+        (`REJET_NON_CONSIGNABLE`, `LIVRABLE_PERIME`, `DEPOT_REMPLACE`, `OBLIGATION_DESACTIVEE`) ;
+      - le motif par la règle de 538 (`MOTIF_INVALIDE`) ; les autres textes à l'octet (`TEXTE_REJET_INVALIDE`, `{ champ
+        }`) ; `rejeteLe` entre le jour de l'engagement et aujourd'hui (`DATE_REJET_HORS_BORNES`) ;
+      - une fois par version (`REJET_DEJA_CONSIGNE`, index `un_rejet_par_version`) ; accusé et rejet s'excluent
+        (`ACCUSE_DEJA_CONSIGNE` ici, **`409 DEPOT_REJETE`** sur la route de l'accusé de 333) ;
+      - `reprise` (la version rejetée, le retour à `A_DEPOSER`, six étapes dans le produit) ; `retard` à la date du rejet
+        (l'échéance court toujours, les pénalités du paquet de dépôt jamais chiffrées) ;
+      - acte `DEPOT_DECLARATION_REJET` au journal chaîné (empreintes seules), textes en clair dans `textes_audit` (329),
+        dans la même transaction.
+    - **`GET …/{depotId}/rejet`** et **`GET /api/v1/depots-declaration/rejets?obligationId=`** (AC-2 : chaque rejet et
+      `retransmission`, la première version scellée après lui).
+    - **Pour la porte de C** (D-334-8) : `AccusesDepotModule` exporte aussi `PreuvesDeRejet` ; la règle
+      `verifierRejetAuRetour` (`409 REJET_REQUIS`).
+    - **334 ne fait pas revenir le cycle** et n'écrit aucune version (le retour est dans `CycleObligationsService`).
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI seulement. Aucune migration, aucun fichier de C.
+  - **Preuves** :
+    - Node 24 (image `verification` de l'archive LF de `8959a3a`, avant le rebase) : unitaires **248/249 suites, 3 708
+      tests** (1 suite et 3 tests ignorés : la spec BullMQ sans Redis) ; e2e **14/14 suites, 360 tests** ; **`test:conformite`
+      30/30 suites, 189 tests** (dont `rejets-depot.conformite-spec.ts` : l'index unique, dix consignations parallèles ⇒ un
+      seul rejet et un seul acte, les textes en clair hors du journal sous leur empreinte, tout ou rien sur une panne du
+      journal — ni rejet ni texte —, la relecture et l'isolement, le schéma strict). Après le rebase sur `c459960` (339 de C, au-dessus
+      de `74b33ec` : la garde `ACCUSE_REQUIS`, qui fait importer `AccusesDepotModule` par `ObligationsModule`), archive LF
+      de `b44eae6` : e2e **14/14 suites, 361 tests**.
+    - Node 25 (local) : domaine 12/12, service 13/13, accusé 19/19, OpenAPI et gardes du module `depots` (9 suites, 125
+      tests), e2e `depots-declaration` 44/44.
+    - **Mutations 29/29**, chacune rouge sur une assertion : la porte du retour sans rejet ; « Accusé reçu » puis « À
+      déposer » consignables ; un texte blanc, trop long, porteur d'un contrôle, rogné ; le motif non vérifié ; la
+      correction sans ses sauts de ligne ; le nom du champ de la cause perdu ; une cause vide admise ; chaque borne de date
+      retirée ; les étapes de la reprise perdues ; le motif en clair au journal ; la cellule perdue à l'acte ; les textes
+      absents gardés ; le périmé non vérifié ; « consignable » non vérifié ; l'accusé de la version ignoré ; le rejet déjà
+      consigné ignoré ; la date de l'engagement ignorée ; la retransmission qui prend la version rejetée, puis la plus
+      récente ; les versions lues sans rejet ; l'accusé admis sur une version rejetée ; le droit `preparer` retiré ; la
+      règle de la cause et la correction perdues dans la réponse. Quatre mutants qui rougissaient en compilation (un
+      import devenu inutile) ont été réécrits en gardant l'intention ; deux restés verts au premier passage (la règle de la
+      cause dans la réponse, le rejet déjà consigné vu avant l'écriture) ont reçu leur assertion, puis ont été rejoués.
+    - lint des fichiers touchés et `tsc` 0.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** (image runtime de l'archive de `8959a3a`) : santé `ok` (mongodb, audit,
+      kafka, redis) ; les trois routes neuves montées et en `401` sans jeton ; `AccusesDepotModule` initialisé ; 0
+      `UnknownDependencies` sur 497 lignes de journal ; les index `un_rejet_par_version` et `rejet_par_depot` posés par
+      l'application. Rejouée sur l'arbre rebasé (archive de `b44eae6`) : santé `ok`, les trois routes en `401`, `AccusesDepotModule` initialisé (importé par `DepotsModule` et par `ObligationsModule`), 0 erreur sur 497 lignes, les index posés.
+    - **Verrou Docker** : deux prises par les scripts autonomes, de 21:24:18 à 21:43:47 (la passe complète) et de 22:20:23 à 22:22:51 (la passe courte après le rebase), rendues par leur `trap`. B et C prévenus à chaque reddition. Il ne reste aucun conteneur, volume ni réseau
+      `grp-d`.
+
+  - **Ce qui reste** :
+    - → C : ouvrir `DEPOSEE → A_DEPOSER` sur un rejet consigné (D-334-8) — ouverte. Jusque-là, la reprise passe par la
+      rectificative de 325 (n + 1 nommée `RECTIFICATIVE`, la version n intacte) ;
+    - Q-D-31, Q-D-32 au PO ;
+    - → A (plus tard) : FE-081 consigne le rejet et affiche la reprise ; → 336 : le dossier de contrôle lit le rejet, son
+      motif et la retransmission ;
+    - bilan, assurance et notification ne lisent pas encore l'état publié (préalable un jour au retrait
+      d'`entitlement.changed`, non demandé ; B 1128, contrat-etat-publie-v1.1 figé à 1.1.0) ;
+    - assurance, liaison-assureur et sinistres : aucun test ne vérifie leur copie de `garde-etat-publie` (relevé par B,
+      1128) — un test d'empreinte à ajouter ;
+    - ← C : canal de la retenue d'IRPP — servie (339, fiscal #84 c459960 ; balance #173 61997fd ; organisme « service
+      des impôts », LPF Art. 27) ; le format `TG × RETENUE-IRPP` (D-331-9) est à écrire par D, par donnée du paquet de
+      dépôt ; non urgent ;
+    - → C : garde `ACCUSE_REQUIS` — servie (fiscal #83, 74b33ec) ;
+    - pour 336 : `GET /obligations/{id}/chemin` porte désormais `detail.basesLegales` (339 de C).
+  - **Suivante : STORY-335** (l'archivage des livrables et des accusés, l'URL présignée ; dossiers de D). Même
+    réalignement, en partie (plan §4, n° 12) : 682 archive déjà le fichier transmis d'une liasse, 333 la pièce d'un
+    accusé (sous `accuses/`, sans URL).
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
@@ -1823,7 +1897,8 @@
 
 ## Demandes aux autres groupes
 
-- **→ C (2026-11-26, STORY-334) : ouvrir `DEPOSEE → A_DEPOSER` sur un rejet consigné — ouverte.**
+- **→ C (2026-11-26, STORY-334) : ouvrir `DEPOSEE → A_DEPOSER` sur un rejet consigné — ouverte.** Livré par D :
+  fiscal #82 (`dev` `69d7e65`) ; le SHA a été envoyé à C (`moneyvibes-apps-f7`).
   - Pourquoi : AC-1 de 334 (« un rejet enregistré, l'obligation revient dans le cycle sans qu'aucune version antérieure
     ne soit altérée ») ; D-325-9 laisse ce retour à 334, mais il est dans `CycleObligationsService.revenir` et
     `verifierRetour` (`domain/obligations/version-declaration.ts`), fichiers de C, et le service n'est pas exporté.
@@ -1837,7 +1912,9 @@
     import d'`AccusesDepotModule` que la garde `ACCUSE_REQUIS` de 339.
   - En attendant : la reprise passe par la rectificative de 325 (n + 1 nommée `RECTIFICATIVE`, la version n intacte).
 
-- **→ C (2026-11-26, STORY-333) : garde ACCUSE_REQUIS — acceptée, placée en tête de 339 (après la fusion de 333).**
+- **→ C (2026-11-26, STORY-333) : garde ACCUSE_REQUIS — servie (fiscal #83, 74b33ec).** `ObligationsModule` importe
+  `AccusesDepotModule` ; les doubles de C doublent `PreuvesDAccuse` (consigné par défaut). Acceptée d'abord, placée en tête
+  de 339 (après la fusion de 333).
   333 est fusionnée (fiscal #81, `dev` `fc317a1`) ; le SHA a été envoyé à C (`moneyvibes-apps-f7`).
   - Pourquoi : AC-3 de 333 (« une obligation sans accusé ne passe pas à "Accusé reçu" ») ; `DEPOSEE → ACCUSE_RECU` n'a
     aujourd'hui aucune garde, et le service n'est pas exporté : D ne peut pas le garder sans toucher le dossier de C.
@@ -1866,8 +1943,10 @@
   le nommerait sans livraison. (2) `COTISATIONS_SOCIALES` et `RETENUE_IRPP` sont écrites par la dérivation sociale
   de D ; si le catalogue les porte un jour, il fait foi (D-349-5). (3) Pour 350 : `ObligationsModule` ne peut pas
   importer `RemunerationModule` sans `forwardRef` (cycle) ; un module de 350 peut importer les deux.
+  - **→ C : canal de la retenue d'IRPP — servie (339, fiscal #84 c459960 ; balance #173 61997fd ; organisme « service des
+    impôts », LPF Art. 27).** Le format `TG × RETENUE-IRPP` (D-331-9) reste à écrire par D, par donnée du paquet de dépôt.
   - **Ajout du 2026-11-26 (STORY-331), toujours non bloquant — → C : nommer le canal du reversement de la
-    retenue d'IRPP au paquet fiscal — ouverte** (rappelée à la clôture de 331, fiscal #78, `dev` `6e9fbbe`) : le point (1) a désormais un effet visible. Un paquet de
+    retenue d'IRPP au paquet fiscal — servie (ci-dessus)** (rappelée à la clôture de 331, fiscal #78, `dev` `6e9fbbe`) : le point (1) a désormais un effet visible. Un paquet de
     formulaire sert une déclaration par son `canal` et sa `taxe` (D-331-3) : tant que le canal de `RETENUE_IRPP` sort
     `NON_DECLARE`, la retenue sur salaires (déposée sur dimana, 1102) n'a pas de format. Dès que le paquet fiscal nomme
     ce canal, D ajoute `TG × RETENUE-IRPP` par donnée seule (D-331-9). Prévenu par SendMessage.
@@ -2400,7 +2479,8 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-26, STORY-334, avant le code)** — branche `MNV-334` de `prospera-fiscal-service`, partie de
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#82, `dev` `69d7e65`, rebasée sur `origin/dev` `c459960` — 339 de C, au-dessus de `74b33ec`, qui touchait aussi le contrat OpenAPI et `ObligationsModule` : aucun conflit — avant la fusion), conforme à l'annonce ;
+  ANNONCÉ (2026-11-26, STORY-334, avant le code)** — branche `MNV-334` de `prospera-fiscal-service`, partie de
   `origin/dev` `fc317a1`. **Aucune migration** (une collection neuve, `rejets_depot`, index posés par Mongoose au
   démarrage), ni `app.module.ts` (les routes neuves entrent dans `DepotsDeclarationController`, déjà monté ; le registre
   des rejets est fourni par `AccusesDepotModule`, fichier de D), ni `package.json`, ni `read-models/`, ni copie du paquet,
@@ -2518,7 +2598,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-26, STORY-334, avant le code) — le rejet administratif d'un dépôt engagé**
+- **PUBLIÉ (2026-11-26, STORY-334 : prospera-fiscal-service#82, `dev` `69d7e65`) sans écart ; ANNONCÉ (2026-11-26,
+  STORY-334, avant le code, prospera-stories#1004, `main` 9bcdf01) — le rejet administratif d'un dépôt engagé**
   (`prospera-fiscal-service`, module `depots`). Fiche : `stories/STORY-334.md` (D-334-1 → 15, section « Contrat »).
   **Ajouts, et un refus de plus sur une route de 333** :
   - **`POST /api/v1/depots-declaration/{depotId}/rejet`** (droit `fiscalite:declaration:preparer`, JSON : `rejeteLe`,
