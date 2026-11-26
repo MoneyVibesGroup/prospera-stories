@@ -1,6 +1,7 @@
 # STORY-324 : La validation du client capturée comme pièce — l'accord du client, opposable, sans lui ouvrir l'application
 
-Status: in_progress — écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 6 du fiscal,
+Status: done — **livrée le 2026-11-26** : prospera-fiscal-service **#74** (`060c85c` sur `dev`) ; voir « Livraison ».
+Écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 6 du fiscal,
 `PLAN-LOT-7-2026-11-24.md` §3) ; contrat et communs annoncés avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de
 C). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-031, STORY-324) et de la
 salle des cabinets (V6, `salle-cabinets-validations-2026-11-19.md`).
@@ -229,8 +230,25 @@ Le téléversement du fichier dans le fiscal (D-324-2) ; la vérification de la 
 retrait d'une pièce ; les versions de déclaration et les rectificatives (325) ; l'écran (FE-081 : consigner l'accord en
 un geste, téléverser à la GED puis consigner) ; tout événement.
 
+## Livraison (2026-11-26)
+
+- **Dépôt** : `prospera-fiscal-service`, `MNV-324` → `dev` (#74, `060c85c`), rebasée sur `origin/dev` 136efdf (STORY-349 de D,
+  #73) avant la fusion. Fichiers : `domain/obligations/validation-client.ts` (natures, normalisation, porte de « Déposée »,
+  faits audités), `application/obligations/validations-client.service.ts`, la porte dans `cycle-obligations.service.ts`,
+  `ports/registre-validations-client.ts`, `adapters/mongo/{validation-client.schema,mongo-registre-validations-client}.ts`,
+  `modules/obligations/{validations-client.controller,dto/validations-client.dto}.ts`, le champ `validationClient`
+  (schéma, port, `versDomaine` exporté, `$setOnInsert`, DTO), `src/garde-acces-client.spec.ts` (AC-3).
+- **Tel qu'annoncé** (#963) : aucune décision D-324-1 → 13 n'a changé ; aucun écart de contrat.
+- **Preuves** : Node 24 (étage `verification`, archive de la branche rebasée sur `origin/dev` 136efdf) : unitaires 220/221 suites (1 sautée), 3187 tests ; e2e 13/13, 304 ; conformité 24/24, 151 (MongoDB en jeu de répliques) ; `nest build` vert ; mutations 22/22 (unitaires, e2e, garde) et 7/7 sur MongoDB réel (après un test ajouté pour la 7e) ; pile `grp-c` fiscal + balance saine, les cinq routes en `401` sans jeton, les index des deux collections neuves posés au démarrage, aucune erreur d'injection, aucun redémarrage.
+- **Deux leçons** : la garde `aucune-date-en-dur` (STORY-316) lit aussi les exemples Swagger des DTO (un « 20/11/2026 »
+  d'exemple l'a rougie) ; la 7e mutation sur MongoDB (l'acte de la consignation écrit hors de la session) survivait, faute
+  d'un test qui relise la chaîne après une panne du journal : ajouté, elle rougit.
+- **Tests des autres** : aucun test de D touché ; deux e2e de C (322, 328) qui passent « Déposée » sans parler de l'accord
+  règlent le dossier sur « non exigée » ; le cycle entier de 323 consigne la pièce avant de déposer.
+
 ## Progress Tracking
 
 | Date | Événement |
 |---|---|
-| 2026-11-26 | Fiche écrite, contrat et communs annoncés (PR de docs) avant le code. |
+| 2026-11-26 | Fiche écrite, contrat et communs annoncés (PR de docs #963) avant le code. |
+| 2026-11-26 | **DONE.** Code : fiscal #74 (`060c85c` sur `dev`). Preuves : voir « Livraison ». |
