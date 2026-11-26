@@ -275,6 +275,47 @@
     story, #936, `e2be149`, puis ventes ; plan §4 bis, n° 5d). Au 26/11 à 10:00, 325 de C n'est pas fusionnée (fiscal
     `origin/dev` `136efdf` ; C fait 324) : 330 et sa chaîne attendent.
 
+- **STORY-1141** ✅ 🧾 — le numéro de compte imprimable sur la facture (prospera-paiement-service#126, `dev`
+  `f6a4800`, `64b5838` ; prospera-ventes-service#17, `dev` `dcb5d3b` ; annonce avant le code #967, `main` 6a5d3ab :
+  fiche D-1141-1 → 12, ⚠ Contrats, manifeste `paiement` 1.2.0, Q-D-26). Plan §4 bis, n° 5d (Q-D-15). Rituel
+  (2026-11-26, vers 10:30) : aucune demande neuve à D chez A, B et C ; **← B : passation de `prospera-paiement-service`
+  pour 1141 — servie** (#936, `e2be149`, aucune PR ouverte, checkout propre) ; 325 de C non fusionnée ; ventes : aucune
+  PR ouverte, `origin/dev` `bc0f85c`.
+  - **Livré** (paiement) :
+    - `numeroImprimable` se déclare avec le compte, pour `BANCAIRE` et `MOBILE_MONEY`.
+    - Il se pose, se remplace ou se retire par `PUT …/comptes-encaissement/{compteId}/numero-imprimable` et par sa route
+      déléguée.
+    - Il est rangé normalisé et doit finir comme l'identifiant scellé. Le contrôle lit l'empreinte visible, jamais le
+      coffre.
+    - Chaque changement est un acte `COMPTE_ENCAISSEMENT_NUMERO_IMPRIMABLE_DECLARE` du journal chaîné du compte : les
+      empreintes SHA-256 de l'avant et de l'après, jamais le clair, que le tamis refuserait pour un numéro de téléphone.
+      L'acte part dans la transaction de l'écriture et de son fait.
+    - Reposer le même numéro n'écrit rien ; un changement concurrent rend 409.
+    - `paiement.compte.changed@1` gagne `numeroImprimable`, facultatif.
+  - **Livré** (ventes) : la facture imprime le numéro déclaré en entier (`origineDuNumero`). À défaut, elle imprime la
+    destination PI-SPI ou l'empreinte (D-1073-6). Aucun écart au contrat annoncé.
+  - **Communs** : sans objet (paiement prêté, ventes à D). Aucune migration.
+  - **Preuves** :
+    - Node 24, paiement : unitaires **351/351 suites, 4 776 tests** ; e2e 28/30. Les deux suites rouges, `health` et
+      `notifications-webhook`, sont rouges aussi sur `e2be149` (rejouées dans la même image) ; la seconde ne compilait
+      même plus depuis 1073 et est recompilée. `test:schemas` **14/14** sur le Karapace de la pile.
+    - Node 24, ventes : unitaires **66/66, 720** ; e2e 2/2 ; intégration sur MongoDB réel **18/18, 206**.
+    - **Mutations 19/19** (paiement) et **8/8** (ventes) ; lint et `tsc` 0.
+    - **Pile `grp-d`** (paiement, ventes, dossier, Kafka, Karapace) : **38/38**. Le registre porte 1073 puis 1141 en
+      BACKWARD. Trois factures : le numéro, le nouveau numéro, puis l'empreinte après le retrait. Le PDF de la première
+      ne change pas d'un octet. L'identifiant scellé n'apparaît nulle part.
+    - **Verrou Docker** : pris à 10:51 (une seule prise) et rendu à 11:22 par le trap du script autonome. B l'a repris
+      aussitôt (1125). B et C ont été prévenus, sous les noms `-be` et `-f7`. Aucun conteneur, volume ni réseau `grp-d`.
+  - **→ B : recopie du manifeste `paiement` 1.2.0 au catalogue — ouverte** (« Demandes aux autres groupes »).
+    **`prospera-paiement-service` est rendu à B** (« Passations »). **→ A (plus tard)** : l'écran des comptes (le
+    numéro à imprimer). **Q-D-26** au PO.
+  - 🏁 **Les quatre stories de l'amendement du 26/11 sont faites** (1138, 1139, 1140, 1141).
+  - **Suivante : D attend STORY-325 de C**, qui débloque 330 → 337. Au 26/11 à 11:25, 325 n'est pas fusionnée :
+    fiscal `origin/dev` `060c85c`, C vient de fusionner 324. **→ C : 325 — ouverte.**
+    - 561 attend 331 (donc 330 et 325), et 562 attend 561 : **aucune des deux n'est libre**.
+    - Il en va de même de 565 (562, 341 de C) et de 1102 (332, 333).
+    - Toute la suite du lot 7 de D attend 325. La session de groupe de D décide.
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
@@ -1121,6 +1162,24 @@
 
 ## Passations
 
+- **← B : passation de `prospera-paiement-service` (1141) — rendu à B** (2026-11-26, fin de STORY-1141). Le prêt (#936,
+  journal de B, « Passations ») a commencé à l'ouverture de 1141, à `origin/dev` **`e2be149`**.
+  - Derniers commits de D sur `dev` : **`f6a4800`** (MNV-1141, le numéro à imprimer) et **`64b5838`** (MNV-1141,
+    `test:schemas`), par **#126**, fusionnée en rebase. **SHA final : `64b5838`.**
+  - **Aucune PR de D ouverte.** Le checkout du poste est sur `dev`, à jour (`64b5838`) et propre ; la branche locale
+    `MNV-1141` est supprimée.
+  - **Ce qui a changé** (information à B) :
+    - `numeroImprimable` est facultatif à la déclaration.
+    - Deux routes `PUT …/numero-imprimable` : celle de l'organisation et celle de la surface déléguée.
+    - Un acte neuf `COMPTE_ENCAISSEMENT_NUMERO_IMPRIMABLE_DECLARE`, avec sa phrase de signalement.
+    - Une propriété facultative de `paiement.compte.changed@1`.
+    - Manifeste 1.2.0 à la source.
+  - **Les deux suites e2e déjà rouges sur `e2be149`** restent à B :
+    - `health` : `admin.listTopics` manque au double (MNV-957).
+    - `notifications-webhook` : `EtatsDeCreance` manque au module de test (MNV-965). Cette suite compile de nouveau
+      (`publier` à deux arguments).
+  - L'e2e `recette-uj1` réécrit `docs/recette-uj1-mesures.md` à chaque passage (remis en place).
+
 - **← C, `prospera-fiscal-service` partagé par dossier, constatée par D au rituel de 560, le 2026-11-25** (lot 7,
   D-L7-1 ; passation de C du 25/11, « Passations » de son journal). Constat : `origin/dev` = **`f1296ae`** (MNV-316,
   fiscal #62), **exactement le SHA de la passation** ; `gh pr list --state open` : aucune PR ; aucune migration en vol
@@ -1574,6 +1633,17 @@
     - **Recettes** : `scripts/recette/1068` → `1071` (piles `grp-d`, pilotes Python, mutations).
 
 ## Demandes aux autres groupes
+
+- **→ B (2026-11-26, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue — ouverte.**
+  - Source : `prospera-stories/manifestes/paiement.manifest.ts`, `main` 6a5d3ab (#967).
+  - Cible : `platform-catalog-service/src/modules/catalog/manifeste/copies.json`, où `paiement` est encore en 1.1.0.
+  - Ce qui change : `paiement.compte.changed@1` gagne `numeroImprimable`, facultatif, et part aussi au changement de ce
+    numéro. La route d'écriture neuve `PUT /api/v1/comptes-encaissement/{compteId}/numero-imprimable` reste hors
+    `routesLectureSeule`. La liste des faits, les droits et les routes de lecture seule ne changent pas.
+  - Le schéma est au dépôt de paiement (`contrat/schemas/paiement.compte.changed.json`), au registre par son script.
+  - La note du catalogue des faits du distributeur (`prospera-plateforme/contrats/distributeur/catalogue-faits.json`)
+    dit encore « manifeste paiement 1.1.0 » : une note, qu'aucune garde ne lit.
+  - Prévenu par SendMessage.
 
 - **→ C (2026-11-26, STORY-349) — information, non bloquante** : (1) le paquet ne nomme pas l'organisme du reversement
   de la retenue d'IRPP : le canal de `RETENUE_IRPP` sort `NON_DECLARE` ; `irpp.retenueALaSource.reversement.organisme`
@@ -2169,8 +2239,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-26, STORY-1141, avant le code, cette PR de docs) — le numéro de compte imprimable sur la facture
-  (Q-D-15)** (`prospera-paiement-service`, prêté par B pour cette story, #936 ; `prospera-ventes-service`, module
+- **PUBLIÉ (2026-11-26, STORY-1141 : prospera-paiement-service#126, `dev` `f6a4800`, `64b5838` ;
+  prospera-ventes-service#17, `dev` `dcb5d3b`) sans écart ; ANNONCÉ (2026-11-26, avant le code, prospera-stories#967,
+  `main` 6a5d3ab) — le numéro de compte imprimable sur la facture (Q-D-15)** (`prospera-paiement-service`, prêté par B pour cette story, #936 ; `prospera-ventes-service`, module
   `facturation`). Fiche : `stories/STORY-1141.md` (D-1141-1 → 11, section « Contrat »). **Ajouts seuls** : aucun champ,
   aucune route, aucun topic existant n'est renommé ni retiré.
   - **`paiement`, déclaration** (`POST /api/v1/comptes-encaissement` et sa route déléguée `POST
@@ -3395,6 +3466,11 @@
 
 ## Questions à l'utilisateur ou au PO
 
+- **Q-D-26 (2026-11-26, STORY-1141) — Un compte `MARCHAND` (ou `PI_SPI`) peut-il porter un numéro imprimable ?**
+  **Choix par défaut** (D-1141-3) : non. Seuls `BANCAIRE` et `MOBILE_MONEY` en portent un : un compte marchand se paie
+  par un lien, et un compte PI-SPI imprime déjà sa destination en clair. Pour l'ouvrir au marchand, il suffit d'ajouter
+  une valeur à une liste du domaine, sans toucher au contrat.
+
 - **Q-D-24 (2026-11-26, STORY-349) — Un mois sans base de rémunération doit-il porter ses obligations sociales ?**
   Une obligation sociale naît de la base d'une période (D-349-2) : un mois sans base n'en a pas. **Choix par défaut** :
   non — rien ne dit au code qu'un dossier est employeur ce mois-là, et une déclaration « néant » à la CNSS n'est pas
@@ -3602,6 +3678,20 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1141** (paiement, ventes) :
+  - (1) **Le tamis du journal de paiement refuse une VALEUR qui a la forme d'un téléphone**, pas seulement un nom de
+    champ (`verifierCeQuiNeDoitPasEntrerAuJournal`). Un numéro Mobile Money en clair ferait refuser l'opération entière.
+    Le faux `EcritureDArgent` des specs existantes ne passe que le tamis « paiement » : un test neuf doit passer le
+    tamis complet.
+  - (2) **Karapace dit compatible le passage d'une propriété facultative à requise** quand elle existe déjà dans la
+    dernière version. Il faut juger contre la version d'avant (`/compatibility/subjects/{s}/versions/1`).
+  - (3) **Les suites e2e de paiement ne sont pas toutes vertes sur `dev`** (`health`, `notifications-webhook`). Avant
+    de croire un rouge sien, monter `src` et `test` de `dev` dans la même image (`-v …:/app/src:ro`).
+  - (4) **Une mutation qui laisse un import ou une variable sans usage ne compile pas** (`noUnusedLocals`). Il faut
+    garder l'usage (`…length > 0`) au lieu de le supprimer.
+  - (5) **Un `heredoc` Python qui écrit un motif `\+` ou un `'\n'`** casse le fichier écrit (JSON invalide, chaîne
+    coupée). Le Write ou l'Edit le fait juste, comme le dit le brief.
 
 - **STORY-349** (fiscal) :
   - (1) **Un redémarrage du poste tue la sous-session et ses boucles, pas le travail poussé** : la tête poussée et la PR
