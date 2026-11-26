@@ -2187,6 +2187,23 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-26, STORY-1127 — les référentiels habilités dans l'état publié, annoncé AVANT la fusion**
+  (`platform-catalog-service`, branche `MNV-1127` ; fiche `stories/STORY-1127.md`, D-1127-1 → 11). Lu par tous les
+  consommateurs de l'état publié (coque, app du cabinet, gardes des modules) et d'abord par **C et D** (`assurance`, D-1006-5 ;
+  le fiscal et balance pour EPIC-159). **Un ajout facultatif seul**, au modèle fermé `module`, à la route
+  (`GET /api/v1/etat-publie/{organisationId}`, `ModuleEtatPublie` ; la lecture de la console de 1080 aussi) et à
+  l'événement (`etat-publie.changed.essai@1`, `.reel@1`), même définition des deux côtés : **`module.referentiels`** =
+  `[{ code, version, artifactUri?, checksum? }]` (`minItems: 1` ; `checksum` = `sha256:<64 hexa>`), **la liste du droit,
+  celle de `entitlement.changed` v2**, même ordre ; `artifactUri` et `checksum` pour `fiscalite` et `declarations`
+  seulement. Présente quand le droit en porte et que le module est installé (comme `versionCode` : jamais en `NON_INSTALLE`
+  ni `EN_INSTALLATION`) ; omise sinon, **jamais vide** ; elle **n'ouvre rien** (seul `etat` ouvre). Un changement de la liste
+  seule publie un état neuf (`numero` suivant) ; au premier démarrage du catalogue livré, chaque module dont le droit porte
+  des référentiels est republié une fois. `schemaVersion` 1, `schemaEtatPublie` 1, topics inchangés (BACKWARD, prouvé sur
+  Karapace) ; `contrat/etat-publie.openapi.json` 1.0.0 → **1.1.0**, étiquette **`contrat-etat-publie-v1.1`** (la v1 reste) ;
+  manifeste `instance` 1.0.0 → **1.1.0** (`publie` inchangé), recopié dans `copies.json`. **Inchangés** : `entitlement.changed`,
+  la matrice, la garde partagée, le BFF (la console lit les référentiels par AP-10, D-1127-8), `prospera-plateforme`, auth.
+  **→ A** : rien à régénérer côté BFF ; la coque peut lire le champ en lecteur tolérant.
+
 - **2026-11-26, STORY-1126 — LIVRÉ** (prospera-recette #34, `585d8bd` sur `dev`) : conforme à l'annonce ci-dessous, sans écart.
   **En plus, un comportement de `document-service` (#41, `5261720`), sans contrat** : la GED garde les droits d'un membre
   **60 s par jeton** (`GET /moi/droits` lu une fois par minute au plus) ; un droit retiré chez auth se voit dans la GED en
