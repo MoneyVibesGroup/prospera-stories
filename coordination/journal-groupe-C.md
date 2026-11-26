@@ -631,6 +631,12 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **AMENDÉ (2026-11-26, STORY-327, avant la fusion)** — les reports ont leur champ, **`reportsDeclares`** sur `obligations`
+  (humain, `$setOnInsert: null`, absent ⇒ `null` ; aucune migration), et leur route (`POST …/reports-declares`, « ⚠ Contrats ») ;
+  `montantDeclare` ne change pas. Le contenu scellé les porte à sa racine (`contenu.reports`, seulement s'ils sont déclarés :
+  `empreinteDuContenu` d'un contenu sans reports inchangée) ; `gardeDuScellement` lit `reportsDeclares.valeurs.*`. Communs
+  touchés : toujours le contrat OpenAPI et la copie du paquet (sha256 `412770f5…`, balance-service `MNV-327`). **→ D** : un
+  banc de D qui comparerait une obligation relue du registre Mongo champ par champ y verrait `reportsDeclares: null`.
 - **ANNONCÉ (2026-11-26, STORY-327, avant le code)** — branche `MNV-327` de `prospera-fiscal-service`. **Aucune
   migration** (un champ facultatif `montantDeclare.reports` dans un champ `Mixed`, absent ⇒ `null`). Ni `app.module.ts`, ni
   `package.json`, ni `read-models/`, ni manifeste `declarations`. Touchés parmi les communs : **le contrat OpenAPI** (un champ
@@ -756,6 +762,14 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-327), AMENDÉ avant la fusion (écart à l'annonce ci-dessous, D-327-12)** — les reports **ne passent
+  plus par `…/montant-declare`** (inchangé) : la DSF est déclarative, sans montant déclaré, ses déficits n'auraient eu aucune
+  voie. **Route neuve `POST /api/v1/obligations/{id}/reports-declares`** (droit `preparer`) `{ reports: { creditAnterieur?,
+  creditAReporter?, deficitAnterieur?, deficitImpute?, deficitAReporter? } }` (remplacent les précédents, `{}` efface ; de
+  `EN_PREPARATION` à `A_DEPOSER`, sinon `409 REPORTS_NON_ENREGISTRABLES` ; `OBLIGATION_CLOTUREE` sur une close, route
+  classée dans la liste fermée de 325 ; acte `OBLIGATION_REPORTS_DECLARES`) ; champ neuf **`ObligationResponseDto.reportsDeclares`**
+  `{ valeurs, par, le } | null` (au lieu de `triplet.declare.reports`) ; la version scellée les porte dans **`contenu.reports`**
+  (au lieu de `contenu.declare.reports`), toujours **seulement s'ils sont déclarés**. Le reste de l'annonce tient.
 - **2026-11-26 (STORY-327), ANNONCÉ avant le code** — **la continuité d'une période à l'autre** (`prospera-fiscal-service`,
   REST ; source du paquet fiscal dans `balance-service`). Fiche : `stories/STORY-327.md` (D-327-1 → 11). Consommateurs :
   l'écran du contrôle et des anomalies (A, FE-081) ; la copie du paquet de `dossier-service` (B). **Ajouts seuls**, plus une
