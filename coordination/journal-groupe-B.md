@@ -2070,6 +2070,29 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-26, STORY-1125 — l'archivage se mesure et se vend, annoncé AVANT le code** (`document-service`, GitHub
+  `prospera-ocr-service`, et le BFF `admin-panel`, branches `MNV-1125` ; fiche `stories/STORY-1125.md`, D-1125-1 → 13).
+  **Ajouts seuls** ; aucun droit neuf (auth inchangé), aucun fait neuf, **`ged.quota.depasse` inchangé** (il lit désormais
+  le quota du cabinet), manifeste `ged` inchangé (D-1125-12, aucune recopie au catalogue).
+  - **`document-service`, surface de la plateforme** (permissions du jeton, `perms`, patron de STORY-105 ; sans elle
+    `403`) : `GET /api/v1/ged/plateforme/archivage?mois=AAAA-MM` (`org:read`) → `{ mois, calculeLe, cabinets: [{
+    organisationId, total, mois, quota }], tronque }` ; `GET /api/v1/ged/plateforme/cabinets/{organisationId}/archivage?du=&au=`
+    (`org:read`) → `{ organisationId, calculeLe, total, mois: [...], quota }` (douze mois par défaut, 36 au plus) ;
+    `PUT /api/v1/ged/plateforme/cabinets/{organisationId}/quota` (`entitlement:grant`), corps `{ quotaOctets: entier ≥ 1 |
+    null, offre? }` → le bloc `quota`. Compteurs : `fonds`, `fondsOuverts`, `fondsFermes`, `piecesVersees`, `pagesVersees`,
+    `volumeOctets`, `boitesCotees` (le total dit ce qui est là, le mois ce qui a été fait, D-1125-2) ; quota : `{
+    quotaOctets, source: OFFRE | SERVICE, offre?, poseLe?, posePar?, volumeOctets, depasse, utilisationPourcent }`. Refus
+    `400 MOIS_INVALIDE`, `400 PERIODE_INVALIDE`. ⛔ Aucun numéro de fonds, dossier, nom ni contenu de pièce (AC-3).
+  - **`document-service`, côté cabinet** : `GET …/ged/cabinet/quota` et l'accusé d'un dépôt rendent le quota du cabinet
+    (celui de son offre, sinon celui du service) et un champ facultatif neuf **`quotaSource`** (`OFFRE` | `SERVICE`).
+  - **Collection neuve** `ged_quotas_cabinet` (le quota posé par Money Vibes, l'offre, qui, quand, les 50 derniers
+    changements).
+  - **BFF** (relais de la console, AP-51) : `GET /api/v1/admin/archivage?mois=` et `GET
+    /api/v1/admin/orgs/{orgId}/archivage?du=&au=` (`org:read`), `PUT /api/v1/admin/orgs/{orgId}/archivage/quota`
+    (`entitlement:grant`) ; projection champ par champ, `503` sur un corps hors forme ; variable facultative neuve
+    `DOCUMENT_SERVICE_URL` (défaut `http://document-service:3006/api/v1`). **→ A** : les types se génèrent depuis les deux
+    OpenAPI vivants après la fusion ; l'écran AP-51 est au lot 8.
+
 - **2026-11-26, STORY-1124 — LIVRÉ** (document-service #38, `b18d3ad` sur `dev` ; catalogue #82, `9674aeb`) : conforme à
   l'annonce ci-dessous ; écarts D-1124-9 → 12 (la sortie d'une pièce rend aussi 409 `PIECE_HORS_BOITE`, code existant,
   quand son original vient de changer de boîte ; `desinscription` déclarée au schéma Mongo). **`comptabilite.facture.desinscrite`
