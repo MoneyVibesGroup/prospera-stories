@@ -1,6 +1,8 @@
 # STORY-339 : La base légale citée mot pour mot sur chaque retraitement — défendre un montant article en main
 
-Status: in-progress — écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 10 du fiscal,
+Status: done — **livrée le 2026-11-26** : balance-service **#173** (`61997fd` sur `dev`) et prospera-fiscal-service
+**#84** (`c459960` sur `dev`, rebasée sur `74b33ec`) ; en tête, la demande D-333-3 de D, fiscal **#83** (`74b33ec`) ; voir
+« Livraison ». Écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 10 du fiscal,
 `PLAN-LOT-7-2026-11-24.md` §3) ; contrat et communs annoncés avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de
 C). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-032, STORY-339) et du PRD
 fiscalité (FR-F55). Elle prolonge l'étape `detail` du chemin d'un montant (STORY-329, D-329-11).
@@ -148,8 +150,47 @@ passe, chaque faute refusée), l'artefact régénéré et réépinglé ; e2e (le
 un retraitement sans base au paquet est non justifié) ; toute la suite du fiscal, celles de D comprises ; mutations sur la
 logique neuve ; `docker compose up` du fiscal, sain.
 
+## Livraison (2026-11-26)
+
+- **En tête de la story — la demande D-333-3 de D, servie** (D a fusionné MNV-333, fiscal #81, `dev` `fc317a1`, pendant
+  339) : fiscal **#83** (`MNV-333-cycle`, `d5da660` poussé, rejoué `74b33ec` sur `dev`), PR à part. À `vers ===
+  'ACCUSE_RECU'`, `CycleObligationsService.transitionner` lit `PreuvesDAccuse.accuseDe(orgId, id,
+  versionCouranteDe(o).numero)` et appelle `verifierAccuseAuRecu` (409 `ACCUSE_REQUIS`), après les gardes d'état et les
+  anomalies ; `ObligationsModule` importe `AccusesDepotModule`. Preuves (Node 24, archive LF de `d5da660`) : unitaires
+  **246 suites, 3 685** ; e2e **14/14, 355** ; conformité **29/29, 183** ; mutations **5/5** ; pile `grp-c` saine (santé,
+  routes en 401, `AccusesDepotModule` résolu, aucun redémarrage). Verrou 20:50 → 21:24. D prévenu (message).
+- **Paquet** : `balance-service` **#173** (`31e4c48` poussé, rejoué `61997fd` sur `dev`) : `basesLegales` (cinq retraitements,
+  CGI Art. 196, 197, 204, 133, 114, « CGI OTR 2025 (LF 2023) »), garde **R12** (`valider-paquet-fiscal.mjs`), schéma,
+  `irpp.retenueALaSource.reversement.organisme` = « service des impôts » et `organismeSource` (LPF Art. 27, citation lue
+  dans le corpus), source du report du crédit de TVA (Art. 204, citée du corpus), `aFaire` et `_meta.revision` ; artefact
+  régénéré, empreinte **`62563b3c9d99a5474a0d41a73de36c0bf3fd6b1fc0c8a984fdc6e85185e94415`**, réépinglée (registre, spec,
+  e2e). Le moteur ne lit rien de neuf.
+- **Fiscal** : **#84** (`MNV-339`, `04f8373` poussé, rejoué `c459960` sur `dev`, rebasé sur `74b33ec`). Fichiers :
+  `domain/obligations/corpus-legal.ts` et `assets/corpus-complet-cgi-lpf-togo.json` (le corpus, copie à l'octet, importé :
+  il est dans `dist/` par `tsc`), `domain/obligations/bases-legales.ts` (la citation), `domain/obligations/chemin.ts`
+  (`basesLegales` sur l'étape `detail`, `citerLesBasesLegales`), `application/obligations/paquet-de-l-obligation.ts` (le
+  paquet de l'obligation, partagé avec la cohérence, qui l'emploie désormais), `historique-obligations.service.ts`
+  (`PaquetsService` injecté, déjà fourni par `PaquetsModule`), `dto/historique.dto.ts` (`BasesLegalesDto`), la copie du
+  paquet (`62563b3c…4415`), l'attente D-349-4 de `obligations-sociales.spec.ts` (le canal de `RETENUE_IRPP` est
+  « service des impôts » ; `NON_DECLARE` reste prouvé sur un paquet sans organisme).
+- **Preuves** (Node 24, étage `verification`, archives LF de `04f8373` et `31e4c48`) : fiscal unitaires **248/248 suites
+  (1 ignorée), 3 724** tests ; e2e **14/14, 356** (un neuf : le chemin d'une TVA cite ses deux retraitements appliqués mot
+  pour mot, le crédit nul n'est pas cité ; le même chemin sur un paquet sans la base de la TVA écartée la rend non
+  justifiée) ; conformité **29/29, 183** ; `nest build` vert, le corpus dans `dist/` ; balance-service unitaires **300/300,
+  5 784** ; e2e **38/38, 2 324**. **Pile `grp-c`** fiscal (`04f8373`) + balance (`31e4c48`) saine : santé `ok` des deux,
+  `…/chemin` et `…/transition` en 401 sans jeton, le corpus dans l'image, aucune erreur d'injection (`PaquetsService`
+  injecté au service du chemin), aucun redémarrage. Verrou pris une fois (21:43 → 21:57, après D).
+- **Mutations** : fiscal **27/27** tuées (citation 19, corpus 4, service 2, paquet de l'obligation 2) — 10 réécrites qui
+  rougissaient par compilation ou dont le motif avait changé de forme au lint ; **une tuée par le seul typage, justifiée** :
+  `B16` (accepter une entrée qui n'est pas un objet) ne compile pas, car l'accès aux champs exige le rétrécissement
+  `estObjet` ; le cas est aussi tenu par le test « une entrée qui n'est pas un objet ». balance-service **R12 9/9** tuées.
+- **B prévenu** (recopie du paquet de `dossier-service` : `dev` `61997fd`, sha256 `62563b3c…4415`) ; **D prévenu** (organisme,
+  empreinte, attente D-349-4).
+
 ## Progress Tracking
 
 | Date | Événement |
 |---|---|
-| 2026-11-26 | Fiche écrite, contrat et communs annoncés avant le code. |
+| 2026-11-26 | Fiche écrite, contrat et communs annoncés avant le code (#1001). |
+| 2026-11-26 | D a fusionné MNV-333 (#81) pendant 339 : la garde `ACCUSE_REQUIS` branchée en tête, PR à part (#83, `74b33ec`). D prévenu. |
+| 2026-11-26 | **DONE.** Paquet : balance-service #173 (`61997fd`) ; code : fiscal #84 (`c459960`). Preuves : voir « Livraison ». B et D prévenus. |
