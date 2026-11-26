@@ -53,6 +53,7 @@
   | e | STORY-953 (suite) | le contrat de l'export C13 publié dans `contrats/instance/` (← D, STORY-1140 ; D-L7B-9) |
   | 6 | STORY-1124 | le circuit sans trou |
   | 7 | STORY-1125 | l'archivage se mesure et se vend |
+  | f | STORY-1119 (suite) | la nature « validation du client » et la référence d'une version (← C, STORY-324 ; D-L7B-10) |
   | 8 | STORY-1126 | la recette des archives de bout en bout |
   | 9 | STORY-1127 | `referentiels` dans l'état publié |
   | 10 | STORY-1128 | le contrat d'état publié figé, inventaire d'EPIC-142 → 147 et 159 |
@@ -102,6 +103,17 @@
   chacun s'y rangera par une recopie à l'octet. **Suite de STORY-953** (plateforme #17, `5a50249` : la story qui a publié
   `contrats/instance/`, étiquette `contrats-instance-v1`) ; aucun identifiant neuf ; commits `MNV-953(plateforme): …` ;
   décisions D-953-10 → 15 dans sa fiche (« Suite du 2026-11-26 »).
+
+- **D-L7B-10 — ordre « f » : la demande de C placée après STORY-1125, avant STORY-1126** (26/11, session de groupe ;
+  §1.1) : « → B (2026-11-26, STORY-324) : la pièce de validation du client dans la GED (`document-service`) » (journal
+  de C, « Demandes aux autres groupes », `main` `8f7fb2c` ; fiche `STORY-324.md`, D-324-2, D-324-3 ; fiscal #74, `dev`
+  `060c85c`). Sans urgence (le défaut de C tient : rien n'est vérifié chez la GED), mais dans le dépôt que B tient, et
+  STORY-1125 l'occupait : elle passe dès sa fin, avant la recette des archives (1126), qui la rejouera. Deux gestes : une
+  nature `VALIDATION_CLIENT` au plan du cabinet (table `2026.2`) et la lecture des métadonnées d'une version par sa
+  référence (`GET …/ged/cabinet/pieces/{pieceId}/versions/{version}`, manifeste `ged` 1.10.0). **Suite de STORY-1119**
+  (document-service #33, `b7b3f91` : la story de B qui a donné aux archives leur valeur de preuve ; le plan de
+  classement vient de STORY-1087, de C) ; aucun identifiant neuf ; commits `MNV-1119(ged): …` ; décisions D-1119-19 → 26
+  dans sa fiche (« Suite du 2026-11-26 »). Recopie au catalogue avec « g » (D-1119-25).
 
 - **Avancement** :
   - **a — troisième suite de STORY-979 (25/11) — faite** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
@@ -2087,6 +2099,26 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-26, suite de STORY-1119 (ordre « f », D-L7B-10) — la validation du client et la référence d'une version,
+  annoncé AVANT la fusion** (`document-service`, GitHub `prospera-ocr-service`, branche `MNV-1119-reference` ; fiche
+  `stories/STORY-1119.md`, « Suite du 2026-11-26 », D-1119-19 → 26). Demandé par C (STORY-324). **Ajouts seuls** ; aucun
+  droit neuf (auth inchangé), aucun fait neuf ni changé, aucune collection ni variable.
+  - **Plan de classement du cabinet `2026.2`** (`GET …/ged/cabinet/natures` : `version: "2026.2"`) : 2026.1 et une nature
+    **`VALIDATION_CLIENT`** « Validation du client » — `ANNUEL` / `FISCAL` (exercice exigé), non sensible, 10 ans après la
+    fin de l'exercice ; servie à tous les fonds, ouverts avant ou après. Un cabinet qui l'avait déjà créée garde la sienne.
+  - **Route neuve `GET /api/v1/ged/cabinet/pieces/{pieceId}/versions/{version}`** (jeton du membre, `ged:piece:consulter`,
+    portée du dossier) → `MetadonneesDeVersionDto` `{ pieceId, version, versionCourante, courante, empreinte, taille,
+    typeContenu, nature, dossierId, fondsNumero, deposeLe, etatAntivirus, etat: CONSERVEE | DETRUITE | RETIREE,
+    destruction?: { numero, le, procesVerbal }, desinscription?: { ecritureId, le } }` ; `empreinte` = SHA-256 du clair,
+    64 hexadécimaux minuscules (format de `ged.piece.recue`). ⛔ Ni contenu, ni texte lu, ni nom de fichier, ni index.
+    Refus : `403 DROIT_INSUFFISANT`, `403 GED_NOT_ENTITLED`, `404 PIECE_INCONNUE` (hors portée, autre cabinet, sensible
+    sans son droit compris), `404 VERSION_INCONNUE`, `400`. Une pièce détruite (1121) ou retirée (1124) : `200`, l'état
+    le dit.
+  - **Manifeste `ged` 1.10.0** (`manifestes/ged.manifest.ts`, cette PR) : la route en `routesLectureSeule` ; recopié
+    dans le service par le code, au catalogue avec « g » (copie entière, D-1119-25). **→ C** (STORY-336) : la route à
+    appeler au jeton du membre. **→ A** : types à régénérer depuis l'OpenAPI vivant (`MetadonneesDeVersionDto`) quand
+    un écran lira la référence (FE-081, FE-143).
 
 - **2026-11-26, STORY-1125 — LIVRÉ** (document-service #39, `5c50ca6` sur `dev` ; BFF #45, `959aeee` et `81817fe`) :
   conforme à l'annonce ci-dessous ; écarts D-1125-14 → 16 (la liste du BFF garde l'ordre des champs de la GED ; `orgId` du
