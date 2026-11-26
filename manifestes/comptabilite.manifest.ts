@@ -89,6 +89,13 @@
 // - Pièce justificative (STORY-962) : chaque écriture cite un `pieceId` de `document-service`, vérifié dans le dossier
 //   à la saisie (`GET /api/v1/dossiers/{dossierId}/pieces?pieceId=`, jeton du membre). document-service est du
 //   socle, pas un module : il n'entre pas dans `depends`.
+// - Liaison écriture ↔ pièce (STORY-338, FR-F54) : d'autres pièces se rattachent à une écriture, brouillard ou validée
+//   (jamais réécrite : collection `liaisons_pieces`, en ajout seul), à toute l'écriture ou à certaines lignes : une pièce
+//   du dossier (vérifiée comme à la saisie) ou une version du fonds d'archives de la GED (`GET /api/v1/ged/cabinet/pieces/
+//   {pieceId}/versions/{version}`, jeton du membre : même dossier, CONSERVEE). Rattacher et retirer exigent
+//   `comptabilite:ecriture:saisir` ; les lectures, `comptabilite:dossier:consulter` (aucun droit neuf). La justification
+//   par compte et période ne lit que les validées ; un exercice qui n'est pas tenu au journal rend la granularité
+//   « compte × période » (le rapprochement du fiscal retombe dessus sans échouer).
 
 export const MANIFESTE_COMPTABILITE = {
   code: 'comptabilite',
@@ -98,7 +105,10 @@ export const MANIFESTE_COMPTABILITE = {
   // 0.4.0 (2026-11-23, STORY-1098) : les trois routes de lecture de la mémoire des choix.
   // 0.5.0 (2026-11-24, STORY-1100) : le fait publié `comptabilite.facture.inscrite` (une facture d'un lot inscrite au
   // brouillard ; la GED de document-service en range une copie au fonds d'archives du client). Aucune route neuve.
-  version: '0.5.0',
+  // 0.6.0 (2026-11-26, STORY-338) : la liaison écriture ↔ pièce justificative — trois routes de lecture (l'écriture → ses
+  // pièces, la pièce → ses écritures, la justification par compte et période pour le rapprochement du fiscal) ; le fait
+  // publié `comptabilite.facture.desinscrite` (le brouillard né d'une facture est abandonné, STORY-1124 de B).
+  version: '0.6.0',
 
   // La comptabilité est une source : elle n'a besoin d'aucun autre module pour enregistrer. La balance qu'elle
   // publie (STORY-967) est ingérée par `balance` si `balance` est installé (origine `comptabilite` du hub, A-921).
@@ -133,6 +143,7 @@ export const MANIFESTE_COMPTABILITE = {
   publie: [
     'balance.submitted', // STORY-967 : la balance dérivée du grand livre, origine `comptabilite`, `checksum` (outbox)
     'comptabilite.facture.inscrite', // STORY-1100 : une facture inscrite au brouillard, v1 (outbox), lue par la GED
+    'comptabilite.facture.desinscrite', // STORY-338 (demande de B, 1124) : son brouillard abandonné, v1 (outbox), lu par la GED
   ],
   consomme: [
     'etat-publie.changed.essai@1', // la garde (AD-24), dans l'espace d'essai
@@ -205,6 +216,9 @@ export const MANIFESTE_COMPTABILITE = {
     'GET /api/v1/dossiers/{dossierId}/memoire-des-choix', // STORY-1098 : la mémoire des choix du dossier
     'GET /api/v1/cabinet/memoire-des-choix', // STORY-1098 : la mémoire des choix du cabinet
     'GET /api/v1/cabinet/memoire-des-choix/actes', // STORY-1098 : le journal des oublis
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ecritures/{ecritureId}/pieces', // STORY-338 : ses pièces
+    'GET /api/v1/dossiers/{dossierId}/pieces/{pieceId}/ecritures', // STORY-338 : les écritures qu'une pièce justifie
+    'GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/pieces/justification', // STORY-338 : par compte et période
   ],
 
   // C13, point 7 (chemins vus par le service). Servis depuis STORY-975, sous l'identité du moteur seule : `import`

@@ -8386,8 +8386,9 @@ sprints:
         title: "Liaison entre écriture comptable et pièce justificative"
         epic: "EPIC-032"
         points: 8
-        service: "fiscal-service"
-        status: "not_started"  # Prérequis de la restitution au niveau de la facture (FR-F54) — la liaison n'existe nulle part.
+        service: "comptabilite-service"
+        source_doc: "prospera-stories/stories/STORY-338.md"
+        status: "in-progress"  # 🚧 2026-11-26 — groupe C, lot 7 (n° 11 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-338-1 → 12) ; contrat annoncé (journal de C) : la liaison écriture ↔ pièce dans prospera-comptabilite-service (rattacher une pièce du dossier ou une version de la GED à une écriture ou à ses lignes, retrait tracé, collection liaisons_pieces en ajout seul ; l'écriture → ses pièces, la pièce → ses écritures ; la justification par compte et période pour 337, granularite PIECE ou COMPTE_PERIODE sans échouer) ; ← B STORY-1124 : comptabilite.facture.desinscrite v1 (schéma de B à l'octet) ; manifeste comptabilite 0.6.0 ; fiscal non touché (REJET_REQUIS de D passe à 340). Prérequis de la restitution au niveau de la facture (FR-F54).
         assigned_to: null
       - story_id: "STORY-339"
         title: "Base légale citée verbatim sur chaque retraitement"
