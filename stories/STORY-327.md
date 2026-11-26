@@ -1,6 +1,7 @@
 # STORY-327 : La continuité d'une période à l'autre — qu'un crédit de taxe ne disparaisse pas en route
 
-Status: in-progress — écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 8 du fiscal,
+Status: done — **livrée le 2026-11-26** : balance-service **#172** (`effdc4a` sur `dev`, le paquet) et
+prospera-fiscal-service **#77** (`9db1653` sur `dev`) ; voir « Livraison ». Écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 8 du fiscal,
 `PLAN-LOT-7-2026-11-24.md` §3) ; contrat et communs annoncés avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de
 C). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-031, STORY-327).
 
@@ -185,8 +186,42 @@ précédente rectifiée et redéposée qui rompt la continuité de la suivante ;
 du fiscal, celles de D comprises ; balance-service : schéma, registre, e2e du référentiel ; mutations sur la logique neuve ;
 `docker compose up` du fiscal et de balance, sain.
 
+## Livraison (2026-11-26)
+
+- **Dépôts** : `balance-service` `MNV-327` → `dev` (**#172**, `effdc4a`) : le paquet (source, schéma, artefact, empreinte
+  **`412770f5e3ba139435b33ed89c83c5e8185c10d0fc9ea62d324d09906b845fd6`** au registre, « vingt et unième fois ») ;
+  `prospera-fiscal-service` `MNV-327` → `dev` (**#77**, `bd19a48` et `9db1653`, rebasée sur `7d48fd9`, STORY-330 de D, sans
+  conflit). Fichiers du fiscal : `domain/obligations/continuite.ts` (périodes précédente et suivante, reports du paquet,
+  forme des reports, état où ils s'enregistrent, fait audité), `coherence.ts` (trois codes, `periodePrecedente`,
+  `cleDeTolerance`), `version-declaration.ts` (`contenu.reports`, empreinte, garde), `anomalies.ts` (trois codes),
+  `calcul-delegue.ts` (la DSF n'est pas chiffrée par le moteur), `coherence-obligations.service.ts` (la continuité,
+  l'imputation, `apresDepot`), `triplet-obligations.service.ts` (`declarerReports`), le port et l'adaptateur du moteur
+  (`deficitsImputes`), le registre (port, Mongo, mémoire : `enregistrerReports`, `reportsDeclares`), le contrôleur (route
+  neuve, relance au dépôt), les DTO ; la route classée dans `test/utils/ecritures-des-obligations.ts` ; copie du paquet.
+- **Écart à l'annonce** (#977), amendé **avant la fusion** (#983) : D-327-12 — les reports ont leur route et leur champ
+  (`POST …/reports-declares`, `reportsDeclares`, `contenu.reports`) au lieu du corps de `…/montant-declare` : la DSF est
+  déclarative, sans montant. Aucune autre décision n'a changé.
+- **Preuves** (Node 24, étage `verification`, archive LF de `c2733df`) : fiscal unitaires 232 suites, **3413** tests (une
+  suite chronométrée de STORY-537, `balayage-lineaire.spec.ts`, rouge sous la charge, **26/26 seule** en Node 24) ; e2e
+  **14/14, 329** (4 neufs : la reprise, la rupture qui nomme les deux périodes, le dépôt refusé, la levée ; la précédente
+  rectifiée et redéposée qui rompt la suivante, ses deux versions scellées ; la forme et l'état des reports ; la DSF face au
+  moteur) ; conformité **27/27, 173** (MongoDB en jeu de répliques ; neuve : `test/continuite.conformite-spec.ts`, 6 tests) ;
+  `nest build` vert ; balance-service unitaires **300/300 suites, 5768** ; e2e **38/38, 2324**. **Mutations** : 34/34 en
+  local (domaine, services, contrôleur, catalogue, contrat du moteur ; 4 réécrites qui rougissaient par compilation, 2
+  survivantes tuées par deux tests ajoutés : une suivante close, une DSF déclarée par ses seuls reports) et **6/6 sur MongoDB
+  réel** (comparaison-échange, relecture, précédentes, transaction, valeurs, `$setOnInsert`). **Pile `grp-c`** fiscal +
+  balance (`MNV-327`) saine : santé `ok` des deux, `reports-declares`, `coherence`, `transition` et `…/fiscal/resultat-fiscal`
+  en `401` sans jeton, paquet servi `412770f5…`, aucune erreur d'injection, aucun redémarrage. Verrou Docker pris deux fois
+  (13:03 → 13:21, 13:21 → 13:23).
+- **Tests touchés** : les contrôles de 326 (unitaires et e2e) lisent désormais aussi la continuité : ils filtrent le code
+  `TVA` ; « sans contrôle applicable » exclut la DSF ; le catalogue épinglé des anomalies et les faits de la porte gagnent
+  trois codes ; la forme figée de la dérivation (`reportsDeclares: null` en `$setOnInsert`). **Aucun fichier de D.**
+- **→ B** : nouvelle empreinte du paquet à recopier dans `dossier-service` (message envoyé). **D prévenu** (message).
+
 ## Progress Tracking
 
 | Date | Événement |
 |---|---|
-| 2026-11-26 | Fiche écrite, contrat et communs annoncés avant le code. |
+| 2026-11-26 | Fiche écrite, contrat et communs annoncés avant le code (#977). |
+| 2026-11-26 | Amendement avant la fusion : les reports ont leur route (D-327-12, #983). |
+| 2026-11-26 | **DONE.** Code : balance-service #172 (`effdc4a`), fiscal #77 (`9db1653`). Preuves : voir « Livraison ». B et D prévenus. |
