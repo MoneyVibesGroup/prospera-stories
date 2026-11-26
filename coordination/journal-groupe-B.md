@@ -296,8 +296,19 @@
     6/6, test:socle 19/19, catalogue construit (n° 5 republié, n° 1 fiscal avec intégrité, n° 6 sur changement, second
     démarrage muet ; route et console). Verrou 14:29 → 14:43, 14:51 → 14:52. Fiche D-1127-1 → 13. **→ C et D** prévenus
     (message ; D tient `assurance`). Date dure tenue (fusion le 26/11, D-L7B-5). Rituel : aucune demande neuve à B chez A, C et D.
-  - **Suivante : STORY-1128** (n° 10 : le contrat d'état publié figé, inventaire d'EPIC-142 → 147 et 159 ; le 11/12 ; y porter
-    `versionCode` hors de la comparaison de l'émetteur, D-1127-10).
+  - **10 — STORY-1128 (26/11) — faite** : le contrat d'état publié figé. **catalogue #85** (`2a19265`, `e35d6a0` sur `dev`) ;
+    **plateforme #42** (`758568e`, étiquette **`contrat-etat-publie-v1.1`**) ; contrat annoncé avant le code (stories #1000,
+    `6742cfb`). Un octet = une version : `contrat/historique/etat-publie/` (versions, photos 1.0.0 et 1.1.0, empreinte
+    canonique) et la garde du gel (changement non versionné, ajouts seuls dans une majeure, matrice figée dans la majeure 1) ;
+    Karapace `BACKWARD_TRANSITIVE` sur `etat-publie.changed.*` ; la copie publiée dans `prospera-plateforme/contrats/etat-publie/`,
+    la garde partagée rejouée contre elle sans se sauter ; l'émetteur republie sur `versionCode` (D-1127-10 refermée). Aucun
+    octet du contrat ne change (1.1.0). Node 25 : 1 699 passés (3 rouges connues), plateforme 674/674 ; mutations 18/18 ; Node 24 :
+    105/105 suites, 1 719 ; pile `grp-b` neuve : test:schemas 9/9, test:socle 20/20, compatibilité transitive verte. Verrou
+    20:38 → 20:44. Fiche D-1128-1 → 15, et **l'inventaire d'EPIC-142 → 147 et 159** (livré, story, SHA, reste, à qui ; ce qui
+    reste avant de retirer `entitlement.changed`) pour STORY-1131. Date dure tenue (fusion le 26/11, D-L7B-5). Deux coupures
+    du réseau pendant la story (reprises par la session de groupe). Rituel : aucune demande neuve à B chez A, C et D.
+  - **Suivante : STORY-1129** (n° 11 : le cabinet sur le moteur ; le 18/12 ; `conseil` dans `INSTALLATION_SERVICES`, FR-6 de
+    `cabinet-moteur` sur `declarations`, recettes rejouées, D-100-4).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
     `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
@@ -1306,6 +1317,21 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-26, STORY-1128) : relire `contrat-etat-publie-v1.1`, et brancher la doublure de la coque sur la copie
+  publiée** — **information, non bloquante.** Le seul écart à la v1 que A a relue est `module.referentiels` (facultatif,
+  STORY-1127). Le contrat est figé (un octet = une version, règle dans le README du catalogue). La coque (AD-23) et l'app du
+  cabinet (EPIC-159, types générés) peuvent épingler `prospera-plateforme/contrats/etat-publie/` à l'étiquette
+  `contrat-etat-publie-v1.1`. Inventaire : `stories/STORY-1128.md`, « Inventaire ».
+- **→ C et D (2026-11-26, STORY-1128) : ce qui reste avant de retirer `entitlement.changed`** — **information.** Relevé du
+  26/11 (`stories/STORY-1128.md`, « Ce qui reste avant de retirer `entitlement.changed` ») : chez **C**, `balance-service` et le
+  fiscal (avec D) lisent encore `config` et `referentiels` dans `entitlement.changed` ; chez **D**, `bilan`, `assurance`
+  (`config`, `referentiels` : la liste est servie depuis STORY-1127), `notification`, et les six services du socle
+  `etat-des-modules` (ventes, terrain, recouvrement, pilotage, croissance, assureur-fictif), qui ne lisent **pas encore**
+  l'état publié. `config` n'existe pas dans l'état publié : `module.interrupteurs` (au contrat, toujours vide) doit d'abord
+  être tenu par B (STORY-1131 ou 1135). Aucun retrait n'est demandé avant ; chacun bascule à sa semaine, double lecture d'abord.
+  **→ D** aussi : `assurance`, `liaison-assureur` et `sinistres` gardent une copie de `garde-etat-publie` **sans test de
+  copie** (les autres services en ont un : empreinte de `ORIGINE.json`, et le voisin `prospera-plateforme`).
+
 - **→ C (2026-11-26, STORY-1124) : publier `comptabilite.facture.desinscrite` v1 à l'abandon d'un brouillard né d'une
   facture inscrite** (`prospera-comptabilite-service`) — **acceptée par C le 26/11, placée dans sa STORY-338, schéma repris
   tel quel** (la GED est prête sur `dev` depuis document-service #38, `b18d3ad` ; à la fusion de C, B recopie son octet).
@@ -2198,6 +2224,11 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-26, STORY-1128 — LIVRÉ** (catalogue #85, `2a19265`, `e35d6a0` sur `dev` ; plateforme #42, `758568e`, étiquette
+  **`contrat-etat-publie-v1.1`** dans la plateforme) : conforme à l'annonce ci-dessous, sans écart. Karapace : les sujets de
+  l'état publié en `BACKWARD_TRANSITIVE`. **→ A, C, D** : rien à faire ; une copie de l'état publié s'épingle désormais sur
+  `prospera-plateforme/contrats/etat-publie/` (`ORIGINE.json`) ; tout ajout futur = une version neuve, annoncée ici.
 
 - **2026-11-26, STORY-1128 — le contrat d'état publié figé, annoncé AVANT le code** (`platform-catalog-service` et
   `prospera-plateforme`, branches `MNV-1128` ; fiche `stories/STORY-1128.md`, D-1128-1 → 12). Lu par tous les consommateurs
@@ -4102,6 +4133,14 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Questions à l'utilisateur ou au PO
 
+- **STORY-1128, D-1128-11 — la ligne « Contrat d'état publié » de `REGLES-DES-GROUPES.md` §3** (ouverte) : elle dit « figé
+  (étiquette `contrat-etat-publie-v1`) : ajouts seulement, tout ajout facultatif (compatibilité BACKWARD vérifiée au
+  registre) ». Toujours vraie, elle ne nomme ni la version figée (1.1.0, `contrat-etat-publie-v1.1`), ni « un octet = une
+  version », ni le transitif ; le fichier ne change que par une PR demandée par l'utilisateur (§6). **Choix retenu par
+  défaut : la ligne reste** ; la règle exacte est dans les README du catalogue et de la plateforme. À écrire si vous le
+  demandez : « figé à la dernière version de `contrat/historique/etat-publie/versions.json` : un octet = une version,
+  ajouts facultatifs seuls dans une majeure, matrice inchangée, registre en BACKWARD_TRANSITIVE ».
+
 - **STORY-1103, D-1103-1 — qui touche `prospera-expert-comptable` pour l'e-mail du renvoi ?** (ouverte) Le dépôt
   n'est tenu par personne (plan maître §2) ; il porte le consommateur des trois e-mails KYC (STORY-021, STORY-590), et
   les textes sont chez D (notification). **Choix retenu par défaut : D**, qui reçoit la demande du modèle, porte aussi
@@ -4150,6 +4189,19 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Karapace rend `50003` (« Error while forwarding the request to the master ») juste après sa santé** (STORY-1128) : un
+  premier `POST /subjects/…` lancé dès `healthy` échoue ; l'enregistrement du script, quelques secondes plus tard, passe.
+  Attendre un premier `GET /subjects` qui répond avant d'écrire, ou rejouer une fois.
+- **Un contrat JSON se compare par empreinte CANONIQUE** (`sha256` de `JSON.stringify(JSON.parse(texte))`) : le checkout du
+  catalogue est en CRLF (`matrice-etats.json` 51 285 octets), l'export et l'image en LF (49 572) ; une empreinte des octets
+  rougirait selon le poste.
+- **Ajouter un champ à la comparaison de l'émetteur casse les cas « inchangé » des tests** (`emis` sans le champ = un état
+  d'avant la livraison, donc republié) : c'est voulu ; ajouter le champ aux états émis de ces cas, et garder un cas « sans le
+  champ ⇒ republié une fois ».
+- **Une sous-session coupée par le réseau (ENOTFOUND) pendant une story longue** (deux fois en 1128) : tout poussé tôt
+  (fiche et annonce fusionnées, branches poussées), passe Docker dans un script `nohup` à trappe qui rend le verrou : la
+  reprise n'a rien perdu.
 
 - **`TaskStop` d'une tâche de fond Bash ne tue pas la boucle qu'elle a lancée** (STORY-1127) : une boucle « attendre le
   verrou puis passer » arrêtée par `TaskStop` a survécu, a attendu la fin de la vraie passe, puis a repris le verrou à la

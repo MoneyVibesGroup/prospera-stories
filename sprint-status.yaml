@@ -2173,11 +2173,18 @@ reserved_ranges:
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
   - range: "STORY-1128"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe B, lot 7, n° 10 — le contrat d'état publié figé (EPIC-142) : garde du gel (historique des versions et photos, ajouts seuls, matrice figée par majeure), Karapace BACKWARD_TRANSITIVE sur etat-publie.changed.*, copie publiée et étiquetée dans prospera-plateforme ; versionCode dans la comparaison de l'émetteur ; inventaire d'EPIC-142 → 147 et 159 (platform-catalog-service, prospera-plateforme)"
     source_doc: "prospera-stories/stories/STORY-1128.md"
     reserved_on: "2026-11-25"
     note: >
+      🏁 DONE le 2026-11-26 — platform-catalog-service #85 (dev 2a19265, e35d6a0), prospera-plateforme #42 (dev
+      758568e, étiquette contrat-etat-publie-v1.1) ; contrat annoncé avant le code (stories #1000, main 6742cfb).
+      Node 25 : 1699 passés (3 suites rouges connues, binding) ; plateforme 674/674 ; mutations 18/18 ; Node 24 :
+      105/105 suites, 1719/1719, lint, build ; pile grp-b neuve : sujets de l'état publié en BACKWARD_TRANSITIVE,
+      schemas:compatibilite vert, test:schemas 9/9 (la liste rendue requise refusée contre la v1, acceptée en BACKWARD
+      seul), test:socle 20/20 (versionCode republié). Inventaire d'EPIC-142 → 147 et 159 dans la fiche (pour
+      STORY-1131). D-1128-1 → 15. Contrat d'origine :
       Fiche écrite et contrat annoncé avant le code (2026-11-26) : version figée 1.1.0 (contrat-etat-publie-v1.1,
       efedd3e), aucun octet du contrat ne change ; contrat/historique/etat-publie/ (versions.json, photos 1.0.0 et
       1.1.0, empreinte canonique) et src/contrat/etat-publie.gel.spec.ts (changement non versionné, ajouts seuls,
