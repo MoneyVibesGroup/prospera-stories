@@ -1777,6 +1777,17 @@
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-26, STORY-333) : brancher la garde `ACCUSE_REQUIS` dans `CycleObligationsService.transitionner` — ouverte.**
+  - Pourquoi : AC-3 de 333 (« une obligation sans accusé ne passe pas à "Accusé reçu" ») ; `DEPOSEE → ACCUSE_RECU` n'a
+    aujourd'hui aucune garde, et le service n'est pas exporté : D ne peut pas le garder sans toucher le dossier de C.
+  - Ce que D fournit (fiscal, `MNV-333`) : le module `AccusesDepotModule` (`src/modules/depots/accuses-depot.module.ts`,
+    il n'importe pas `ObligationsModule`) qui exporte le port `PreuvesDAccuse` (`src/ports/preuves-accuse.ts`) ; la règle
+    pure `verifierAccuseAuRecu(accuse)` (`src/domain/depot/accuse-depot.ts`), qui lève `409 ACCUSE_REQUIS`.
+  - Ce que C fait : importer `AccusesDepotModule` dans `ObligationsModule` ; injecter `PreuvesDAccuse` dans
+    `CycleObligationsService` ; à `vers === 'ACCUSE_RECU'`, `verifierAccuseAuRecu(await preuves.accuseDe(orgId, id,
+    versionCouranteDe(obligation).numero))`, après les gardes d'état. Aucune migration. Les fixtures de C qui passent à
+    `ACCUSE_RECU` devront consigner un accusé (ou doubler le port).
+
 - **→ B (2026-11-26, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue — servie (catalogue #83, dev
   `ce8cbc0` ; journal de B `main` 1206297).**
   - Source : `prospera-stories/manifestes/paiement.manifest.ts`, `main` 6a5d3ab (#967).
@@ -2328,6 +2339,14 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-333, avant le code)** — branche `MNV-333` de `prospera-fiscal-service`, partie de
+  `origin/dev` `8d85c10`. **Aucune migration** (une collection neuve, `accuses_depot`, index posé par Mongoose au
+  démarrage), ni `app.module.ts` (les routes neuves entrent dans `DepotsDeclarationController`, déjà monté ;
+  `AccusesDepotModule`, neuf, est importé par `DepotsModule`, fichier de D), ni `package.json`, ni `read-models/`, ni
+  copie du paquet, ni manifeste `declarations`. Touché parmi les communs : **le contrat OpenAPI** (trois routes neuves).
+  **Aucun fichier de C** : `qualifierRetard`, le cycle, les ports des obligations et des versions sont lus. C a 329 en
+  vol sur le contrat OpenAPI et le journal partagé : la PR de 333 se rebase sur sa fusion si elle passe avant.
+
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#79, `dev` `8d85c10`, sur `origin/dev` `6e9fbbe`, qui n'avait pas
   bougé : aucun rebase), conforme à l'annonce ; ANNONCÉ (2026-11-26, STORY-332, avant le code)** — branche `MNV-332` de `prospera-fiscal-service`, partie de
   `origin/dev` `6e9fbbe`. **Aucune migration** (aucun stockage ne change), ni `app.module.ts` (la route neuve entre dans
@@ -2426,6 +2445,23 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-26, STORY-333, avant le code) — l'accusé d'un dépôt engagé et le retard qualifié à la date réelle**
+  (`prospera-fiscal-service`, module `depots`). Fiche : `stories/STORY-333.md` (D-333-1 → 13, section « Contrat »).
+  **Ajout seul** : aucune route, aucun champ, aucun topic existant ne change.
+  - **`POST /api/v1/depots-declaration/{depotId}/accuse`** (droit `fiscalite:declaration:deposer`, multipart : `piece`
+    facultatif, `reference` facultative, `deposeLe` exigée) : 201 `{ accuseId, depotId, obligationId, dossierId, numero,
+    empreinte, nature, reference, piece, deposeLe, consignePar, consigneLe, retard: { echeance, echeanceLegale, reportee,
+    joursDeRetard, qualification, penalites, source }, statutObligation }`. Refus : `404 DEPOT_INTROUVABLE`, `409
+    DEPOT_REMPLACE`, `409 OBLIGATION_DESACTIVEE`, **`409 ACCUSE_NON_CONSIGNABLE`** (`{ statut }` : la déclaration n'est
+    pas déposée), `409 LIVRABLE_PERIME`, **`409 ACCUSE_DEJA_CONSIGNE`** (`{ accuseId }`), **`422 ACCUSE_REQUIS`**, **`422
+    DATE_DEPOT_HORS_BORNES`** (`{ min, max }`), **`422 PIECE_ACCUSE_TYPE_REFUSE`**, `413`.
+  - **`GET /api/v1/depots-declaration/{depotId}/accuse`** (accès fiscal) : 200 l'accusé ; **`404 ACCUSE_INTROUVABLE`**.
+  - **`GET /api/v1/depots-declaration/accuses?obligationId=…`** (accès fiscal) : 200 `{ obligationId, accuses }`.
+  - **Code neuf pour C** : `409 ACCUSE_REQUIS` sur `POST /api/v1/obligations/{id}/transition` vers `ACCUSE_RECU`, quand C
+    l'aura branché (D-333-3, « → C » ci-dessous). Collection neuve `accuses_depot` ; objets sous `accuses/` dans le
+    bucket privé de 682 ; acte `DEPOT_DECLARATION_ACCUSE` au journal chaîné. Aucun topic ni droit. **→ A (plus tard)** :
+    FE-081 consigne l'accusé à l'étape `RELEVER_ACCUSE` du guidage.
 
 - **PUBLIÉ (2026-11-26, STORY-332 : prospera-fiscal-service#79, `dev` `8d85c10`) sans écart ; ANNONCÉ (2026-11-26,
   STORY-332, avant le code, prospera-stories#991, `main` 72e9915) — le dépôt guidé pas à pas** (`prospera-fiscal-service`, modules
@@ -3721,6 +3757,11 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-30 (2026-11-26, STORY-333) — Les majorations de retard des déclarations du mois : quel paquet les déclare ?**
+  **Choix par défaut** (D-333-8) : seul le paquet de dépôt de la liasse (`TG × DSF`) porte `penalites[]`. Le retard d'une
+  déclaration du mois est qualifié (jours, `EN_RETARD`), et son risque dit `source: null` (« aucun paquet ne déclare de
+  pénalité ») au lieu d'inventer un taux. Les déclarer ne coûtera qu'une donnée de paquet.
 
 - **Q-D-29 (2026-11-26, STORY-332) — Les écrans réels de dimana et du GUDEF : quelles étapes, dans quel ordre ?**
   **Choix par défaut** : deux guidages `amorce` de six étapes (se connecter avec le compte du redevable, ouvrir,
