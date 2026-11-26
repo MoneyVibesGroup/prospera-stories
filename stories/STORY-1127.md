@@ -1,6 +1,7 @@
 # STORY-1127 : Les référentiels habilités dans l'état publié (`module.referentiels`, champ facultatif)
 
-Status: in-progress — fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 9 de B,
+Status: done — **livrée le 2026-11-26** : platform-catalog-service **#84** (`efedd3e` sur `dev`), étiquette
+**`contrat-etat-publie-v1.1`** ; voir « Livraison ». Fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 9 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, deuxième partie, ligne 9 ; identifiant réservé D-L7B-1).
 **Date dure : fusionnée au plus tard le 09/12, avant le gel du contrat d'état publié du 11/12** (plan §3, D-L7B-5).
 
@@ -132,6 +133,56 @@ gel**, la liste des référentiels habilités, champ facultatif, à la route et 
   republié, depuis STORY-936) : écart préexistant, hors de ce champ ; **nommé pour l'inventaire de STORY-1128**.
 - **D-1127-11 — Les consommateurs basculent chez eux** : `assurance` est à D depuis le lot 6 ; C a posé la question
   (D-1006-5). Le message part aux deux avec le chemin et la forme ; B ne touche aucun de leurs dépôts.
+
+## Livraison (2026-11-26)
+
+**platform-catalog-service #84**, fusionnée en « Rebase and merge » : `dev` **`efedd3e`** (branche `67fb078`, contenu
+identique). Étiquette **`contrat-etat-publie-v1.1`** posée sur `efedd3e` et poussée ; `contrat-etat-publie-v1` inchangée.
+Contrat annoncé avant le code : stories #992 (`main` `650024d`). Conforme à l'annonce, sans écart.
+
+- **Code** : `src/etat-publie/referentiels-publies.ts` (la règle unique : `referentielsPublies`, `memesReferentiels` ;
+  `MODULES_A_ARTEFACT_FISCAL` y vit, réexportée par `entitlement-events.service.ts`) ; `LectureEtatPublie` (une requête au
+  registre des référentiels pour les seuls modules fiscaux, aucune sinon) ; `EmetteurEtatPublie` (la liste dans le fait, dans
+  `etats_emis.referentiels`, et dans la comparaison) ; `EtatEmis.referentiels` déclaré (schéma strict) ; `EtatPublieModule`
+  reçoit le modèle `ReferentielVersion`. Contrat : `etat-publie.openapi.json` 1.1.0 et `etat-publie.changed.json`, même
+  définition. Manifeste `instance` 1.1.0 ; `copies.json` depuis `prospera-stories@650024d` (seul `instance` change).
+- **Tests neufs** : 27 unitaires (lecture, console, émetteur, contrat), un cas de `test:socle` (vrai MongoDB), deux de
+  `test:schemas` (la v1 → le neuf compatible ; la liste exigée incompatible).
+
+### Preuves
+
+- **Node 25** : suites touchées 209/209 ; suite complète **1 657 passés** / 1 658, 3 suites rouges connues du poste (binding
+  de Confluent : `app-cablage.invariant`, `kafka-producer`, `outbox-relay`) ; lint des fichiers touchés et `tsc` propres.
+- **Mutations 14/14 tuées sur assertion** (aucune au compilateur) : liste hors installation, intégrité lue pour tout module,
+  empreinte mal formée, ancre vide, ordre ignoré, listes toujours égales, émetteur sans comparaison, liste non rangée, liste
+  absente du fait, absente de la lecture, registre jamais lu, lu pour tous, liste publiée en installation, registre lu hors
+  session.
+- **Node 24, étage `verification`** (image de l'export de la branche) : **104/104 suites, 1 676/1 676**, lint 0, build 0.
+- **Pile `grp-b` neuve** (MongoDB rs0, Redis, Kafka, Karapace 6.2, doublure JWKS, catalogue construit) :
+  - Karapace : la v1 (`contrat-etat-publie-v1`, identique à `dev`) enregistrée sur `etat-publie.changed.reel-value` et
+    `.essai-value`, puis `schemas:compatibilite` → **compatible BACKWARD** ; `schemas:enregistrer` → versions `[1, 2]`, la
+    dernière porte `module.referentiels`. `test:schemas` **6/6**, `test:socle` **19/19** (Node 24, dans le réseau de la pile).
+  - Premier démarrage du catalogue livré sur une base semée (trois droits installés ; deux états émis d'avant, sans le champ) :
+    « états émis : 2 » ; sur Kafka, **`assurance` n° 5** avec `[cima-assurances 7.0]` (la republication) et **`declarations`
+    n° 1** avec `artifactUri` et `checksum` du registre ; `stock` (sans liste) rien ; 2/2 valides au schéma neuf.
+  - `GET /api/v1/etat-publie/{org}` (membre) **valide au contrat 1.1.0** et `GET /api/v1/console/etat-publie/{org}`
+    (`org:read`) : la même liste par module, omise pour `stock`.
+  - La liste du droit changée (`7.0` → `7.1`), redémarrage : **n° 6** ; second redémarrage : « états émis : 0 » ; 3/3 valides ;
+    `etats_emis` porte la liste (et `stock` aucune).
+  - Verrou 14:29 → 14:43 puis 14:51 → 14:52 (la route rendait 403 `EMAIL_NOT_VERIFIED` à la première passe : jeton de la
+    doublure sans `emailVerified`) ; `down -v`, aucun conteneur `grp-b` restant.
+
+### Décisions ajoutées à la livraison
+
+- **D-1127-12 — L'étiquette `contrat-etat-publie-v1.1` sur le commit fusionné** (`efedd3e`), annotée ; les copies épinglées
+  à la v1 restent valides (lecteur tolérant).
+- **D-1127-13 — Message court à C et à D** (sessions vivantes) avec le chemin et la forme du champ ; aucune action exigée.
+
+### Nommé pour plus tard
+
+- `versionCode` hors de la comparaison de l'émetteur (D-1127-10) → **inventaire de STORY-1128**.
+- Le retrait du consommateur de `entitlement.changed` dans `assurance` (D) ; la bascule du fiscal et de balance (EPIC-159).
+- Le relais du BFF (D-1127-8), quand un écran de A le demande.
 
 ## Hors de cette story
 
