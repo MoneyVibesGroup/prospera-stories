@@ -8112,7 +8112,8 @@ sprints:
         epic: "EPIC-031"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-329.md"
+        status: "in_progress"  # 🚧 2026-11-26 — groupe C, lot 7 (n° 9 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-329-1 → 13) ; contrat et communs annoncés (journal de C) : GET /obligations/{id}/chemin (le déclaré d'une version → le calculé et son constat → le détail relu chez le moteur, sa concordance → la balance des bases → les lignes de cahier de la TVA → leurs pièces ; chaque arrêt nommé) et GET /obligations/{id}/historique (le journal chaîné vérifié ; qui, nom et PARTI ; état avant et après ; motif retrouvé par empreinte) ; collection neuve textes_audit (les motifs en clair hors du journal, même transaction) ; aucune migration ; balance-service non touché.
         assigned_to: null
       - story_id: "STORY-340"
         title: "Montant à régler net d'acomptes, crédits et retenues"
