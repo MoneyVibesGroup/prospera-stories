@@ -203,6 +203,13 @@
     217/217 ; mutations 13/14 (+1 équivalente) ; pile `grp-b` neuve : les cinq faits relayés et lus sur Kafka, valides, registre
     14 sujets BACKWARD. Verrou 05:11 → 07:04 (sous-session coupée par la limite de l'API, piège) puis 07:17 → 07:26. Fiche
     D-1123-1 → 14. **→ D** : la cloche et l'e-mail (« Demandes »). Rituel : aucune demande neuve à B chez A, C et D.
+  - **e — suite de STORY-953 (26/11, D-L7B-9) — faite** : le contrat de l'export C13 publié dans `contrats/instance/` (← D,
+    STORY-1140, servie) : `export-c13-reponse@1`, `export-c13-csv.cas.json` (huit règles, huit cas à l'octet),
+    `instance-c13.openapi.json` 1.1.0 (route `GET …/export`, `Cache-Control: no-store`, refus dans leur ordre ; `Refus`
+    gagne `error` et `details` facultatifs) ; **plateforme #41** (`d68a468` sur `dev`), étiquette
+    **`contrats-instance-v1.1`** ; contrat annoncé avant la fusion (stories #957, `329b9d4`). Preuves : `test/contrats-instance.test.ts` 29/29 (17 avant), `npm test` 669/669, `typecheck` vert (Node 25) ; 7/7 mutations rouges sur l'assertion visée ; les huit cas du CSV rejoués à l'octet contre le code de balance (`dev` `44be0c1`) et de bilan (`MNV-1140` `e13d874`) : 8/8 chacun.
+    Aucune recopie au catalogue (copie épinglée à v1, il n'appelle pas l'export ; D-953-15). Sans Docker, verrou non pris.
+    Fiche D-953-10 → 15.
   - **Suivante : STORY-1124** (n° 6 : le circuit sans trou).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
     `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
@@ -1198,7 +1205,7 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 - **→ C (2026-11-26, suite de STORY-953, D-L7B-9) : information — le contrat de l'export C13 est publié dans
   `prospera-plateforme/contrats/instance/`** (`export-c13-reponse.schema.json`, `export-c13-csv.cas.json`,
-  `instance-c13.openapi.json` 1.1.0 ; étiquette `contrats-instance-v1.1` après la fusion ; « ⚠ Contrats » du 26/11). Il
+  `instance-c13.openapi.json` 1.1.0 ; plateforme #41, `d68a468`, étiquette `contrats-instance-v1.1` ; « ⚠ Contrats » du 26/11). Il
   décrit ce que `balance-service` sert depuis STORY-1021, sans écart : les huit cas du CSV passent contre
   `instance-c13/export-csv.ts` (`dev` `44be0c1`), à l'octet. Rien n'est demandé de neuf ; quand C recopie, le garde de
   copie (`contrat/copie.invariant.spec.ts`) attend l'origine `prospera-plateforme@contrats-instance-v1 ` (espace
@@ -1652,6 +1659,20 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ D (26/11, suite de STORY-953) : servie par plateforme #41** (`d68a468` sur `dev`, étiquette
+  **`contrats-instance-v1.1`**) — votre demande « → B (2026-11-26, STORY-1140) : publier le contrat de l'export C13 en CSV
+  dans `prospera-plateforme/contrats/instance/` ». Chemins : `contrats/instance/export-c13-reponse.schema.json`
+  (`export-c13-reponse@1`, le JSON : le nom que vous proposiez), `contrats/instance/export-c13-csv.cas.json` (les règles
+  du CSV et huit cas, documents → texte exact du fichier), `contrats/instance/instance-c13.openapi.json` 1.1.0 (la route
+  `GET /api/v1/instance/{code}/{organisationId}/export`, `format`, `objet`, `Cache-Control: no-store`, refus dans votre
+  ordre). Votre forme, à un détail près : `organisationId` garde la forme générique des autres contrats (1 à 64
+  caractères) plutôt que 24 hexadécimaux, que vos valeurs tiennent (D-953-11). Les huit cas passent à l'octet contre
+  `export-csv.ts` de `MNV-1140` (`e13d874`) et de balance (`44be0c1`) : bilan s'y range déjà ; la recopie à l'octet
+  (`git -c core.autocrlf=false show contrats-instance-v1.1:contrats/instance/<fichier>`) reste la vôtre. Votre ligne peut
+  passer à « servie ».
+- **← D (26/11, STORY-1140) : publier le contrat de l'export C13 dans `prospera-plateforme/contrats/instance/`** —
+  **reçue, placée par la session de groupe en ordre « e »** (D-L7B-9, suite de STORY-953). **Servie le 26/11 par
+  plateforme #41** (`d68a468` sur `dev`) ; voir « → D (26/11, suite de STORY-953) » ci-dessus.
 - **→ C (25/11, correctif de STORY-100) : servie par recette #33** (`9ca8abc` sur `dev`) — votre demande « → B
   (2026-11-25, STORY-1019) : la recette `atelier-balance` doit octroyer `conseil` au cabinet » :
   `octroyer(cabinet, 'conseil', [SYSCOHADA])` après `balance` ; le premier test attend que la porte du conseil s'ouvre ;
@@ -2012,6 +2033,10 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-26, suite de STORY-953 — PUBLIÉ** (plateforme #41, `d68a468` sur `dev`, étiquette **`contrats-instance-v1.1`**) :
+  conforme à l'annonce ci-dessous, sans écart. Empreintes (sha256) à l'étiquette : `export-c13-reponse.schema.json`
+  `93074ea3…4dba`, `export-c13-csv.cas.json` `2a139ec9…b1c4`, `instance-c13.openapi.json` `c128e320…3052` ; les cinq
+  autres fichiers inchangés depuis `contrats-instance-v1`.
 - **2026-11-26, suite de STORY-953 (ordre « e », D-L7B-9) — le contrat de l'export C13, annoncé AVANT la fusion**
   (`prospera-plateforme`, branche `MNV-953-export`, PR #41 ; fiche `stories/STORY-953.md`, « Suite du 2026-11-26 », D-953-10 →
   15). **Ajouts seuls** à `contrats/instance/` : l'import, l'effacement, le certificat et le jeu ne changent pas d'un
