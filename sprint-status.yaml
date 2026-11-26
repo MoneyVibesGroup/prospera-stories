@@ -2166,11 +2166,17 @@ reserved_ranges:
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
   - range: "STORY-1125"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe B, lot 7, n° 7 — l'archivage se mesure et se vend : compteurs par cabinet (fonds, pièces et pages versées, volume stocké, boîtes cotées, au mois et au total), quota de l'offre posé par cabinet par Money Vibes, l'alerte de quota sur ce quota, relais du BFF pour la console (document-service, module ged ; admin-panel ; écran AP-51 : A)"
     source_doc: "prospera-stories/stories/STORY-1125.md"
     reserved_on: "2026-11-25"
     note: >
+      🏁 DONE le 2026-11-26 — document-service #39 (dev 5c50ca6), BFF admin-panel #45 (dev 959aeee, 81817fe) ; contrat
+      annoncé avant le code (stories #969, main 33ef00e). Manifeste ged inchangé, aucune recopie au catalogue. Node 25 :
+      document-service unitaires 1379 (3 rouges du poste, CRLF), e2e 220/220 ; BFF 740/740, e2e 307/307 ; Node 24 : 117/117
+      suites, 220/220 ; mutations 21/21 (+1 rouge au compilateur) et 9/9 ; pile grp-b neuve avec le BFF construit appelé
+      pour de vrai : 35/35 (compteurs = Mongo compté à la main, versions détruites hors volume, quota de l'offre posé et
+      retiré par le BFF, ged.quota.depasse contre lui puis réarmé). → A : AP-51 débloquée. D-1125-1 → 16. Contrat d'origine :
       Fiche écrite et contrat annoncé avant le code (2026-11-26) : GET …/ged/plateforme/archivage, GET
       …/ged/plateforme/cabinets/{org}/archivage, PUT …/ged/plateforme/cabinets/{org}/quota (perms du jeton : org:read,
       entitlement:grant) ; compteurs calculés à la lecture ; quota posé tenu dans ged_quotas_cabinet, sinon celui du

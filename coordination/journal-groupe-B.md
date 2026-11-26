@@ -223,7 +223,18 @@
     sortie : une seule ; réception refusée par la base sans rien écrire ; RETIREE et GARDEE sur de vrais faits Kafka).
     Verrou 09:08 → 09:19, 09:22 → 09:25, gardé par le redémarrage du poste jusqu'à 09:39 (rendu à la reprise), puis
     10:04 → 10:07 (étage `verification`). Fiche D-1124-1 → 12. Rituel : aucune demande neuve à B chez A, C et D.
-  - **Suivante : STORY-1125** (n° 7 : l'archivage se mesure et se vend).
+  - **7 — STORY-1125 (26/11) — faite** : l'archivage se mesure et se vend. **document-service #39** (`5c50ca6` sur `dev`) ;
+    **BFF #45** (`959aeee`, `81817fe` sur `dev`) ; contrat annoncé avant le code (stories #969, `33ef00e`). Surface de la
+    plateforme de la GED (`GET …/ged/plateforme/archivage`, `GET …/cabinets/{org}/archivage` : `org:read` ; `PUT
+    …/cabinets/{org}/quota` : `entitlement:grant` ; `perms` du jeton projeté par la `JwtStrategy`) ; compteurs calculés à la
+    lecture (fonds, pièces et pages versées, volume hors versions détruites, boîtes cotées non restituées ; total et mois
+    UTC), aucune donnée de pièce ; quota de l'offre posé par Money Vibes (`ged_quotas_cabinet`), sinon celui du service ; le
+    cabinet (`quotaSource`) et le passage des alertes le lisent (`ged.quota.depasse` inchangé) ; relais du BFF (AP-51). Aucun
+    droit ni fait neufs, manifeste `ged` inchangé (aucune recopie). Node 25 : unitaires 1 379, e2e 220/220 ; BFF 740/740,
+    307/307 ; Node 24 : 117/117 suites, 220/220 ; mutations 21/21 (+1 au compilateur) et 9/9 ; pile `grp-b` neuve avec le
+    BFF construit appelé pour de vrai, 35/35. Verrou 11:22 → 11:30. Fiche D-1125-1 → 16. Q-SC-5 (valeur et prix de l'offre)
+    reste à l'utilisateur. Rituel : aucune demande neuve à B chez A, C et D.
+  - **Suivante : STORY-1126** (n° 8 : la recette des archives de bout en bout).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
     `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
@@ -1266,6 +1277,13 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   la boîte par leurs numéros. **Choix par défaut de B** : les alertes se lisent dans l'application (`GET …/sorties?enRetard=true`,
   `GET …/pieces-echues`, `GET …/quota`, les campagnes, les destructions) ; aucun message ne part tant que `notification` ne
   consomme pas ces topics.
+- **→ A (2026-11-26) : AP-51 — la console voit l'archivage de chaque cabinet, débloquée par STORY-1125** (BFF #45,
+  `81817fe` sur `dev` ; document-service #39, `5c50ca6`) : `GET /api/v1/admin/archivage?mois=AAAA-MM` et `GET
+  /api/v1/admin/orgs/{orgId}/archivage?du=&au=` (`org:read`), `PUT /api/v1/admin/orgs/{orgId}/archivage/quota` (corps `{
+  quotaOctets: entier ≥ 1 | null, offre? }`, `entitlement:grant`). Des compteurs seulement (fonds, ouverts, fermés,
+  pièces et pages versées, volume, boîtes cotées ; total et mois) et le bloc `quota` (`source` `OFFRE` | `SERVICE`,
+  `depasse`, `utilisationPourcent`) ; refus `400 MOIS_INVALIDE`, `400 PERIODE_INVALIDE`, `403`, `503`. Prouvé par un appel
+  réel au BFF construit contre la GED d'une pile (fiche, « Livraison »). Types depuis l'OpenAPI vivant ; l'écran est au lot 8.
 - **→ A (2026-11-26) : FE-143 — les pièces échues de tout le cabinet sont servies par STORY-1123** (document-service
   #37, `7e65881` sur `dev`) : `GET /api/v1/ged/cabinet/pieces-echues?horizonJours=&curseur=&limite=`
   (`ged:fonds:gerer`) → `PiecesEchuesDuCabinetDestructionDto` (lignes de la liste d'un fonds plus `echue`, `fondsNumero`,
@@ -2070,6 +2088,12 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-26, STORY-1125 — LIVRÉ** (document-service #39, `5c50ca6` sur `dev` ; BFF #45, `959aeee` et `81817fe`) :
+  conforme à l'annonce ci-dessous ; écarts D-1125-14 → 16 (la liste du BFF garde l'ordre des champs de la GED ; `orgId` du
+  BFF exigé en ObjectId ; refus de plateforme en `403` générique). Manifeste `ged` inchangé. **Types à régénérer** (A)
+  depuis les deux OpenAPI vivants : BFF `ArchivageDesCabinetsDto`, `ArchivageDuCabinetDto`, `ArchivageDUnCabinetDto`,
+  `TotalDArchivageDto`, `MoisDArchivageDto`, `QuotaDArchivageDto`, `PoserQuotaDArchivageRequestDto` ; `document-service`
+  : les mêmes noms (tag `ged-plateforme`) et `quotaSource` sur `GET …/ged/cabinet/quota`.
 - **2026-11-26, STORY-1125 — l'archivage se mesure et se vend, annoncé AVANT le code** (`document-service`, GitHub
   `prospera-ocr-service`, et le BFF `admin-panel`, branches `MNV-1125` ; fiche `stories/STORY-1125.md`, D-1125-1 → 13).
   **Ajouts seuls** ; aucun droit neuf (auth inchangé), aucun fait neuf, **`ged.quota.depasse` inchangé** (il lit désormais
@@ -3926,6 +3950,19 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une preuve qui compare deux corps JSON par `JSON.stringify` rougit sur l'ordre des champs** (STORY-1125 : la liste du BFF
+  rendait `cabinets` avant `tronque`, contenu identique) : comparer en JSON canonique (clés triées), et garder l'ordre de la
+  source dans une projection qui se veut un relais.
+- **Un tableau de promesses lancées d'un coup dans un test de refus** (`for (const p of [service().a(), service().b()])`)
+  laisse une promesse rejetée sans attente quand une mutation fait passer une autre : jest meurt sans ligne `Tests:` et le
+  script de mutations lit « SURVIT (?) ». Lancer chaque appel dans la boucle (`() => service().a()`).
+- **Une mutation qui retire un rétrécissement (`pose.quotaOctets === null`) ne compile plus** : en écrire une variante typée
+  (`as number`) pour la juger sur assertion.
+- **La garde `sources-des-manifestes.spec` de `document-service` rougit sous Node 25 sur ce poste** (le manifeste du checkout
+  est en CRLF, l'empreinte notée est celle du LF) : troisième rouge connue du poste, verte dans l'étage `verification`.
+- **Le paramètre `OrgParamsDto` des installations du BFF accepte toute chaîne** (`/^[A-Za-z0-9_-]{1,64}$/`) : une route qui
+  relaie vers un service qui exige un ObjectId doit poser le sien, sinon l'erreur revient de l'amont en `404`.
 
 - **Un schéma Mongoose strict retire en silence un champ neuf d'un `$set`** (STORY-1124) : les doubles en mémoire étaient
   verts, la pile a rendu 6 KO (la copie désinscrite ni retirée ni gardée). Tout champ neuf d'une entité persistée ⇒
