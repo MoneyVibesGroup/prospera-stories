@@ -150,9 +150,9 @@ reserved_ranges:
       pile grp-d 15/15. Lot 7 de D, n° 5c (§4 bis). Détachée de la plage 1140 → 1141 (entrée propre). Suivante :
       STORY-349 (319 de C fusionnée).
   - range: "STORY-1141"
-    status: "RÉSERVÉ"
-    owner: "Groupe D — lot 7, amendement du 26/11 : facture et paiement (1141)"
-    source_doc: "prospera-stories/coordination/PLAN-LOT-7-2026-11-24.md"
+    status: "in_progress"
+    owner: "Groupe D — le numéro de compte imprimable sur la facture (Q-D-15 ; prospera-paiement-service, prêté par B, et prospera-ventes-service)"
+    source_doc: "prospera-stories/stories/STORY-1141.md"
     reserved_on: "2026-11-26"
     note: >-
       Consigne de l'utilisateur du 26/11 (plan §4 bis). 1138 = le rapprochement de la liasse avec sa balance par
@@ -163,6 +163,7 @@ reserved_ranges:
       MAJ 2026-11-26 : 1138 s'en est détachée en entrée propre (DONE, ci-dessus) ; la plage garde 1139 → 1141.
       MAJ 2026-11-26 : 1139 s'en est détachée à son tour (entrée propre, ci-dessus) ; la plage garde 1140 → 1141.
       MAJ 2026-11-26 : 1140 s'en est détachée à son tour (entrée propre, ci-dessus) ; la plage garde 1141.
+      MAJ 2026-11-26 : 1141 ouverte (fiche écrite avant le code, contrat annoncé) — in_progress.
   # ── COMPLÉMENTS DE LA COMPTABILITÉ TENUE (2026-11-26) : epics-comptabilite-complements-2026-11-26.md, tiré du livre
   #    « La Boîte à Outils du Comptable » et de ses 50 modèles, croisés avec le code de origin/dev.
   - range: "EPIC-270 → EPIC-276"

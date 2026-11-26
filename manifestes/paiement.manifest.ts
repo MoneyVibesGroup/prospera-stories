@@ -1,3 +1,4 @@
+// Amendé le 2026-11-26 (STORY-1141, groupe D, dépôt prêté par B) : C5, `paiement.compte.changed@1` gagne `numeroImprimable`, propriété facultative (le numéro « à imprimer » déclaré par le DAF avec le compte, non secret, tracé, jamais tiré du coffre ; Q-D-15), et le fait part aussi au changement de ce numéro (route d'écriture neuve `PUT /api/v1/comptes-encaissement/{compteId}/numero-imprimable`, droit `paiement:compte:administrer`, hors lecture seule) ; topic toujours `@1` ; version 1.1.0 → 1.2.0 (un ajout, une mineure).
 // Amendé le 2026-11-24 (STORY-1073, groupe D, dépôt prêté par B) : C5, + `paiement.compte.changed@1` publié (l'état imprimable d'un compte d'encaissement, sans aucun secret du coffre ; lu par `facturation`, Q-D-12, D-Q12-1) ; version 1.0.0 → 1.1.0 (un ajout, une mineure).
 // Manifeste M33 — Encaissements & PI-SPI (format du contrat de module, clause C1, amendée le 2026-11-10, le
 // 2026-11-11 et le 2026-11-12).
@@ -79,7 +80,7 @@
 
 export const MANIFESTE_PAIEMENT = {
   code: 'paiement',
-  version: '1.1.0',
+  version: '1.2.0',
 
   depends: [],
 
@@ -136,7 +137,7 @@ export const MANIFESTE_PAIEMENT = {
     'paiement.creance.troppercu.constate',
     'paiement.creance.anomalie.constatee',
     // Nouveaux, 2026-11-13 (voir l'en-tête) :
-    'paiement.compte.changed@1', // [STORY-1073] état imprimable d'un compte d'encaissement (nature, titulaire, fournisseur, empreinte visible, destination PI-SPI, vérifié ; révision = rang de l'acte du compte) ; jamais un secret ; consommé par facturation
+    'paiement.compte.changed@1', // [STORY-1073] état imprimable d'un compte d'encaissement (nature, titulaire, fournisseur, empreinte visible, destination PI-SPI, vérifié ; révision = rang de l'acte du compte) ; jamais un secret ; consommé par facturation ; [STORY-1141] + numeroImprimable facultatif (le numéro « à imprimer » déclaré par le DAF, non secret, BANCAIRE et MOBILE_MONEY), publié aussi à son changement
     'paiement.creance.changed@1', // état absolu : tiers, source, périmètre, composantes, reste dû, montantExigible, lueLe, échéance, ancienneté (FR-247 ; IMF AD-6)
     'paiement.credit-tiers.changed@1', // solde, origine (avance, acompte, trop-perçu, avoir), imputations (FR-248)
     'paiement.encaissement.changed@1', // état absolu d'un encaissement ; consommé par la microfinance (spine IMF, AD-9)
