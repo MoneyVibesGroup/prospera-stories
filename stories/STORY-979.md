@@ -1,7 +1,8 @@
 # STORY-979 : les droits de la facture et des archives du cabinet au catalogue de tenant d'auth
 
-Status: done (rouverte et refermée quatre fois pour ses suites : « Suite du 2026-11-24 », « Suite du 2026-11-24
-(soir) », « Suite du 2026-11-25 » et « Quatrième suite (2026-11-25) », en fin de fiche)
+Status: in-progress (cinquième suite, 2026-11-26) — rouverte et refermée quatre fois pour ses suites : « Suite du
+2026-11-24 », « Suite du 2026-11-24 (soir) », « Suite du 2026-11-25 », « Quatrième suite (2026-11-25) » ; la cinquième
+(2026-11-26) en fin de fiche
 
 **Complexité :** faible (huit droits neufs au catalogue de tenant, hors du jeton ; un rôle du socle neuf ; une ligne
 d'ajout à l'annexe B ; la copie des manifestes du catalogue ; aucun champ, aucune route, aucun topic)
@@ -571,3 +572,55 @@ Fusionnée en « Rebase and merge », `mergedAt` non nul, `headRefOid` = SHA pou
 - **A** : rien à régénérer (aucune OpenAPI du catalogue ni du BFF ne change ; FE-077 appelle la route de
   `balance-service`).
 - **B** : STORY-1119 (n° 1 du lot 7).
+
+---
+
+## Cinquième suite (2026-11-26) : le manifeste `paiement` 1.2.0 (et `ged` 1.10.0)
+
+**Demande servie :** journal de D, « → B (2026-11-26, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au
+catalogue » (source `manifestes/paiement.manifest.ts`, `main` `6a5d3ab`, #967 ; code fusionné : paiement #126,
+`f6a4800` et `64b5838`). **Entraînée par la copie entière :** `ged` 1.10.0, la suite « f » de STORY-1119 (← C,
+STORY-324 ; source `10d9d6e`, #976 ; code fusionné : document-service #40, `5d060aa`), qui la laissait à cette PR
+(D-1119-25).
+**Place :** lot 7 de B, **ordre « g »** (D-L7B-11 : après « f », avant STORY-1126). Branche
+`MNV-979-manifestes-paiement-ged` (catalogue seul), docs `docs-979-paiement-ged`. Le tracker rouvre l'entrée de 979
+(`in-progress`) le temps de la suite et la referme dans la PR de docs finale.
+**Sources lues :** journal de D (la demande, mot pour mot ; « ← B : passation de `prospera-paiement-service` (1141) —
+rendu à B ») ; `manifestes/paiement.manifest.ts` à `6a5d3ab` et à `main` (identiques : sha256
+`d247fcc9cc45eb5e23150e66bd04995bcee2a6125495abac955db7fcd32bdca9`, 1.2.0) ; `manifestes/ged.manifest.ts` à `main`
+(1.10.0, `0a0f68268e5e79b3745f016e979e87475354fbc0bdb832bc49df3b1e294acbb0`) ; code relu sur `origin/dev` du catalogue
+`9674aeb` (`copies.json`, `scripts/manifestes/`, `manifestes-seed.service.spec.ts`).
+
+**Ce qui existait déjà (relu avant le code) :** au catalogue, `paiement` 1.1.0 et `ged` 1.9.0 ; aucune PR ouverte.
+`manifestes:garde` contre `main` : **rouge sur `ged` et `paiement` seuls** (`ged` : `version`,
+`routesLectureSeule[50, 51]` ; `paiement` : `version`) ; aucun `droits` ne diffère. Depuis `5bd506e` (la copie de 1124),
+`manifestes/` n'a bougé que pour ces deux-là (`6a5d3ab`, `10d9d6e`).
+
+| Exigence | Fait |
+|---|---|
+| `paiement` 1.2.0 au catalogue | `copies.json` depuis `main` : 1.1.0 → **1.2.0** ; `paiement.compte.changed@1` (déjà publié) gagne `numeroImprimable` facultatif ; la route d'écriture `PUT …/numero-imprimable` reste hors `routesLectureSeule` ; faits, droits, routes de lecture inchangés |
+| `ged` 1.10.0 (« f », entraînée) | même copie : 1.9.0 → **1.10.0**, `GET /api/v1/ged/cabinet/pieces/{pieceId}/versions/{version}` en `routesLectureSeule` |
+| Aucun droit à poser dans auth | aucun `droits` ne change (garde) ; auth inchangé |
+| Rien d'autre ne change | garde rouge avant sur ces deux seuls ; verte après (48) contre `main` |
+
+### Décisions (prises par défaut, contestables)
+
+- **D-979-35 — Une cinquième suite de 979, ordre « g » du lot 7 de B.** Décidée par la session du groupe B (D-L7B-11,
+  comme D-979-23) : aucun identifiant neuf, même fichier, même voie.
+- **D-979-36 — La copie depuis `main`, entière : `ged` 1.10.0 y entre.** `npm run manifestes:copier` lit tout
+  `manifestes/`. `paiement` 1.2.0 est sur `main` depuis `6a5d3ab`, son code fusionné (#126) ; `ged` 1.10.0 depuis
+  `10d9d6e`, son code fusionné (#40) : les deux suivent leur code (D-979-24). Une seule copie, une seule PR, plutôt
+  qu'une copie depuis un commit plus ancien (qui n'aurait eu que `paiement`) puis une seconde.
+- **D-979-37 — Aucun droit à ajouter dans auth.** Ni `paiement` ni `ged` ne changent leurs `droits` (garde) ; la route
+  neuve de `paiement` sert le droit déjà attribué `paiement:compte:administrer`.
+- **D-979-38 — Le test de semis suit la copie.** Deux tests neufs dans `manifestes-seed.service.spec.ts` : `paiement`
+  1.2.0 (publie toujours `paiement.compte.changed@1`, la route d'écriture hors lecture seule) ; `ged` 1.10.0 (la route de
+  lecture neuve, faits et droits inchangés). Ceux de STORY-1073 et 1124 ne figent plus la version. Rouges sur la copie
+  d'avant (2 échecs), verts après.
+- **D-979-39 — Sans Docker** (comme D-979-27). Une copie JSON semée au démarrage du catalogue ; aucun module, aucune
+  dépendance, aucun Dockerfile. Le verrou n'est pas pris.
+- **D-979-40 — Contrats.** Deux manifestes publiés au catalogue changent de version ; aucune route, aucun champ, aucun
+  topic du catalogue ne change de forme. Une base déjà semée reçoit les deux versions neuves à son prochain démarrage
+  (D-979-13). La note « manifeste paiement 1.1.0 » du catalogue des faits du distributeur
+  (`prospera-plateforme/contrats/distributeur/catalogue-faits.json`) reste à D (dossier de D dans la plateforme ;
+  aucune garde ne la lit). Annoncé dans « ⚠ Contrats » avant la fusion.
