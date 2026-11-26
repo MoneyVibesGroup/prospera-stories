@@ -131,9 +131,12 @@
    cliente). Node 24 : unitaires 220 suites, 3187 ; e2e 13/13, 304 ; conformité 24/24, 151 ; mutations 22/22 et 7/7 MongoDB ;
    pile `grp-c` saine. Verrou pris trois fois (09:59 → 10:03, arrêté pour rebaser sur 349 ; 10:08 → 10:17 ; 10:18 → 10:21).
    D-324-1 → 13 dans la fiche. **→ B** (GED, information, ci-dessous) ; **D prévenu** (la porte de « Déposée », pour 333).
-15. **Suivante : STORY-325** (rectificatives versionnées, immuabilité et clôture, EPIC-031 ; fiche à écrire juste avant de
-   coder ; **330 de D l'attend**). Le modèle de 324 est prêt à être figé (D-324-12 : pièce immuable, pointeur courant remis à
-   `null` par une rectificative).
+15. 🚧 **STORY-325 en cours (26/11)** (rectificatives versionnées, immuabilité et clôture, EPIC-031 ; **330 de D l'attend**) :
+   fiche `stories/STORY-325.md` écrite avant le code (D-325-1 → 13), contrat et communs annoncés ci-dessous. La version est
+   scellée au dépôt dans `versions_declaration` (jamais récrite : port sans écriture, schéma qui refuse toute mise à jour,
+   garde AST) ; `POST /obligations/{id}/rectificatives` (à partir de `DEPOSEE`, `CLOTUREE` comprise : version n + 1 en
+   préparation, visa retiré, pièce du client à `null`) ; `POST /obligations/{id}/retour` (motif obligatoire) ;
+   `GET /obligations/{id}/versions` ; toute autre écriture d'une obligation `CLOTUREE` ⇒ `409 OBLIGATION_CLOTUREE`.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -619,6 +622,20 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-325, avant le code)** — branche `MNV-325` de `prospera-fiscal-service`. **Aucune
+  migration** (une collection neuve, `versions_declaration`, index unique posé par Mongoose au démarrage ; un champ
+  facultatif `versionCourante` sur `obligations`, absent ⇒ la version 1 en cours). Ni `app.module.ts`, ni `package.json`,
+  ni `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touché : **le contrat OpenAPI** (trois routes
+  neuves, un champ, la précision de la clôture : « ⚠ Contrats »). Tout le reste dans les dossiers de C
+  (`domain/obligations`, `application/obligations`, `modules/obligations`, `adapters/mongo` des obligations, des versions
+  et des pièces du client, `ports/`, `test/utils`, e2e et conformité des obligations) et une garde neuve à la racine de
+  `src/` (`garde-versions-immuables.spec.ts`, AC-2). Rien dans les dossiers de D. **→ D** : rien à faire pour un rebase ;
+  **à savoir** : (1) `ObligationsModule` exporte en plus `RegistreVersionsDeclaration` (lecture des versions, pour 330) ;
+  (2) `RegistreObligations.enregistrer` **ne récrit plus une obligation `CLOTUREE`** (elle est comptée `inchangees`) —
+  vaut pour la dérivation sociale de 349, sans changer une ligne de D ; (3) les obligations sociales suivent les mêmes
+  règles (scellées au dépôt, rectifiables, closes) ; (4) le retour `DEPOSEE → A_DEPOSER` du rejet reste à 334 (D-325-9) ;
+  (5) une voie de D qui passerait une obligation à `DEPOSEE` passe toujours par `CycleObligationsService.transitionner`
+  (D-324-7) : c'est là que la version se scelle.
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#74, `dev` `060c85c`, rebasée sur `origin/dev` `136efdf` de D)** — conforme à
   l'annonce : seul le contrat OpenAPI parmi les communs ; aucun fichier de D touché. **→ D** : rien à faire pour un rebase ;
   toute la suite (unitaires, e2e, conformité) est verte en Node 24 avec 349 ; les obligations sociales de 349 passent la même
@@ -713,6 +730,43 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-325), ANNONCÉ avant le code** — **les rectificatives versionnées, l'immuabilité et la clôture**
+  (`prospera-fiscal-service`, REST). Fiche : `stories/STORY-325.md` (D-325-1 → 13). Consommateurs : l'écran du dossier de
+  dépôt (A, FE-081) ; **STORY-330 de D** (le livrable sur une version : D-325-11) ; 334 et 336 (D) ; 329 et 340 (C).
+  **Ajouts seuls**, plus deux précisions de comportement (le dépôt scelle ; la clôture refuse). Aucun droit neuf, aucun
+  événement, manifeste inchangé.
+  - **Comportement (le dépôt scelle)** : `POST /obligations/{id}/transition` `vers: DEPOSEE` écrit en plus, dans la même
+    transaction, la **version** déposée (`versions_declaration`, jamais récrite) ; le déclaré lu entre dans la
+    comparaison-échange (une saisie concurrente ⇒ `409 TRANSITION_CONCURRENTE`). Rien d'autre ne change pour l'appelant.
+  - **Route neuve** : **`POST /api/v1/obligations/{id}/rectificatives`** (droit `fiscalite:declaration:preparer`) `{ motif
+    (10 à 500) }`, à partir de `DEPOSEE` (`CLOTUREE` comprise) → `201 { versionPrecedente: VersionDeclarationDto,
+    obligation: ObligationResponseDto }` : l'obligation repasse `EN_PREPARATION` sur la version n + 1 (`RECTIFICATIVE`),
+    visa retiré, calculé défigé, pièce du client à `null` ; la version n ne bouge pas. Refus : `400`, `403
+    DROIT_FISCAL_REFUSE`, `404 OBLIGATION_INTROUVABLE`, `409 OBLIGATION_DESACTIVEE` / `OBLIGATION_BLOQUEE` /
+    **`RECTIFICATIVE_AVANT_DEPOT`** / **`RECTIFICATIVE_CONCURRENTE`**.
+  - **Route neuve** : **`POST /api/v1/obligations/{id}/retour`** `{ vers, motif (10 à 500) }` → `200` l'obligation ; droit
+    de l'état quitté, plus `valider` pour retirer le visa ; avant le dépôt vers tout état antérieur, après le dépôt jamais
+    avant `DEPOSEE`. Refus : `400`, `403 DROIT_FISCAL_REFUSE` (journalisé), `404`, `409` **`RETOUR_NON_PREVU`** /
+    **`RETOUR_AU_DELA_DU_DEPOT`** / `OBLIGATION_CLOTUREE` / `OBLIGATION_DESACTIVEE` / `TRANSITION_CONCURRENTE`.
+    `…/transition` reste en avant seulement (`TRANSITION_NON_PREVUE` inchangé pour un `vers` antérieur).
+  - **Route neuve de lecture** : **`GET /api/v1/obligations/{id}/versions`** → `{ obligationId, courante, versions:
+    VersionDeclarationDto[] }` (la plus récente d'abord) ; `VersionDeclarationDto = { versionId, obligationId, dossierId,
+    numero, nature: INITIALE | RECTIFICATIVE, contenu: { taxe, periode, annee, redevableId, implantationId, declare: {
+    montant, assiette } | null }, empreinte: "sha256:<hex>", declare, calcule: { montant, origine }, visa,
+    validationClient, rectificative: { motif, par, le, versionPrecedente } | null, scellee: { par, le, mode: DEPOT |
+    REPRISE } }`.
+  - **Comportement (la clôture)** : sur une obligation `CLOTUREE`, **toute** écriture sauf la rectificative répond **`409
+    OBLIGATION_CLOTUREE`** (après la portée et le droit) : `…/transition`, `…/retour`, `…/desactivation`,
+    `…/reactivation`, `…/report/annulation`, `…/bases`, `…/calcul`, `…/montant`, `…/montant-declare`, `…/montant-paye`,
+    `…/coherence`, `…/anomalies/{code}/levee`, `POST /obligations/reports`, `/obligations/affectation`,
+    `/obligations/validations-client` (tout ou rien). Les codes rendus jusqu'ici dans ce cas (`TRANSITION_NON_PREVUE`,
+    `MONTANT_DECLARE_NON_ENREGISTRABLE`, `PAIEMENT_NON_ENREGISTRABLE`, `CALCUL_NON_ACTUALISABLE`, `BASES_NON_ACTUALISABLES`,
+    `VALIDATION_CLIENT_TARDIVE`) cèdent la place à `OBLIGATION_CLOTUREE`. La re-dérivation ne récrit plus une close.
+  - **Champ neuf** `ObligationResponseDto.versionCourante` (jamais `null`) : `{ numero, nature, versionId | null,
+    rectificative | null }`.
+  - **Journal chaîné** : actes neufs `OBLIGATION_VERSION_SCELLEE`, `OBLIGATION_RECTIFICATIVE_OUVERTE`,
+    `OBLIGATION_RETOUR_ARRIERE` (`obligation:<id>`, motifs par leur empreinte seule). **→ A (FE-081)** : types à
+    régénérer à la publication.
 - **2026-11-26 (STORY-324), PUBLIÉ** (fiscal #74, `060c85c`) — **conforme à l'annonce** (#963), sans écart. **→ A (FE-081)** :
   types à régénérer (`validationClient`, les quatre routes). Annonce :
 - **2026-11-26 (STORY-324), ANNONCÉ avant le code** — **la validation du client capturée comme pièce**
