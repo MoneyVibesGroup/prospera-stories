@@ -260,9 +260,11 @@ dossier de contrôle (STORY-336) ne peut que la croire.
   le retrait (1124 : `desinscription.issue = RETIREE`, la pièce se lit encore par son identifiant), le schéma
   `ged.piece.recue` (`empreinte` : `^[0-9a-f]{64}$`).
 - [x] Contrat annoncé avant la fusion (cette PR de docs ; manifeste `ged` 1.10.0 à la source).
-- [ ] PR de code fusionnée en rebase, manifeste recopié dans le service depuis cette PR.
+- [x] PR de code fusionnée en rebase : document-service **#40** (`dev` **`5d060aa`** ; arbre identique au commit poussé
+  `397870e`), manifeste `ged` 1.10.0 recopié depuis `prospera-stories@10d9d6e` (annonce #976).
 - [ ] Recopie au catalogue : avec « g » (D-1119-25).
-- [ ] PR de docs finale (fiche, tracker, journal de B : avancement, « Réponses » → C), message à C.
+- [x] PR de docs finale (fiche, tracker, journal de B : avancement, « Réponses » → C), message à C. Verrou Docker non
+  pris.
 
 ### Contrat (annoncé avant la fusion)
 
@@ -332,3 +334,33 @@ dossier de contrôle (STORY-336) ne peut que la croire.
   Nest commun, ni une dépendance, ni un Dockerfile, ni Kafka ne changent : une route de plus dans un contrôleur existant,
   lue par les méthodes déjà prouvées sur MongoDB du dépôt (`piece`, `versions`), et un paramètre JSON. Les tests du
   service (unitaires et e2e, la vraie chaîne de guards) suffisent ; la pile n'apporterait rien.
+
+### Livré (26/11)
+
+- **document-service #40**, `5d060aa` sur `dev` (fusionnée en rebase, `mergedAt` non nul, `headRefOid` = `397870e`
+  poussé, arbre identique) : `parametres/ged-cabinet-2026.2.json` (sha256 LF `f8dc11af…38a1` ; 2026.1 inchangé,
+  `ba14fe40…349b`), `parametres/plan-cabinet.ts` (version courante `2026.2` ; `planServi` : la nature du cabinet l'emporte
+  sur son code), `cabinet/cabinet.service.ts` (`metadonneesDeVersion`, `EtatDeLaVersion`), `cabinet/cabinet.controller.ts`
+  (la route, `MetadonneesDeVersionDto`, `DestructionDUneVersionDto`, `DesinscriptionDUneVersionDto`), `module.manifest.ts`
+  1.10.0 (`0a0f6826…acbb0`, `sources-des-manifestes.ts` à `10d9d6e`). Tel qu'annoncé (#976) : aucun écart.
+
+### Preuves (Node 25, sans Docker : D-1119-26)
+
+- Par chemin : `plan-cabinet.spec.ts` 7/7 (2 neufs : 2026.2 = 2026.1 + une nature, rien d'autre ; le code du cabinet
+  gagne, une seule fois), `cabinet.service.spec.ts` 44 avec le plan (7 neufs : la nature dans un fonds déjà ouvert,
+  `EXERCICE_REQUIS`, `NATURE_DEJA_PRISE` ; la nature d'un cabinet gardée, sensible, et celle de la table chez un autre ;
+  les métadonnées exactes, sans index, nom de fichier ni inscription au journal ; la garde — droit, portefeuille,
+  archiviste, autre cabinet, version 0 et 2, pièce inconnue, nature sensible ; détruite ; version seule détruite ; retirée
+  puis gardée), `ged-cabinet.e2e-spec.ts` 15/15 (2 neufs : la route par HTTP derrière la vraie chaîne de guards —
+  200 exact, aucun nom de fichier ni tiers dans le corps, 404 `VERSION_INCONNUE`, 400, 404 hors portée, 403
+  `GED_NOT_ENTITLED` ; l'OpenAPI publie la route, `MetadonneesDeVersionDto`, l'énumération de `etat`, le motif de
+  `empreinte`).
+- Suite complète : unitaires **1 390 passés** (117 suites ; 2 rouges connues du poste, rouges aussi sur `dev` : chemins
+  Windows de `piece-conservation.spec.ts`, copies CRLF de `ged.service.spec.ts`) ; e2e **222/222** (220 + 2). Lint des
+  fichiers touchés, `tsc`, build.
+- **Mutations 12/12 rouges** : la table l'emporte sur la nature du cabinet ; une version seule détruite ignorée ; toute
+  désinscription vaut retrait ; la portée sautée ; le droit sauté ; `courante` toujours vraie ; le nom du fichier rendu ;
+  la table restée en 2026.1 ; la désinscription d'une copie gardée rendue ; une version inconnue rendue comme la courante ;
+  l'OpenAPI sans le type de réponse ; la destruction sans son procès-verbal.
+- Docker : aucun, verrou non pris ; la recette de l'Atelier n'est pas rejouée (D-1119-26). La recette des archives
+  (STORY-1126) appellera la route sur la pile.
