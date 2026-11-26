@@ -79,7 +79,10 @@ export const MANIFESTE_GED = {
   // 1.8.0 (2026-11-26, STORY-1123) : les alertes de l'archiviste (retour d'un original en retard, échéance de
   // conservation proche, quota dépassé, écart d'intégrité) et les étapes d'une destruction, publiées ; cinq faits neufs ;
   // la liste des pièces échues de tout le cabinet (une route de lecture neuve).
-  version: '1.8.0',
+  // 1.9.0 (2026-11-26, STORY-1124) : le circuit sans trou (réception et boîtes dans une transaction, mouvements d'une
+  // boîte verrouillés) ; la facture désinscrite de la comptabilité retirée du fonds (`comptabilite.facture.desinscrite`,
+  // proposé à C) ; aucune route neuve.
+  version: '1.9.0',
 
   // C1 : aucune dépendance dure. La GED reçoit, lit, classe, conserve et retrouve des pièces sans autre module ; une pièce
   // enregistrée sans dossier va dans la file « à rattacher » (FR-159, FR-166).
@@ -163,6 +166,7 @@ export const MANIFESTE_GED = {
     'sinistres.acces-sante.retire@1',
     'reprise.cles-rattachement.publiees@1', // numéro de police, de sinistre, `DEC-`, numéro d'archivage d'origine (FR-215)
     'comptabilite.facture.inscrite', // STORY-1100 : une facture inscrite au brouillard, rangée en copie pré-indexée au fonds du client (si `comptabilite` est installé)
+    'comptabilite.facture.desinscrite', // STORY-1124 [proposition, à C] : le brouillard né d'une facture inscrite est abandonné ; la copie jamais versée est retirée du fonds, la copie versée gardée
     'dossier.updated', // STORY-1120 : un dossier client archivé (`statut: ARCHIVE`, état absolu publié par `dossier-service`) ferme ses fonds d'archives ouverts
     'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
     'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
