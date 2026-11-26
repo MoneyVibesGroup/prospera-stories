@@ -1,6 +1,6 @@
 # STORY-325 : Les rectificatives versionnées, l'immuabilité et la clôture — corriger une déclaration sans effacer la précédente
 
-Status: in-progress — fiche écrite et contrat annoncé avant le code (2026-11-26).
+Status: done — **livrée le 2026-11-26** : prospera-fiscal-service **#75** (`7e2bff8` sur `dev`) ; voir « Livraison ».
 Écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 7 du fiscal,
 `PLAN-LOT-7-2026-11-24.md` §3) ; contrat et communs annoncés avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de
 C). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-031, STORY-325).
@@ -122,7 +122,7 @@ Sur une obligation **`CLOTUREE`**, **toute** route qui l'écrit répond **`409 O
 `…/montant`, `…/montant-declare`, `…/montant-paye`, `…/coherence`, `…/anomalies/{code}/levee`, et les trois écritures
 groupées `POST /obligations/reports`, `/obligations/affectation`, `/obligations/validations-client` (une seule obligation
 clôturée refuse le lot entier, tout ou rien). Ordre : la portée (404), le droit (403), puis la clôture, avant toute autre
-garde. Les codes rendus jusqu'ici dans ce cas (`TRANSITION_NON_PREVUE`, `MONTANT_DECLARE_NON_ENREGISTRABLE`,
+garde (le report et l'affectation refusaient déjà une close depuis 317 et 319, après l'écartée : inchangés). Les codes rendus jusqu'ici dans ce cas (`TRANSITION_NON_PREVUE`, `MONTANT_DECLARE_NON_ENREGISTRABLE`,
 `PAIEMENT_NON_ENREGISTRABLE`, `CALCUL_NON_ACTUALISABLE`, `BASES_NON_ACTUALISABLES`, `VALIDATION_CLIENT_TARDIVE`) cèdent la
 place à `OBLIGATION_CLOTUREE` ; les écritures qui passaient (désactivation, report, affectation, saisie, levée) refusent.
 **Les écritures du système** ne touchent plus une obligation clôturée : la re-dérivation (`…/derivation`, recalcul du paquet,
@@ -227,8 +227,34 @@ chaque route d'écriture en `409 OBLIGATION_CLOTUREE`) ; mutations sur la logiqu
 
 Voir D-325-13. Et : la lecture d'une version par la console (B) ; la purge (une version vit autant que l'obligation).
 
+## Livraison (2026-11-26)
+
+- **Dépôt** : `prospera-fiscal-service`, `MNV-325` → `dev` (#75, `7e2bff8`, sur `origin/dev` `060c85c`, aucune PR de D
+  fusionnée entre-temps). Fichiers : `domain/obligations/version-declaration.ts` (version, contenu et empreinte, clôture,
+  rectificative, retour, faits audités), `application/obligations/rectificatives-obligations.service.ts`, le scellement et
+  `revenir` dans `cycle-obligations.service.ts`, `droitsDuRetour` (`droits-du-cycle.ts`), la garde de clôture dans neuf
+  services, `ports/registre-versions-declaration.ts`, `adapters/mongo/{version-declaration.schema,
+  mongo-registre-versions-declaration,immuabilite-mongo}.ts`, le registre des obligations (scellement, rectificative,
+  retour, `NON_CLOTUREE`, la dérivation qui épargne une close), `modules/obligations/{rectificatives-obligations.controller,
+  dto/versions.dto}.ts`, `versionCourante` au DTO ; gardes `src/garde-versions-immuables.spec.ts` (AC-2) et
+  `modules/obligations/ecritures-des-obligations.spec.ts` (AC-3, liste fermée `test/utils/ecritures-des-obligations.ts`).
+- **Tel qu'annoncé** (#971) : aucune décision D-325-1 → 13 n'a changé ; aucun écart de contrat.
+- **Preuves** : Node 24 (étage `verification`, archive LF de `71ed333`) : unitaires 225/226 suites (1 sautée), 3248 tests ;
+  e2e 13/13, 308 ; conformité 25/25, 160 (MongoDB en jeu de répliques ; neuve : `test/versions.conformite-spec.ts`, 9
+  tests) ; `nest build` vert ; **mutations 30/30** en local (domaine, services, crochets, garde AST, e2e : chaque garde de
+  clôture retirée d'un service rougit l'e2e « sur une close ») et **11/11 sur MongoDB réel** (adaptateurs des obligations
+  et des versions) ; pile `grp-c` fiscal + balance (`origin/dev` 44be0c1) saine : les trois routes neuves montées et en
+  `401` sans jeton, index unique `version_de_l_obligation` posé au démarrage, aucune erreur d'injection, aucun redémarrage.
+  Verrou Docker pris une fois (11:30 → 11:39).
+- **Tests touchés** : `bases-obligations.service.spec.ts` et `calcul-obligations.service.spec.ts` (une close répond
+  désormais `OBLIGATION_CLOTUREE`, la précision annoncée) ; le registre en mémoire (versions, rectificative, retour, close) ;
+  le nettoyage de la conformité de 324 passe par la collection brute (le modèle refuse `deleteMany`). Aucun test de D.
+- **Une leçon** : le nettoyage d'un banc qui supprime par le modèle rougit dès que le schéma devient immuable ; nettoyer
+  par `modele.collection`.
+
 ## Progress Tracking
 
 | Date | Événement |
 |---|---|
-| 2026-11-26 | Fiche écrite, contrat et communs annoncés avant le code. |
+| 2026-11-26 | Fiche écrite, contrat et communs annoncés avant le code (PR de docs #971). |
+| 2026-11-26 | **DONE.** Code : fiscal #75 (`7e2bff8` sur `dev`). Preuves : voir « Livraison ». D prévenu (330). |

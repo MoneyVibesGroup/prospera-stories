@@ -1,7 +1,8 @@
 # STORY-1125 : L'archivage se mesure et se vend — compteurs par cabinet, quota de l'offre, relais de la console
 
-Status: in-progress — fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 7 de B,
-`coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, ligne 7 ; identifiant réservé D-L7B-1).
+Status: done — **livrée le 2026-11-26** : document-service **#39** (`5c50ca6` sur `dev`), BFF admin-panel **#45**
+(`959aeee`, `81817fe` sur `dev`) ; voir « Livraison ». Fiche écrite le 2026-11-26 par la session du groupe B juste avant de
+la coder (lot 7, n° 7 de B, `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, ligne 7 ; identifiant réservé D-L7B-1).
 
 **Services :** `document-service` (GitHub `prospera-ocr-service`, module `ged`), `admin-panel` (le BFF,
 `prospera-admin-panel-service`) · **Points :** 5 · **Dépend de :** STORY-1087 (quota du service, `volumeCabinet`),
@@ -109,6 +110,60 @@ Le BFF relaie le jeton de l'opérateur, **recopie champ par champ** (anti-fuite,
 Les refus de la GED traversent par leur statut, `MOIS_INVALIDE` et `PERIODE_INVALIDE` par leur code (D-1125-11). Variable
 neuve facultative **`DOCUMENT_SERVICE_URL`** (défaut `http://document-service:3006/api/v1`). OpenAPI des deux services à
 jour : A en génère les types. **B ne code aucun écran.**
+
+## Livraison (2026-11-26)
+
+- **Code, `document-service`** (`prospera-ocr-service`) **#39**, `5c50ca6` sur `dev` (un commit, arbre identique à `f742119`
+  poussé) : `src/modules/ged/archivage/` — `archivage.ts` (compteurs, mois UTC, quota appliqué et son état),
+  `depot-archivage.ts` (`DepotArchivage` : la mémoire applique les règles, MongoDB les rejoue en huit agrégations sur
+  `ged_fonds_cabinet`, `ged_versions`, `ged_boites` ; collection `ged_quotas_cabinet`), `archivage.service.ts`
+  (`ArchivageService`, `QuotasDesCabinets`, `exigerPermission`), `archivage.controller.ts` (surface `ged/plateforme`, DTO
+  OpenAPI) ; `JwtStrategy` projette `perms` ; `CabinetService.etatDuQuota` (et l'accusé de dépôt) et
+  `AlertesDeLArchiviste.quotas` lisent le quota du cabinet ; refus `MOIS_INVALIDE`, `PERMISSION_INSUFFISANTE` ; les trois
+  routes classées au recensement de STORY-695 (hors portée de dossier). Manifeste `ged` **inchangé** (1.9.0), aucune recopie.
+- **Code, BFF** (`prospera-admin-panel-service`) **#45**, `959aeee` puis `81817fe` sur `dev` (arbre identique à `dc06bb4`) :
+  `src/admin/archivage/` (deux contrôleurs, proxy, projection champ par champ, DTO), `DocumentServiceClient`,
+  `DOCUMENT_SERVICE_URL` ; le second commit garde l'ordre des champs de la GED dans la liste (relevé par la pile, D-1125-14).
+- **Preuves** :
+  - `document-service`, Node 25 : unitaires 1 379 passés (117 suites ; 3 rouges du poste, toutes en CRLF ou chemins Windows :
+    `ged.service.spec`, `piece-conservation.spec`, et `sources-des-manifestes.spec` qui lit le manifeste en CRLF — vertes en
+    Node 24) ; e2e **220/220** (+3) ; lint des fichiers touchés, `tsc`.
+  - Node 24 (étage `verification`, image depuis `git -c core.autocrlf=false archive f742119`) : **117/117 suites**, 1 384
+    passés ; e2e **220/220**.
+  - BFF, Node 25 : unitaires **740/740** (51 suites) ; e2e **307/307** (18 suites ; `admin-archivage.e2e-spec` neuf contre une
+    doublure HTTP de `document-service`, `openapi-contract` gardant les quatre schémas) ; lint, `tsc`, build.
+  - Mutations : `document-service` **21/21** rouges sur assertion (+ M9 rouge au compilateur, sa variante typée M9b tuée) —
+    fonds fermé, version détruite comptée, boîte restituée comptée, dernière cote, page devinée, borne du mois, dernier mois
+    exclu, dépassé à égalité, quota retiré gardé, perms absentes, tronqué à 1 000, 37 mois, offre non nettoyée, période par
+    défaut, lire avec la permission de poser, historique sans borne, alerte et dépôt sans le quota de l'offre, source figée,
+    perms non filtrées, schéma Mongo sans l'historique ; BFF **9/9**.
+  - **Pile `grp-b` neuve** (image depuis l'archive ; Mongo rs0, Kafka, Redis, MinIO Chainguard, doublure d'auth avec des
+    opérateurs à `perms`) et **le BFF construit (`dist/main.js`) démarré pour de vrai contre cette GED** : un fonds, quatre
+    pièces versées (3 + 2 + 5 + 0 pages), scellé, trois boîtes reçues, deux cotées, une restituée, deux pièces de 2015
+    détruites par la file, une pièce de plus non versée. Compteurs = ce que Mongo dit compté à la main : `fonds 1, ouverts 1,
+    pièces versées 4, pages 10, volume 9 241 octets` (les 5 094 octets des deux versions détruites hors du volume, leurs
+    pages restées versées), `boîtes cotées 1` (mois : 2, la restituée comprise) ; détail sur trois mois (deux à zéro) ; aucun
+    numéro de fonds, nom ni contenu (AC-3) ; GED : `403 PERMISSION_INSUFFISANTE` sans permission, pour un `TENANT_ADMIN` et
+    pour l'archiviste, `400 MOIS_INVALIDE` ; **BFF** : la liste et le détail relayés à l'identique, `PUT …/quota` (1 000
+    octets, « Essentiel 1 Ko ») écrit dans `ged_quotas_cabinet`, le cabinet le voit (`quotaSource: OFFRE`, sans l'offre),
+    le dépôt suivant passe (alerte seulement), un second cabinet au quota posé apparaît à zéro, `403` sans permission, `400
+    MOIS_INVALIDE` et `PERIODE_INVALIDE` relayés par leur code ; **alerte** : le passage du jour publie un
+    `ged.quota.depasse` (`quotaOctets` 1 000, schéma inchangé, `SENT`), le quota retiré réarme l'état sans fait ;
+    historique `[1000 « Essentiel 1 Ko », null]`. Aucune erreur au journal du service ni du BFF. Première passe 33/34 (la
+    comparaison de la liste au JSON brut : ordre des champs), seconde après `81817fe` **35/35**. Verrou 11:22 → 11:30, `down -v`.
+- **Recette de l'Atelier** non rejouée (D-1125-13) : le diff ne touche ni l'OCR, ni les extractions, ni le module commun ;
+  la `JwtStrategy` gagne `perms` sur `request.user` (lu par la seule GED) et les e2e de l'OCR et des extractions, qui montent
+  la vraie stratégie, sont vertes (Node 25 et 24).
+
+### Écarts au contrat, décidés au code
+
+- **D-1125-14 — La liste projetée par le BFF garde l'ordre des champs de la GED** (`tronque` avant `cabinets`) : la pile l'a
+  relevé ; le contenu ne changeait pas, la console lit désormais le même corps qu'à la source.
+- **D-1125-15 — `orgId` du BFF exigé en ObjectId** sur les routes de l'archivage (`OrgArchivageParamsDto`) : le paramètre
+  commun des installations accepte toute chaîne, que la GED refuserait de toute façon ; le refus se fait au bord.
+- **D-1125-16 — Les refus de la surface de la plateforme sont des `403` génériques** (`PERMISSION_INSUFFISANTE`, sans nommer la
+  permission), comme `kyc-service` (STORY-105), plutôt que le `404` de la surface de `paiement` : la GED n'a pas d'organisation
+  Money Vibes à cacher, et le BFF refuse déjà au bord.
 
 ## Critères d'acceptation
 

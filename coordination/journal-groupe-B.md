@@ -53,6 +53,8 @@
   | e | STORY-953 (suite) | le contrat de l'export C13 publié dans `contrats/instance/` (← D, STORY-1140 ; D-L7B-9) |
   | 6 | STORY-1124 | le circuit sans trou |
   | 7 | STORY-1125 | l'archivage se mesure et se vend |
+  | f | STORY-1119 (suite) | la nature « validation du client » et la référence d'une version (← C, STORY-324 ; D-L7B-10) |
+  | g | STORY-979 (5ᵉ suite) | recopies `paiement` 1.2.0 et `ged` 1.10.0 au catalogue (← D, STORY-1141 ; D-L7B-11) |
   | 8 | STORY-1126 | la recette des archives de bout en bout |
   | 9 | STORY-1127 | `referentiels` dans l'état publié |
   | 10 | STORY-1128 | le contrat d'état publié figé, inventaire d'EPIC-142 → 147 et 159 |
@@ -102,6 +104,25 @@
   chacun s'y rangera par une recopie à l'octet. **Suite de STORY-953** (plateforme #17, `5a50249` : la story qui a publié
   `contrats/instance/`, étiquette `contrats-instance-v1`) ; aucun identifiant neuf ; commits `MNV-953(plateforme): …` ;
   décisions D-953-10 → 15 dans sa fiche (« Suite du 2026-11-26 »).
+
+- **D-L7B-10 — ordre « f » : la demande de C placée après STORY-1125, avant STORY-1126** (26/11, session de groupe ;
+  §1.1) : « → B (2026-11-26, STORY-324) : la pièce de validation du client dans la GED (`document-service`) » (journal
+  de C, « Demandes aux autres groupes », `main` `8f7fb2c` ; fiche `STORY-324.md`, D-324-2, D-324-3 ; fiscal #74, `dev`
+  `060c85c`). Sans urgence (le défaut de C tient : rien n'est vérifié chez la GED), mais dans le dépôt que B tient, et
+  STORY-1125 l'occupait : elle passe dès sa fin, avant la recette des archives (1126), qui la rejouera. Deux gestes : une
+  nature `VALIDATION_CLIENT` au plan du cabinet (table `2026.2`) et la lecture des métadonnées d'une version par sa
+  référence (`GET …/ged/cabinet/pieces/{pieceId}/versions/{version}`, manifeste `ged` 1.10.0). **Suite de STORY-1119**
+  (document-service #33, `b7b3f91` : la story de B qui a donné aux archives leur valeur de preuve ; le plan de
+  classement vient de STORY-1087, de C) ; aucun identifiant neuf ; commits `MNV-1119(ged): …` ; décisions D-1119-19 → 26
+  dans sa fiche (« Suite du 2026-11-26 »). Recopie au catalogue avec « g » (D-1119-25).
+
+- **D-L7B-11 — ordre « g » : la demande de D placée après « f », avant STORY-1126** (26/11, session de groupe ; §1.1) :
+  « → B (2026-11-26, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue » (journal de D, « Demandes » ;
+  source `main` `6a5d3ab`, #967 ; code fusionné : paiement #126). Minuscule, sans Docker, dans le catalogue de B. Le même
+  geste que « a » : **cinquième suite de STORY-979** (la story des recopies de manifestes au catalogue : #71, #74, #75, #76) ;
+  aucun identifiant neuf ; commits `MNV-979(manifestes): …` ; décisions D-979-35 → 40 dans sa fiche
+  (« Cinquième suite (2026-11-26) »). La copie est entière : elle porte aussi `ged` 1.10.0 de « f » (D-1119-25). Sa PR
+  de docs finale ferme aussi la passation de `prospera-paiement-service` (prêtée à D pour STORY-1141, rendue le 26/11).
 
 - **Avancement** :
   - **a — troisième suite de STORY-979 (25/11) — faite** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
@@ -223,7 +244,71 @@
     sortie : une seule ; réception refusée par la base sans rien écrire ; RETIREE et GARDEE sur de vrais faits Kafka).
     Verrou 09:08 → 09:19, 09:22 → 09:25, gardé par le redémarrage du poste jusqu'à 09:39 (rendu à la reprise), puis
     10:04 → 10:07 (étage `verification`). Fiche D-1124-1 → 12. Rituel : aucune demande neuve à B chez A, C et D.
-  - **Suivante : STORY-1125** (n° 7 : l'archivage se mesure et se vend).
+  - **7 — STORY-1125 (26/11) — faite** : l'archivage se mesure et se vend. **document-service #39** (`5c50ca6` sur `dev`) ;
+    **BFF #45** (`959aeee`, `81817fe` sur `dev`) ; contrat annoncé avant le code (stories #969, `33ef00e`). Surface de la
+    plateforme de la GED (`GET …/ged/plateforme/archivage`, `GET …/cabinets/{org}/archivage` : `org:read` ; `PUT
+    …/cabinets/{org}/quota` : `entitlement:grant` ; `perms` du jeton projeté par la `JwtStrategy`) ; compteurs calculés à la
+    lecture (fonds, pièces et pages versées, volume hors versions détruites, boîtes cotées non restituées ; total et mois
+    UTC), aucune donnée de pièce ; quota de l'offre posé par Money Vibes (`ged_quotas_cabinet`), sinon celui du service ; le
+    cabinet (`quotaSource`) et le passage des alertes le lisent (`ged.quota.depasse` inchangé) ; relais du BFF (AP-51). Aucun
+    droit ni fait neufs, manifeste `ged` inchangé (aucune recopie). Node 25 : unitaires 1 379, e2e 220/220 ; BFF 740/740,
+    307/307 ; Node 24 : 117/117 suites, 220/220 ; mutations 21/21 (+1 au compilateur) et 9/9 ; pile `grp-b` neuve avec le
+    BFF construit appelé pour de vrai, 35/35. Verrou 11:22 → 11:30. Fiche D-1125-1 → 16. Q-SC-5 (valeur et prix de l'offre)
+    reste à l'utilisateur. Rituel : aucune demande neuve à B chez A, C et D.
+  - **f — suite de STORY-1119 (26/11, D-L7B-10) — faite** : la validation du client et la référence d'une version (← C,
+    STORY-324, servie). **document-service #40** (`5d060aa` sur `dev`) ; contrat annoncé avant la fusion (stories #976,
+    `10d9d6e`). Plan de classement du cabinet **2026.2** : `VALIDATION_CLIENT` (annuel, fiscal, non sensible, 10 ans après
+    la fin de l'exercice), servie à tous les fonds, ouverts avant ou après (le plan est servi par cabinet, jamais figé par
+    fonds) ; un code déjà pris par un cabinet reste le sien. **`GET …/ged/cabinet/pieces/{pieceId}/versions/{version}`** :
+    empreinte au format de `ged.piece.recue`, taille, nature, dossier, état (`CONSERVEE` | `DETRUITE` | `RETIREE`) ; jamais
+    le contenu, le nom du fichier ni l'index ; garde de la pièce. Manifeste `ged` 1.10.0, recopié au catalogue avec « g »
+    (copie entière, D-1119-25). Node 25 : unitaires 1 390 (2 suites rouges connues du poste), e2e 222/222 ; mutations
+    12/12. Sans Docker, verrou non pris ; recette de l'Atelier non rejouée (ni OCR, ni extractions, ni module commun :
+    D-1119-26). Fiche D-1119-19 → 26.
+  - **g — cinquième suite de STORY-979 (26/11, D-L7B-11) — faite** : `paiement` 1.2.0 recopié au catalogue depuis
+    `prospera-stories@59ed625` (← D, STORY-1141, servie ; code fusionné : paiement #126, `64b5838`) ; `ged` 1.10.0 de
+    « f » entraîné par la copie entière (D-1119-25, D-979-36) ; **catalogue #83** (`ce8cbc0` sur `dev`) ; contrat annoncé
+    avant la fusion (stories #980, `59ed625`). `manifestes:garde` verte (48) contre `main` ; catalogue 69/69 par chemin,
+    complète 1 630 passés (3 suites rouges connues) ; 3/3 mutations. Sans Docker, verrou non pris. Fiche D-979-35 → 40.
+    Passation de `prospera-paiement-service` (STORY-1141) refermée : rendu le 26/11 (« Passations »).
+  - **8 — STORY-1126 (26/11) — faite** : la recette des archives de bout en bout. **prospera-recette #34** (`585d8bd`,
+    `9a7749a`, `3ca9907` sur `dev`) ; défaut révélé corrigé à part : **document-service #41** (`5261720`, `57f9581`) ; contrat
+    annoncé avant la fusion (stories #982, `30a833b`). `recette/archives.recette.ts` (13 tests) : la console ouvre `ged` par le
+    BFF ; l'archiviste reçoit 40 boîtes, les cote (étiquettes), les numérise dans leur lot (vrai PDF à couche texte lu par la
+    GED, contrôlé, relié à son original), verse et scelle (attestation) ; **la facture de 2019 en deux gestes** (D-1126-8 :
+    recherche du fournisseur dans l'exercice, avec la cote de l'original ; la copie) ; par le mois, par le texte lu (jamais
+    celui d'une nature sensible) ; la référence d'une version (« f ») ; sortie et retour ; récolement ; la console compte par
+    le BFF et pose le quota ; restitution des 40 boîtes, fermeture, export, `BRN-` ; journal intact. Le profil pose sur
+    `document-service` l'espace, `AUTH_SERVICE_URL` et `GED_CLE_CABINET` (tirée par le paquet dans `.recette/`). **Défaut** :
+    la GED relisait `GET /moi/droits` à chaque requête, auth limitait son adresse, 503 `DROITS_INDISPONIBLES` à la cinquième
+    boîte → cache des droits 60 s par jeton (D-1126-11) ; et le recensement STORY-695 complété (la route de « f » y manquait,
+    e2e rouge sur `dev`). Recette 175/175, mutations 10/10 ; GED Node 25 1 396, e2e 222/222, mutations 8/8, Node 24 117/117
+    suites, 222/222 ; pile `grp-b-recette` neuve depuis `origin/dev` : **13/13** (numérisation des 40 boîtes 81 s, recherche et
+    copie 126 ms). Verrou 12:48 → 13:02, 13:23 → 13:35, 13:44 → 13:49. Fiche D-1126-1 → 13. **La partie archives du lot 7 est
+    finie.** Rituel : aucune demande neuve à B chez A, C et D.
+  - **9 — STORY-1127 (26/11) — faite** : les référentiels habilités dans l'état publié. **catalogue #84** (`efedd3e` sur
+    `dev`), étiquette **`contrat-etat-publie-v1.1`** ; contrat annoncé avant le code (stories #992, `650024d`).
+    `module.referentiels` (la liste du droit, forme de `entitlement.changed` v2, `artifactUri` et `checksum` pour les modules
+    fiscaux ; omise hors installation, jamais vide) à la route, à la console (1080) et dans `etat-publie.changed@1` ; l'émetteur
+    republie sur un changement de liste (et une fois au premier démarrage, pour les droits qui en portent) ; OpenAPI 1.1.0 ;
+    manifeste `instance` 1.1.0 recopié. BFF et plateforme inchangés (D-1127-8, 9). Node 25 : 1 657 passés (3 rouges
+    connues) ; mutations 14/14 ; Node 24 : 104/104 suites, 1 676 ; pile `grp-b` neuve : Karapace v1 → neuf BACKWARD, test:schemas
+    6/6, test:socle 19/19, catalogue construit (n° 5 republié, n° 1 fiscal avec intégrité, n° 6 sur changement, second
+    démarrage muet ; route et console). Verrou 14:29 → 14:43, 14:51 → 14:52. Fiche D-1127-1 → 13. **→ C et D** prévenus
+    (message ; D tient `assurance`). Date dure tenue (fusion le 26/11, D-L7B-5). Rituel : aucune demande neuve à B chez A, C et D.
+  - **10 — STORY-1128 (26/11) — faite** : le contrat d'état publié figé. **catalogue #85** (`2a19265`, `e35d6a0` sur `dev`) ;
+    **plateforme #42** (`758568e`, étiquette **`contrat-etat-publie-v1.1`**) ; contrat annoncé avant le code (stories #1000,
+    `6742cfb`). Un octet = une version : `contrat/historique/etat-publie/` (versions, photos 1.0.0 et 1.1.0, empreinte
+    canonique) et la garde du gel (changement non versionné, ajouts seuls dans une majeure, matrice figée dans la majeure 1) ;
+    Karapace `BACKWARD_TRANSITIVE` sur `etat-publie.changed.*` ; la copie publiée dans `prospera-plateforme/contrats/etat-publie/`,
+    la garde partagée rejouée contre elle sans se sauter ; l'émetteur republie sur `versionCode` (D-1127-10 refermée). Aucun
+    octet du contrat ne change (1.1.0). Node 25 : 1 699 passés (3 rouges connues), plateforme 674/674 ; mutations 18/18 ; Node 24 :
+    105/105 suites, 1 719 ; pile `grp-b` neuve : test:schemas 9/9, test:socle 20/20, compatibilité transitive verte. Verrou
+    20:38 → 20:44. Fiche D-1128-1 → 15, et **l'inventaire d'EPIC-142 → 147 et 159** (livré, story, SHA, reste, à qui ; ce qui
+    reste avant de retirer `entitlement.changed`) pour STORY-1131. Date dure tenue (fusion le 26/11, D-L7B-5). Deux coupures
+    du réseau pendant la story (reprises par la session de groupe). Rituel : aucune demande neuve à B chez A, C et D.
+  - **Suivante : STORY-1129** (n° 11 : le cabinet sur le moteur ; le 18/12 ; `conseil` dans `INSTALLATION_SERVICES`, FR-6 de
+    `cabinet-moteur` sur `declarations`, recettes rejouées, D-100-4).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
     `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
@@ -1065,7 +1150,23 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Passations
 
-- **Prêté le 2026-11-26 à D, pour STORY-1141 seule : `prospera-paiement-service`** (demande de D, journal de D,
+- **Rendu le 2026-11-26 par D, fin de STORY-1141 : `prospera-paiement-service`** (journal de D, « ← B : passation de
+  `prospera-paiement-service` (1141) — rendu à B », prospera-stories #973, `main` `9a37c3e`). Constaté le 26/11 (ordre
+  « g ») : `origin/dev` = **`64b5838`** (MNV-1141, #126 : `f6a4800`, `64b5838`), le SHA nommé par D ; **aucune PR de D
+  ouverte** (`gh pr list --state open` : vide) ; checkout du poste sur `dev`, à jour, propre. B le tient de nouveau ; le
+  prêt ci-dessous est clos.
+  - **Ce qui a changé** (D, information) : `numeroImprimable` facultatif à la déclaration d'un compte d'encaissement ;
+    deux routes `PUT …/comptes-encaissement/{compteId}/numero-imprimable` (celle de l'organisation et celle de la
+    surface déléguée) ; un acte neuf `COMPTE_ENCAISSEMENT_NUMERO_IMPRIMABLE_DECLARE` (avec sa phrase de signalement) ;
+    `paiement.compte.changed@1` gagne `numeroImprimable` (facultatif, Karapace BACKWARD) ; manifeste 1.2.0 (recopié au
+    catalogue : « g », #83).
+  - **Deux suites e2e déjà rouges sur `e2be149`, à reprendre par STORY-1136** (n° 18, le consommateur de
+    `facturation.avoir.emis@1`, la prochaine story de B dans ce dépôt) : `health` — `admin.listTopics` manque au double
+    de Kafka (**MNV-957**) ; `notifications-webhook` — `EtatsDeCreance` manque au module de test (**MNV-965** ; la suite
+    compile de nouveau depuis `publier` à deux arguments). À joindre au prompt de STORY-1136.
+
+- **Prêté le 2026-11-26 à D, pour STORY-1141 seule : `prospera-paiement-service`** — **rendu le 26/11, clos** (entrée
+  ci-dessus) — (demande de D, journal de D,
   « → B : passation de `prospera-paiement-service` limitée à STORY-1141 » ; lot 7 de D, plan §4 bis, #934 ; Q-D-15,
   le numéro de compte imprimable). Le prêt **commence quand D ouvre STORY-1141** (sa quatrième story, après 1138 →
   1140) et finit par une ligne de D dans son journal (« rendu »). Pendant ce temps, B n'écrit pas dans ce dépôt : la
@@ -1216,6 +1317,21 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-26, STORY-1128) : relire `contrat-etat-publie-v1.1`, et brancher la doublure de la coque sur la copie
+  publiée** — **information, non bloquante.** Le seul écart à la v1 que A a relue est `module.referentiels` (facultatif,
+  STORY-1127). Le contrat est figé (un octet = une version, règle dans le README du catalogue). La coque (AD-23) et l'app du
+  cabinet (EPIC-159, types générés) peuvent épingler `prospera-plateforme/contrats/etat-publie/` à l'étiquette
+  `contrat-etat-publie-v1.1`. Inventaire : `stories/STORY-1128.md`, « Inventaire ».
+- **→ C et D (2026-11-26, STORY-1128) : ce qui reste avant de retirer `entitlement.changed`** — **information.** Relevé du
+  26/11 (`stories/STORY-1128.md`, « Ce qui reste avant de retirer `entitlement.changed` ») : chez **C**, `balance-service` et le
+  fiscal (avec D) lisent encore `config` et `referentiels` dans `entitlement.changed` ; chez **D**, `bilan`, `assurance`
+  (`config`, `referentiels` : la liste est servie depuis STORY-1127), `notification`, et les six services du socle
+  `etat-des-modules` (ventes, terrain, recouvrement, pilotage, croissance, assureur-fictif), qui ne lisent **pas encore**
+  l'état publié. `config` n'existe pas dans l'état publié : `module.interrupteurs` (au contrat, toujours vide) doit d'abord
+  être tenu par B (STORY-1131 ou 1135). Aucun retrait n'est demandé avant ; chacun bascule à sa semaine, double lecture d'abord.
+  **→ D** aussi : `assurance`, `liaison-assureur` et `sinistres` gardent une copie de `garde-etat-publie` **sans test de
+  copie** (les autres services en ont un : empreinte de `ORIGINE.json`, et le voisin `prospera-plateforme`).
+
 - **→ C (2026-11-26, STORY-1124) : publier `comptabilite.facture.desinscrite` v1 à l'abandon d'un brouillard né d'une
   facture inscrite** (`prospera-comptabilite-service`) — **acceptée par C le 26/11, placée dans sa STORY-338, schéma repris
   tel quel** (la GED est prête sur `dev` depuis document-service #38, `b18d3ad` ; à la fusion de C, B recopie son octet).
@@ -1266,6 +1382,13 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   la boîte par leurs numéros. **Choix par défaut de B** : les alertes se lisent dans l'application (`GET …/sorties?enRetard=true`,
   `GET …/pieces-echues`, `GET …/quota`, les campagnes, les destructions) ; aucun message ne part tant que `notification` ne
   consomme pas ces topics.
+- **→ A (2026-11-26) : AP-51 — la console voit l'archivage de chaque cabinet, débloquée par STORY-1125** (BFF #45,
+  `81817fe` sur `dev` ; document-service #39, `5c50ca6`) : `GET /api/v1/admin/archivage?mois=AAAA-MM` et `GET
+  /api/v1/admin/orgs/{orgId}/archivage?du=&au=` (`org:read`), `PUT /api/v1/admin/orgs/{orgId}/archivage/quota` (corps `{
+  quotaOctets: entier ≥ 1 | null, offre? }`, `entitlement:grant`). Des compteurs seulement (fonds, ouverts, fermés,
+  pièces et pages versées, volume, boîtes cotées ; total et mois) et le bloc `quota` (`source` `OFFRE` | `SERVICE`,
+  `depasse`, `utilisationPourcent`) ; refus `400 MOIS_INVALIDE`, `400 PERIODE_INVALIDE`, `403`, `503`. Prouvé par un appel
+  réel au BFF construit contre la GED d'une pile (fiche, « Livraison »). Types depuis l'OpenAPI vivant ; l'écran est au lot 8.
 - **→ A (2026-11-26) : FE-143 — les pièces échues de tout le cabinet sont servies par STORY-1123** (document-service
   #37, `7e65881` sur `dev`) : `GET /api/v1/ged/cabinet/pieces-echues?horizonJours=&curseur=&limite=`
   (`ged:fonds:gerer`) → `PiecesEchuesDuCabinetDestructionDto` (lignes de la liste d'un fonds plus `echue`, `fondsNumero`,
@@ -1696,6 +1819,36 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ D (26/11, cinquième suite de STORY-979) : servie par catalogue #83** (`ce8cbc0` sur `dev` ; annonce : stories #980)
+  — votre demande « → B (2026-11-26, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue » : `copies.json`
+  depuis `prospera-stories@59ed625` (votre source de `6a5d3ab`, sha256 `d247fcc9…bdca9`, inchangée), après la fusion de
+  votre code (#126) ; `paiement` 1.1.0 → **1.2.0** ; `PUT …/numero-imprimable` hors `routesLectureSeule` ; faits, droits
+  et routes de lecture inchangés, auth inchangé. La copie entière porte aussi `ged` 1.10.0 (« f », de B). Un catalogue
+  déjà semé la reçoit à son prochain démarrage. La note « manifeste paiement 1.1.0 » de
+  `prospera-plateforme/contrats/distributeur/catalogue-faits.json` reste à vous (votre dossier ; aucune garde ne la lit).
+  Votre ligne peut passer à « servie ».
+- **← D (26/11, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue** — **reçue, placée par la session de
+  groupe en ordre « g »** (D-L7B-11, cinquième suite de STORY-979). **Servie le 26/11 par catalogue #83** (`ce8cbc0` sur
+  `dev`) ; voir « → D (26/11, cinquième suite de STORY-979) » ci-dessus.
+- **→ C (26/11, suite de STORY-1119) : servie par document-service #40** (`5d060aa` sur `dev` ; annonce : stories #976)
+  — votre demande « → B (2026-11-26, STORY-324) : la pièce de validation du client dans la GED ».
+  - **(1) La nature** : `VALIDATION_CLIENT` « Validation du client » au plan du cabinet `2026.2` (`ANNUEL` / `FISCAL`,
+    exercice exigé, non sensible, 10 ans après la fin de l'exercice), servie à **tous** les fonds, ceux déjà ouverts
+    compris. Un cabinet qui l'avait créée lui-même par `POST …/natures` garde la sienne (sa rubrique, sa sensibilité, sa
+    conservation) ; sous un autre code, sa nature reste aussi. Déposer : `POST /api/v1/ged/cabinet/pieces` avec `nature:
+    VALIDATION_CLIENT` et `exercice`.
+  - **(2) La lecture** : `GET /api/v1/ged/cabinet/pieces/{gedPieceId}/versions/{gedVersion}`, au jeton du membre
+    (`ged:piece:consulter`, portée du dossier) → `{ pieceId, version, versionCourante, courante, empreinte, taille,
+    typeContenu, nature, dossierId, fondsNumero, deposeLe, etatAntivirus, etat, destruction?, desinscription? }`.
+    `empreinte` : 64 hexadécimaux minuscules, le format de `ged.piece.recue` (comparez à votre `sha256:<hex>` sans le
+    préfixe). Jamais le contenu, le texte lu, le nom du fichier ni l'index. Une pièce **détruite** (destruction visée et
+    accordée) ou **retirée** (écriture désinscrite) se lit encore : `200`, `etat: DETRUITE` avec `{ numero, le,
+    procesVerbal }`, ou `RETIREE` avec `{ ecritureId, le }` ; l'empreinte reste. `404 PIECE_INCONNUE` pour une pièce
+    inconnue, hors portée, d'un autre cabinet ou d'une nature sensible sans `ged:sensible:consulter` ; `404
+    VERSION_INCONNUE`. Décisions : fiche `STORY-1119.md`, D-1119-19 → 26. Votre ligne peut passer à « servie ».
+- **← C (26/11, STORY-324) : la nature « validation du client » et la lecture d'une version par sa référence** —
+  **reçue, placée par la session de groupe en ordre « f »** (D-L7B-10, suite de STORY-1119). **Servie le 26/11 par
+  document-service #40** (`5d060aa` sur `dev`) ; voir « → C (26/11, suite de STORY-1119) » ci-dessus.
 - **→ D (26/11, suite de STORY-953) : servie par plateforme #41** (`d68a468` sur `dev`, étiquette
   **`contrats-instance-v1.1`**) — votre demande « → B (2026-11-26, STORY-1140) : publier le contrat de l'export C13 en CSV
   dans `prospera-plateforme/contrats/instance/` ». Chemins : `contrats/instance/export-c13-reponse.schema.json`
@@ -2001,8 +2154,10 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   `manifestes:copier` depuis `prospera-stories@51f4803`, `manifestes:garde` verte (47). Les quatre sont recopiés **à
   leur version 1.0.0** : voir « → C » (D-972-3).
 
-- **← C (2026-11-17, STORY-1006) : les référentiels habilités dans l'état publié ?** — **lue, prise en charge, pas
-  encore servie.** Le choix par défaut de C convient : garder `entitlement.changed` pour le seul champ `referentiels`
+- **← C (2026-11-17, STORY-1006) : les référentiels habilités dans l'état publié ?** — **servie par STORY-1127** (catalogue
+  #84, `dev` `efedd3e`, étiquette `contrat-etat-publie-v1.1` ; annonce : stories #992) : `module.referentiels`, la liste de
+  `entitlement.changed` v2, à la route et dans `etat-publie.changed@1`. C et D (qui tient `assurance` depuis le lot 6)
+  prévenus par message le 26/11. Historique : **lue, prise en charge.** Le choix par défaut de C convient : garder `entitlement.changed` pour le seul champ `referentiels`
   (D-1006-5). Le contrat d'état publié est figé (`contrat-etat-publie-v1`, ajouts facultatifs seuls, BACKWARD) : un
   champ facultatif `referentiels` y entrera par une story de B au catalogue, à placer comme remplaçante du lot 3 ou au
   lot suivant. Elle sera annoncée ici avant sa fusion ; C basculera alors. **Toujours ouverte après STORY-972**
@@ -2070,6 +2225,126 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-26, STORY-1129 — le cabinet sur le moteur : le `PUT` d'octroi n'installe plus ce que le moteur sait
+  installer, annoncé AVANT le code** (`platform-catalog-service`, `admin-panel`, `prospera-recette`, branches `MNV-1129` ;
+  fiche `stories/STORY-1129.md`, D-1129-1 → 10). Lu par la console (**A**, panneau des droits d'AP-05, qui appelle le
+  catalogue directement) et par qui installe dans une recette (**C**, **D**). (1) **Catalogue**, `PUT
+  /api/v1/catalog/entitlements/{orgId}/{moduleCode}` : refus neuf **409 `INSTALLATION_PAR_LE_MOTEUR`** (`{ statusCode, error,
+  message, code, module }`) quand le corps demande `ACTIVE` (ou omet `status`) pour un module **pas installé** que le moteur
+  sait vérifier (son manifeste ne déclare aucune vérification, ou `INSTALLATION_SERVICES` lui donne une adresse) ; rien
+  n'est écrit. Sanction, levée, réécriture d'un module installé, et l'installation transitoire d'un module sans adresse
+  (plan `CONSOLE_PUT`, vérifications différées) : **inchangées**. (2) **BFF**, `PUT
+  /api/v1/admin/orgs/{orgId}/entitlements/{moduleCode}` (toujours `deprecated`) : ses 404, 409, 422 portant un code du
+  moteur gardent ce code et `details` (`modules`, `refus`, `planId`), comme `…/installations` ; `CODES_DU_MOTEUR` gagne
+  `INSTALLATION_PAR_LE_MOTEUR`. OpenAPI du catalogue et du BFF : descriptions et réponse 409. (3) **Réglage** :
+  `INSTALLATION_SERVICES` de la pile de recette et de `.env.essai.example` gagne `conseil=http://balance-service:3007`.
+  (4) **Recettes** : `balance`, `bilan`, `comptabilite`, `conseil` s'installent par l'offre et `POST /installations`
+  (aide `installerParLeMoteur`, `src/moteur.ts`) ; FR-6 de `cabinet-moteur` sur `declarations`. **Inchangés** :
+  `entitlement.changed`, l'état publié, `POST /installations`, l'offre, `DELETE`, auth, manifestes. **→ A** : ajouter
+  `INSTALLATION_PAR_LE_MOTEUR` à `GRANT_REFUSAL_CODES` (sinon phrase générique, rien ne casse) ; types à régénérer si le
+  409 du BFF est lu. **→ C, D** : une recette qui installe ces quatre modules par le `PUT` passe par l'aide ; vos services
+  ne sont pas touchés.
+
+- **2026-11-26, STORY-1128 — LIVRÉ** (catalogue #85, `2a19265`, `e35d6a0` sur `dev` ; plateforme #42, `758568e`, étiquette
+  **`contrat-etat-publie-v1.1`** dans la plateforme) : conforme à l'annonce ci-dessous, sans écart. Karapace : les sujets de
+  l'état publié en `BACKWARD_TRANSITIVE`. **→ A, C, D** : rien à faire ; une copie de l'état publié s'épingle désormais sur
+  `prospera-plateforme/contrats/etat-publie/` (`ORIGINE.json`) ; tout ajout futur = une version neuve, annoncée ici.
+
+- **2026-11-26, STORY-1128 — le contrat d'état publié figé, annoncé AVANT le code** (`platform-catalog-service` et
+  `prospera-plateforme`, branches `MNV-1128` ; fiche `stories/STORY-1128.md`, D-1128-1 → 12). Lu par tous les consommateurs
+  de l'état publié (coque et app du cabinet de **A**, gardes des modules de **C** et **D**). **Aucun octet du contrat ne
+  change** : la version figée est **1.1.0** (`contrat-etat-publie-v1.1`, `efedd3e`). Ce qui change : (1) **un octet = une
+  version** : `contrat/historique/etat-publie/versions.json` et la photo de chaque version ; la garde du gel rougit sur tout
+  changement non versionné des trois fichiers (OpenAPI, matrice, schéma de l'événement), et sur une version qui n'est pas un
+  ajout seul (rien ne disparaît ni ne change de type, de borne ou de motif ; `required` et `enum` identiques ; un champ neuf
+  jamais exigé) ; **la matrice est figée pour la majeure 1** (une cellule changée = `versionMatrice` 2, contrat 2.0.0,
+  événement `@2`) ; (2) Karapace : `etat-publie.changed.essai-value` et `.reel-value` en **`BACKWARD_TRANSITIVE`** ; (3)
+  **`prospera-plateforme/contrats/etat-publie/`** : la copie à l'étiquette, `ORIGINE.json`, étiquette
+  `contrat-etat-publie-v1.1` dans la plateforme ; la garde partagée (`garde-etat-publie-v1`) y est rejouée, **son fichier
+  ne change pas** (les douze copies restent vraies) ; (4) **comportement** : l'émetteur republie sur une montée de
+  `versionCode` seule (D-1127-10) ; au premier démarrage du catalogue livré, chaque module installé qui porte une version
+  est republié **une fois** (`numero` + 1, même état). **Inchangés** : route, événement, topics, `entitlement.changed`, BFF,
+  auth, manifestes. **→ A, C, D** : rien à faire ; tout ajout futur demande une version neuve annoncée ici.
+
+- **2026-11-26, STORY-1127 — LIVRÉ** (catalogue #84, `efedd3e` sur `dev` ; étiquette **`contrat-etat-publie-v1.1`**) :
+  conforme à l'annonce ci-dessous, sans écart. Karapace : la v1 → le neuf **compatible BACKWARD**, enregistré sur les deux
+  sujets. **→ C et D** : `module.referentiels` est servi ; `assurance` peut retirer son consommateur de
+  `entitlement.changed` (D-1006-5). **→ A** : rien à régénérer côté BFF.
+
+- **2026-11-26, STORY-1127 — les référentiels habilités dans l'état publié, annoncé AVANT la fusion**
+  (`platform-catalog-service`, branche `MNV-1127` ; fiche `stories/STORY-1127.md`, D-1127-1 → 11). Lu par tous les
+  consommateurs de l'état publié (coque, app du cabinet, gardes des modules) et d'abord par **C et D** (`assurance`, D-1006-5 ;
+  le fiscal et balance pour EPIC-159). **Un ajout facultatif seul**, au modèle fermé `module`, à la route
+  (`GET /api/v1/etat-publie/{organisationId}`, `ModuleEtatPublie` ; la lecture de la console de 1080 aussi) et à
+  l'événement (`etat-publie.changed.essai@1`, `.reel@1`), même définition des deux côtés : **`module.referentiels`** =
+  `[{ code, version, artifactUri?, checksum? }]` (`minItems: 1` ; `checksum` = `sha256:<64 hexa>`), **la liste du droit,
+  celle de `entitlement.changed` v2**, même ordre ; `artifactUri` et `checksum` pour `fiscalite` et `declarations`
+  seulement. Présente quand le droit en porte et que le module est installé (comme `versionCode` : jamais en `NON_INSTALLE`
+  ni `EN_INSTALLATION`) ; omise sinon, **jamais vide** ; elle **n'ouvre rien** (seul `etat` ouvre). Un changement de la liste
+  seule publie un état neuf (`numero` suivant) ; au premier démarrage du catalogue livré, chaque module dont le droit porte
+  des référentiels est republié une fois. `schemaVersion` 1, `schemaEtatPublie` 1, topics inchangés (BACKWARD, prouvé sur
+  Karapace) ; `contrat/etat-publie.openapi.json` 1.0.0 → **1.1.0**, étiquette **`contrat-etat-publie-v1.1`** (la v1 reste) ;
+  manifeste `instance` 1.0.0 → **1.1.0** (`publie` inchangé), recopié dans `copies.json`. **Inchangés** : `entitlement.changed`,
+  la matrice, la garde partagée, le BFF (la console lit les référentiels par AP-10, D-1127-8), `prospera-plateforme`, auth.
+  **→ A** : rien à régénérer côté BFF ; la coque peut lire le champ en lecteur tolérant.
+
+- **2026-11-26, STORY-1126 — LIVRÉ** (prospera-recette #34, `585d8bd` sur `dev`) : conforme à l'annonce ci-dessous, sans écart.
+  **En plus, un comportement de `document-service` (#41, `5261720`), sans contrat** : la GED garde les droits d'un membre
+  **60 s par jeton** (`GET /moi/droits` lu une fois par minute au plus) ; un droit retiré chez auth se voit dans la GED en
+  une minute au plus (comme dans la comptabilité). Aucune route, aucun fait, aucune variable. **→ A** : rien à régénérer.
+
+- **2026-11-26, STORY-1126 — la GED du cabinet dans le profil de recette, annoncé AVANT la fusion** (`prospera-recette`,
+  branche `MNV-1126` ; fiche `stories/STORY-1126.md`, D-1126-1 → 10). Lu par tous ceux qui lèvent la pile de recette (A, C,
+  D). **Ajouts seuls**, des réglages : `document-service` reçoit `INSTANCE_ESPACE: ${RECETTE_ESPACE:-REEL}`,
+  `AUTH_SERVICE_URL: http://auth-service:3001/api/v1` et `GED_CLE_CABINET: ${RECETTE_GED_CLE_CABINET:-}` ; le paquet tire la
+  clé une fois dans `.recette/cle-ged-cabinet.b64` (non versionné) et la passe à chaque `docker compose` qu'il lance (comme
+  la clé de signature commune, D-1115-3) ; un compose lancé à la main garde la GED du cabinet fermée (503). Recette neuve :
+  `npm run recette -- archives` (lève `dossier-service`, `document-service`, `admin-panel` à la demande). Aucune autre
+  recette ne change ; aucune route, aucun fait ni droit d'un service (un défaut révélé par la recette sera annoncé à part).
+
+- **2026-11-26, cinquième suite de STORY-979 — LIVRÉ** (catalogue #83, `ce8cbc0` sur `dev`) : conforme à l'annonce
+  ci-dessous, sans écart. `copies.json` depuis `prospera-stories@59ed625` : `paiement` 1.2.0 et `ged` 1.10.0 ; aucun
+  autre manifeste. **→ A** : rien à régénérer (aucune OpenAPI du catalogue ni du BFF ne change).
+- **2026-11-26, cinquième suite de STORY-979 (ordre « g », D-L7B-11) — deux manifestes recopiés au catalogue, annoncé
+  AVANT la fusion** (`platform-catalog-service`, branche `MNV-979-manifestes-paiement-ged` ; fiche `stories/STORY-979.md`,
+  « Cinquième suite (2026-11-26) », D-979-35 → 40). `copies.json` depuis `main` (copie entière) : **`paiement` 1.1.0 →
+  1.2.0** (← D, STORY-1141 : `paiement.compte.changed@1` gagne `numeroImprimable` facultatif ; `PUT
+  /api/v1/comptes-encaissement/{compteId}/numero-imprimable` hors lecture seule) et **`ged` 1.9.0 → 1.10.0** (« f » :
+  `GET /api/v1/ged/cabinet/pieces/{pieceId}/versions/{version}` en `routesLectureSeule`). Aucun autre manifeste, aucun
+  droit (auth inchangé), aucune route ni aucun topic du catalogue ne change ; une base déjà semée reçoit les deux versions
+  à son prochain démarrage.
+
+- **2026-11-26, suite de STORY-1119 — LIVRÉ** (document-service #40, `5d060aa` sur `dev`) : conforme à l'annonce
+  ci-dessous, sans écart. Manifeste `ged` 1.10.0 dans le service (`prospera-stories@10d9d6e`, sha256 `0a0f6826…acbb0`) ;
+  au catalogue avec « g ». **→ C** : la route est servie (voir « Réponses »). **→ A** : `MetadonneesDeVersionDto`,
+  `DestructionDUneVersionDto`, `DesinscriptionDUneVersionDto` dans l'OpenAPI vivant de `document-service` (tag
+  `ged-cabinet`) ; `GET …/natures` rend `version: "2026.2"`.
+- **2026-11-26, suite de STORY-1119 (ordre « f », D-L7B-10) — la validation du client et la référence d'une version,
+  annoncé AVANT la fusion** (`document-service`, GitHub `prospera-ocr-service`, branche `MNV-1119-reference` ; fiche
+  `stories/STORY-1119.md`, « Suite du 2026-11-26 », D-1119-19 → 26). Demandé par C (STORY-324). **Ajouts seuls** ; aucun
+  droit neuf (auth inchangé), aucun fait neuf ni changé, aucune collection ni variable.
+  - **Plan de classement du cabinet `2026.2`** (`GET …/ged/cabinet/natures` : `version: "2026.2"`) : 2026.1 et une nature
+    **`VALIDATION_CLIENT`** « Validation du client » — `ANNUEL` / `FISCAL` (exercice exigé), non sensible, 10 ans après la
+    fin de l'exercice ; servie à tous les fonds, ouverts avant ou après. Un cabinet qui l'avait déjà créée garde la sienne.
+  - **Route neuve `GET /api/v1/ged/cabinet/pieces/{pieceId}/versions/{version}`** (jeton du membre, `ged:piece:consulter`,
+    portée du dossier) → `MetadonneesDeVersionDto` `{ pieceId, version, versionCourante, courante, empreinte, taille,
+    typeContenu, nature, dossierId, fondsNumero, deposeLe, etatAntivirus, etat: CONSERVEE | DETRUITE | RETIREE,
+    destruction?: { numero, le, procesVerbal }, desinscription?: { ecritureId, le } }` ; `empreinte` = SHA-256 du clair,
+    64 hexadécimaux minuscules (format de `ged.piece.recue`). ⛔ Ni contenu, ni texte lu, ni nom de fichier, ni index.
+    Refus : `403 DROIT_INSUFFISANT`, `403 GED_NOT_ENTITLED`, `404 PIECE_INCONNUE` (hors portée, autre cabinet, sensible
+    sans son droit compris), `404 VERSION_INCONNUE`, `400`. Une pièce détruite (1121) ou retirée (1124) : `200`, l'état
+    le dit.
+  - **Manifeste `ged` 1.10.0** (`manifestes/ged.manifest.ts`, cette PR) : la route en `routesLectureSeule` ; recopié
+    dans le service par le code, au catalogue avec « g » (copie entière, D-1119-25). **→ C** (STORY-336) : la route à
+    appeler au jeton du membre. **→ A** : types à régénérer depuis l'OpenAPI vivant (`MetadonneesDeVersionDto`) quand
+    un écran lira la référence (FE-081, FE-143).
+
+- **2026-11-26, STORY-1125 — LIVRÉ** (document-service #39, `5c50ca6` sur `dev` ; BFF #45, `959aeee` et `81817fe`) :
+  conforme à l'annonce ci-dessous ; écarts D-1125-14 → 16 (la liste du BFF garde l'ordre des champs de la GED ; `orgId` du
+  BFF exigé en ObjectId ; refus de plateforme en `403` générique). Manifeste `ged` inchangé. **Types à régénérer** (A)
+  depuis les deux OpenAPI vivants : BFF `ArchivageDesCabinetsDto`, `ArchivageDuCabinetDto`, `ArchivageDUnCabinetDto`,
+  `TotalDArchivageDto`, `MoisDArchivageDto`, `QuotaDArchivageDto`, `PoserQuotaDArchivageRequestDto` ; `document-service`
+  : les mêmes noms (tag `ged-plateforme`) et `quotaSource` sur `GET …/ged/cabinet/quota`.
 - **2026-11-26, STORY-1125 — l'archivage se mesure et se vend, annoncé AVANT le code** (`document-service`, GitHub
   `prospera-ocr-service`, et le BFF `admin-panel`, branches `MNV-1125` ; fiche `stories/STORY-1125.md`, D-1125-1 → 13).
   **Ajouts seuls** ; aucun droit neuf (auth inchangé), aucun fait neuf, **`ged.quota.depasse` inchangé** (il lit désormais
@@ -3878,6 +4153,14 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Questions à l'utilisateur ou au PO
 
+- **STORY-1128, D-1128-11 — la ligne « Contrat d'état publié » de `REGLES-DES-GROUPES.md` §3** (ouverte) : elle dit « figé
+  (étiquette `contrat-etat-publie-v1`) : ajouts seulement, tout ajout facultatif (compatibilité BACKWARD vérifiée au
+  registre) ». Toujours vraie, elle ne nomme ni la version figée (1.1.0, `contrat-etat-publie-v1.1`), ni « un octet = une
+  version », ni le transitif ; le fichier ne change que par une PR demandée par l'utilisateur (§6). **Choix retenu par
+  défaut : la ligne reste** ; la règle exacte est dans les README du catalogue et de la plateforme. À écrire si vous le
+  demandez : « figé à la dernière version de `contrat/historique/etat-publie/versions.json` : un octet = une version,
+  ajouts facultatifs seuls dans une majeure, matrice inchangée, registre en BACKWARD_TRANSITIVE ».
+
 - **STORY-1103, D-1103-1 — qui touche `prospera-expert-comptable` pour l'e-mail du renvoi ?** (ouverte) Le dépôt
   n'est tenu par personne (plan maître §2) ; il porte le consommateur des trois e-mails KYC (STORY-021, STORY-590), et
   les textes sont chez D (notification). **Choix retenu par défaut : D**, qui reçoit la demande du modèle, porte aussi
@@ -3926,6 +4209,56 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Karapace rend `50003` (« Error while forwarding the request to the master ») juste après sa santé** (STORY-1128) : un
+  premier `POST /subjects/…` lancé dès `healthy` échoue ; l'enregistrement du script, quelques secondes plus tard, passe.
+  Attendre un premier `GET /subjects` qui répond avant d'écrire, ou rejouer une fois.
+- **Un contrat JSON se compare par empreinte CANONIQUE** (`sha256` de `JSON.stringify(JSON.parse(texte))`) : le checkout du
+  catalogue est en CRLF (`matrice-etats.json` 51 285 octets), l'export et l'image en LF (49 572) ; une empreinte des octets
+  rougirait selon le poste.
+- **Ajouter un champ à la comparaison de l'émetteur casse les cas « inchangé » des tests** (`emis` sans le champ = un état
+  d'avant la livraison, donc republié) : c'est voulu ; ajouter le champ aux états émis de ces cas, et garder un cas « sans le
+  champ ⇒ republié une fois ».
+- **Une sous-session coupée par le réseau (ENOTFOUND) pendant une story longue** (deux fois en 1128) : tout poussé tôt
+  (fiche et annonce fusionnées, branches poussées), passe Docker dans un script `nohup` à trappe qui rend le verrou : la
+  reprise n'a rien perdu.
+
+- **`TaskStop` d'une tâche de fond Bash ne tue pas la boucle qu'elle a lancée** (STORY-1127) : une boucle « attendre le
+  verrou puis passer » arrêtée par `TaskStop` a survécu, a attendu la fin de la vraie passe, puis a repris le verrou à la
+  seconde où il a été rendu (14:43) pour rejouer toute la passe pendant que D attendait. Après tout `TaskStop` d'une boucle :
+  `ps -ef | grep <script>`, puis `kill` du parent ET de l'enfant ; la trappe `EXIT` de la passe a bien rendu le verrou. Ne
+  jamais lancer une boucle d'attente en tâche de fond : attendre par `timeout 175 … while [ -e verrou ]` au premier plan,
+  puis lancer la passe seule (elle prend le verrou elle-même, atomiquement).
+- **Les routes du catalogue exigent `emailVerified: true` dans le jeton** (`403 EMAIL_NOT_VERIFIED`) : une doublure JWKS de
+  preuve doit le poser, comme `iss`, `aud`, `org`, `perms`.
+- **L'émetteur de l'état publié ne compare que ce qu'il range** (`etats_emis`) : un champ neuf du fait qui doit republier
+  se range et se compare ; `versionCode` ne l'est pas (D-1127-10). Un état émis avant la livraison est republié une fois.
+
+- **Une pile de preuve à doublure d'auth cache la limite de débit d'auth** (STORY-1126) : sept stories de la GED prouvées
+  contre une doublure sans limite ; la vraie pile a rendu 503 `DROITS_INDISPONIBLES` à la cinquième boîte (la GED relisait
+  `GET /moi/droits` à chaque requête, et auth limite chaque ADRESSE, donc celle de la GED, à 100 par minute). Tout service qui
+  lit les droits chez auth : un cache par jeton (ou membre, organisation, `dv`), et une recette sur la vraie pile.
+- **Le recensement des routes de `document-service` (STORY-695) est une liste fermée** : une route neuve du cabinet non
+  inscrite fait rougir `dossier-portee-collaborateur.e2e-spec` (la route de « f » y manquait, rouge sur `dev`). Relancer
+  CETTE e2e après toute route neuve.
+- **Le journal d'intégrité ne chaîne que les actes probants** (versement, scellé, documents émis, vérification, fermeture,
+  export) : 10 entrées pour 40 boîtes ; une recette le prouve par ses actes, jamais par un nombre de gestes.
+- **Un `Start-Process` détaché porte la passe, pas l'outil** : un `run_in_background` garde un délai ; une passe qui prend le
+  verrou, lève la pile, `down -v` et rend le verrou dans un `finally` ne meurt pas avec la commande qui l'a lancée.
+- **Un heredoc Bash avec des apostrophes typographiques a cassé, encore** (script de docs) : écrire ces scripts par l'outil.
+
+- **Une preuve qui compare deux corps JSON par `JSON.stringify` rougit sur l'ordre des champs** (STORY-1125 : la liste du BFF
+  rendait `cabinets` avant `tronque`, contenu identique) : comparer en JSON canonique (clés triées), et garder l'ordre de la
+  source dans une projection qui se veut un relais.
+- **Un tableau de promesses lancées d'un coup dans un test de refus** (`for (const p of [service().a(), service().b()])`)
+  laisse une promesse rejetée sans attente quand une mutation fait passer une autre : jest meurt sans ligne `Tests:` et le
+  script de mutations lit « SURVIT (?) ». Lancer chaque appel dans la boucle (`() => service().a()`).
+- **Une mutation qui retire un rétrécissement (`pose.quotaOctets === null`) ne compile plus** : en écrire une variante typée
+  (`as number`) pour la juger sur assertion.
+- **La garde `sources-des-manifestes.spec` de `document-service` rougit sous Node 25 sur ce poste** (le manifeste du checkout
+  est en CRLF, l'empreinte notée est celle du LF) : troisième rouge connue du poste, verte dans l'étage `verification`.
+- **Le paramètre `OrgParamsDto` des installations du BFF accepte toute chaîne** (`/^[A-Za-z0-9_-]{1,64}$/`) : une route qui
+  relaie vers un service qui exige un ObjectId doit poser le sien, sinon l'erreur revient de l'amont en `404`.
 
 - **Un schéma Mongoose strict retire en silence un champ neuf d'un `$set`** (STORY-1124) : les doubles en mémoire étaient
   verts, la pile a rendu 6 KO (la copie désinscrite ni retirée ni gardée). Tout champ neuf d'une entité persistée ⇒

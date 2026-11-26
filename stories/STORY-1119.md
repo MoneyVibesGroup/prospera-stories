@@ -233,3 +233,135 @@ GED, **retéléchargés à l'identique** ; leur SHA-256 est inscrit au journal (
   (STORY-1121) ; le journal et les documents probants dans l'export de réversibilité (STORY-1120).
 - L'horodatage qualifié d'une tête de chaîne ou d'un certificat (interrupteur `horodatage-qualifie`).
 - Le journal de l'assurance (sinistres) reste non chaîné.
+
+## Suite du 2026-11-26 — la validation du client et la référence d'une version (groupe B, lot 7, ordre « f »)
+
+**Demande :** C, STORY-324 (journal de C, « Demandes aux autres groupes » : « → B (2026-11-26, STORY-324) : la pièce de
+validation du client dans la GED », `main` `8f7fb2c` ; fiche `STORY-324.md`, D-324-2, D-324-3 ; fiscal #74, `dev`
+`060c85c`) ; placée par la session de groupe après STORY-1125, avant STORY-1126 (D-L7B-10). **Aucun identifiant neuf.**
+**Dépôt :** `document-service` (GitHub `prospera-ocr-service`, module `ged`), branche `MNV-1119-reference`, commits
+`MNV-1119(ged): …` · **Exécutée par :** groupe B.
+
+**Pourquoi :** depuis fiscal #74, le cabinet range l'accord du client (document signé, courriel, capture) dans sa GED par
+`POST /api/v1/ged/cabinet/pieces`, et le fiscal n'en garde que la référence (`gedPieceId`, `gedVersion`) et le SHA-256,
+**déclarés** par qui consigne (D-324-3). Deux manques : la nature n'existe pas au plan (le cabinet la crée à la main par
+`POST …/natures`, chacun sous son code) ; et rien ne permet de vérifier une référence sans télécharger la pièce — le
+dossier de contrôle (STORY-336) ne peut que la croire.
+
+### Où en est-on
+
+- [x] Rituel : journaux de A, C, D (demandes neuves à B : celle-ci et celle de D, STORY-1141, placée en « g ») ;
+  `document-service` sur `dev` à jour (`5c50ca6`), propre ; branche `MNV-1119-reference` partie d'`origin/dev`.
+- [x] Relu avant d'écrire : `parametres/plan-cabinet.ts` et `ged-cabinet-2026.1.json` (le plan est **servi par cabinet**,
+  la table puis ses natures, à chaque lecture : aucun fonds ne fige une version du plan), `cabinet.service.ts`
+  (`pieceAccessible`, `lirePiece`, `contenu`, `lecture`, `vuePiece`), `physique.controller.ts` (`GET …/pieces/{pieceId}`
+  : la vue entière, index compris), `index-de-recherche.ts` et `recherche.ts` (la nature lue par son code dans le plan
+  servi), la destruction (1121 : identité et empreintes gardées, fichiers retirés, `410 PIECE_DETRUITE` sur le contenu),
+  le retrait (1124 : `desinscription.issue = RETIREE`, la pièce se lit encore par son identifiant), le schéma
+  `ged.piece.recue` (`empreinte` : `^[0-9a-f]{64}$`).
+- [x] Contrat annoncé avant la fusion (cette PR de docs ; manifeste `ged` 1.10.0 à la source).
+- [x] PR de code fusionnée en rebase : document-service **#40** (`dev` **`5d060aa`** ; arbre identique au commit poussé
+  `397870e`), manifeste `ged` 1.10.0 recopié depuis `prospera-stories@10d9d6e` (annonce #976).
+- [x] Recopie au catalogue : avec « g » (D-1119-25) — catalogue **#83** (`ce8cbc0` sur `dev`), `ged` 1.10.0 depuis
+  `prospera-stories@59ed625`.
+- [x] PR de docs finale (fiche, tracker, journal de B : avancement, « Réponses » → C), message à C. Verrou Docker non
+  pris.
+
+### Contrat (annoncé avant la fusion)
+
+- **Plan de classement du cabinet `ged-cabinet-2026.2`** (paramètre versionné neuf ; 2026.1 ne change pas d'un octet,
+  son empreinte reste épinglée) : 2026.1, plus une nature **`VALIDATION_CLIENT`** « Validation du client » — dossier
+  annuel (`ANNUEL`, exercice exigé), sous-rubrique `FISCAL` (après `QUITTANCE`), **non sensible**, conservation **10 ans**
+  à compter de la **fin de l'exercice**. `GET …/ged/cabinet/natures` rend `version: "2026.2"`. Servie à **tous** les
+  cabinets et à **tous** leurs fonds, ouverts avant ou après (D-1119-20). Un cabinet qui avait déjà créé une nature
+  `VALIDATION_CLIENT` garde la sienne (D-1119-21) ; un code de la table ne se crée plus (`409 NATURE_DEJA_PRISE`, déjà).
+- **Route neuve** : **`GET /api/v1/ged/cabinet/pieces/{pieceId}/versions/{version}`** (jeton du membre ; droit
+  `ged:piece:consulter` lu chez `auth-service` ; portée du dossier) → `200 MetadonneesDeVersionDto` :
+  `{ pieceId, version, versionCourante, courante, empreinte, taille, typeContenu, nature, dossierId, fondsNumero,
+  deposeLe, etatAntivirus, etat: CONSERVEE | DETRUITE | RETIREE, destruction?: { numero, le, procesVerbal },
+  desinscription?: { ecritureId, le } }`. `empreinte` : SHA-256 du fichier en clair, **64 hexadécimaux minuscules, le
+  format de `ged.piece.recue`** (le fiscal la rend `sha256:<hex>` chez lui, D-324-2). ⛔ Jamais le contenu, ni le texte
+  lu, ni le nom du fichier, ni l'index (tiers, NIF, montant, référence). Refus : `403 DROIT_INSUFFISANT`
+  (`details.droit`), `403 GED_NOT_ENTITLED`, `404 PIECE_INCONNUE` (inconnue, autre cabinet, hors portée, nature sensible
+  sans `ged:sensible:consulter`), `404 VERSION_INCONNUE`, `400` (version non entière).
+- **Manifeste `ged` 1.10.0** (`manifestes/ged.manifest.ts`, cette PR) : la route en `routesLectureSeule` ; recopié dans
+  le service par le code. Aucun droit neuf (auth inchangé), aucun fait neuf ni changé, aucune collection ni variable.
+
+### Décisions retenues par défaut (contestables)
+
+- **D-1119-19 — La suite se rattache à STORY-1119.** C'est elle qui a donné aux archives du cabinet leur valeur de preuve
+  (empreinte de chaque version recalculée, journal chaîné, certificat) ; vérifier, de dehors, qu'une référence désigne
+  bien la pièce et l'empreinte déclarées est la même chose vue par un tiers. Le plan de classement et la pièce viennent
+  de STORY-1087, une story de C (lot 6) : B ne rouvre pas la fiche d'un autre groupe. Aucun identifiant neuf (D-L7B-10).
+- **D-1119-20 — La nature : une version neuve de la table, servie à tous les fonds.** Une version publiée ne se modifie
+  jamais (empreinte épinglée, STORY-1087) : `2026.2` = `2026.1` + `VALIDATION_CLIENT`. Ajout aux plans **existants**,
+  pas aux seuls nouveaux fonds : le plan n'est pas figé par fonds (il est servi par cabinet à chaque lecture, depuis
+  1087), et l'accord du client porte sur des déclarations d'exercices dont les fonds sont **déjà ouverts** — le réserver
+  aux fonds neufs le rendrait inutile pour l'année en cours. Ajouter une nature ne touche aucune pièce rangée. Rangée au
+  dossier **annuel**, sous **Fiscal** : elle accompagne une déclaration d'un exercice (exercice exigé, comme ses voisines
+  `DECLARATION_FISCALE`, `AVIS_IMPOSITION`, `QUITTANCE`). **Non sensible** : les natures sensibles restent les quatre de
+  1087 (paie, travail, santé, identité) ; un accord sur une déclaration n'en est pas une, et le dossier de contrôle doit
+  pouvoir la lire sans le droit sensible. **10 ans après la fin de l'exercice** : la règle de toutes les pièces
+  justificatives (AUDCIF art. 24, Q-SC-3 encore ouverte) ; l'échéance de destruction (1121) se calcule d'elle-même par
+  `conservationAns` et `pointDeDepart`. **Index (1122)** : la nature se lit par son code dans le plan servi ; non
+  sensible, son texte lu entre dans l'index comme celui d'une facture ; aucun rattrapage (aucune pièce n'a encore ce
+  code de la table).
+- **D-1119-21 — Un code déjà pris par un cabinet reste le sien.** Un cabinet a pu créer `VALIDATION_CLIENT` lui-même
+  (C l'y invitait). Si la table l'emportait, ses pièces changeraient de rubrique, de conservation et peut-être de
+  sensibilité (une pièce que le cabinet avait voulue sensible deviendrait lisible sans le droit). Le plan servi garde donc
+  la nature du cabinet pour ce code (une seule fois, `duCabinet: true`) ; les autres cabinets reçoivent celle de la table.
+- **D-1119-22 — Une route de métadonnées, pas la vue de la pièce.** `GET …/pieces/{pieceId}` existe, mais elle rend
+  l'index (tiers, NIF, montant), toutes les versions et leurs noms de fichier : plus que ce qu'une vérification demande.
+  La route neuve vit à côté de `…/lecture` et `…/contenu`, au même chemin de version, et ne rend que l'identité de la
+  version ; le nom du fichier en est exclu comme de `ged.piece.recue`. `courante` et `versionCourante` disent si la
+  référence désigne encore la dernière version (une version 2 n'efface jamais la 1, que la référence garde).
+- **D-1119-23 — La garde est celle de la pièce.** `ged:piece:consulter`, la portée du dossier du collaborateur (son
+  portefeuille ; `TENANT_ADMIN` et `ged:fonds:gerer` tout le cabinet), la même que la recherche (1122) ; une nature
+  sensible en `404` sans `ged:sensible:consulter`, comme sa vue. Rien ne s'inscrit au journal d'intégrité : aucun contenu
+  ne part (D-1119-2 : la fiche de métadonnées n'est pas une consultation sensible).
+- **D-1119-24 — Détruite ou retirée : `200`, et l'état le dit.** Une pièce détruite par une destruction visée et accordée
+  (1121) garde son identité et ses empreintes : la route rend `etat: DETRUITE` et la destruction (`DES-`, date, `PVD-`) —
+  le dossier de contrôle peut vérifier qu'une référence a existé, que son empreinte concordait, et qu'elle a été détruite
+  légalement. Un `410` (celui du contenu) ou un `404` effacerait cette preuve. Une version seule détruite dit de même. Une
+  copie retirée de son fonds (1124 : écriture désinscrite, jamais versée) se lit encore par son identifiant : `etat:
+  RETIREE` et l'écriture ; une copie gardée (`GARDEE`) reste `CONSERVEE`. Le contenu, lui, ne change pas de règle.
+- **D-1119-25 — Manifeste `ged` 1.10.0 ; recopie au catalogue avec « g ».** Une route de lecture neuve entre en
+  `routesLectureSeule` (règle suivie depuis 1.7.0). La copie du catalogue est **entière** (`manifestes:copier`) et le
+  manifeste `paiement` 1.2.0 de D est déjà sur `main` (6a5d3ab), son code fusionné (#126) : toute copie faite après
+  l'entraîne. La recopie de `ged` 1.10.0 se fait donc dans la PR du catalogue de « g » (← D, STORY-1141, placée juste
+  après), qui porte les deux manifestes, plutôt que de copier depuis un commit plus ancien qui n'aurait pas `ged` 1.10.0
+  ou d'éditer la copie à la main. Le catalogue ne sert pas cette route : rien n'attend la copie.
+- **D-1119-26 — Sans Docker ; la recette de l'Atelier n'est pas rejouée.** Ni l'OCR, ni les extractions, ni le module
+  Nest commun, ni une dépendance, ni un Dockerfile, ni Kafka ne changent : une route de plus dans un contrôleur existant,
+  lue par les méthodes déjà prouvées sur MongoDB du dépôt (`piece`, `versions`), et un paramètre JSON. Les tests du
+  service (unitaires et e2e, la vraie chaîne de guards) suffisent ; la pile n'apporterait rien.
+
+### Livré (26/11)
+
+- **document-service #40**, `5d060aa` sur `dev` (fusionnée en rebase, `mergedAt` non nul, `headRefOid` = `397870e`
+  poussé, arbre identique) : `parametres/ged-cabinet-2026.2.json` (sha256 LF `f8dc11af…38a1` ; 2026.1 inchangé,
+  `ba14fe40…349b`), `parametres/plan-cabinet.ts` (version courante `2026.2` ; `planServi` : la nature du cabinet l'emporte
+  sur son code), `cabinet/cabinet.service.ts` (`metadonneesDeVersion`, `EtatDeLaVersion`), `cabinet/cabinet.controller.ts`
+  (la route, `MetadonneesDeVersionDto`, `DestructionDUneVersionDto`, `DesinscriptionDUneVersionDto`), `module.manifest.ts`
+  1.10.0 (`0a0f6826…acbb0`, `sources-des-manifestes.ts` à `10d9d6e`). Tel qu'annoncé (#976) : aucun écart.
+
+### Preuves (Node 25, sans Docker : D-1119-26)
+
+- Par chemin : `plan-cabinet.spec.ts` 7/7 (2 neufs : 2026.2 = 2026.1 + une nature, rien d'autre ; le code du cabinet
+  gagne, une seule fois), `cabinet.service.spec.ts` 44 avec le plan (7 neufs : la nature dans un fonds déjà ouvert,
+  `EXERCICE_REQUIS`, `NATURE_DEJA_PRISE` ; la nature d'un cabinet gardée, sensible, et celle de la table chez un autre ;
+  les métadonnées exactes, sans index, nom de fichier ni inscription au journal ; la garde — droit, portefeuille,
+  archiviste, autre cabinet, version 0 et 2, pièce inconnue, nature sensible ; détruite ; version seule détruite ; retirée
+  puis gardée), `ged-cabinet.e2e-spec.ts` 15/15 (2 neufs : la route par HTTP derrière la vraie chaîne de guards —
+  200 exact, aucun nom de fichier ni tiers dans le corps, 404 `VERSION_INCONNUE`, 400, 404 hors portée, 403
+  `GED_NOT_ENTITLED` ; l'OpenAPI publie la route, `MetadonneesDeVersionDto`, l'énumération de `etat`, le motif de
+  `empreinte`).
+- Suite complète : unitaires **1 390 passés** (117 suites ; 2 rouges connues du poste, rouges aussi sur `dev` : chemins
+  Windows de `piece-conservation.spec.ts`, copies CRLF de `ged.service.spec.ts`) ; e2e **222/222** (220 + 2). Lint des
+  fichiers touchés, `tsc`, build.
+- **Mutations 12/12 rouges** : la table l'emporte sur la nature du cabinet ; une version seule détruite ignorée ; toute
+  désinscription vaut retrait ; la portée sautée ; le droit sauté ; `courante` toujours vraie ; le nom du fichier rendu ;
+  la table restée en 2026.1 ; la désinscription d'une copie gardée rendue ; une version inconnue rendue comme la courante ;
+  l'OpenAPI sans le type de réponse ; la destruction sans son procès-verbal.
+- Docker : aucun, verrou non pris ; la recette de l'Atelier n'est pas rejouée (D-1119-26). La recette des archives
+  (STORY-1126) appellera la route sur la pile.

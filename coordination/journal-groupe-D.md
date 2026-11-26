@@ -306,15 +306,278 @@
       ne change pas d'un octet. L'identifiant scellé n'apparaît nulle part.
     - **Verrou Docker** : pris à 10:51 (une seule prise) et rendu à 11:22 par le trap du script autonome. B l'a repris
       aussitôt (1125). B et C ont été prévenus, sous les noms `-be` et `-f7`. Aucun conteneur, volume ni réseau `grp-d`.
-  - **→ B : recopie du manifeste `paiement` 1.2.0 au catalogue — ouverte** (« Demandes aux autres groupes »).
+  - **→ B : recopie du manifeste `paiement` 1.2.0 au catalogue — ouverte** (« Demandes aux autres groupes ») ;
+    servie (catalogue #83, dev `ce8cbc0` ; journal de B `main` 1206297).
     **`prospera-paiement-service` est rendu à B** (« Passations »). **→ A (plus tard)** : l'écran des comptes (le
     numéro à imprimer). **Q-D-26** au PO.
   - 🏁 **Les quatre stories de l'amendement du 26/11 sont faites** (1138, 1139, 1140, 1141).
   - **Suivante : D attend STORY-325 de C**, qui débloque 330 → 337. Au 26/11 à 11:25, 325 n'est pas fusionnée :
-    fiscal `origin/dev` `060c85c`, C vient de fusionner 324. **→ C : 325 — ouverte.**
+    fiscal `origin/dev` `060c85c`, C vient de fusionner 324. **→ C : 325 — ouverte** (servie : fiscal #75, `7e2bff8` ; voir STORY-330).
     - 561 attend 331 (donc 330 et 325), et 562 attend 561 : **aucune des deux n'est libre**.
     - Il en va de même de 565 (562, 341 de C) et de 1102 (332, 333).
     - Toute la suite du lot 7 de D attend 325. La session de groupe de D décide.
+
+- **STORY-330** ✅ 📨 — le port de canal asynchrone et la production du livrable : le fichier exact, estampillé de la
+  version qu'il emballe, et un dépôt engagé qui rend un identifiant, jamais un accusé (prospera-fiscal-service#76, `dev`
+  `7d48fd9` ; annonce avant le code #978, `main` 6f6b797 : fiche D-330-1 → 16, ⚠ Contrats, ⚠ Communs, Q-D-27). Plan §4,
+  n° 7 ; **la première story de D dans EPIC-032**. Rituel (2026-11-26) : aucune demande neuve à D chez A, B et C ;
+  **← C : 325 — servie (fiscal #75, 7e2bff8)** ; aucune PR ouverte ni migration en vol sur le fiscal.
+  **→ B : recopie du manifeste `paiement` 1.2.0 au catalogue — servie (catalogue #83, dev ce8cbc0 ; journal de B main
+  1206297).**
+  - **Livré** (dossiers `depots` et `livrables-depot` de D) :
+    - `POST /api/v1/livrables-declaration/{obligationId}` (droit `preparer`) : le classeur de 537, produit depuis une
+      déclaration `VALIDEE` ou au-delà ; le format est celui que le `gabarit` de la déclaration nomme, jamais la
+      requête ; le dossier est celui de la déclaration ; la liasse vient de `bilan-service` par le producteur de 537,
+      inchangé (AC-2). L'estampille `{ numero, empreinte }` (la version scellée si elle l'est, sinon le contenu
+      courant, D-325-11) part dans trois propriétés du fichier et dans `X-Declaration-Version` /
+      `X-Declaration-Empreinte`.
+    - Le port **`CanalDeDepot`** et le **dépôt assisté** : engager rend `{ depotId, mode, statut, engageLe, rejoue }`,
+      sans aucun champ d'accusé (AC-3).
+    - `POST /api/v1/depots-declaration` (droit `deposer`) et `GET /api/v1/depots-declaration/{depotId}` : l'obligation
+      reste `A_DEPOSER` (D-330-7, Q-D-27) ; `409 LIVRABLE_PERIME` ; un seul engagement en vol par version (index unique
+      partiel de `engagements_depot`) ; rejeu ⇒ 200, même identifiant ; un contenu nouveau ⇒ l'ancien `REMPLACE`, en une
+      transaction avec ses deux actes au journal chaîné (`depot-declaration:<id>`) ; la lecture dit `perime`.
+    - La **garde d'AD-12** (AC-4) : aucun nom de pays, de portail ni de guichet, commentaires compris, dans le domaine,
+      le port, l'adaptateur et les cas d'usage du dépôt ; éprouvée sur des témoins.
+    - Aucun écart au contrat annoncé. **D-330-17** : la garde d'AD-13 de 560 admet la route du livrable d'une
+      déclaration (le même classeur que 537).
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI (trois routes neuves) et `src/main.ts` (deux
+    en-têtes exposés au CORS). Aucune migration, aucun fichier de C ; `DepotsModule` et `LivrablesDepotModule` importent
+    `ObligationsModule`.
+  - **Preuves** :
+    - Node 24 (image `verification` de l'archive LF de `fb518ba`) : unitaires **231/231 suites, 3 341 tests** (1 suite
+      ignorée : BullMQ sans Redis), e2e **14/14, 325**, **`test:conformite` 26/26, 167** (dont `engagements-depot`, 7 :
+      dix engagements parallèles ⇒ un seul, remplacement tout ou rien, chaînes intactes).
+    - Node 25 : les 35 suites du dépôt, du livrable, des paquets, de la complétude et du coffre, 578 tests ; lint et
+      `tsc` 0 ; **mutations 25/25**.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** saine, les trois routes montées et en 401 sans jeton,
+      0 `UnknownDependencies`, l'index posé par l'application.
+    - **Verrou Docker** : pris à 12:39 (une seule prise), rendu à 12:48 par le trap du script autonome ; B l'a repris
+      aussitôt (1126) ; B et C prévenus (`-be`, `-f7`) ; aucun conteneur, volume ni réseau `grp-d`.
+  - **Ce qui reste** :
+    - → A (plus tard) : l'écran du livrable d'une déclaration et de son engagement (FE-081).
+    - 331 (les formulaires des déclarations du mois comme donnée du paquet), 332 (le guidage, et la vérification de
+      l'exercice de la liasse, D-330-5), 333 (l'accusé d'un dépôt engagé et sa jonction avec la chaîne de 538,
+      D-330-15), 561 (le connecteur ; l'accord du client avant d'agir, D-330-13). Q-D-27 au PO.
+    - la note « paiement 1.1.0 » de `paiement.compte.changed@1` dans
+      `prospera-plateforme/contrats/distributeur/catalogue-faits.json` est à passer à 1.2.0 (numeroImprimable, 1141) :
+      une étiquette `contrats-distributeur-v3` et sa recopie à l'octet dans
+      `prospera-ventes-service/src/socle/contrats-distributeur/` (source.ts, empreinte) ; non urgent.
+  - **Suivante : STORY-331** (le format de canal décrit comme une donnée du paquet ; dossiers de D ; fiche à écrire depuis
+    `epics-fiscalite-2026-08-03.md` juste avant de coder ; le paquet fiscal est à C, D-L7-3).
+- **STORY-331** ✅ 📨 — le format de canal décrit comme une donnée du paquet : le classeur à téléverser et le formulaire à
+  saisir, deux natures d'une même description, derrière le même port. Code : prospera-fiscal-service#78, `dev`
+  `6e9fbbe`. Annonce avant le code : #986, `main` 756fc0f (fiche D-331-1 → 12, ⚠ Contrats, ⚠ Communs, Q-D-28). Plan
+  §4, n° 8.
+  - **← C : 327 reçue, rebasé (fiscal #77, 9db1653)** : la branche, partie de `7d48fd9`, a été rebasée sur `9db1653`
+    avant les preuves sous Node 24 ; `origin/dev` n'a plus bougé jusqu'à la fusion. Aucune migration en vol sur le
+    fiscal.
+  - **Livré** (dossiers `paquets-depot`, `livrables-depot` et `depots` de D) :
+    - **Une seconde nature de format, décrite comme donnée** : le formulaire à saisir (`SAISIE_FORMULAIRE`), à côté du
+      classeur à téléverser (`TELEVERSEMENT_FICHIER`). Son contrat est strict et pur. Il porte les déclarations servies
+      (`canal`, `taxe`), le canal, et les champs dans l'ordre du formulaire (`code`, `libelle`, `valeur` du contenu
+      déclaré, contraintes `MONTANT` | `PERIODE`, `source`). Il vit dans un second manifeste, vérifié par sha256, que
+      `etatsActifs` ne voit jamais.
+    - **Les deux formats du « fini quand »** : dimana, avec `TG × TVA` 1.0 (`statut: 'amorce'`, Q-D-28 : la période, la
+      base imposable, la TVA due) ; le GUDEF, avec `TG × DSF` 1.3, dont aucun octet n'a changé.
+    - **Un seul résolveur** du format : le gabarit du paquet fiscal prime (330 inchangé) ; sinon, le formulaire qui sert
+      le couple `(canal, taxe)` ; sinon, `FORMAT_DE_CANAL_NON_DECLARE`. Deux formulaires pour un même couple sont
+      refusés au build (`PAQUET_DEPOT_AMBIGU`).
+    - `GET /api/v1/livrables-declaration/{obligationId}/formulaire` (droit `preparer`) : les valeurs sont lues dans le
+      contenu de l'estampille (la version scellée si elle l'est), prêtes à recopier. Rien n'est écrit. La route du
+      classeur rend `422 FORMAT_DE_CANAL_AUTRE_NATURE` sur une déclaration que seul un formulaire décrit.
+    - **AC-2** : une description incomplète est refusée en nommant le champ, au build (`verifierFormulaires`) et à la
+      demande (`422 FORMAT_DE_CANAL_INCOMPLET`, `details.champ`).
+    - **AC-3** : une TVA s'engage avec la référence de son format. `nature` est déduite de la référence et n'est jamais
+      stockée. Les deux natures passent par le même `CanalDeDepot`.
+    - Aucun écart au contrat annoncé.
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI seulement. Aucune migration, aucun stockage,
+    aucun fichier de C ; `contenuDeclareDe` est lu sans écriture.
+  - **Preuves** :
+    - **Node 24** (image `verification` de l'archive LF de `914cd8a`) : unitaires **235/235 suites, 3 484 tests** (une
+      suite ignorée : BullMQ sans Redis), e2e **14/14, 339**, **`test:conformite` 27/27, 173**.
+    - **Node 25** : 47/47 suites, 890 tests (dépôt, livrable, paquets, complétude, coffre, échéances, garde d'AD-12) ;
+      e2e `depots-declaration` 27/27 ; lint et `tsc` 0 ; **mutations 19/19**.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** saine. Les quatre routes sont montées et répondent 401 sans jeton,
+      avec 0 erreur au journal et les index posés.
+    - **Verrou Docker** : pris à 13:35:35 (une seule prise), rendu à 13:43:48 par le `trap` du script autonome. B et C
+      ont été prévenus (`-be`, `-f7`). Il ne reste aucun conteneur, volume ni réseau `grp-d`.
+  - **Ce qui reste** :
+    - **→ C : nommer le canal du reversement de la retenue d'IRPP au paquet fiscal — ouverte** (non bloquante ;
+      « Demandes aux autres groupes »). D ajoutera ensuite `TG × RETENUE-IRPP` par donnée seule.
+    - Q-D-28 au PO.
+    - → A (plus tard) : FE-081 lit `nature`.
+    - 332 (le guidage, dans l'ordre du formulaire) ; 561 (le bloc `automatisation`, adressé par `code`).
+  - **Suivante : STORY-332** : le guidage de dépôt pas à pas, dans les dossiers de D. Sa fiche est à écrire depuis
+    `epics-fiscalite-2026-08-03.md` juste avant de coder. Elle lit le livrable d'un formulaire de 331 (D-331-12) et le
+    dépôt engagé de 330 (D-330-5).
+- **STORY-332** ✅ 📨 — le dépôt guidé pas à pas : les étapes viennent du paquet, les valeurs suivent l'ordre du
+  formulaire, chacune prête à copier, et rien de ce que le produit connaît n'est demandé en saisie. Code :
+  prospera-fiscal-service#79, `dev` `8d85c10`. Annonce avant le code : #991, `main` 72e9915 (fiche D-332-1 → 12, ⚠
+  Contrats, ⚠ Communs, Q-D-29). Plan §4, n° 9 (« fini quand » : salle des cabinets V3).
+  - **Livré** (dossiers `depots` et `paquets-depot` de D) :
+    - **Le guidage, un paquet de dépôt à part.** Il est publié par un troisième manifeste, `manifeste-guidages.json`,
+      et vérifié par sha256. Les formats et leurs deux manifestes restent intacts d'un octet. Son contrat est strict et
+      pur : le format guidé (sa nature, ses versions), la source, puis les étapes (`code`, `libelle`, `geste`,
+      `consigne`, et `champs` pour une saisie). Les gestes forment une liste fermée, et **aucun ne demande une valeur**
+      (AC-3).
+    - **Les règles du parcours**, tenues au build et à la lecture (`GUIDAGE_INCOMPLET`, `details.champ`) :
+      - un fichier : une seule étape de téléversement, aucune saisie (AC-4, « un seul fichier ») ;
+      - un formulaire : aucun téléversement, et les champs reportés sont exactement ceux du formulaire, dans son
+        ordre (AC-5) ;
+      - l'accusé : relevé une seule fois, en dernier.
+    - **Les deux guidages du « fini quand »**, en `amorce` (Q-D-29) :
+      - `TG × TVA`, pour dimana : six étapes, et les trois valeurs dans l'ordre du formulaire ;
+      - `TG × DSF`, pour le GUDEF : un seul fichier, désigné par son estampille.
+    - **`GET /api/v1/depots-declaration/{depotId}/guidage`** (droit `deposer`) :
+      - les valeurs viennent de `valeursDuFormulaire` (331), sur la version engagée et le contenu de l'estampille (la
+        version scellée si elle l'est) ; chacune est une chaîne prête à copier (AC-2) ;
+      - le redevable est nommé : l'entreprise et le dirigeant ont chacun leur dépôt et leur guidage (AC-5) ;
+      - refus : `DEPOT_REMPLACE`, `OBLIGATION_DESACTIVEE`, `LIVRABLE_PERIME`, `FORMAT_DE_CANAL_NON_DECLARE`,
+        `GUIDAGE_NON_DECLARE` ;
+      - rien n'est écrit.
+    - **332 ne dépose pas** : « Déposée » reste `CycleObligationsService.transitionner` (C).
+    - **Un écart, sans effet sur le contrat** : la garde de build ne compte plus elle-même les guidages actifs. C'était
+      du code mort : l'analyse du manifeste refuse déjà deux guidages actifs d'un même couple (536). Il a été retiré.
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI seulement. Aucune migration, aucun stockage,
+    aucun fichier de C.
+  - **Preuves** :
+    - **Node 24** : sur `da293d6`, unitaires **239/239 suites, 3 549 tests** (une suite ignorée : BullMQ sans Redis), e2e
+      **14/14, 345**, **`test:conformite` 27/27, 173** ; sur `891574b`, les mêmes nombres (unitaires 239/239 suites, 3 549 tests ; e2e 14/14, 345 ; `test:conformite` 27/27, 173), et la pile `grp-d` avec Redis saine, la route du guidage en `401` sans jeton.
+    - **Node 25** : contrat, domaine, registre, service et OpenAPI (70 tests), e2e `depots-declaration` 33/33 ; lint et
+      `tsc` 0 ; **mutations 25/25**.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** saine. La route du guidage est montée et répond `401` sans jeton,
+      avec 0 erreur au journal.
+    - **Verrou Docker** : deux prises, chacune par le script autonome et rendue par son `trap` : de 14:15:43 à 14:28:57 (sur `da293d6`), puis de 14:44:36 à 14:51:21 (sur `891574b`). B et C ont été prévenus à chaque reddition (`-be`, `-f7`). Il ne reste aucun conteneur, volume ni réseau `grp-d`.
+  - **Ce qui reste** :
+    - Q-D-29 au PO ;
+    - → A (plus tard) : FE-081 affiche les étapes, avec un bouton « copier » par valeur ;
+    - D-332-9 : l'exercice de la liasse, vérifié automatiquement, avec 1102 ;
+    - les déclarations propres du dirigeant attendent leur format (→ C : canal de la retenue d'IRPP, ouverte).
+  - **Suivante : STORY-333** (la capture de l'accusé et la qualification du retard ; dossiers de D). Il faut **d'abord
+    la réaligner** avec 537 → 539 et 688 → 691, qui la couvrent en partie (plan §4, n° 10). Sa fiche est à écrire depuis
+    `epics-fiscalite-2026-08-03.md` juste avant de coder. Elle prend la suite de l'étape `RELEVER_ACCUSE` du guidage
+    et du dépôt engagé de 330 (D-330-15).
+- **STORY-333** ✅ 📨 — l'accusé d'un dépôt engagé : un document ou une simple référence, consigné une fois par
+  version, horodaté, rattaché à la version déposée ; le retard qualifié à la date réelle du dépôt. Code :
+  prospera-fiscal-service#81, `dev` `fc317a1`. Annonce avant le code : #998, `main` 572be5d (fiche D-333-1 → 13, ⚠
+  Contrats, ⚠ Communs, → C, Q-D-30). Plan §4, n° 10.
+  - **Réalignement** (fiche, avant le code) : 333 n'était **pas** couverte. 538 et 691 couvrent l'accusé du **dépôt de
+    liasse** (l'ancien modèle, que `bilan-service` consomme) ; manquaient l'accusé de la **déclaration** (le dépôt engagé
+    de 330, la version scellée de 325), la garde `ACCUSE_REQUIS` (le cycle de C passait `DEPOSEE → ACCUSE_RECU` sans
+    garde) et le retard à la date réelle. 688 et 690 sont sans rapport. 333 complète sans réécrire 538.
+  - **Livré** (dossier `depots` de D) :
+    - **`POST /api/v1/depots-declaration/{depotId}/accuse`** (droit `deposer`, multipart : `piece`, `reference`,
+      `deposeLe`) :
+      - un document (PDF, PNG, JPEG ou XML lu dans ses octets, archivé dans le bucket privé de 682, empreinte calculée),
+        une référence (gardée à l'octet), ou les deux (AC-1, AC-2) ; aucun ⇒ `422 ACCUSE_REQUIS` ;
+      - sur une déclaration « Déposée » ou au-delà, dont la version déposée est celle du dépôt engagé
+        (`ACCUSE_NON_CONSIGNABLE`, `LIVRABLE_PERIME`, `DEPOT_REMPLACE`, `OBLIGATION_DESACTIVEE`) ;
+      - une fois par version (`409 ACCUSE_DEJA_CONSIGNE`, index unique `un_accuse_par_version`) ; la pièce d'une
+        écriture perdue est supprimée ;
+      - `deposeLe` entre le jour de l'engagement et aujourd'hui (`DATE_DEPOT_HORS_BORNES`) ;
+      - **le retard** (AC-4) : `qualifierRetard` de C sur l'échéance applicable (le report compris) à la date réelle ;
+        `DANS_LES_DELAIS`, `EN_RETARD` ou `ECHEANCE_INCONNUE` ; les pénalités du paquet de dépôt du format, ouvertes par
+        le retard seul, jamais chiffrées ; `source: null` pour un formulaire du mois (Q-D-30) ; figé à la consignation ;
+      - acte `DEPOT_DECLARATION_ACCUSE` au journal chaîné, dans la transaction de l'accusé (la référence par son
+        empreinte seule).
+    - **`GET …/{depotId}/accuse`** et **`GET /api/v1/depots-declaration/accuses?obligationId=`** (AC-5, V2 : dossier →
+      déclaration → accusés, deux gestes).
+    - **Pour la porte de C** (D-333-3) : `AccusesDepotModule` (sans `ObligationsModule`), le port `PreuvesDAccuse`, la
+      règle `verifierAccuseAuRecu` (`409 ACCUSE_REQUIS`).
+    - **333 ne fait pas avancer le cycle** : ni « Déposée » ni « Accusé reçu » (`CycleObligationsService` n'est pas
+      exporté ; la porte reste à C).
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI seulement. Aucune migration, aucun fichier de C.
+  - **Preuves** :
+    - Node 24 : unitaires **246/246 suites, 3 681 tests** (1 suite et 3 tests ignorés : la spec BullMQ sans Redis) ; e2e **14/14 suites, 354 tests** (dont `depots-declaration`) ; **`test:conformite` 29/29 suites, 183 tests** (dont `accuses-depot.conformite-spec.ts` : l'index unique, dix consignations parallèles ⇒ une seule et un seul acte, une rectificative a le sien, tout ou rien sur une panne du journal, la relecture et l'isolement, le schéma strict). Le dernier commit (`f232d9d`, trois assertions de test, aucun code de production) a été rejoué sous Node 25 : service 18/18, e2e `depots-declaration` 39/39 ;
+    - mutations 26/26 ; lint des fichiers touchés et `tsc` 0 ;
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** (image runtime de l'archive de `7df3823`) : santé `ok` (mongodb, audit, kafka, redis) ; les trois routes neuves montées et en `401` sans jeton ; `AccusesDepotModule` initialisé ; 0 `UnknownDependencies` sur 491 lignes de journal ; les index `un_accuse_par_version` et `accuse_par_depot` posés par l'application.
+    - **Verrou Docker** : une prise, par le script autonome, de 16:31:49 à 16:46:34, rendue par son `trap`. B et C ont été prévenus (`-be`, `-f7`), après coup : une coupure réseau a interrompu la sous-session pendant la passe. Il ne reste aucun conteneur, volume ni réseau `grp-d`.
+  - **Ce qui reste** :
+    - → C : la garde `ACCUSE_REQUIS` dans `transitionner` — acceptée, placée en tête de 339 (après la fusion de 333) ;
+      SHA de la fusion envoyé à C ;
+    - Q-D-30 au PO ;
+    - → A (plus tard) : FE-081 consigne l'accusé à l'étape `RELEVER_ACCUSE` du guidage ;
+    - `prospera-assurance-service` : le consommateur `entitlement.changed` (D-1006-5, palier ④) peut être remplacé par
+      `module.referentiels` de l'état publié (B, 1127, catalogue #84 efedd3e, contrat-etat-publie-v1.1) — optionnel,
+      hors lot 7.
+  - **Suivante : STORY-334** (le rejet administratif, `DEPOSEE → A_DEPOSER`, D-325-9 ; dossiers de D). Même
+    réalignement que 333 (plan §4, n° 11) : 538 porte déjà le rejet du dépôt de liasse. Garder la version scellée, en
+    sceller une de plus à la retransmission ; l'accusé de 333 est par version.
+
+- **STORY-334** ✅ 📨 — le rejet administratif d'un dépôt engagé : consigné une fois par version, avec son motif à
+  l'octet, sa cause en clair et la correction proposée ; la reprise dans le produit ; la version déposée intacte. Code :
+  prospera-fiscal-service#82, `dev` `69d7e65`. Annonce avant le code : #1004, `main` 9bcdf01 (fiche D-334-1 → 15, ⚠
+  Contrats, ⚠ Communs, → C, Q-D-31, Q-D-32). Plan §4, n° 11.
+  - **Réalignement** (fiche, avant le code) : 334 n'était **pas** couverte. 538 couvre le rejet du **dépôt de liasse**
+    (l'ancien modèle, qui reste) ; manquaient le rejet de la **déclaration** (le dépôt engagé de 330, la version scellée
+    de 325), sa cause en clair et sa reprise, et le retour de l'obligation à « À déposer » (dans un fichier de C, D-325-9).
+    537, 539, 688, 690 et 691 sont sans rapport. 334 complète sans réécrire 538.
+  - **Livré** (dossier `depots` de D) :
+    - **`POST /api/v1/depots-declaration/{depotId}/rejet`** (droit `preparer`, D-538-8 ; JSON : `rejeteLe`, `motif`,
+      `reference?`, `cause?: { feuille?, cellule?, regle? }`, `correctionProposee?`) :
+      - sur une déclaration exactement « Déposée », dont la version déposée est celle du dépôt engagé
+        (`REJET_NON_CONSIGNABLE`, `LIVRABLE_PERIME`, `DEPOT_REMPLACE`, `OBLIGATION_DESACTIVEE`) ;
+      - le motif par la règle de 538 (`MOTIF_INVALIDE`) ; les autres textes à l'octet (`TEXTE_REJET_INVALIDE`, `{ champ
+        }`) ; `rejeteLe` entre le jour de l'engagement et aujourd'hui (`DATE_REJET_HORS_BORNES`) ;
+      - une fois par version (`REJET_DEJA_CONSIGNE`, index `un_rejet_par_version`) ; accusé et rejet s'excluent
+        (`ACCUSE_DEJA_CONSIGNE` ici, **`409 DEPOT_REJETE`** sur la route de l'accusé de 333) ;
+      - `reprise` (la version rejetée, le retour à `A_DEPOSER`, six étapes dans le produit) ; `retard` à la date du rejet
+        (l'échéance court toujours, les pénalités du paquet de dépôt jamais chiffrées) ;
+      - acte `DEPOT_DECLARATION_REJET` au journal chaîné (empreintes seules), textes en clair dans `textes_audit` (329),
+        dans la même transaction.
+    - **`GET …/{depotId}/rejet`** et **`GET /api/v1/depots-declaration/rejets?obligationId=`** (AC-2 : chaque rejet et
+      `retransmission`, la première version scellée après lui).
+    - **Pour la porte de C** (D-334-8) : `AccusesDepotModule` exporte aussi `PreuvesDeRejet` ; la règle
+      `verifierRejetAuRetour` (`409 REJET_REQUIS`).
+    - **334 ne fait pas revenir le cycle** et n'écrit aucune version (le retour est dans `CycleObligationsService`).
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI seulement. Aucune migration, aucun fichier de C.
+  - **Preuves** :
+    - Node 24 (image `verification` de l'archive LF de `8959a3a`, avant le rebase) : unitaires **248/249 suites, 3 708
+      tests** (1 suite et 3 tests ignorés : la spec BullMQ sans Redis) ; e2e **14/14 suites, 360 tests** ; **`test:conformite`
+      30/30 suites, 189 tests** (dont `rejets-depot.conformite-spec.ts` : l'index unique, dix consignations parallèles ⇒ un
+      seul rejet et un seul acte, les textes en clair hors du journal sous leur empreinte, tout ou rien sur une panne du
+      journal — ni rejet ni texte —, la relecture et l'isolement, le schéma strict). Après le rebase sur `c459960` (339 de C, au-dessus
+      de `74b33ec` : la garde `ACCUSE_REQUIS`, qui fait importer `AccusesDepotModule` par `ObligationsModule`), archive LF
+      de `b44eae6` : e2e **14/14 suites, 361 tests**.
+    - Node 25 (local) : domaine 12/12, service 13/13, accusé 19/19, OpenAPI et gardes du module `depots` (9 suites, 125
+      tests), e2e `depots-declaration` 44/44.
+    - **Mutations 29/29**, chacune rouge sur une assertion : la porte du retour sans rejet ; « Accusé reçu » puis « À
+      déposer » consignables ; un texte blanc, trop long, porteur d'un contrôle, rogné ; le motif non vérifié ; la
+      correction sans ses sauts de ligne ; le nom du champ de la cause perdu ; une cause vide admise ; chaque borne de date
+      retirée ; les étapes de la reprise perdues ; le motif en clair au journal ; la cellule perdue à l'acte ; les textes
+      absents gardés ; le périmé non vérifié ; « consignable » non vérifié ; l'accusé de la version ignoré ; le rejet déjà
+      consigné ignoré ; la date de l'engagement ignorée ; la retransmission qui prend la version rejetée, puis la plus
+      récente ; les versions lues sans rejet ; l'accusé admis sur une version rejetée ; le droit `preparer` retiré ; la
+      règle de la cause et la correction perdues dans la réponse. Quatre mutants qui rougissaient en compilation (un
+      import devenu inutile) ont été réécrits en gardant l'intention ; deux restés verts au premier passage (la règle de la
+      cause dans la réponse, le rejet déjà consigné vu avant l'écriture) ont reçu leur assertion, puis ont été rejoués.
+    - lint des fichiers touchés et `tsc` 0.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** (image runtime de l'archive de `8959a3a`) : santé `ok` (mongodb, audit,
+      kafka, redis) ; les trois routes neuves montées et en `401` sans jeton ; `AccusesDepotModule` initialisé ; 0
+      `UnknownDependencies` sur 497 lignes de journal ; les index `un_rejet_par_version` et `rejet_par_depot` posés par
+      l'application. Rejouée sur l'arbre rebasé (archive de `b44eae6`) : santé `ok`, les trois routes en `401`, `AccusesDepotModule` initialisé (importé par `DepotsModule` et par `ObligationsModule`), 0 erreur sur 497 lignes, les index posés.
+    - **Verrou Docker** : deux prises par les scripts autonomes, de 21:24:18 à 21:43:47 (la passe complète) et de 22:20:23 à 22:22:51 (la passe courte après le rebase), rendues par leur `trap`. B et C prévenus à chaque reddition. Il ne reste aucun conteneur, volume ni réseau
+      `grp-d`.
+
+  - **Ce qui reste** :
+    - → C : ouvrir `DEPOSEE → A_DEPOSER` sur un rejet consigné (D-334-8) — ouverte. Jusque-là, la reprise passe par la
+      rectificative de 325 (n + 1 nommée `RECTIFICATIVE`, la version n intacte) ;
+    - Q-D-31, Q-D-32 au PO ;
+    - → A (plus tard) : FE-081 consigne le rejet et affiche la reprise ; → 336 : le dossier de contrôle lit le rejet, son
+      motif et la retransmission ;
+    - bilan, assurance et notification ne lisent pas encore l'état publié (préalable un jour au retrait
+      d'`entitlement.changed`, non demandé ; B 1128, contrat-etat-publie-v1.1 figé à 1.1.0) ;
+    - assurance, liaison-assureur et sinistres : aucun test ne vérifie leur copie de `garde-etat-publie` (relevé par B,
+      1128) — un test d'empreinte à ajouter ;
+    - ← C : canal de la retenue d'IRPP — servie (339, fiscal #84 c459960 ; balance #173 61997fd ; organisme « service
+      des impôts », LPF Art. 27) ; le format `TG × RETENUE-IRPP` (D-331-9) est à écrire par D, par donnée du paquet de
+      dépôt ; non urgent ;
+    - → C : garde `ACCUSE_REQUIS` — servie (fiscal #83, 74b33ec) ;
+    - pour 336 : `GET /obligations/{id}/chemin` porte désormais `detail.basesLegales` (339 de C).
+  - **Suivante : STORY-335** (l'archivage des livrables et des accusés, l'URL présignée ; dossiers de D). Même
+    réalignement, en partie (plan §4, n° 12) : 682 archive déjà le fichier transmis d'une liasse, 333 la pièce d'un
+    accusé (sous `accuses/`, sans URL).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1634,7 +1897,51 @@
 
 ## Demandes aux autres groupes
 
-- **→ B (2026-11-26, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue — ouverte.**
+- **→ B (2026-11-26, STORY-335) : recevoir dans le fonds d'archives du client les pièces du dépôt d'une déclaration —
+  ouverte, à placer par la session de groupe de B.**
+  - Pourquoi : AC-1 de 335 (« archivé dans `document-service`, rattaché au dossier, à l'implantation, à l'obligation et à
+    la période ») et V9 de la salle du 19/11 (« la liasse figée, son accusé et la validation du client dans le même fonds
+    d'archives que les pièces », 1100). Le fonds est la GED de B ; sa pièce ne s'indexe aujourd'hui ni par obligation, ni
+    par implantation, ni par période, et aucun fait du fiscal n'y est consommé.
+  - Ce que D fournit (fiscal, `MNV-335`) : l'original, dans le bucket privé du fiscal (682), rattaché (`obligationId`,
+    `dossierId`, `implantationId`, `redevableId`, `taxe`, `periode`, `numero`, `empreinte` sha256), relu par URL présignée
+    re-vérifiée ; l'archive par version (`GET /api/v1/depots-declaration/archives?obligationId=…`).
+  - Ce que B choisit : la forme de la copie (un fait du fiscal, `fiscal.depot.piece-archivee`, que la GED consomme en
+    demandant les octets par une route de service du fiscal ; ou une route de dépôt de la GED que le fiscal appelle), et
+    l'indexation (obligation, implantation, période, version). D émet le fait ou appelle la route dès que B a choisi ; rien
+    n'est émis d'ici là (D-335-9). La copie ne remplace pas l'original : la preuve reste re-vérifiée au fiscal (Q-D-31).
+
+- **→ C (2026-11-26, STORY-334) : ouvrir `DEPOSEE → A_DEPOSER` sur un rejet consigné — ouverte.** Livré par D :
+  fiscal #82 (`dev` `69d7e65`) ; le SHA a été envoyé à C (`moneyvibes-apps-f7`).
+  - Pourquoi : AC-1 de 334 (« un rejet enregistré, l'obligation revient dans le cycle sans qu'aucune version antérieure
+    ne soit altérée ») ; D-325-9 laisse ce retour à 334, mais il est dans `CycleObligationsService.revenir` et
+    `verifierRetour` (`domain/obligations/version-declaration.ts`), fichiers de C, et le service n'est pas exporté.
+  - Ce que D fournit (fiscal, `MNV-334`) : `AccusesDepotModule` (le même qu'en 333, sans `ObligationsModule`) exporte
+    aussi le port `PreuvesDeRejet` (`src/ports/preuves-rejet.ts` : `rejetDe(orgId, obligationId, numero)`) ; la règle pure
+    `verifierRejetAuRetour(preuve, { obligationId, numero })` (`src/domain/depot/rejet-depot.ts`) lève `409 REJET_REQUIS`.
+  - Ce que C fait : dans `revenir`, de `DEPOSEE` vers `A_DEPOSER` seulement (les autres retours au-delà du dépôt restent
+    `RETOUR_AU_DELA_DU_DEPOT`), `verifierRejetAuRetour(await preuves.rejetDe(orgId, id, versionCouranteDe(o).numero), …)` ;
+    la version scellée n intacte ; le pointeur passe à `{ numero: n + 1, nature: 'RETRANSMISSION', versionId: null }` ; le
+    dépôt suivant scelle n + 1. Le motif du retour reste exigé ; l'acte peut citer `rejetId`. Aucune migration. Le même
+    import d'`AccusesDepotModule` que la garde `ACCUSE_REQUIS` de 339.
+  - En attendant : la reprise passe par la rectificative de 325 (n + 1 nommée `RECTIFICATIVE`, la version n intacte).
+
+- **→ C (2026-11-26, STORY-333) : garde ACCUSE_REQUIS — servie (fiscal #83, 74b33ec).** `ObligationsModule` importe
+  `AccusesDepotModule` ; les doubles de C doublent `PreuvesDAccuse` (consigné par défaut). Acceptée d'abord, placée en tête
+  de 339 (après la fusion de 333).
+  333 est fusionnée (fiscal #81, `dev` `fc317a1`) ; le SHA a été envoyé à C (`moneyvibes-apps-f7`).
+  - Pourquoi : AC-3 de 333 (« une obligation sans accusé ne passe pas à "Accusé reçu" ») ; `DEPOSEE → ACCUSE_RECU` n'a
+    aujourd'hui aucune garde, et le service n'est pas exporté : D ne peut pas le garder sans toucher le dossier de C.
+  - Ce que D fournit (fiscal, `MNV-333`) : le module `AccusesDepotModule` (`src/modules/depots/accuses-depot.module.ts`,
+    il n'importe pas `ObligationsModule`) qui exporte le port `PreuvesDAccuse` (`src/ports/preuves-accuse.ts`) ; la règle
+    pure `verifierAccuseAuRecu(accuse)` (`src/domain/depot/accuse-depot.ts`), qui lève `409 ACCUSE_REQUIS`.
+  - Ce que C fait : importer `AccusesDepotModule` dans `ObligationsModule` ; injecter `PreuvesDAccuse` dans
+    `CycleObligationsService` ; à `vers === 'ACCUSE_RECU'`, `verifierAccuseAuRecu(await preuves.accuseDe(orgId, id,
+    versionCouranteDe(obligation).numero))`, après les gardes d'état. Aucune migration. Les fixtures de C qui passent à
+    `ACCUSE_RECU` devront consigner un accusé (ou doubler le port).
+
+- **→ B (2026-11-26, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue — servie (catalogue #83, dev
+  `ce8cbc0` ; journal de B `main` 1206297).**
   - Source : `prospera-stories/manifestes/paiement.manifest.ts`, `main` 6a5d3ab (#967).
   - Cible : `platform-catalog-service/src/modules/catalog/manifeste/copies.json`, où `paiement` est encore en 1.1.0.
   - Ce qui change : `paiement.compte.changed@1` gagne `numeroImprimable`, facultatif, et part aussi au changement de ce
@@ -1650,6 +1957,13 @@
   le nommerait sans livraison. (2) `COTISATIONS_SOCIALES` et `RETENUE_IRPP` sont écrites par la dérivation sociale
   de D ; si le catalogue les porte un jour, il fait foi (D-349-5). (3) Pour 350 : `ObligationsModule` ne peut pas
   importer `RemunerationModule` sans `forwardRef` (cycle) ; un module de 350 peut importer les deux.
+  - **→ C : canal de la retenue d'IRPP — servie (339, fiscal #84 c459960 ; balance #173 61997fd ; organisme « service des
+    impôts », LPF Art. 27).** Le format `TG × RETENUE-IRPP` (D-331-9) reste à écrire par D, par donnée du paquet de dépôt.
+  - **Ajout du 2026-11-26 (STORY-331), toujours non bloquant — → C : nommer le canal du reversement de la
+    retenue d'IRPP au paquet fiscal — servie (ci-dessus)** (rappelée à la clôture de 331, fiscal #78, `dev` `6e9fbbe`) : le point (1) a désormais un effet visible. Un paquet de
+    formulaire sert une déclaration par son `canal` et sa `taxe` (D-331-3) : tant que le canal de `RETENUE_IRPP` sort
+    `NON_DECLARE`, la retenue sur salaires (déposée sur dimana, 1102) n'a pas de format. Dès que le paquet fiscal nomme
+    ce canal, D ajoute `TG × RETENUE-IRPP` par donnée seule (D-331-9). Prévenu par SendMessage.
 
 - **← B : cloche et e-mail des cinq faits `ged.*` de la GED du cabinet (document-service #37 ; demande au journal de B,
   `main` f760f37) — reçue, hors lot 7, à placer par l'utilisateur.** Rien n'est codé par D.
@@ -2179,6 +2493,72 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-335, avant le code)** — branche `MNV-335` de `prospera-fiscal-service`, partie de
+  `origin/dev` `69d7e65`. **Aucune migration** (une collection neuve, `livrables_archives_depot`, index posés par Mongoose
+  au démarrage), ni `app.module.ts` (les routes entrent dans `DepotsDeclarationController`, déjà monté ; le registre des
+  livrables archivés est fourni par `AccusesDepotModule`, fichier de D, qui n'importe toujours pas `ObligationsModule`),
+  ni `package.json`, ni `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touché parmi les communs : **le
+  contrat OpenAPI** (quatre routes neuves). **Aucun fichier de C.** Aucune minuterie neuve (garde de 318).
+
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#82, `dev` `69d7e65`, rebasée sur `origin/dev` `c459960` — 339 de C, au-dessus de `74b33ec`, qui touchait aussi le contrat OpenAPI et `ObligationsModule` : aucun conflit — avant la fusion), conforme à l'annonce ;
+  ANNONCÉ (2026-11-26, STORY-334, avant le code)** — branche `MNV-334` de `prospera-fiscal-service`, partie de
+  `origin/dev` `fc317a1`. **Aucune migration** (une collection neuve, `rejets_depot`, index posés par Mongoose au
+  démarrage), ni `app.module.ts` (les routes neuves entrent dans `DepotsDeclarationController`, déjà monté ; le registre
+  des rejets est fourni par `AccusesDepotModule`, fichier de D), ni `package.json`, ni `read-models/`, ni copie du paquet,
+  ni manifeste `declarations`. Touché parmi les communs : **le contrat OpenAPI** (trois routes neuves, un refus de plus sur
+  la route de l'accusé). **Aucun fichier de C** : le retour du cycle est demandé à C (« → C : … — ouverte »). Pour ne pas
+  croiser la garde `ACCUSE_REQUIS` que C pose en tête de 339 : D ne touche ni `obligations.module.ts` ni le cycle ;
+  `AccusesDepotModule` garde son nom et ses exports (`PreuvesDeRejet` s'y ajoute).
+
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#81, `dev` `fc317a1`, rebasée sur `origin/dev` `94baf9f` — 329 de C,
+  qui touchait aussi le contrat OpenAPI : aucun conflit — avant la fusion), conforme à l'annonce ; ANNONCÉ (2026-11-26,
+  STORY-333, avant le code)** — branche `MNV-333` de `prospera-fiscal-service`, partie de
+  `origin/dev` `8d85c10`. **Aucune migration** (une collection neuve, `accuses_depot`, index posé par Mongoose au
+  démarrage), ni `app.module.ts` (les routes neuves entrent dans `DepotsDeclarationController`, déjà monté ;
+  `AccusesDepotModule`, neuf, est importé par `DepotsModule`, fichier de D), ni `package.json`, ni `read-models/`, ni
+  copie du paquet, ni manifeste `declarations`. Touché parmi les communs : **le contrat OpenAPI** (trois routes neuves).
+  **Aucun fichier de C** : `qualifierRetard`, le cycle, les ports des obligations et des versions sont lus. C a 329 en
+  vol sur le contrat OpenAPI et le journal partagé : la PR de 333 se rebase sur sa fusion si elle passe avant.
+
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#79, `dev` `8d85c10`, sur `origin/dev` `6e9fbbe`, qui n'avait pas
+  bougé : aucun rebase), conforme à l'annonce ; ANNONCÉ (2026-11-26, STORY-332, avant le code)** — branche `MNV-332` de `prospera-fiscal-service`, partie de
+  `origin/dev` `6e9fbbe`. **Aucune migration** (aucun stockage ne change), ni `app.module.ts` (la route neuve entre dans
+  `DepotsDeclarationController`, déjà monté ; le service neuf est fourni par `DepotsModule`, fichier de D), ni
+  `package.json` (le `prebuild` appelle la même garde, étendue aux guidages), ni `read-models/`, ni copie du paquet
+  fiscal, ni manifeste `declarations`. Touché parmi les communs : **le contrat OpenAPI** (une route neuve : « ⚠
+  Contrats »). Données neuves dans le dossier de D : `modules/paquets-depot/assets/manifeste-guidages.json`,
+  `tg-tva-guidage-1.0.json` et `tg-dsf-guidage-1.0.json` (LF, vérifiées par sha256) ; les formats et leurs deux
+  manifestes **intacts**. **Lus, sans y écrire** (dossiers de C) : `REDEVABLE_ENTREPRISE` et `NatureRedevable`
+  (`domain/redevables/redevable.ts`), les ports des obligations et des versions. **→ C** : rien à faire pour un rebase.
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#78, `dev` `6e9fbbe`, rebasée sur `origin/dev` `9db1653` — 327
+  de C, qui touchait aussi le contrat OpenAPI — avant la fusion), conforme à l'annonce ; ANNONCÉ (2026-11-26,
+  STORY-331, avant le code)** — branche `MNV-331` de `prospera-fiscal-service`, partie de
+  `origin/dev` `7d48fd9`. **Aucune migration** (aucun stockage ne change), ni `app.module.ts` (la route neuve entre dans
+  `LivrablesDeclarationController`, déjà monté), ni `package.json` (le `prebuild` appelle la même garde, étendue), ni
+  `read-models/`, ni copie du paquet fiscal, ni manifeste `declarations`. Touché : **le contrat OpenAPI** (une route
+  neuve, un refus de plus sur la route du classeur de 330, un champ `nature` sur les deux réponses du dépôt engagé :
+  « ⚠ Contrats »). Données neuves dans le dossier de D : `modules/paquets-depot/assets/manifeste-formulaires.json` et
+  `tg-tva-1.0.json` (LF, vérifiées par sha256) ; `manifeste.json` et `tg-dsf-*.json` **intacts**. **Lus, sans y écrire**
+  (dossiers de C) : `domain/obligations/version-declaration.ts` (`contenuDeclareDe`), les ports des obligations et des
+  versions. **→ C** : rien à faire pour un rebase ; `etatsActifs` (le calendrier des dépôts que lisent les échéances) ne
+  voit jamais un formulaire (D-331-2).
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#76, `dev` `7d48fd9`, sur `origin/dev` `7e2bff8`, qui n'avait pas
+  bougé : aucun rebase), conforme à l'annonce, plus un fichier de D : `src/modules/coffre-secrets/garde-ad13.spec.ts`
+  (la route du livrable d'une déclaration reçoit le classeur de 537, D-330-17) ; ANNONCÉ (2026-11-26, STORY-330, avant
+  le code)** — branche `MNV-330` de `prospera-fiscal-service`, partie de
+  `origin/dev` `7e2bff8`. **Aucune migration** (une collection neuve, `engagements_depot`, son index unique partiel posé
+  par Mongoose au démarrage), ni `app.module.ts` (les deux contrôleurs neufs entrent dans `DepotsModule` et
+  `LivrablesDepotModule`, déjà montés ; ces deux modules importent `ObligationsModule`), ni `package.json`, ni
+  `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touchés : **le contrat OpenAPI** (trois routes neuves :
+  « ⚠ Contrats ») et **`src/main.ts`** (transverse : deux en-têtes de réponse de plus dans `exposedHeaders` du CORS,
+  `X-Declaration-Version` et `X-Declaration-Empreinte`). **Lus, sans y écrire** (dossiers de C) :
+  `ports/registre-obligations.ts`, `ports/registre-versions-declaration.ts` (exporté pour 330, D-325-11),
+  `domain/obligations/version-declaration.ts` (`contenuDeclareDe`, `empreinteDuContenu`, `versionCouranteDe`),
+  `domain/obligations/cycle.ts` (`CYCLE`, `obligationDesactivee`), `test/utils/registre-obligations-memoire.ts` (l'e2e).
+  Tout le reste dans les dossiers de D (`depots`, `livrables-depot`, `adapters/canal-depot`, `adapters/mongo` de
+  l'engagement, `ports/canal-depot.ts`, `ports/registre-engagements-depot.ts`) et une garde neuve
+  `src/modules/depots/garde-ad12.spec.ts`. **→ C** : rien à faire pour un rebase ; aucune voie de D ne passe une obligation
+  à « Déposée » (D-330-7).
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#73, `dev` `136efdf`, rebasée sur `origin/dev` `493a817` avant la
   fusion), conforme à l'annonce, plus un fichier de D : `src/domain/paquets-depot/libelle-imprime.spec.ts` (la borne de
   temps passe de 500 à 2000 ms, demande de C, commit séparé) ; ANNONCÉ (2026-11-26, STORY-349, avant le code)** —
@@ -2238,6 +2618,134 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-26, STORY-335, avant le code) — l'archive d'une déclaration déposée** (`prospera-fiscal-service`,
+  module `depots`). Fiche : `stories/STORY-335.md` (D-335-1 → 10, section « Contrat »). **Ajouts seuls** :
+  - **`POST /api/v1/depots-declaration/{depotId}/livrable`** (droit `fiscalite:declaration:deposer`, multipart : `fichier`
+    pour un format à fichier, aucun pour un formulaire) : 201 `{ archiveId, depotId, obligationId, dossierId,
+    implantationId, redevableId, taxe, periode, numero, empreinte, nature: FICHIER | FORMULAIRE, format, fichier: { sha256,
+    taille, type, nom }, archivePar, archiveLe, statutObligation }`. Refus neufs : **`409 LIVRABLE_NON_ARCHIVABLE`**
+    (`{ statut }`), **`409 LIVRABLE_DEJA_ARCHIVE`** (`{ archiveId }`), **`422 LIVRABLE_REQUIS`**, **`422
+    FICHIER_NON_ATTENDU`**, **`422 LIVRABLE_NON_CONFORME`** (`{ attendu, lu }`) ; et ceux du dépôt engagé (`404
+    DEPOT_INTROUVABLE`, `409 DEPOT_REMPLACE`, `409 OBLIGATION_DESACTIVEE`, `409 LIVRABLE_PERIME`, `422
+    FORMAT_DE_CANAL_NON_DECLARE`, `422 CLASSEUR_*`, `413`).
+  - **`GET /api/v1/depots-declaration/{depotId}/livrable`** (accès fiscal) : 200 `{ livrable, url, expireLe }` (URL
+    présignée éphémère, objet re-haché d'abord, 682) ; **`404 LIVRABLE_NON_ARCHIVE`**, `502 FICHIER_ARCHIVE_ALTERE`.
+  - **`GET /api/v1/depots-declaration/{depotId}/accuse/piece`** (accès fiscal) : 200 `{ accuseId, piece, url, expireLe }` ;
+    `404 ACCUSE_INTROUVABLE`, **`404 PIECE_ACCUSE_ABSENTE`**, `502 FICHIER_ARCHIVE_ALTERE`.
+  - **`GET /api/v1/depots-declaration/archives?obligationId=…`** (accès fiscal) : 200 `{ obligationId, dossierId,
+    implantationId, redevableId, taxe, periode, statutObligation, versions: [{ numero, livrable, accuse, rejet }] }` (la
+    plus récente d'abord, aucune URL) — **ce que 336 lira**.
+  - Collection neuve `livrables_archives_depot` ; acte `DEPOT_DECLARATION_LIVRABLE_ARCHIVE`. Aucun topic, aucun droit
+    neuf, aucun champ d'une route existante. **→ A (plus tard)** : FE-081 archive le livrable déposé et ouvre les pièces.
+
+- **PUBLIÉ (2026-11-26, STORY-334 : prospera-fiscal-service#82, `dev` `69d7e65`) sans écart ; ANNONCÉ (2026-11-26,
+  STORY-334, avant le code, prospera-stories#1004, `main` 9bcdf01) — le rejet administratif d'un dépôt engagé**
+  (`prospera-fiscal-service`, module `depots`). Fiche : `stories/STORY-334.md` (D-334-1 → 15, section « Contrat »).
+  **Ajouts, et un refus de plus sur une route de 333** :
+  - **`POST /api/v1/depots-declaration/{depotId}/rejet`** (droit `fiscalite:declaration:preparer`, JSON : `rejeteLe`,
+    `motif` à l'octet, `reference?`, `cause?: { feuille?, cellule?, regle? }`, `correctionProposee?`) : 201 `{ rejetId,
+    depotId, obligationId, dossierId, numero, empreinte, rejeteLe, motif, reference, cause, correctionProposee,
+    consignePar, consigneLe, retard, reprise: { versionRejetee, retour: { vers: 'A_DEPOSER' }, etapes }, statutObligation
+    }`. Refus : `400` (`MOTIF_INVALIDE`, **`TEXTE_REJET_INVALIDE`** `{ champ }`), `404 DEPOT_INTROUVABLE`, `409
+    DEPOT_REMPLACE`, `409 OBLIGATION_DESACTIVEE`, `409 LIVRABLE_PERIME`, **`409 REJET_NON_CONSIGNABLE`** (`{ statut }`),
+    `409 ACCUSE_DEJA_CONSIGNE`, **`409 REJET_DEJA_CONSIGNE`** (`{ rejetId }`), **`422 DATE_REJET_HORS_BORNES`**.
+  - **`GET /api/v1/depots-declaration/{depotId}/rejet`** (accès fiscal) : 200 le rejet ; **`404 REJET_INTROUVABLE`**.
+  - **`GET /api/v1/depots-declaration/rejets?obligationId=…`** (accès fiscal) : 200 `{ obligationId, statutObligation,
+    rejets: [{ ...rejet, retransmission: { numero, nature, versionId, scelleLe } | null }] }`.
+  - **Route de 333, un refus de plus** : `POST …/{depotId}/accuse` répond **`409 DEPOT_REJETE`** (`{ rejetId }`) sur une
+    version rejetée (D-334-5 : accusé et rejet s'excluent, par version).
+  - **Pour C** : `409 REJET_REQUIS` sur `POST /api/v1/obligations/{id}/retour` `{ vers: 'A_DEPOSER' }` depuis `DEPOSEE`, et
+    la nature de version `RETRANSMISSION`, quand C l'aura ouvert (D-334-8, « → C » ci-dessous). Collection neuve
+    `rejets_depot` ; acte `DEPOT_DECLARATION_REJET` (empreintes seules), textes en clair dans `textes_audit` (329). Aucun
+    topic, aucun droit neuf. **→ A (plus tard)** : FE-081 consigne le rejet et affiche la reprise.
+
+- **PUBLIÉ (2026-11-26, STORY-333 : prospera-fiscal-service#81, `dev` `fc317a1`) sans écart ; ANNONCÉ (2026-11-26,
+  STORY-333, avant le code, prospera-stories#998, `main` 572be5d) — l'accusé d'un dépôt engagé et le retard qualifié à
+  la date réelle**
+  (`prospera-fiscal-service`, module `depots`). Fiche : `stories/STORY-333.md` (D-333-1 → 13, section « Contrat »).
+  **Ajout seul** : aucune route, aucun champ, aucun topic existant ne change.
+  - **`POST /api/v1/depots-declaration/{depotId}/accuse`** (droit `fiscalite:declaration:deposer`, multipart : `piece`
+    facultatif, `reference` facultative, `deposeLe` exigée) : 201 `{ accuseId, depotId, obligationId, dossierId, numero,
+    empreinte, nature, reference, piece, deposeLe, consignePar, consigneLe, retard: { echeance, echeanceLegale, reportee,
+    joursDeRetard, qualification, penalites, source }, statutObligation }`. Refus : `404 DEPOT_INTROUVABLE`, `409
+    DEPOT_REMPLACE`, `409 OBLIGATION_DESACTIVEE`, **`409 ACCUSE_NON_CONSIGNABLE`** (`{ statut }` : la déclaration n'est
+    pas déposée), `409 LIVRABLE_PERIME`, **`409 ACCUSE_DEJA_CONSIGNE`** (`{ accuseId }`), **`422 ACCUSE_REQUIS`**, **`422
+    DATE_DEPOT_HORS_BORNES`** (`{ min, max }`), **`422 PIECE_ACCUSE_TYPE_REFUSE`**, `413`.
+  - **`GET /api/v1/depots-declaration/{depotId}/accuse`** (accès fiscal) : 200 l'accusé ; **`404 ACCUSE_INTROUVABLE`**.
+  - **`GET /api/v1/depots-declaration/accuses?obligationId=…`** (accès fiscal) : 200 `{ obligationId, accuses }`.
+  - **Code neuf pour C** : `409 ACCUSE_REQUIS` sur `POST /api/v1/obligations/{id}/transition` vers `ACCUSE_RECU`, quand C
+    l'aura branché (D-333-3, « → C » ci-dessous). Collection neuve `accuses_depot` ; objets sous `accuses/` dans le
+    bucket privé de 682 ; acte `DEPOT_DECLARATION_ACCUSE` au journal chaîné. Aucun topic ni droit. **→ A (plus tard)** :
+    FE-081 consigne l'accusé à l'étape `RELEVER_ACCUSE` du guidage.
+
+- **PUBLIÉ (2026-11-26, STORY-332 : prospera-fiscal-service#79, `dev` `8d85c10`) sans écart ; ANNONCÉ (2026-11-26,
+  STORY-332, avant le code, prospera-stories#991, `main` 72e9915) — le dépôt guidé pas à pas** (`prospera-fiscal-service`, modules
+  `depots` et `paquets-depot`). Fiche : `stories/STORY-332.md` (D-332-1 → 12, section « Contrat »). **Ajout seul** :
+  aucune route, aucun champ, aucun topic existant ne change.
+  - **`GET /api/v1/depots-declaration/{depotId}/guidage`** (droit `fiscalite:declaration:deposer`) : 200 `{ depotId,
+    obligationId, dossierId, redevable: { id, nature: 'ENTREPRISE' | 'PERSONNE_PHYSIQUE' }, taxe, periode, nature,
+    format, guidage: { pays, etat, version, checksum, statut }, canal: { type, adresse }, estampille: { numero, empreinte
+    }, etapes: [{ rang, code, libelle, geste, consigne, valeurs: [{ rang, code, libelle, type, valeur }] | null, fichier:
+    { format, numero, empreinte, periode } | null }] }`. Les étapes viennent du paquet de guidage, dans son ordre. Les
+    valeurs sont celles du formulaire de 331, dans l'ordre du formulaire, chacune une chaîne prête à copier. `geste`
+    prend sa valeur dans une liste fermée : `SE_CONNECTER`, `OUVRIR`, `SAISIR_VALEURS`, `TELEVERSER_FICHIER`,
+    `VERIFIER`, `SOUMETTRE`, `RELEVER_ACCUSE`. Aucun geste ne demande une valeur.
+  - Refus : `404 DEPOT_INTROUVABLE`, **`409 DEPOT_REMPLACE`** (`{ remplacePar }`), `409 OBLIGATION_DESACTIVEE`, `409
+    LIVRABLE_PERIME` (`{ numero, empreinte }`), `422 FORMAT_DE_CANAL_NON_DECLARE`, **`422 GUIDAGE_NON_DECLARE`** (`{
+    champ: 'guidage', pays, etat, version }`), **`422 GUIDAGE_INCOMPLET`** (`{ champ }`), `422
+    FORMAT_DE_CANAL_INCOMPLET`, `422 VALEUR_DE_CANAL_ABSENTE`, `422 VALEUR_DE_CANAL_HORS_CONTRAINTE`, `502
+    PAQUET_DEPOT_INTEGRITE`, `502 VERSION_SCELLEE_INTROUVABLE`.
+  - **Données** : deux guidages `amorce` (Q-D-29), `TG × TVA` (dimana : six étapes, les trois valeurs dans l'ordre) et
+    `TG × DSF` (GUDEF : un seul fichier à téléverser). Aucun topic, droit, acte ni stockage. **→ A (plus tard)** :
+    FE-081 affiche les étapes et met un bouton « copier » sur chaque valeur.
+
+- **PUBLIÉ (2026-11-26, STORY-331 : prospera-fiscal-service#78, `dev` `6e9fbbe`) sans écart ; ANNONCÉ (2026-11-26,
+  STORY-331, avant le code, prospera-stories#986, `main` 756fc0f) — le format de canal décrit comme une donnée du
+  paquet**
+  (`prospera-fiscal-service`, modules `paquets-depot`, `livrables-depot` et `depots`). Fiche : `stories/STORY-331.md`
+  (D-331-1 → 12, section « Contrat »).
+  - **`GET /api/v1/livrables-declaration/{obligationId}/formulaire`** (droit `fiscalite:declaration:preparer`) : 200
+    `{ obligationId, nature: 'SAISIE_FORMULAIRE', format: { pays, etat, version, checksum }, statutFormat, estampille:
+    { numero, empreinte }, champs: [{ rang, code, libelle, type: 'MONTANT' | 'PERIODE', valeur: string | null }] }` —
+    les valeurs du contenu de l'estampille (la version scellée si elle l'est), dans l'ordre du formulaire. Refus : `404
+    OBLIGATION_INTROUVABLE`, `409 DECLARATION_NON_VALIDEE`, `409 OBLIGATION_DESACTIVEE`, `422
+    FORMAT_DE_CANAL_NON_DECLARE`, `422 FORMAT_DE_CANAL_ILLISIBLE`, **`422 FORMAT_DE_CANAL_AUTRE_NATURE`** (`{ nature
+    }`), **`422 FORMAT_DE_CANAL_INCOMPLET`** (`{ champ }`), **`422 VALEUR_DE_CANAL_ABSENTE`** (`{ champ, valeur }`),
+    **`422 VALEUR_DE_CANAL_HORS_CONTRAINTE`** (`{ champ, contrainte }`), `502 PAQUET_DEPOT_INTEGRITE`, `502
+    VERSION_SCELLEE_INTROUVABLE`.
+  - **Changé** : `POST /api/v1/livrables-declaration/{obligationId}` (330) rend `422 FORMAT_DE_CANAL_AUTRE_NATURE` (`{
+    nature: 'SAISIE_FORMULAIRE' }`) sur une déclaration que seul un formulaire décrit (elle rendait
+    `FORMAT_DE_CANAL_NON_DECLARE`). `POST /api/v1/depots-declaration` et `GET /api/v1/depots-declaration/{depotId}`
+    gagnent **`nature`** (`TELEVERSEMENT_FICHIER` | `SAISIE_FORMULAIRE` | `null`) ; le `format` d'une TVA sur dimana y
+    est la référence de `TG × TVA` 1.0 (il valait `null`). Toujours aucun champ d'accusé.
+  - **Données** : le paquet de formulaire `TG × TVA` 1.0 (dimana), `statut: 'amorce'` (Q-D-28) ; le GUDEF reste `TG ×
+    DSF` 1.3. Aucun topic, droit, acte ni stockage. **→ A (plus tard)** : FE-081 lit `nature` pour choisir l'écran
+    (téléverser ou recopier) ; 332 affichera les valeurs dans l'ordre.
+
+- **PUBLIÉ (2026-11-26, STORY-330 : prospera-fiscal-service#76, `dev` `7d48fd9`) sans écart ; ANNONCÉ (2026-11-26,
+  STORY-330, avant le code, prospera-stories#978, `main` 6f6b797) — le livrable d'une déclaration et le dépôt engagé**
+  (`prospera-fiscal-service`, modules `livrables-depot` et `depots`). Fiche : `stories/STORY-330.md` (D-330-1 → 16,
+  section « Contrat »). **Ajouts seuls** : aucune route, aucun champ, aucun topic existant ne change ; la route de 537
+  (`POST /livrables-depot/{pays}/{etat}`) et la chaîne de 538 (`/depots`) restent identiques.
+  - **`POST /api/v1/livrables-declaration/{obligationId}`** (droit `fiscalite:declaration:preparer`) : multipart de 537
+    moins `dossierId` (pris sur l'obligation) ; le format est celui que le `gabarit` de l'obligation nomme ; la
+    déclaration doit être `VALIDEE` ou au-delà. 200 : le classeur rempli, en-têtes de 537 **+ `X-Declaration-Version` +
+    `X-Declaration-Empreinte`** (la version scellée si elle l'est, sinon le contenu courant). Refus neufs : `409
+    DECLARATION_NON_VALIDEE`, `422 FORMAT_DE_CANAL_NON_DECLARE` (`{ champ: 'gabarit', canal }`), `422
+    FORMAT_DE_CANAL_ILLISIBLE` ; plus `404 OBLIGATION_INTROUVABLE`, `409 OBLIGATION_DESACTIVEE`, `422
+    PAQUET_DEPOT_NON_PUBLIE` et ceux de 537.
+  - **`POST /api/v1/depots-declaration`** (droit `fiscalite:declaration:deposer`) : corps `{ obligationId, numero,
+    empreinte }` ; 201 (créé) ou 200 (rejeu) `{ depotId, obligationId, dossierId, numero, empreinte, canal, format |
+    null, mode: 'ASSISTE', statut: 'ENGAGE', engagePar, engageLe, rejoue }` — **aucun champ d'accusé** (AD-12 : il
+    arrivera comme un fait séparé, 333). L'obligation reste à `A_DEPOSER` (Q-D-27). Refus : `409 DEPOT_NON_ENGAGEABLE`,
+    `409 LIVRABLE_PERIME`, `409 ENGAGEMENT_CONCURRENT`, `409 OBLIGATION_DESACTIVEE`, `404 OBLIGATION_INTROUVABLE`, `422`
+    du format.
+  - **`GET /api/v1/depots-declaration/{depotId}`** : le dépôt engagé + `statut` (`ENGAGE` | `REMPLACE`), `remplacePar`,
+    `perime`, `statutObligation` ; `404 DEPOT_INTROUVABLE`.
+  - **Journal chaîné** : périmètre `depot-declaration:<depotId>`, actes `DEPOT_DECLARATION_ENGAGE` et
+    `DEPOT_DECLARATION_REMPLACE`. Aucun topic, aucun droit neuf.
+  - **→ A (plus tard)** : l'écran du livrable d'une déclaration et de son engagement (FE-081). **→ C** : rien à faire.
 
 - **PUBLIÉ (2026-11-26, STORY-1141 : prospera-paiement-service#126, `dev` `f6a4800`, `64b5838` ;
   prospera-ventes-service#17, `dev` `dcb5d3b`) sans écart ; ANNONCÉ (2026-11-26, avant le code, prospera-stories#967,
@@ -3466,6 +3974,34 @@
 
 ## Questions à l'utilisateur ou au PO
 
+- **Q-D-31 (2026-11-26, STORY-335) — La preuve du dépôt vit dans le fiscal ; le fonds du client en reçoit-il une
+  copie ?** L'AC-1 de 335 dit « dans `document-service` » ; le lot 6 a mis la preuve du dépôt dans le bucket privé du
+  fiscal (682). **Choix par défaut** (D-335-9) : l'original reste au fiscal (l'empreinte, l'URL présignée re-vérifiée) ;
+  la GED de B en reçoit une copie rattachée quand B l'aura ouverte (« → B » ci-dessus).
+
+- **Q-D-30 (2026-11-26, STORY-333) — Les majorations de retard des déclarations du mois : quel paquet les déclare ?**
+  **Choix par défaut** (D-333-8) : seul le paquet de dépôt de la liasse (`TG × DSF`) porte `penalites[]`. Le retard d'une
+  déclaration du mois est qualifié (jours, `EN_RETARD`), et son risque dit `source: null` (« aucun paquet ne déclare de
+  pénalité ») au lieu d'inventer un taux. Les déclarer ne coûtera qu'une donnée de paquet.
+
+- **Q-D-29 (2026-11-26, STORY-332) — Les écrans réels de dimana et du GUDEF : quelles étapes, dans quel ordre ?**
+  **Choix par défaut** : deux guidages `amorce` de six étapes (se connecter avec le compte du redevable, ouvrir,
+  reporter les valeurs ou téléverser le fichier, vérifier, valider, relever l'accusé). Ils seront relevés sur les
+  portails au premier dépôt réel (1102). Changer une étape ne coûte qu'une version du paquet de guidage, sans code et sans
+  toucher au format. Les lignes du formulaire réel que le produit ne tient pas (Q-D-28) restent à remplir sur le
+  portail, et la consigne de l'étape de saisie le dit.
+
+- **Q-D-28 (2026-11-26, STORY-331) — Le formulaire mensuel de TVA de dimana : quelles lignes, dans quel ordre ?**
+  **Choix par défaut** (D-331-9) : les trois valeurs que le produit tient (la période, la base imposable, la TVA due),
+  dans cet ordre, au paquet `TG × TVA` 1.0 en `statut: 'amorce'` ; le relevé du formulaire réel se fait au premier dépôt
+  réel (1102). Une ligne de plus ne coûte qu'une version du paquet si sa valeur existe dans le produit ; sinon, elle reste
+  à saisir sur le portail, et le guidage (332) le dira.
+
+- **Q-D-27 (2026-11-26, STORY-330) — Engager un dépôt fait-il passer la déclaration à « Déposée » ?** **Choix par
+  défaut** (D-330-7) : non. « Déposée » est la transmission (D-323-3) et reste la porte de C, avec l'accord du client et
+  le scellement de la version ; un dépôt engagé que personne n'a encore fait sur le portail garde son alerte d'échéance. Si
+  le PO veut l'inverse, l'engagement appellera la porte de C (D-324-7), sans autre changement.
+
 - **Q-D-26 (2026-11-26, STORY-1141) — Un compte `MARCHAND` (ou `PI_SPI`) peut-il porter un numéro imprimable ?**
   **Choix par défaut** (D-1141-3) : non. Seuls `BANCAIRE` et `MOBILE_MONEY` en portent un : un compte marchand se paie
   par un lien, et un compte PI-SPI imprime déjà sa destination en clair. Pour l'ouvrir au marchand, il suffit d'ajouter
@@ -3678,6 +4214,54 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-333** (fiscal) :
+  - (1) **Un heredoc de bash qui contient du TypeScript ou du Python avec apostrophes casse la commande entière**
+    (« unexpected EOF while looking for matching `'` ») : rien n'est écrit, et rien ne le dit. Écrire les fichiers et les
+    scripts par l'outil d'écriture, puis les lancer (la règle du brief, vérifiée deux fois).
+  - (2) **Un `'﻿'` écrit par un script Python dans une chaîne non brute devient un vrai BOM dans le source** :
+    `no-irregular-whitespace` le refuse. Garder l'échappement dans le source (`/^﻿/u`).
+  - (3) **Le service de cycle de C n'est pas exporté** par `ObligationsModule` : une story de D qui doit faire avancer
+    une obligation, ou garder une transition, demande à C (export ou garde) au lieu de fournir le service dans son
+    module. 333 a fourni la preuve et la règle dans un module qui n'importe pas `ObligationsModule`, pour que C puisse
+    l'importer sans cycle.
+- **STORY-332** (fiscal) :
+  - (1) **Une mutation qui laisse une variable ou un paramètre inutilisé rougit en compilation, pas sur une
+    assertion.** Avec `noUnusedLocals` et `noUnusedParameters`, supprimer un appel (`verifierEstampille(depot, courante)`)
+    ou une lecture (`parCode.get(code)`) rend `courante` ou `code` inutilisés. Écrire la mutation en gardant l'usage :
+    rendre la condition toujours fausse (`&& x < 0`), ou passer une valeur neutre (`{ ...courante, numero:
+    depot.numero, … }`).
+  - (2) **Une mutation restée verte peut révéler du code mort, pas un test manquant.** La garde « deux guidages actifs
+    de la même version » ne pouvait jamais se déclencher : `analyserManifeste` refuse déjà deux entrées actives d'un même
+    couple (`PAQUET_DEPOT_AMBIGU`). Avant d'écrire un test de plus, chercher si une couche plus basse tient déjà la
+    règle. Si c'est le cas, retirer le code et le dire dans la fiche.
+  - (3) Sous Node 25, les trois tests de régénération du classeur à l'octet (`paquet-tg-dsf-11/12/13`) rougissent tant
+    que les copies de `completude-depot/assets/` sont en CRLF (le piège (1) de 331, qui vaut aussi pour ce dossier).
+    Ils sont verts sous Node 24.
+- **STORY-331** (fiscal) :
+  - (1) **Les copies du paquet de dépôt en CRLF doivent être réécrites par `git show` pour les tests locaux.** Cela vaut
+    aussi pour les deux copies neuves, `manifeste-formulaires.json` et `tg-tva-1.0.json`. Avec `core.autocrlf=true`,
+    un fichier ajouté ou rebasé ressort en CRLF, et son sha256 ne correspond plus au manifeste. Sous Node 25, avant les
+    suites, faire `git show HEAD:<f> > <f>` sur chaque copie de `paquets-depot/assets/` et de `completude-depot/assets/`.
+    `git status` les dit alors « M » sans aucun diff (`--ignore-cr-at-eol` vide). Ne jamais les ajouter, et faire
+    `git checkout -- <dossiers>` avant le commit et avant de rendre le worktree. L'archive LF de Docker n'a pas ce
+    problème.
+  - (2) **Un motif de mutation doit viser un texte unique dans le fichier, pas un texte partagé.** Un motif qui se
+    trouve aussi ailleurs dans le fichier mute la mauvaise occurrence, ou les deux. La mutation rougit alors pour une
+    autre raison que celle qu'elle prétend éprouver, ou ne rougit pas. Le script compte les occurrences (exactement 1,
+    sinon il s'arrête), et le motif est élargi jusqu'à la ligne qui ne se trouve qu'à l'endroit visé.
+
+- **STORY-330** (fiscal) :
+  - (1) **Les copies du paquet de dépôt (`paquets-depot/assets/`, `completude-depot/assets/`) sont vérifiées par leur
+    sha256 sur les octets LF du dépôt** ; avec `core.autocrlf=true`, le checkout les écrit en CRLF et les suites du
+    livrable rougissent localement (« L'empreinte du paquet de dépôt ne correspond pas au manifeste »). Pour les
+    tests sous Node 25, réécrire les blobs (`git show HEAD:<f> > <f>`) : `git status` les dit alors « M » sans aucun
+    diff. Ne jamais les ajouter ; `git checkout -- <dossiers>` avant de rendre le worktree. L'archive LF de Docker
+    n'a pas ce problème.
+  - (2) **Une route neuve qui reçoit un fichier rougit la garde d'AD-13 de 560** (« une seule route reçoit un
+    fichier ») : elle n'est vue qu'à la suite complète. L'ajouter à `ROUTES_DE_FICHIER` avec sa raison, dans la même PR.
+  - (3) **Un motif de mutation écrit sur une ligne que prettier a coupée** n'est pas trouvé (« MOTIF INTROUVABLE ») :
+    écrire le motif sur le texte formaté (retour à la ligne compris) et rejouer la mutation seule.
 
 - **STORY-1141** (paiement, ventes) :
   - (1) **Le tamis du journal de paiement refuse une VALEUR qui a la forme d'un téléphone**, pas seulement un nom de

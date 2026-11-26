@@ -2121,7 +2121,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-979.md"
     reserved_on: "2026-11-24"
     note: >
-      🏁 QUATRIÈME SUITE DONE le 2026-11-25 (rouverte, puis refermée ; fiche, « Quatrième suite (2026-11-25) », D-979-29
+      🏁 CINQUIÈME SUITE DONE le 2026-11-26 (rouverte, puis refermée ; fiche, « Cinquième suite (2026-11-26) », D-979-35
+      → 40 ; lot 7 de B, ordre « g », D-L7B-11) — catalogue #83 (dev ce8cbc0) ; contrat annoncé avant la fusion (stories
+      #980, main 59ed625). La demande de D (STORY-1141) : paiement 1.2.0 recopié depuis prospera-stories@59ed625 (sha256
+      vérifié, code fusionné : paiement #126, 64b5838) ; ged 1.10.0 entraîné par la copie entière (« f », suite de
+      STORY-1119 ; document-service #40, 5d060aa). manifestes:garde verte (48) contre main. Aucun droit ne change ; auth
+      inchangé. Node 25 : catalogue 69/69 par chemin, complète 1630 passés (3 suites rouges connues) ; build ; 3/3
+      mutations rouges. Sans Docker (D-979-39).
+      Quatrième suite : 🏁 QUATRIÈME SUITE DONE le 2026-11-25 (rouverte, puis refermée ; fiche, « Quatrième suite (2026-11-25) », D-979-29
       → 34 ; lot 7 de B, entre la « c » et STORY-1119, D-L7B-6) — catalogue #76 (dev 66a4f6c) ; contrat annoncé avant
       la fusion (stories #913, main 0ee7144). La demande de C (STORY-1020) : le manifeste balance 1.2.0 recopié depuis
       prospera-stories@ac8e450 (sha256 vérifié), après la fusion de son code (balance-service #165, 58322c4) ; la copie
@@ -2165,12 +2172,86 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
-  - range: "STORY-1125"
+  - range: "STORY-1129"
     status: "in-progress"
+    owner: "Groupe B, lot 7, n° 11 — le cabinet sur le moteur (EPIC-144, 159) : le PUT d'octroi n'installe plus un module que le moteur sait vérifier (409 INSTALLATION_PAR_LE_MOTEUR ; sanction, levée et réécriture gardées), le BFF relaie les refus du moteur, conseil dans INSTALLATION_SERVICES, recettes croisées installées par l'offre et POST /installations (platform-catalog-service, admin-panel, prospera-recette)"
+    source_doc: "prospera-stories/stories/STORY-1129.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite et contrat annoncé avant le code (2026-11-26) : AP-55 livrée (A, a18dda1) ; la console n'écrit plus
+      par le PUT du BFF (le panneau des droits d'AP-05 appelle le catalogue, code inconnu = phrase générique). Le PUT du
+      catalogue refuse 409 INSTALLATION_PAR_LE_MOTEUR l'installation d'un module que le moteur sait vérifier (aucune
+      vérification au manifeste, ou une adresse dans INSTALLATION_SERVICES) ; un module sans adresse garde le passage
+      transitoire de STORY-945 ; le BFF relaie les codes du moteur sur son PUT ; conseil=http://balance-service:3007 ;
+      FR-6 de cabinet-moteur sur declarations ; six recettes rejouées sur pile neuve. D-1129-1 → 10. Lot 7 de B, n° 11 ;
+      fusion au plus tard le 18/12 (D-L7B-5). NON SLOTTÉE.
+  - range: "STORY-1128"
+    status: "done"
+    owner: "Groupe B, lot 7, n° 10 — le contrat d'état publié figé (EPIC-142) : garde du gel (historique des versions et photos, ajouts seuls, matrice figée par majeure), Karapace BACKWARD_TRANSITIVE sur etat-publie.changed.*, copie publiée et étiquetée dans prospera-plateforme ; versionCode dans la comparaison de l'émetteur ; inventaire d'EPIC-142 → 147 et 159 (platform-catalog-service, prospera-plateforme)"
+    source_doc: "prospera-stories/stories/STORY-1128.md"
+    reserved_on: "2026-11-25"
+    note: >
+      🏁 DONE le 2026-11-26 — platform-catalog-service #85 (dev 2a19265, e35d6a0), prospera-plateforme #42 (dev
+      758568e, étiquette contrat-etat-publie-v1.1) ; contrat annoncé avant le code (stories #1000, main 6742cfb).
+      Node 25 : 1699 passés (3 suites rouges connues, binding) ; plateforme 674/674 ; mutations 18/18 ; Node 24 :
+      105/105 suites, 1719/1719, lint, build ; pile grp-b neuve : sujets de l'état publié en BACKWARD_TRANSITIVE,
+      schemas:compatibilite vert, test:schemas 9/9 (la liste rendue requise refusée contre la v1, acceptée en BACKWARD
+      seul), test:socle 20/20 (versionCode republié). Inventaire d'EPIC-142 → 147 et 159 dans la fiche (pour
+      STORY-1131). D-1128-1 → 15. Contrat d'origine :
+      Fiche écrite et contrat annoncé avant le code (2026-11-26) : version figée 1.1.0 (contrat-etat-publie-v1.1,
+      efedd3e), aucun octet du contrat ne change ; contrat/historique/etat-publie/ (versions.json, photos 1.0.0 et
+      1.1.0, empreinte canonique) et src/contrat/etat-publie.gel.spec.ts (changement non versionné, ajouts seuls,
+      matrice figée dans une majeure) ; sujets etat-publie.changed.* en BACKWARD_TRANSITIVE, compatibilité vérifiée
+      contre chaque version ; prospera-plateforme/contrats/etat-publie/ (copie à l'étiquette, ORIGINE.json, la garde
+      partagée rejouée sans se sauter), étiquette contrat-etat-publie-v1.1 dans la plateforme ; l'émetteur range et
+      compare versionCode (D-1127-10), republication une fois au démarrage. D-1128-1 → 12. Lot 7 de B, n° 10 ; fusion
+      au plus tard le 11/12 (D-L7B-5). NON SLOTTÉE.
+  - range: "STORY-1127"
+    status: "done"
+    owner: "Groupe B, lot 7, n° 9 — les référentiels habilités dans l'état publié : module.referentiels, champ facultatif de la route et de etat-publie.changed (la forme de entitlement.changed v2), avant le gel du 11/12 (platform-catalog-service ; manifeste instance 1.1.0)"
+    source_doc: "prospera-stories/stories/STORY-1127.md"
+    reserved_on: "2026-11-25"
+    note: >
+      🏁 DONE le 2026-11-26 — platform-catalog-service #84 (dev efedd3e), étiquette contrat-etat-publie-v1.1 ; contrat
+      annoncé avant le code (stories #992, main 650024d). Node 25 : 1657 passés (3 suites rouges connues, binding) ;
+      mutations 14/14 ; Node 24 : 104/104 suites, 1676/1676, lint, build ; pile grp-b neuve : Karapace v1 → neuf compatible
+      BACKWARD (versions [1, 2]), test:schemas 6/6, test:socle 19/19 ; catalogue construit : assurance republiée n° 5 avec
+      la liste, declarations n° 1 avec l'intégrité, changement de liste n° 6, second démarrage muet, faits valides ; route
+      et console servent la liste. D-1127-1 → 13. Contrat d'origine :
+      Fiche écrite et contrat annoncé avant le code (2026-11-26) : module.referentiels ({ code, version, artifactUri?,
+      checksum? }[], minItems 1, la liste du droit, omise hors installation), à la route GET /etat-publie/{org}, à la
+      lecture de la console et à etat-publie.changed.essai@1 / .reel@1 (schemaVersion 1, BACKWARD) ; OpenAPI du contrat
+      1.1.0, étiquette contrat-etat-publie-v1.1 ; l'émetteur republie sur un changement de liste ; manifeste instance
+      1.1.0 recopié. BFF et plateforme inchangés. D-1127-1 → 11. Lot 7 de B, n° 9 ; fusion au plus tard le 09/12
+      (D-L7B-5). NON SLOTTÉE.
+  - range: "STORY-1126"
+    status: "done"
+    owner: "Groupe B, lot 7, n° 8 — la recette des archives de bout en bout : le parcours UJ-2 sur pile neuve (40 boîtes reçues, cotées, numérisées dans leur lot, lues, contrôlées, versées ; une facture de 2019 retrouvée en moins de trois gestes avec la cote de son original ; une pièce sortie et rentrée ; un récolement ; la restitution et la fin de mission), la console par le BFF (prospera-recette ; document-service et BFF éprouvés)"
+    source_doc: "prospera-stories/stories/STORY-1126.md"
+    reserved_on: "2026-11-25"
+    note: >
+      🏁 DONE le 2026-11-26 — prospera-recette #34 (dev 585d8bd, 9a7749a, 3ca9907) ; défaut révélé corrigé à part :
+      document-service #41 (dev 5261720, 57f9581 : la GED relisait GET /moi/droits à chaque requête, auth la limitait,
+      503 DROITS_INDISPONIBLES à la cinquième boîte ; cache des droits 60 s par jeton ; recensement STORY-695 complété).
+      Recette npm test 175/175, mutations 10/10 ; document-service Node 25 unitaires 1396 (3 rouges du poste), e2e 222/222,
+      mutations 8/8, Node 24 117/117 suites, 222/222 ; pile grp-b-recette neuve depuis origin/dev : 13/13 (40 boîtes
+      numérisées en 81 s, facture de 2019 en 2 gestes, 126 ms). D-1126-1 → 13. Contrat d'origine :
+      Fiche écrite et contrat annoncé avant la fusion (2026-11-26) : le profil de recette pose sur document-service
+      INSTANCE_ESPACE, AUTH_SERVICE_URL et GED_CLE_CABINET (interpolée depuis RECETTE_GED_CLE_CABINET, tirée par le paquet
+      dans .recette/, jamais versionnée) ; recette neuve npm run recette -- archives. Aucune route, aucun fait, aucun droit
+      ne change dans un service (sauf défaut révélé, annoncé à part). D-1126-1 → 10. Lot 7 de B, n° 8. NON SLOTTÉE.
+  - range: "STORY-1125"
+    status: "done"
     owner: "Groupe B, lot 7, n° 7 — l'archivage se mesure et se vend : compteurs par cabinet (fonds, pièces et pages versées, volume stocké, boîtes cotées, au mois et au total), quota de l'offre posé par cabinet par Money Vibes, l'alerte de quota sur ce quota, relais du BFF pour la console (document-service, module ged ; admin-panel ; écran AP-51 : A)"
     source_doc: "prospera-stories/stories/STORY-1125.md"
     reserved_on: "2026-11-25"
     note: >
+      🏁 DONE le 2026-11-26 — document-service #39 (dev 5c50ca6), BFF admin-panel #45 (dev 959aeee, 81817fe) ; contrat
+      annoncé avant le code (stories #969, main 33ef00e). Manifeste ged inchangé, aucune recopie au catalogue. Node 25 :
+      document-service unitaires 1379 (3 rouges du poste, CRLF), e2e 220/220 ; BFF 740/740, e2e 307/307 ; Node 24 : 117/117
+      suites, 220/220 ; mutations 21/21 (+1 rouge au compilateur) et 9/9 ; pile grp-b neuve avec le BFF construit appelé
+      pour de vrai : 35/35 (compteurs = Mongo compté à la main, versions détruites hors volume, quota de l'offre posé et
+      retiré par le BFF, ged.quota.depasse contre lui puis réarmé). → A : AP-51 débloquée. D-1125-1 → 16. Contrat d'origine :
       Fiche écrite et contrat annoncé avant le code (2026-11-26) : GET …/ged/plateforme/archivage, GET
       …/ged/plateforme/cabinets/{org}/archivage, PUT …/ged/plateforme/cabinets/{org}/quota (perms du jeton : org:read,
       entitlement:grant) ; compteurs calculés à la lecture ; quota posé tenu dans ged_quotas_cabinet, sinon celui du
@@ -2274,7 +2355,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1119.md"
     reserved_on: "2026-11-25"
     note: >
-      🏁 DONE le 2026-11-25 — document-service #33 (dev b7b3f91) et catalogue #77 (dev f4fcee0, ged 1.4.0 recopié) ;
+      🏁 SUITE DONE le 2026-11-26 (groupe B, lot 7, ordre « f », D-L7B-10 ; fiche, « Suite du 2026-11-26 », D-1119-19 → 26 ;
+      demande de C, STORY-324, servie) — document-service #40 (dev 5d060aa) ; contrat annoncé avant la fusion (docs #976,
+      main 10d9d6e). Plan de classement du cabinet 2026.2 (VALIDATION_CLIENT : annuel, fiscal, non sensible, 10 ans après
+      la fin de l'exercice ; servie à tous les fonds ; un code déjà pris par un cabinet reste le sien) ; GET
+      …/ged/cabinet/pieces/{pieceId}/versions/{version} (empreinte au format de ged.piece.recue, taille, nature, dossier ;
+      jamais le contenu ; détruite ou retirée : 200, etat le dit) ; manifeste ged 1.10.0 (recopie au catalogue avec « g »,
+      D-1119-25). Node 25 : unitaires 1390 (2 suites rouges connues du poste), e2e 222/222 ; mutations 12/12. Sans Docker.
+      Avant la suite : 🏁 DONE le 2026-11-25 — document-service #33 (dev b7b3f91) et catalogue #77 (dev f4fcee0, ged 1.4.0 recopié) ;
       contrat annoncé avant le code (stories #918, main 13e17a4). Journal d'intégrité chaîné par cabinet (versement,
       scellé, vérification, campagne, document émis, consultation sensible ; atomique avec l'acte ; 503
       JOURNAL_INDISPONIBLE), contrôle des empreintes par la file BullMQ (GED_CONTROLE_INTEGRITE_MOTIF, 0 3 * * * UTC ;
@@ -8053,7 +8141,7 @@ sprints:
         points: 5
         service: "fiscal-service"
         source_doc: "prospera-stories/stories/STORY-325.md"
-        status: "in_progress"  # 🚧 2026-11-26 — groupe C, lot 7 (n° 7 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-325-1 → 13) ; contrat et communs annoncés (journal de C) : la version scellée au dépôt (versions_declaration, jamais récrite : port sans écriture, schéma qui refuse toute mise à jour, garde AST), POST /obligations/{id}/rectificatives (à partir de DEPOSEE, CLOTUREE comprise ; version n + 1 en préparation, visa retiré, pièce du client à null), POST /obligations/{id}/retour (motif obligatoire), GET /obligations/{id}/versions, 409 OBLIGATION_CLOTUREE sur toute autre écriture d'une close ; aucune migration ; 330 de D l'attend.
+        status: "done"  # ✅ 2026-11-26 — groupe C, lot 7 (n° 7 du fiscal) : fiscal #75 (7e2bff8 : le dépôt scelle la version courante dans versions_declaration, document neuf jamais récrit — port sans écriture, schéma qui refuse toute réécriture, aussi sur validations_client, garde AST ; POST /obligations/{id}/rectificatives à partir de DEPOSEE, CLOTUREE comprise, version n + 1 en préparation, reprise d'une déposée avant 325 ; POST /obligations/{id}/retour, motif obligatoire ; GET /obligations/{id}/versions ; 409 OBLIGATION_CLOTUREE sur chaque écriture d'une close, liste fermée et e2e route par route ; la re-dérivation épargne une close) ; annonce #971 ; Node 24 : unitaires 225 suites, 3248 ; e2e 13/13, 308 ; conformité 25/25, 160 ; mutations 30/30 et 11/11 MongoDB ; pile grp-c saine ; D-325-1 → 13 ; D prévenu (330 débloquée) ; suivante STORY-327 — AVANT : 🚧 2026-11-26 — groupe C, lot 7 (n° 7 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-325-1 → 13) ; contrat et communs annoncés (journal de C) : la version scellée au dépôt (versions_declaration, jamais récrite : port sans écriture, schéma qui refuse toute mise à jour, garde AST), POST /obligations/{id}/rectificatives (à partir de DEPOSEE, CLOTUREE comprise ; version n + 1 en préparation, visa retiré, pièce du client à null), POST /obligations/{id}/retour (motif obligatoire), GET /obligations/{id}/versions, 409 OBLIGATION_CLOTUREE sur toute autre écriture d'une close ; aucune migration ; 330 de D l'attend.
         assigned_to: null
       - story_id: "STORY-326"
         title: "Contrôles de cohérence intra-période avec tolérances"
@@ -8067,7 +8155,8 @@ sprints:
         epic: "EPIC-031"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-327.md"
+        status: "done"  # ✅ 2026-11-26 — groupe C, lot 7 (n° 8 du fiscal) : fiscal #77 (9db1653, rebasée sur 7d48fd9 de D : POST /obligations/{id}/reports-declares et reportsDeclares, scellés dans contenu.reports seulement s’ils sont déclarés ; POST /obligations/{id}/coherence gagne CONTINUITE_CREDIT_TVA, CONTINUITE_DEFICIT — la dernière version déposée de la période précédente, l’attendu rendu sans déclaré — et DSF_DEFICIT_IMPUTE face à totalDeficitsImputes du moteur ; anomalies CONTINUITE_CREDIT_TVA_ROMPUE, CONTINUITE_DEFICIT_ROMPUE (elles nomment les deux périodes), DEFICIT_IMPUTATION_ECART ; le dépôt relance la période suivante) et balance-service #172 (effdc4a : continuite.reports et coherence.tolerances.DSF au paquet, empreinte 412770f5) ; annonce #977, amendée #983 avant la fusion ; Node 24 : fiscal unitaires 232 suites, 3413 ; e2e 14/14, 329 ; conformité 27/27, 173 ; balance 300/300, 5768 ; e2e 38/38, 2324 ; mutations 34/34 et 6/6 MongoDB ; pile grp-c saine ; D-327-1 → 12 ; → B recopie du paquet ; D prévenu ; suivante STORY-329 — AVANT : 🚧 2026-11-26 — groupe C, lot 7 (n° 8 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-327-1 → 11) ; contrat et communs annoncés (journal de C) : le paquet porte ses reports (continuite.reports : CREDIT_TVA, DEFICIT ; coherence.tolerances.DSF), le déclaré porte les siens (montantDeclare.reports, scellés seulement s'ils sont déclarés), POST /obligations/{id}/coherence gagne CONTINUITE_CREDIT_TVA, CONTINUITE_DEFICIT et DSF_DEFICIT_IMPUTE (la dernière version déposée de la période précédente ; totalDeficitsImputes du moteur), anomalies CONTINUITE_CREDIT_TVA_ROMPUE, CONTINUITE_DEFICIT_ROMPUE, DEFICIT_IMPUTATION_ECART ; le dépôt relance la période suivante ; aucune migration.
         assigned_to: null
       - story_id: "STORY-328"
         title: "Anomalies : gravité, blocage et levée motivée"
@@ -8081,7 +8170,8 @@ sprints:
         epic: "EPIC-031"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-329.md"
+        status: "done"  # ✅ 2026-11-26 — groupe C, lot 7 (n° 9 du fiscal) : fiscal #80 (94baf9f, rebasée sur 8d85c10 de D : GET /obligations/{id}/chemin — le déclaré d'une version, le calculé et le constat du moteur à son instant, le détail relu chez le moteur et sa concordance, la balance des bases, les lignes de cahier de la TVA et leurs pièces, chaque arrêt nommé ; GET /obligations/{id}/historique — le journal chaîné vérifié, qui et PARTI, quoi, quand, état avant et après, motif par empreinte ; textes_audit : les motifs en clair hors du journal, dans la transaction de l'acte) ; annonce #988 ; Node 24 : unitaires 244 suites, 3619 ; e2e 14/14, 349 ; conformité 28/28, 177 ; mutations 65/67 (2 équivalentes justifiées) et 6/6 MongoDB ; pile grp-c saine ; D-329-1 → 13 ; D prévenu ; EPIC-031 fini ; suivante STORY-339 — AVANT : 🚧 2026-11-26 — groupe C, lot 7 (n° 9 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-329-1 → 13) ; contrat et communs annoncés (journal de C) : GET /obligations/{id}/chemin (le déclaré d'une version → le calculé et son constat → le détail relu chez le moteur, sa concordance → la balance des bases → les lignes de cahier de la TVA → leurs pièces ; chaque arrêt nommé) et GET /obligations/{id}/historique (le journal chaîné vérifié ; qui, nom et PARTI ; état avant et après ; motif retrouvé par empreinte) ; collection neuve textes_audit (les motifs en clair hors du journal, même transaction) ; aucune migration ; balance-service non touché.
         assigned_to: null
       - story_id: "STORY-340"
         title: "Montant à régler net d'acomptes, crédits et retenues"
@@ -8198,29 +8288,33 @@ sprints:
         epic: "EPIC-032"
         points: 8
         service: "fiscal-service"
-        status: "not_started"  #  # ⚡⚡ JALON « FORMAT CONFIRME » LEVE LE 2026-08-28 : le PO a fourni UNE PIECE REELLE DE DEPOT — 1000745307_2025_Definitif.xlsx, DSF DEFINITIVE du dossier PMS (NIF 1000745307, exercice 2025), 92 feuilles. C est exactement ce que le blocage attendait (« aucune piece reelle de depot en main a ce jour »). STORY-330/331/332/333 cessent d etre bloquees.  — Historique —  ⛔ BLOQUÉE par le jalon `format confirmé` — aucune pièce réelle de dépôt en main à ce jour.
-        assigned_to: null
+        status: "done"  # 🏁 DONE le 2026-11-26 (lot 7 de D, n° 7) — prospera-fiscal-service#76 (dev 7d48fd9) ; annonce avant le code prospera-stories#978. Le livrable d’une déclaration (POST /livrables-declaration/{obligationId} : format lu sur le gabarit de la déclaration, VALIDEE ou au-delà, estampille { numero, empreinte } de la version qu’il emballe dans le fichier et deux en-têtes) ; le port CanalDeDepot et le dépôt assisté (un identifiant, jamais un accusé) ; POST et GET /depots-declaration (l’obligation reste A_DEPOSER, Q-D-27 ; LIVRABLE_PERIME ; un seul engagement en vol par version, rejeu 200, remplacement tout ou rien avec le journal chaîné ; perime à la lecture) ; garde AD-12. Communs : contrat OpenAPI, main.ts (CORS). Aucune migration, aucun fichier de C. Node 24 unitaires 231/231 (3 341), e2e 14/14 (325), test:conformite 26/26 (167) ; mutations 25/25 ; pile grp-d avec Redis saine, trois routes en 401 sans jeton. — Historique :  # ⚡⚡ JALON « FORMAT CONFIRME » LEVE LE 2026-08-28 : le PO a fourni UNE PIECE REELLE DE DEPOT — 1000745307_2025_Definitif.xlsx, DSF DEFINITIVE du dossier PMS (NIF 1000745307, exercice 2025), 92 feuilles. C est exactement ce que le blocage attendait (« aucune piece reelle de depot en main a ce jour »). STORY-330/331/332/333 cessent d etre bloquees.  — Historique —  ⛔ BLOQUÉE par le jalon `format confirmé` — aucune pièce réelle de dépôt en main à ce jour.
+        story_path: "stories/STORY-330.md"
+        assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-331"
         title: "Format de canal décrit comme donnée du paquet"
         epic: "EPIC-032"
         points: 5
         service: "fiscal-service"
-        status: "not_started"  #  # ⚡⚡ JALON « FORMAT CONFIRME » LEVE LE 2026-08-28 : le PO a fourni UNE PIECE REELLE DE DEPOT — 1000745307_2025_Definitif.xlsx, DSF DEFINITIVE du dossier PMS (NIF 1000745307, exercice 2025), 92 feuilles. C est exactement ce que le blocage attendait (« aucune piece reelle de depot en main a ce jour »). STORY-330/331/332/333 cessent d etre bloquees.  — Historique —  ⛔ BLOQUÉE par le jalon `format confirmé`.
-        assigned_to: null
+        status: "done"  # 🏁 DONE le 2026-11-26 (lot 7 de D, n° 8) — prospera-fiscal-service#78 (dev 6e9fbbe, rebasée sur 9db1653) ; annonce avant le code prospera-stories#986. Le format de canal décrit comme une donnée du paquet : le formulaire à saisir (SAISIE_FORMULAIRE), seconde nature à côté du classeur à téléverser (TELEVERSEMENT_FICHIER), au paquet de dépôt de D (second manifeste, sha256) ; dimana = TG × TVA 1.0 (amorce, Q-D-28), GUDEF = TG × DSF 1.3 intact ; un seul résolveur (gabarit, puis (canal, taxe), puis FORMAT_DE_CANAL_NON_DECLARE) ; GET /livrables-declaration/{obligationId}/formulaire (valeurs du contenu de l’estampille) ; description incomplète refusée en nommant le champ (build et 422 FORMAT_DE_CANAL_INCOMPLET) ; nature sur le dépôt engagé, même port CanalDeDepot. Communs : contrat OpenAPI. Aucune migration, aucun fichier de C. Node 24 unitaires 235/235 (3 484), e2e 14/14 (339), test:conformite 27/27 (173) ; mutations 19/19 ; pile grp-d avec Redis saine, quatre routes en 401 sans jeton. → C : canal de la retenue IRPP (ouverte). — Historique — # ⚡⚡ JALON « FORMAT CONFIRME » LEVE LE 2026-08-28 : le PO a fourni UNE PIECE REELLE DE DEPOT — 1000745307_2025_Definitif.xlsx, DSF DEFINITIVE du dossier PMS (NIF 1000745307, exercice 2025), 92 feuilles. C est exactement ce que le blocage attendait (« aucune piece reelle de depot en main a ce jour »). STORY-330/331/332/333 cessent d etre bloquees.  — Historique —  ⛔ BLOQUÉE par le jalon `format confirmé`.
+        story_path: "stories/STORY-331.md"
+        assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-332"
         title: "Guidage de dépôt pas à pas"
         epic: "EPIC-032"
         points: 5
         service: "fiscal-service"
-        status: "not_started"  #  # ⚡⚡ JALON « FORMAT CONFIRME » LEVE LE 2026-08-28 : le PO a fourni UNE PIECE REELLE DE DEPOT — 1000745307_2025_Definitif.xlsx, DSF DEFINITIVE du dossier PMS (NIF 1000745307, exercice 2025), 92 feuilles. C est exactement ce que le blocage attendait (« aucune piece reelle de depot en main a ce jour »). STORY-330/331/332/333 cessent d etre bloquees.  — Historique —  ⛔ BLOQUÉE par le jalon `format confirmé`.
-        assigned_to: null
+        status: "done"  # 🏁 DONE le 2026-11-26 (lot 7 de D, n° 9) — prospera-fiscal-service#79 (dev 8d85c10, sur 6e9fbbe) ; annonce avant le code prospera-stories#991. Le dépôt guidé pas à pas : le guidage, paquet de dépôt à part (troisième manifeste, sha256), étapes du paquet dans son ordre, gestes fermés dont aucun ne demande une valeur ; GET /depots-declaration/{depotId}/guidage (deposer) : les valeurs du formulaire de 331 dans son ordre, prêtes à copier (V3) ; un seul fichier pour le GUDEF ; le redevable nommé (entreprise et dirigeant, chacun son guidage) ; rien d’écrit, rien ne passe à DEPOSEE (porte de C). Guidages TG × TVA (dimana) et TG × DSF (GUDEF) en amorce (Q-D-29). Communs : contrat OpenAPI. Aucune migration, aucun fichier de C. Node 24 unitaires 239/239 (3 549), e2e 14/14 (345), test:conformite 27/27 (173) ; mutations 25/25 ; pile grp-d avec Redis saine, la route en 401 sans jeton. — Historique —  # ⚡⚡ JALON « FORMAT CONFIRME » LEVE LE 2026-08-28 : le PO a fourni UNE PIECE REELLE DE DEPOT — 1000745307_2025_Definitif.xlsx, DSF DEFINITIVE du dossier PMS (NIF 1000745307, exercice 2025), 92 feuilles. C est exactement ce que le blocage attendait (« aucune piece reelle de depot en main a ce jour »). STORY-330/331/332/333 cessent d etre bloquees.  — Historique —  ⛔ BLOQUÉE par le jalon `format confirmé`.
+        story_path: "stories/STORY-332.md"
+        assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-333"
         title: "Capture de l'accusé et qualification du retard"
         epic: "EPIC-032"
         points: 5
         service: "fiscal-service"
-        status: "not_started"  # ⚠ 2026-11-24 (A, STORY-323) : l'accusé (numéro ou document) est DÉJÀ consigné sur le dépôt (538, 539, 689-691) ; NON COUVERT : la liaison à l'obligation (le passage à ACCUSE_RECU depuis un dépôt accepté, `ACCUSE_REQUIS`) et la qualification du retard — la correspondance est écrite dans `etatDuCycleSelonLeDepot` (323). Statut inchangé, périmètre à réécrire avant de coder.  # ⚡⚡ JALON « FORMAT CONFIRME » LEVE LE 2026-08-28 : le PO a fourni UNE PIECE REELLE DE DEPOT — 1000745307_2025_Definitif.xlsx, DSF DEFINITIVE du dossier PMS (NIF 1000745307, exercice 2025), 92 feuilles. C est exactement ce que le blocage attendait (« aucune piece reelle de depot en main a ce jour »). STORY-330/331/332/333 cessent d etre bloquees.  — Historique —  ⛔ BLOQUÉE par le jalon `format confirmé`.
-        assigned_to: null
+        status: "done"  # 🏁 DONE le 2026-11-26 (lot 7 de D, n° 10) — prospera-fiscal-service#81 (dev fc317a1, rebasée sur 94baf9f) ; annonce avant le code prospera-stories#998. Réalignement : 538/691 ne couvraient que l accusé du dépôt de LIASSE ; 333 complète. POST /depots-declaration/{depotId}/accuse (deposer ; document PDF/PNG/JPEG/XML archivé, ou référence à l octet, ou les deux ; une fois par version ; horodaté, rattaché à la version déposée ; sur une déclaration DEPOSEE ou au-delà), GET …/{depotId}/accuse, GET /depots-declaration/accuses?obligationId= ; le retard qualifié à la date réelle du dépôt (échéance applicable, pénalités du paquet de dépôt jamais chiffrées ; Q-D-30) ; pour la porte : PreuvesDAccuse et verifierAccuseAuRecu (409 ACCUSE_REQUIS) dans AccusesDepotModule — la garde dans transitionner est à C (acceptée, en tête de 339). Communs : contrat OpenAPI. Aucune migration, aucun fichier de C. Node 24 unitaires 246/246 (3 681), e2e 14/14 (354), test:conformite 29/29 (183) ; mutations 26/26 ; pile grp-d avec Redis saine, les routes en 401 sans jeton. — Historique — ⚠ 2026-11-24 (A, STORY-323) : l'accusé (numéro ou document) est DÉJÀ consigné sur le dépôt (538, 539, 689-691) ; NON COUVERT : la liaison à l'obligation (le passage à ACCUSE_RECU depuis un dépôt accepté, `ACCUSE_REQUIS`) et la qualification du retard — la correspondance est écrite dans `etatDuCycleSelonLeDepot` (323). Statut inchangé, périmètre à réécrire avant de coder.  # ⚡⚡ JALON « FORMAT CONFIRME » LEVE LE 2026-08-28 : le PO a fourni UNE PIECE REELLE DE DEPOT — 1000745307_2025_Definitif.xlsx, DSF DEFINITIVE du dossier PMS (NIF 1000745307, exercice 2025), 92 feuilles. C est exactement ce que le blocage attendait (« aucune piece reelle de depot en main a ce jour »). STORY-330/331/332/333 cessent d etre bloquees.  — Historique —  ⛔ BLOQUÉE par le jalon `format confirmé`.
+        story_path: "stories/STORY-333.md"
+        assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-558"
         title: "Le gabarit de depot est une donnee du paquet pays — le classeur GUDEF Togo en est la premiere instance, pas le modele en dur"
         epic: "EPIC-032"
@@ -8264,15 +8358,17 @@ sprints:
         epic: "EPIC-032"
         points: 3
         service: "fiscal-service"
-        status: "not_started"  # ⚠ 2026-11-24 (A, STORY-323) : le rejet (motif verbatim, chaîne de dépôts) est DÉJÀ couvert par 538 ; NON COUVERT : le retour de l'OBLIGATION à `A_DEPOSER` (retour en arrière motivé : STORY-325). Statut inchangé.  # ⛔ BLOQUÉE par le jalon `format confirmé`.
-        assigned_to: null
+        status: "done"  # 🏁 DONE le 2026-11-26 (lot 7 de D, n° 11) — prospera-fiscal-service#82 (dev 69d7e65, rebasée sur 74b33ec) ; annonce avant le code prospera-stories#1004. Réalignement : 538 couvre le rejet du dépôt de LIASSE seulement ; 334 consigne le rejet d une DÉCLARATION (dépôt engagé de 330) : motif à l octet, cause en clair, correction proposée, reprise dans le produit, une fois par version, accusé et rejet exclusifs (DEPOT_REJETE sur l accuse de 333) ; PreuvesDeRejet + verifierRejetAuRetour pour la porte de C. ⚠️ AC-1 : le retour DEPOSEE → A_DEPOSER est demandé à C (D-334-8, ouverte) ; jusque-là la reprise passe par la rectificative de 325. Q-D-31, Q-D-32. — Avant : "in-progress"  # 2026-11-26 (D, lot 7 n° 11) : fiche écrite et contrat annoncé avant le code ; réalignement : 538 couvre le rejet du dépôt de LIASSE seulement ; 334 consigne le rejet d une DÉCLARATION (dépôt engagé de 330), sa cause en clair et sa reprise ; le retour DEPOSEE → A_DEPOSER est demandé à C (D-334-8). — Avant : "not_started"  # ⚠ 2026-11-24 (A, STORY-323) : le rejet (motif verbatim, chaîne de dépôts) est DÉJÀ couvert par 538 ; NON COUVERT : le retour de l'OBLIGATION à `A_DEPOSER` (retour en arrière motivé : STORY-325). Statut inchangé.  # ⛔ BLOQUÉE par le jalon `format confirmé`.
+        story_path: "stories/STORY-334.md"
+        assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-335"
         title: "Archivage des livrables et accusés"
         epic: "EPIC-032"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in-progress"  # 2026-11-26 (D, lot 7 n° 12) : fiche écrite et contrat annoncé avant le code ; réalignement : 682 archive le fichier de la LIASSE et le relit par URL présignée ; 333 archive la pièce de l accusé sans la relire ; 335 archive le livrable déposé d une DÉCLARATION, relit livrable et pièce par URL présignée, et rend l archive par version (pour 336) ; la copie dans document-service est demandée à B (D-335-9, Q-D-31).
+        story_path: "stories/STORY-335.md"
+        assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-336"
         title: "Dossier de contrôle à la demande"
         epic: "EPIC-032"
@@ -8291,15 +8387,17 @@ sprints:
         title: "Liaison entre écriture comptable et pièce justificative"
         epic: "EPIC-032"
         points: 8
-        service: "fiscal-service"
-        status: "not_started"  # Prérequis de la restitution au niveau de la facture (FR-F54) — la liaison n'existe nulle part.
+        service: "comptabilite-service"
+        source_doc: "prospera-stories/stories/STORY-338.md"
+        status: "in-progress"  # 🚧 2026-11-26 — groupe C, lot 7 (n° 11 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-338-1 → 12) ; contrat annoncé (journal de C) : la liaison écriture ↔ pièce dans prospera-comptabilite-service (rattacher une pièce du dossier ou une version de la GED à une écriture ou à ses lignes, retrait tracé, collection liaisons_pieces en ajout seul ; l'écriture → ses pièces, la pièce → ses écritures ; la justification par compte et période pour 337, granularite PIECE ou COMPTE_PERIODE sans échouer) ; ← B STORY-1124 : comptabilite.facture.desinscrite v1 (schéma de B à l'octet) ; manifeste comptabilite 0.6.0 ; fiscal non touché (REJET_REQUIS de D passe à 340). Prérequis de la restitution au niveau de la facture (FR-F54).
         assigned_to: null
       - story_id: "STORY-339"
         title: "Base légale citée verbatim sur chaque retraitement"
         epic: "EPIC-032"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-339.md"
+        status: "done"  # ✅ 2026-11-26 — groupe C, lot 7 (n° 10 du fiscal) : balance-service #173 (61997fd : basesLegales au paquet fiscal Togo, garde R12, organisme de la retenue d'IRPP LPF Art. 27, source du crédit de TVA Art. 204 ; empreinte 62563b3c) et fiscal #84 (c459960, sur 74b33ec : detail.basesLegales du chemin — chaque retraitement appliqué, son article au paquet de l'obligation, son texte mot pour mot depuis le corpus packagé CGI + LPF OTR 2025 ; non justifié nommé) ; en tête, D-333-3 de D (fiscal #83, 74b33ec : ACCUSE_REQUIS dans la porte du cycle) ; annonce #1001 ; Node 24 : fiscal unitaires 248 suites, 3724 ; e2e 14/14, 356 ; conformité 29/29, 183 ; balance 300/300, 5784 ; e2e 38/38, 2324 ; mutations 27/27, 9/9 et 5/5 ; pile grp-c saine ; D-339-1 → 11 ; B et D prévenus ; suivante STORY-338 — AVANT : 🚧 2026-11-26 — groupe C, lot 7 (n° 10 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-339-1 → 11) ; contrat et communs annoncés (journal de C) : detail.basesLegales sur GET /obligations/{id}/chemin (chaque retraitement appliqué, son article au paquet de l'obligation, son texte mot pour mot depuis le corpus packagé CGI + LPF OTR 2025 ; non justifié nommé) ; paquet fiscal Togo : basesLegales (R12), organisme de la retenue d'IRPP (LPF Art. 27, demande de D) ; aucune migration.
         assigned_to: null
       - story_id: "STORY-563"
         title: "Un dossier porte deux redevables — l entreprise et le dirigeant, chacun avec son NIF, ses obligations et son calendrier"
@@ -9246,7 +9344,7 @@ fiscalite_epics:
     - { id: "EPIC-028", name: "Dossier fiscal, implantations et catalogue d'obligations dérivé", frs: "FR-F01..F10, F57, F71..F78", stories: "STORY-301..309", status: "done" }  # 2026-11-14 : 305→309 et 362 done (301-304 réancrées en EPIC-043)
     - { id: "EPIC-029", name: "Moteur de familles de calcul (registre de stratégies typées, pas d'interpréteur)", frs: "FR-F11..F15", stories: "STORY-310..314", status: "in_progress" }  # 2026-11-14 : STORY-310 done
     - { id: "EPIC-030", name: "Calendrier fiscal et responsabilité", frs: "FR-F16..F21 + AR-09", stories: "STORY-315..319", status: "done" }  # 🏁 2026-11-26 : EPIC-030 fini (319, fiscal #71, groupe C, lot 7)
-    - { id: "EPIC-031", name: "Chaîne déclarative — alimentation, cycle de vie, contrôles, piste d'audit 🏁 premier jalon vendable", frs: "FR-F22..F26, F33..F38, F51, F56, F62..F66", stories: "STORY-320..329", status: "proposed" }
+    - { id: "EPIC-031", name: "Chaîne déclarative — alimentation, cycle de vie, contrôles, piste d'audit 🏁 premier jalon vendable", frs: "FR-F22..F26, F33..F38, F51, F56, F62..F66", stories: "STORY-320..329", status: "done" }  # 🏁 2026-11-26 : EPIC-031 fini (329, fiscal #80, groupe C, lot 7)
     - { id: "EPIC-032", name: "Dépôt assisté, accusé et dossier de contrôle ⛔ jalon `format confirmé`", frs: "FR-F39..F45, F52..F55", stories: "STORY-330..339", status: "proposed" }
     - { id: "EPIC-033", name: "Règlement de l'impôt (préparation et rapprochement, jamais exécution)", frs: "FR-F46..F50", stories: "STORY-340..344", status: "proposed" }
     - { id: "EPIC-034", name: "Base de rémunération et obligations sociales (import ET saisie)", frs: "FR-F27..F32", stories: "STORY-345..350 + STORY-364", status: "in_progress" }  # 2026-11-26 : la part de D est finie (345 → 349 et 364, groupe D, lot 7 ; 349 = fiscal #73) ; reste STORY-350 (C, le rapprochement des charges sociales)

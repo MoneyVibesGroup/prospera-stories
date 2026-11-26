@@ -131,12 +131,64 @@
    cliente). Node 24 : unitaires 220 suites, 3187 ; e2e 13/13, 304 ; conformité 24/24, 151 ; mutations 22/22 et 7/7 MongoDB ;
    pile `grp-c` saine. Verrou pris trois fois (09:59 → 10:03, arrêté pour rebaser sur 349 ; 10:08 → 10:17 ; 10:18 → 10:21).
    D-324-1 → 13 dans la fiche. **→ B** (GED, information, ci-dessous) ; **D prévenu** (la porte de « Déposée », pour 333).
-15. 🚧 **STORY-325 en cours (26/11)** (rectificatives versionnées, immuabilité et clôture, EPIC-031 ; **330 de D l'attend**) :
-   fiche `stories/STORY-325.md` écrite avant le code (D-325-1 → 13), contrat et communs annoncés ci-dessous. La version est
-   scellée au dépôt dans `versions_declaration` (jamais récrite : port sans écriture, schéma qui refuse toute mise à jour,
-   garde AST) ; `POST /obligations/{id}/rectificatives` (à partir de `DEPOSEE`, `CLOTUREE` comprise : version n + 1 en
-   préparation, visa retiré, pièce du client à `null`) ; `POST /obligations/{id}/retour` (motif obligatoire) ;
-   `GET /obligations/{id}/versions` ; toute autre écriture d'une obligation `CLOTUREE` ⇒ `409 OBLIGATION_CLOTUREE`.
+15. ✅ **STORY-325 DONE (26/11)** : fiscal **#75** (`7e2bff8` sur `dev`, sur `060c85c`), annonce #971 avant le code.
+   **Le dépôt scelle** la version courante (`A_DEPOSER → DEPOSEE`, même transaction que l'état) dans **`versions_declaration`** :
+   contenu déclaré (identité, numéro, déclaré et assiette) et son **empreinte** canonique, puis les attestations (déclaré
+   complet, calculé retenu, visa, pièce du client, ouverture de la rectificative) ; le déclaré lu entre dans la
+   comparaison-échange. **Jamais récrite** (AC-2) : port sans écriture, **schéma Mongoose qui refuse toute réécriture** (aussi
+   sur `validations_client`, D-324-12 (5)), garde AST. **`POST /obligations/{id}/rectificatives`** (droit `preparer`, à partir de
+   `DEPOSEE`, `CLOTUREE` comprise) : version n + 1 en préparation, visa retiré, calculé défigé, pièce du client à `null`, la n
+   inchangée ; reprise d'une déposée avant 325. **`POST /obligations/{id}/retour`** (motif obligatoire ; droit de l'état quitté,
+   `valider` pour retirer le visa ; jamais avant `DEPOSEE` une fois déposée) ; **`GET /obligations/{id}/versions`** ;
+   `versionCourante` au DTO. **AC-3** : `409 OBLIGATION_CLOTUREE` sur chaque écriture d'une close (liste fermée des routes, e2e
+   route par route) ; la re-dérivation et les signalements laissent une close telle quelle. Node 24 : unitaires 225 suites,
+   3248 ; e2e 13/13, 308 ; conformité 25/25, 160 ; mutations 30/30 et 11/11 MongoDB ; pile `grp-c` saine. Verrou pris une fois
+   (11:30 → 11:39). D-325-1 → 13 dans la fiche. **D prévenu** (SendMessage : 330 débloquée, ce qu'elle emploie, D-325-11).
+16. ✅ **STORY-327 DONE (26/11)** : fiscal **#77** (`bd19a48`, `9db1653` sur `dev`, rebasée sur `7d48fd9` de D) et
+   balance-service **#172** (`effdc4a`, le paquet), annonce #977 avant le code, amendée #983 avant la fusion. **Le paquet porte
+   ses reports** (`continuite.reports` : `CREDIT_TVA` TVA `creditAReporter` → `creditAnterieur`, `DEFICIT` DSF
+   `deficitAReporter` → `deficitAnterieur`, tolérance 0 ; `coherence.tolerances.DSF` 1 000 F ; empreinte **`412770f5…6fd6`**).
+   **`POST /obligations/{id}/reports-declares`** (droit `preparer`, de `EN_PREPARATION` à `A_DEPOSER`, `{}` efface ; acte
+   `OBLIGATION_REPORTS_DECLARES`) ; champ `reportsDeclares` ; scellés au dépôt dans `contenu.reports`, seulement s'ils sont
+   déclarés (aucune empreinte existante ne bouge). **La continuité** (`POST …/coherence`, à l'enregistrement, **et au dépôt
+   de la période précédente**) lit la **dernière version déposée** de la précédente : `CONTINUITE_CREDIT_TVA`,
+   `CONTINUITE_DEFICIT`, `periodePrecedente`, l'attendu rendu sans déclaré (« repris ») ; anomalies
+   `CONTINUITE_CREDIT_TVA_ROMPUE`, `CONTINUITE_DEFICIT_ROMPUE` (bloquantes au dépôt, levables ; elles nomment les deux
+   périodes). **L'imputation des déficits** : `DSF_DEFICIT_IMPUTE` face à `totalDeficitsImputes` du moteur (`GET
+   …/fiscal/resultat-fiscal`) ; `DEFICIT_IMPUTATION_ECART`. Node 24 : fiscal unitaires 232 suites, 3413 ; e2e 14/14, 329 ;
+   conformité 27/27, 173 ; balance 300/300, 5768 ; e2e 38/38, 2324 ; mutations 34/34 et 6/6 MongoDB ; pile `grp-c` saine.
+   Verrou pris deux fois (13:03 → 13:21, 13:21 → 13:23). D-327-1 → 12 dans la fiche. **→ B** : recopie du paquet (ci-dessous) ;
+   **D prévenu**.
+17. ✅ **STORY-329 DONE (26/11)** : fiscal **#80** (`94baf9f` sur `dev`, rebasée sur `8d85c10` de D), annonce #988 avant le code.
+   **`GET /obligations/{id}/chemin?version=`** : montant (le déclaré qui est parti pour une version scellée) → calcul (le
+   constat du moteur en vigueur à l'instant de la version, de l'obligation ou du journal) → détail (relu chez le moteur, sa
+   **concordance** avec le calculé retenu, le tampon du paquet où 339 citera la base légale) → balance des bases → journal (les
+   lignes de cahier de la TVA, retrouvées dans la provenance des comptes collectée et déductible) → pièces (OCR ; une ligne sans
+   pièce est saisie à la main) ; chaque arrêt nommé (`ARRETE`, `NON_ATTEINT`), AD-14 tenu (`JOURNAL_HORS_DE_PROSPERA`).
+   **`GET /obligations/{id}/historique`** : le journal chaîné vérifié, qui (nom de l'annuaire, **`PARTI`**), quoi, quand,
+   état avant / après, motif retrouvé par empreinte. Les motifs en clair vont dans **`textes_audit`** (base métier, dans la
+   transaction de l'acte) ; le journal n'en garde que l'empreinte. Node 24 : unitaires 244 suites, 3619 ; e2e 14/14, 349 ;
+   conformité 28/28, 177 ; mutations 65/67 (2 équivalentes justifiées) et 6/6 MongoDB ; pile `grp-c` saine. Verrou pris une fois
+   (16:07 → 16:15). D-329-1 → 13 dans la fiche. **D prévenu.**
+18. 🏁 **EPIC-031 fini** (320 → 329 : l'alimentation depuis la balance, le calcul délégué au moteur, le triplet, le cycle et le
+   visa, la validation du client, les rectificatives et la clôture, la cohérence, la continuité, les anomalies, le chemin d'un
+   montant et l'historique complet) — premier jalon vendable du fiscal.
+19. ✅ **STORY-339 DONE (26/11)** : balance-service **#173** (`61997fd` sur `dev`) et fiscal **#84** (`c459960` sur `dev`, rebasée
+   sur `74b33ec`), annonce #1001 avant le code. **← D servie en tête, PR à part** (D a fusionné MNV-333, #81, pendant 339 ; la
+   note « passe à 338 » de l'annonce est caduque) : fiscal **#83** (`74b33ec`), `CycleObligationsService.transitionner` refuse
+   `DEPOSEE → ACCUSE_RECU` sans accusé consigné pour la version courante (`PreuvesDAccuse`, `verifierAccuseAuRecu`, **409
+   `ACCUSE_REQUIS`**), `ObligationsModule` importe `AccusesDepotModule` ; Node 24 : unitaires 246 suites, 3685 ; e2e 14/14,
+   355 ; conformité 29/29, 183 ; mutations 5/5 ; pile `grp-c` saine ; verrou 20:50 → 21:24. **339** : l'étape `detail` du chemin
+   gagne **`basesLegales`** — chaque retraitement que le moteur a appliqué (TVA : `tvaDeductible`, `tvaEcartee`,
+   `creditAnterieurImpute` ; TPU : `tpuCalculee` ; acompte : `theorique` ; montant non nul), **sa référence au paquet de
+   l'obligation** et **son texte mot pour mot depuis le corpus packagé** (CGI + LPF OTR 2025, 1 185 articles, copie à l'octet de
+   `referentiels/corpus-complet-cgi-lpf-togo.json`) ; non justifié nommé (sept motifs). Le paquet porte **`basesLegales`** (CGI
+   Art. 196, 197, 204, 133, 114 ; garde **R12**), **l'organisme de la retenue d'IRPP** (LPF Art. 27, ← D servie) et la source du
+   crédit de TVA (Art. 204) ; empreinte **`62563b3c…4415`**. Node 24 : fiscal unitaires 248 suites, 3724 ; e2e 14/14, 356 ;
+   conformité 29/29, 183 ; balance 300/300, 5784 ; e2e 38/38, 2324 ; mutations 27/27 et 9/9 ; pile `grp-c` saine. Verrou pris
+   une fois (21:43 → 21:57). D-339-1 → 11 dans la fiche. **B prévenu** (recopie) ; **D prévenu** (organisme, empreinte).
+20. **Suivante : STORY-338** (la liaison écriture ↔ pièce, `prospera-comptabilite-service` ; avec elle, la demande de B
+   STORY-1124 placée en 338).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -409,7 +461,10 @@ seulement.
   lecture des métadonnées d'une version par sa référence (`pieceId`, `version` → empreinte, taille, nature, dossier ; sans
   contenu), au jeton du membre, pour que le dossier de contrôle (336) vérifie une référence sans télécharger la pièce.
   **Choix par défaut de C** (D-324-2, D-324-3) : la référence et l'empreinte sont déclarées et attribuées ; le fiscal
-  n'appelle pas la GED. Prévenu par message.
+  n'appelle pas la GED. Prévenu par message. — ✅ **servie par B** (STORY-1119, document-service **#40**, `dev` `5d060aa` ;
+  réponse au journal de B, `main` `c2da232`) : la nature `VALIDATION_CLIENT` au plan de classement du cabinet 2026.2, et
+  `GET …/ged/cabinet/pieces/{pieceId}/versions/{version}` (empreinte au format de `ged.piece.recue`, taille, nature, dossier,
+  jamais le contenu ; manifeste `ged` 1.10.0). À lire par 336 (D) au jeton du membre.
 
 - **→ D (2026-11-26, STORY-318) : prévenir par e-mail ou dans la cloche à l'approche d'une échéance fiscale
   (`prospera-notification-service`)** — **ouverte**, sans urgence. **Publié depuis fiscal #70 (`dev` `cefbe20`).** Le fiscal produit l'alerte (une par obligation, état
@@ -424,10 +479,14 @@ seulement.
   (algorithme et vecteur dans « ⚠ Contrats » et `stories/STORY-1022.md`). Prévenu par message (session
   `moneyvibes-apps-83`).
 
-- **→ B (2026-11-25, STORY-564, mise à jour le 26/11 par STORY-317) : recopier le paquet fiscal Togo 2026 dans
-  `dossier-service`** — **ouverte** (plan du lot 7 §6 : à ta prochaine story sur le service, en LF). **Dernière version :
-  prospera-balance-service `dev` `44be0c1`, sha256 `d0558c545ae6a95102c188114fcd82034b68c8cfd322d1ca19372f4fc2372465`**
-  (elle contient celle de 564 et ajoute `cnss.collecte` : une seule recopie suffit). Avant : `dev` `c9e94c6`,
+- **→ B (2026-11-25, STORY-564, mise à jour le 26/11 par STORY-317, 327 et 339) : recopier le paquet fiscal Togo 2026 dans
+  `dossier-service`** — **ouverte** (plan du lot 7 §6 : à ta prochaine story sur le service, en LF). **Dernière version
+  (STORY-339, 26/11) : prospera-balance-service `dev` `61997fd`, sha256
+  `62563b3c9d99a5474a0d41a73de36c0bf3fd6b1fc0c8a984fdc6e85185e94415`** (elle contient les précédentes et ajoute
+  `basesLegales`, `irpp.retenueALaSource.reversement.organisme` et la source du crédit de TVA, que `dossier-service` ne lit
+  pas ; B prévenu par message, session `moneyvibes-apps-be`). Avant : `effdc4a`, `412770f5…6fd6` (327) (elle contenait les précédentes et ajoutait
+  `continuite.reports` et `coherence.tolerances.DSF`, que `dossier-service` ne lit pas : une seule recopie suffit ; B prévenu
+  par message, session `moneyvibes-apps-be`). Avant : `44be0c1`, `d0558c54…2465` (564 et `cnss.collecte`). Avant : `dev` `c9e94c6`,
   `src/modules/referentiel/assets/paquet-fiscal-togo-2026.json`, sha256 `bfcc3fc9…c065` ; cible :
   `src/modules/portefeuille/echeance/assets/paquet-fiscal-togo-2026.json` (la copie actuelle, `e8e94c84…dc6`, n'a déjà ni
   `coherence` ni `rapprochementAnnuel`) ; `git -c core.autocrlf=false show origin/dev:<chemin> > <copie>`, puis son
@@ -534,6 +593,25 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← D (2026-11-26, STORY-333, D-333-3) : brancher la garde `ACCUSE_REQUIS` dans `CycleObligationsService.transitionner`** —
+  ✅ **servie en tête de STORY-339, PR à part** : fiscal **#83** (`74b33ec` sur `dev`, sur `fc317a1` de D). À `vers ===
+  'ACCUSE_RECU'`, après les gardes d'état et les anomalies : `verifierAccuseAuRecu(await preuves.accuseDe(orgId, id,
+  versionCouranteDe(o).numero), { obligationId, numero })` ; `ObligationsModule` importe `AccusesDepotModule`. Les doublures de C
+  (cycle, rectificatives, e2e des obligations) doublent `PreuvesDAccuse` (par défaut : consigné). Prévenu par message.
+
+- **← D (2026-11-26, STORY-349 → 331) : nommer l'organisme du reversement de la retenue d'IRPP au paquet** — ✅ **servie par
+  STORY-339** : balance-service #173 (`61997fd`), `irpp.retenueALaSource.reversement.organisme` = « service des impôts »,
+  `organismeSource` cite LPF Art. 27 (« doit être reversé au plus tard le 15 du mois suivant à la caisse du service des
+  impôts ») ; le texte ne nomme aucun télé-service (aucune question au PO : l'organisme est dans le texte, D-339-8). Le canal
+  de `RETENUE_IRPP` (D-349-4) devient cet organisme ; le format `TG × RETENUE-IRPP` reste à D. Copie du fiscal à jour (#84).
+  Prévenu par message.
+
+- **← B (2026-11-26, STORY-1127) : D-1006-5 de C — ✅ servie** (catalogue #84, `dev` `efedd3e`, étiquette
+  `contrat-etat-publie-v1.1` ; journal de B « ⚠ Contrats », stories #992). L'état publié porte `module.referentiels` `[{ code,
+  version, artifactUri?, checksum? }]` (la liste d'`entitlement.changed` v2 ; omise en `NON_INSTALLE` / `EN_INSTALLATION` ;
+  n'ouvre rien, seul `etat` ouvre). Aucune action exigée : `assurance`, le fiscal et balance pourront y basculer et retirer leur
+  lecture d'`entitlement.changed` avec EPIC-159 (hors lot 7).
+
 - **← B (2026-11-26, STORY-1124) : publier `comptabilite.facture.desinscrite@1` depuis `prospera-comptabilite-service`**
   (dans la transaction de `BrouillardService.abandonner`, par l'outbox, si `surAbandon` trouve la pièce qui portait
   `inscription.ecritureId` ; schéma au journal de B et dans `prospera-ocr-service/contrat/consommes/`, à reprendre tel quel)
@@ -622,7 +700,73 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-26, STORY-325, avant le code)** — branche `MNV-325` de `prospera-fiscal-service`. **Aucune
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#84, `dev` `c459960`, rebasée sur `origin/dev` `74b33ec`, sans conflit)** —
+  conforme à l'annonce : le contrat OpenAPI (`EtapeDetailDto.basesLegales`), la copie du paquet (`62563b3c…4415`, de
+  balance-service #173 `61997fd`) et l'attente D-349-4 de `obligations-sociales.spec.ts` (le canal de `RETENUE_IRPP` sur la
+  copie est « service des impôts » ; `NON_DECLARE` reste prouvé sur un paquet sans organisme ; logique de D inchangée). Avant
+  elle, **#83** (`74b33ec`, la garde `ACCUSE_REQUIS`, D-333-3) : aucun commun (dossiers de C : `application/obligations`,
+  `modules/obligations`, `test/obligations.e2e-spec.ts` ; le module de D est importé, pas modifié). **→ D** : rien à faire pour
+  un rebase ; toute la suite verte en Node 24 avec 333 ; prévenu par message.
+- **ANNONCÉ (2026-11-26, STORY-339, avant le code)** — branche `MNV-339` de `prospera-fiscal-service`, partie de
+  `origin/dev` `94baf9f` (et `MNV-339` de `balance-service`, de `origin/dev` `effdc4a`, pour la source du paquet). **Aucune
+  migration**, aucune collection ; ni `app.module.ts`, ni `package.json`, ni `nest-cli.json`, ni `read-models/`, ni
+  manifeste `declarations`. Touchés parmi les communs : **le contrat OpenAPI** (un champ neuf, `detail.basesLegales`, sur
+  la réponse du chemin : « ⚠ Contrats ») ; **la copie du paquet** (`test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`,
+  recopiée à l'octet de balance-service : bloc neuf `basesLegales`, `irpp.retenueALaSource.reversement.organisme`, source du
+  report de crédit de TVA) ; **une attente d'un test de D**, parce que la donnée change : `src/domain/remuneration/obligations-sociales.spec.ts`
+  (D-349-4 : le canal de `RETENUE_IRPP` lu sur la copie du paquet devient l'organisme nommé, « service des impôts », au lieu
+  de `NON_DECLARE` ; aucune ligne de la logique de D ne change). Tout le reste dans les dossiers de C (`domain/obligations` :
+  la citation et le corpus packagé ; `application/obligations` : le paquet de l'obligation, partagé par la cohérence et le
+  chemin ; `modules/obligations/dto`). **→ D** : rien à faire pour un rebase ; la suite de D est jouée en entier avant le
+  push ; D prévenu par message (organisme, empreinte).
+
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#80, `dev` `94baf9f`, rebasée sur `origin/dev` `8d85c10` de D, sans
+  conflit)** — conforme à l'annonce, **un commun de moins** : `src/ports/journal-audit.ts` **n'a pas changé** (une méthode de
+  plus y cassait le double `{ chaine }` de `audit-depots.service.spec.ts`, fichier de D) ; la lecture des textes passe par un
+  port neuf de C, `src/ports/textes-audit.ts`. Communs touchés : le contrat OpenAPI (deux routes),
+  `src/adapters/mongo/mongo-journal-audit.ts` (`ajouter(fait, session, textes?)`), `test/utils/journal-audit-memoire.ts`.
+  **→ D** : rien à faire ; toute la suite (unitaires, e2e, conformité) est verte en Node 24 avec 331 et 332 ; prévenu par
+  message.
+- **ANNONCÉ (2026-11-26, STORY-329, avant le code)** — branche `MNV-329` de `prospera-fiscal-service`, partie de
+  `origin/dev` `9db1653`. **Aucune migration** (une collection neuve, `textes_audit`, base métier, index `(orgId, perimetre,
+  seq)` posé par Mongoose au démarrage ; rien ne change dans `obligations` ni `versions_declaration`). Ni `app.module.ts`, ni
+  `package.json`, ni `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touchés parmi les communs : **le contrat
+  OpenAPI** (deux routes de lecture : « ⚠ Contrats ») ; **`src/adapters/mongo/mongo-journal-audit.ts`** (le journal partagé :
+  `ajouter(fait, session, textes?)`, le troisième paramètre **facultatif** — les motifs en clair, écrits dans `textes_audit`
+  dans la même transaction ; la lecture `textes(orgId, perimetre)`) ; **`src/ports/journal-audit.ts`** (la méthode `textes`,
+  **concrète**, vide par défaut : aucune implantation de D ne casse) ; **`test/utils/journal-audit-memoire.ts`** (le banc en
+  mémoire garde les textes passés). Tout le reste dans les dossiers de C (`domain/obligations`, `application/obligations`,
+  `modules/obligations`, `adapters/http` de la balance, `adapters/mongo` des obligations et des pièces du client, `ports/`).
+  Rien dans les dossiers de D. **→ D** : rien à faire pour un rebase ; un acte de D (dépôts, coffre, rémunération) s'écrit au
+  journal exactement comme avant ; le journal reste sans texte libre (AD-10).
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#77, `dev` `9db1653`, rebasée sur `origin/dev` `7d48fd9` de D, sans
+  conflit)** — conforme à l'amendement : le contrat OpenAPI et la copie du paquet (`412770f5…`, balance-service #172
+  `effdc4a`) parmi les communs ; aucun fichier de D. **→ D** : rien à faire pour un rebase ; toute la suite (unitaires, e2e,
+  conformité) est verte en Node 24 avec 330 ; prévenu par message.
+- **AMENDÉ (2026-11-26, STORY-327, avant la fusion)** — les reports ont leur champ, **`reportsDeclares`** sur `obligations`
+  (humain, `$setOnInsert: null`, absent ⇒ `null` ; aucune migration), et leur route (`POST …/reports-declares`, « ⚠ Contrats ») ;
+  `montantDeclare` ne change pas. Le contenu scellé les porte à sa racine (`contenu.reports`, seulement s'ils sont déclarés :
+  `empreinteDuContenu` d'un contenu sans reports inchangée) ; `gardeDuScellement` lit `reportsDeclares.valeurs.*`. Communs
+  touchés : toujours le contrat OpenAPI et la copie du paquet (sha256 `412770f5…`, balance-service `MNV-327`). **→ D** : un
+  banc de D qui comparerait une obligation relue du registre Mongo champ par champ y verrait `reportsDeclares: null`.
+- **ANNONCÉ (2026-11-26, STORY-327, avant le code)** — branche `MNV-327` de `prospera-fiscal-service`. **Aucune
+  migration** (un champ facultatif `montantDeclare.reports` dans un champ `Mixed`, absent ⇒ `null`). Ni `app.module.ts`, ni
+  `package.json`, ni `read-models/`, ni manifeste `declarations`. Touchés parmi les communs : **le contrat OpenAPI** (un champ
+  du corps de `…/montant-declare`, deux champs de réponse, trois codes de contrôle, trois codes d'anomalie : « ⚠ Contrats ») et
+  **la copie du paquet fiscal** `test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`, recopiée à l'octet (LF) de
+  l'artefact de `balance-service` (bloc neuf `continuite`, `coherence.tolerances.DSF`). Tout le reste dans les dossiers de C
+  (`domain/obligations`, `application/obligations`, `modules/obligations`, `adapters/mongo` des obligations, `adapters/http` du
+  moteur, `ports/`, `test/utils`, e2e et conformité des obligations). Rien dans les dossiers de D. **→ D** : rien à faire pour
+  un rebase ; **à savoir** : (1) les clés du paquet que lit D ne changent pas (`cnss.*`, `irpp.*`) ; une spec de D qui
+  compterait les blocs du paquet se lirait avec un bloc de plus ; (2) le contenu scellé d'une version (325, que 330 estampille)
+  gagne `declare.reports` **seulement si des reports sont déclarés** : `empreinteDuContenu` d'un contenu sans reports ne change
+  pas d'un octet ; (3) `gardeDuScellement` lit en plus les reports ; (4) le dépôt (`POST …/transition` vers `DEPOSEE`) relance
+  la continuité de la période suivante, sans changer sa réponse.
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#75, `dev` `7e2bff8`, sur `origin/dev` `060c85c`)** — conforme à l'annonce :
+  seul le contrat OpenAPI parmi les communs ; aucun fichier de D touché. **→ D** : rien à faire pour un rebase ; toute la suite
+  (unitaires, e2e, conformité) est verte en Node 24 ; un banc qui nettoie `validations_client` ou `versions_declaration` par le
+  modèle (`deleteMany`) échoue désormais : nettoyer par `modele.collection`.
+  **ANNONCÉ (2026-11-26, STORY-325, avant le code)** — branche `MNV-325` de `prospera-fiscal-service`. **Aucune
   migration** (une collection neuve, `versions_declaration`, index unique posé par Mongoose au démarrage ; un champ
   facultatif `versionCourante` sur `obligations`, absent ⇒ la version 1 en cours). Ni `app.module.ts`, ni `package.json`,
   ni `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touché : **le contrat OpenAPI** (trois routes
@@ -730,6 +874,121 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-338), ANNONCÉ avant le code** — **la liaison entre l'écriture comptable et la pièce qui la justifie**
+  (`prospera-comptabilite-service`, REST et Kafka). Fiche : `stories/STORY-338.md` (D-338-1 → 12). Consommateurs : le
+  rapprochement des pièces (337, D, fiscal) ; la GED (B, `comptabilite.facture.desinscrite`, STORY-1124) ; l'écran de la
+  comptabilité (A). **Ajouts seuls** : cinq routes, une collection (`liaisons_pieces`), un fait ; aucun champ existant ne
+  change ; aucun droit neuf ; manifeste `comptabilite` **0.6.0** (source `manifestes/comptabilite.manifest.ts`, cette PR).
+  - **`POST /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ecritures/{ecritureId}/pieces`** (`comptabilite:ecriture:saisir`) :
+    `{ source: DOSSIER, pieceId, lignes? }` ou `{ source: GED, gedPieceId, gedVersion, lignes? }` ⇒ 201 la liaison
+    (brouillard ou validée, jamais réécrite ; acte `PIECE_RATTACHEE`) ; refus neufs `PIECE_DEJA_RATTACHEE` (409),
+    `LIGNE_INCONNUE`, `PIECE_GED_NON_CONSERVEE` (422). **`POST …/pieces/{liaisonId}/retrait`** `{ motif }` ⇒ 200 (acte
+    `PIECE_RETIREE`) ; `LIAISON_INTROUVABLE` (404), `LIAISON_DEJA_RETIREE` (409).
+  - **`GET …/ecritures/{ecritureId}/pieces`** (l'écriture → ses pièces, la pièce de saisie en tête) et
+    **`GET /api/v1/dossiers/{dossierId}/pieces/{pieceId}/ecritures?source=DOSSIER|GED`** (la pièce → ses écritures, tous
+    exercices du dossier, les lignes justifiées).
+  - **`GET …/exercices/{exerciceId}/pieces/justification?comptes=&du=&au=&devise=`** (pour 337) : validées seules, par préfixe
+    de compte et période, `granularite: PIECE` avec `mouvements`, `documente`, `aNouveaux`, `nonDocumente` et les pièces et
+    leurs montants ; un exercice qui n'est pas tenu au journal ici rend **200** `granularite: COMPTE_PERIODE` et sa `raison`
+    (`EXERCICE_TENU_AUX_CAHIERS`, `EXERCICE_NON_TENU_ICI`) : le rapprochement retombe sur le compte × la période sans échouer.
+    Refus neufs : `COMPTES_MALFORMES` (400).
+  - **Kafka : `comptabilite.facture.desinscrite` v1** (← B, STORY-1124), à l'abandon d'un brouillard né d'une facture, dans sa
+    transaction, par l'outbox ; schéma de B **à l'octet** (`prospera-ocr-service` `dev` `e51c4d5`, sha256 `86a50e6f…2ecf`),
+    sujet neuf au registre en BACKWARD.
+  - **→ B** : à la fusion, recopie du manifeste `comptabilite` 0.6.0 au catalogue ; la GED consomme déjà le fait (#38).
+    **→ D (337)** : la lecture du rapprochement et ce qui doit faire retomber sur le compte × période (fiche, « Pour
+    STORY-337 »).
+- **2026-11-26 (STORY-339), PUBLIÉ** (fiscal #84, `c459960` ; balance-service #173, `61997fd`) — conforme à l'annonce (#1001),
+  sans écart. **→ A (FE-081)** : types à régénérer (`BasesLegalesDto` sur `EtapeDetailDto`). **→ D (336)** : le dossier de
+  contrôle peut citer ces bases ; **→ D** : le code `409 ACCUSE_REQUIS` annoncé par D (333) est servi par la porte du cycle
+  (#83, `74b33ec`). **→ B** : la copie du paquet (ci-dessous). Annonce :
+- **2026-11-26 (STORY-339), ANNONCÉ avant le code** — **la base légale citée mot pour mot sur chaque retraitement**
+  (`prospera-fiscal-service`, REST ; source du paquet fiscal Togo dans `balance-service`). Fiche : `stories/STORY-339.md`
+  (D-339-1 → 11). Consommateurs : l'écran du chemin (A, FE-081) ; le dossier de contrôle (336, D) ; la copie du paquet de
+  `dossier-service` (B) ; le calcul social (D, l'organisme de la retenue). **Ajouts seuls** : aucune route, aucun droit,
+  aucun événement ; aucun champ existant ne change ; manifeste inchangé ; aucune route de `balance-service` ne change.
+  - **`GET /api/v1/obligations/{id}/chemin`** : l'étape `detail` gagne **`basesLegales`** `{ statut: RESTITUE | ARRETE |
+    NON_ATTEINT, motif, message, paquet { code, version, checksum } | null, corpus { artefact, source, avertissement,
+    empreinte, articles }, retraitements[{ grandeur, montant, libelle, justifie, motif, message, reference { livre,
+    article, millesime } | null, aConfirmer, citation { livre, article, page, texte } | null }] }` — les retraitements
+    appliqués (TVA : `tvaDeductible`, `tvaEcartee`, `creditAnterieurImpute` ; TPU : `tpuCalculee` ; acompte : `theorique` ;
+    montant non nul), l'article du paquet de l'obligation, son texte **mot pour mot** depuis le corpus packagé (CGI + LPF
+    OTR 2025, 1 185 articles). Non justifié, nommé : `BASE_LEGALE_ABSENTE_DU_PAQUET`, `BASE_LEGALE_A_CONFIRMER`,
+    `BASE_LEGALE_MAL_FORMEE`, `ARTICLE_ABSENT_DU_CORPUS`, `MILLESIME_SANS_CORPUS`, `PAQUET_NON_LISIBLE`,
+    `PAQUET_DU_MOTEUR_DIFFERENT` ; l'étape `ARRETE RETRAITEMENT_NON_JUSTIFIE` (ou `PAQUET_NON_LISIBLE`).
+  - **Paquet fiscal Togo 2026** : bloc neuf **`basesLegales.retraitements.<RESSOURCE>.<grandeur>`** `{ libelle, livre,
+    article, millesime } | { libelle, aConfirmer }` (CGI Art. 196, 197, 204, 133, 114 ; « CGI OTR 2025 (LF 2023) »), garde
+    R12 ; **`irpp.retenueALaSource.reversement.organisme`** = « service des impôts » (LPF Art. 27) ; la source de
+    `tva.declaration.reportCredit` cite l'Art. 204. Le moteur de balance-service ne lit aucun des trois. Nouvelle empreinte
+    au « Livré ».
+
+- **2026-11-26 (STORY-329), PUBLIÉ** (fiscal #80, `94baf9f`) — conforme à l'annonce (#988), sans écart de contrat (la lecture
+  des textes passe par un port interne de plus, sans effet sur les routes). **→ A (FE-081)** : types à régénérer
+  (`CheminDuMontantDto`, `HistoriqueDeLObligationDto`). **→ D (336)** : le dossier de contrôle peut lire ces deux routes.
+  Annonce :
+- **2026-11-26 (STORY-329), ANNONCÉ avant le code** — **le chemin d'un montant et l'historique complet**
+  (`prospera-fiscal-service`, REST). Fiche : `stories/STORY-329.md` (D-329-1 → 13). Consommateurs : l'écran du dossier de dépôt
+  (A, FE-081) ; le dossier de contrôle (336, D) ; la base légale (339, C). **Ajouts seuls** : deux routes de lecture ; aucun
+  droit, aucun événement ; aucune réponse existante ne change ; manifeste inchangé ; `balance-service` inchangé (il sert déjà
+  `…/fiscal/tva`, `…/tpu`, `…/acomptes` et `…/balance/{id}/lignes/{compte}/provenance`, lus avec le jeton de l'appelant).
+  - **`GET /api/v1/obligations/{id}/chemin?version=`** (rôles `TENANT_ADMIN` / `TENANT_USER`, portée du dossier ; `version`
+    1 → 999, absente : la courante ; `404 OBLIGATION_INTROUVABLE`, `404 VERSION_INTROUVABLE`) → `{ obligationId, dossierId,
+    taxe, periode, version { numero, nature, scellee, versionId, empreinte, scelleeLe }, luLe, montant, calcul, detail,
+    balance, journal, pieces }` ; chaque étape `{ statut: RESTITUE | ARRETE | NON_ATTEINT, motif, message, … }`. `detail` :
+    `ressource`, `montantDuMoteur`, `concordance` (`CONCORDANT` | `DIVERGENT` | `NON_COMPARABLE`), `grandeurs[{ cle, montant,
+    lignes? }]` (noms du moteur), `formule`, `paquet { pays, annee, checksum }` ; `balance` : `balanceId`, `version`, `etat`,
+    `statutPreuve`, `checksum`, `exercice`, `balanceDuMoteur`, `comptes[{ grandeur, compte }]`, `postes[]` ; `journal` (TVA) :
+    `lignes[{ transactionId, grandeur, compte, sens, date, libelle, montantDebit, montantCredit, niveauPreuve, pieceId,
+    lotId }]`, `nombre`, `tronque`, `nonRetrouvees` ; `pieces` : `pieces[{ pieceId, lotId, transactions }]`,
+    `lignesSansPiece`. Arrêts nommés : `DECLARE_ABSENT`, les codes du triplet, `CALCULE_SAISI_PAR_LE_CABINET`, les `MOTEUR_*`,
+    `BASES_NON_CONSTATEES`, `JOURNAL_NON_RESTITUE_PAR_LE_MOTEUR`, `COMPTE_NON_PUBLIE`, `JOURNAL_HORS_DE_PROSPERA`,
+    `JOURNAL_NON_LISIBLE`, `JOURNAL_INDISPONIBLE`, `JOURNAL_REPONSE_INVALIDE`.
+  - **`GET /api/v1/obligations/{id}/historique`** (mêmes rôles et portée) → `{ obligationId, perimetre, verification {
+    intacte, entrees, rupture }, entrees[{ seq, acte, libelle, qui { identifiant, nature: UTILISATEUR | SYSTEME, nom,
+    appartenance: ACTIF | PARTI | INCONNUE, affichage }, survenuLe, enregistreLe, etatAvant, etatApres, motif { empreinte,
+    texte, conserve }, reference, contenu, empreinte }] }`.
+  - **Stockage** : collection neuve `textes_audit` (les motifs en clair, hors du journal ineffaçable, écrits dans la
+    transaction de l'acte) ; aucune migration.
+
+- **2026-11-26 (STORY-327), PUBLIÉ** (fiscal #77, `9db1653` ; balance-service #172, `effdc4a`) — conforme à
+  l'amendement (#983). **→ A (FE-081)** : types à régénérer (`reportsDeclares`, `POST …/reports-declares`, les trois codes de
+  contrôle et `periodePrecedente`, les trois anomalies). **→ B** : la copie du paquet (ci-dessous). Amendement :
+- **2026-11-26 (STORY-327), AMENDÉ avant la fusion (écart à l'annonce ci-dessous, D-327-12)** — les reports **ne passent
+  plus par `…/montant-declare`** (inchangé) : la DSF est déclarative, sans montant déclaré, ses déficits n'auraient eu aucune
+  voie. **Route neuve `POST /api/v1/obligations/{id}/reports-declares`** (droit `preparer`) `{ reports: { creditAnterieur?,
+  creditAReporter?, deficitAnterieur?, deficitImpute?, deficitAReporter? } }` (remplacent les précédents, `{}` efface ; de
+  `EN_PREPARATION` à `A_DEPOSER`, sinon `409 REPORTS_NON_ENREGISTRABLES` ; `OBLIGATION_CLOTUREE` sur une close, route
+  classée dans la liste fermée de 325 ; acte `OBLIGATION_REPORTS_DECLARES`) ; champ neuf **`ObligationResponseDto.reportsDeclares`**
+  `{ valeurs, par, le } | null` (au lieu de `triplet.declare.reports`) ; la version scellée les porte dans **`contenu.reports`**
+  (au lieu de `contenu.declare.reports`), toujours **seulement s'ils sont déclarés**. Le reste de l'annonce tient.
+- **2026-11-26 (STORY-327), ANNONCÉ avant le code** — **la continuité d'une période à l'autre** (`prospera-fiscal-service`,
+  REST ; source du paquet fiscal dans `balance-service`). Fiche : `stories/STORY-327.md` (D-327-1 → 11). Consommateurs :
+  l'écran du contrôle et des anomalies (A, FE-081) ; la copie du paquet de `dossier-service` (B). **Ajouts seuls**, plus une
+  précision de comportement. Aucune route neuve, aucun droit, aucun événement ; manifeste inchangé ; aucune route de
+  `balance-service` ne change.
+  - **Paquet fiscal Togo 2026** : bloc neuf **`continuite.reports[]`** `{ code, obligation, sortie, entree, tolerance, regle,
+    source }` — `CREDIT_TVA` (`TVA`, `creditAReporter` → `creditAnterieur`, tolérance 0) et `DEFICIT` (`DSF`,
+    `deficitAReporter` → `deficitAnterieur`, tolérance 0) ; **`coherence.tolerances.DSF`** `{ absolue: 1000 }` (l'imputation
+    des déficits face au moteur). Schéma, artefact régénéré, empreinte au registre ; **→ B** : nouvelle empreinte à recopier
+    dans `dossier-service` (message à la livraison).
+  - **`POST /api/v1/obligations/{id}/montant-declare`** : champ facultatif **`reports`** `{ creditAnterieur?,
+    creditAReporter?, deficitAnterieur?, deficitImpute?, deficitAReporter? }` (entiers ≥ 0) ; rendu dans
+    **`triplet.declare.reports`** (`null` si aucun) ; scellé dans **`contenu.declare.reports`** de la version
+    (`GET …/versions`) **seulement s'il est déclaré** (empreinte d'un contenu sans reports inchangée).
+  - **`POST /api/v1/obligations/{id}/coherence`** : `controles[].code` gagne **`DSF_DEFICIT_IMPUTE`**,
+    **`CONTINUITE_CREDIT_TVA`**, **`CONTINUITE_DEFICIT`** ; champ facultatif **`periodePrecedente`** `{ obligationId | null,
+    periode, version | null }` ; motifs de `NON_EXECUTE` neufs : `PERIODE_PRECEDENTE_INDETERMINEE`,
+    `PERIODE_PRECEDENTE_ABSENTE`, `PERIODE_PRECEDENTE_NON_DEPOSEE`, `REPORT_PRECEDENT_NON_DECLARE`. La continuité lit la
+    **dernière version déposée** de la période précédente ; l'imputation des déficits lit `totalDeficitsImputes` de
+    `GET …/fiscal/resultat-fiscal` (jeton de l'appelant).
+  - **Anomalies** (catalogue, `SIGNALEE`, bloquantes au dépôt, levables) : **`CONTINUITE_CREDIT_TVA_ROMPUE`**,
+    **`CONTINUITE_DEFICIT_ROMPUE`** (l'explication nomme les deux périodes ; `details.periodePrecedente`, `periode`,
+    `obligationPrecedenteId`, `versionPrecedente`), **`DEFICIT_IMPUTATION_ECART`**.
+  - **Comportement** : `POST /obligations/{id}/transition` vers `DEPOSEE` relance la continuité de la période suivante (si elle
+    existe, active, non close), sans changer la réponse du dépôt ni son refus.
+
+- **2026-11-26 (STORY-325), PUBLIÉ** (fiscal #75, `7e2bff8`) — **conforme à l'annonce** (#971), sans écart. **→ A (FE-081)** :
+  types à régénérer (`versionCourante`, les trois routes, `OBLIGATION_CLOTUREE`). **→ D (330)** : prévenu. Annonce :
 - **2026-11-26 (STORY-325), ANNONCÉ avant le code** — **les rectificatives versionnées, l'immuabilité et la clôture**
   (`prospera-fiscal-service`, REST). Fiche : `stories/STORY-325.md` (D-325-1 → 13). Consommateurs : l'écran du dossier de
   dépôt (A, FE-081) ; **STORY-330 de D** (le livrable sur une version : D-325-11) ; 334 et 336 (D) ; 329 et 340 (C).
@@ -1483,6 +1742,46 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-339, 26/11) un `… &` lancé par l'outil Bash survit à l'appel, et une deuxième campagne de mutations sur le même
+  checkout lit comme « original » le fichier que la première a muté** : à la restauration, la mutation serait réécrite pour de
+  bon. Une seule campagne à la fois, lancée par `run_in_background` (jamais `&`) ; avant d'en relancer une, vérifier qu'aucun
+  `mut.py` ne tourne (`Win32_Process`) et `git checkout -- src test`. Les motifs multi-lignes s'écrivent en CRLF après le lint.
+- **(STORY-339)** une PR d'un autre groupe peut fusionner pendant la story : ce qui « passe à la suivante » se reprend en tête,
+  PR à part partie d'`origin/dev` à jour, après un commit WIP de la story en cours ; la story se rebase ensuite.
+
+- **(STORY-329, 26/11) une méthode ajoutée à un port abstrait casse le double d'un autre groupe** : `JournalAudit` gagnait
+  `textes()` ; `audit-depots.service.spec.ts` (D) passe un objet `{ chaine }` typé `JournalAudit`, et `tsc` l'a refusé. Un
+  besoin neuf de lecture se range dans **un port à part** (`TextesAudit`), que l'adaptateur implante aussi.
+- **(STORY-329)** `eslint --fix` retire des `as unknown as X` qu'il juge inutiles et laisse les imports de type orphelins
+  (`TS6133`) : relancer `tsc` après le lint, et reprendre les motifs des mutations sur le fichier **lint passé** (une mutation
+  écrite avant le lint se lit « MOTIF INTROUVABLE »).
+- **(STORY-329)** une réécriture de mutations faite par un heredoc Python dans la MÊME commande que leur relance en arrière-plan
+  n'a rien écrit (le script est reparti sur les anciennes : 8 « COMPILATION » de nouveau) : écrire le script de mutations avec
+  l'outil d'écriture, puis le lancer.
+
+- **(STORY-327, 26/11) une obligation DÉCLARATIVE n'a pas de montant déclaré** : la DSF (`famille: DECLARATIVE`) refuse
+  `…/montant-declare` (`MONTANT_NON_SAISISSABLE`) ; une donnée annoncée « dans le déclaré » lui est inaccessible. Lire la
+  famille au catalogue du paquet avant d'y ranger un champ (amendement #983 avant la fusion).
+- **(STORY-327)** un contrôle qui s'ajoute à `POST …/coherence` rougit les tests de 326 qui figent toute la liste
+  (`toEqual([…])`) : filtrer par code dans les tests anciens, et la continuité se déclenche sur le **vrai** paquet de l'e2e
+  (`TOGO`) dès qu'il porte le bloc.
+- **(STORY-327)** une mutation qui retire un `&& o.active` ne rougit qu'avec un double qui RENVOIE les écartées
+  (`duDossier` réel les filtre) ; une mutation « suivante close » survit si le calendrier du test ne contient pas la
+  précédente : le contrôle n'avait rien à dire de toute façon. Construire le cas où la garde est la seule défense.
+- **(STORY-327)** `python - <<'EOF'` sous Git Bash : un `\\n` d'un script qui ÉCRIT un autre script Python redevient un vrai saut
+  de ligne ; et `print` d'un `→` lève `UnicodeEncodeError` (cp1252) : `PYTHONIOENCODING=utf-8`, et l'outil d'écriture pour
+  les scripts de mutation.
+
+- **(STORY-325, 26/11) un schéma rendu immuable fait rougir le nettoyage des bancs** : `afterAll` de la conformité de 324
+  supprimait les pièces par `modele.deleteMany` ; les crochets de `rendreImmuable` le refusent (`ReecritureInterdite`).
+  Nettoyer par `modele.collection.deleteMany` (le banc n'est pas un chemin applicatif).
+- **(STORY-325)** un constructeur d'adaptateur qui gagne un paramètre casse tous les bancs qui l'instancient (15 fichiers,
+  dont un de D) : le rendre facultatif et le prendre de la connexion par défaut, plutôt que de toucher les bancs des autres.
+- **(STORY-325)** le fixture `base()` de `cycle-obligations.service.spec.ts` n'avait ni `annee` ni `taxe` : l'empreinte
+  canonique refuse une valeur indéfinie. Un fixture partiel `as Obligation` cache ce que le code neuf lit.
+- **(STORY-325)** un e2e qui fait confier une obligation (`/obligations/affectation`) signe un jeton dont le `sub` est un
+  `ObjectId`, et le dossier de la réplique doit avoir un `responsableUserId` en `ObjectId` (sinon `400 IDENTIFIANT_MALFORME`).
 
 - **(STORY-324, 26/11) la garde `aucune-date-en-dur` (316) lit aussi les exemples Swagger des DTO** : un `example: 'Courriel
   du 20/11/2026…'` l'a rougie (seule la suite entière l'a vu). Écrire les exemples sans date `JJ/MM`.

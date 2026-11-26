@@ -82,7 +82,11 @@ export const MANIFESTE_GED = {
   // 1.9.0 (2026-11-26, STORY-1124) : le circuit sans trou (réception et boîtes dans une transaction, mouvements d'une
   // boîte verrouillés) ; la facture désinscrite de la comptabilité retirée du fonds (`comptabilite.facture.desinscrite`,
   // proposé à C) ; aucune route neuve.
-  version: '1.9.0',
+  // 1.10.0 (2026-11-26, suite de STORY-1119, demande de C, STORY-324) : les métadonnées d'une version par sa référence
+  // (empreinte, taille, nature, dossier ; jamais le contenu), pour vérifier la référence d'une validation du client ;
+  // une route de lecture neuve. Le plan de classement du cabinet passe en 2026.2 (`VALIDATION_CLIENT`), paramètre du
+  // service, hors manifeste.
+  version: '1.10.0',
 
   // C1 : aucune dépendance dure. La GED reçoit, lit, classe, conserve et retrouve des pièces sans autre module ; une pièce
   // enregistrée sans dossier va dans la file « à rattacher » (FR-159, FR-166).
@@ -311,6 +315,7 @@ export const MANIFESTE_GED = {
     'GET /api/v1/ged/cabinet/registre-des-destructions', // STORY-1121 : le registre des destructions du cabinet
     'GET /api/v1/ged/cabinet/recherche', // STORY-1122 : retrouver une pièce dans tous les fonds du cabinet
     'GET /api/v1/ged/cabinet/pieces-echues', // STORY-1123 : les pièces échues (ou proches de l'être) de tout le cabinet
+    'GET /api/v1/ged/cabinet/pieces/{pieceId}/versions/{version}', // suite de STORY-1119 : une version par sa référence, sans contenu
     'GET /api/v1/instance/ged/{organisationId}/export',
   ],
 
