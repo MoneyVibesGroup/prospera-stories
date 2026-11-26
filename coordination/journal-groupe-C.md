@@ -86,9 +86,21 @@
    conformité 19/19, 121 ; balance 300/300, 5764 ; e2e 38/38, 2324 ; mutations 14/14 et 1/1 ; compose `grp-c` sain, routes en
    401 sans jeton ; verrou pris deux fois (02:39 → 02:50, 02:54 → 02:56). D-317-1 → 11 dans la fiche. **D prévenu** ;
    **→ B** : copie de `dossier-service` (demande mise à jour ci-dessous).
-10. 🚧 **STORY-318 EN COURS (26/11)** (les alertes d'échéance et les états de retard, fiscal) : fiche écrite, contrat et
-   communs annoncés avant le code (`MNV-318` du fiscal ; BullMQ entre au service, le relais de l'outbox y passe). Puis 319,
-   que **349 de D attend**.
+10. ✅ **STORY-318 DONE (26/11)** : fiscal **#70** (`cefbe20` sur `dev`), annonce #945 avant le code. **`qualifierEcheance`**
+   (pur, `domain/obligations/alertes-echeance.ts`) compose `qualifierRetard` de 317 : `NON_DATEE`, `PAS_ENCORE_PREPAREE`,
+   `EN_RETARD_DE_PREPARATION` (pas encore `VALIDEE` et dans l'horizon), `PREPAREE`, `ECHEANCE_DEPASSEE`, `DEPOSEE`, sur
+   l'échéance applicable ; **horizon par organisation** (1 à 90 j, 7 par défaut, `PUT /obligations/alertes/horizon`, droit
+   `valider`, acte `ALERTES_HORIZON_CHANGE`). **BullMQ entre au service** (AD-18) : balayage `balayage-des-echeances` (cron
+   `ALERTES_ECHEANCE_CRON`, 05:00 UTC) et rattrapage du jour au démarrage ; une alerte par `(obligation, état, échéance)`
+   (`alertes_echeance`, index unique `cle_alerte`) et **`fiscal.obligation.alerte-echeance`** v1 par l'outbox ;
+   `GET /obligations/alertes` (portée du calendrier) ; `etatEcheance` et `joursRestants` au calendrier. **Le relais de l'outbox
+   passe sur BullMQ** (planificateur `relais-outbox`, concurrence globale de 1 ; plus aucun `setInterval`, garde AST). Node 24 :
+   unitaires 209/209 suites, 3050 ; BullMQ sur vrai Redis 2/2 ; e2e 13/13, 282 ; conformité 20/20, 126 ; mutations 20/20 ;
+   pile `grp-c` à **deux répliques** (2 alertes pour 2 clés après 12 balayages, faits `SENT`, reprise après arrêt sans doublon) ;
+   verrou pris deux fois (03:43 → 04:00, 04:15 → 04:26). D-318-1 → 13 dans la fiche. **→ D** (notification) ci-dessous.
+11. **Suivante : STORY-319** (le responsable désigné et la vue de charge par collaborateur, fiscal ; fiche à écrire juste avant
+   de coder ; le champ humain `responsable` existe déjà, l'alerte le recopie ; la vue de charge lit `qualifierEcheance` et les
+   alertes ; re-dérivation qui garde l'affectation, AD-17). **349 de D l'attend** : prévenir D à la fusion.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -354,7 +366,7 @@ seulement.
 ## Demandes aux autres groupes
 
 - **→ D (2026-11-26, STORY-318) : prévenir par e-mail ou dans la cloche à l'approche d'une échéance fiscale
-  (`prospera-notification-service`)** — **ouverte**, sans urgence. Le fiscal produit l'alerte (une par obligation, état
+  (`prospera-notification-service`)** — **ouverte**, sans urgence. **Publié depuis fiscal #70 (`dev` `cefbe20`).** Le fiscal produit l'alerte (une par obligation, état
   et échéance applicable) et la publie : **`fiscal.obligation.alerte-echeance`** v1 (forme au « ⚠ Contrats » ;
   `etat` `EN_RETARD_DE_PREPARATION` | `ECHEANCE_DEPASSEE`, `responsable` = identifiant d'utilisateur ou `null`).
   Demandé : la consommer et prévenir le `responsable` (sans responsable : les associés du cabinet). **Choix par défaut de
@@ -559,7 +571,12 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-26, STORY-318, avant le code)** — branche `MNV-318` de `prospera-fiscal-service`. **Aucune
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#70, `dev` `cefbe20`, sur `origin/dev` `8f6b1ba`)** — conforme à l'annonce ;
+  un `setImmediate` (intercepteur de journalisation, transverse) entre aussi dans la liste fermée de la garde, sans changer de
+  code. **→ D** : `fiscal.declaration.deposee` part désormais par le relais BullMQ (prouvé `SENT` sur la pile à deux
+  répliques) ; **sans Redis, l'outbox attend** (les événements restent `PENDING`). Un test de D qui démarrerait le relais n'existe
+  pas ; toute la suite (unitaires, e2e, conformité) est verte en Node 24.
+  **ANNONCÉ (2026-11-26, STORY-318, avant le code)** — branche `MNV-318` de `prospera-fiscal-service`. **Aucune
   migration** (deux collections neuves, `alertes_echeance` et `parametres_alertes`, index posés par Mongoose au
   démarrage). Touchés (fiche `stories/STORY-318.md`, « Persistance et fichiers communs ») :
   - **`package.json` / `package-lock.json`** : `bullmq` ~6.7 et `@nestjs/bullmq` 11 (les versions de `sinistres` et du
@@ -608,6 +625,9 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-318), PUBLIÉ** (fiscal #70, `cefbe20`) — **conforme à l'annonce** (#945). Précisions (fiche, D-318-13) :
+  le balayage n'alerte pas une échéance dépassée depuis plus de 31 jours (elle reste `ECHEANCE_DEPASSEE` au calendrier) ; les
+  trois routes sont servies par un contrôleur à part (`AlertesEcheanceController`), mêmes chemins, même gate. Annonce :
 - **2026-11-26 (STORY-318), ANNONCÉ avant le code** — **les alertes d'échéance et les états de retard**
   (`prospera-fiscal-service`, REST et Kafka). Fiche : `stories/STORY-318.md` (D-318-1 → 12). Consommateurs : les écrans
   du calendrier (A) ; STORY-319 (C) ; **`prospera-notification-service` (D)**, à venir. **Ajouts seuls.**
@@ -1233,6 +1253,18 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-318, 26/11) un `tsc` vert avant la dernière retouche ne prouve rien** : un `delete` sur une propriété `readonly`,
+  écrit après le dernier `tsc --noEmit` pour satisfaire le lint, a cassé la compilation de deux specs ; les mutations (qui
+  rougissaient « COMPILATION ») l'ont vu, après que l'image de preuve était lancée sur le commit fautif. Rejouer `tsc` juste
+  avant le commit, et une mutation qui rougit « COMPILATION » partout désigne le code, pas la mutation.
+- **(STORY-318)** une mutation qui rend un paramètre inutilisé rougit par `TS6133` (`noUnusedParameters`) : garder le symbole
+  lu (`limite !== ''`, `etat.slice(0, 0)`).
+- **(STORY-318)** sous Node 25, `npm install` échoue sur le binding natif de Confluent : `npm install --ignore-scripts` pour
+  ajouter une dépendance (le verrou s'écrit, l'image Node 24 construit le binding).
+- **(STORY-318)** deux répliques du fiscal sur la pile : un service `fiscal-service-b` dans la surcouche (même contexte, cible
+  `runtime`, sans port, `depends_on: fiscal-service: service_healthy`) ; sa santé se lit par `docker exec … node -e fetch`.
+  Obligations semées par `mongosh --eval` (scripts `s318/semer.js`, `compter.js` du bloc-notes de la session).
 
 - **(STORY-317, 26/11) un fichier qui lit le paquet se cherche dans `*.e2e-spec.ts` et `*.conformite-spec.ts` aussi** : le
   repérage des tests de D qui attendaient `NON_DECLAREE` par `grep … --include=*.spec.ts` a manqué
