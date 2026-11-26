@@ -1,6 +1,8 @@
 # STORY-334 : Le rejet administratif d'un dépôt engagé — consigné avec son motif à l'octet, sa cause en clair et la reprise dans le produit, sans altérer la version déposée
 
-Status: in-progress (2026-11-26) — fiche écrite et contrat annoncé avant le code.
+Status: done (2026-11-26 — prospera-fiscal-service#82, `dev` `69d7e65` ; lot 7 de D, n° 11) — fiche écrite et
+contrat annoncé avant le code (prospera-stories#1004, `main` 9bcdf01). ⚠️ AC-1 : le fait, la règle et sa preuve sont
+livrés ; le retour `DEPOSEE → A_DEPOSER` dans la porte du cycle est à C (demande ouverte, D-334-8).
 Écrite le 2026-11-26 par la sous-session du groupe D juste avant de coder (lot 7 de D, n° 11,
 `PLAN-LOT-7-2026-11-24.md` §4 : « même réalignement que 333 » — avec 537 → 539 et 688 → 691, lot 6 §3). Il n'existait
 pas de fiche : les critères viennent d'`epics-fiscalite-2026-08-03.md` (EPIC-032) et de la salle des cabinets du
@@ -160,17 +162,69 @@ la règle (D-334-8).
 
 ## Definition of Done
 
-- [ ] Un rejet consigné (201) avec motif à l'octet, cause, correction, reprise et retard ; chaque refus de D-334-2 → 5 par
+- [x] Un rejet consigné (201) avec motif à l'octet, cause, correction, reprise et retard ; chaque refus de D-334-2 → 5 par
       un test ; l'accusé de 333 refusé sur une version rejetée (e2e).
-- [ ] La lecture d'un rejet et des rejets d'une déclaration, la retransmission lue sur une version scellée plus récente.
-- [ ] La règle `verifierRejetAuRetour` et le port `PreuvesDeRejet` prouvés ; `AccusesDepotModule` n'importe pas
+- [x] La lecture d'un rejet et des rejets d'une déclaration, la retransmission lue sur une version scellée plus récente.
+- [x] La règle `verifierRejetAuRetour` et le port `PreuvesDeRejet` prouvés ; `AccusesDepotModule` n'importe pas
       `ObligationsModule`.
-- [ ] **MongoDB réel** (`test:conformite`) : l'index unique ; dix consignations parallèles ⇒ un seul rejet et un seul
+- [x] **MongoDB réel** (`test:conformite`) : l'index unique ; dix consignations parallèles ⇒ un seul rejet et un seul
       acte ; le rejet, son acte et ses textes tout ou rien ; schéma strict.
-- [ ] Les gardes d'AD-12 et d'AD-13 vertes.
-- [ ] **Mutations** qui rougissent sur une assertion.
-- [ ] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
+- [x] Les gardes d'AD-12 et d'AD-13 vertes.
+- [x] **Mutations** qui rougissent sur une assertion.
+- [x] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
       compris) sain, les routes neuves en `401` sans jeton.
+
+## Livraison (2026-11-26)
+
+- **Code** : prospera-fiscal-service#82, fusionnée en rebase sur `dev` (`69d7e65`), rebasée sur `origin/dev` `c459960` — 339 de C, au-dessus de `74b33ec`, qui touchait aussi le contrat OpenAPI et `ObligationsModule` : aucun conflit — avant la fusion. Annonce avant le code :
+  prospera-stories#1004 (`main` 9bcdf01). **Aucun écart au contrat annoncé.**
+- **Fichiers** (dossiers de D) : `domain/depot/rejet-depot.ts` (pur : la règle de la porte `verifierRejetAuRetour`,
+  « consignable », les textes à l'octet, la cause, la correction, les bornes, la reprise, l'acte et les textes hors du
+  journal) et son test ; `ports/preuves-rejet.ts`, `ports/registre-rejets-depot.ts` ; `adapters/mongo/rejet-depot.schema.ts`
+  (collection `rejets_depot`, index `un_rejet_par_version` et `rejet_par_depot`) et `mongo-registre-rejets-depot.ts` ;
+  `modules/depots/accuses-depot.module.ts` (exporte aussi `RegistreRejetsDepot` et `PreuvesDeRejet` ; n'importe toujours
+  pas `ObligationsModule`) ; `application/depots/rejets-depot.service.ts` et son test ; `accuses-depot.service.ts`
+  (`DEPOT_REJETE`, et `penalitesDeclareesDu` partagée avec le rejet) ; les trois routes dans
+  `DepotsDeclarationController`, leurs DTO (`dto/rejet-depot.dto.ts` ; `RetardDepotDto.depuis` dans `accuse-depot.dto.ts`),
+  `depots.module.ts` ; la garde d'AD-12 (deux ports de plus) ; `depots-declaration.openapi.spec.ts` ;
+  `test/depots-declaration.e2e-spec.ts` (cinq cas de plus), `test/rejets-depot.conformite-spec.ts`,
+  `test/utils/registre-rejets-depot-memoire.ts`. **Lus, sans écriture** (dossiers de C) : `verifierMotif` (538, dossier de
+  D), `RegistreVersionsDeclaration`, les ports des obligations.
+- **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI (trois routes neuves, un refus de plus sur la route de
+  l'accusé). Aucune migration.
+- **Preuves** :
+    - Node 24 (image `verification` de l'archive LF de `8959a3a`, avant le rebase) : unitaires **248/249 suites, 3 708
+      tests** (1 suite et 3 tests ignorés : la spec BullMQ sans Redis) ; e2e **14/14 suites, 360 tests** ; **`test:conformite`
+      30/30 suites, 189 tests** (dont `rejets-depot.conformite-spec.ts` : l'index unique, dix consignations parallèles ⇒ un
+      seul rejet et un seul acte, les textes en clair hors du journal sous leur empreinte, tout ou rien sur une panne du
+      journal — ni rejet ni texte —, la relecture et l'isolement, le schéma strict). Après le rebase sur `c459960` (339 de C, au-dessus
+      de `74b33ec` : la garde `ACCUSE_REQUIS`, qui fait importer `AccusesDepotModule` par `ObligationsModule`), archive LF
+      de `b44eae6` : e2e **14/14 suites, 361 tests**.
+    - Node 25 (local) : domaine 12/12, service 13/13, accusé 19/19, OpenAPI et gardes du module `depots` (9 suites, 125
+      tests), e2e `depots-declaration` 44/44.
+    - **Mutations 29/29**, chacune rouge sur une assertion : la porte du retour sans rejet ; « Accusé reçu » puis « À
+      déposer » consignables ; un texte blanc, trop long, porteur d'un contrôle, rogné ; le motif non vérifié ; la
+      correction sans ses sauts de ligne ; le nom du champ de la cause perdu ; une cause vide admise ; chaque borne de date
+      retirée ; les étapes de la reprise perdues ; le motif en clair au journal ; la cellule perdue à l'acte ; les textes
+      absents gardés ; le périmé non vérifié ; « consignable » non vérifié ; l'accusé de la version ignoré ; le rejet déjà
+      consigné ignoré ; la date de l'engagement ignorée ; la retransmission qui prend la version rejetée, puis la plus
+      récente ; les versions lues sans rejet ; l'accusé admis sur une version rejetée ; le droit `preparer` retiré ; la
+      règle de la cause et la correction perdues dans la réponse. Quatre mutants qui rougissaient en compilation (un
+      import devenu inutile) ont été réécrits en gardant l'intention ; deux restés verts au premier passage (la règle de la
+      cause dans la réponse, le rejet déjà consigné vu avant l'écriture) ont reçu leur assertion, puis ont été rejoués.
+    - lint des fichiers touchés et `tsc` 0.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** (image runtime de l'archive de `8959a3a`) : santé `ok` (mongodb, audit,
+      kafka, redis) ; les trois routes neuves montées et en `401` sans jeton ; `AccusesDepotModule` initialisé ; 0
+      `UnknownDependencies` sur 497 lignes de journal ; les index `un_rejet_par_version` et `rejet_par_depot` posés par
+      l'application. Rejouée sur l'arbre rebasé (archive de `b44eae6`) : santé `ok`, les trois routes en `401`, `AccusesDepotModule` initialisé (importé par `DepotsModule` et par `ObligationsModule`), 0 erreur sur 497 lignes, les index posés.
+    - **Verrou Docker** : deux prises par les scripts autonomes, de 21:24:18 à 21:43:47 (la passe complète) et de 22:20:23 à 22:22:51 (la passe courte après le rebase), rendues par leur `trap`. B et C prévenus à chaque reddition. Il ne reste aucun conteneur, volume ni réseau
+      `grp-d`.
+
+- **Ce qui reste** :
+  - **→ C : ouvrir `DEPOSEE → A_DEPOSER` sur un rejet consigné** (D-334-8) — ouverte. Jusque-là, AC-1 n'est tenu que
+    par le fait, la règle et sa preuve ; la reprise passe par la rectificative de 325.
+  - → 336 : le dossier de contrôle lit le rejet, son motif et la retransmission ; → A (plus tard) : FE-081.
+  - Q-D-31, Q-D-32 au PO.
 
 ## Questions au PO
 
