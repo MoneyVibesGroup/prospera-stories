@@ -246,7 +246,18 @@
     307/307 ; Node 24 : 117/117 suites, 220/220 ; mutations 21/21 (+1 au compilateur) et 9/9 ; pile `grp-b` neuve avec le
     BFF construit appelé pour de vrai, 35/35. Verrou 11:22 → 11:30. Fiche D-1125-1 → 16. Q-SC-5 (valeur et prix de l'offre)
     reste à l'utilisateur. Rituel : aucune demande neuve à B chez A, C et D.
-  - **Suivante : STORY-1126** (n° 8 : la recette des archives de bout en bout).
+  - **f — suite de STORY-1119 (26/11, D-L7B-10) — faite** : la validation du client et la référence d'une version (← C,
+    STORY-324, servie). **document-service #40** (`5d060aa` sur `dev`) ; contrat annoncé avant la fusion (stories #976,
+    `10d9d6e`). Plan de classement du cabinet **2026.2** : `VALIDATION_CLIENT` (annuel, fiscal, non sensible, 10 ans après
+    la fin de l'exercice), servie à tous les fonds, ouverts avant ou après (le plan est servi par cabinet, jamais figé par
+    fonds) ; un code déjà pris par un cabinet reste le sien. **`GET …/ged/cabinet/pieces/{pieceId}/versions/{version}`** :
+    empreinte au format de `ged.piece.recue`, taille, nature, dossier, état (`CONSERVEE` | `DETRUITE` | `RETIREE`) ; jamais
+    le contenu, le nom du fichier ni l'index ; garde de la pièce. Manifeste `ged` 1.10.0, recopié au catalogue avec « g »
+    (copie entière, D-1119-25). Node 25 : unitaires 1 390 (2 suites rouges connues du poste), e2e 222/222 ; mutations
+    12/12. Sans Docker, verrou non pris ; recette de l'Atelier non rejouée (ni OCR, ni extractions, ni module commun :
+    D-1119-26). Fiche D-1119-19 → 26.
+  - **Suivante : « g »** (la recopie de `paiement` 1.2.0 au catalogue, ← D, STORY-1141 ; D-L7B-11), puis **STORY-1126**
+    (n° 8 : la recette des archives de bout en bout, qui appellera la route neuve).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
     `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
@@ -1726,6 +1737,25 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ C (26/11, suite de STORY-1119) : servie par document-service #40** (`5d060aa` sur `dev` ; annonce : stories #976)
+  — votre demande « → B (2026-11-26, STORY-324) : la pièce de validation du client dans la GED ».
+  - **(1) La nature** : `VALIDATION_CLIENT` « Validation du client » au plan du cabinet `2026.2` (`ANNUEL` / `FISCAL`,
+    exercice exigé, non sensible, 10 ans après la fin de l'exercice), servie à **tous** les fonds, ceux déjà ouverts
+    compris. Un cabinet qui l'avait créée lui-même par `POST …/natures` garde la sienne (sa rubrique, sa sensibilité, sa
+    conservation) ; sous un autre code, sa nature reste aussi. Déposer : `POST /api/v1/ged/cabinet/pieces` avec `nature:
+    VALIDATION_CLIENT` et `exercice`.
+  - **(2) La lecture** : `GET /api/v1/ged/cabinet/pieces/{gedPieceId}/versions/{gedVersion}`, au jeton du membre
+    (`ged:piece:consulter`, portée du dossier) → `{ pieceId, version, versionCourante, courante, empreinte, taille,
+    typeContenu, nature, dossierId, fondsNumero, deposeLe, etatAntivirus, etat, destruction?, desinscription? }`.
+    `empreinte` : 64 hexadécimaux minuscules, le format de `ged.piece.recue` (comparez à votre `sha256:<hex>` sans le
+    préfixe). Jamais le contenu, le texte lu, le nom du fichier ni l'index. Une pièce **détruite** (destruction visée et
+    accordée) ou **retirée** (écriture désinscrite) se lit encore : `200`, `etat: DETRUITE` avec `{ numero, le,
+    procesVerbal }`, ou `RETIREE` avec `{ ecritureId, le }` ; l'empreinte reste. `404 PIECE_INCONNUE` pour une pièce
+    inconnue, hors portée, d'un autre cabinet ou d'une nature sensible sans `ged:sensible:consulter` ; `404
+    VERSION_INCONNUE`. Décisions : fiche `STORY-1119.md`, D-1119-19 → 26. Votre ligne peut passer à « servie ».
+- **← C (26/11, STORY-324) : la nature « validation du client » et la lecture d'une version par sa référence** —
+  **reçue, placée par la session de groupe en ordre « f »** (D-L7B-10, suite de STORY-1119). **Servie le 26/11 par
+  document-service #40** (`5d060aa` sur `dev`) ; voir « → C (26/11, suite de STORY-1119) » ci-dessus.
 - **→ D (26/11, suite de STORY-953) : servie par plateforme #41** (`d68a468` sur `dev`, étiquette
   **`contrats-instance-v1.1`**) — votre demande « → B (2026-11-26, STORY-1140) : publier le contrat de l'export C13 en CSV
   dans `prospera-plateforme/contrats/instance/` ». Chemins : `contrats/instance/export-c13-reponse.schema.json`
@@ -2100,6 +2130,11 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-26, suite de STORY-1119 — LIVRÉ** (document-service #40, `5d060aa` sur `dev`) : conforme à l'annonce
+  ci-dessous, sans écart. Manifeste `ged` 1.10.0 dans le service (`prospera-stories@10d9d6e`, sha256 `0a0f6826…acbb0`) ;
+  au catalogue avec « g ». **→ C** : la route est servie (voir « Réponses »). **→ A** : `MetadonneesDeVersionDto`,
+  `DestructionDUneVersionDto`, `DesinscriptionDUneVersionDto` dans l'OpenAPI vivant de `document-service` (tag
+  `ged-cabinet`) ; `GET …/natures` rend `version: "2026.2"`.
 - **2026-11-26, suite de STORY-1119 (ordre « f », D-L7B-10) — la validation du client et la référence d'une version,
   annoncé AVANT la fusion** (`document-service`, GitHub `prospera-ocr-service`, branche `MNV-1119-reference` ; fiche
   `stories/STORY-1119.md`, « Suite du 2026-11-26 », D-1119-19 → 26). Demandé par C (STORY-324). **Ajouts seuls** ; aucun

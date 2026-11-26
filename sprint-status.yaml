@@ -2280,7 +2280,14 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1119.md"
     reserved_on: "2026-11-25"
     note: >
-      🏁 DONE le 2026-11-25 — document-service #33 (dev b7b3f91) et catalogue #77 (dev f4fcee0, ged 1.4.0 recopié) ;
+      🏁 SUITE DONE le 2026-11-26 (groupe B, lot 7, ordre « f », D-L7B-10 ; fiche, « Suite du 2026-11-26 », D-1119-19 → 26 ;
+      demande de C, STORY-324, servie) — document-service #40 (dev 5d060aa) ; contrat annoncé avant la fusion (docs #976,
+      main 10d9d6e). Plan de classement du cabinet 2026.2 (VALIDATION_CLIENT : annuel, fiscal, non sensible, 10 ans après
+      la fin de l'exercice ; servie à tous les fonds ; un code déjà pris par un cabinet reste le sien) ; GET
+      …/ged/cabinet/pieces/{pieceId}/versions/{version} (empreinte au format de ged.piece.recue, taille, nature, dossier ;
+      jamais le contenu ; détruite ou retirée : 200, etat le dit) ; manifeste ged 1.10.0 (recopie au catalogue avec « g »,
+      D-1119-25). Node 25 : unitaires 1390 (2 suites rouges connues du poste), e2e 222/222 ; mutations 12/12. Sans Docker.
+      Avant la suite : 🏁 DONE le 2026-11-25 — document-service #33 (dev b7b3f91) et catalogue #77 (dev f4fcee0, ged 1.4.0 recopié) ;
       contrat annoncé avant le code (stories #918, main 13e17a4). Journal d'intégrité chaîné par cabinet (versement,
       scellé, vérification, campagne, document émis, consultation sensible ; atomique avec l'acte ; 503
       JOURNAL_INDISPONIBLE), contrôle des empreintes par la file BullMQ (GED_CONTROLE_INTEGRITE_MOTIF, 0 3 * * * UTC ;
