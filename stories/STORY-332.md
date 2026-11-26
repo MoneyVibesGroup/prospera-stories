@@ -1,6 +1,7 @@
 # STORY-332 : Le dépôt guidé pas à pas — les étapes viennent du paquet, les valeurs suivent l'ordre du formulaire, chacune prête à copier, et rien de ce que le produit connaît n'est demandé en saisie
 
-Status: in-progress (2026-11-26 ; lot 7 de D, n° 9) — fiche écrite et contrat annoncé avant le code.
+Status: done (2026-11-26 — prospera-fiscal-service#79, `dev` `8d85c10` ; lot 7 de D, n° 9) — fiche écrite et
+contrat annoncé avant le code (prospera-stories#991, `main` 72e9915).
 Écrite le 2026-11-26 par la sous-session du groupe D juste avant de coder (lot 7 de D, n° 9,
 `PLAN-LOT-7-2026-11-24.md` §4, « fini quand : salle des cabinets V3 : valeurs dans l'ordre du formulaire, copiables ») ;
 contrat et fichiers communs annoncés avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de D). Il n'existait pas
@@ -209,21 +210,96 @@ valeurs qu'elle reporte.
 
 ## Definition of Done
 
-- [ ] Une TVA engagée sur `TELESERVICE_OTR` ⇒ son guidage `TG × TVA`, six étapes dans l'ordre du paquet, l'étape de
+- [x] Une TVA engagée sur `TELESERVICE_OTR` ⇒ son guidage `TG × TVA`, six étapes dans l'ordre du paquet, l'étape de
       saisie portant les trois valeurs du formulaire dans son ordre ; la même déposée ⇒ les valeurs de la version scellée
       (e2e, vrais paquets).
-- [ ] Une DSF engagée ⇒ son guidage `TG × DSF` : une seule étape de téléversement, désignant le fichier par son
+- [x] Une DSF engagée ⇒ son guidage `TG × DSF` : une seule étape de téléversement, désignant le fichier par son
       estampille, et aucune valeur à reporter (e2e).
-- [ ] Les refus de D-332-5, chacun par un test ; `perime` ⇒ `LIVRABLE_PERIME`, relayé ⇒ `DEPOT_REMPLACE`.
-- [ ] La garde de D-332-4, au build et à la lecture : champ oublié, répété ou déplacé ; second fichier ; saisie dans un
+- [x] Les refus de D-332-5, chacun par un test ; `perime` ⇒ `LIVRABLE_PERIME`, relayé ⇒ `DEPOT_REMPLACE`.
+- [x] La garde de D-332-4, au build et à la lecture : champ oublié, répété ou déplacé ; second fichier ; saisie dans un
       téléversement ; accusé absent ou pas en dernier ; version guidée non publiée ; ambiguïté — chacun refusé en
       nommant le champ.
-- [ ] Deux dépôts du même dossier, l'un de l'entreprise et l'autre d'une personne physique ⇒ deux guidages, chacun avec
+- [x] Deux dépôts du même dossier, l'un de l'entreprise et l'autre d'une personne physique ⇒ deux guidages, chacun avec
       son redevable et ses propres valeurs.
-- [ ] La garde d'AD-12 verte sur le code neuf.
-- [ ] **Mutations** qui rougissent sur une assertion.
-- [ ] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : pile `grp-d` du fiscal (Redis compris) saine,
+- [x] La garde d'AD-12 verte sur le code neuf.
+- [x] **Mutations** qui rougissent sur une assertion.
+- [x] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : pile `grp-d` du fiscal (Redis compris) saine,
       la route neuve en `401` sans jeton.
+
+## Livraison (2026-11-26)
+
+- **Code** : prospera-fiscal-service#79, fusionnée en rebase sur `dev` (`8d85c10` ; arbre identique à la tête poussée
+  `891574b`). La branche est partie de `origin/dev` `6e9fbbe` (331), qui n'a pas bougé jusqu'à la fusion : aucun
+  rebase. Annonce avant le code : prospera-stories#991 (`main` 72e9915).
+- **Un écart, sans effet sur le contrat** : la garde de build ne compte plus elle-même les guidages actifs d'une même
+  version (D-332-4). Deux guidages actifs d'un même couple sont déjà refusés par l'analyse du manifeste
+  (`PAQUET_DEPOT_AMBIGU`, la règle de 536). Ce contrôle était donc du code mort, et une mutation restée verte l'a
+  montré ; il a été retiré. La règle annoncée tient : une version du format n'a jamais qu'un guidage.
+  `guidagePour` lit l'unique guidage actif du couple et ne le sert que s'il guide la version engagée.
+- **Fichiers** (dossiers de D) :
+  - le contrat d'un paquet de guidage, pur et strict : `domain/paquets-depot/contrat-guidage-depot.ts`. Les lecteurs du
+    contrat de 331 sont partagés (`lecteursDuContrat`, ajouté à `contrat-formulaire-depot.ts`) ;
+  - le guidage d'un dépôt engagé, en fonctions pures : `domain/depot/guidage-depot.ts` ;
+  - le cas d'usage : `application/depots/guidage-depot.service.ts`, fourni par `depots.module.ts` ;
+  - la route `GET /depots-declaration/{depotId}/guidage` dans `depots-declaration.controller.ts`, et son DTO
+    `dto/guidage-depot.dto.ts` ;
+  - le registre : `registre-paquets-depot.ts` (troisième manifeste, `chargerGuidage`, `guidagePour`,
+    `formulaireVersion`, `verifierGuidages`) et la garde de build `verifier-build.ts` ;
+  - les données : `assets/manifeste-guidages.json`, `tg-tva-guidage-1.0.json` (dimana) et `tg-dsf-guidage-1.0.json`
+    (GUDEF), en LF et vérifiées par sha256 ;
+  - les tests : `contrat-guidage-depot.spec.ts`, `guidage-depot.spec.ts`, `registre-guidages.spec.ts`,
+    `guidage-depot.service.spec.ts` (sur les vrais paquets), l'OpenAPI du dépôt et six cas de plus dans l'e2e
+    `depots-declaration`.
+  - **Aucune ligne de test retirée** : la spec OpenAPI de 330 reçoit seulement le service neuf, que le contrôleur
+    demande. Les formats (`tg-dsf-*.json`, `tg-tva-1.0.json`) et leurs deux manifestes sont **intacts d'un octet**.
+  - **Lus, sans écriture** (dossiers de C) : `REDEVABLE_ENTREPRISE` et `NatureRedevable`
+    (`domain/redevables/redevable.ts`), `obligationDesactivee` (`domain/obligations/cycle.ts`), `contenuDeclareDe`.
+- **Communs** (D-L7-2, annoncés avant le code) : **le contrat OpenAPI** seulement (une route neuve). Aucune migration,
+  aucun stockage. Ni `app.module.ts`, ni `package.json`, ni `read-models/`, ni copie du paquet fiscal.
+- **332 ne dépose pas** (D-332-10) : le guidage se lit, n'écrit rien et ne fait passer aucune obligation à « Déposée ».
+  Ce passage reste `CycleObligationsService.transitionner` (C).
+- **Preuves** :
+  - **Node 24** (image `verification` de l'archive LF) :
+    - sur `da293d6` : unitaires **239/239 suites, 3 549 tests** (une suite et 3 tests ignorés : la spec BullMQ, sans
+      Redis) ; e2e **14/14 suites, 345 tests** ; **`test:conformite` 27/27 suites, 173 tests** ;
+    - sur `891574b` (après le retrait du code mort) : les mêmes nombres (unitaires 239/239 suites, 3 549 tests ; e2e 14/14, 345 ; `test:conformite` 27/27, 173), et la pile `grp-d` avec Redis saine, la route du guidage en `401` sans jeton.
+  - **Node 25** (local) : contrat 26/26, domaine 11/11, registre 14/14, service 13/13, OpenAPI 6/6, e2e
+    `depots-declaration` 33/33. Sur les 32 suites du dépôt, des paquets, du livrable et du domaine, 695 tests passent sur
+    698. Les trois autres sont des tests de régénération du classeur à l'octet (`paquet-tg-dsf-11/12/13`) : ils
+    rougissent sous Node 25 à cause des copies CRLF de `completude-depot/assets/` (le piège de 331), et ils sont verts
+    sous Node 24.
+  - **Mutations 25/25**, chacune rouge sur une assertion :
+    - dans le contrat : un second téléversement accepté, une saisie dans un fichier, un téléversement dans un
+      formulaire, l'accusé qui n'est pas en dernier, un geste de saisie libre ajouté, des champs sur un geste qui ne
+      saisit pas ;
+    - pour la couverture des champs : l'ordre ignoré, un champ oublié accepté ;
+    - dans le domaine : un dépôt relayé guidé, une déclaration écartée guidée, le périmé non vu, un dépôt sans format
+      guidé, le fichier sur chaque étape, une valeur prise pour une autre, la nature du redevable inversée ;
+    - dans le service : la période du fichier fausse, le hors-portée rendu sous un autre refus ;
+    - dans le registre : la version guidée ignorée à la garde de build, puis à la lecture ; la couverture non vérifiée
+      au build ; le champ d'un guidage incomplet non nommé ; l'intégrité rendue sous un mauvais code ;
+    - dans la réponse : les valeurs perdues ;
+    - sur la route : le droit `deposer` retiré.
+
+    Six mutations ont été réécrites, et une a été remplacée. Cinq rougissaient d'abord en compilation (une variable
+    ou un paramètre devenu inutilisé). La sixième survivait : c'était le code mort ci-dessus. Elle est remplacée par
+    « un guidage d'une autre version servi ».
+  - lint des fichiers touchés et `tsc` : 0.
+  - §1.5 : pile `grp-d` du fiscal **avec Redis**, sur l'image runtime de l'archive de `da293d6`.
+    - Santé `ok` : mongodb, audit, kafka, redis.
+    - La route du guidage est montée et répond `401` sans jeton, comme les quatre routes de 330 et 331.
+    - 0 erreur sur 481 lignes de journal.
+    - Les index de `engagements_depot` sont posés.
+    - `DepotsModule`, `LivrablesDepotModule` et `ObligationsModule` sont montés.
+  - **Verrou Docker** : deux prises, chacune par le script autonome et rendue par son `trap` : de 14:15:43 à 14:28:57 (sur `da293d6`), puis de 14:44:36 à 14:51:21 (sur `891574b`). B et C ont été prévenus à chaque reddition (`-be`, `-f7`). Il ne reste aucun conteneur, volume ni réseau `grp-d`.
+- **Ce qui reste** :
+  - Q-D-29 au PO : les écrans réels des deux portails, à relever au premier dépôt réel (1102).
+  - → A (plus tard) : FE-081 affiche les étapes et met un bouton « copier » sur chaque valeur.
+  - D-332-9 : la vérification automatique de l'exercice de la liasse demande que l'engagement nomme la liasse. Elle
+    sera revue avec 1102.
+  - Le dirigeant : ses déclarations propres n'ont pas encore de format (« → C : canal de la retenue d'IRPP —
+    ouverte », 331).
+  - → 333 : l'accusé d'un dépôt engagé (le parcours finit sur `RELEVER_ACCUSE`).
 
 ## Questions au PO
 

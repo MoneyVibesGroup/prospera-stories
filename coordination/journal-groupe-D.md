@@ -411,6 +411,53 @@
   - **Suivante : STORY-332** : le guidage de dépôt pas à pas, dans les dossiers de D. Sa fiche est à écrire depuis
     `epics-fiscalite-2026-08-03.md` juste avant de coder. Elle lit le livrable d'un formulaire de 331 (D-331-12) et le
     dépôt engagé de 330 (D-330-5).
+- **STORY-332** ✅ 📨 — le dépôt guidé pas à pas : les étapes viennent du paquet, les valeurs suivent l'ordre du
+  formulaire, chacune prête à copier, et rien de ce que le produit connaît n'est demandé en saisie. Code :
+  prospera-fiscal-service#79, `dev` `8d85c10`. Annonce avant le code : #991, `main` 72e9915 (fiche D-332-1 → 12, ⚠
+  Contrats, ⚠ Communs, Q-D-29). Plan §4, n° 9 (« fini quand » : salle des cabinets V3).
+  - **Livré** (dossiers `depots` et `paquets-depot` de D) :
+    - **Le guidage, un paquet de dépôt à part.** Il est publié par un troisième manifeste, `manifeste-guidages.json`,
+      et vérifié par sha256. Les formats et leurs deux manifestes restent intacts d'un octet. Son contrat est strict et
+      pur : le format guidé (sa nature, ses versions), la source, puis les étapes (`code`, `libelle`, `geste`,
+      `consigne`, et `champs` pour une saisie). Les gestes forment une liste fermée, et **aucun ne demande une valeur**
+      (AC-3).
+    - **Les règles du parcours**, tenues au build et à la lecture (`GUIDAGE_INCOMPLET`, `details.champ`) :
+      - un fichier : une seule étape de téléversement, aucune saisie (AC-4, « un seul fichier ») ;
+      - un formulaire : aucun téléversement, et les champs reportés sont exactement ceux du formulaire, dans son
+        ordre (AC-5) ;
+      - l'accusé : relevé une seule fois, en dernier.
+    - **Les deux guidages du « fini quand »**, en `amorce` (Q-D-29) :
+      - `TG × TVA`, pour dimana : six étapes, et les trois valeurs dans l'ordre du formulaire ;
+      - `TG × DSF`, pour le GUDEF : un seul fichier, désigné par son estampille.
+    - **`GET /api/v1/depots-declaration/{depotId}/guidage`** (droit `deposer`) :
+      - les valeurs viennent de `valeursDuFormulaire` (331), sur la version engagée et le contenu de l'estampille (la
+        version scellée si elle l'est) ; chacune est une chaîne prête à copier (AC-2) ;
+      - le redevable est nommé : l'entreprise et le dirigeant ont chacun leur dépôt et leur guidage (AC-5) ;
+      - refus : `DEPOT_REMPLACE`, `OBLIGATION_DESACTIVEE`, `LIVRABLE_PERIME`, `FORMAT_DE_CANAL_NON_DECLARE`,
+        `GUIDAGE_NON_DECLARE` ;
+      - rien n'est écrit.
+    - **332 ne dépose pas** : « Déposée » reste `CycleObligationsService.transitionner` (C).
+    - **Un écart, sans effet sur le contrat** : la garde de build ne compte plus elle-même les guidages actifs. C'était
+      du code mort : l'analyse du manifeste refuse déjà deux guidages actifs d'un même couple (536). Il a été retiré.
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI seulement. Aucune migration, aucun stockage,
+    aucun fichier de C.
+  - **Preuves** :
+    - **Node 24** : sur `da293d6`, unitaires **239/239 suites, 3 549 tests** (une suite ignorée : BullMQ sans Redis), e2e
+      **14/14, 345**, **`test:conformite` 27/27, 173** ; sur `891574b`, les mêmes nombres (unitaires 239/239 suites, 3 549 tests ; e2e 14/14, 345 ; `test:conformite` 27/27, 173), et la pile `grp-d` avec Redis saine, la route du guidage en `401` sans jeton.
+    - **Node 25** : contrat, domaine, registre, service et OpenAPI (70 tests), e2e `depots-declaration` 33/33 ; lint et
+      `tsc` 0 ; **mutations 25/25**.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** saine. La route du guidage est montée et répond `401` sans jeton,
+      avec 0 erreur au journal.
+    - **Verrou Docker** : deux prises, chacune par le script autonome et rendue par son `trap` : de 14:15:43 à 14:28:57 (sur `da293d6`), puis de 14:44:36 à 14:51:21 (sur `891574b`). B et C ont été prévenus à chaque reddition (`-be`, `-f7`). Il ne reste aucun conteneur, volume ni réseau `grp-d`.
+  - **Ce qui reste** :
+    - Q-D-29 au PO ;
+    - → A (plus tard) : FE-081 affiche les étapes, avec un bouton « copier » par valeur ;
+    - D-332-9 : l'exercice de la liasse, vérifié automatiquement, avec 1102 ;
+    - les déclarations propres du dirigeant attendent leur format (→ C : canal de la retenue d'IRPP, ouverte).
+  - **Suivante : STORY-333** (la capture de l'accusé et la qualification du retard ; dossiers de D). Il faut **d'abord
+    la réaligner** avec 537 → 539 et 688 → 691, qui la couvrent en partie (plan §4, n° 10). Sa fiche est à écrire depuis
+    `epics-fiscalite-2026-08-03.md` juste avant de coder. Elle prend la suite de l'étape `RELEVER_ACCUSE` du guidage
+    et du dépôt engagé de 330 (D-330-15).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -2281,7 +2328,8 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-26, STORY-332, avant le code)** — branche `MNV-332` de `prospera-fiscal-service`, partie de
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#79, `dev` `8d85c10`, sur `origin/dev` `6e9fbbe`, qui n'avait pas
+  bougé : aucun rebase), conforme à l'annonce ; ANNONCÉ (2026-11-26, STORY-332, avant le code)** — branche `MNV-332` de `prospera-fiscal-service`, partie de
   `origin/dev` `6e9fbbe`. **Aucune migration** (aucun stockage ne change), ni `app.module.ts` (la route neuve entre dans
   `DepotsDeclarationController`, déjà monté ; le service neuf est fourni par `DepotsModule`, fichier de D), ni
   `package.json` (le `prebuild` appelle la même garde, étendue aux guidages), ni `read-models/`, ni copie du paquet
@@ -2379,7 +2427,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-26, STORY-332, avant le code) — le dépôt guidé pas à pas** (`prospera-fiscal-service`, modules
+- **PUBLIÉ (2026-11-26, STORY-332 : prospera-fiscal-service#79, `dev` `8d85c10`) sans écart ; ANNONCÉ (2026-11-26,
+  STORY-332, avant le code, prospera-stories#991, `main` 72e9915) — le dépôt guidé pas à pas** (`prospera-fiscal-service`, modules
   `depots` et `paquets-depot`). Fiche : `stories/STORY-332.md` (D-332-1 → 12, section « Contrat »). **Ajout seul** :
   aucune route, aucun champ, aucun topic existant ne change.
   - **`GET /api/v1/depots-declaration/{depotId}/guidage`** (droit `fiscalite:declaration:deposer`) : 200 `{ depotId,
@@ -3904,6 +3953,19 @@
 
 ## Pièges rencontrés
 
+- **STORY-332** (fiscal) :
+  - (1) **Une mutation qui laisse une variable ou un paramètre inutilisé rougit en compilation, pas sur une
+    assertion.** Avec `noUnusedLocals` et `noUnusedParameters`, supprimer un appel (`verifierEstampille(depot, courante)`)
+    ou une lecture (`parCode.get(code)`) rend `courante` ou `code` inutilisés. Écrire la mutation en gardant l'usage :
+    rendre la condition toujours fausse (`&& x < 0`), ou passer une valeur neutre (`{ ...courante, numero:
+    depot.numero, … }`).
+  - (2) **Une mutation restée verte peut révéler du code mort, pas un test manquant.** La garde « deux guidages actifs
+    de la même version » ne pouvait jamais se déclencher : `analyserManifeste` refuse déjà deux entrées actives d'un même
+    couple (`PAQUET_DEPOT_AMBIGU`). Avant d'écrire un test de plus, chercher si une couche plus basse tient déjà la
+    règle. Si c'est le cas, retirer le code et le dire dans la fiche.
+  - (3) Sous Node 25, les trois tests de régénération du classeur à l'octet (`paquet-tg-dsf-11/12/13`) rougissent tant
+    que les copies de `completude-depot/assets/` sont en CRLF (le piège (1) de 331, qui vaut aussi pour ce dossier).
+    Ils sont verts sous Node 24.
 - **STORY-331** (fiscal) :
   - (1) **Les copies du paquet de dépôt en CRLF doivent être réécrites par `git show` pour les tests locaux.** Cela vaut
     aussi pour les deux copies neuves, `manifeste-formulaires.json` et `tg-tva-1.0.json`. Avec `core.autocrlf=true`,
