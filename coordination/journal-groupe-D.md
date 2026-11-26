@@ -1823,6 +1823,20 @@
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-26, STORY-334) : ouvrir `DEPOSEE → A_DEPOSER` sur un rejet consigné — ouverte.**
+  - Pourquoi : AC-1 de 334 (« un rejet enregistré, l'obligation revient dans le cycle sans qu'aucune version antérieure
+    ne soit altérée ») ; D-325-9 laisse ce retour à 334, mais il est dans `CycleObligationsService.revenir` et
+    `verifierRetour` (`domain/obligations/version-declaration.ts`), fichiers de C, et le service n'est pas exporté.
+  - Ce que D fournit (fiscal, `MNV-334`) : `AccusesDepotModule` (le même qu'en 333, sans `ObligationsModule`) exporte
+    aussi le port `PreuvesDeRejet` (`src/ports/preuves-rejet.ts` : `rejetDe(orgId, obligationId, numero)`) ; la règle pure
+    `verifierRejetAuRetour(preuve, { obligationId, numero })` (`src/domain/depot/rejet-depot.ts`) lève `409 REJET_REQUIS`.
+  - Ce que C fait : dans `revenir`, de `DEPOSEE` vers `A_DEPOSER` seulement (les autres retours au-delà du dépôt restent
+    `RETOUR_AU_DELA_DU_DEPOT`), `verifierRejetAuRetour(await preuves.rejetDe(orgId, id, versionCouranteDe(o).numero), …)` ;
+    la version scellée n intacte ; le pointeur passe à `{ numero: n + 1, nature: 'RETRANSMISSION', versionId: null }` ; le
+    dépôt suivant scelle n + 1. Le motif du retour reste exigé ; l'acte peut citer `rejetId`. Aucune migration. Le même
+    import d'`AccusesDepotModule` que la garde `ACCUSE_REQUIS` de 339.
+  - En attendant : la reprise passe par la rectificative de 325 (n + 1 nommée `RECTIFICATIVE`, la version n intacte).
+
 - **→ C (2026-11-26, STORY-333) : garde ACCUSE_REQUIS — acceptée, placée en tête de 339 (après la fusion de 333).**
   333 est fusionnée (fiscal #81, `dev` `fc317a1`) ; le SHA a été envoyé à C (`moneyvibes-apps-f7`).
   - Pourquoi : AC-3 de 333 (« une obligation sans accusé ne passe pas à "Accusé reçu" ») ; `DEPOSEE → ACCUSE_RECU` n'a
@@ -2386,6 +2400,15 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-334, avant le code)** — branche `MNV-334` de `prospera-fiscal-service`, partie de
+  `origin/dev` `fc317a1`. **Aucune migration** (une collection neuve, `rejets_depot`, index posés par Mongoose au
+  démarrage), ni `app.module.ts` (les routes neuves entrent dans `DepotsDeclarationController`, déjà monté ; le registre
+  des rejets est fourni par `AccusesDepotModule`, fichier de D), ni `package.json`, ni `read-models/`, ni copie du paquet,
+  ni manifeste `declarations`. Touché parmi les communs : **le contrat OpenAPI** (trois routes neuves, un refus de plus sur
+  la route de l'accusé). **Aucun fichier de C** : le retour du cycle est demandé à C (« → C : … — ouverte »). Pour ne pas
+  croiser la garde `ACCUSE_REQUIS` que C pose en tête de 339 : D ne touche ni `obligations.module.ts` ni le cycle ;
+  `AccusesDepotModule` garde son nom et ses exports (`PreuvesDeRejet` s'y ajoute).
+
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#81, `dev` `fc317a1`, rebasée sur `origin/dev` `94baf9f` — 329 de C,
   qui touchait aussi le contrat OpenAPI : aucun conflit — avant la fusion), conforme à l'annonce ; ANNONCÉ (2026-11-26,
   STORY-333, avant le code)** — branche `MNV-333` de `prospera-fiscal-service`, partie de
@@ -2494,6 +2517,26 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-26, STORY-334, avant le code) — le rejet administratif d'un dépôt engagé**
+  (`prospera-fiscal-service`, module `depots`). Fiche : `stories/STORY-334.md` (D-334-1 → 15, section « Contrat »).
+  **Ajouts, et un refus de plus sur une route de 333** :
+  - **`POST /api/v1/depots-declaration/{depotId}/rejet`** (droit `fiscalite:declaration:preparer`, JSON : `rejeteLe`,
+    `motif` à l'octet, `reference?`, `cause?: { feuille?, cellule?, regle? }`, `correctionProposee?`) : 201 `{ rejetId,
+    depotId, obligationId, dossierId, numero, empreinte, rejeteLe, motif, reference, cause, correctionProposee,
+    consignePar, consigneLe, retard, reprise: { versionRejetee, retour: { vers: 'A_DEPOSER' }, etapes }, statutObligation
+    }`. Refus : `400` (`MOTIF_INVALIDE`, **`TEXTE_REJET_INVALIDE`** `{ champ }`), `404 DEPOT_INTROUVABLE`, `409
+    DEPOT_REMPLACE`, `409 OBLIGATION_DESACTIVEE`, `409 LIVRABLE_PERIME`, **`409 REJET_NON_CONSIGNABLE`** (`{ statut }`),
+    `409 ACCUSE_DEJA_CONSIGNE`, **`409 REJET_DEJA_CONSIGNE`** (`{ rejetId }`), **`422 DATE_REJET_HORS_BORNES`**.
+  - **`GET /api/v1/depots-declaration/{depotId}/rejet`** (accès fiscal) : 200 le rejet ; **`404 REJET_INTROUVABLE`**.
+  - **`GET /api/v1/depots-declaration/rejets?obligationId=…`** (accès fiscal) : 200 `{ obligationId, statutObligation,
+    rejets: [{ ...rejet, retransmission: { numero, nature, versionId, scelleLe } | null }] }`.
+  - **Route de 333, un refus de plus** : `POST …/{depotId}/accuse` répond **`409 DEPOT_REJETE`** (`{ rejetId }`) sur une
+    version rejetée (D-334-5 : accusé et rejet s'excluent, par version).
+  - **Pour C** : `409 REJET_REQUIS` sur `POST /api/v1/obligations/{id}/retour` `{ vers: 'A_DEPOSER' }` depuis `DEPOSEE`, et
+    la nature de version `RETRANSMISSION`, quand C l'aura ouvert (D-334-8, « → C » ci-dessous). Collection neuve
+    `rejets_depot` ; acte `DEPOT_DECLARATION_REJET` (empreintes seules), textes en clair dans `textes_audit` (329). Aucun
+    topic, aucun droit neuf. **→ A (plus tard)** : FE-081 consigne le rejet et affiche la reprise.
 
 - **PUBLIÉ (2026-11-26, STORY-333 : prospera-fiscal-service#81, `dev` `fc317a1`) sans écart ; ANNONCÉ (2026-11-26,
   STORY-333, avant le code, prospera-stories#998, `main` 572be5d) — l'accusé d'un dépôt engagé et le retard qualifié à
