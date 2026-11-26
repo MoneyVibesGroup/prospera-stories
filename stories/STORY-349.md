@@ -1,10 +1,11 @@
 # STORY-349 : Les obligations sociales dans le calendrier, le cycle et la preuve
 
-Status: in-progress — fiche écrite le 2026-11-26 par la sous-session du groupe D juste avant de coder (lot 7 de D, n° 6,
-`PLAN-LOT-7-2026-11-24.md` §4) ; contrat et fichiers communs annoncés avant le code (« ⚠ Contrats » et « ⚠ Communs »
-du journal de D). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-034).
+Status: done (2026-11-26 — prospera-fiscal-service#73, `dev` `136efdf` ; lot 7 de D, n° 6) — fiche écrite le
+2026-11-26 par la sous-session du groupe D juste avant de coder (`PLAN-LOT-7-2026-11-24.md` §4) ; contrat et fichiers
+communs annoncés avant le code (prospera-stories#962, « ⚠ Contrats » et « ⚠ Communs » du journal de D). Il n'existait
+pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-034).
 
-**Épic :** EPIC-034 — Base de rémunération et obligations sociales (**la dernière story de l'épic**)
+**Épic :** EPIC-034 — Base de rémunération et obligations sociales (**la dernière story de D dans l'épic** ; l'épic se ferme avec STORY-350 de C)
 **Points :** 3 · **Service :** `fiscal-service` (`:3012`), dossier de D `remuneration` (D-L7-1)
 **FR :** `FR-F31` *(les obligations sociales au calendrier, au cycle et à la preuve, au même titre que les fiscales)* ·
 `FR-F10` *(une obligation qu'on ne sait pas dater est dérivée non datée et nommée)* · `NFR-F04` *(aucune date dans le
@@ -132,13 +133,50 @@ une ligne de code dans les dossiers de C.
 
 ## Definition of Done
 
-- [ ] Une base écrite (saisie et import) ⇒ ses deux obligations sociales au calendrier du dossier et du portefeuille, au
+- [x] Une base écrite (saisie et import) ⇒ ses deux obligations sociales au calendrier du dossier et du portefeuille, au
       même titre qu'une `TVA` du même dossier (e2e et MongoDB réel).
-- [ ] Une obligation sociale traverse le cycle par la route de transition et laisse `OBLIGATION_DERIVEE` puis
+- [x] Une obligation sociale traverse le cycle par la route de transition et laisse `OBLIGATION_DERIVEE` puis
       `OBLIGATION_TRANSITION` au journal chaîné, chaîne intacte ; une re-dérivation garde statut et responsable
       (MongoDB réel).
-- [ ] **Mutations** qui rougissent sur une assertion : échéance au 15 en dur ; `NON_DECLAREE` datée quand même ;
+- [x] **Mutations** qui rougissent sur une assertion : échéance au 15 en dur ; `NON_DECLAREE` datée quand même ;
       garde du catalogue retirée ; redevable ou implantation autres ; dérivation retirée de la saisie ou de l'import ;
       `INCHANGEE` qui ne dérive pas ; paquet refusé qui refuse la base ou qu'on tait.
-- [ ] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
+- [x] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
       compris) sain, le module monté.
+
+## Livraison (2026-11-26)
+
+- **Code** : prospera-fiscal-service#73, fusionnée en rebase sur `dev` (`a7d42cc`, `a145468`, `136efdf` ; arbre identique
+  à la tête poussée `713295a`), rebasée sur `493a817` (321 de C). Annonce avant le code : prospera-stories#962 (`main`
+  9a83ce8). **Aucun écart au contrat annoncé.**
+- **Fichiers** (dossier `remuneration` de D) : `domain/remuneration/obligations-sociales.ts` (pur) et son test ;
+  `application/remuneration/obligations-sociales.service.ts` et son test ; `RemunerationService.ecrire` (la dérivation
+  après la base) et son test ; `ObligationsSocialesDto` et le champ `obligationsSociales` (`dto/remuneration.dto.ts`) ;
+  `remuneration.module.ts` (importe `ObligationsModule`) ; `test/remuneration-import.e2e-spec.ts` (sept cas neufs),
+  `test/obligations-sociales.conformite-spec.ts` (neuf), `test/import-paie.conformite-spec.ts` et
+  `test/remuneration.conformite-spec.ts` (le constructeur du service). Commit séparé, demande de C :
+  `src/domain/paquets-depot/libelle-imprime.spec.ts` (borne de temps 500 → 2000 ms ; vue à 851 ms sous la suite
+  complète). **Lus, sans écriture** (dossiers de C) : `ports/registre-obligations.ts`, `domain/obligations/derivation.ts`
+  (type), `catalogue.ts`, `montant.ts`, `domain/paquet-fiscal/validation-paquet.ts`.
+- **Communs** (D-L7-2) : le contrat OpenAPI seul. Aucune migration.
+- **Preuves** :
+  - Node 24 (image `verification` de l'archive LF) : unitaires **216/216 suites, 3 148 tests** (1 suite et 3 tests
+    ignorés : la spec BullMQ sans Redis) et e2e **13/13 suites, 299 tests** sur `407f48e` ; **`test:conformite` 23/23
+    suites, 144 tests** sur `713295a` (dont `obligations-sociales.conformite-spec.ts`, 4 : au calendrier du dossier à
+    côté de la `TVA` et de la `RSH` de mars, au calendrier du portefeuille et filtrable par taxe, le cycle entier avec
+    `OBLIGATION_DERIVEE` puis dix `OBLIGATION_TRANSITION`, chaîne intacte, une re-dérivation qui change la date garde
+    l'état et le responsable et écrit `OBLIGATION_REDERIVEE`). La première passe de conformité, sur `407f48e`, avait
+    rougi de deux attentes de test (corrigées en `713295a`, aucun code changé).
+  - Node 25 : rémunération et `libelle-imprime` 172/172 (8 suites), e2e de la base 38/38 (31 avant 349).
+  - **Mutations 14/14 rouges sur une assertion** : échéance au 15 en dur, `NON_DECLAREE` prise pour dérivable, garde du
+    catalogue retirée, redevable autre que l'entreprise, implantation autre que la principale, canal en dur,
+    signalements du paquet ignorés, année de l'échéance au lieu de la période, paquet refusé qui refuse la base,
+    refus du paquet tu, `INCHANGEE` qui ne dérive pas, import sans dérivation, saisie sans dérivation, pays du dossier
+    ignoré (cinq réécrites : leur première forme ne compilait pas, piège (2) de 1140).
+  - §1.5 : `docker compose -p grp-d` du fiscal (image runtime de l'archive LF, **Redis compris**, sain), santé `ok`
+    (MongoDB en jeu de répliques, audit, Kafka, Redis), `PUT …/remuneration/{periode}` et `GET /obligations/calendrier`
+    en 401 sans jeton, `RemunerationModule` et `ObligationsModule` initialisés, 0 `UnknownDependencies` sur 461 lignes.
+  - Lint des fichiers touchés, `tsc` : 0.
+- **Ce qui reste** : Q-D-24 (mois sans base) et Q-D-25 (les bases d'une obligation sociale) au PO ; le calculé du
+  triplet d'une obligation sociale branché sur le calcul social (dossier de C, à placer) ; l'organisme du reversement
+  de la retenue au paquet (→ C, information) ; l'écran (→ A) ; STORY-350 de C ferme l'épic.

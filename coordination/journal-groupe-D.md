@@ -243,6 +243,38 @@
     est fusionnée** (fiscal `origin/dev` `0cc79a7`, docs `main` 5b54ed7) : 349 est débloquée ; 325 ne l'est pas encore.
     Après 349 et la suite du tableau, D finit **STORY-1141** (5d, la passation de paiement de B est servie, #936).
 
+- **STORY-349** ✅ 🗓️ — les obligations sociales dans le calendrier, le cycle et la preuve (prospera-fiscal-service#73,
+  `dev` `a7d42cc`, `a145468`, `136efdf` ; annonce avant le code #962, `main` 9a83ce8 : fiche D-349-1 → 8, ⚠ Contrats,
+  ⚠ Communs, Q-D-24, Q-D-25). Rituel (2026-11-26) : aucune demande neuve à D chez A, B et C (les demandes de
+  notification de C et de B restent hors lot 7) ; **← C : 319 — servie** (fiscal #71, `0cc79a7`) ; 321 de C fusionnée
+  pendant la story (#72, `493a817`) : 349 rebasée dessus.
+  - **Mesuré avant le code** (sur `0cc79a7`) : le calendrier, le cycle, l'affectation, la charge et les alertes reçoivent
+    toute obligation écrite par `RegistreObligations.enregistrer` ; le catalogue Togo 2026 ne porte aucune obligation
+    sociale ; rien ne les dérivait.
+  - **Livré** (dossier `remuneration`) : `deriverObligationsSociales` (pur) — une base de `AAAA-MM` ⇒
+    `COTISATIONS_SOCIALES` et `RETENUE_IRPP` de l'employeur (redevable `entreprise`, implantation `principale`),
+    datées par `echeancesDe` de 348 (le 15 du mois suivant au paquet 2026 ; non datées et nommées
+    `ECHEANCE_ABSENTE_DU_PAQUET` sinon) ; familles `PROPORTIONNELLE` / `BAREME_TRANCHES` ; canal = l'organisme du paquet
+    (« CNSS Togo »), `NON_DECLARE` pour la retenue ; le catalogue fait foi s'il porte le code (`CATALOGUE_LA_PORTE`).
+    `ObligationsSocialesService` les écrit par l'écriture unique des obligations (AD-17) ; la saisie et l'import
+    dérivent après la base, `CREEE` comme `INCHANGEE` ; paquet inaccessible : base écrite, `NON_DERIVEES` dit. Aucun
+    écart au contrat annoncé.
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI seul. Aucune migration, aucun fichier de C ;
+    `remuneration.module.ts` importe `ObligationsModule`. Plus `libelle-imprime.spec.ts` (D, borne 500 → 2000 ms,
+    demande de C, commit séparé).
+  - Preuves : Node 24 (image `verification` de l'archive LF) unitaires 216/216 suites, 3 148 tests, e2e 13/13, 299 ;
+    **`test:conformite` 23/23, 144** (seconde passe, sur `713295a` : la première avait rougi de deux attentes de test) ;
+    Node 25 : rémunération 172/172, e2e de la base 38/38 ; **mutations 14/14** ; lint, `tsc` 0 ; §1.5 : pile `grp-d`
+    du fiscal **avec Redis** saine, deux routes en 401 sans jeton, 0 `UnknownDependencies`. **Verrou Docker** : pris à
+    09:41 (après le redémarrage du poste à 09:29 ; la première prise de 09:2x n'avait rien fait), rendu à 09:55 par
+    le trap ; repris à 09:55 (seconde conformité), rendu à 09:59 ; aucun conteneur, volume ni réseau `grp-d`. B et C
+    n'ont pas pu être prévenus par SendMessage (sessions renommées après le redémarrage) : dit dans le rapport.
+  - 🏁 **La part de D d'EPIC-034 est finie** (345, 346, 347, 348, 364, 349) ; l'épic se ferme avec **STORY-350 de C**
+    (le rapprochement des charges sociales, n° 17 du tableau de C).
+  - **Suivante : STORY-1141** (le numéro de compte imprimable, Q-D-15 : paiement par la passation de B limitée à la
+    story, #936, `e2be149`, puis ventes ; plan §4 bis, n° 5d). Au 26/11 à 10:00, 325 de C n'est pas fusionnée (fiscal
+    `origin/dev` `136efdf` ; C fait 324) : 330 et sa chaîne attendent.
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
@@ -1543,6 +1575,12 @@
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-26, STORY-349) — information, non bloquante** : (1) le paquet ne nomme pas l'organisme du reversement
+  de la retenue d'IRPP : le canal de `RETENUE_IRPP` sort `NON_DECLARE` ; `irpp.retenueALaSource.reversement.organisme`
+  le nommerait sans livraison. (2) `COTISATIONS_SOCIALES` et `RETENUE_IRPP` sont écrites par la dérivation sociale
+  de D ; si le catalogue les porte un jour, il fait foi (D-349-5). (3) Pour 350 : `ObligationsModule` ne peut pas
+  importer `RemunerationModule` sans `forwardRef` (cycle) ; un module de 350 peut importer les deux.
+
 - **← B : cloche et e-mail des cinq faits `ged.*` de la GED du cabinet (document-service #37 ; demande au journal de B,
   `main` f760f37) — reçue, hors lot 7, à placer par l'utilisateur.** Rien n'est codé par D.
 
@@ -1965,6 +2003,10 @@
 
 ## Réponses aux demandes reçues
 
+- **← C (2026-11-26, après STORY-321) : la borne de temps de `libelle-imprime.spec.ts`** (851 ms sous la suite complète
+  de C, borne 500) — **servie** dans 349 (fiscal #73, commit séparé `a7d42cc`) : 2000 ms, l'assertion (linéaire sur
+  400 000 caractères) inchangée.
+
 - **← B (2026-11-25, STORY-1116, `TICKET-BACKEND-modules-ouverts-dans-l-essai.md`) : dans l'espace d'essai, la garde de
   bilan ne lit pas le KYC (point 3, « D (bilan) »)** — **placée en STORY-1079 le 2026-11-25** (par STORY-1078, sur
   consigne de la session de groupe de D) : le dernier numéro de la plage 1030 → 1079 de D, entrée du tracker `RÉSERVÉ`
@@ -2067,7 +2109,10 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-26, STORY-349, avant le code)** — branche `MNV-349` de `prospera-fiscal-service`. **Aucune
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#73, `dev` `136efdf`, rebasée sur `origin/dev` `493a817` avant la
+  fusion), conforme à l'annonce, plus un fichier de D : `src/domain/paquets-depot/libelle-imprime.spec.ts` (la borne de
+  temps passe de 500 à 2000 ms, demande de C, commit séparé) ; ANNONCÉ (2026-11-26, STORY-349, avant le code)** —
+  branche `MNV-349` de `prospera-fiscal-service`. **Aucune
   migration**, aucune collection, aucun index ; ni `app.module.ts` (`RemunerationModule` et `ObligationsModule` y sont
   déjà), ni `package.json`, ni `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touché : **le contrat
   OpenAPI** (un champ ajouté à deux réponses : « ⚠ Contrats »). **Lus, sans y écrire** (dossiers de C) :
@@ -2124,7 +2169,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-26, STORY-349, avant le code) — les obligations sociales d'une période naissent de l'écriture de sa
+- **PUBLIÉ (2026-11-26, STORY-349, prospera-fiscal-service#73, `dev` `136efdf`) sans écart ; ANNONCÉ (2026-11-26,
+  STORY-349, avant le code, prospera-stories#962) — les obligations sociales d'une période naissent de l'écriture de sa
   base** (`prospera-fiscal-service`, dossier `remuneration`). Fiche : `stories/STORY-349.md` (D-349-1 → 8, section
   « Contrat »). **Un champ ajouté**, aucune route neuve :
   - `PUT /api/v1/dossiers/{dossierId}/remuneration/{periode}` et `POST …/{periode}/import` : statuts, refus et gardes
@@ -3524,6 +3570,18 @@
 
 ## Pièges rencontrés
 
+- **STORY-349** (fiscal) :
+  - (1) **Un redémarrage du poste tue la sous-session et ses boucles, pas le travail poussé** : la tête poussée et la PR
+    restent, la preuve Docker non rendue se refait (vécu à 09:29 : le script n'avait pas pris le verrou ; relancé à
+    09:41). Après un redémarrage, vérifier `docker ps -a`, `docker volume ls`, le fichier du verrou, puis relancer.
+  - (2) **Les noms des sessions de groupe changent après un redémarrage** : `SendMessage` vers `moneyvibes-apps-86` /
+    `-5e` échoue (« not reachable »). Ne pas deviner : le dire dans le rapport, la session de groupe relaie.
+  - (3) **Un test de conformité qui compare la réponse entière** (`toEqual({ statut, version })`) rougit dès qu'un champ
+    s'ajoute ; la conformité ne tourne que sous Docker, donc la faute ne se voit qu'au verrou. Chercher les `toEqual` sur
+    la réponse modifiée dans `test/*.conformite-spec.ts` avant la passe, et compter les obligations mensuelles du vrai
+    paquet (`TVA` **et** `RSH`) avant d'écrire une liste attendue.
+  - (4) **Une borne de temps dans un test unitaire** (`libelle-imprime.spec.ts`, 500 ms) rougit sous la suite complète
+    d'un poste chargé (851 ms chez C) : borner large (2000 ms), là où un comportement quadratique prendrait des minutes.
 - **STORY-1140** (dixième passage de D dans `bilan-service`) :
   - (1) **`MSYS_NO_PATHCONV=1` et `curl.exe`** : dans un script de preuve, `curl -o /c/…` n'écrit rien (le chemin POSIX
     n'est plus converti, et `curl` est un binaire Windows). Passer les chemins de sortie par `cygpath -m`. Vécu : une
