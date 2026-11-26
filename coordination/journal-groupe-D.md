@@ -134,6 +134,37 @@
     fiche à relire et mettre à jour ; elle remplace le motif `REGIME_SOCIAL_NON_DETERMINE` de 348 par le refus sourcé
     au paquet, `cnss.aCompleter`, et le déblocage sans livraison ; le calcul est dans `domain/remuneration/calcul-social.ts`).
 
+- **STORY-364** ✅ 🚧 — un dirigeant dont le régime social n'est pas déterminable sort BLOQUÉ, jamais approximé
+  (prospera-fiscal-service#68, `dev` `d41dbe6` ; fiche relue et mise à jour juste avant le code, D-364-1 → 9 ;
+  aucune annonce : ni contrat ni fichier commun ne bouge). Rituel (2026-11-25, reprise le 26/11) : aucune demande neuve à D chez A, B et
+  C ; aucune PR ouverte ni migration en vol sur le fiscal (C est sur STORY-1023, dans `balance-service`).
+  - **Mesuré avant le code** (sur `dev` `bc0c09f`) : 348 rendait déjà le dirigeant et l'associé `BLOQUEE`
+    (`REGIME_SOCIAL_NON_DETERMINE`, aucun montant) et leur IRPP bloqué (`REMUNERATION_GERANT`, D-564-5), et ses totaux
+    comptaient les lignes bloquées. **Manquaient** : un motif qui nomme le **paquet** (348 rendait `objet:
+    'typeBeneficiaire DIRIGEANT'`, un texte du code), l'absence **lue à l'artefact** (348 : une liste codée
+    `['SALARIE']`) et le **déblocage sans livraison** (aucun paquet ne pouvait débloquer un dirigeant). L'ancien premier
+    critère (« l'IRPP du dirigeant aboutit normalement ») tombe, remplacé par D-564-5 (D-364-2).
+  - **Livré** (`domain/remuneration/calcul-social.ts`, dossier de D) : `lireAffiliation` — l'affiliation d'un
+    `DIRIGEANT` ou d'un `ASSOCIE` se lit au paquet, **`cnss.affiliation.<TYPE>` `{ regime, source }`** ; `SALARIE` au
+    régime salarié par définition (D-364-3). Sans déclaration : `BLOQUEE`, `objet: 'cnss.affiliation.DIRIGEANT'`, et le
+    texte rendu dit « le régime d'affiliation CNSS des dirigeants (gérants) n'est pas défini dans le paquet
+    fiscal-tg-entreprise 2026.1 », cite `cnss.aCompleter` **tel quel, jamais analysé** (D-364-4), « jamais au régime
+    salarié », et que « le blocage se lève au paquet fiscal, sans livraison : aucune saisie de la base ne le lève »
+    (D-364-5). `regime: 'salarie'` + `source` ⇒ les cotisations du type se calculent, sans recompiler ; sans source, ou
+    à un autre régime (`travailleurIndependant`…) ⇒ `PAQUET_INCOMPLET` nommé (D-364-6). Art. 79 : une distribution
+    n'entre pas dans la base (`RUBRIQUE_INCONNUE`), la retenue est refusée par le calcul de C (D-364-7). Agrégat :
+    inchangé, prouvé égal à l'unité aux totaux du salarié seul (D-364-8). Aucun motif, champ ni route neuf.
+  - **Communs** : aucun. Aucune migration.
+  - Preuves : Node 24 (image `verification` de l'archive LF) unitaires 203/203 suites, 2 958 tests (1 ignoré), e2e 13/13 suites, 273 tests ; Node 25 : rémunération 148/148 (les tests de 348 inchangés), e2e de la base 31/31 ; **mutations 10/10** (dont le repli sur le régime salarié, la citation codée en dur, la source non exigée) ; lint, `tsc`, build 0 ; pas de conformité ni de compose (ni stockage, ni module, ni Dockerfile). **Verrou Docker** : pris à 00:38 (26/11 ; une seule passe : unitaires, e2e), rendu à 00:42 par le `trap` du script autonome ; B et C prévenus ; aucun conteneur ni réseau grp-d. (La limite de 5 h de l'API a interrompu la sous-session avant le commit, sans verrou tenu ; reprise sans perte.)
+  - **→ C (information, non bloquante)** : la clé `cnss.affiliation.<TYPE>` que le calcul lit, à écrire au paquet le
+    jour où l'affiliation des gérants sera sourcée (« Demandes aux autres groupes »). **→ C : `cnss.collecte` —
+    toujours ouverte** (non servie au 26/11 : la copie du paquet du fiscal ne la porte pas ; C est sur 1023).
+  - **Suivante : STORY-349** (les obligations sociales dans le calendrier, le cycle et la preuve ; EPIC-034 fini).
+    **Elle attend STORY-319 de C** (plan §5) : **→ C : 319 — ouverte**. État constaté au journal de C (`origin/main`,
+    26/11 à 00:40) : 319 **pas commencée** — C fait 1023 (balance, annonce `main` 28dc047), puis 317 → 318 → **319** ;
+    aucune fiche, aucune branche. La session de groupe de D décide de la suite (les autres stories de D attendent C :
+    330 ← 325, puis 331 → 337 et 561 → 565).
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
@@ -1433,6 +1464,18 @@
     - **Recettes** : `scripts/recette/1068` → `1071` (piles `grp-d`, pilotes Python, mutations).
 
 ## Demandes aux autres groupes
+
+- **→ C (2026-11-26, pour STORY-349) : STORY-319** (plan §5 : 349 attend 319) — **ouverte**. État constaté au journal de
+  C (`origin/main`, 26/11 à 00:40) : 319 **pas commencée**. C est sur STORY-1023 (`balance-service`, annonce `main`
+  28dc047), puis fera 317 → 318 → **319** ; ni fiche ni branche pour 319. Prévenir D à la fusion de 319.
+
+- **→ C (2026-11-26, STORY-364) : la règle d'affiliation des gérants au paquet fiscal Togo** — **information, non
+  bloquante**. Le calcul social lit **`cnss.affiliation.<TYPE>`** (`DIRIGEANT`, `ASSOCIE`) : `{ regime, source }`. Il
+  ne sait chiffrer que `regime: 'salarie'` (`cnss.branches.salarie`, `cnss.assiette`, `cnss.amu`) ; un autre régime
+  bloque, avec son nom. Tant que la clé manque, les cotisations des dirigeants et des associés sortent `BLOQUEE` en citant
+  `cnss.aCompleter`. Le jour où l'affiliation des gérants sera sourcée (relecture du bloc `cnss` par un fiscaliste,
+  geste de l'utilisateur, plan §8), l'écrire dans la source de `balance-service` puis dans la recopie du fiscal : la
+  ligne se calculera **sans livraison**. La demande `cnss.collecte` (348) reste **ouverte**, non servie au 26/11.
 
 - **→ C (2026-11-25, STORY-348) : la date de collecte des cotisations sociales au paquet fiscal Togo** — **ouverte**.
   Le paquet 2026 ne porte la date de collecte de la CNSS (et de l'AMU, qu'elle collecte) qu'en texte
@@ -3244,6 +3287,19 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-364** (le refus sourcé du dirigeant) :
+  - (1) **Six mutations sur dix « rougissaient » sur une erreur de compilation**, pas sur une assertion. Trois causes :
+    un `return` qui laisse du code mort derrière lui ; `if (false as boolean)` qui retire le rétrécissement du type (un
+    `affiliation.motif` qui ne compile plus) ; une fonction ou un paramètre devenu inutilisé (`noUnusedLocals`,
+    `noUnusedParameters`). Le script de mutations classe donc `COMPILATION` à part de `ROUGE`. Pour garder la mutation
+    compilable : ajouter `&& (false as boolean)` à la condition plutôt que la remplacer, garder l'appel `(f(x), null)`,
+    garder le paramètre lu `p.code.slice(0, 0)`, et préférer `if (objet) return …` (toujours vrai) à un `return` nu.
+  - (2) Le piège (1) de 348 vaut aussi pour **`cat >> fichier <<'EOF'`** (environ 150 lignes de TS avec des `’`) : il
+    échoue sans rien écrire. Ajouter un bloc de tests par l'outil d'édition.
+  - (3) **La limite de 5 h de l'API** a interrompu la sous-session après les mutations, avant le commit, sans verrou
+    tenu. La reprise s'est faite sans perte, depuis le worktree non commité. Commiter dès que les preuves locales sont
+    vertes, avant la passe Docker.
 
 - **STORY-348** (le calcul des cotisations et des retenues) :
   - (1) **Un heredoc de plus de ~180 lignes vers `python -`** échoue (« unexpected EOF while looking for matching `'` »)
