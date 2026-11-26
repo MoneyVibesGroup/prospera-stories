@@ -144,8 +144,8 @@
    route par route) ; la re-dérivation et les signalements laissent une close telle quelle. Node 24 : unitaires 225 suites,
    3248 ; e2e 13/13, 308 ; conformité 25/25, 160 ; mutations 30/30 et 11/11 MongoDB ; pile `grp-c` saine. Verrou pris une fois
    (11:30 → 11:39). D-325-1 → 13 dans la fiche. **D prévenu** (SendMessage : 330 débloquée, ce qu'elle emploie, D-325-11).
-16. **Suivante : STORY-327** (la continuité d'une période à l'autre, EPIC-031 ; fiche à écrire juste avant de coder ; dépend
-   de 326 ✅).
+16. 🚧 **STORY-327 en cours (26/11)** (la continuité d'une période à l'autre, EPIC-031 ; dépend de 326 ✅) : fiche écrite
+   (D-327-1 → 11), contrat et communs annoncés avant le code.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -631,6 +631,19 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-327, avant le code)** — branche `MNV-327` de `prospera-fiscal-service`. **Aucune
+  migration** (un champ facultatif `montantDeclare.reports` dans un champ `Mixed`, absent ⇒ `null`). Ni `app.module.ts`, ni
+  `package.json`, ni `read-models/`, ni manifeste `declarations`. Touchés parmi les communs : **le contrat OpenAPI** (un champ
+  du corps de `…/montant-declare`, deux champs de réponse, trois codes de contrôle, trois codes d'anomalie : « ⚠ Contrats ») et
+  **la copie du paquet fiscal** `test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`, recopiée à l'octet (LF) de
+  l'artefact de `balance-service` (bloc neuf `continuite`, `coherence.tolerances.DSF`). Tout le reste dans les dossiers de C
+  (`domain/obligations`, `application/obligations`, `modules/obligations`, `adapters/mongo` des obligations, `adapters/http` du
+  moteur, `ports/`, `test/utils`, e2e et conformité des obligations). Rien dans les dossiers de D. **→ D** : rien à faire pour
+  un rebase ; **à savoir** : (1) les clés du paquet que lit D ne changent pas (`cnss.*`, `irpp.*`) ; une spec de D qui
+  compterait les blocs du paquet se lirait avec un bloc de plus ; (2) le contenu scellé d'une version (325, que 330 estampille)
+  gagne `declare.reports` **seulement si des reports sont déclarés** : `empreinteDuContenu` d'un contenu sans reports ne change
+  pas d'un octet ; (3) `gardeDuScellement` lit en plus les reports ; (4) le dépôt (`POST …/transition` vers `DEPOSEE`) relance
+  la continuité de la période suivante, sans changer sa réponse.
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#75, `dev` `7e2bff8`, sur `origin/dev` `060c85c`)** — conforme à l'annonce :
   seul le contrat OpenAPI parmi les communs ; aucun fichier de D touché. **→ D** : rien à faire pour un rebase ; toute la suite
   (unitaires, e2e, conformité) est verte en Node 24 ; un banc qui nettoie `validations_client` ou `versions_declaration` par le
@@ -742,6 +755,32 @@ seulement.
   clés, plus celles de l'IRPP et de la CNSS (voir « ⚠ Contrats »).
 
 ## ⚠ Contrats
+
+- **2026-11-26 (STORY-327), ANNONCÉ avant le code** — **la continuité d'une période à l'autre** (`prospera-fiscal-service`,
+  REST ; source du paquet fiscal dans `balance-service`). Fiche : `stories/STORY-327.md` (D-327-1 → 11). Consommateurs :
+  l'écran du contrôle et des anomalies (A, FE-081) ; la copie du paquet de `dossier-service` (B). **Ajouts seuls**, plus une
+  précision de comportement. Aucune route neuve, aucun droit, aucun événement ; manifeste inchangé ; aucune route de
+  `balance-service` ne change.
+  - **Paquet fiscal Togo 2026** : bloc neuf **`continuite.reports[]`** `{ code, obligation, sortie, entree, tolerance, regle,
+    source }` — `CREDIT_TVA` (`TVA`, `creditAReporter` → `creditAnterieur`, tolérance 0) et `DEFICIT` (`DSF`,
+    `deficitAReporter` → `deficitAnterieur`, tolérance 0) ; **`coherence.tolerances.DSF`** `{ absolue: 1000 }` (l'imputation
+    des déficits face au moteur). Schéma, artefact régénéré, empreinte au registre ; **→ B** : nouvelle empreinte à recopier
+    dans `dossier-service` (message à la livraison).
+  - **`POST /api/v1/obligations/{id}/montant-declare`** : champ facultatif **`reports`** `{ creditAnterieur?,
+    creditAReporter?, deficitAnterieur?, deficitImpute?, deficitAReporter? }` (entiers ≥ 0) ; rendu dans
+    **`triplet.declare.reports`** (`null` si aucun) ; scellé dans **`contenu.declare.reports`** de la version
+    (`GET …/versions`) **seulement s'il est déclaré** (empreinte d'un contenu sans reports inchangée).
+  - **`POST /api/v1/obligations/{id}/coherence`** : `controles[].code` gagne **`DSF_DEFICIT_IMPUTE`**,
+    **`CONTINUITE_CREDIT_TVA`**, **`CONTINUITE_DEFICIT`** ; champ facultatif **`periodePrecedente`** `{ obligationId | null,
+    periode, version | null }` ; motifs de `NON_EXECUTE` neufs : `PERIODE_PRECEDENTE_INDETERMINEE`,
+    `PERIODE_PRECEDENTE_ABSENTE`, `PERIODE_PRECEDENTE_NON_DEPOSEE`, `REPORT_PRECEDENT_NON_DECLARE`. La continuité lit la
+    **dernière version déposée** de la période précédente ; l'imputation des déficits lit `totalDeficitsImputes` de
+    `GET …/fiscal/resultat-fiscal` (jeton de l'appelant).
+  - **Anomalies** (catalogue, `SIGNALEE`, bloquantes au dépôt, levables) : **`CONTINUITE_CREDIT_TVA_ROMPUE`**,
+    **`CONTINUITE_DEFICIT_ROMPUE`** (l'explication nomme les deux périodes ; `details.periodePrecedente`, `periode`,
+    `obligationPrecedenteId`, `versionPrecedente`), **`DEFICIT_IMPUTATION_ECART`**.
+  - **Comportement** : `POST /obligations/{id}/transition` vers `DEPOSEE` relance la continuité de la période suivante (si elle
+    existe, active, non close), sans changer la réponse du dépôt ni son refus.
 
 - **2026-11-26 (STORY-325), PUBLIÉ** (fiscal #75, `7e2bff8`) — **conforme à l'annonce** (#971), sans écart. **→ A (FE-081)** :
   types à régénérer (`versionCourante`, les trois routes, `OBLIGATION_CLOTUREE`). **→ D (330)** : prévenu. Annonce :
