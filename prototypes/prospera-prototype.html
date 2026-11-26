@@ -3756,6 +3756,26 @@
   [data-pf-root] .pf-notice.wn { border-color: var(--warning); background: var(--warning-soft); }
   [data-pf-root] .pf-rig { display: flex; gap: 0.5rem 1rem; flex-wrap: wrap; align-items: center; font-size: 0.8rem; color: var(--muted-fg); padding: 0.5rem 0.7rem; border: 1px dashed var(--border-strong); border-radius: 0.5rem; }
   [data-pf-root] .pf-rig select { font: inherit; font-size: 0.8rem; height: 2rem; padding: 0 0.4rem; border: 1px solid var(--border-strong); border-radius: 0.4rem; background: var(--card); color: var(--foreground); max-width: 100%; }
+  /* FE-041 : lire les statuts */
+  [data-pf-root] .pf-dz { display: flex; gap: 0.6rem 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 0.7rem 0.85rem; border: 1px dashed var(--border-strong); border-radius: 0.5rem; }
+  [data-pf-root] .pf-dz.ok { border-style: solid; border-color: var(--success); background: color-mix(in srgb, var(--success-soft) 40%, var(--card)); }
+  [data-pf-root] .pf-dz > div { min-width: 0; overflow-wrap: anywhere; }
+  [data-pf-root] .pf-pick { cursor: pointer; display: inline-flex; align-items: center; }
+  [data-pf-root] .pf-pick:focus-within { outline: 2px solid var(--ring); outline-offset: 1px; }
+  [data-pf-root] .pf-lr { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.2rem 0.7rem; align-items: start; padding: 0.7rem 0.8rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--card); }
+  [data-pf-root] .pf-lr.regard, [data-pf-root] .pf-lr.conf { border-color: var(--warning); background: color-mix(in srgb, var(--warning-soft) 35%, var(--card)); }
+  [data-pf-root] .pf-lr > input[type="checkbox"] { width: 1.15rem; height: 1.15rem; margin-top: 0.15rem; accent-color: var(--primary); }
+  [data-pf-root] .pf-lb { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+  [data-pf-root] .pf-ll { font-size: 0.78rem; font-weight: 700; color: var(--muted-fg); }
+  [data-pf-root] .pf-lb input[type="text"], [data-pf-root] .pf-lb input[type="date"], [data-pf-root] .pf-lb input:not([type]), [data-pf-root] .pf-lb select { font: inherit; font-size: 0.9rem; height: 2.4rem; padding: 0 0.7rem; border: 1px solid var(--border-strong); border-radius: 0.5rem; background: var(--card); color: var(--foreground); width: 100%; min-width: 0; box-sizing: border-box; }
+  [data-pf-root] .pf-lb input:focus-visible, [data-pf-root] .pf-lb select:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+  [data-pf-root] .pf-lb small { font-size: 0.76rem; color: var(--muted-fg); line-height: 1.4; overflow-wrap: anywhere; }
+  [data-pf-root] .pf-lb small.err { color: var(--danger); font-weight: 600; }
+  [data-pf-root] .pf-lb small.wrn { color: var(--warning); font-weight: 600; }
+  [data-pf-root] .pf-lb small svg, [data-pf-root] .pf-warnl svg, [data-pf-root] .dp-sub svg { display: inline-block; vertical-align: -0.15em; }
+  [data-pf-root] .pf-warnl { margin: 0; font-size: 0.82rem; font-weight: 600; color: var(--warning); }
+  [data-pf-root] .pf-opt { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; font-size: 0.9rem; cursor: pointer; }
+  [data-pf-root] .pf-chip { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 999px; background: var(--hover-surface); border: 1px solid var(--border); color: var(--muted-fg); }
   @media (max-width: 640px) {
     [data-pf-root] .pf-grid { grid-template-columns: minmax(0, 1fr); }
     [data-pf-root] .pf-row, [data-pf-root] .pf-row.dir { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
@@ -26013,9 +26033,9 @@
       function nb(i) { return String(Math.round(i)).replace(/\B(?=(\d{3})+(?!\d))/g, String.fromCharCode(8239)) + String.fromCharCode(160) + 'F CFA'; }
       function fr(i) { var p = String(i || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : ''; }
       function clone(x) { return JSON.parse(JSON.stringify(x)); }
-      var P = { mode: 'complet', profil: complet(), edit: false, f: null, f0: null, manq: null, errs: {}, notice: null, err: null, suite: null, creation: false, lire: false };
+      var P = { mode: 'complet', profil: complet(), edit: false, f: null, f0: null, manq: null, errs: {}, notice: null, err: null, suite: null, creation: false, lire: false, lec: null, lecT: null, scen: 'diverge' };
       window.__lot7p3b = function () { return P; };
-      function charger(mode) { P.mode = mode; P.edit = false; P.notice = null; P.err = null; P.suite = null; P.errs = {}; P.lire = false; P.profil = mode === 'incomplet' ? incomplet() : mode === 'aucun' ? null : complet(); }
+      function charger(mode) { P.mode = mode; P.edit = false; P.notice = null; P.err = null; P.suite = null; P.errs = {}; P.lire = false; lecStop(); P.lec = null; P.profil = mode === 'incomplet' ? incomplet() : mode === 'aucun' ? null : complet(); }
       function lectureSeule() { return P.mode === 'archive'; }
       function ouvrirForm() {
         P.creation = !P.profil; P.edit = true; P.errs = {}; P.notice = null; P.err = null; P.suite = null;
@@ -26107,7 +26127,7 @@
       }
       function carte() {
         var d = P.profil, m = d ? manque(d) : null, h;
-        var lire = '<button class="btn btn-ghost" type="button" data-pf-act="lire">Lire les statuts</button>';
+        var lire = '<button class="btn btn-ghost" type="button" data-pf-act="lire">Lire les statuts</button>', relire = '<button class="btn btn-ghost" type="button" data-pf-act="lire">Relire les statuts</button>';
         if (lectureSeule()) {
           h = '<div class="dp-card"><div class="dp-big">' + IC.lock + ' Ce dossier est archivé</div><p class="dp-sub">Le profil se lit, il ne se modifie plus.</p></div>';
         } else if (!d) {
@@ -26115,22 +26135,188 @@
         } else if (!m.pret) {
           h = '<div class="dp-card warn"><div><p class="dp-big">' + IC.warn + ' Il manque ' + m.bloq.length + ' information' + (m.bloq.length > 1 ? 's' : '') + ' avant la liasse</p><p class="dp-sub">' + m.bloq.map(function (k) { return LIB[k].replace(/ \(.*\)$/, ''); }).join(', ') + '.</p></div><div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-pf-act="ouvrir">Compléter maintenant</button>' + lire + '</div></div>';
         } else {
-          h = '<div class="dp-card ok"><div><p class="dp-big">' + IC.ok + ' Le profil est complet : la liasse peut être produite</p><p class="dp-sub">' + (m.opt.length ? 'Facultatif : ' + m.opt.map(function (k) { return LIB[k].replace(/ \(.*\)$/, '').toLowerCase(); }).join(', ') + '.' : 'Rien à ajouter.') + '</p></div><div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-pf-act="ouvrir">Modifier le profil</button></div></div>';
+          h = '<div class="dp-card ok"><div><p class="dp-big">' + IC.ok + ' Le profil est complet : la liasse peut être produite</p><p class="dp-sub">' + (m.opt.length ? 'Facultatif : ' + m.opt.map(function (k) { return LIB[k].replace(/ \(.*\)$/, '').toLowerCase(); }).join(', ') + '.' : 'Rien à ajouter.') + '</p></div><div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-pf-act="ouvrir">Modifier le profil</button>' + relire + '</div></div>';
         }
-        if (P.lire) h += '<div class="pf-notice wn">Ici s’ouvrira la lecture des statuts et de la carte CFE : les champs se rempliront d’eux-mêmes, à relire avant d’enregistrer. C’est l’écran de FE-041 (maquette suivante).</div>';
+                return h;
+      }
+      /* ═══ FE-041 · lire les statuts et pré-remplir le profil (lot 7, paquet 3) ═══
+         Un geste : déposer les statuts (et la carte CFE si on l'a) → « Lire » → les champs arrivent, chacun avec sa source ; rien ne s'écrit avant « Enregistrer ».
+         Contrats : balance-service POST|GET /dossiers/{dossierId}/profil-societe/ocr, POST …/ocr/{extractionId}/appliquer (STORY-081, 529) ; document-service
+         lit PDF, JPEG, PNG (10 Mo). Une valeur peu sûre (confiance < 0,80) n'est pas cochée ; deux pièces qui divergent gardent les DEUX valeurs ; une valeur
+         qui changerait le profil existant n'est pas cochée non plus. Dossier : exemples illustratifs. */
+      var SRC = { STATUTS: 'Statuts', CARTE_CFE: 'Carte CFE' };
+      var LIBL = { raisonSociale: 'Raison sociale', sigle: 'Sigle', formeJuridique: 'Forme juridique', capitalSocial: 'Capital', objetSocial: 'Activité de la société', dateCreation: 'Date de création', dirigeant: 'Dirigeant', nif: 'NIF', rccm: 'RCCM', adresse: 'Adresse du siège', codeNaema: 'Code d’activité (NAEMA)' };
+      var ORDRE = ['raisonSociale', 'sigle', 'formeJuridique', 'nif', 'rccm', 'dateCreation', 'objetSocial', 'capitalSocial', 'adresse', 'dirigeant', 'codeNaema'];
+      var SCEN = [['diverge', 'une date diverge, un RCCM est peu sûr'], ['sur', 'tout se lit sans doute'], ['lent', 'la lecture est longue'], ['illisible', 'le document est illisible'], ['indispo', 'le service de lecture ne répond pas']];
+      function lues(scen, fich) {
+        var S = function (c, v, k, b) { return { champ: c, valeur: v, confiance: k, source: 'STATUTS', brut: b, faibleConfiance: k < 0.8 }; };
+        var C = function (c, v, k, b) { return { champ: c, valeur: v, confiance: k, source: 'CARTE_CFE', brut: b, faibleConfiance: k < 0.8 }; };
+        var l = [];
+        if (fich.statuts) l.push(S('raisonSociale', 'ETS KOSSI DISTRIBUTION', 0.97, 'ETS KOSSI DISTRIBUTION, société à responsabilité limitée'), S('sigle', 'EKD', 0.92, 'dite « EKD »'), S('formeJuridique', 'SARL', 0.95, 'Société à Responsabilité Limitée (SARL)'),
+          S('capitalSocial', '10000000', 0.94, 'Le capital social est fixé à 10 000 000 FCFA'), S('objetSocial', 'Commerce de détail et distribution de produits de grande consommation', 0.88, 'La société a pour objet : commerce de détail et distribution de produits de grande consommation'),
+          S('dateCreation', '2019-03-15', 0.9, 'Fait à Lomé, le 15/03/2019'), S('dirigeant', 'Komlan Kossi', 0.91, 'Gérant : Monsieur Komlan Kossi'));
+        if (fich.cfe) l.push(C('nif', '1000745307', 0.96, 'NIF : 1000745307'), C('rccm', scen === 'sur' ? 'TG-LOM-2019-A-1204' : 'TG-LOM-2019-A-I204', scen === 'sur' ? 0.95 : 0.62, scen === 'sur' ? 'RCCM : TG-LOM-2019-A-1204' : 'RCCM : TG-LOM-2019-A-I204'),
+          C('raisonSociale', 'Ets Kossi Distribution', 0.9, 'Ets Kossi Distribution'), C('adresse', 'Quartier Bè-Kpota, Lomé', 0.9, 'Siège : Quartier Bè-Kpota, Lomé'), C('codeNaema', '4711', 0.93, 'Code NAEMA : 4711'),
+          C('dateCreation', scen === 'sur' ? '2019-03-15' : '2019-03-18', 0.9, scen === 'sur' ? 'Immatriculé le 15/03/2019' : 'Immatriculé le 18/03/2019'));
+        return l;
+      }
+      function norm(c, v) {
+        v = String(v == null ? '' : v);
+        if (c === 'capitalSocial') return v.replace(/\D/g, '');
+        return v.trim().toLowerCase().replace(/\s+/g, ' ');
+      }
+      function actuel(c) {
+        var d = P.profil; if (!d) return '';
+        if (c === 'dirigeant') { var x = (d.dirigeants || []).filter(function (e) { return e.nom; }); return x.length ? x[0].nom : ''; }
+        return d[c] == null ? '' : String(d[c]);
+      }
+      function aff(c, v) {
+        if (c === 'dateCreation') return fr(v);
+        if (c === 'capitalSocial') return v === '' || v == null ? '' : nb(Number(String(v).replace(/\D/g, '')));
+        if (c === 'formeJuridique') return (FORMES.filter(function (f) { return f[0] === v; })[0] || [0, v])[1].split(' — ')[0];
+        return v;
+      }
+      function construire(brut) {
+        var par = {};
+        brut.forEach(function (p) { (par[p.champ] = par[p.champ] || []).push(p); });
+        var lignes = [], deja = 0;
+        ORDRE.forEach(function (c) {
+          var ps = par[c]; if (!ps) return;
+          var act = actuel(c), conflit = ps.length > 1 && norm(c, ps[0].valeur) !== norm(c, ps[1].valeur);
+          var faible = ps.some(function (p) { return p.faibleConfiance; });
+          if (!conflit && !faible && act && norm(c, act) === norm(c, ps[0].valeur)) { deja++; return; }
+          var L = { champ: c, ps: conflit ? ps : [ps[0]], accord: !conflit && ps.length > 1, faible: faible, conflit: conflit, act: act, differe: !!act && !conflit && norm(c, act) !== norm(c, ps[0].valeur), choix: conflit ? null : 0, val: conflit ? '' : ps[0].valeur, fonction: 'Gérant', err: null };
+          L.coche = !conflit && !faible && !L.differe;
+          lignes.push(L);
+        });
+        return { lignes: lignes, deja: deja };
+      }
+      function lecStop() { if (P.lecT) { clearTimeout(P.lecT); P.lecT = null; } }
+      function lecOuvrir() { lecStop(); P.edit = false; P.notice = null; P.suite = null; P.lec = { etat: 'depot', fich: { statuts: null, cfe: null }, err: null, lignes: [], deja: 0, fichErr: '' }; }
+      function lecFermer() { lecStop(); P.lec = null; }
+      function lecFichier(cle, f) {
+        var L = P.lec; L.fichErr = '';
+        if (!f) { L.fich[cle] = null; return; }
+        if (!/\.(pdf|jpe?g|png)$/i.test(f.name)) { L.fichErr = 'Format de fichier non supporté (PDF, JPEG ou PNG uniquement).'; return; }
+        if (f.size > 10 * 1024 * 1024) { L.fichErr = 'Fichier trop volumineux (maximum 10 Mo).'; return; }
+        L.fich[cle] = { nom: f.name };
+      }
+      function lecLancer() {
+        var L = P.lec; L.etat = 'cours'; L.err = null; lecStop();
+        P.lecT = setTimeout(function () { P.lecT = null; if (P.lec) { lecResultat(); rendre(); } }, 1300);
+      }
+      function lecResultat() {
+        var L = P.lec, s = P.scen;
+        if (s === 'indispo') { L.etat = 'indispo'; return; }
+        if (s === 'illisible') { L.etat = 'illisible'; return; }
+        if (s === 'lent' && !L.patient) { L.patient = true; L.etat = 'lent'; return; }
+        var r = construire(lues(s, L.fich)); L.lignes = r.lignes; L.deja = r.deja; L.etat = r.lignes.length ? 'revue' : 'rien';
+      }
+      function nCoches() { return P.lec.lignes.filter(function (l) { return l.coche; }).length; }
+      function lecLigne(l, i) {
+        var cls = 'pf-lr' + (l.conflit ? ' conf' : l.faible || l.differe ? ' regard' : ''), h = '<div class="' + cls + '"><input type="checkbox" id="pf-lc' + i + '" data-pf-lc="' + i + '"' + (l.coche ? ' checked' : '') + (l.conflit && l.choix == null ? ' disabled' : '') + ' aria-label="Enregistrer : ' + esc(LIBL[l.champ]) + '"><div class="pf-lb">';
+        h += '<label class="pf-ll" for="pf-lv' + i + '">' + esc(LIBL[l.champ]) + '</label>';
+        if (l.conflit) {
+          h += '<p class="pf-warnl">' + IC.warn + ' Les deux documents ne disent pas la même chose : choisissez.</p>';
+          l.ps.forEach(function (p, j) {
+            h += '<label class="pf-opt"><input type="radio" name="pf-lo' + i + '" data-pf-lo="' + i + ':' + j + '"' + (l.choix === j ? ' checked' : '') + '> <b>' + esc(aff(l.champ, p.valeur)) + '</b> <span class="pf-chip">' + SRC[p.source] + '</span></label><small class="pf-frag">« ' + esc(p.brut) + ' »</small>';
+          });
+          if (l.act) h += '<small class="pf-frag">Le profil dit aujourd’hui : <b>' + esc(aff(l.champ, l.act)) + '</b></small>';
+        }
+        if (!l.conflit || l.choix != null) {
+          var v = l.val, id = 'pf-lv' + i;
+          if (l.champ === 'formeJuridique') h += '<select id="' + id + '" data-pf-lv="' + i + '">' + FORMES.map(function (o) { return '<option value="' + o[0] + '"' + (v === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>';
+          else h += '<input id="' + id + '" data-pf-lv="' + i + '" type="' + (l.champ === 'dateCreation' ? 'date' : 'text') + '" value="' + esc(v) + '"' + (/^(nif|rccm|codeNaema|capitalSocial)$/.test(l.champ) ? ' style="font-family:var(--font-mono)"' : '') + '>';
+          if (l.champ === 'dirigeant') h += '<label class="pf-ll" for="pf-lf' + i + '" style="margin-top:0.3rem">Sa fonction</label><input id="pf-lf' + i + '" data-pf-lf="' + i + '" value="' + esc(l.fonction) + '">';
+          if (l.err) h += '<small class="err">' + esc(l.err) + '</small>';
+          if (!l.conflit) {
+            var p0 = l.ps[0];
+            h += '<small class="pf-frag"><span class="pf-chip">' + (l.accord ? 'Statuts et carte CFE' : SRC[p0.source]) + '</span> « ' + esc(p0.brut) + ' »</small>';
+            if (l.faible) h += '<small class="wrn">' + IC.warn + ' Lecture peu sûre : comparez avec le document.</small>';
+            if (l.differe) h += '<small class="wrn">' + IC.warn + ' Le profil dit aujourd’hui : ' + esc(aff(l.champ, l.act)) + '. Cochez pour le remplacer.</small>';
+          }
+        }
+        return h + '</div></div>';
+      }
+      function lecPanneau() {
+        var L = P.lec, h = '', e = L.etat, noms = [L.fich.statuts && L.fich.statuts.nom, L.fich.cfe && L.fich.cfe.nom].filter(Boolean);
+        var zone = function (cle, titre, aide) {
+          var f = L.fich[cle];
+          return '<div class="pf-dz' + (f ? ' ok' : '') + '"><div><b>' + titre + '</b><div class="dp-sub">' + (f ? esc(f.nom) : aide) + '</div></div>' + (f ? '<button class="btn btn-ghost btn-sm" type="button" data-pf-act="lf-rm" data-k="' + cle + '">Retirer</button>' :
+            '<label class="btn btn-ghost btn-sm pf-pick">Choisir le fichier<input type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" data-pf-file="' + cle + '" hidden></label>') + '</div>';
+        };
+        if (e === 'depot') {
+          h = '<div class="dp-card"><div><p class="dp-big">Lire les statuts de la société</p><p class="dp-sub">Déposez les statuts, et la carte CFE si vous l’avez : les champs se remplissent, vous relisez avant d’enregistrer.</p></div>' +
+            zone('statuts', 'Les statuts', 'PDF ou photo') + zone('cfe', 'La carte CFE (facultative)', 'Donne le NIF, le RCCM et l’adresse') +
+            (L.fichErr ? '<div class="pf-notice ko" role="alert">' + esc(L.fichErr) + '</div>' : '') +
+            '<div class="pf-foot"><span class="dp-sub grow">PDF, JPEG ou PNG, 10 Mo au plus par document.</span><button class="btn btn-ghost" type="button" data-pf-act="lec-ex">Essayer avec des exemples</button><button class="btn btn-ghost" type="button" data-pf-act="lec-ann">Annuler</button><button class="btn btn-primary dp-lg" type="button" data-pf-act="lec-go"' + (noms.length ? '' : ' disabled') + '>Lire ' + (noms.length > 1 ? 'les documents' : 'le document') + '</button></div></div>';
+        } else if (e === 'cours') {
+          h = '<div class="dp-card" role="status"><p class="dp-big">Lecture en cours…</p><p class="dp-sub">Quelques secondes. ' + esc(noms.join(' · ')) + '</p><div class="dp-go"><button class="btn btn-ghost" type="button" data-pf-act="lec-ann">Annuler</button></div></div>';
+        } else if (e === 'lent') {
+          h = '<div class="dp-card warn" role="status"><div><p class="dp-big">La lecture prend plus de temps que d’habitude</p><p class="dp-sub">Rien n’est perdu : vérifiez à nouveau dans un instant.</p></div><div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-pf-act="lec-go">Vérifier à nouveau</button><button class="btn btn-ghost" type="button" data-pf-act="lec-ann">Annuler</button></div></div>';
+        } else if (e === 'illisible' || e === 'indispo' || e === 'rien') {
+          var t = e === 'indispo' ? ['Le service de lecture ne répond pas pour le moment', 'Rien n’a été enregistré. Réessayez, ou saisissez le profil à la main.'] : e === 'rien' ? ['Rien de reconnu dans ces documents', 'Essayez avec une photo plus nette, ou saisissez le profil à la main.'] : ['Ce document n’a pas pu être lu', 'Essayez avec une photo plus nette, ou saisissez le profil à la main.'];
+          h = '<div class="dp-card ko" role="alert"><div><p class="dp-big">' + IC.warn + ' ' + t[0] + '</p><p class="dp-sub">' + t[1] + '</p></div><div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-pf-act="' + (e === 'indispo' ? 'lec-go' : 'lec-redo') + '">' + (e === 'indispo' ? 'Réessayer' : 'Choisir un autre document') + '</button><button class="btn btn-ghost" type="button" data-pf-act="lec-main">Saisir à la main</button></div></div>';
+        } else {
+          var reg = L.lignes.map(function (l, i) { return [l, i]; }), A = reg.filter(function (x) { return x[0].conflit || x[0].faible || x[0].differe; }), B = reg.filter(function (x) { return !(x[0].conflit || x[0].faible || x[0].differe); }), n = nCoches();
+          h = '<div class="dp-card"><div><p class="dp-big">Voici ce qui a été lu</p><p class="dp-sub">' + esc(noms.join(' · ')) + '. La lecture automatique peut se tromper : relisez, rien n’est enregistré avant votre accord.</p></div>' +
+            (P.lec.err ? '<div class="pf-notice ko" role="alert">' + P.lec.err + '</div>' : '') +
+            (A.length ? '<p class="pf-h">À regarder (' + A.length + ')</p>' + A.map(function (x) { return lecLigne(x[0], x[1]); }).join('') : '') +
+            (B.length ? '<p class="pf-h">Prêt à enregistrer (' + B.length + ')</p>' + B.map(function (x) { return lecLigne(x[0], x[1]); }).join('') : '') +
+            (L.deja ? '<p class="dp-sub">' + IC.ok + ' ' + L.deja + ' valeur' + (L.deja > 1 ? 's' : '') + ' lue' + (L.deja > 1 ? 's' : '') + ' identique' + (L.deja > 1 ? 's' : '') + ' au profil : rien à changer.</p>' : '') +
+            (!P.profil ? '<p class="dp-sub">Le profil sera créé avec ces valeurs ; le pays (Togo) vient du dossier.</p>' : '') +
+            '<div class="pf-foot"><button class="btn btn-ghost" type="button" data-pf-act="lec-ann">Annuler</button><span class="grow"></span><button class="btn btn-primary dp-lg" type="button" data-pf-act="lec-ok"' + (n ? '' : ' disabled') + '>' + (n ? 'Enregistrer ' + n + ' valeur' + (n > 1 ? 's' : '') : 'Cochez au moins une valeur') + '</button></div></div>';
+        }
         return h;
+      }
+      function lecEnregistrer() {
+        var L = P.lec, bad = false;
+        L.err = null;
+        L.lignes.forEach(function (l) {
+          l.err = null; if (!l.coche) return;
+          var v = String(l.val == null ? '' : l.val).trim();
+          if (!v) { l.err = 'Cette valeur est vide : décochez la ligne ou remplissez-la.'; bad = true; }
+          else if (l.champ === 'capitalSocial' && !/^\d+$/.test(v.replace(/\s/g, ''))) { l.err = 'Un montant entier, en francs CFA.'; bad = true; }
+          else if (l.champ === 'dateCreation' && v > TODAY) { l.err = 'La date ne peut pas être dans le futur.'; bad = true; }
+          else if (l.champ === 'dirigeant' && !String(l.fonction).trim()) { l.err = 'Indiquez sa fonction (gérant, DG…).'; bad = true; }
+        });
+        if (bad) { L.err = 'Corrigez les lignes marquées, puis enregistrez.'; rendre(); return; }
+        var c = P.rig; P.rig = '';
+        if (c) {
+          if (c === 'PROFIL_SOCIETE_MODIFIE_CONCURREMMENT') { if (P.profil) { P.profil.version++; P.profil.par = 'Awa Diallo'; P.profil.le = '26 novembre 2026'; } lecFermer(); P.notice = REFUS[c]; P.noticeKo = true; }
+          else if (c === 'DOSSIER_ARCHIVE') { P.mode = 'archive'; lecFermer(); P.notice = REFUS[c]; P.noticeKo = true; }
+          else if (c === 'PROFIL_SOCIETE_DEJA_EXISTANT') { lecFermer(); P.profil = complet(); P.mode = 'complet'; P.notice = REFUS[c]; P.noticeKo = true; }
+          else L.err = REFUS[c];
+          rendre(); return;
+        }
+        var nouveau = !P.profil, d = P.profil ? clone(P.profil) : { raisonSociale: 'Ets Kossi Distribution', formeJuridique: 'SARL', pays: 'TG', devise: 'XOF', actionnaires: [], dirigeants: [] }, n = 0;
+        L.lignes.forEach(function (l) {
+          if (!l.coche) return; n++;
+          var v = String(l.val).trim();
+          if (l.champ === 'dirigeant') { d.dirigeants = d.dirigeants || []; if (!d.dirigeants.some(function (x) { return norm('dirigeant', x.nom) === norm('dirigeant', v); })) d.dirigeants.push({ nom: v, fonction: String(l.fonction).trim(), nif: '' }); }
+          else if (l.champ === 'capitalSocial') d.capitalSocial = Number(v.replace(/\s/g, ''));
+          else d[l.champ] = v;
+        });
+        d.version = nouveau ? 1 : P.profil.version + 1; d.par = 'Vous'; d.le = '26 novembre 2026';
+        P.profil = d; P.mode = P.mode === 'aucun' ? 'incomplet' : P.mode; lecFermer();
+        var m = manque(d), w = avert(d);
+        P.notice = '<b>' + n + ' valeur' + (n > 1 ? 's' : '') + ' enregistrée' + (n > 1 ? 's' : '') + '</b> d’après les documents, relue' + (n > 1 ? 's' : '') + ' par vous. Version ' + d.version + '.' + (w.length ? ' ' + w.map(function (a) { return esc(a.m); }).join(' ') : ''); P.noticeKo = false;
+        P.suite = m.pret ? { txt: 'Le profil est complet. Étape suivante : confirmer le régime de la société.', btn: 'Confirmer le régime', act: 'axes' } : { txt: 'Il manque encore : ' + m.bloq.map(function (k) { return LIB[k].replace(/ \(.*\)$/, '').toLowerCase(); }).join(', ') + '.', btn: 'Compléter', act: 'ouvrir' };
+        rendre();
       }
       function rig() {
         function opt(v, l) { return '<option value="' + v + '"' + (P.rig === v ? ' selected' : '') + '>' + l + '</option>'; }
         function om(v, l) { return '<option value="' + v + '"' + (P.mode === v ? ' selected' : '') + '>' + l + '</option>'; }
         return '<details class="pf-d"><summary>Pour la démonstration</summary><div class="pf-rig" style="margin-top:0.5rem"><label>Le dossier est : <select data-pf-rig-mode>' + om('complet', 'complet') + om('incomplet', 'incomplet (3 informations manquent)') + om('aucun', 'sans profil') + om('archive', 'archivé') + '</select></label>' +
-          '<label>Au prochain enregistrement : <select data-pf-rig-err>' + opt('', 'tout se passe bien') + opt('PAYS_NON_SUPPORTE', 'le pays est refusé') + opt('DATE_CREATION_FUTURE', 'la date est refusée') + opt('PROFIL_SOCIETE_MODIFIE_CONCURREMMENT', 'quelqu’un a modifié entre-temps') + opt('PROFIL_SOCIETE_DEJA_EXISTANT', 'le profil existe déjà') + opt('ORG_CONTEXTE_REQUIS', 'le droit est refusé') + opt('DOSSIER_ARCHIVE', 'le dossier vient d’être archivé') + opt('reseau', 'le service ne répond pas') + '</select></label></div></details>';
+          '<label>Au prochain enregistrement : <select data-pf-rig-err>' + opt('', 'tout se passe bien') + opt('PAYS_NON_SUPPORTE', 'le pays est refusé') + opt('DATE_CREATION_FUTURE', 'la date est refusée') + opt('PROFIL_SOCIETE_MODIFIE_CONCURREMMENT', 'quelqu’un a modifié entre-temps') + opt('PROFIL_SOCIETE_DEJA_EXISTANT', 'le profil existe déjà') + opt('ORG_CONTEXTE_REQUIS', 'le droit est refusé') + opt('DOSSIER_ARCHIVE', 'le dossier vient d’être archivé') + opt('reseau', 'le service ne répond pas') + '</select></label>' +
+          '<label>Quand on lit les statuts : <select data-pf-rig-lec>' + SCEN.map(function (o) { return '<option value="' + o[0] + '"' + (P.scen === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label></div></details>';
       }
       function rendre() {
         var h = '<div class="dp-head"><div><h3>Profil de la société</h3><p>Ets Kossi Distribution · une société par dossier</p></div></div>';
         if (P.notice) h += '<div class="pf-notice' + (P.noticeKo ? ' ko' : '') + '" role="status">' + P.notice + '</div>';
         if (P.suite) h += '<div class="dp-card"><div class="dp-go"><span class="dp-sub">' + P.suite.txt + '</span>' + (P.suite.btn ? '<button class="btn btn-primary" type="button" data-pf-act="' + P.suite.act + '">' + P.suite.btn + '</button>' : '') + '</div></div>';
         if (P.edit) h += formulaire();
+        else if (P.lec) h += lecPanneau();
         else { h += carte(); if (P.profil) h += fiche(); }
         root.innerHTML = h + rig();
         var step = root.closest('[data-dc-panel-edit]'), bd = step && step.previousElementSibling && step.previousElementSibling.querySelector('.dc-badge');
@@ -26186,7 +26372,14 @@
         if (a === 'ouvrir') { ouvrirForm(); rendre(); }
         else if (a === 'annuler') { P.edit = false; P.errs = {}; P.err = null; rendre(); }
         else if (a === 'enregistrer') enregistrer();
-        else if (a === 'lire') { P.lire = !P.lire; rendre(); }
+        else if (a === 'lire') { lecOuvrir(); rendre(); }
+        else if (a === 'lf-rm') { lecFichier(b.dataset.k, null); rendre(); }
+        else if (a === 'lec-ex') { P.lec.fich = { statuts: { nom: 'Statuts_Ets_Kossi_Distribution.pdf' }, cfe: { nom: 'Carte_CFE_Ets_Kossi.jpg' } }; P.lec.fichErr = ''; rendre(); }
+        else if (a === 'lec-ann') { lecFermer(); rendre(); }
+        else if (a === 'lec-go') { lecLancer(); rendre(); }
+        else if (a === 'lec-redo') { lecOuvrir(); rendre(); }
+        else if (a === 'lec-main') { lecFermer(); ouvrirForm(); rendre(); }
+        else if (a === 'lec-ok') lecEnregistrer();
         else if (a === 'axes') { P.suite = { txt: 'Ici s’ouvrira l’écran « Les axes » (FE-042) : système comptable et régime fiscal proposés d’après ce profil.' }; rendre(); }
         else if (a === 'addA') { P.f.actionnaires.push({ nom: '', type: 'PHYSIQUE', parts: '', pourcentage: '' }); rendre(); }
         else if (a === 'rmA') { P.f.actionnaires.splice(i, 1); rendre(); }
@@ -26202,11 +26395,31 @@
         var tb = root.querySelector('[data-pf-act="enregistrer"]');
         if (tb && !P.creation) tb.disabled = JSON.stringify(P.f) === JSON.stringify(P.f0);
       }
-      root.addEventListener('input', maj);
+      function lecBtn() {
+        var b = root.querySelector('[data-pf-act="lec-ok"]'); if (!b || !P.lec) return; var n = nCoches();
+        b.disabled = !n; b.textContent = n ? 'Enregistrer ' + n + ' valeur' + (n > 1 ? 's' : '') : 'Cochez au moins une valeur';
+      }
+      function lecChange(t) {
+        var d = t.dataset || {}, L = P.lec;
+        if (d.pfFile) { lecFichier(d.pfFile, t.files && t.files[0]); rendre(); return true; }
+        if (d.pfLc != null && d.pfLc !== '') { L.lignes[+d.pfLc].coche = t.checked; lecBtn(); return true; }
+        if (d.pfLo) { var q = d.pfLo.split(':'), l = L.lignes[+q[0]]; l.choix = +q[1]; l.val = l.ps[+q[1]].valeur; l.coche = true; rendre(); return true; }
+        if (d.pfLv != null && d.pfLv !== '') { L.lignes[+d.pfLv].val = t.value; return true; }
+        return false;
+      }
+      root.addEventListener('input', function (ev) {
+        var t = ev.target, d = t.dataset || {};
+        if (P.lec && d.pfLv != null && d.pfLv !== '') { P.lec.lignes[+d.pfLv].val = t.value; return; }
+        if (P.lec && d.pfLf != null && d.pfLf !== '') { P.lec.lignes[+d.pfLf].fonction = t.value; return; }
+        maj(ev);
+      });
+
       root.addEventListener('change', function (ev) {
         var t = ev.target;
         if (t.matches && t.matches('[data-pf-rig-mode]')) { charger(t.value); rendre(); }
         else if (t.matches && t.matches('[data-pf-rig-err]')) P.rig = t.value;
+        else if (t.matches && t.matches('[data-pf-rig-lec]')) { P.scen = t.value; if (P.lec) lecFermer(); rendre(); }
+        else if (P.lec && lecChange(t)) { }
         else maj(ev);
       });
       rendre();
