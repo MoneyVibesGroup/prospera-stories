@@ -1,6 +1,7 @@
 # STORY-331 : Le format de canal décrit comme une donnée du paquet — le classeur à téléverser et le formulaire à saisir, deux natures d'une même description, derrière le même port
 
-Status: ready-for-dev (2026-11-26) — fiche écrite et contrat annoncé avant le code.
+Status: done (2026-11-26 — prospera-fiscal-service#78, `dev` `6e9fbbe` ; lot 7 de D, n° 8) — fiche écrite et
+contrat annoncé avant le code (prospera-stories#986, `main` 756fc0f).
 Écrite le 2026-11-26 par la sous-session du groupe D juste avant de coder (lot 7 de D, n° 8,
 `PLAN-LOT-7-2026-11-24.md` §4, « fini quand : formats dimana et GUDEF (§1) ») ; contrat et fichiers communs annoncés
 avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de D). Il n'existait pas de fiche : les critères viennent de
@@ -191,19 +192,91 @@ le champ dans la réponse.
 
 ## Definition of Done
 
-- [ ] Une TVA validée sur `TELESERVICE_OTR` ⇒ son formulaire `TG × TVA` 1.0, trois valeurs dans l'ordre, estampillées ;
+- [x] Une TVA validée sur `TELESERVICE_OTR` ⇒ son formulaire `TG × TVA` 1.0, trois valeurs dans l'ordre, estampillées ;
       la même déposée ⇒ les valeurs et l'estampille de la version scellée (e2e, vrai paquet).
-- [ ] Le classeur d'une DSF inchangé (les tests de 330 verts sans retouche) ; une déclaration sans aucun format ⇒
+- [x] Le classeur d'une DSF inchangé (les tests de 330 verts sans retouche) ; une déclaration sans aucun format ⇒
       `FORMAT_DE_CANAL_NON_DECLARE` inchangé.
-- [ ] AC-2 : une description incomplète refusée au build et à la demande, `details.champ` nommé ; chaque refus de D-331-6
+- [x] AC-2 : une description incomplète refusée au build et à la demande, `details.champ` nommé ; chaque refus de D-331-6
       par un test.
-- [ ] AC-3 : une DSF et une TVA engagées par le même port (le même adaptateur appelé), chacune avec sa `nature`.
-- [ ] La garde d'AD-12 verte sur le code neuf.
-- [ ] **Mutations** qui rougissent sur une assertion (gabarit qui ne prime plus ; canal ou taxe ignorés à la résolution ;
+- [x] AC-3 : une DSF et une TVA engagées par le même port (le même adaptateur appelé), chacune avec sa `nature`.
+- [x] La garde d'AD-12 verte sur le code neuf.
+- [x] **Mutations** qui rougissent sur une assertion (gabarit qui ne prime plus ; canal ou taxe ignorés à la résolution ;
       ordre des champs perdu ; obligatoire relâché ; contrainte de montant relâchée ; période mal formatée ; valeur lue
       hors de l'estampille ; nature fausse ; champ manquant non nommé ; ambiguïté acceptée).
-- [ ] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : pile `grp-d` du fiscal (Redis compris) saine,
+- [x] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : pile `grp-d` du fiscal (Redis compris) saine,
       la route neuve en `401` sans jeton.
+
+## Livraison (2026-11-26)
+
+- **Code** : prospera-fiscal-service#78, fusionnée en rebase sur `dev` (`6e9fbbe` ; arbre identique à la tête poussée
+  `914cd8a`). La branche est partie de `origin/dev` `7d48fd9`, puis a été rebasée avant la fusion sur `origin/dev`
+  `9db1653` (327 de C), qui n'a plus bougé jusqu'à la fusion. Annonce avant le code : prospera-stories#986 (`main`
+  756fc0f). **Aucun écart au contrat annoncé.**
+- **Fichiers** (dossiers de D) :
+  - le contrat d'un paquet de formulaire : `domain/paquets-depot/contrat-formulaire-depot.ts`, pur et strict ;
+  - le livrable d'un formulaire, fonction pure : `domain/paquets-depot/valeurs-formulaire.ts` ;
+  - la nature d'un dépôt engagé : `domain/depot/depot-declaration.ts` ;
+  - le résolveur unique du format : `application/livrables-depot/format-de-canal.ts` ;
+  - les deux services : `livrables-declaration.service.ts` et `depots-declaration.service.ts`, avec
+    `declarations-en-portee.ts` ;
+  - les deux contrôleurs et leurs DTO, dont `dto/livrable-formulaire.dto.ts` ;
+  - le registre des paquets de dépôt : `registre-paquets-depot.ts` (second manifeste, `chargerFormulaire`,
+    `formulairePour`, `natureDe`) ;
+  - la garde de build : `verifier-build.ts` (`verifierFormulaires`) ;
+  - les données : `assets/manifeste-formulaires.json` et `assets/tg-tva-1.0.json` ;
+  - les tests : les specs du contrat, des valeurs et du registre des formulaires, ceux des deux services, l'OpenAPI du
+    dépôt et l'e2e `depots-declaration`.
+  - **Aucune ligne de test retirée** : les tests de 330 passent sans retouche.
+  - `manifeste.json` et `tg-dsf-*.json` sont intacts. **Lu, sans écriture** (dossier de C) : `contenuDeclareDe`
+    (`domain/obligations/version-declaration.ts`).
+- **Communs** (D-L7-2, annoncés avant le code) : **le contrat OpenAPI** seulement. Il gagne une route neuve, un refus de
+  plus sur la route du classeur et le champ `nature` sur les deux réponses du dépôt engagé. Aucune migration, aucun
+  stockage. Ni `app.module.ts`, ni `package.json`, ni `read-models/`, ni copie du paquet fiscal.
+- **Preuves** :
+  - **Node 24** (image `verification` de l'archive LF de `914cd8a`) :
+    - unitaires **235/235 suites, 3 484 tests**. Une suite et 3 tests sont ignorés : la spec BullMQ, qui n'a pas de
+      Redis ;
+    - e2e **14/14 suites, 339 tests** ;
+    - **`test:conformite` 27/27 suites, 173 tests**.
+  - **Node 25** (local) :
+    - les 47 suites du dépôt, du livrable, des paquets, de la complétude, du coffre, des échéances et de la garde d'AD-12
+      : **47/47, 890 tests** ;
+    - e2e `depots-declaration` **27/27**. Elle contient le formulaire `TG × TVA` 1.0 d'une TVA validée, puis le même
+      formulaire déposé avec les valeurs de la version scellée. Elle montre aussi, pour AC-3, une liasse et une TVA
+      engagées par le même port, chacune avec sa nature.
+  - **Mutations 19/19**, chacune rouge sur une assertion :
+    - le gabarit ne prime plus ;
+    - le canal ou la taxe sont ignorés à la résolution ;
+    - l'ordre des champs est perdu ;
+    - l'obligatoire est relâché ;
+    - la contrainte de montant est relâchée ;
+    - la période est mal formatée ;
+    - la valeur est lue hors de l'estampille (le contenu courant pour une version scellée) ;
+    - la nature est fausse ;
+    - le champ manquant n'est pas nommé ;
+    - l'ambiguïté est acceptée ;
+    - un fichier et un formulaire du même couple sont acceptés ;
+    - l'intégrité est vérifiée avec le mauvais code ;
+    - l'engagement ignore le formulaire ;
+    - la nature n'est pas déduite à la lecture ;
+    - le contrat accepte un type qui ne suit pas la valeur, un code répété ou une clé inconnue ;
+    - la nature est perdue dans la réponse.
+  - lint des fichiers touchés et `tsc` : 0.
+  - §1.5 : pile `grp-d` du fiscal **avec Redis**, sur l'image runtime de l'archive.
+    - Santé `ok` : mongodb, audit, kafka, redis.
+    - Les quatre routes (formulaire, livrable, engager, lire) sont montées et répondent `401` sans jeton.
+    - 0 erreur sur 479 lignes de journal.
+    - Index `_id_`, `un_engagement_en_vol_par_version`, `depots_par_obligation`.
+    - `DepotsModule`, `LivrablesDepotModule` et `ObligationsModule` sont montés.
+  - **Verrou Docker** : pris à 13:35:35 (une seule prise), rendu à 13:43:48 par le `trap` du script autonome. B et C
+    ont été prévenus (`-be`, `-f7`). Il ne reste aucun conteneur, volume ni réseau `grp-d`.
+- **Ce qui reste** :
+  - **→ C** (non bloquante) : nommer au paquet fiscal le canal du reversement de la retenue d'IRPP. D ajoutera alors
+    `TG × RETENUE-IRPP` par donnée seule (D-331-9).
+  - Q-D-28 au PO : les lignes du formulaire de dimana, à relever au premier dépôt réel (1102).
+  - → 332 : le guidage, qui affiche les valeurs dans l'ordre (D-331-12).
+  - → 561 : le bloc `automatisation`, qui adresse les champs par leur `code` (D-331-11).
+  - → A (plus tard) : FE-081 lit `nature` pour choisir l'écran.
 
 ## Questions au PO
 
