@@ -159,8 +159,9 @@
    conformité 27/27, 173 ; balance 300/300, 5768 ; e2e 38/38, 2324 ; mutations 34/34 et 6/6 MongoDB ; pile `grp-c` saine.
    Verrou pris deux fois (13:03 → 13:21, 13:21 → 13:23). D-327-1 → 12 dans la fiche. **→ B** : recopie du paquet (ci-dessous) ;
    **D prévenu**.
-17. **Suivante : STORY-329** (le chemin d'un montant restitué, et l'historique complet ; EPIC-031 finira avec elle ; fiche à
-   écrire juste avant de coder ; dépend de 328 ✅).
+17. 🚧 **STORY-329 en cours (26/11)** (le chemin d'un montant restitué, et l'historique complet ; EPIC-031 finira avec elle) :
+   fiche `stories/STORY-329.md` (D-329-1 → 13), contrat et communs annoncés avant le code (ci-dessous). Rituel : aucune
+   demande neuve à C chez A, B et D ; D est sur 331 (annoncée, verrou pris pour sa preuve) ; aucune migration en vol.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -651,6 +652,18 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-329, avant le code)** — branche `MNV-329` de `prospera-fiscal-service`, partie de
+  `origin/dev` `9db1653`. **Aucune migration** (une collection neuve, `textes_audit`, base métier, index `(orgId, perimetre,
+  seq)` posé par Mongoose au démarrage ; rien ne change dans `obligations` ni `versions_declaration`). Ni `app.module.ts`, ni
+  `package.json`, ni `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touchés parmi les communs : **le contrat
+  OpenAPI** (deux routes de lecture : « ⚠ Contrats ») ; **`src/adapters/mongo/mongo-journal-audit.ts`** (le journal partagé :
+  `ajouter(fait, session, textes?)`, le troisième paramètre **facultatif** — les motifs en clair, écrits dans `textes_audit`
+  dans la même transaction ; la lecture `textes(orgId, perimetre)`) ; **`src/ports/journal-audit.ts`** (la méthode `textes`,
+  **concrète**, vide par défaut : aucune implantation de D ne casse) ; **`test/utils/journal-audit-memoire.ts`** (le banc en
+  mémoire garde les textes passés). Tout le reste dans les dossiers de C (`domain/obligations`, `application/obligations`,
+  `modules/obligations`, `adapters/http` de la balance, `adapters/mongo` des obligations et des pièces du client, `ports/`).
+  Rien dans les dossiers de D. **→ D** : rien à faire pour un rebase ; un acte de D (dépôts, coffre, rémunération) s'écrit au
+  journal exactement comme avant ; le journal reste sans texte libre (AD-10).
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#77, `dev` `9db1653`, rebasée sur `origin/dev` `7d48fd9` de D, sans
   conflit)** — conforme à l'amendement : le contrat OpenAPI et la copie du paquet (`412770f5…`, balance-service #172
   `effdc4a`) parmi les communs ; aucun fichier de D. **→ D** : rien à faire pour un rebase ; toute la suite (unitaires, e2e,
@@ -785,6 +798,30 @@ seulement.
   clés, plus celles de l'IRPP et de la CNSS (voir « ⚠ Contrats »).
 
 ## ⚠ Contrats
+
+- **2026-11-26 (STORY-329), ANNONCÉ avant le code** — **le chemin d'un montant et l'historique complet**
+  (`prospera-fiscal-service`, REST). Fiche : `stories/STORY-329.md` (D-329-1 → 13). Consommateurs : l'écran du dossier de dépôt
+  (A, FE-081) ; le dossier de contrôle (336, D) ; la base légale (339, C). **Ajouts seuls** : deux routes de lecture ; aucun
+  droit, aucun événement ; aucune réponse existante ne change ; manifeste inchangé ; `balance-service` inchangé (il sert déjà
+  `…/fiscal/tva`, `…/tpu`, `…/acomptes` et `…/balance/{id}/lignes/{compte}/provenance`, lus avec le jeton de l'appelant).
+  - **`GET /api/v1/obligations/{id}/chemin?version=`** (rôles `TENANT_ADMIN` / `TENANT_USER`, portée du dossier ; `version`
+    1 → 999, absente : la courante ; `404 OBLIGATION_INTROUVABLE`, `404 VERSION_INTROUVABLE`) → `{ obligationId, dossierId,
+    taxe, periode, version { numero, nature, scellee, versionId, empreinte, scelleeLe }, luLe, montant, calcul, detail,
+    balance, journal, pieces }` ; chaque étape `{ statut: RESTITUE | ARRETE | NON_ATTEINT, motif, message, … }`. `detail` :
+    `ressource`, `montantDuMoteur`, `concordance` (`CONCORDANT` | `DIVERGENT` | `NON_COMPARABLE`), `grandeurs[{ cle, montant,
+    lignes? }]` (noms du moteur), `formule`, `paquet { pays, annee, checksum }` ; `balance` : `balanceId`, `version`, `etat`,
+    `statutPreuve`, `checksum`, `exercice`, `balanceDuMoteur`, `comptes[{ grandeur, compte }]`, `postes[]` ; `journal` (TVA) :
+    `lignes[{ transactionId, grandeur, compte, sens, date, libelle, montantDebit, montantCredit, niveauPreuve, pieceId,
+    lotId }]`, `nombre`, `tronque`, `nonRetrouvees` ; `pieces` : `pieces[{ pieceId, lotId, transactions }]`,
+    `lignesSansPiece`. Arrêts nommés : `DECLARE_ABSENT`, les codes du triplet, `CALCULE_SAISI_PAR_LE_CABINET`, les `MOTEUR_*`,
+    `BASES_NON_CONSTATEES`, `JOURNAL_NON_RESTITUE_PAR_LE_MOTEUR`, `COMPTE_NON_PUBLIE`, `JOURNAL_HORS_DE_PROSPERA`,
+    `JOURNAL_NON_LISIBLE`, `JOURNAL_INDISPONIBLE`, `JOURNAL_REPONSE_INVALIDE`.
+  - **`GET /api/v1/obligations/{id}/historique`** (mêmes rôles et portée) → `{ obligationId, perimetre, verification {
+    intacte, entrees, rupture }, entrees[{ seq, acte, libelle, qui { identifiant, nature: UTILISATEUR | SYSTEME, nom,
+    appartenance: ACTIF | PARTI | INCONNUE, affichage }, survenuLe, enregistreLe, etatAvant, etatApres, motif { empreinte,
+    texte, conserve }, reference, contenu, empreinte }] }`.
+  - **Stockage** : collection neuve `textes_audit` (les motifs en clair, hors du journal ineffaçable, écrits dans la
+    transaction de l'acte) ; aucune migration.
 
 - **2026-11-26 (STORY-327), PUBLIÉ** (fiscal #77, `9db1653` ; balance-service #172, `effdc4a`) — conforme à
   l'amendement (#983). **→ A (FE-081)** : types à régénérer (`reportsDeclares`, `POST …/reports-declares`, les trois codes de
