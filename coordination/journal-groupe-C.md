@@ -109,8 +109,9 @@
    D-319-1 → 11 dans la fiche. **D prévenu** (349).
 12. 🏁 **EPIC-030 fini** (315 → 319 : le calendrier du portefeuille, les échéances du paquet, les reports, les alertes, le
    responsable et la charge).
-13. **Suivante : STORY-321** (la délégation du calcul au moteur de `balance-service`, EPIC-031 ; fiche à écrire juste avant de
-   coder ; voir D-322-1 de 322).
+13. 🚧 **STORY-321 en cours (26/11)** : la délégation du calcul au moteur de `balance-service` (fiscal, branche `MNV-321` ;
+   balance-service lu seulement, D-321-1) ; fiche `stories/STORY-321.md` écrite avant le code (D-321-1 → 11), contrat et
+   communs annoncés ci-dessous (« ⚠ Contrats », « ⚠ Communs »).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -581,6 +582,16 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-321, avant le code)** — branche `MNV-321` de `prospera-fiscal-service`. **Aucune
+  migration** (un champ neuf facultatif `calculMoteur` sur `obligations`, absent ⇒ `null` ; `montantAttendu` existe déjà, à
+  `null` partout : la dérivation cesse de le remettre à `null`, il passe de `$set` à `$setOnInsert`). Ni `app.module.ts`,
+  ni `package.json`, ni `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touchés : **le contrat OpenAPI**
+  (une route neuve, deux champs : « ⚠ Contrats ») ; **`src/adapters/http/lecture-amont.ts`** (transverse) gagne un
+  traitement **facultatif** du `409` (seul l'adaptateur du moteur le demande : tout autre appelant, dont ceux de D, garde
+  son comportement à l'octet). Tout le reste dans les dossiers de C (`domain/obligations`, `application/obligations`,
+  `modules/obligations`, `adapters/mongo` et `adapters/http` du moteur, `ports`, `test/utils`, e2e et conformité des
+  obligations) et une garde neuve à la racine de `src/` (`garde-calcul-delegue.spec.ts`, AC-2). Rien dans les dossiers de
+  D. **→ D** : rien à faire pour un rebase ; `domain/familles` (que lit le calcul social) ne change pas.
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#71, `dev` `0cc79a7`, sur `origin/dev` `cefbe20`)** — conforme à l'annonce :
   seul le contrat OpenAPI est touché parmi les communs. **→ D** : rien à faire pour un rebase ; toute la suite (unitaires, e2e,
   conformité) est verte en Node 24.
@@ -645,6 +656,35 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-321), ANNONCÉ avant le code** — **le calculé d'une obligation vient du moteur de `balance-service`**
+  (`prospera-fiscal-service`, REST ; `balance-service` lu seulement). Fiche : `stories/STORY-321.md` (D-321-1 → 11).
+  Consommateurs : les écrans des obligations et du triplet (A, FE-081) ; STORY-328 (anomalies, lit déjà
+  `triplet.calcule`) ; STORY-340 (le montant à régler). **Ajouts seuls**, plus deux précisions de comportement.
+  - **Ce que le fiscal lit chez la balance** (jeton de l'appelant, exercice = celui de la balance des bases) : `TVA`
+    (`AAAA-MM`, `AAAA-Tn` → son mois de début) → `aPayer` de `GET …/fiscal/tva?periode=` ; `IS_ACOMPTE` (`AAAA-En`) →
+    `theorique` du rang `n` de `GET …/fiscal/acomptes` ; **`TPU` (`AAAA`) → `tpuDue` de `GET …/fiscal/tpu`** (neuf pour le
+    fiscal). `TAF`, `TCA`, `RSH`, `TPU_ACOMPTE` : aucun appel, indisponible `TAXE_NON_CALCULEE_PAR_LE_MOTEUR`.
+  - **Comportement** : la prise en charge (`POST …/transition`, `A_PREPARER → EN_PREPARATION`) chiffre l'obligation après
+    ses bases, dans la même transaction ; le moteur injoignable n'empêche pas la prise en charge (constat `INDISPONIBLE`
+    `MOTEUR_INDISPONIBLE`, aucun montant). Aucun nouveau refus sur la transition.
+  - **Route neuve** : **`POST /api/v1/obligations/{id}/calcul`** (sans corps, droit `fiscalite:declaration:preparer`) →
+    `200` l'obligation ; de `EN_PREPARATION` à `A_VALIDER`. Refus : `404 OBLIGATION_INTROUVABLE`, `409`
+    `OBLIGATION_DESACTIVEE` / `OBLIGATION_BLOQUEE` / **`CALCUL_NON_DELEGUE`** / **`CALCUL_NON_ACTUALISABLE`** (avant la prise
+    en charge, et à partir du visa : le calculé est figé) / `TRANSITION_CONCURRENTE` ; **`503 SERVICE_AMONT_INDISPONIBLE`**,
+    rien d'écrit.
+  - **Champ neuf `ObligationResponseDto.calculMoteur`** (`null` tant qu'aucun calcul) : `{ statut: CALCULE | INDISPONIBLE,
+    montant, motif (MOTEUR_INDISPONIBLE | MOTEUR_NON_LISIBLE | MOTEUR_PARAMETRAGE_INSUFFISANT | MOTEUR_REPONSE_INVALIDE |
+    PERIODE_INCONNUE_DU_MOTEUR | ATTENDU_INDISPONIBLE | BASES_NON_EXPLOITABLES | null), motifMoteur, message, demande {
+    ressource, periode, rang, exercice }, bases { balanceId, version, etat, statutPreuve, checksum } | null,
+    balanceDuMoteur { id, version } | null, calculeLe, par }`. **`montantAttendu`** est désormais écrit (le montant si
+    `CALCULE`, sinon `null`).
+  - **Champ neuf `triplet.calcule.motif`** (`string | null`) : `TAXE_NON_CALCULEE_PAR_LE_MOTEUR`, `NON_ENCORE_CALCULE` ou le
+    motif du constat quand le calculé est indisponible. `triplet.calcule.indisponible` garde ses trois valeurs ; l'origine
+    `MOTEUR` apparaît dès qu'un calcul aboutit ; `triplet.calcule.source` d'un calculé du moteur est la balance de ses
+    bases au moment du calcul.
+  - **Cohérence (326)** : un `409` du moteur rend `NON_EXECUTE` avec le motif `MOTEUR_PARAMETRAGE_INSUFFISANT` (avant :
+    `MOTEUR_REPONSE_INVALIDE`).
+  - **Journal chaîné** : acte neuf `OBLIGATION_CALCUL_CONSTATE`. Aucun événement, aucun droit neuf, manifeste inchangé.
 - **2026-11-26 (STORY-319), PUBLIÉ** (fiscal #71, `0cc79a7`) — **conforme à l'annonce** (#951) ; un corps d'affectation vide, en
   doublon ou au-delà de 50 sort en `400`. Prouvé sur la pile : la clé `obligationId|état|échéance|responsable` et le fait `SENT` qui
   porte le responsable. Annonce :

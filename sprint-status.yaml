@@ -7966,7 +7966,8 @@ sprints:
         epic: "EPIC-031"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-321.md"
+        status: "in_progress"  # 🚧 2026-11-26 — groupe C, lot 7 (n° 5 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-321-1 → 11) ; contrat et communs annoncés (journal de C) : le calculé d'une obligation vient du moteur de balance-service (TVA → aPayer, IS_ACOMPTE → theorique, TPU → tpuDue ; TAF, TCA, RSH, TPU_ACOMPTE nommés non calculés), chiffré à la prise en charge, recalculable de EN_PREPARATION à A_VALIDER par POST /obligations/{id}/calcul, figé au visa ; moteur injoignable ⇒ constat nommé ou 503, jamais un montant ; champ calculMoteur, triplet.calcule.motif, acte OBLIGATION_CALCUL_CONSTATE ; balance-service non touché (D-321-1) ; aucune migration.
         assigned_to: null
       - story_id: "STORY-322"
         title: "Triplet calculé, déclaré, payé"
