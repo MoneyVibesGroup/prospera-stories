@@ -122,9 +122,19 @@ reserved_ranges:
       recalcul ; balance v1 SANS_EMPREINTE (BALANCE_SCELLEE_V1). Node 24 : e2e 45/45 (3 565), unitaires 369/369 suites en deux passes ;
       mutations 18/18. Détachée de la plage 1138 → 1141 (entrée propre). Lot 7 de D, n° 5a (§4 bis, D-1078-10). Suivante :
       STORY-1139.
-  - range: "STORY-1139 → STORY-1141"
+  - range: "STORY-1139"
+    status: "IN_PROGRESS"
+    owner: "Groupe D — les repères des seize indicateurs de l'analyse financière, sourcés et modifiables par dossier, chaque changement tracé (Q-D-14 ; prospera-bilan-service)"
+    source_doc: "prospera-stories/stories/STORY-1139.md"
+    reserved_on: "2026-11-26"
+    note: >-
+      Fiche et annonce « ⚠ Contrats » avant le code (2026-11-26). Recherche du 26/11 : aucune norme sur la même formule
+      pour les seize (ils restent « aucun repère déclaré ») ; repères par dossier (TENANT_ADMIN), collection append-only
+      reperes_analyse (plans C13), origine PAQUET | DOSSIER dans seuilApplique. Lot 7 de D, n° 5b (§4 bis). Détachée de la
+      plage 1139 → 1141 (entrée propre).
+  - range: "STORY-1140 → STORY-1141"
     status: "RÉSERVÉ"
-    owner: "Groupe D — lot 7, amendement du 26/11 : bilan (1139, 1140), facture et paiement (1141)"
+    owner: "Groupe D — lot 7, amendement du 26/11 : bilan (1140), facture et paiement (1141)"
     source_doc: "prospera-stories/coordination/PLAN-LOT-7-2026-11-24.md"
     reserved_on: "2026-11-26"
     note: >-
@@ -134,6 +144,7 @@ reserved_ranges:
       facture (Q-D-15 ; paiement par une passation de B limitée à la story). Les fiches sont écrites juste avant de
       coder ; chaque story met à jour sa ligne (ou s'en détache en entrée propre, au choix de la story).
       MAJ 2026-11-26 : 1138 s'en est détachée en entrée propre (DONE, ci-dessus) ; la plage garde 1139 → 1141.
+      MAJ 2026-11-26 : 1139 s'en est détachée à son tour (entrée propre, ci-dessus) ; la plage garde 1140 → 1141.
   # ── COMPLÉMENTS DE LA COMPTABILITÉ TENUE (2026-11-26) : epics-comptabilite-complements-2026-11-26.md, tiré du livre
   #    « La Boîte à Outils du Comptable » et de ses 50 modèles, croisés avec le code de origin/dev.
   - range: "EPIC-270 → EPIC-276"
