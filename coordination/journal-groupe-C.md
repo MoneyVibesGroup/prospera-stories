@@ -144,8 +144,23 @@
    route par route) ; la re-dérivation et les signalements laissent une close telle quelle. Node 24 : unitaires 225 suites,
    3248 ; e2e 13/13, 308 ; conformité 25/25, 160 ; mutations 30/30 et 11/11 MongoDB ; pile `grp-c` saine. Verrou pris une fois
    (11:30 → 11:39). D-325-1 → 13 dans la fiche. **D prévenu** (SendMessage : 330 débloquée, ce qu'elle emploie, D-325-11).
-16. 🚧 **STORY-327 en cours (26/11)** (la continuité d'une période à l'autre, EPIC-031 ; dépend de 326 ✅) : fiche écrite
-   (D-327-1 → 11), contrat et communs annoncés avant le code.
+16. ✅ **STORY-327 DONE (26/11)** : fiscal **#77** (`bd19a48`, `9db1653` sur `dev`, rebasée sur `7d48fd9` de D) et
+   balance-service **#172** (`effdc4a`, le paquet), annonce #977 avant le code, amendée #983 avant la fusion. **Le paquet porte
+   ses reports** (`continuite.reports` : `CREDIT_TVA` TVA `creditAReporter` → `creditAnterieur`, `DEFICIT` DSF
+   `deficitAReporter` → `deficitAnterieur`, tolérance 0 ; `coherence.tolerances.DSF` 1 000 F ; empreinte **`412770f5…6fd6`**).
+   **`POST /obligations/{id}/reports-declares`** (droit `preparer`, de `EN_PREPARATION` à `A_DEPOSER`, `{}` efface ; acte
+   `OBLIGATION_REPORTS_DECLARES`) ; champ `reportsDeclares` ; scellés au dépôt dans `contenu.reports`, seulement s'ils sont
+   déclarés (aucune empreinte existante ne bouge). **La continuité** (`POST …/coherence`, à l'enregistrement, **et au dépôt
+   de la période précédente**) lit la **dernière version déposée** de la précédente : `CONTINUITE_CREDIT_TVA`,
+   `CONTINUITE_DEFICIT`, `periodePrecedente`, l'attendu rendu sans déclaré (« repris ») ; anomalies
+   `CONTINUITE_CREDIT_TVA_ROMPUE`, `CONTINUITE_DEFICIT_ROMPUE` (bloquantes au dépôt, levables ; elles nomment les deux
+   périodes). **L'imputation des déficits** : `DSF_DEFICIT_IMPUTE` face à `totalDeficitsImputes` du moteur (`GET
+   …/fiscal/resultat-fiscal`) ; `DEFICIT_IMPUTATION_ECART`. Node 24 : fiscal unitaires 232 suites, 3413 ; e2e 14/14, 329 ;
+   conformité 27/27, 173 ; balance 300/300, 5768 ; e2e 38/38, 2324 ; mutations 34/34 et 6/6 MongoDB ; pile `grp-c` saine.
+   Verrou pris deux fois (13:03 → 13:21, 13:21 → 13:23). D-327-1 → 12 dans la fiche. **→ B** : recopie du paquet (ci-dessous) ;
+   **D prévenu**.
+17. **Suivante : STORY-329** (le chemin d'un montant restitué, et l'historique complet ; EPIC-031 finira avec elle ; fiche à
+   écrire juste avant de coder ; dépend de 328 ✅).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -418,7 +433,10 @@ seulement.
   lecture des métadonnées d'une version par sa référence (`pieceId`, `version` → empreinte, taille, nature, dossier ; sans
   contenu), au jeton du membre, pour que le dossier de contrôle (336) vérifie une référence sans télécharger la pièce.
   **Choix par défaut de C** (D-324-2, D-324-3) : la référence et l'empreinte sont déclarées et attribuées ; le fiscal
-  n'appelle pas la GED. Prévenu par message.
+  n'appelle pas la GED. Prévenu par message. — ✅ **servie par B** (STORY-1119, document-service **#40**, `dev` `5d060aa` ;
+  réponse au journal de B, `main` `c2da232`) : la nature `VALIDATION_CLIENT` au plan de classement du cabinet 2026.2, et
+  `GET …/ged/cabinet/pieces/{pieceId}/versions/{version}` (empreinte au format de `ged.piece.recue`, taille, nature, dossier,
+  jamais le contenu ; manifeste `ged` 1.10.0). À lire par 336 (D) au jeton du membre.
 
 - **→ D (2026-11-26, STORY-318) : prévenir par e-mail ou dans la cloche à l'approche d'une échéance fiscale
   (`prospera-notification-service`)** — **ouverte**, sans urgence. **Publié depuis fiscal #70 (`dev` `cefbe20`).** Le fiscal produit l'alerte (une par obligation, état
@@ -434,9 +452,11 @@ seulement.
   `moneyvibes-apps-83`).
 
 - **→ B (2026-11-25, STORY-564, mise à jour le 26/11 par STORY-317) : recopier le paquet fiscal Togo 2026 dans
-  `dossier-service`** — **ouverte** (plan du lot 7 §6 : à ta prochaine story sur le service, en LF). **Dernière version :
-  prospera-balance-service `dev` `44be0c1`, sha256 `d0558c545ae6a95102c188114fcd82034b68c8cfd322d1ca19372f4fc2372465`**
-  (elle contient celle de 564 et ajoute `cnss.collecte` : une seule recopie suffit). Avant : `dev` `c9e94c6`,
+  `dossier-service`** — **ouverte** (plan du lot 7 §6 : à ta prochaine story sur le service, en LF). **Dernière version
+  (STORY-327, 26/11) : prospera-balance-service `dev` `effdc4a`, sha256
+  `412770f5e3ba139435b33ed89c83c5e8185c10d0fc9ea62d324d09906b845fd6`** (elle contient les précédentes et ajoute
+  `continuite.reports` et `coherence.tolerances.DSF`, que `dossier-service` ne lit pas : une seule recopie suffit ; B prévenu
+  par message, session `moneyvibes-apps-be`). Avant : `44be0c1`, `d0558c54…2465` (564 et `cnss.collecte`). Avant : `dev` `c9e94c6`,
   `src/modules/referentiel/assets/paquet-fiscal-togo-2026.json`, sha256 `bfcc3fc9…c065` ; cible :
   `src/modules/portefeuille/echeance/assets/paquet-fiscal-togo-2026.json` (la copie actuelle, `e8e94c84…dc6`, n'a déjà ni
   `coherence` ni `rapprochementAnnuel`) ; `git -c core.autocrlf=false show origin/dev:<chemin> > <copie>`, puis son
@@ -631,6 +651,10 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#77, `dev` `9db1653`, rebasée sur `origin/dev` `7d48fd9` de D, sans
+  conflit)** — conforme à l'amendement : le contrat OpenAPI et la copie du paquet (`412770f5…`, balance-service #172
+  `effdc4a`) parmi les communs ; aucun fichier de D. **→ D** : rien à faire pour un rebase ; toute la suite (unitaires, e2e,
+  conformité) est verte en Node 24 avec 330 ; prévenu par message.
 - **AMENDÉ (2026-11-26, STORY-327, avant la fusion)** — les reports ont leur champ, **`reportsDeclares`** sur `obligations`
   (humain, `$setOnInsert: null`, absent ⇒ `null` ; aucune migration), et leur route (`POST …/reports-declares`, « ⚠ Contrats ») ;
   `montantDeclare` ne change pas. Le contenu scellé les porte à sa racine (`contenu.reports`, seulement s'ils sont déclarés :
@@ -762,6 +786,9 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-327), PUBLIÉ** (fiscal #77, `9db1653` ; balance-service #172, `effdc4a`) — conforme à
+  l'amendement (#983). **→ A (FE-081)** : types à régénérer (`reportsDeclares`, `POST …/reports-declares`, les trois codes de
+  contrôle et `periodePrecedente`, les trois anomalies). **→ B** : la copie du paquet (ci-dessous). Amendement :
 - **2026-11-26 (STORY-327), AMENDÉ avant la fusion (écart à l'annonce ci-dessous, D-327-12)** — les reports **ne passent
   plus par `…/montant-declare`** (inchangé) : la DSF est déclarative, sans montant déclaré, ses déficits n'auraient eu aucune
   voie. **Route neuve `POST /api/v1/obligations/{id}/reports-declares`** (droit `preparer`) `{ reports: { creditAnterieur?,
@@ -1551,6 +1578,19 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-327, 26/11) une obligation DÉCLARATIVE n'a pas de montant déclaré** : la DSF (`famille: DECLARATIVE`) refuse
+  `…/montant-declare` (`MONTANT_NON_SAISISSABLE`) ; une donnée annoncée « dans le déclaré » lui est inaccessible. Lire la
+  famille au catalogue du paquet avant d'y ranger un champ (amendement #983 avant la fusion).
+- **(STORY-327)** un contrôle qui s'ajoute à `POST …/coherence` rougit les tests de 326 qui figent toute la liste
+  (`toEqual([…])`) : filtrer par code dans les tests anciens, et la continuité se déclenche sur le **vrai** paquet de l'e2e
+  (`TOGO`) dès qu'il porte le bloc.
+- **(STORY-327)** une mutation qui retire un `&& o.active` ne rougit qu'avec un double qui RENVOIE les écartées
+  (`duDossier` réel les filtre) ; une mutation « suivante close » survit si le calendrier du test ne contient pas la
+  précédente : le contrôle n'avait rien à dire de toute façon. Construire le cas où la garde est la seule défense.
+- **(STORY-327)** `python - <<'EOF'` sous Git Bash : un `\\n` d'un script qui ÉCRIT un autre script Python redevient un vrai saut
+  de ligne ; et `print` d'un `→` lève `UnicodeEncodeError` (cp1252) : `PYTHONIOENCODING=utf-8`, et l'outil d'écriture pour
+  les scripts de mutation.
 
 - **(STORY-325, 26/11) un schéma rendu immuable fait rougir le nettoyage des bancs** : `afterAll` de la conformité de 324
   supprimait les pièces par `modele.deleteMany` ; les crochets de `rendreImmuable` le refusent (`ReecritureInterdite`).
