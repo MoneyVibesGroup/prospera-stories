@@ -8073,7 +8073,8 @@ sprints:
         epic: "EPIC-031"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-327.md"
+        status: "in_progress"  # 🚧 2026-11-26 — groupe C, lot 7 (n° 8 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-327-1 → 11) ; contrat et communs annoncés (journal de C) : le paquet porte ses reports (continuite.reports : CREDIT_TVA, DEFICIT ; coherence.tolerances.DSF), le déclaré porte les siens (montantDeclare.reports, scellés seulement s'ils sont déclarés), POST /obligations/{id}/coherence gagne CONTINUITE_CREDIT_TVA, CONTINUITE_DEFICIT et DSF_DEFICIT_IMPUTE (la dernière version déposée de la période précédente ; totalDeficitsImputes du moteur), anomalies CONTINUITE_CREDIT_TVA_ROMPUE, CONTINUITE_DEFICIT_ROMPUE, DEFICIT_IMPUTATION_ECART ; le dépôt relance la période suivante ; aucune migration.
         assigned_to: null
       - story_id: "STORY-328"
         title: "Anomalies : gravité, blocage et levée motivée"
