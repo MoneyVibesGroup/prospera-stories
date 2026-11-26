@@ -365,6 +365,52 @@
       `prospera-ventes-service/src/socle/contrats-distributeur/` (source.ts, empreinte) ; non urgent.
   - **Suivante : STORY-331** (le format de canal décrit comme une donnée du paquet ; dossiers de D ; fiche à écrire depuis
     `epics-fiscalite-2026-08-03.md` juste avant de coder ; le paquet fiscal est à C, D-L7-3).
+- **STORY-331** ✅ 📨 — le format de canal décrit comme une donnée du paquet : le classeur à téléverser et le formulaire à
+  saisir, deux natures d'une même description, derrière le même port. Code : prospera-fiscal-service#78, `dev`
+  `6e9fbbe`. Annonce avant le code : #986, `main` 756fc0f (fiche D-331-1 → 12, ⚠ Contrats, ⚠ Communs, Q-D-28). Plan
+  §4, n° 8.
+  - **← C : 327 reçue, rebasé (fiscal #77, 9db1653)** : la branche, partie de `7d48fd9`, a été rebasée sur `9db1653`
+    avant les preuves sous Node 24 ; `origin/dev` n'a plus bougé jusqu'à la fusion. Aucune migration en vol sur le
+    fiscal.
+  - **Livré** (dossiers `paquets-depot`, `livrables-depot` et `depots` de D) :
+    - **Une seconde nature de format, décrite comme donnée** : le formulaire à saisir (`SAISIE_FORMULAIRE`), à côté du
+      classeur à téléverser (`TELEVERSEMENT_FICHIER`). Son contrat est strict et pur. Il porte les déclarations servies
+      (`canal`, `taxe`), le canal, et les champs dans l'ordre du formulaire (`code`, `libelle`, `valeur` du contenu
+      déclaré, contraintes `MONTANT` | `PERIODE`, `source`). Il vit dans un second manifeste, vérifié par sha256, que
+      `etatsActifs` ne voit jamais.
+    - **Les deux formats du « fini quand »** : dimana, avec `TG × TVA` 1.0 (`statut: 'amorce'`, Q-D-28 : la période, la
+      base imposable, la TVA due) ; le GUDEF, avec `TG × DSF` 1.3, dont aucun octet n'a changé.
+    - **Un seul résolveur** du format : le gabarit du paquet fiscal prime (330 inchangé) ; sinon, le formulaire qui sert
+      le couple `(canal, taxe)` ; sinon, `FORMAT_DE_CANAL_NON_DECLARE`. Deux formulaires pour un même couple sont
+      refusés au build (`PAQUET_DEPOT_AMBIGU`).
+    - `GET /api/v1/livrables-declaration/{obligationId}/formulaire` (droit `preparer`) : les valeurs sont lues dans le
+      contenu de l'estampille (la version scellée si elle l'est), prêtes à recopier. Rien n'est écrit. La route du
+      classeur rend `422 FORMAT_DE_CANAL_AUTRE_NATURE` sur une déclaration que seul un formulaire décrit.
+    - **AC-2** : une description incomplète est refusée en nommant le champ, au build (`verifierFormulaires`) et à la
+      demande (`422 FORMAT_DE_CANAL_INCOMPLET`, `details.champ`).
+    - **AC-3** : une TVA s'engage avec la référence de son format. `nature` est déduite de la référence et n'est jamais
+      stockée. Les deux natures passent par le même `CanalDeDepot`.
+    - Aucun écart au contrat annoncé.
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI seulement. Aucune migration, aucun stockage,
+    aucun fichier de C ; `contenuDeclareDe` est lu sans écriture.
+  - **Preuves** :
+    - **Node 24** (image `verification` de l'archive LF de `914cd8a`) : unitaires **235/235 suites, 3 484 tests** (une
+      suite ignorée : BullMQ sans Redis), e2e **14/14, 339**, **`test:conformite` 27/27, 173**.
+    - **Node 25** : 47/47 suites, 890 tests (dépôt, livrable, paquets, complétude, coffre, échéances, garde d'AD-12) ;
+      e2e `depots-declaration` 27/27 ; lint et `tsc` 0 ; **mutations 19/19**.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** saine. Les quatre routes sont montées et répondent 401 sans jeton,
+      avec 0 erreur au journal et les index posés.
+    - **Verrou Docker** : pris à 13:35:35 (une seule prise), rendu à 13:43:48 par le `trap` du script autonome. B et C
+      ont été prévenus (`-be`, `-f7`). Il ne reste aucun conteneur, volume ni réseau `grp-d`.
+  - **Ce qui reste** :
+    - **→ C : nommer le canal du reversement de la retenue d'IRPP au paquet fiscal — ouverte** (non bloquante ;
+      « Demandes aux autres groupes »). D ajoutera ensuite `TG × RETENUE-IRPP` par donnée seule.
+    - Q-D-28 au PO.
+    - → A (plus tard) : FE-081 lit `nature`.
+    - 332 (le guidage, dans l'ordre du formulaire) ; 561 (le bloc `automatisation`, adressé par `code`).
+  - **Suivante : STORY-332** : le guidage de dépôt pas à pas, dans les dossiers de D. Sa fiche est à écrire depuis
+    `epics-fiscalite-2026-08-03.md` juste avant de coder. Elle lit le livrable d'un formulaire de 331 (D-331-12) et le
+    dépôt engagé de 330 (D-330-5).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1701,7 +1747,8 @@
   le nommerait sans livraison. (2) `COTISATIONS_SOCIALES` et `RETENUE_IRPP` sont écrites par la dérivation sociale
   de D ; si le catalogue les porte un jour, il fait foi (D-349-5). (3) Pour 350 : `ObligationsModule` ne peut pas
   importer `RemunerationModule` sans `forwardRef` (cycle) ; un module de 350 peut importer les deux.
-  - **Ajout du 2026-11-26 (STORY-331), toujours non bloquant** : le point (1) a désormais un effet visible. Un paquet de
+  - **Ajout du 2026-11-26 (STORY-331), toujours non bloquant — → C : nommer le canal du reversement de la
+    retenue d'IRPP au paquet fiscal — ouverte** (rappelée à la clôture de 331, fiscal #78, `dev` `6e9fbbe`) : le point (1) a désormais un effet visible. Un paquet de
     formulaire sert une déclaration par son `canal` et sa `taxe` (D-331-3) : tant que le canal de `RETENUE_IRPP` sort
     `NON_DECLARE`, la retenue sur salaires (déposée sur dimana, 1102) n'a pas de format. Dès que le paquet fiscal nomme
     ce canal, D ajoute `TG × RETENUE-IRPP` par donnée seule (D-331-9). Prévenu par SendMessage.
@@ -2234,7 +2281,9 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-26, STORY-331, avant le code)** — branche `MNV-331` de `prospera-fiscal-service`, partie de
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#78, `dev` `6e9fbbe`, rebasée sur `origin/dev` `9db1653` — 327
+  de C, qui touchait aussi le contrat OpenAPI — avant la fusion), conforme à l'annonce ; ANNONCÉ (2026-11-26,
+  STORY-331, avant le code)** — branche `MNV-331` de `prospera-fiscal-service`, partie de
   `origin/dev` `7d48fd9`. **Aucune migration** (aucun stockage ne change), ni `app.module.ts` (la route neuve entre dans
   `LivrablesDeclarationController`, déjà monté), ni `package.json` (le `prebuild` appelle la même garde, étendue), ni
   `read-models/`, ni copie du paquet fiscal, ni manifeste `declarations`. Touché : **le contrat OpenAPI** (une route
@@ -2321,7 +2370,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-26, STORY-331, avant le code) — le format de canal décrit comme une donnée du paquet**
+- **PUBLIÉ (2026-11-26, STORY-331 : prospera-fiscal-service#78, `dev` `6e9fbbe`) sans écart ; ANNONCÉ (2026-11-26,
+  STORY-331, avant le code, prospera-stories#986, `main` 756fc0f) — le format de canal décrit comme une donnée du
+  paquet**
   (`prospera-fiscal-service`, modules `paquets-depot`, `livrables-depot` et `depots`). Fiche : `stories/STORY-331.md`
   (D-331-1 → 12, section « Contrat »).
   - **`GET /api/v1/livrables-declaration/{obligationId}/formulaire`** (droit `fiscalite:declaration:preparer`) : 200
@@ -3816,6 +3867,19 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-331** (fiscal) :
+  - (1) **Les copies du paquet de dépôt en CRLF doivent être réécrites par `git show` pour les tests locaux.** Cela vaut
+    aussi pour les deux copies neuves, `manifeste-formulaires.json` et `tg-tva-1.0.json`. Avec `core.autocrlf=true`,
+    un fichier ajouté ou rebasé ressort en CRLF, et son sha256 ne correspond plus au manifeste. Sous Node 25, avant les
+    suites, faire `git show HEAD:<f> > <f>` sur chaque copie de `paquets-depot/assets/` et de `completude-depot/assets/`.
+    `git status` les dit alors « M » sans aucun diff (`--ignore-cr-at-eol` vide). Ne jamais les ajouter, et faire
+    `git checkout -- <dossiers>` avant le commit et avant de rendre le worktree. L'archive LF de Docker n'a pas ce
+    problème.
+  - (2) **Un motif de mutation doit viser un texte unique dans le fichier, pas un texte partagé.** Un motif qui se
+    trouve aussi ailleurs dans le fichier mute la mauvaise occurrence, ou les deux. La mutation rougit alors pour une
+    autre raison que celle qu'elle prétend éprouver, ou ne rougit pas. Le script compte les occurrences (exactement 1,
+    sinon il s'arrête), et le motif est élargi jusqu'à la ligne qui ne se trouve qu'à l'endroit visé.
 
 - **STORY-330** (fiscal) :
   - (1) **Les copies du paquet de dépôt (`paquets-depot/assets/`, `completude-depot/assets/`) sont vérifiées par leur
