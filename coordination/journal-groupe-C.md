@@ -173,8 +173,10 @@
 18. 🏁 **EPIC-031 fini** (320 → 329 : l'alimentation depuis la balance, le calcul délégué au moteur, le triplet, le cycle et le
    visa, la validation du client, les rectificatives et la clôture, la cohérence, la continuité, les anomalies, le chemin d'un
    montant et l'historique complet) — premier jalon vendable du fiscal.
-19. **Suivante : STORY-339** (la base légale citée mot pour mot sur chaque retraitement ; elle prolonge l'étape `detail` du
-   chemin, D-329-11 ; fiche à écrire juste avant de coder).
+19. 🚧 **STORY-339 en cours (26/11)** (la base légale citée mot pour mot sur chaque retraitement ; elle prolonge l'étape
+   `detail` du chemin, D-329-11) : fiche écrite, contrat et communs annoncés avant le code (ci-dessous). **La demande de D
+   (333, D-333-3 : la garde `ACCUSE_REQUIS` dans `transitionner`) passe à STORY-338** : au début de 339, la PR fiscal
+   `MNV-333` de D n'était pas fusionnée sur `dev` (`94baf9f`), ni ouverte.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -671,6 +673,19 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-339, avant le code)** — branche `MNV-339` de `prospera-fiscal-service`, partie de
+  `origin/dev` `94baf9f` (et `MNV-339` de `balance-service`, de `origin/dev` `effdc4a`, pour la source du paquet). **Aucune
+  migration**, aucune collection ; ni `app.module.ts`, ni `package.json`, ni `nest-cli.json`, ni `read-models/`, ni
+  manifeste `declarations`. Touchés parmi les communs : **le contrat OpenAPI** (un champ neuf, `detail.basesLegales`, sur
+  la réponse du chemin : « ⚠ Contrats ») ; **la copie du paquet** (`test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`,
+  recopiée à l'octet de balance-service : bloc neuf `basesLegales`, `irpp.retenueALaSource.reversement.organisme`, source du
+  report de crédit de TVA) ; **une attente d'un test de D**, parce que la donnée change : `src/domain/remuneration/obligations-sociales.spec.ts`
+  (D-349-4 : le canal de `RETENUE_IRPP` lu sur la copie du paquet devient l'organisme nommé, « service des impôts », au lieu
+  de `NON_DECLARE` ; aucune ligne de la logique de D ne change). Tout le reste dans les dossiers de C (`domain/obligations` :
+  la citation et le corpus packagé ; `application/obligations` : le paquet de l'obligation, partagé par la cohérence et le
+  chemin ; `modules/obligations/dto`). **→ D** : rien à faire pour un rebase ; la suite de D est jouée en entier avant le
+  push ; D prévenu par message (organisme, empreinte).
+
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#80, `dev` `94baf9f`, rebasée sur `origin/dev` `8d85c10` de D, sans
   conflit)** — conforme à l'annonce, **un commun de moins** : `src/ports/journal-audit.ts` **n'a pas changé** (une méthode de
   plus y cassait le double `{ chaine }` de `audit-depots.service.spec.ts`, fichier de D) ; la lecture des textes passe par un
@@ -824,6 +839,26 @@ seulement.
   clés, plus celles de l'IRPP et de la CNSS (voir « ⚠ Contrats »).
 
 ## ⚠ Contrats
+
+- **2026-11-26 (STORY-339), ANNONCÉ avant le code** — **la base légale citée mot pour mot sur chaque retraitement**
+  (`prospera-fiscal-service`, REST ; source du paquet fiscal Togo dans `balance-service`). Fiche : `stories/STORY-339.md`
+  (D-339-1 → 11). Consommateurs : l'écran du chemin (A, FE-081) ; le dossier de contrôle (336, D) ; la copie du paquet de
+  `dossier-service` (B) ; le calcul social (D, l'organisme de la retenue). **Ajouts seuls** : aucune route, aucun droit,
+  aucun événement ; aucun champ existant ne change ; manifeste inchangé ; aucune route de `balance-service` ne change.
+  - **`GET /api/v1/obligations/{id}/chemin`** : l'étape `detail` gagne **`basesLegales`** `{ statut: RESTITUE | ARRETE |
+    NON_ATTEINT, motif, message, paquet { code, version, checksum } | null, corpus { artefact, source, avertissement,
+    empreinte, articles }, retraitements[{ grandeur, montant, libelle, justifie, motif, message, reference { livre,
+    article, millesime } | null, aConfirmer, citation { livre, article, page, texte } | null }] }` — les retraitements
+    appliqués (TVA : `tvaDeductible`, `tvaEcartee`, `creditAnterieurImpute` ; TPU : `tpuCalculee` ; acompte : `theorique` ;
+    montant non nul), l'article du paquet de l'obligation, son texte **mot pour mot** depuis le corpus packagé (CGI + LPF
+    OTR 2025, 1 185 articles). Non justifié, nommé : `BASE_LEGALE_ABSENTE_DU_PAQUET`, `BASE_LEGALE_A_CONFIRMER`,
+    `BASE_LEGALE_MAL_FORMEE`, `ARTICLE_ABSENT_DU_CORPUS`, `MILLESIME_SANS_CORPUS`, `PAQUET_NON_LISIBLE`,
+    `PAQUET_DU_MOTEUR_DIFFERENT` ; l'étape `ARRETE RETRAITEMENT_NON_JUSTIFIE` (ou `PAQUET_NON_LISIBLE`).
+  - **Paquet fiscal Togo 2026** : bloc neuf **`basesLegales.retraitements.<RESSOURCE>.<grandeur>`** `{ libelle, livre,
+    article, millesime } | { libelle, aConfirmer }` (CGI Art. 196, 197, 204, 133, 114 ; « CGI OTR 2025 (LF 2023) »), garde
+    R12 ; **`irpp.retenueALaSource.reversement.organisme`** = « service des impôts » (LPF Art. 27) ; la source de
+    `tva.declaration.reportCredit` cite l'Art. 204. Le moteur de balance-service ne lit aucun des trois. Nouvelle empreinte
+    au « Livré ».
 
 - **2026-11-26 (STORY-329), PUBLIÉ** (fiscal #80, `94baf9f`) — conforme à l'annonce (#988), sans écart de contrat (la lecture
   des textes passe par un port interne de plus, sans effet sur les routes). **→ A (FE-081)** : types à régénérer
