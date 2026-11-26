@@ -8205,8 +8205,9 @@ sprints:
         epic: "EPIC-032"
         points: 8
         service: "fiscal-service"
-        status: "not_started"  #  # ⚡⚡ JALON « FORMAT CONFIRME » LEVE LE 2026-08-28 : le PO a fourni UNE PIECE REELLE DE DEPOT — 1000745307_2025_Definitif.xlsx, DSF DEFINITIVE du dossier PMS (NIF 1000745307, exercice 2025), 92 feuilles. C est exactement ce que le blocage attendait (« aucune piece reelle de depot en main a ce jour »). STORY-330/331/332/333 cessent d etre bloquees.  — Historique —  ⛔ BLOQUÉE par le jalon `format confirmé` — aucune pièce réelle de dépôt en main à ce jour.
-        assigned_to: null
+        status: "in_progress"  # 🚧 EN COURS le 2026-11-26 (lot 7 de D, n° 7) — fiche stories/STORY-330.md écrite et contrat annoncé avant le code (⚠ Contrats, ⚠ Communs, Q-D-27 au journal de D). — Historique :  # ⚡⚡ JALON « FORMAT CONFIRME » LEVE LE 2026-08-28 : le PO a fourni UNE PIECE REELLE DE DEPOT — 1000745307_2025_Definitif.xlsx, DSF DEFINITIVE du dossier PMS (NIF 1000745307, exercice 2025), 92 feuilles. C est exactement ce que le blocage attendait (« aucune piece reelle de depot en main a ce jour »). STORY-330/331/332/333 cessent d etre bloquees.  — Historique —  ⛔ BLOQUÉE par le jalon `format confirmé` — aucune pièce réelle de dépôt en main à ce jour.
+        story_path: "stories/STORY-330.md"
+        assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-331"
         title: "Format de canal décrit comme donnée du paquet"
         epic: "EPIC-032"

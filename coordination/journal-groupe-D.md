@@ -2179,6 +2179,20 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-330, avant le code)** — branche `MNV-330` de `prospera-fiscal-service`, partie de
+  `origin/dev` `7e2bff8`. **Aucune migration** (une collection neuve, `engagements_depot`, son index unique partiel posé
+  par Mongoose au démarrage), ni `app.module.ts` (les deux contrôleurs neufs entrent dans `DepotsModule` et
+  `LivrablesDepotModule`, déjà montés ; ces deux modules importent `ObligationsModule`), ni `package.json`, ni
+  `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touchés : **le contrat OpenAPI** (trois routes neuves :
+  « ⚠ Contrats ») et **`src/main.ts`** (transverse : deux en-têtes de réponse de plus dans `exposedHeaders` du CORS,
+  `X-Declaration-Version` et `X-Declaration-Empreinte`). **Lus, sans y écrire** (dossiers de C) :
+  `ports/registre-obligations.ts`, `ports/registre-versions-declaration.ts` (exporté pour 330, D-325-11),
+  `domain/obligations/version-declaration.ts` (`contenuDeclareDe`, `empreinteDuContenu`, `versionCouranteDe`),
+  `domain/obligations/cycle.ts` (`CYCLE`, `obligationDesactivee`), `test/utils/registre-obligations-memoire.ts` (l'e2e).
+  Tout le reste dans les dossiers de D (`depots`, `livrables-depot`, `adapters/canal-depot`, `adapters/mongo` de
+  l'engagement, `ports/canal-depot.ts`, `ports/registre-engagements-depot.ts`) et une garde neuve
+  `src/modules/depots/garde-ad12.spec.ts`. **→ C** : rien à faire pour un rebase ; aucune voie de D ne passe une obligation
+  à « Déposée » (D-330-7).
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#73, `dev` `136efdf`, rebasée sur `origin/dev` `493a817` avant la
   fusion), conforme à l'annonce, plus un fichier de D : `src/domain/paquets-depot/libelle-imprime.spec.ts` (la borne de
   temps passe de 500 à 2000 ms, demande de C, commit séparé) ; ANNONCÉ (2026-11-26, STORY-349, avant le code)** —
@@ -2238,6 +2252,29 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-26, STORY-330, avant le code) — le livrable d'une déclaration et le dépôt engagé**
+  (`prospera-fiscal-service`, modules `livrables-depot` et `depots`). Fiche : `stories/STORY-330.md` (D-330-1 → 16,
+  section « Contrat »). **Ajouts seuls** : aucune route, aucun champ, aucun topic existant ne change ; la route de 537
+  (`POST /livrables-depot/{pays}/{etat}`) et la chaîne de 538 (`/depots`) restent identiques.
+  - **`POST /api/v1/livrables-declaration/{obligationId}`** (droit `fiscalite:declaration:preparer`) : multipart de 537
+    moins `dossierId` (pris sur l'obligation) ; le format est celui que le `gabarit` de l'obligation nomme ; la
+    déclaration doit être `VALIDEE` ou au-delà. 200 : le classeur rempli, en-têtes de 537 **+ `X-Declaration-Version` +
+    `X-Declaration-Empreinte`** (la version scellée si elle l'est, sinon le contenu courant). Refus neufs : `409
+    DECLARATION_NON_VALIDEE`, `422 FORMAT_DE_CANAL_NON_DECLARE` (`{ champ: 'gabarit', canal }`), `422
+    FORMAT_DE_CANAL_ILLISIBLE` ; plus `404 OBLIGATION_INTROUVABLE`, `409 OBLIGATION_DESACTIVEE`, `422
+    PAQUET_DEPOT_NON_PUBLIE` et ceux de 537.
+  - **`POST /api/v1/depots-declaration`** (droit `fiscalite:declaration:deposer`) : corps `{ obligationId, numero,
+    empreinte }` ; 201 (créé) ou 200 (rejeu) `{ depotId, obligationId, dossierId, numero, empreinte, canal, format |
+    null, mode: 'ASSISTE', statut: 'ENGAGE', engagePar, engageLe, rejoue }` — **aucun champ d'accusé** (AD-12 : il
+    arrivera comme un fait séparé, 333). L'obligation reste à `A_DEPOSER` (Q-D-27). Refus : `409 DEPOT_NON_ENGAGEABLE`,
+    `409 LIVRABLE_PERIME`, `409 ENGAGEMENT_CONCURRENT`, `409 OBLIGATION_DESACTIVEE`, `404 OBLIGATION_INTROUVABLE`, `422`
+    du format.
+  - **`GET /api/v1/depots-declaration/{depotId}`** : le dépôt engagé + `statut` (`ENGAGE` | `REMPLACE`), `remplacePar`,
+    `perime`, `statutObligation` ; `404 DEPOT_INTROUVABLE`.
+  - **Journal chaîné** : périmètre `depot-declaration:<depotId>`, actes `DEPOT_DECLARATION_ENGAGE` et
+    `DEPOT_DECLARATION_REMPLACE`. Aucun topic, aucun droit neuf.
+  - **→ A (plus tard)** : l'écran du livrable d'une déclaration et de son engagement (FE-081). **→ C** : rien à faire.
 
 - **PUBLIÉ (2026-11-26, STORY-1141 : prospera-paiement-service#126, `dev` `f6a4800`, `64b5838` ;
   prospera-ventes-service#17, `dev` `dcb5d3b`) sans écart ; ANNONCÉ (2026-11-26, avant le code, prospera-stories#967,
@@ -3465,6 +3502,11 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-27 (2026-11-26, STORY-330) — Engager un dépôt fait-il passer la déclaration à « Déposée » ?** **Choix par
+  défaut** (D-330-7) : non. « Déposée » est la transmission (D-323-3) et reste la porte de C, avec l'accord du client et
+  le scellement de la version ; un dépôt engagé que personne n'a encore fait sur le portail garde son alerte d'échéance. Si
+  le PO veut l'inverse, l'engagement appellera la porte de C (D-324-7), sans autre changement.
 
 - **Q-D-26 (2026-11-26, STORY-1141) — Un compte `MARCHAND` (ou `PI_SPI`) peut-il porter un numéro imprimable ?**
   **Choix par défaut** (D-1141-3) : non. Seuls `BANCAIRE` et `MOBILE_MONEY` en portent un : un compte marchand se paie
