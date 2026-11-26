@@ -1,6 +1,8 @@
 # STORY-1126 : La recette des archives de bout en bout — 40 boîtes, une facture de 2019 en deux gestes, une sortie, un récolement, une restitution
 
-Status: in-progress — fiche écrite le 2026-11-26 par la session du groupe B juste avant de coder (lot 7, n° 8 de B,
+Status: done — **livrée le 2026-11-26** : prospera-recette **#34** (`585d8bd`, `9a7749a`, `3ca9907` sur `dev`) ; défaut
+révélé corrigé à part : document-service **#41** (`5261720`, `57f9581` sur `dev`) ; voir « Livraison ». Fiche écrite le
+2026-11-26 par la session du groupe B juste avant de coder (lot 7, n° 8 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, ligne 8 ; identifiant réservé D-L7B-1). Dernière story de la partie
 archives.
 
@@ -87,6 +89,56 @@ UJ-2 vert pour la suite.
   toujours sa pièce hors GED.
 
 Aucune route, aucun fait, aucun droit ne change dans un service (sauf défaut révélé, annoncé alors à part).
+
+## Livraison (2026-11-26)
+
+- **Recette, `prospera-recette` #34** (`585d8bd`, `9a7749a`, `3ca9907` sur `dev`) : `recette/archives.recette.ts` (13 tests,
+  le parcours ci-dessus), `src/archives.ts` (les 40 boîtes, le PDF de chaque pièce, `compteurDeGestes`, `cleDeLaGed`,
+  `fuitesDeLaConsole`) et ses tests ; `environnementDeLaPile` porte `RECETTE_GED_CLE_CABINET` ; profil (`document-service` :
+  trois réglages) et sa garde ; README (section STORY-1126). `npm run recette -- archives`.
+- **Défaut révélé, `document-service` (`prospera-ocr-service`) #41** (`5261720`, `57f9581` sur `dev`), fusionné avant la
+  recette (D-1126-11) :
+  - **la passe 1 l'a montré** : la GED relisait `GET /moi/droits` à chaque requête (deux ou trois fois pour `PUT
+    …/original`, `GET …/pieces/{id}`) ; l'adresse de la GED dépassait la limite d'auth (100 par minute et par adresse) bien
+    avant la sienne — **aucun** `429` de la GED, **404** lignes `429` au journal d'auth — et Edem recevait **503
+    `DROITS_INDISPONIBLES`** au dépôt de la cinquième boîte (passe 1 : 5/13, tout l'aval en cascade) ;
+  - **le correctif** : `CacheDesDroits` devant `SourceDesDroitsHttp`, câblé par le module `ged` : clé = empreinte SHA-256 du
+    jeton présenté + organisation (le jeton jamais gardé en clair), 60 s au plus, un échec jamais gardé, deux lectures
+    simultanées d'un jeton n'en font qu'une, borné à 10 000 jetons ;
+  - second commit : le recensement des routes du cabinet (STORY-695, `dossier-portee-collaborateur.e2e-spec`) inscrit `GET
+    …/ged/cabinet/pieces/{pieceId}/versions/{version}` : la route de « f » manquait à la liste fermée et l'e2e rougissait sur
+    `dev` (rouge sans le diff, `git stash`).
+- **Preuves** :
+  - recette : `npm test` **175/175** (17 suites), `npm run verifier` vert ; mutations **10/10** tuées sur assertion (R3, la clé
+    retirée de l'environnement de la pile, a d'abord survécu : un test de plus) ;
+  - `document-service`, Node 25 : `droits.spec` 11/11 (+7), unitaires 1 396 passés (117 suites, les 3 rouges connues du poste),
+    e2e **222/222**, lint des fichiers touchés, `tsc` ; mutations **8/8** ; Node 24 (étage `verification`, archive
+    d'`origin/dev` `57f9581`) : **117/117 suites** (1 400 passés), e2e **222/222** ;
+  - **pile `grp-b-recette` neuve, images depuis les archives d'`origin/dev`** (auth `e9c32c1`, kyc `9cef9cb`, catalogue
+    `ce8cbc0`, notification `749b3cd`, paiement `64b5838`, dossier `645a699`, document-service `57f9581`, BFF `81817fe`),
+    volumes neufs : **13/13** en 115 s (passe 3). `MESURES-1126` : dépôts des 40 pièces 10 s, lecture 1 s, numérisation des 40
+    boîtes (lots, dépôts, lectures, contrôles, originaux) 81 s, recherche + copie 126 ms, texte lu à l'index aussitôt, export
+    2 s, un `429` de la GED attendu ; `GESTES-1126` : `GET …/recherche`, `GET …/versions/1/contenu` ; journal d'intégrité :
+    10 actes chaînés (versement, scellé, attestation, vérification, fermeture, export, deux téléchargements, `BRN-`) ;
+    aucune erreur au journal de la GED ni du BFF.
+  - Passes : 1 (12:48 → 13:02, `origin/dev` d'avant le correctif : le défaut), 2 (13:23 → 13:35, avec le correctif et
+    l'étage `verification` : 12/13, une assertion de la recette sur le journal, D-1126-13), 3 (13:44 → 13:49 : 13/13).
+    `down -v` à chaque fin, aucun conteneur `grp-b-*` restant, verrou rendu.
+- **Recette de l'Atelier non rejouée** (D-1126-12) : le correctif ne touche ni l'OCR, ni les extractions, ni le module commun.
+
+### Décisions prises au code
+
+- **D-1126-11 — Les droits du membre en cache, 60 s par jeton, dans la GED** : l'ADR « droits hors du jeton » (décision 2)
+  prescrit le cache sous (membre, organisation, `dv`) ; la comptabilité le fait (STORY-962). La clé est l'empreinte du jeton
+  plutôt que `dv` : un jeton porte membre, organisation et `dv`, et la GED n'a pas à projeter `dv` pour cela ; un droit
+  retiré se voit en une minute au plus, comme ailleurs. Corrigé dans `document-service` (dépôt de B), PR à part fusionnée
+  avant la recette.
+- **D-1126-12 — La recette de l'Atelier n'est pas rejouée** : le diff de #41 tient dans le module `ged` (sa source des droits)
+  et un e2e de recensement ; ni l'OCR, ni les extractions, ni le module Nest commun (D-1125-13). La recette des archives
+  rejoue la lecture de la GED.
+- **D-1126-13 — Le journal d'intégrité se prouve par ses actes** : il chaîne les actes probants (STORY-1119 : versement,
+  scellé, documents émis, vérification, fermeture, export et téléchargement…), pas chaque geste ; la recette lit le journal,
+  y trouve les actes du parcours, et exige `rangs` = entrées relues par la vérification.
 
 ## Critères d'acceptation
 

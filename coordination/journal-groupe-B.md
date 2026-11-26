@@ -271,7 +271,23 @@
     avant la fusion (stories #980, `59ed625`). `manifestes:garde` verte (48) contre `main` ; catalogue 69/69 par chemin,
     complète 1 630 passés (3 suites rouges connues) ; 3/3 mutations. Sans Docker, verrou non pris. Fiche D-979-35 → 40.
     Passation de `prospera-paiement-service` (STORY-1141) refermée : rendu le 26/11 (« Passations »).
-  - **Suivante : STORY-1126** (n° 8 : la recette des archives de bout en bout, qui appellera aussi la route de « f »).
+  - **8 — STORY-1126 (26/11) — faite** : la recette des archives de bout en bout. **prospera-recette #34** (`585d8bd`,
+    `9a7749a`, `3ca9907` sur `dev`) ; défaut révélé corrigé à part : **document-service #41** (`5261720`, `57f9581`) ; contrat
+    annoncé avant la fusion (stories #982, `30a833b`). `recette/archives.recette.ts` (13 tests) : la console ouvre `ged` par le
+    BFF ; l'archiviste reçoit 40 boîtes, les cote (étiquettes), les numérise dans leur lot (vrai PDF à couche texte lu par la
+    GED, contrôlé, relié à son original), verse et scelle (attestation) ; **la facture de 2019 en deux gestes** (D-1126-8 :
+    recherche du fournisseur dans l'exercice, avec la cote de l'original ; la copie) ; par le mois, par le texte lu (jamais
+    celui d'une nature sensible) ; la référence d'une version (« f ») ; sortie et retour ; récolement ; la console compte par
+    le BFF et pose le quota ; restitution des 40 boîtes, fermeture, export, `BRN-` ; journal intact. Le profil pose sur
+    `document-service` l'espace, `AUTH_SERVICE_URL` et `GED_CLE_CABINET` (tirée par le paquet dans `.recette/`). **Défaut** :
+    la GED relisait `GET /moi/droits` à chaque requête, auth limitait son adresse, 503 `DROITS_INDISPONIBLES` à la cinquième
+    boîte → cache des droits 60 s par jeton (D-1126-11) ; et le recensement STORY-695 complété (la route de « f » y manquait,
+    e2e rouge sur `dev`). Recette 175/175, mutations 10/10 ; GED Node 25 1 396, e2e 222/222, mutations 8/8, Node 24 117/117
+    suites, 222/222 ; pile `grp-b-recette` neuve depuis `origin/dev` : **13/13** (numérisation des 40 boîtes 81 s, recherche et
+    copie 126 ms). Verrou 12:48 → 13:02, 13:23 → 13:35, 13:44 → 13:49. Fiche D-1126-1 → 13. **La partie archives du lot 7 est
+    finie.** Rituel : aucune demande neuve à B chez A, C et D.
+  - **Suivante : STORY-1127** (n° 9 : `referentiels` dans l'état publié, avant le gel du 11/12 ; D-L7B-5 : fusionnée au plus
+    tard le 09/12).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
     `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
@@ -2170,6 +2186,11 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-26, STORY-1126 — LIVRÉ** (prospera-recette #34, `585d8bd` sur `dev`) : conforme à l'annonce ci-dessous, sans écart.
+  **En plus, un comportement de `document-service` (#41, `5261720`), sans contrat** : la GED garde les droits d'un membre
+  **60 s par jeton** (`GET /moi/droits` lu une fois par minute au plus) ; un droit retiré chez auth se voit dans la GED en
+  une minute au plus (comme dans la comptabilité). Aucune route, aucun fait, aucune variable. **→ A** : rien à régénérer.
 
 - **2026-11-26, STORY-1126 — la GED du cabinet dans le profil de recette, annoncé AVANT la fusion** (`prospera-recette`,
   branche `MNV-1126` ; fiche `stories/STORY-1126.md`, D-1126-1 → 10). Lu par tous ceux qui lèvent la pile de recette (A, C,
@@ -4079,6 +4100,19 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une pile de preuve à doublure d'auth cache la limite de débit d'auth** (STORY-1126) : sept stories de la GED prouvées
+  contre une doublure sans limite ; la vraie pile a rendu 503 `DROITS_INDISPONIBLES` à la cinquième boîte (la GED relisait
+  `GET /moi/droits` à chaque requête, et auth limite chaque ADRESSE, donc celle de la GED, à 100 par minute). Tout service qui
+  lit les droits chez auth : un cache par jeton (ou membre, organisation, `dv`), et une recette sur la vraie pile.
+- **Le recensement des routes de `document-service` (STORY-695) est une liste fermée** : une route neuve du cabinet non
+  inscrite fait rougir `dossier-portee-collaborateur.e2e-spec` (la route de « f » y manquait, rouge sur `dev`). Relancer
+  CETTE e2e après toute route neuve.
+- **Le journal d'intégrité ne chaîne que les actes probants** (versement, scellé, documents émis, vérification, fermeture,
+  export) : 10 entrées pour 40 boîtes ; une recette le prouve par ses actes, jamais par un nombre de gestes.
+- **Un `Start-Process` détaché porte la passe, pas l'outil** : un `run_in_background` garde un délai ; une passe qui prend le
+  verrou, lève la pile, `down -v` et rend le verrou dans un `finally` ne meurt pas avec la commande qui l'a lancée.
+- **Un heredoc Bash avec des apostrophes typographiques a cassé, encore** (script de docs) : écrire ces scripts par l'outil.
 
 - **Une preuve qui compare deux corps JSON par `JSON.stringify` rougit sur l'ordre des champs** (STORY-1125 : la liste du BFF
   rendait `cabinets` avant `tronque`, contenu identique) : comparer en JSON canonique (clés triées), et garder l'ordre de la
