@@ -1,7 +1,9 @@
 # STORY-317 : Les reports d'échéance accordés par l'administration — la date reportée s'affiche, la date légale reste
 
-Status: ready-for-dev — écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 2 du fiscal,
-`PLAN-LOT-7-2026-11-24.md` §3) ; contrat annoncé avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de C).
+Status: done — **livrée le 2026-11-26** : prospera-fiscal-service **#69** (`98ab317`, `8f6b1ba` sur `dev`) et
+balance-service **#171** (`44be0c1` sur `dev`, `cnss.collecte`) ; voir « Livraison ». Écrite le 2026-11-26 par la session du
+groupe C juste avant de la coder (lot 7, n° 2 du fiscal, `PLAN-LOT-7-2026-11-24.md` §3) ; contrat annoncé avant le code
+(#940).
 
 **Epic :** EPIC-030 · **Points :** 3 · **FR :** FR-F20
 **Service :** `prospera-fiscal-service` (dossier `obligations`, à C) ; `balance-service` pour la demande de D servie ici
@@ -95,6 +97,44 @@ affiche) rend la date reportée.
   cotisations, que le calcul de 348 lit déjà (absent ⇒ `NON_DECLAREE`). Rien n'est renommé (`cnss.amu.collecte`,
   `cnss.affiliation.<TYPE>`, `irpp.traitementsSalaires` restent). Réépinglage, copies à l'octet dans balance et fiscal ;
   celle de `dossier-service` est à B (ajoutée à la demande ouverte).
+
+## Livraison (2026-11-26)
+
+- **balance-service** (#171, `44be0c1`) : `cnss.collecte` dans la source du paquet Togo 2026, artefact régénéré par
+  `build.mjs`, sha256 **`d0558c545ae6a95102c188114fcd82034b68c8cfd322d1ca19372f4fc2372465`** (vingtième fois), réépinglé
+  (`paquet-fiscal-registry.ts` et les deux tests d'empreinte) ; `paquet-fiscal-schema.spec.ts` exige le bloc. La surcouche
+  zone franche ne bouge pas.
+- **fiscal** (#69, `98ab317` puis `8f6b1ba`) : `domain/obligations/report-echeance.ts` (`echeanceApplicable`,
+  `echeanceLegaleDe`, `qualifierRetard`, `obstacleAuReport`, `faitReport`, `faitReportAnnule`, purs),
+  `application/obligations/reports-echeance.service.ts`, deux routes au contrôleur des obligations, `report` et
+  `echeanceLegale` au schéma, `reporter` / `annulerReport` au registre (Mongo et mémoire), la ligne du calendrier enrichie ;
+  la copie du paquet recopiée à l'octet (sha256 identique à l'artefact de `dev`).
+- **Les AC en tests** : AC-1 (la date reportée dans la réponse, la liste d'un exercice et le calendrier du portefeuille,
+  qui trie dessus sur le vrai MongoDB ; la légale dans `echeanceLegale` et `report.echeanceLegale`) ; AC-2
+  (`qualifierRetard` : au 15 mai, une obligation reportée au 30 juin n'a aucun jour de retard, la même sans report en a 15 ;
+  10 jours au 10 juillet) ; AC-3 (acte `OBLIGATION_ECHEANCE_REPORTEE` relu sur le vrai journal : `acteur`, `survenuLe` = date
+  de la décision, `portee` `{ dossierId, obligations }`, référence et motif par empreinte, chaîne intacte avec l'annulation).
+  Et : la re-dérivation garde le report (Mongo réel, mémoire, e2e) ; une légale devenue plus tardive l'emporte ; tout ou
+  rien (la seconde obligation périmée : la première n'est pas reportée, sur le vrai MongoDB) ; les refus nommés.
+- **Preuves** (Node 24, image `verification` de l'archive LF) : fiscal unitaires **205/205 suites, 2995** (1 sauté), e2e
+  **13/13, 278**, `test:conformite` **19/19, 121**, `nest build` ; balance unitaires **300/300 suites** (2 sautées),
+  **5764**, e2e **38/38, 2324** ; mutations **14/14** rouges sur l'assertion (report ignoré, retard sur la légale, report
+  qui avance, date égale acceptée, décision future, portée absente du journal, motif en clair, date du fait, deux dossiers,
+  obligation écartée, portée de l'appelant, re-dérivation qui efface, comparaison-échange retirée, re-dérivation comparée à
+  l'applicable) et **1/1** sur le paquet ; §1.5 `docker compose -p grp-c` : `fiscal-service` sain (MongoDB en jeu de
+  répliques, Kafka, Redis), les deux routes montées, **401** sans jeton, 0 `UnknownDependencies`. Verrou pris deux fois
+  (02:39 → 02:50, 02:54 → 02:56).
+- **Écart à l'annonce** (dit dans « ⚠ Communs ») : une troisième spec de D suit le paquet, `test/remuneration-import.e2e-spec.ts`
+  (vue rouge par l'e2e Node 24, corrigée par `8f6b1ba`, rejouée verte).
+
+### Écarts au contrat, décidés au code
+
+- **D-317-9** : le report est rendu tel quel (`reportId`, `date`, `echeanceLegale`, `decision`, `motif`, `par`, `le`) ;
+  `reportId` est un UUID (commun à toute la portée).
+- **D-317-10** : la ligne du calendrier dit `reportee` seulement quand l'applicable EST la date reportée (une légale devenue
+  plus tardive la rend `false`).
+- **D-317-11** : `REPORT_CONCURRENT` couvre aussi l'obligation qui a changé de statut ou de date entre la lecture et
+  l'écriture : rien n'est écrit, la transaction est annulée.
 
 ## Décisions prises au contrat (contestables)
 

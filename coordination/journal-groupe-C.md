@@ -74,8 +74,21 @@
    lit la balance d'une organisation par ces routes.
 8. 🏁 **Les cinq stories de balance placées en tête du lot 7 sont livrées : 1020, 1019, 1021, 1022, 1023** (564, du
    fiscal, glissée entre 1021 et 1022 par l'amendement du point 4).
-9. 🚧 **STORY-317 EN COURS (26/11)** — les reports d'échéance administratifs (fiscal ; fiche écrite, D-317-1 → 8 ;
-   annonce « ⚠ Contrats » et « ⚠ Communs » avant le code). Sert la demande de D (STORY-348) : `cnss.collecte` au paquet.
+9. ✅ **STORY-317 DONE (26/11)** : fiscal **#69** (`98ab317`, `8f6b1ba` sur `dev`) et balance-service **#171** (`44be0c1`),
+   annonce #940 avant le code. Une obligation porte l'**échéance applicable** (`echeance` : la date reportée s'il y a un
+   report) et la **légale** (`echeanceLegale`, du paquet) ; le **report** est un champ humain (`{ reportId, date,
+   echeanceLegale, decision: { reference, du }, motif, par, le }`), gardé par la re-dérivation (un report n'avance jamais
+   une échéance). `POST /api/v1/obligations/reports` (une décision, les obligations d'un dossier, tout ou rien) et
+   `POST /api/v1/obligations/{id}/report/annulation`, droit `valider` ; actes `OBLIGATION_ECHEANCE_REPORTEE` (auteur, date de
+   la décision, portée) et `OBLIGATION_REPORT_ANNULE`. **`qualifierRetard`** (pur, `domain/obligations/report-echeance.ts`)
+   compte le retard sur l'applicable : **318 le prolonge** (états, horizon), 319 n'y touche pas. **← D servie** :
+   `cnss.collecte` au paquet (empreinte **`d0558c54…2465`**). Node 24 : fiscal 205/205 suites, 2995 ; e2e 13/13, 278 ;
+   conformité 19/19, 121 ; balance 300/300, 5764 ; e2e 38/38, 2324 ; mutations 14/14 et 1/1 ; compose `grp-c` sain, routes en
+   401 sans jeton ; verrou pris deux fois (02:39 → 02:50, 02:54 → 02:56). D-317-1 → 11 dans la fiche. **D prévenu** ;
+   **→ B** : copie de `dossier-service` (demande mise à jour ci-dessous).
+10. **Suivante : STORY-318** (les alertes d'échéance et les états de retard, fiscal ; fiche à écrire juste avant de coder,
+   sur `qualifierRetard` de 317 ; AR-09 / AD-18 : ordonnanceur BullMQ idempotent, aucun `setInterval`). Puis 319, que **349
+   de D attend**.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -345,8 +358,10 @@ seulement.
   (algorithme et vecteur dans « ⚠ Contrats » et `stories/STORY-1022.md`). Prévenu par message (session
   `moneyvibes-apps-83`).
 
-- **→ B (2026-11-25, STORY-564) : recopier le paquet fiscal Togo 2026 dans `dossier-service`** — **ouverte** (plan du
-  lot 7 §6 : à ta prochaine story sur le service, en LF). Source : prospera-balance-service `dev` `c9e94c6`,
+- **→ B (2026-11-25, STORY-564, mise à jour le 26/11 par STORY-317) : recopier le paquet fiscal Togo 2026 dans
+  `dossier-service`** — **ouverte** (plan du lot 7 §6 : à ta prochaine story sur le service, en LF). **Dernière version :
+  prospera-balance-service `dev` `44be0c1`, sha256 `d0558c545ae6a95102c188114fcd82034b68c8cfd322d1ca19372f4fc2372465`**
+  (elle contient celle de 564 et ajoute `cnss.collecte` : une seule recopie suffit). Avant : `dev` `c9e94c6`,
   `src/modules/referentiel/assets/paquet-fiscal-togo-2026.json`, sha256 `bfcc3fc9…c065` ; cible :
   `src/modules/portefeuille/echeance/assets/paquet-fiscal-togo-2026.json` (la copie actuelle, `e8e94c84…dc6`, n'a déjà ni
   `coherence` ni `rapprochementAnnuel`) ; `git -c core.autocrlf=false show origin/dev:<chemin> > <copie>`, puis son
@@ -453,6 +468,16 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← D (2026-11-25, STORY-348) : la date de collecte des cotisations sociales au paquet fiscal Togo** — ✅ **servie par
+  STORY-317** : balance-service #171 (`44be0c1` sur `dev`), source `scripts/referentiels/sources/paquet-fiscal-togo-2026.json`,
+  **`cnss.collecte`** `{ jourLimite: 15, moisSuivant: true, organisme: "CNSS Togo", source, aValider }` (la source cite le
+  décret n° 2023-097/PR et la Loi n° 2011-006 ; `aValider` nomme l'article du Code qui fixe le 15 et un éventuel versement
+  trimestriel des petits employeurs : à relire par un fiscaliste, plan §8) ; artefact sha256 **`d0558c54…2465`**, copie à
+  l'octet dans le fiscal (#69, `98ab317`, `test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`). Le calcul de 348 rend
+  désormais les cotisations **`DECLAREE`, exigibles le 15 du mois suivant, sans livraison** (trois specs de D mises à jour,
+  « ⚠ Communs »). Rien de ce que D lit n'est renommé (`irpp.traitementsSalaires`, `cnss.affiliation.<TYPE>`,
+  `cnss.amu.collecte`). Prévenu par message (session `moneyvibes-apps-83`).
+
 - **← D (24/11 → 25/11, STORY-1076 → 1118) : recopier à l'octet les paquets SYSCOHADA révisé 2.1, 2.2, 2.3 et le SMT** —
   ✅ **servie par STORY-1020** : balance-service #165, `f6d3f8f` sur `dev` (plus `58322c4` : trois gardes qui comptaient
   le plan ou le poste `BI`) ; les quatre artefacts de `bilan-service` `dev` (`b6f2d49`, empreintes `3880b6c2…`,
@@ -526,7 +551,11 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-26, STORY-317, avant le code)** — branche `MNV-317` de `prospera-fiscal-service`. **Aucune migration**
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#69, `dev` `98ab317` et `8f6b1ba`, sur `origin/dev` `d41dbe6`)** —
+  conforme à l'annonce, avec **un fichier de D de plus** : `test/remuneration-import.e2e-spec.ts` (l'e2e du calcul attendait
+  `NON_DECLAREE` pour les cotisations ; il attend maintenant `DECLAREE` au 15 du mois suivant ; vu rouge par l'e2e Node 24,
+  corrigé dans `8f6b1ba`). Copie du paquet : sha256 `d0558c54…2465`, celle de l'artefact de balance-service `dev` `44be0c1`.
+  **ANNONCÉ (2026-11-26, STORY-317, avant le code)** — branche `MNV-317` de `prospera-fiscal-service`. **Aucune migration**
   (deux champs facultatifs sur `obligations`, `echeanceLegale` et `report` ; une obligation antérieure se lit sans eux),
   ni `app.module.ts`, ni `package.json`, ni `read-models/`, ni manifeste `declarations`. Touchés :
   - **le contrat OpenAPI** : deux routes neuves et des champs ajoutés (« ⚠ Contrats ») ;
@@ -553,6 +582,10 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-317), PUBLIÉ** (fiscal #69, `98ab317` / `8f6b1ba` ; balance-service #171, `44be0c1`) — **conforme à
+  l'annonce** (#940). Empreinte du paquet Togo 2026 : **`d0558c545ae6a95102c188114fcd82034b68c8cfd322d1ca19372f4fc2372465`**
+  (balance et fiscal ; `dossier-service` : → B). Précisions (fiche, D-317-9 → 11) : `reportId` est un UUID commun à la
+  portée ; `reportee` n'est vrai que si l'applicable est la date reportée. Annonce :
 - **2026-11-26 (STORY-317), ANNONCÉ avant le code** — **les reports d'échéance administratifs** (`prospera-fiscal-service`,
   REST ; et le paquet fiscal Togo 2026). Fiche : `stories/STORY-317.md` (D-317-1 → 8). Consommateurs : les écrans du
   calendrier (A) ; STORY-318 et 319 (C) ; le calcul social de D (`cnss.collecte`).
@@ -1154,6 +1187,14 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-317, 26/11) un fichier qui lit le paquet se cherche dans `*.e2e-spec.ts` et `*.conformite-spec.ts` aussi** : le
+  repérage des tests de D qui attendaient `NON_DECLAREE` par `grep … --include=*.spec.ts` a manqué
+  `test/remuneration-import.e2e-spec.ts` ; l'e2e Node 24 l'a vu. Chercher dans `src` **et** `test`, tous suffixes.
+- **(STORY-317)** un script Python passé par heredoc à `bash` échoue au-delà d'environ 180 lignes (« unexpected EOF ») et
+  `runpy` ne lit pas `/dev/stdin` sous Windows : écrire les scripts et leurs paires de remplacement avec l'outil d'écriture.
+- **(STORY-317)** `git stash` puis `stash pop` réécrit en CRLF une copie du paquet suivie sans `-text` (`test/fixtures/…`) :
+  son empreinte change dans la copie de travail. Recopier l'artefact après un `stash` (l'index et l'archive restent en LF).
 
 - **(STORY-1023, 26/11) l'entrée standard de Python sous Windows est en cp1252** : un script de remplacement qui lit
   ses paires par `json.load(sys.stdin)` depuis un heredoc écrit des accents en mojibake (`âš¡`, `Ã©`). Lire
