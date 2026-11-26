@@ -2172,6 +2172,19 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1129"
+    status: "in-progress"
+    owner: "Groupe B, lot 7, n° 11 — le cabinet sur le moteur (EPIC-144, 159) : le PUT d'octroi n'installe plus un module que le moteur sait vérifier (409 INSTALLATION_PAR_LE_MOTEUR ; sanction, levée et réécriture gardées), le BFF relaie les refus du moteur, conseil dans INSTALLATION_SERVICES, recettes croisées installées par l'offre et POST /installations (platform-catalog-service, admin-panel, prospera-recette)"
+    source_doc: "prospera-stories/stories/STORY-1129.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite et contrat annoncé avant le code (2026-11-26) : AP-55 livrée (A, a18dda1) ; la console n'écrit plus
+      par le PUT du BFF (le panneau des droits d'AP-05 appelle le catalogue, code inconnu = phrase générique). Le PUT du
+      catalogue refuse 409 INSTALLATION_PAR_LE_MOTEUR l'installation d'un module que le moteur sait vérifier (aucune
+      vérification au manifeste, ou une adresse dans INSTALLATION_SERVICES) ; un module sans adresse garde le passage
+      transitoire de STORY-945 ; le BFF relaie les codes du moteur sur son PUT ; conseil=http://balance-service:3007 ;
+      FR-6 de cabinet-moteur sur declarations ; six recettes rejouées sur pile neuve. D-1129-1 → 10. Lot 7 de B, n° 11 ;
+      fusion au plus tard le 18/12 (D-L7B-5). NON SLOTTÉE.
   - range: "STORY-1128"
     status: "done"
     owner: "Groupe B, lot 7, n° 10 — le contrat d'état publié figé (EPIC-142) : garde du gel (historique des versions et photos, ajouts seuls, matrice figée par majeure), Karapace BACKWARD_TRANSITIVE sur etat-publie.changed.*, copie publiée et étiquetée dans prospera-plateforme ; versionCode dans la comparaison de l'émetteur ; inventaire d'EPIC-142 → 147 et 159 (platform-catalog-service, prospera-plateforme)"

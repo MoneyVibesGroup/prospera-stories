@@ -2225,6 +2225,26 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-26, STORY-1129 — le cabinet sur le moteur : le `PUT` d'octroi n'installe plus ce que le moteur sait
+  installer, annoncé AVANT le code** (`platform-catalog-service`, `admin-panel`, `prospera-recette`, branches `MNV-1129` ;
+  fiche `stories/STORY-1129.md`, D-1129-1 → 10). Lu par la console (**A**, panneau des droits d'AP-05, qui appelle le
+  catalogue directement) et par qui installe dans une recette (**C**, **D**). (1) **Catalogue**, `PUT
+  /api/v1/catalog/entitlements/{orgId}/{moduleCode}` : refus neuf **409 `INSTALLATION_PAR_LE_MOTEUR`** (`{ statusCode, error,
+  message, code, module }`) quand le corps demande `ACTIVE` (ou omet `status`) pour un module **pas installé** que le moteur
+  sait vérifier (son manifeste ne déclare aucune vérification, ou `INSTALLATION_SERVICES` lui donne une adresse) ; rien
+  n'est écrit. Sanction, levée, réécriture d'un module installé, et l'installation transitoire d'un module sans adresse
+  (plan `CONSOLE_PUT`, vérifications différées) : **inchangées**. (2) **BFF**, `PUT
+  /api/v1/admin/orgs/{orgId}/entitlements/{moduleCode}` (toujours `deprecated`) : ses 404, 409, 422 portant un code du
+  moteur gardent ce code et `details` (`modules`, `refus`, `planId`), comme `…/installations` ; `CODES_DU_MOTEUR` gagne
+  `INSTALLATION_PAR_LE_MOTEUR`. OpenAPI du catalogue et du BFF : descriptions et réponse 409. (3) **Réglage** :
+  `INSTALLATION_SERVICES` de la pile de recette et de `.env.essai.example` gagne `conseil=http://balance-service:3007`.
+  (4) **Recettes** : `balance`, `bilan`, `comptabilite`, `conseil` s'installent par l'offre et `POST /installations`
+  (aide `installerParLeMoteur`, `src/moteur.ts`) ; FR-6 de `cabinet-moteur` sur `declarations`. **Inchangés** :
+  `entitlement.changed`, l'état publié, `POST /installations`, l'offre, `DELETE`, auth, manifestes. **→ A** : ajouter
+  `INSTALLATION_PAR_LE_MOTEUR` à `GRANT_REFUSAL_CODES` (sinon phrase générique, rien ne casse) ; types à régénérer si le
+  409 du BFF est lu. **→ C, D** : une recette qui installe ces quatre modules par le `PUT` passe par l'aide ; vos services
+  ne sont pas touchés.
+
 - **2026-11-26, STORY-1128 — LIVRÉ** (catalogue #85, `2a19265`, `e35d6a0` sur `dev` ; plateforme #42, `758568e`, étiquette
   **`contrat-etat-publie-v1.1`** dans la plateforme) : conforme à l'annonce ci-dessous, sans écart. Karapace : les sujets de
   l'état publié en `BACKWARD_TRANSITIVE`. **→ A, C, D** : rien à faire ; une copie de l'état publié s'épingle désormais sur
