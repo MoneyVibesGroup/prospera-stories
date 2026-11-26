@@ -1,6 +1,7 @@
 # STORY-1121 : La destruction proposée, puis visée — pièces échues, gel, visa de l'associé, accord du client, procès-verbal et registre
 
-Status: in_progress — fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 3 de B,
+Status: done — **livrée le 2026-11-26** : document-service **#35** (`023446c` sur `dev`), auth **#51** (`e9c32c1`),
+catalogue **#79** (`08f08d6`) ; voir « Livraison ». Fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 3 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, ligne 3 ; identifiant réservé D-L7B-1).
 
 **Service :** `document-service` (GitHub `prospera-ocr-service`, module `ged`) et `auth-service` (deux droits du
@@ -195,6 +196,67 @@ Catalogue de tenant 165 → **167 codes** (24 + 143), borne du jeton inchangée 
   **Recopie au catalogue** par B après la fusion du code (D-979-24).
 - **→ A (FE-143)** : types à régénérer depuis l'OpenAPI de `document-service` quand l'écran viendra (DTO de réponse
   nommés par le module : `…DestructionDto`).
+
+## Livraison (2026-11-26)
+
+- **Code** : document-service (`prospera-ocr-service`) **#35**, `023446c` sur `dev` : `src/modules/ged/cabinet/`
+  `destruction.ts` (gel, échéance, états, lignes), `depot-destruction.ts` (`ged_gels`, `ged_destructions`,
+  `ged_destructions_lignes`), `destruction.service.ts`, `destruction.controller.ts` (treize routes, DTO de réponse
+  `…DestructionDto`), `destruction.planificateur.ts` (file `ged-destructions`) ; `pdf-probants.ts` (bordereau de
+  destruction, procès-verbal, certificat qui cite les détruites) ; `StockageObjets.detruire` (S3 `removeObject`) ;
+  `DepotGed.marquerDetruites`, `DepotLectures.effacerLesTextes`, `DepotExports.marquerVolumesDetruits` ;
+  `CabinetService` (version détruite jamais `FICHIER_ABSENT`, `detruites`, 410/409 `PIECE_DETRUITE`) ; export, recherche,
+  quota. Manifeste `ged` **1.6.0** recopié depuis `prospera-stories@5031fc8` (#933), empreinte épinglée.
+- **Auth** : `auth-service` **#51**, `e9c32c1` sur `dev` : `ged:destruction:proposer` (`CAB_ARCHIVISTE`, `CAB_ASSOCIE`),
+  `ged:destruction:viser` (`CAB_ASSOCIE`), hors du jeton ; catalogue de tenant 167 codes (24 + 143).
+- **Catalogue** : `platform-catalog-service` **#79**, `08f08d6` sur `dev` : `ged` 1.6.0 recopié depuis
+  `prospera-stories@5c56b2d` (seul manifeste qui change ; `manifestes:garde` verte, 48).
+- **Preuves** :
+  - document-service, Node 25 : unitaires 1290 passés (112 suites ; 2 rouges connues du poste, copies CRLF de
+    `ged.service.spec`, chemins Windows de `piece-conservation.spec`) ; e2e **217/217** (17 suites ; `ged-destruction`
+    4/4, recensement de STORY-695 compris) ; lint des fichiers touchés, `tsc`, build.
+  - document-service, Node 24 (étage `verification`, image depuis `git -c core.autocrlf=false archive`) : unitaires
+    112/112 suites, 1293 passés ; e2e 217/217.
+  - Mutations **18/18** rouges sur assertion (gel et sortie à la proposition ; viseur = proposant ; version détruite
+    relue ; gel et version ajoutée à l'exécution ; exécution non accordée ; échue le jour même ; texte lu gardé ; copies
+    d'export gardées ; permanente d'un fonds ouvert ; sensible montrée ; refus de visa qui ne libère pas ; accord sans
+    fichier ; pièce détruite modifiable ; contenu servi ; gel levé sans viser ; marquage retiré). Auth 2/2, catalogue 2/2.
+  - auth, Node 25 : rbac, droits, rôles 23 suites 406/406 ; complète 1466 passés (4 suites rouges connues, binding de
+    Confluent). Catalogue : 64/64 par chemin, complète 1625 passés (3 suites rouges connues).
+  - **Pile `grp-b` neuve** (image depuis l'archive ; Mongo rs0, Kafka, Redis, MinIO Chainguard ; doublure d'auth avec les
+    deux droits ; le dossier par `dossier.created`, l'état publié de `ged` par Kafka) : `healthy`, aucune erreur hors des
+    sondes du démarrage ; pièces échues 2015 et 2014 (2026 absente) ; gel du contrôle fiscal de 2015 nommé `GEL`,
+    proposition refusée `GELEE`, levée refusée à l'archiviste (403 `ged:destruction:viser`) puis faite par l'associé ;
+    **course de 5 propositions simultanées de la même pièce : 1 × 201, 4 × 409 `DEJA_PROPOSEE`** (index partiel et
+    transaction) ; visa refusé à l'archiviste, `BDE-2026-00001` émis par l'associé, exécution refusée avant l'accord
+    (409), accord multipart ; **exécution par la file `ged-destructions` en 0,7 s** (3 pièces ; l'export antérieur
+    `EXP-2026-00001` compris) ; **MinIO ne garde plus que la pièce de 2026 et les documents probants** ; contenu 410,
+    volume d'export 410 `EXPORT_DETRUIT` ; index sans tiers ni montant, versions sans nom de fichier ; vérification
+    `ok`, `detruites: 3`, aucun écart ; campagne `TERMINEE` (`detruites: 3`) ; certificat `CERT-2026-00002` émis après la
+    destruction ; chaîne vérifiée (18 rangs ; `DESTRUCTION` au rang 14, le procès-verbal au rang 15) ; `PVD-2026-00001`
+    retéléchargé à l'octet ; registre ; index `une_proposition_en_cours_par_piece` (partiel `enCours`) créé. Les textes
+    lus de la pile étaient en `ECHEC` (faux PDF) : leur effacement est prouvé par les unitaires. Verrou 02:24 → 02:39,
+    `down -v`.
+
+### Écarts au contrat, décidés au code
+
+- **D-1121-11** : une raison de retrait de plus à l'exécution, **`VERSION_AJOUTEE`** : une version déposée après la
+  proposition n'était ni au bordereau visé ni à l'accord ; la pièce est gardée. La marque `destruction` d'une pièce
+  porte son `procesVerbal`, numéroté à la demande d'exécution.
+- **D-1121-12** : une exécution `EN_EXECUTION` se **redemande** (202) après une panne ; l'erreur d'une tentative reste
+  dans `execution.erreur`. Les trois étapes (marquer, effacer, procès-verbal) ne se font qu'une fois chacune.
+- **D-1121-13** : ajouts seuls à la réponse : `restantes` d'une proposition, `bordereauDocument` et
+  `procesVerbalDocument` d'une destruction lue ou du registre, `destructionNumero` d'un document probant,
+  `volumesDetruits` d'un export, `detruites` d'un contrôle de campagne.
+- **D-1121-14** : la garde de STORY-395 (`piece-conservation.spec`, « aucun code n'appelle `removeObject` ») admet une
+  seule exception nommée, l'adaptateur S3 de `ged` (son bucket, un seul appel) ; l'invariant de `ged` garde que seule la
+  destruction l'appelle.
+- **D-1121-15** : un numéro `DES-` pris par une proposition refusée (la course) n'est jamais rendu : la séquence a des
+  trous, comme les autres. Un PDF orphelin d'une émission tombée (bordereau, procès-verbal) est retiré par la
+  destruction elle-même avant la nouvelle émission (aucun document ne le cite).
+- **D-1121-16** : la recette de l'Atelier n'est pas rejouée : le diff ne touche ni l'OCR, ni les extractions, ni le
+  module Nest commun (seul `GedModule` gagne des fournisseurs et une file) ; leurs e2e passent tels quels sous Node 24 et
+  25.
 
 ## Critères d'acceptation
 

@@ -157,10 +157,23 @@
     paquet fiscal de STORY-564 dans `dossier-service` (← C) n'est pas faite** : 1120 n'a pas touché ce dépôt (D-1120-9) ;
     elle reste ouverte pour la prochaine story de B sur `dossier-service` (n° 12, STORY-1130, au plus tard), sauf si la
     session de groupe la place avant.
-  - **3 — STORY-1121 (26/11) — en cours** : fiche écrite et contrat annoncé avant le code (« ⚠ Contrats ») ; rituel :
-    aucune demande neuve adressée à B dans les journaux de A, C et D.
-  - **Suivante après 1121 : STORY-1122.** Avant 1121, était écrit : **STORY-1121** (n° 3 : la destruction proposée, puis visée ; s'inscrit au journal d'intégrité ; un fonds
-    fermé reste concerné par la conservation). **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans
+  - **3 — STORY-1121 (26/11) — faite** : la destruction proposée, puis visée. **document-service #35** (`023446c` sur
+    `dev`) ; **auth #51** (`e9c32c1` : `ged:destruction:proposer` à `CAB_ARCHIVISTE` et `CAB_ASSOCIE`,
+    `ged:destruction:viser` à `CAB_ASSOCIE`, hors du jeton, 167 codes) ; **catalogue #79** (`08f08d6`, `ged` 1.6.0
+    recopié) ; contrat annoncé avant le code (stories #933, `5031fc8`). « En litige ou en contrôle » n'existait nulle
+    part : un **gel** posé dans la GED (fonds, exercices ou pièces ; levé par qui vise). Pièces échues lues par pages ;
+    proposition `DES-` (une pièce dans une seule proposition en cours), visa jamais par le proposant (bordereau `BDE-`),
+    accord du client = son bordereau signé déposé, exécution par la file `ged-destructions` sur un geste humain
+    seulement ; pièces gelées, sorties ou augmentées d'une version entre-temps retirées et gardées ; fichiers, texte lu,
+    tiers/NIF/montant et copies d'export détruits ; identité, empreintes, scellés, journal, `BDE-`, accord et `PVD-`
+    gardés ; une version détruite n'est jamais `FICHIER_ABSENT`. Aucun fait publié (STORY-1123). Node 25 : unitaires
+    1290, e2e 217/217 ; Node 24 : 112/112 suites, 217/217 ; mutations 18/18 ; pile `grp-b` neuve (course de 5
+    propositions : 1 × 201, 4 × 409 ; exécution en 0,7 s ; MinIO vidé des pièces détruites). Verrou 02:24 → 02:39. Fiche
+    D-1121-1 → 16. Rituel : la passation de `prospera-paiement-service` à D pour STORY-1141 (← D) est servie par la
+    session de groupe (`6812a4a`), pas par cette story.
+  - **Suivante : STORY-1122** (n° 4 : retrouver dans tous les fonds du cabinet ; elle peut aussi porter la liste des
+    pièces échues de tout le cabinet, nommée par 1121 ; la lecture par pages du versement et du contrôle reste à faire).
+    **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (au plus tard STORY-1130). **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans
     `dossier-service` (servable : balance-service `c9e94c6` est sur `dev`). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
     `cabinet-moteur` et `abonnement` rejouées (D-100-4).
@@ -1152,6 +1165,15 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-26) : FE-143 — la destruction proposée, puis visée est servie par STORY-1121** (document-service #35,
+  `023446c` sur `dev` ; droits par auth #51) : `GET …/fonds/{numero}/pieces-echues` (par pages, `echeance`, `blocage`),
+  `POST`/`GET …/fonds/{numero}/gels`, `POST …/gels/{numero}/levee`, `POST`/`GET …/fonds/{numero}/destructions`, `GET
+  …/destructions/{numero}` et `…/pieces`, `POST …/destructions/{numero}/visa`, `…/accord` (multipart : `decision`,
+  `accordePar`, `accordeLe`, `fichier`), `…/abandon`, `…/execution` (202), `GET …/registre-des-destructions` ; documents
+  `BDE-` et `PVD-` par `GET …/documents-probants/{numero}/pdf`. Refus à afficher : `409 PIECES_NON_DESTRUCTIBLES`
+  (`details.pieces`), `VISA_PAR_LE_PROPOSANT`, `ETAT_DE_DESTRUCTION`, `410 PIECE_DETRUITE`, `410 EXPORT_DETRUIT`. **Types
+  à régénérer** depuis l'OpenAPI vivant (DTO `…DestructionDto`). Rien n'est relayé par le BFF. — information, rien à
+  faire avant le lot 8.
 - **→ A (2026-11-25) : FE-143 — fin de mission et réversibilité servies par STORY-1120** (document-service #34,
   `b92ac18` sur `dev`) : `POST /api/v1/ged/cabinet/fonds/{numero}/fermeture` (la vue d'un fonds gagne `etat` et
   `fermeture`), `POST`/`GET …/fonds/{numero}/exports`, `GET …/exports/{numero}`, `GET …/exports/{numero}/volumes/{rang}`
@@ -1956,6 +1978,10 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
     `routesLectureSeule` ; `droits`, `publie`, `consomme` inchangés ; recopié dans le service par le code, **puis au
     catalogue par B** après la fusion du code. **→ A (FE-143)** : types à régénérer depuis l'OpenAPI de
     `document-service` quand l'écran viendra. **Pour C et D** : rien (D : l'alerte d'échéance viendra par STORY-1123).
+  - **Livré le 26/11** : document-service #35 (`023446c`), auth #51 (`e9c32c1`), catalogue #79 (`08f08d6`, `ged` 1.6.0 au
+    catalogue). Au code, ajouts seuls (D-1121-11 → 13) : raison de retrait `VERSION_AJOUTEE`, `procesVerbal` dans la
+    marque d'une pièce, exécution redemandable sur `EN_EXECUTION`, `restantes`, `bordereauDocument`,
+    `procesVerbalDocument`, `destructionNumero`, `volumesDetruits`, `detruites` (contrôle de campagne).
 
 - **2026-11-25, STORY-1120 — fin de mission et réversibilité, annoncé AVANT le code** (`document-service`, GitHub
   `prospera-ocr-service`, branche `MNV-1120` ; fiche `stories/STORY-1120.md`, D-1120-1 → 9). **Ajouts seuls**, sous
@@ -3640,6 +3666,21 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **La garde de STORY-395 (`piece-conservation.spec`) lit TOUT `src/` pour `removeObject(`** (STORY-1121) : sous Node 25
+  sur ce poste elle rougit déjà (chemins Windows), si bien que seul l'étage `verification` (Node 24) a vu l'adaptateur de
+  `ged` la faire rougir. Toujours rejouer l'étage `verification` avant de pousser un retrait de stockage.
+- **`GET …/ged/cabinet/pieces/{id}` est servie par `PhysiqueController`** (la vue enrichie de l'original), pas par
+  `CabinetController` : une e2e qui ne monte pas `PhysiqueController` et `PhysiqueService` rend 404 (STORY-1121).
+- **`jest -t "<un test>"` d'une e2e enchaînée saute les tests qui posent l'état** (le fonds, les pièces) : le test visé
+  tombe sur des variables vides (404). Rejouer le fichier entier.
+- **Une course de propositions consomme des numéros** (`DES-2026-00001 → 00005` pour une seule gagnante sur la pile) :
+  la séquence a des trous, jamais de doublon ; un script de preuve ne présume pas du numéro.
+- **`DepotIntegriteMongo.inscrire` rejoue la transaction sur `E11000`** (8 essais) : un acte qui doit refuser une course
+  sur un index unique la juge d'abord dans la session (lecture des lignes en cours) et rend `false`, sinon il épuise les
+  essais avant de lever (STORY-1121, `creerDestruction`).
+- **Un heredoc Bash de ~80 lignes avec des apostrophes typographiques a encore cassé** (« unexpected EOF ») : écrire les
+  scripts de docs avec l'outil d'écriture.
 
 - **Une mutation sur une empreinte survit derrière AES-GCM, encore** (STORY-1120, M10 et M12, après M12 de 1119) : un
   test qui « altère » un objet en changeant un octet du chiffré prouve le refus du déchiffrement, jamais la comparaison
