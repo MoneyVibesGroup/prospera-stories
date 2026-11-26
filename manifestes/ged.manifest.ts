@@ -74,7 +74,9 @@ export const MANIFESTE_GED = {
   // 1.6.0 (2026-11-26, STORY-1121) : la destruction proposée, puis visée (pièces échues, gel en litige ou en contrôle,
   // proposition, visa de l'associé, accord du client, exécution, procès-verbal et registre) ; six routes de lecture
   // neuves ; `ged:destruction:proposer` et `ged:destruction:viser` (déjà déclarés) attribués au cabinet par auth.
-  version: '1.6.0',
+  // 1.7.0 (2026-11-26, STORY-1122) : retrouver dans tous les fonds du cabinet (un index aveugle à jetons, sans mot en
+  // clair) ; une route de lecture neuve.
+  version: '1.7.0',
 
   // C1 : aucune dépendance dure. La GED reçoit, lit, classe, conserve et retrouve des pièces sans autre module ; une pièce
   // enregistrée sans dossier va dans la file « à rattacher » (FR-159, FR-166).
@@ -292,6 +294,7 @@ export const MANIFESTE_GED = {
     'GET /api/v1/ged/cabinet/destructions/{numero}', // STORY-1121 : une destruction, son visa, l'accord, son procès-verbal
     'GET /api/v1/ged/cabinet/destructions/{numero}/pieces', // STORY-1121 : ses pièces, par pages
     'GET /api/v1/ged/cabinet/registre-des-destructions', // STORY-1121 : le registre des destructions du cabinet
+    'GET /api/v1/ged/cabinet/recherche', // STORY-1122 : retrouver une pièce dans tous les fonds du cabinet
     'GET /api/v1/instance/ged/{organisationId}/export',
   ],
 

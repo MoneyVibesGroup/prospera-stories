@@ -2113,6 +2113,18 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1122"
+    status: "in_progress"
+    owner: "Groupe B, lot 7, n° 4 — retrouver dans tous les fonds du cabinet : une recherche sur tous les fonds dans la portée du dossier, servie (avec la recherche d'un fonds) par un index aveugle à jetons HMAC sous une clé du cabinet dérivée de GED_CLE_CABINET (aucun mot en clair en base, aucun texte déchiffré à la recherche), tenu par l'écriture des pièces, la destruction et un balayage BullMQ ; le versement d'un fonds de plus de 1 000 pièces (document-service, module ged)"
+    source_doc: "prospera-stories/stories/STORY-1122.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite et contrat annoncé avant le code (2026-11-26) : GET …/ged/cabinet/recherche (critères de la recherche
+      d'un fonds + fonds, dossierId ; résultats avec fondsNumero, dossierId, raisonSociale) ; GET …/fonds/{n}/recherche
+      servie par le même index (texte par mot entier, métadonnées par début de mot ; plus de borne de 500 textes) ;
+      collection ged_index_recherche, file BullMQ ged-index, GED_INDEX_BALAYAGE_SECONDES ; versement, liste et reprises
+      sans la borne de 1 000 ; manifeste ged 1.7.0. Aucun droit neuf, aucun fait publié. Pièces échues de tout le
+      cabinet : STORY-1123 (D-1122-11). D-1122-1 → 12. Lot 7 de B, n° 4. NON SLOTTÉE.
   - range: "STORY-1121"
     status: "done"
     owner: "Groupe B, lot 7, n° 3 — la destruction proposée, puis visée : pièces échues lues par pages, gel en litige ou en contrôle, proposition de l'archiviste, visa de l'associé (jamais le proposant), accord du client sur le bordereau signé, exécution jamais automatique, procès-verbal et registre ; une pièce détruite reconnue par le contrôle, le certificat et l'export (document-service, module ged ; auth-service, deux droits du cabinet)"
