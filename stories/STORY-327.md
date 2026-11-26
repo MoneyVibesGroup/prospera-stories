@@ -67,16 +67,26 @@ celui de la période contrôlée qui doit le reprendre ; la tolérance suit la r
 le valide ; l'artefact se régénère par `build.mjs` ; empreinte au registre ; la surcouche zone franche en hérite. La copie
 du fiscal (`test/fixtures/paquet-fiscal/`) suit. **→ B** : nouvelle empreinte du paquet (copie de `dossier-service`).
 
-### Le déclaré porte ses reports — `POST /api/v1/obligations/{id}/montant-declare`
+### Les reports déclarés — `POST /api/v1/obligations/{id}/reports-declares` (amendé avant la fusion, D-327-12)
 
-Corps : champ neuf facultatif **`reports`** `{ creditAnterieur?, creditAReporter?, deficitAnterieur?, deficitImpute?,
-deficitAReporter? }`, chacun entier ≥ 0 (unités de la devise), absent ⇒ non déclaré. Rangé dans `montantDeclare.reports`
-(`null` si aucun) et rendu dans `ObligationResponseDto.triplet.declare.reports` (`null` si aucun). Remplaçable comme le
-déclaré (jusqu'à `A_DEPOSER`), figé au dépôt, tracé au journal chaîné avec l'enregistrement.
+> **Écart à l'annonce du 26/11 (#977), décidé au code, avant toute fusion** : les reports devaient passer par le corps de
+> `…/montant-declare`. Or la DSF est une obligation **déclarative** (`famille: DECLARATIVE`) : elle ne porte pas de montant
+> déclaré (`409 MONTANT_NON_SAISISSABLE`, 322), et ses déficits n'auraient eu aucune voie. Les reports ont donc **leur route
+> et leur champ**, sur toute obligation ; `…/montant-declare` ne change pas.
 
-**La version scellée** (325) porte les reports dans `contenu.declare.reports` **seulement s'ils sont déclarés** : l'empreinte
-d'un contenu sans reports ne change pas (les versions déjà scellées et l'estampille de 330 gardent la leur). Les reports
-entrent dans la garde du scellement (une saisie concurrente fait échouer le dépôt).
+Route neuve (droit `fiscalite:declaration:preparer`, rôles `TENANT_ADMIN` / `TENANT_USER`), corps `{ reports: {
+creditAnterieur?, creditAReporter?, deficitAnterieur?, deficitImpute?, deficitAReporter? } }`, chacun entier ≥ 0 (unités de la
+devise) ; ils **remplacent** les précédents, `{}` les efface. Permise de `EN_PREPARATION` à `A_DEPOSER` (sinon `409
+REPORTS_NON_ENREGISTRABLES` : avant la prise en charge, ou figés depuis le dépôt — une correction est une rectificative) ;
+`400` forme ; `403` ; `404 OBLIGATION_INTROUVABLE` ; `409 OBLIGATION_CLOTUREE` (route classée `ecrit-une-obligation` dans la
+liste fermée de 325), `OBLIGATION_DESACTIVEE`, `OBLIGATION_BLOQUEE`, `TRANSITION_CONCURRENTE`. Acte
+**`OBLIGATION_REPORTS_DECLARES`** (`valeurs`, `precedentes` : des montants, aucun texte). Réponse `200` l'obligation, après le
+contrôle de cohérence et de continuité (comme `…/montant-declare`). Champ neuf **`ObligationResponseDto.reportsDeclares`** `{
+valeurs, par, le } | null` ; en base `reportsDeclares` (humain, `$setOnInsert: null`).
+
+**La version scellée** (325) porte les reports dans **`contenu.reports`** **seulement s'ils sont déclarés** (aussi sans
+déclaré : une DSF) : l'empreinte d'un contenu sans reports ne change pas (les versions déjà scellées et l'estampille de 330
+gardent la leur). Les reports entrent dans la garde du scellement (une saisie concurrente fait échouer le dépôt).
 
 ### Les contrôles — `POST /api/v1/obligations/{id}/coherence` (route de 326, inchangée pour l'appelant)
 
@@ -110,7 +120,7 @@ changer la réponse du dépôt ni son refus ; une panne est journalisée.
 
 ## Persistance et fichiers communs (D-L7-2)
 
-**Aucune migration** (un champ facultatif `montantDeclare.reports` dans un champ `Mixed` ; absent ⇒ `null`). Ni
+**Aucune migration** (un champ facultatif `reportsDeclares` sur `obligations` ; absent ⇒ `null`). Ni
 `app.module.ts`, ni `package.json`, ni `read-models/`, ni manifeste `declarations`. Touchés parmi les communs : **le contrat
 OpenAPI** (un champ du corps, deux champs de réponse, trois codes) et **la copie du paquet fiscal**
 (`test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`, recopiée à l'octet, LF, de l'artefact de `balance-service`). Tout
@@ -156,6 +166,11 @@ le reste dans les dossiers de C (`domain/obligations`, `application/obligations`
   l'imputation (`DEFICIT_IMPUTATION_ECART`), bloquantes au dépôt de la période contrôlée, levables. Empreinte :
   `code | déclaré | attendu | obligationPrécédente@numéro` — redéposer la précédente rectifiée est un fait neuf qui rouvre une
   levée.
+- **D-327-12 — Les reports ont leur route (écart à l'annonce, avant la fusion).** La DSF, déclarative, n'a pas de montant
+  déclaré : des reports rangés dans `montantDeclare` lui auraient été inaccessibles. `POST …/reports-declares` et le champ
+  `reportsDeclares`, sur toute obligation ; la période est « déclarée » pour la continuité dès qu'elle porte un déclaré ou des
+  reports. Le contenu scellé les porte à sa racine (`contenu.reports`). Les reports ne rendent pas périmée la pièce du client
+  (324 compare le déclaré) : nommé.
 - **D-327-11 — Hors périmètre, nommé.** TAF, TCA, RSH (aucun report) ; l'excédent d'acompte d'IS ou de TPU reporté ; le
   remboursement d'un crédit de TVA ; la cohérence des reports avec le moteur (`creditRestant`) ; l'écran (A) ; tout événement.
 
