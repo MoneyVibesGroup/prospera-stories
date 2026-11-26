@@ -2172,6 +2172,18 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1127"
+    status: "in_progress"
+    owner: "Groupe B, lot 7, n° 9 — les référentiels habilités dans l'état publié : module.referentiels, champ facultatif de la route et de etat-publie.changed (la forme de entitlement.changed v2), avant le gel du 11/12 (platform-catalog-service ; manifeste instance 1.1.0)"
+    source_doc: "prospera-stories/stories/STORY-1127.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite et contrat annoncé avant le code (2026-11-26) : module.referentiels ({ code, version, artifactUri?,
+      checksum? }[], minItems 1, la liste du droit, omise hors installation), à la route GET /etat-publie/{org}, à la
+      lecture de la console et à etat-publie.changed.essai@1 / .reel@1 (schemaVersion 1, BACKWARD) ; OpenAPI du contrat
+      1.1.0, étiquette contrat-etat-publie-v1.1 ; l'émetteur republie sur un changement de liste ; manifeste instance
+      1.1.0 recopié. BFF et plateforme inchangés. D-1127-1 → 11. Lot 7 de B, n° 9 ; fusion au plus tard le 09/12
+      (D-L7B-5). NON SLOTTÉE.
   - range: "STORY-1126"
     status: "done"
     owner: "Groupe B, lot 7, n° 8 — la recette des archives de bout en bout : le parcours UJ-2 sur pile neuve (40 boîtes reçues, cotées, numérisées dans leur lot, lues, contrôlées, versées ; une facture de 2019 retrouvée en moins de trois gestes avec la cote de son original ; une pièce sortie et rentrée ; un récolement ; la restitution et la fin de mission), la console par le BFF (prospera-recette ; document-service et BFF éprouvés)"
