@@ -141,6 +141,74 @@ STORY-952 avait posé l'échéance `EFFACEMENT` et réservé le point d'accroche
 - **D-953-9 — L'effacement d'un essai signé est refusé** (`ESSAI_SIGNE`) : ses données sont celles d'un client.
   L'effacement à la fin d'un contrat (`FIN_CONTRAT`) est prévu par le contrat, mais pas servi ici.
 
+## Suite du 2026-11-26 — le contrat de l'export C13 (groupe B, lot 7, ordre « e »)
+
+**Demande :** D, STORY-1140 (journal de D, « Demandes » : « → B (2026-11-26, STORY-1140) : publier le contrat de l'export
+C13 en CSV de `prospera-bilan-service` dans `prospera-plateforme/contrats/instance/` » ; docs #953, `main` `67efaf9`) ;
+placée par la session de groupe après STORY-1123, avant STORY-1124 (D-L7B-9). **Aucun identifiant neuf.** **Dépôt :**
+`prospera-plateforme`, branche `MNV-953-export`, commits `MNV-953(plateforme): …` · **Exécutée par :** groupe B.
+
+**Pourquoi :** la réponse du PO à Q-D-19 (25/11) veut l'export C13 aussi en CSV, à une seule forme sur le poste. Balance
+la sert depuis STORY-1021 (D-1021-6 → 8), bilan depuis STORY-1140 ; aucun contrat publié ne la portait :
+`instance-c13.openapi.json` ne décrivait que l'import et l'effacement, et le `routesInstance.export` des manifestes ne
+renvoyait à rien.
+
+### Où en est-on
+
+- [x] Rituel : plan du lot 7, journaux de A, B, C, D (une seule demande neuve à B : celle-ci) ; la plateforme était en
+  HEAD détachée sur `a06d8c9` (ancêtre de `origin/dev`), propre ; branche `MNV-953-export` partie d'`origin/dev`
+  (`de8f0d3`). Le worktree `_wt-d-plateforme` (D) n'est pas touché.
+- [x] Relu avant d'écrire : `scripts/contrats-instance.ts` (la seule source de `contrats/instance/`), son générateur et
+  son test ; le code servi (lecture seule) : `balance-service` `origin/dev` `44be0c1` (`instance-c13/export-c13.ts`,
+  `export-csv.ts`, `refus.ts`, le contrôleur, `fiscal/export-liasse.regles.ts`) et `prospera-bilan-service`
+  `origin/MNV-1140` `e13d874` ; les copies : `platform-catalog-service/contrat/copies/instance/` (épinglée à
+  `contrats-instance-v1`), `balance-service/src/modules/instance-c13/contrat/ORIGINE.json` ; aucune copie dans
+  `agent-instance`, `centrale-service`, le BFF ou la recette.
+- [x] Contrat écrit dans sa source, fichiers régénérés (`npm run contrats:instance`), tests et mutations.
+- [x] « ⚠ Contrats » du journal de B annoncé avant la fusion (cette PR de docs ; PR de code : plateforme #41, `f1e0a20`).
+- [ ] PR de code fusionnée en rebase, étiquette `contrats-instance-v1.1`.
+- [ ] PR de docs finale (fiche, tracker, journal de B : avancement, « Réponses » → D).
+
+### Décisions retenues par défaut (contestables)
+
+- **D-953-10 — La suite se rattache à STORY-953.** C'est elle qui a publié `contrats/instance/` et son générateur ; la
+  route d'export est la troisième route générique de C13, point 7, à côté de l'import et de l'effacement. Aucun
+  identifiant neuf (D-L7B-9).
+- **D-953-11 — Le JSON : un schéma voisin, `export-c13-reponse@1`, dans le style du dépôt** (draft-07, aucun `$ref`, objets
+  fermés, Ajv strict, une seule source) ; la route entre dans `instance-c13.openapi.json`, qui passe en 1.1.0 et porte le
+  corps à l'identique (`ExportReponse`). Un document exporté appartient au module (`_id`, `__v`, champs de la
+  collection) : il est fermé dans la forme (`additionalProperties: false`) mais tout nom de champ y passe
+  (`patternProperties` sans borne), là où l'import borne les noms (`^[a-z]…`). `organisationId` garde la forme générique des
+  autres contrats (1 à 64 caractères) plutôt que les 24 hexadécimaux que D écrit : balance et bilan, sur MongoDB, servent
+  24 hexadécimaux, qui la tiennent ; un module d'une autre base n'en sera pas exclu. **Seul écart avec la forme de D**,
+  sans effet sur ce que servent les deux.
+- **D-953-12 — Le CSV n'est pas un schéma JSON : ses règles et des cas exécutables** (`export-c13-csv.cas.json`, contrat
+  `export-c13-csv@1`). Huit règles écrites, huit cas : documents (Extended JSON relaxed) → texte exact du fichier, BOM
+  compris. Les six premiers sont les vecteurs de balance (`export-csv.spec.ts`), que bilan rejoue déjà ; deux de plus
+  bornent ce qu'ils laissaient ouvert (tabulation, CR, `+`, guillemets, saut de ligne, `false`, `$numberLong` négatif ;
+  une feuille `$` à valeur composée, `$binary` et `$date` hors plage, écrite en JSON). Le test de la plateforme les rejoue
+  sur une lecture de référence écrite depuis les seules règles ; et les huit ont été rejoués, hors dépôt, contre le code
+  de balance (`44be0c1`) et de bilan (`e13d874`) : **8/8 et 8/8**, à l'octet. Le contrat décrit donc ce que les deux
+  servent.
+- **D-953-13 — Les refus : ce que les modules servent.** Le corps `Refus` de 1.0.0 était fermé sur `code` et `message`,
+  alors que les modules servent aussi `error` et, souvent, `details` : les deux entrent, facultatifs (ajout seul).
+  `RefusExport` nomme les `details` de l'export (`formatsServis`, `objetsServis`, `etatPublie`). L'ordre des refus est une
+  constante (`REFUS_D_EXPORT`) que la description de la route recopie et que le test garde : l'identité, puis la demande
+  (rien de lu), puis l'état publié ; `{MODULE}_NOT_ENTITLED` est générique (`BALANCE_NOT_ENTITLED`, `BILAN_NOT_ENTITLED`).
+  `IDENTITE_DE_SERVICE_REFUSEE` vient du garde commun de bilan ; balance ne le rend pas sur cette route (son garde ne
+  connaît que `IDENTITE_DE_SERVICE_REQUISE`) : le contrat le nomme comme possible, aucun des deux ne s'en écarte.
+- **D-953-14 — Étiquette `contrats-instance-v1.1`** : ajouts seuls, les schémas restent `@1`, l'OpenAPI passe en 1.1.0 ;
+  `contrats-instance-v1` reste où elle est (jamais déplacée). Le garde de copie de balance attend l'origine
+  `prospera-plateforme@contrats-instance-v1 ` (espace compris) : C l'ajuste quand il recopie (information → C au journal
+  de B, « Demandes » ; la recopie reste la sienne, comme celle de bilan reste à D).
+- **D-953-15 — Aucune recopie au catalogue maintenant.** Sa copie (`contrat/copies/instance/`) est **épinglée** à
+  `contrats-instance-v1`, et elle reste vraie : l'import, l'effacement, le certificat et le jeu n'ont pas changé d'un
+  octet. Le catalogue n'appelle pas l'export ; la règle de 953 est de recopier une version étiquetée quand un lecteur en
+  a besoin, pas à chaque étiquette. Écart noté, non servi ici : le manifeste du module `instance` (le catalogue) déclare
+  `routesInstance.export` (`GET /api/v1/instance/instance/{organisationId}/export`), qu'aucun contrôleur ne sert encore ;
+  la story qui le servira (n° 10, STORY-1128, l'inventaire du contrat d'état publié, au plus tard) recopie
+  `contrats-instance-v1.1`.
+
 ## Ce qui reste
 
 - **Jeux des verticales** (A, C, D, EPIC-160) : livrer leur jeu au format `jeu-demonstration@1`, et servir les deux

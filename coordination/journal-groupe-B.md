@@ -50,6 +50,7 @@
   | 3 | STORY-1121 | la destruction proposée, puis visée |
   | 4 | STORY-1122 | retrouver dans tous les fonds du cabinet |
   | 5 | STORY-1123 | les alertes de l'archiviste |
+  | e | STORY-953 (suite) | le contrat de l'export C13 publié dans `contrats/instance/` (← D, STORY-1140 ; D-L7B-9) |
   | 6 | STORY-1124 | le circuit sans trou |
   | 7 | STORY-1125 | l'archivage se mesure et se vend |
   | 8 | STORY-1126 | la recette des archives de bout en bout |
@@ -93,6 +94,14 @@
   dans la recette de B, et la suite de l'Atelier rougit sans elle. **Correctif rattaché à STORY-100** (la story qui a
   écrit l'octroi des droits du cabinet dans `atelier-balance`, `0874cff`) ; aucun identifiant neuf ; commits
   `MNV-100(recette): …`.
+
+- **D-L7B-9 — ordre « e » : la demande de D placée après STORY-1123, avant STORY-1124** (26/11, session de groupe ;
+  §1.1) : « → B (2026-11-26, STORY-1140) : publier le contrat de l'export C13 en CSV de `prospera-bilan-service` dans
+  `prospera-plateforme/contrats/instance/` » (journal de D, « Demandes », docs #953, `main` `67efaf9`). Part « moteur » de
+  B dans la plateforme, sans Docker ; deux services servent déjà la forme (balance, STORY-1021 ; bilan, STORY-1140), et
+  chacun s'y rangera par une recopie à l'octet. **Suite de STORY-953** (plateforme #17, `5a50249` : la story qui a publié
+  `contrats/instance/`, étiquette `contrats-instance-v1`) ; aucun identifiant neuf ; commits `MNV-953(plateforme): …` ;
+  décisions D-953-10 → 15 dans sa fiche (« Suite du 2026-11-26 »).
 
 - **Avancement** :
   - **a — troisième suite de STORY-979 (25/11) — faite** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
@@ -1187,6 +1196,14 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-26, suite de STORY-953, D-L7B-9) : information — le contrat de l'export C13 est publié dans
+  `prospera-plateforme/contrats/instance/`** (`export-c13-reponse.schema.json`, `export-c13-csv.cas.json`,
+  `instance-c13.openapi.json` 1.1.0 ; étiquette `contrats-instance-v1.1` après la fusion ; « ⚠ Contrats » du 26/11). Il
+  décrit ce que `balance-service` sert depuis STORY-1021, sans écart : les huit cas du CSV passent contre
+  `instance-c13/export-csv.ts` (`dev` `44be0c1`), à l'octet. Rien n'est demandé de neuf ; quand C recopie, le garde de
+  copie (`contrat/copie.invariant.spec.ts`) attend l'origine `prospera-plateforme@contrats-instance-v1 ` (espace
+  compris) : à ajuster pour `contrats-instance-v1.1`. Pas d'urgence.
+
 - **→ D (2026-11-26, STORY-1123) : la cloche et l'e-mail des alertes de l'archiviste (`prospera-notification-service`)**
   — **ouverte**, sans urgence (rien ne bloque B). La GED du cabinet publie cinq faits (document-service #37, schémas au
   dépôt `prospera-ocr-service/contrat/schemas/<topic>.json`, sujets `<topic>-value` au registre en BACKWARD ; clé
@@ -1994,6 +2011,33 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-26, suite de STORY-953 (ordre « e », D-L7B-9) — le contrat de l'export C13, annoncé AVANT la fusion**
+  (`prospera-plateforme`, branche `MNV-953-export`, PR #41 ; fiche `stories/STORY-953.md`, « Suite du 2026-11-26 », D-953-10 →
+  15). **Ajouts seuls** à `contrats/instance/` : l'import, l'effacement, le certificat et le jeu ne changent pas d'un
+  octet. Demandé par D (STORY-1140) ; la forme est celle que servent `balance-service` (STORY-1021, D-1021-6 → 8) et
+  `prospera-bilan-service` (STORY-1140), relue dans leur code. Étiquette neuve **`contrats-instance-v1.1`** après la fusion.
+  - **`export-c13-reponse@1`** (neuf, `export-c13-reponse.schema.json`) : la réponse 200 en JSON de `GET
+    /api/v1/instance/<code>/{organisationId}/export` — `{ schemaVersion: 1, module, organisationId, espace: ESSAI | REEL,
+    exporteLe, objets: [{ objet, collection, nombre ≥ 0, enregistrements: documents en Extended JSON relaxed }] }`, objets
+    dans l'ordre du plan d'export du module (avec `objet`, ce seul objet).
+  - **`export-c13-csv.cas.json`** (neuf, contrat `export-c13-csv@1`) : les huit règles du CSV d'un objet (BOM, `;`, CRLF,
+    RFC 4180, en-tête par ordre d'apparition, `a.b`, feuilles `$…`, tableau en JSON, formules neutralisées puis échappées,
+    nombres jamais neutralisés) et **huit cas** (documents → texte exact du fichier) : les six vecteurs de balance et
+    deux de plus (tabulation, CR, `+`, guillemets, saut de ligne, booléen, `$numberLong` négatif ; feuille à valeur
+    composée `$binary`, `$date` hors plage). Rejoués à l'octet contre le code de balance (`dev` `44be0c1`) et de bilan
+    (`MNV-1140` `e13d874`) : 8/8 chacun.
+  - **`instance-c13.openapi.json` 1.1.0** : la route `GET …/export` (paramètres `format` = `json` (défaut) | `csv`,
+    `objet` exigé en CSV ; 200 `application/json` ou `text/csv` en pièce jointe `export-<code>-<objet>-<organisationId>.csv`
+    ; en-tête `Cache-Control: no-store`) ; refus dans leur ordre : 401 ; 403 `IDENTITE_DE_SERVICE_REQUISE` |
+    `IDENTITE_DE_SERVICE_REFUSEE` | `ORGANISATION_HORS_JETON` ; 400 `FORMAT_NON_SERVI` (`details.formatsServis`) ; 400
+    `OBJET_REQUIS` (`details.objetsServis`) ; 422 `OBJET_INCONNU` (`details.objetsServis`) ; 403 `{MODULE}_NOT_ENTITLED`
+    (`details.etatPublie`). Le corps `Refus` commun gagne `error` et `details` **facultatifs** (ce que les modules servent
+    déjà) ; `RefusExport` nomme les `details` de l'export.
+  - **Qui recopie** : balance (C) et bilan (D), à l'octet, à l'étiquette `contrats-instance-v1.1` (le garde de balance
+    attend l'origine `contrats-instance-v1 ` : C l'ajuste en recopiant). Le catalogue garde sa copie épinglée à
+    `contrats-instance-v1` (il n'appelle pas l'export, D-953-15). **→ A** : rien (aucune route d'écran, aucun type à
+    régénérer).
 
 - **2026-11-26, STORY-1123 — LIVRÉ** (document-service #37, `7e65881` sur `dev` ; catalogue #81, `85aee3a`) : conforme
   à l'annonce ci-dessous ; écarts D-1123-12 → 14 (curseur rendu dès qu'une page est pleine ; quota regardé au passage du
