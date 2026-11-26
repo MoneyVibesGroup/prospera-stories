@@ -874,6 +874,30 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-338), ANNONCÉ avant le code** — **la liaison entre l'écriture comptable et la pièce qui la justifie**
+  (`prospera-comptabilite-service`, REST et Kafka). Fiche : `stories/STORY-338.md` (D-338-1 → 12). Consommateurs : le
+  rapprochement des pièces (337, D, fiscal) ; la GED (B, `comptabilite.facture.desinscrite`, STORY-1124) ; l'écran de la
+  comptabilité (A). **Ajouts seuls** : cinq routes, une collection (`liaisons_pieces`), un fait ; aucun champ existant ne
+  change ; aucun droit neuf ; manifeste `comptabilite` **0.6.0** (source `manifestes/comptabilite.manifest.ts`, cette PR).
+  - **`POST /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/ecritures/{ecritureId}/pieces`** (`comptabilite:ecriture:saisir`) :
+    `{ source: DOSSIER, pieceId, lignes? }` ou `{ source: GED, gedPieceId, gedVersion, lignes? }` ⇒ 201 la liaison
+    (brouillard ou validée, jamais réécrite ; acte `PIECE_RATTACHEE`) ; refus neufs `PIECE_DEJA_RATTACHEE` (409),
+    `LIGNE_INCONNUE`, `PIECE_GED_NON_CONSERVEE` (422). **`POST …/pieces/{liaisonId}/retrait`** `{ motif }` ⇒ 200 (acte
+    `PIECE_RETIREE`) ; `LIAISON_INTROUVABLE` (404), `LIAISON_DEJA_RETIREE` (409).
+  - **`GET …/ecritures/{ecritureId}/pieces`** (l'écriture → ses pièces, la pièce de saisie en tête) et
+    **`GET /api/v1/dossiers/{dossierId}/pieces/{pieceId}/ecritures?source=DOSSIER|GED`** (la pièce → ses écritures, tous
+    exercices du dossier, les lignes justifiées).
+  - **`GET …/exercices/{exerciceId}/pieces/justification?comptes=&du=&au=&devise=`** (pour 337) : validées seules, par préfixe
+    de compte et période, `granularite: PIECE` avec `mouvements`, `documente`, `aNouveaux`, `nonDocumente` et les pièces et
+    leurs montants ; un exercice qui n'est pas tenu au journal ici rend **200** `granularite: COMPTE_PERIODE` et sa `raison`
+    (`EXERCICE_TENU_AUX_CAHIERS`, `EXERCICE_NON_TENU_ICI`) : le rapprochement retombe sur le compte × la période sans échouer.
+    Refus neufs : `COMPTES_MALFORMES` (400).
+  - **Kafka : `comptabilite.facture.desinscrite` v1** (← B, STORY-1124), à l'abandon d'un brouillard né d'une facture, dans sa
+    transaction, par l'outbox ; schéma de B **à l'octet** (`prospera-ocr-service` `dev` `e51c4d5`, sha256 `86a50e6f…2ecf`),
+    sujet neuf au registre en BACKWARD.
+  - **→ B** : à la fusion, recopie du manifeste `comptabilite` 0.6.0 au catalogue ; la GED consomme déjà le fait (#38).
+    **→ D (337)** : la lecture du rapprochement et ce qui doit faire retomber sur le compte × période (fiche, « Pour
+    STORY-337 »).
 - **2026-11-26 (STORY-339), PUBLIÉ** (fiscal #84, `c459960` ; balance-service #173, `61997fd`) — conforme à l'annonce (#1001),
   sans écart. **→ A (FE-081)** : types à régénérer (`BasesLegalesDto` sur `EtapeDetailDto`). **→ D (336)** : le dossier de
   contrôle peut citer ces bases ; **→ D** : le code `409 ACCUSE_REQUIS` annoncé par D (333) est servi par la porte du cycle
