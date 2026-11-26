@@ -86,9 +86,9 @@
    conformité 19/19, 121 ; balance 300/300, 5764 ; e2e 38/38, 2324 ; mutations 14/14 et 1/1 ; compose `grp-c` sain, routes en
    401 sans jeton ; verrou pris deux fois (02:39 → 02:50, 02:54 → 02:56). D-317-1 → 11 dans la fiche. **D prévenu** ;
    **→ B** : copie de `dossier-service` (demande mise à jour ci-dessous).
-10. **Suivante : STORY-318** (les alertes d'échéance et les états de retard, fiscal ; fiche à écrire juste avant de coder,
-   sur `qualifierRetard` de 317 ; AR-09 / AD-18 : ordonnanceur BullMQ idempotent, aucun `setInterval`). Puis 319, que **349
-   de D attend**.
+10. 🚧 **STORY-318 EN COURS (26/11)** (les alertes d'échéance et les états de retard, fiscal) : fiche écrite, contrat et
+   communs annoncés avant le code (`MNV-318` du fiscal ; BullMQ entre au service, le relais de l'outbox y passe). Puis 319,
+   que **349 de D attend**.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -353,6 +353,14 @@ seulement.
 
 ## Demandes aux autres groupes
 
+- **→ D (2026-11-26, STORY-318) : prévenir par e-mail ou dans la cloche à l'approche d'une échéance fiscale
+  (`prospera-notification-service`)** — **ouverte**, sans urgence. Le fiscal produit l'alerte (une par obligation, état
+  et échéance applicable) et la publie : **`fiscal.obligation.alerte-echeance`** v1 (forme au « ⚠ Contrats » ;
+  `etat` `EN_RETARD_DE_PREPARATION` | `ECHEANCE_DEPASSEE`, `responsable` = identifiant d'utilisateur ou `null`).
+  Demandé : la consommer et prévenir le `responsable` (sans responsable : les associés du cabinet). **Choix par défaut de
+  C** : l'alerte se lit dans l'application (`GET /api/v1/obligations/alertes`, calendrier) ; aucun message ne part tant
+  que notification ne consomme pas le topic. Rien ne bloque 318 ni 319.
+
 - **→ D (2026-11-25, STORY-1022), information** : `soldesChecksum` / `soldesChecksumVersion` (`soldes-v1`) publiés sur
   `balance.created` et `balance.etat.document.change` (balance-service `dev` `d5878be`) ; D-1078-10 peut se faire
   (algorithme et vecteur dans « ⚠ Contrats » et `stories/STORY-1022.md`). Prévenu par message (session
@@ -551,6 +559,24 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-318, avant le code)** — branche `MNV-318` de `prospera-fiscal-service`. **Aucune
+  migration** (deux collections neuves, `alertes_echeance` et `parametres_alertes`, index posés par Mongoose au
+  démarrage). Touchés (fiche `stories/STORY-318.md`, « Persistance et fichiers communs ») :
+  - **`package.json` / `package-lock.json`** : `bullmq` ~6.7 et `@nestjs/bullmq` 11 (les versions de `sinistres` et du
+    catalogue) ;
+  - **`app.module.ts`** : la file partagée (`BullModule.forRootAsync` sur le Redis du service) ;
+  - **`src/kafka/outbox/`** (transverse, donc commun : **D y publie `fiscal.declaration.deposee`**) : le relais perd son
+    `setInterval` (AC-5, AD-18) et tourne sur BullMQ, planificateur `relais-outbox` toutes les `OUTBOX_RELAY_INTERVAL_MS`,
+    **concurrence globale de 1** (deux répliques ne relaient plus ensemble). Le tour (`dispatchBatch`, ordre par
+    partition, `FAILED` après 5 échecs non rejouables) ne change pas ; **sans Redis, l'outbox ne se relaie pas** (les
+    événements restent `PENDING`, jamais perdus ; la santé dit déjà Redis tombé) ;
+  - **le contrat OpenAPI** : trois routes neuves et deux champs du calendrier (« ⚠ Contrats ») ;
+  - **`src/config/`** et `.env.example` : `ALERTES_ECHEANCE_CRON` (`0 5 * * *`), `ALERTES_HORIZON_JOURS_DEFAUT` (7) ;
+  - la garde `src/garde-evaluation-dynamique.spec.ts` n'est pas touchée : une **garde neuve** (racine de `src/`) interdit
+    `setInterval` partout et tient en liste fermée les trois `setTimeout` qui bornent une attente (dont
+    `kafka/supervision-consommateur.util.ts` et `health/indicators/kafka.health.ts`, transverses).
+  Rien dans les dossiers de D. **→ D** : rien à faire pour un rebase ; un e2e ou un test de D qui démarrerait le relais
+  par `onModuleInit` n'existe pas (vérifié : seul `outbox-relay.service.spec.ts` appelle `tick`, inchangé).
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#69, `dev` `98ab317` et `8f6b1ba`, sur `origin/dev` `d41dbe6`)** —
   conforme à l'annonce, avec **un fichier de D de plus** : `test/remuneration-import.e2e-spec.ts` (l'e2e du calcul attendait
   `NON_DECLAREE` pour les cotisations ; il attend maintenant `DECLAREE` au 15 du mois suivant ; vu rouge par l'e2e Node 24,
@@ -582,6 +608,26 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-318), ANNONCÉ avant le code** — **les alertes d'échéance et les états de retard**
+  (`prospera-fiscal-service`, REST et Kafka). Fiche : `stories/STORY-318.md` (D-318-1 → 12). Consommateurs : les écrans
+  du calendrier (A) ; STORY-319 (C) ; **`prospera-notification-service` (D)**, à venir. **Ajouts seuls.**
+  - **Routes neuves** : **`GET /api/v1/obligations/alertes`** (`dossierId`, `etat` `EN_RETARD_DE_PREPARATION` |
+    `ECHEANCE_DEPASSEE`, `responsable` ou `AUCUN`, `limite` 1 à 200, `apres`) → `200 { alertes: AlerteEcheanceDto[],
+    suivant }`, portée de l'appelant comme le calendrier, `400 CURSEUR_INVALIDE` ; **`GET /api/v1/obligations/alertes/horizon`**
+    → `{ horizonJours, parDefaut, par, le }` ; **`PUT /api/v1/obligations/alertes/horizon`** `{ horizonJours }` (1 à 90,
+    droit `fiscalite:declaration:valider`), acte `ALERTES_HORIZON_CHANGE` au journal chaîné (`organisation:<orgId>`).
+  - **`AlerteEcheanceDto`** : `{ alerteId, obligationId, dossierId, redevableId, taxe, libelle, periode, etat, echeance,
+    echeanceLegale, reportee, horizonJours, datePreparationLimite, joursRestants, statut, responsable, produiteLe }`.
+  - **Ajouté à `LigneCalendrierDto`** (`GET /obligations/calendrier`) : **`etatEcheance`** (`NON_DATEE` |
+    `PAS_ENCORE_PREPAREE` | `EN_RETARD_DE_PREPARATION` | `PREPAREE` | `ECHEANCE_DEPASSEE` | `DEPOSEE`) et
+    **`joursRestants`** (`number | null`, négatif une fois l'applicable passée), au jour de la lecture.
+  - **Topic neuf** : **`fiscal.obligation.alerte-echeance`** (v1, en-têtes `eventId` et `schemaVersion`, clé `orgId`),
+    par l'outbox dans la transaction de l'alerte : `{ schemaVersion: 1, eventId, occurredAt, orgId, alerteId,
+    obligationId, dossierId, redevableId, taxe, libelle, periode, etat, echeance, echeanceLegale, reportee, horizonJours,
+    datePreparationLimite, joursRestants, statut, responsable }`. Une alerte par `(obligation, état, échéance
+    applicable)`. Aucun consommateur aujourd'hui ; manifeste `declarations` non amendé (D-318-10).
+  - **Comportement** : le relais de l'outbox passe sur BullMQ (« ⚠ Communs ») ; `fiscal.declaration.deposee` garde sa
+    forme et son ordre.
 - **2026-11-26 (STORY-317), PUBLIÉ** (fiscal #69, `98ab317` / `8f6b1ba` ; balance-service #171, `44be0c1`) — **conforme à
   l'annonce** (#940). Empreinte du paquet Togo 2026 : **`d0558c545ae6a95102c188114fcd82034b68c8cfd322d1ca19372f4fc2372465`**
   (balance et fiscal ; `dossier-service` : → B). Précisions (fiche, D-317-9 → 11) : `reportId` est un UUID commun à la

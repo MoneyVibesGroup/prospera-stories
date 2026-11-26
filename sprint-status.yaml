@@ -7897,7 +7897,8 @@ sprints:
         epic: "EPIC-030"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-318.md"
+        status: "in_progress"  # 🚧 2026-11-26 — groupe C, lot 7 (n° 3 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-318-1 → 12) ; contrat et communs annoncés (journal de C) : qualifierEcheance (six états, horizon par organisation, 7 j par défaut), alertes produites une fois par (obligation, état, échéance) par un balayage BullMQ, relais de l'outbox sur BullMQ (aucun setInterval), GET /obligations/alertes, GET|PUT /obligations/alertes/horizon, etatEcheance au calendrier, topic fiscal.obligation.alerte-echeance ; → D (notification).
         assigned_to: null
       - story_id: "STORY-319"
         title: "Responsable désigné et vue de charge par collaborateur"
