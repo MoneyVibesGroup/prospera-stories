@@ -265,8 +265,13 @@
     (copie entière, D-1119-25). Node 25 : unitaires 1 390 (2 suites rouges connues du poste), e2e 222/222 ; mutations
     12/12. Sans Docker, verrou non pris ; recette de l'Atelier non rejouée (ni OCR, ni extractions, ni module commun :
     D-1119-26). Fiche D-1119-19 → 26.
-  - **Suivante : « g »** (la recopie de `paiement` 1.2.0 au catalogue, ← D, STORY-1141 ; D-L7B-11), puis **STORY-1126**
-    (n° 8 : la recette des archives de bout en bout, qui appellera la route neuve).
+  - **g — cinquième suite de STORY-979 (26/11, D-L7B-11) — faite** : `paiement` 1.2.0 recopié au catalogue depuis
+    `prospera-stories@59ed625` (← D, STORY-1141, servie ; code fusionné : paiement #126, `64b5838`) ; `ged` 1.10.0 de
+    « f » entraîné par la copie entière (D-1119-25, D-979-36) ; **catalogue #83** (`ce8cbc0` sur `dev`) ; contrat annoncé
+    avant la fusion (stories #980, `59ed625`). `manifestes:garde` verte (48) contre `main` ; catalogue 69/69 par chemin,
+    complète 1 630 passés (3 suites rouges connues) ; 3/3 mutations. Sans Docker, verrou non pris. Fiche D-979-35 → 40.
+    Passation de `prospera-paiement-service` (STORY-1141) refermée : rendu le 26/11 (« Passations »).
+  - **Suivante : STORY-1126** (n° 8 : la recette des archives de bout en bout, qui appellera aussi la route de « f »).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
     `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
@@ -1108,7 +1113,23 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Passations
 
-- **Prêté le 2026-11-26 à D, pour STORY-1141 seule : `prospera-paiement-service`** (demande de D, journal de D,
+- **Rendu le 2026-11-26 par D, fin de STORY-1141 : `prospera-paiement-service`** (journal de D, « ← B : passation de
+  `prospera-paiement-service` (1141) — rendu à B », prospera-stories #973, `main` `9a37c3e`). Constaté le 26/11 (ordre
+  « g ») : `origin/dev` = **`64b5838`** (MNV-1141, #126 : `f6a4800`, `64b5838`), le SHA nommé par D ; **aucune PR de D
+  ouverte** (`gh pr list --state open` : vide) ; checkout du poste sur `dev`, à jour, propre. B le tient de nouveau ; le
+  prêt ci-dessous est clos.
+  - **Ce qui a changé** (D, information) : `numeroImprimable` facultatif à la déclaration d'un compte d'encaissement ;
+    deux routes `PUT …/comptes-encaissement/{compteId}/numero-imprimable` (celle de l'organisation et celle de la
+    surface déléguée) ; un acte neuf `COMPTE_ENCAISSEMENT_NUMERO_IMPRIMABLE_DECLARE` (avec sa phrase de signalement) ;
+    `paiement.compte.changed@1` gagne `numeroImprimable` (facultatif, Karapace BACKWARD) ; manifeste 1.2.0 (recopié au
+    catalogue : « g », #83).
+  - **Deux suites e2e déjà rouges sur `e2be149`, à reprendre par STORY-1136** (n° 18, le consommateur de
+    `facturation.avoir.emis@1`, la prochaine story de B dans ce dépôt) : `health` — `admin.listTopics` manque au double
+    de Kafka (**MNV-957**) ; `notifications-webhook` — `EtatsDeCreance` manque au module de test (**MNV-965** ; la suite
+    compile de nouveau depuis `publier` à deux arguments). À joindre au prompt de STORY-1136.
+
+- **Prêté le 2026-11-26 à D, pour STORY-1141 seule : `prospera-paiement-service`** — **rendu le 26/11, clos** (entrée
+  ci-dessus) — (demande de D, journal de D,
   « → B : passation de `prospera-paiement-service` limitée à STORY-1141 » ; lot 7 de D, plan §4 bis, #934 ; Q-D-15,
   le numéro de compte imprimable). Le prêt **commence quand D ouvre STORY-1141** (sa quatrième story, après 1138 →
   1140) et finit par une ligne de D dans son journal (« rendu »). Pendant ce temps, B n'écrit pas dans ce dépôt : la
@@ -1746,6 +1767,17 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ D (26/11, cinquième suite de STORY-979) : servie par catalogue #83** (`ce8cbc0` sur `dev` ; annonce : stories #980)
+  — votre demande « → B (2026-11-26, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue » : `copies.json`
+  depuis `prospera-stories@59ed625` (votre source de `6a5d3ab`, sha256 `d247fcc9…bdca9`, inchangée), après la fusion de
+  votre code (#126) ; `paiement` 1.1.0 → **1.2.0** ; `PUT …/numero-imprimable` hors `routesLectureSeule` ; faits, droits
+  et routes de lecture inchangés, auth inchangé. La copie entière porte aussi `ged` 1.10.0 (« f », de B). Un catalogue
+  déjà semé la reçoit à son prochain démarrage. La note « manifeste paiement 1.1.0 » de
+  `prospera-plateforme/contrats/distributeur/catalogue-faits.json` reste à vous (votre dossier ; aucune garde ne la lit).
+  Votre ligne peut passer à « servie ».
+- **← D (26/11, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue** — **reçue, placée par la session de
+  groupe en ordre « g »** (D-L7B-11, cinquième suite de STORY-979). **Servie le 26/11 par catalogue #83** (`ce8cbc0` sur
+  `dev`) ; voir « → D (26/11, cinquième suite de STORY-979) » ci-dessus.
 - **→ C (26/11, suite de STORY-1119) : servie par document-service #40** (`5d060aa` sur `dev` ; annonce : stories #976)
   — votre demande « → B (2026-11-26, STORY-324) : la pièce de validation du client dans la GED ».
   - **(1) La nature** : `VALIDATION_CLIENT` « Validation du client » au plan du cabinet `2026.2` (`ANNUEL` / `FISCAL`,
@@ -2139,6 +2171,9 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-26, cinquième suite de STORY-979 — LIVRÉ** (catalogue #83, `ce8cbc0` sur `dev`) : conforme à l'annonce
+  ci-dessous, sans écart. `copies.json` depuis `prospera-stories@59ed625` : `paiement` 1.2.0 et `ged` 1.10.0 ; aucun
+  autre manifeste. **→ A** : rien à régénérer (aucune OpenAPI du catalogue ni du BFF ne change).
 - **2026-11-26, cinquième suite de STORY-979 (ordre « g », D-L7B-11) — deux manifestes recopiés au catalogue, annoncé
   AVANT la fusion** (`platform-catalog-service`, branche `MNV-979-manifestes-paiement-ged` ; fiche `stories/STORY-979.md`,
   « Cinquième suite (2026-11-26) », D-979-35 → 40). `copies.json` depuis `main` (copie entière) : **`paiement` 1.1.0 →

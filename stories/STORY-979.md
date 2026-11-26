@@ -1,8 +1,8 @@
 # STORY-979 : les droits de la facture et des archives du cabinet au catalogue de tenant d'auth
 
-Status: in-progress (cinquième suite, 2026-11-26) — rouverte et refermée quatre fois pour ses suites : « Suite du
-2026-11-24 », « Suite du 2026-11-24 (soir) », « Suite du 2026-11-25 », « Quatrième suite (2026-11-25) » ; la cinquième
-(2026-11-26) en fin de fiche
+Status: done (rouverte et refermée cinq fois pour ses suites : « Suite du 2026-11-24 », « Suite du 2026-11-24
+(soir) », « Suite du 2026-11-25 », « Quatrième suite (2026-11-25) » et « Cinquième suite (2026-11-26) », en fin de
+fiche)
 
 **Complexité :** faible (huit droits neufs au catalogue de tenant, hors du jeton ; un rôle du socle neuf ; une ligne
 d'ajout à l'annexe B ; la copie des manifestes du catalogue ; aucun champ, aucune route, aucun topic)
@@ -624,3 +624,32 @@ rendu à B ») ; `manifestes/paiement.manifest.ts` à `6a5d3ab` et à `main` (id
   (D-979-13). La note « manifeste paiement 1.1.0 » du catalogue des faits du distributeur
   (`prospera-plateforme/contrats/distributeur/catalogue-faits.json`) reste à D (dossier de D dans la plateforme ;
   aucune garde ne la lit). Annoncé dans « ⚠ Contrats » avant la fusion.
+
+### Livraison de la cinquième suite (26/11)
+
+Fusionnée en « Rebase and merge », `mergedAt` non nul, `headRefOid` = SHA poussé, arbre de la branche identique à
+`dev` après rejeu :
+
+- **catalogue #83** : **`ce8cbc0` sur `dev`** (tête de la PR `2cb7d7e`). Fichiers : `copies.json` depuis
+  `prospera-stories@59ed625` ; `manifestes-seed.service.spec.ts`.
+- Contrat annoncé avant la fusion : stories #980 (fiche, tracker rouvert, « ⚠ Contrats »), `59ed625` sur `main`.
+- D et C prévenus par le journal de B (« Réponses aux demandes reçues ») et par message.
+
+### Preuves de la cinquième suite (26/11)
+
+- **Sans Docker** (D-979-39) : verrou non pris.
+- **Catalogue, Node 25** : `manifestes:garde` contre `main` **rouge avant la copie** (`ged`, `paiement` seuls), **verte
+  après (48)** ; la copie ne change que ces deux manifestes (`origine` à part) ; sha256 des sources vérifiés (`paiement`
+  `d247fcc9…bdca9` à `6a5d3ab` et à `main` ; `ged` `0a0f6826…acbb0`).
+- **Tests relancés par chemin** : `src/modules/catalog/manifeste` 3 suites, **69/69** (les deux neufs rouges sur la copie
+  d'avant) ; **suite complète : 104 suites, 1 630 passés**, 3 suites rouges connues (binding natif de Confluent sous Node
+  25 : `app-cablage.invariant.spec.ts`, `kafka-producer.service.spec.ts`, `outbox-relay.service.spec.ts`). Lint du spec,
+  build : verts.
+- **Mutations : 3/3 rouges sur assertion** : `paiement` resté en 1.1.0 ; la route de `ged` retirée ; la route d'écriture
+  de `paiement` mise en lecture seule.
+
+### Pour la suite (26/11)
+
+- **D** : `paiement` 1.2.0 est au catalogue ; un catalogue déjà semé le reçoit à son prochain démarrage (D-979-13).
+- **C** : `ged` 1.10.0 aussi (la route de « f »).
+- **B** : STORY-1126 (n° 8, la recette des archives de bout en bout).
