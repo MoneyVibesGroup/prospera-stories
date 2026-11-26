@@ -8345,8 +8345,9 @@ sprints:
         epic: "EPIC-032"
         points: 3
         service: "fiscal-service"
-        status: "not_started"  # ⚠ 2026-11-24 (A, STORY-323) : le rejet (motif verbatim, chaîne de dépôts) est DÉJÀ couvert par 538 ; NON COUVERT : le retour de l'OBLIGATION à `A_DEPOSER` (retour en arrière motivé : STORY-325). Statut inchangé.  # ⛔ BLOQUÉE par le jalon `format confirmé`.
-        assigned_to: null
+        status: "in-progress"  # 2026-11-26 (D, lot 7 n° 11) : fiche écrite et contrat annoncé avant le code ; réalignement : 538 couvre le rejet du dépôt de LIASSE seulement ; 334 consigne le rejet d une DÉCLARATION (dépôt engagé de 330), sa cause en clair et sa reprise ; le retour DEPOSEE → A_DEPOSER est demandé à C (D-334-8). — Avant : "not_started"  # ⚠ 2026-11-24 (A, STORY-323) : le rejet (motif verbatim, chaîne de dépôts) est DÉJÀ couvert par 538 ; NON COUVERT : le retour de l'OBLIGATION à `A_DEPOSER` (retour en arrière motivé : STORY-325). Statut inchangé.  # ⛔ BLOQUÉE par le jalon `format confirmé`.
+        story_path: "stories/STORY-334.md"
+        assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-335"
         title: "Archivage des livrables et accusés"
         epic: "EPIC-032"
