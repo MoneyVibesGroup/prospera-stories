@@ -8373,7 +8373,8 @@ sprints:
         epic: "EPIC-032"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-339.md"
+        status: "in-progress"  # 🚧 2026-11-26 — groupe C, lot 7 (n° 10 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-339-1 → 11) ; contrat et communs annoncés (journal de C) : detail.basesLegales sur GET /obligations/{id}/chemin (chaque retraitement appliqué, son article au paquet de l'obligation, son texte mot pour mot depuis le corpus packagé CGI + LPF OTR 2025 ; non justifié nommé) ; paquet fiscal Togo : basesLegales (R12), organisme de la retenue d'IRPP (LPF Art. 27, demande de D) ; aucune migration.
         assigned_to: null
       - story_id: "STORY-563"
         title: "Un dossier porte deux redevables — l entreprise et le dirigeant, chacun avec son NIF, ses obligations et son calendrier"
