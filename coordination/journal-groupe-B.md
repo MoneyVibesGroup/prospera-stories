@@ -1965,6 +1965,10 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   - **Manifeste `ged` 1.7.0** (`manifestes/ged.manifest.ts`, cette PR) : `GET /api/v1/ged/cabinet/recherche` en
     `routesLectureSeule` ; recopié dans le service par le code, **puis au catalogue par B** après la fusion du code.
     **→ A (FE-143)** : types à régénérer quand l'écran viendra. **Pour C et D** : rien.
+  - **Amendé au code, AVANT la fusion** (document-service #36) : refus neuf **`400 CURSEUR_INVALIDE`** (un curseur qui ne
+    vient pas d'une page) ; `fonds` (80 caractères au plus) et `dossierId` (24 hexadécimaux) validés (400). Un texte lu
+    attendu se revoit au balayage suivant tant que sa lecture est planifiée (40 balayages au plus), avec un délai
+    croissant (jusqu'à 24 h) pour une lecture en échec ou absente. Aucune autre forme ne change.
 
 - **2026-11-26, STORY-1121 — la destruction proposée, puis visée, annoncé AVANT le code** (`document-service`, GitHub
   `prospera-ocr-service`, branche `MNV-1121` ; `auth-service`, branche `MNV-1121` ; fiche `stories/STORY-1121.md`,
