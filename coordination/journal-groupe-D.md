@@ -1992,6 +1992,25 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-26, STORY-1138, avant le code) — la liasse rapprochée de sa balance par l'empreinte des soldes**
+  (`prospera-bilan-service`). Fiche : `stories/STORY-1138.md` (D-1138-1 → 11, tableau « Contrat »). **Ajouts seuls** :
+  aucun champ, aucune route, aucune valeur d'énumération existante ne change ni ne disparaît ; aucune collection neuve,
+  aucune migration ; plans C13 d'export et d'effacement inchangés (`balances_balance` y est déjà).
+  - **Événements consommés** (contrat de C, STORY-1022, inchangé chez C) : `balance.created` et
+    `balance.etat.document.change` sont lus avec `soldesChecksum` et `soldesChecksumVersion`, **ensemble ou pas du
+    tout** ; une paire incomplète ou hors forme est ignorée sans faire rejeter le message.
+  - **Read-model `balances_balance`** : deux champs facultatifs, sans défaut, `soldesChecksum`, `soldesChecksumVersion`
+    (un `$set` qui ne les porte pas ne les efface pas).
+  - **Réponse d'analyse** (`GET /dossiers/{id}/bilan/analyse` et `POST …/analyse/dry-run`) : bloc neuf
+    **`rapprochementBalance`**, toujours présent, à côté de `controlesIntegrite` : `statut` (`CONCORDANT` | `DISCORDANT`
+    | `NON_VERIFIABLE` | `SANS_EMPREINTE` | `NON_APPLICABLE`), `motif` (`VERSION_EMPREINTE_INCONNUE`,
+    `BALANCE_INTROUVABLE`, `BALANCE_SCELLEE_V1`, `EMPREINTE_NON_RECUE`, `JEU_SANS_BALANCE`, `SOLDES_FOURNIS`, ou `null`
+    pour les deux premiers statuts), `balanceId`, `balanceChecksumVersion` (le sceau, tel que publié), `soldesChecksumVersion`
+    et `soldesChecksumPublie` (tels que publiés), `soldesChecksumRecalcule` (seulement sous une version connue : `soldes-v1`),
+    `message`. Les soldes comparés sont ceux de la liasse servie (jeu, ou version figée demandée) ; la balance est celle que
+    ce document nomme. **Un signal** : ni `valide`, ni la batterie, ni la liasse, ni le jeu ou ses snapshots ne changent.
+  - **→ A (plus tard)** : l'écran de l'analyse peut afficher le bloc (`message` tel quel).
+
 - **PUBLIÉ (2026-11-25, STORY-348, prospera-fiscal-service#67, `dev` `bc0c09f`) sans écart ; ANNONCÉ (2026-11-25, avant le code, prospera-stories#925) — le calcul des cotisations et des retenues** (`prospera-fiscal-service`,
   dossier `remuneration`). Fiche : `stories/STORY-348.md` (D-348-1 → 12, tableau « Contrat » ; Q-D-22).
   - **Route neuve** : `GET /api/v1/dossiers/{dossierId}/remuneration/{periode}/calcul` (`?version=` facultative ;
