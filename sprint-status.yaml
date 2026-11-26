@@ -2079,6 +2079,19 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1121"
+    status: "in_progress"
+    owner: "Groupe B, lot 7, n° 3 — la destruction proposée, puis visée : pièces échues lues par pages, gel en litige ou en contrôle, proposition de l'archiviste, visa de l'associé (jamais le proposant), accord du client sur le bordereau signé, exécution jamais automatique, procès-verbal et registre ; une pièce détruite reconnue par le contrôle, le certificat et l'export (document-service, module ged ; auth-service, deux droits du cabinet)"
+    source_doc: "prospera-stories/stories/STORY-1121.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite et contrat annoncé avant le code (2026-11-26) : GET …/fonds/{n}/pieces-echues ; POST/GET …/fonds/{n}/gels,
+      POST …/gels/{n}/levee (GEL-) ; POST/GET …/fonds/{n}/destructions (DES-), GET …/destructions/{n}[/pieces], POST
+      …/destructions/{n}/visa (BDE-), …/accord (multipart), …/abandon, …/execution (202, file BullMQ ged-destructions,
+      PVD-) ; GET …/registre-des-destructions ; actes GEL, GEL_LEVE, DESTRUCTION_PROPOSEE, _VISEE, _ACCORDEE,
+      _ABANDONNEE, DESTRUCTION ; une version détruite n'est jamais FICHIER_ABSENT ; manifeste ged 1.6.0. Auth :
+      ged:destruction:proposer (CAB_ARCHIVISTE, CAB_ASSOCIE) et ged:destruction:viser (CAB_ASSOCIE), hors du jeton.
+      Aucun fait publié (STORY-1123). D-1121-1 → 10. Lot 7 de B, n° 3. NON SLOTTÉE.
   - range: "STORY-1120"
     status: "done"
     owner: "Groupe B, lot 7, n° 2 — fin de mission et réversibilité : fermeture du fonds (à la main, ou avec le dossier client archivé par dossier.updated), refus de tout versement neuf, export complet en volumes ZIP (copies, index, bordereaux, empreintes, journal du fonds, certificat d'intégrité), bordereau de restitution numérique et son exemplaire signé (document-service, module ged)"

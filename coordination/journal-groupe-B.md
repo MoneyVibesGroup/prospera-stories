@@ -157,7 +157,9 @@
     paquet fiscal de STORY-564 dans `dossier-service` (← C) n'est pas faite** : 1120 n'a pas touché ce dépôt (D-1120-9) ;
     elle reste ouverte pour la prochaine story de B sur `dossier-service` (n° 12, STORY-1130, au plus tard), sauf si la
     session de groupe la place avant.
-  - **Suivante : STORY-1121** (n° 3 : la destruction proposée, puis visée ; s'inscrit au journal d'intégrité ; un fonds
+  - **3 — STORY-1121 (26/11) — en cours** : fiche écrite et contrat annoncé avant le code (« ⚠ Contrats ») ; rituel :
+    aucune demande neuve adressée à B dans les journaux de A, C et D.
+  - **Suivante après 1121 : STORY-1122.** Avant 1121, était écrit : **STORY-1121** (n° 3 : la destruction proposée, puis visée ; s'inscrit au journal d'intégrité ; un fonds
     fermé reste concerné par la conservation). **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans
     `dossier-service` (servable : balance-service `c9e94c6` est sur `dev`). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
@@ -1893,6 +1895,43 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-26, STORY-1121 — la destruction proposée, puis visée, annoncé AVANT le code** (`document-service`, GitHub
+  `prospera-ocr-service`, branche `MNV-1121` ; `auth-service`, branche `MNV-1121` ; fiche `stories/STORY-1121.md`,
+  D-1121-1 → 10). **Ajouts seuls**, sous `/api/v1/ged/cabinet` ; le chemin de l'assurance ne change pas.
+  - **Droits (auth)** : `ged:destruction:proposer` (`CAB_ARCHIVISTE`, `CAB_ASSOCIE`) et `ged:destruction:viser`
+    (`CAB_ASSOCIE`) entrent au catalogue de tenant, **hors du jeton** (`droitsHorsJeton` de `GET /moi/droits`), dans la
+    table d'accès du cabinet. Les deux codes sont **déjà au manifeste `ged`** : `droits` ne change pas. Catalogue 165 →
+    167 codes (24 + 143), borne inchangée ; `moi-droits` 1.1.0 et `identity.droits.changed@1` inchangés.
+  - **Gel** (« en litige ou en contrôle », qui n'existait nulle part) : `POST …/fonds/{numero}/gels` `{ motif: LITIGE |
+    CONTROLE_FISCAL | CONTROLE_SOCIAL | AUTRE_CONTROLE, reference?, observation?, exercices?, pieces? }` → 201
+    (`GEL-AAAA-NNNNN`, `ged:fonds:gerer`) ; `GET …/fonds/{numero}/gels` ; `POST …/gels/{numero}/levee` `{ observation }`
+    (`ged:destruction:viser`). Refus neufs : `404 GEL_INCONNU`, `409 GEL_DEJA_LEVE`.
+  - **Pièces échues** : `GET …/fonds/{numero}/pieces-echues?curseur=&limite=` (`ged:fonds:gerer`), lue par pages ; chaque
+    ligne porte `echeance` et `blocage?` (`GEL`, `SORTIE`, `PROPOSEE`). Une pièce permanente n'est échue qu'après la
+    fermeture du fonds.
+  - **Destruction** : `POST …/fonds/{numero}/destructions` `{ pieces?, observation? }` → 201 (`DES-AAAA-NNNNN`,
+    `ged:destruction:proposer`) ; `GET …/fonds/{numero}/destructions`, `GET …/destructions/{numero}`, `GET
+    …/destructions/{numero}/pieces` (`ged:fonds:gerer`) ; `POST …/destructions/{numero}/visa` `{ decision: VISEE |
+    REFUSEE, observation? }` (`ged:destruction:viser`, jamais le proposant) ; `POST …/destructions/{numero}/accord`
+    (multipart : `decision`, `accordePar`, `accordeLe`, `fichier`) ; `POST …/destructions/{numero}/abandon` ; `POST
+    …/destructions/{numero}/execution` → 202 (file BullMQ neuve **`ged-destructions`**) ; `GET
+    …/registre-des-destructions`. Documents probants de types neufs **`BORDEREAU_DE_DESTRUCTION`** (`BDE-`, émis au
+    visa, l'accord signé du client en `exemplaireSigne`) et **`PROCES_VERBAL_DE_DESTRUCTION`** (`PVD-`). Refus neufs :
+    `404 DESTRUCTION_INCONNUE`, `409 PIECES_NON_DESTRUCTIBLES`, `AUCUNE_PIECE_DESTRUCTIBLE`, `ETAT_DE_DESTRUCTION`,
+    `VISA_PAR_LE_PROPOSANT`, `PIECE_DETRUITE`, `400 OBSERVATION_REQUISE`, `410 PIECE_DETRUITE`, `410 EXPORT_DETRUIT`.
+  - **Une pièce détruite** : la vue gagne `destruction?` (`{ numero, le, procesVerbal }`), ses versions `detruite` ;
+    contenu et texte lu en 410 ; `ResultatDuControle` (vérification, campagnes) gagne `detruites` : une version détruite
+    régulièrement **n'est jamais `FICHIER_ABSENT`** ; l'export la liste sans fichier ; l'export gagne `volumesDetruits`.
+  - **Journal d'intégrité** : actes neufs `GEL`, `GEL_LEVE`, `DESTRUCTION_PROPOSEE`, `DESTRUCTION_VISEE`,
+    `DESTRUCTION_ACCORDEE`, `DESTRUCTION_ABANDONNEE`, `DESTRUCTION` (l'énumération `acte` de l'OpenAPI s'élargit).
+  - Collections neuves `ged_gels`, `ged_destructions`, `ged_destructions_lignes` ; champs neufs `destruction`
+    (`ged_pieces`, `ged_versions`), `volumesDetruits` (`ged_exports_fonds`). **Aucun fait Kafka publié** (STORY-1123).
+    Aucune dépendance neuve, aucune variable neuve.
+  - **Manifeste `ged` 1.6.0** (`manifestes/ged.manifest.ts`, cette PR) : six routes `GET` neuves en
+    `routesLectureSeule` ; `droits`, `publie`, `consomme` inchangés ; recopié dans le service par le code, **puis au
+    catalogue par B** après la fusion du code. **→ A (FE-143)** : types à régénérer depuis l'OpenAPI de
+    `document-service` quand l'écran viendra. **Pour C et D** : rien (D : l'alerte d'échéance viendra par STORY-1123).
 
 - **2026-11-25, STORY-1120 — fin de mission et réversibilité, annoncé AVANT le code** (`document-service`, GitHub
   `prospera-ocr-service`, branche `MNV-1120` ; fiche `stories/STORY-1120.md`, D-1120-1 → 9). **Ajouts seuls**, sous

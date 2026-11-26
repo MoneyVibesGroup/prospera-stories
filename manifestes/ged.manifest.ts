@@ -71,7 +71,10 @@ export const MANIFESTE_GED = {
   // 1.5.0 (2026-11-25, STORY-1120) : fin de mission et réversibilité (fermeture du fonds, avec le dossier client archivé
   // par `dossier.updated` ; export complet en volumes ; bordereau de restitution et son exemplaire signé) ; quatre routes
   // de lecture neuves.
-  version: '1.5.0',
+  // 1.6.0 (2026-11-26, STORY-1121) : la destruction proposée, puis visée (pièces échues, gel en litige ou en contrôle,
+  // proposition, visa de l'associé, accord du client, exécution, procès-verbal et registre) ; six routes de lecture
+  // neuves ; `ged:destruction:proposer` et `ged:destruction:viser` (déjà déclarés) attribués au cabinet par auth.
+  version: '1.6.0',
 
   // C1 : aucune dépendance dure. La GED reçoit, lit, classe, conserve et retrouve des pièces sans autre module ; une pièce
   // enregistrée sans dossier va dans la file « à rattacher » (FR-159, FR-166).
@@ -103,8 +106,8 @@ export const MANIFESTE_GED = {
     'ged:fonds:verifier', // ARCH, AUD
     'ged:papier:sortir', // ARCH
     'ged:dossier:reconstituer',
-    'ged:destruction:proposer', // ARCH
-    'ged:destruction:viser', // RESP puis DG : double visa (AD-9)
+    'ged:destruction:proposer', // ARCH ; au cabinet (STORY-1121) : CAB_ARCHIVISTE, CAB_ASSOCIE
+    'ged:destruction:viser', // RESP puis DG : double visa (AD-9) ; au cabinet (STORY-1121) : CAB_ASSOCIE, jamais le proposant
     'ged:sante:consulter', // capacité `sante:lire` (AD-8)
     'ged:parametre:administrer',
     'ged:journal:consulter', // AUD : journal des lectures de pièces (AD-17)
@@ -283,6 +286,12 @@ export const MANIFESTE_GED = {
     'GET /api/v1/ged/cabinet/exports/{numero}', // STORY-1120 : un export, ses volumes et leurs empreintes
     'GET /api/v1/ged/cabinet/exports/{numero}/volumes/{rang}', // STORY-1120 : un volume ZIP, retéléchargé à l'octet
     'GET /api/v1/ged/cabinet/documents-probants/{numero}/exemplaire-signe', // STORY-1120 : le bordereau de restitution signé
+    'GET /api/v1/ged/cabinet/fonds/{numero}/pieces-echues', // STORY-1121 : les pièces dont la conservation est échue, par pages
+    'GET /api/v1/ged/cabinet/fonds/{numero}/gels', // STORY-1121 : les gels (litige, contrôle) d'un fonds
+    'GET /api/v1/ged/cabinet/fonds/{numero}/destructions', // STORY-1121 : les propositions de destruction d'un fonds
+    'GET /api/v1/ged/cabinet/destructions/{numero}', // STORY-1121 : une destruction, son visa, l'accord, son procès-verbal
+    'GET /api/v1/ged/cabinet/destructions/{numero}/pieces', // STORY-1121 : ses pièces, par pages
+    'GET /api/v1/ged/cabinet/registre-des-destructions', // STORY-1121 : le registre des destructions du cabinet
     'GET /api/v1/instance/ged/{organisationId}/export',
   ],
 
