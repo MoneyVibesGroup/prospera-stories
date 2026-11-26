@@ -1,6 +1,6 @@
 # STORY-1138 : la liasse rapprochée de sa balance par l'empreinte des soldes (`soldes-v1`)
 
-Status: in-progress
+Status: done
 
 **Plan :** `coordination/PLAN-LOT-7-2026-11-24.md` §4 bis (amendement du 26/11), n° **5a** · **Dépôt :**
 `prospera-bilan-service` (tenu par D jusqu'au prochain plan ; `origin/dev` au départ : `4317dd2`, STORY-1075) · **Plage :**
@@ -130,6 +130,39 @@ change ni ne disparaît.
 - **D-1138-11 — Aucun changement C13** : `balances_balance` est déjà au plan d'effacement (par `orgId`) et dans les
   collections non exportées justifiées (« copie d'un voisin ») ; ses deux champs la suivent. Fixture de
   `bilan-export.e2e` inchangée (la collection n'est pas exportée).
+
+## Livraison
+
+**prospera-bilan-service #193**, fusionnée en rebase : **`dev` `65eecdc`** (branche `7680a51`). Annonce avant le
+code : prospera-stories #937 (`main` 69c1cfe). **Conforme à l'annonce, sans écart.**
+
+- `rapprochement-balance.ts` (pur) : `soldes-v1` (copie du contrat de C), `ALGORITHMES_EMPREINTE_SOLDES` (une version),
+  `recalculerEmpreinteSoldes` (une version inconnue rend `null`, y compris `toString`), `evaluerRapprochementBalance`.
+- `balance-payload.util.ts` : `lireEmpreinteDesSoldes` (la paire ou rien, formes bornées) ; `balance-events.ts` (copie
+  du contrat) ; `balance-balance.schema.ts` : deux `@Prop` sans défaut ; `BalanceLue` les expose.
+- `analyse.service.ts` : la balance que nomme le document servi (jeu ou snapshot), lue par
+  `BalancesDossierRepository.parId` (organisation et dossier) ; `dry-run` ⇒ `SOLDES_FOURNIS`. DTO
+  `RapprochementBalanceDto` (énumérations nommées `StatutRapprochementBalance`, `MotifRapprochementBalance`).
+- **Constat avant le code** : l'empreinte publiée depuis `d5878be` était reçue et **jetée** (projection limitée aux
+  champs connus, et Mongoose `strict` retire du `$set` un champ que le schéma ne déclare pas).
+
+## Preuves
+
+| Preuve | Résultat |
+|---|---|
+| Node 24 (étage `verification`, image de l'archive LF de `7680a51`) — e2e complets | **45/45 suites, 3 565 tests** |
+| Node 24 — `npm run build` | 0 |
+| Node 24 — unitaires complets | **369/369 suites, aucun rouge**, en deux passes sur la même image : 286 suites dans la première (coupée par la borne de 40 min du script, piège 1138-2), les 83 restantes dans la seconde (518 tests verts, 2 ignorés) |
+| Vecteurs de C (AC-3) | `49c4d3b1…49d8` et `5e296cc6…65b2` écrits en dur dans `rapprochement-balance.spec.ts` (et le premier dans `openapi-contract`) ; vérifiés aussi hors service (`node -e`) avant le code |
+| Spec pure `rapprochement-balance.spec.ts` | 18 tests (vecteurs, lignes 0/0, ordre, point de code contre `localeCompare`, versions inconnues, chaque statut et motif) |
+| Service d'analyse (AC-4 → 7) | 7 tests neufs (jeu, snapshot de la version demandée, dossier dans le filtre, introuvable, sans balance, version inconnue, `dry-run`) |
+| Lecture des messages et projection (AC-2) | 20 tests neufs (`VALIDÉE` et `REJETÉE`, version inconnue gardée, 13 paires hors forme ignorées sans rejet, bornes) ; schéma réel (3 tests) : la paire gardée, un champ inconnu retiré |
+| e2e `bilan-analyse` + `openapi-contract` (AC-8) | `CONCORDANT`, `DISCORDANT`, `NON_VERIFIABLE`, `SANS_EMPREINTE`, `NON_APPLICABLE` par la vraie route ; filtre du vrai dépôt (organisation, dossier, balance) ; réponses décrites exactement par le contrat ; énumérations nommées |
+| Mutations | **18/18 tuées sur une assertion** (filtre 0/0 retiré ou en ET, tri retiré ou par `localeCompare`, ordre des clés, `in` au lieu de `hasOwn`, version inconnue recalculée, toujours `CONCORDANT`, sceau `v1` non reconnu, jeu sans balance non distingué, empreinte sans version acceptée, formes non bornées, paire non projetée, `@Prop` retiré, balance ou soldes du jeu au lieu du snapshot, dossier non passé) |
+| Lint des fichiers touchés, `tsc` (code et tests) | 0 |
+| §1.5 | sans `docker compose up` : aucun module Nest, dépendance ni Dockerfile ne change (le dépôt injecté est déjà exporté par `ReadModelsModule`) |
+| C13 (AC-9) | `plan-d-export.invariant`, `export-c13`, `effaceur` verts sans changement (la collection y est déjà) |
+| Verrou Docker | pris à 01:29, rendu à 02:24 (trap) ; seconde passe : prise à 02:50, rendue à 02:54 ; B et C prévenus ; aucun conteneur `grp-d` restant |
 
 ## Ce qui reste (hors story)
 
