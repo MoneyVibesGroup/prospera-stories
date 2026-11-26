@@ -1,6 +1,6 @@
 # STORY-1140 : l'export C13 du bilan aussi en CSV (Q-D-19)
 
-Status: in-progress
+Status: done
 
 **Plan :** `coordination/PLAN-LOT-7-2026-11-24.md` §4 bis (amendement du 26/11), n° **5c** · **Dépôt :**
 `prospera-bilan-service` (tenu par D jusqu'au prochain plan ; `origin/dev` au départ : `027075d`, STORY-1139) ;
@@ -111,8 +111,69 @@ limitée à l'organisation du chemin, hors limite de débit, dans les deux espac
   comportement de bout en bout de la route change : une pile `grp-d` (mongo, kafka, l'image `runtime`, un IdP de test
   RS256 qui sert son JWKS) joue le JSON, le CSV, les refus et l'état publié sur de vrais documents, sous le verrou.
 
+- **D-1140-9 — Le contrat de B, recopié dans la même PR** (servi pendant la story : plateforme #41,
+  `contrats-instance-v1.1`, d68a468). `export-c13-reponse.schema.json` et `export-c13-csv.cas.json` sont copiés **à
+  l'octet** dans `instance-c13/contrat/` (sha256 dans `ORIGINE.json`, `copie.invariant` : huit copies, origine
+  `contrats-instance-v1.1` dans `autresOrigines`) ; la réponse JSON est relue par Ajv contre le schéma ; les **huit cas** du
+  CSV sont rejoués à l'octet par `objetEnCsv` (`export-csv.contrat.spec.ts`). Le seul écart de B à la forme annoncée,
+  `organisationId` générique (1 → 64 caractères), est plus large : nos 24 hex y tiennent, rien ne change.
+
+## Livraison
+
+**prospera-bilan-service #195**, fusionnée en rebase le 2026-11-26 : **`dev` `c29fcc2`** (le CSV) puis **`7f96163`** (la
+copie du contrat de B) ; `head` `f2186c9`, arbre de `dev` identique. Annonce avant le code : prospera-stories #953 (`main`
+67efaf9). **Conforme à l'annonce, sans écart.**
+
+- `instance-c13/export-csv.ts` (neuf, pur) : les règles de balance recopiées (`SEPARATEUR_CSV`, `FIN_DE_LIGNE_CSV`,
+  `BOM_UTF8`, `echapperCsv`, `neutraliserFormule`) et l'aplatissement (`cellulesDe`, `objetEnCsv`).
+- `export-c13.ts` : `exporter(organisationId, { format, objet })` ⇒ `ResultatDExport` (`json` : l'enveloppe ; `csv` : le
+  fichier et son nom) ; refus de la demande avant l'état publié ; seules les étapes demandées sont lues ;
+  `FORMATS_D_EXPORT`, `OBJETS_SERVIS`.
+- `instance-c13.controller.ts` : `@Query('format')`, `@Query('objet')`, `@Res({ passthrough: true })`, `StreamableFile`
+  pour le CSV, `Cache-Control: no-store` sur les deux ; Swagger (`ApiQuery`, `ApiProduces`).
+- `refus.ts` : `FORMAT_NON_SERVI`, `OBJET_REQUIS`.
+- `contrat/` : deux copies neuves, `ORIGINE.json`, `copie.invariant.spec.ts`, `validerReponseDExport`.
+- Tests neufs : `export-csv.spec` (8 : les six vecteurs de balance à la lettre, les règles, un document à plusieurs
+  niveaux), `export-c13.spec` (+21 : JSON inchangé, `objet` qui réduit et ne lit que lui, CSV et son nom, objet vide,
+  cinq formats refusés, deux CSV sans objet, quatre objets inconnus, demande jugée avant l'état publié, état publié en CSV),
+  `export-csv.contrat.spec` (11 : les huit cas de B à l'octet, le schéma JSON), e2e `instance-c13` (+3 : CSV et ses
+  en-têtes, refus et état publié, identité).
+
+## Preuves
+
+| Preuve | Résultat |
+|---|---|
+| Node 24 (étage `verification`, image de l'archive LF de `e13d874`) — unitaires complets, deux passes `--shard` | **373/373 suites** : passe 1/2 187/187 (7 649 tests, 3 ignorés), passe 2/2 186/186 (5 168 tests, 3 ignorés) — **12 817 tests verts, aucun rouge** |
+| Node 24 — e2e complets (`e13d874`) | **45/45 suites, 3 592/3 592** |
+| Node 24 — `npm run build` | 0 |
+| Node 24 — second commit (`f2186c9`) : `instance-c13`, `read-models`, `app-cablage` ; e2e `instance-c13` et `openapi-contract` | **52/52 suites (927 tests, 1 ignoré)** ; **2/2 suites, 608 tests** |
+| Node 25 — `instance-c13` (unitaires) et e2e `instance-c13` | 13/13 suites (141) ; 38/38 |
+| Pile `grp-d` (mongo 8.0 `rs0`, kafka 3.9.0, un IdP de test RS256 qui sert son JWKS, l'image runtime de `f2186c9`) | `/health` `ok` ; 0 `UnknownDependencies` sur 602 lignes de journal ; **15/15 cas** ci-dessous |
+| Mutations (Node 25) | **32/32 tuées sur une assertion** ; sept réécrites parce que leur première forme ne compilait pas (`TS6133`, paramètre ou import devenu inutile : « 0 total » ou « 8 passed » sans la suite visée) |
+| Lint des fichiers touchés, `tsc --noEmit` | 0 |
+| Verrou Docker | attendu (B) ; pris à 07:26:41, rendu à 08:10:29 (trap) ; repris à 08:23:13 (après C), rendu à 08:27:59 ; B et C prévenus ; aucun conteneur, volume ni réseau `grp-d` |
+
+**Les cas de la pile** (A `EN_SERVICE` avec deux repères, l'un à `tenantId` ObjectId, l'autre en chaîne ; B sans état
+publié avec un repère ; C `NON_INSTALLE`) :
+
+| Cas | Réponse |
+|---|---|
+| `GET …/A/export` | **200** JSON, huit objets, `reperes-analyse` 2 (rien de B), `Cache-Control: no-store` |
+| `?objet=reperes-analyse` | **200** JSON, ce seul objet (2) |
+| `?format=csv&objet=reperes-analyse` | **200** `text/csv; charset=utf-8`, `attachment; filename="export-bilan-reperes-analyse-<A>.csv"`, `Cache-Control: no-store`, `Content-Length: 465` ; octets `EF BB BF` ; en-tête `_id;tenantId;dossierId;indicateur;version;apres.statut;apres.sens;apres.bornes;motif;taux;le` ; bornes en JSON échappé ; le motif `=HYPERLINK("http://x";"clic")` écrit `"'=HYPERLINK(""http://x"";""clic"")"` ; `-12.50` (décimal) sans apostrophe ; cellules vides du second document |
+| `?format=csv&objet=exercices` (aucun document) | **200**, `EF BB BF 0D 0A` |
+| `?format=xml` ; `?format=csv` ; `?format=csv&objet=` | **400 `FORMAT_NON_SERVI`** (`formatsServis`) ; **400 `OBJET_REQUIS`** (`objetsServis`, huit) ; **400 `OBJET_REQUIS`** |
+| `?format=csv&objet=balances-balance` ; `?objet=jeux_etats` | **422 `OBJET_INCONNU`** (`objetsServis`) ; **422 `OBJET_INCONNU`** |
+| CSV de B (aucun état) ; de C (`NON_INSTALLE`) | **403 `BILAN_NOT_ENTITLED`** (`etatPublie: null`) ; **403 `BILAN_NOT_ENTITLED`** (`NON_INSTALLE`) |
+| CSV sans jeton ; jeton d'utilisateur de A ; moteur de B sur A | **401** ; **403 `IDENTITE_DE_SERVICE_REQUISE`** ; **403 `ORGANISATION_HORS_JETON`** |
+| `GET …/A/sante` | **200** `{"etat":"OK"}` |
+
+La première pile (images de `e13d874`, 07:28) a démarré saine mais n'a rien enregistré : sous `MSYS_NO_PATHCONV=1`,
+`curl.exe` n'écrit pas à un chemin `/c/…` (piège 1140-1) ; rejouée sur `f2186c9` avec des chemins Windows.
+
 ## Ce qui reste (hors story)
 
-- **→ B** : le contrat publié (demande « ouverte » du journal de D) ; bilan le recopiera à l'octet et s'y rangera.
+- **← B : le contrat — servi** (plateforme #41, d68a468) et recopié ici (D-1140-9). `balance-service` (C) peut s'y ranger
+  à son tour (copie et cas) : information pour C, rien ne bloque.
 - Un export volumineux se lit en un seul corps (comme balance) : pagination ou flux quand le contrat le dira ; une cellule
   CSV de plus de 32 767 caractères ne s'ouvre pas entière dans un tableur, le JSON reste la forme fidèle.

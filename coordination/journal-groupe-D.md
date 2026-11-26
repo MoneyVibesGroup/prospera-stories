@@ -219,6 +219,30 @@
     contrat dans `prospera-plateforme/contrats/instance/`). Au 26/11 vers 04:40, 319 et 325 de C ne sont pas fusionnées
     (fiscal `origin/dev` `cefbe20`, 318) : D reste sur 5c → 5d.
 
+- **STORY-1140** ✅ 📤 — l'export C13 du bilan aussi en CSV, à la forme par objet de balance (prospera-bilan-service#195,
+  `dev` `c29fcc2`, `7f96163` ; annonce avant le code #953, `main` 67efaf9 : fiche D-1140-1 → 8, ⚠ Contrats, → B). Plan
+  §4 bis, n° 5c (Q-D-19). Rituel (2026-11-26, 05:10) : aucune demande neuve à D chez A, B et C ; 319 et 325 de C non
+  fusionnées ; bilan : aucune PR ouverte, `origin/dev` `027075d`, deux brouillons non suivis connus laissés.
+  - **Livré** (`instance-c13/`) : `?format=json|csv` et `?objet=` sur `GET …/instance/bilan/{organisationId}/export` ; un
+    objet par fichier CSV (`export-bilan-<objet>-<organisationId>.csv`), les règles et l'aplatissement de balance
+    recopiés (`export-csv.ts`, ses six vecteurs repris à la lettre) ; refus avant toute lecture 400 `FORMAT_NON_SERVI`,
+    400 `OBJET_REQUIS`, 422 `OBJET_INCONNU`, puis l'état publié ; `Cache-Control: no-store` sur le JSON et le CSV.
+    **← B : le contrat servi pendant la story** (plateforme #41, `contrats-instance-v1.1`, d68a468) : recopié à l'octet
+    dans la même PR (D-1140-9), la réponse JSON relue par Ajv, les huit cas du CSV rejoués à l'octet. Aucun écart à
+    l'annonce.
+  - **Communs** : sans objet (le bilan est à D seul). Aucun module Nest, aucune dépendance, aucun Dockerfile, aucune
+    collection, aucune migration ; plans C13 inchangés.
+  - Preuves : Node 24 (image `verification` de l'archive LF de `e13d874`) **unitaires 373/373 suites, 12 817 tests, aucun
+    rouge** (deux passes `--shard`, 187 + 186), **e2e 45/45, 3 592**, `npm run build` 0 ; sur `f2186c9` : suites touchées
+    52/52, e2e `instance-c13` et `openapi-contract` 2/2 (608) ; **mutations 32/32** (sept réécrites : leur première forme
+    ne compilait pas) ; lint et `tsc` 0. **Pile `grp-d`** (mongo, kafka, IdP de test RS256, image runtime) : **15/15 cas**
+    (JSON, CSV et ses octets, refus, état publié, identité, santé). **Verrou Docker** : pris à 07:26, rendu à 08:10 ;
+    repris à 08:23, rendu à 08:28 ; B et C prévenus ; aucun conteneur, volume ni réseau `grp-d`.
+  - **Ce qui reste** : → C (information) : `balance-service` peut se ranger au même contrat (copie et cas) ; → A : rien.
+  - **Suivante : STORY-349** (le calendrier reçoit les obligations sociales ; plan §4, D reprend le tableau). **319 de C
+    est fusionnée** (fiscal `origin/dev` `0cc79a7`, docs `main` 5b54ed7) : 349 est débloquée ; 325 ne l'est pas encore.
+    Après 349 et la suite du tableau, D finit **STORY-1141** (5d, la passation de paiement de B est servie, #936).
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
@@ -1519,8 +1543,15 @@
 
 ## Demandes aux autres groupes
 
+- **← B : cloche et e-mail des cinq faits `ged.*` de la GED du cabinet (document-service #37 ; demande au journal de B,
+  `main` f760f37) — reçue, hors lot 7, à placer par l'utilisateur.** Rien n'est codé par D.
+
 - **→ B (2026-11-26, STORY-1140) : publier le contrat de l'export C13 en CSV de `prospera-bilan-service` dans
-  `prospera-plateforme/contrats/instance/` — ouverte.** La réponse de l'utilisateur à Q-D-19 (25/11) le place chez B.
+  `prospera-plateforme/contrats/instance/` — servie (plateforme #41, d68a468)** ; placée par B en demande « e »
+  (D-L7B-9), réponse dans « Réponses » du journal de B (`main` 1f2ccb9) : `export-c13-reponse.schema.json`,
+  `export-c13-csv.cas.json` (huit règles, huit cas), `instance-c13.openapi.json` 1.1.0, étiquette
+  `contrats-instance-v1.1`. Un seul écart : `organisationId` générique (1 → 64 caractères), où nos 24 hex tiennent.
+  Recopié à l'octet par bilan dans 1140 (#195, `7f96163`). Demande d'origine : La réponse de l'utilisateur à Q-D-19 (25/11) le place chez B.
   Deux services servent déjà la même forme : `balance-service` (STORY-1021, C, `b52d262`) et `bilan-service`
   (STORY-1140) ; les deux recopieront le contrat à l'octet et s'y rangeront. **La forme exacte servie** (fiche
   `stories/STORY-1140.md`, « Contrat » ; `stories/STORY-1021.md`, D-1021-6 → 8) :
@@ -2082,8 +2113,10 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-26, STORY-1140, avant le code) — l'export C13 du bilan aussi en CSV, à la forme par objet de
-  balance** (`prospera-bilan-service`, Q-D-19). Fiche : `stories/STORY-1140.md` (D-1140-1 → 8, section « Contrat »).
+- **PUBLIÉ (2026-11-26, STORY-1140, prospera-bilan-service#195, `dev` `c29fcc2`, `7f96163`) sans écart, et rangé au
+  contrat de B (`contrats-instance-v1.1`, d68a468 : `export-c13-reponse@1`, `export-c13-csv@1`, recopiés à l'octet) ;
+  ANNONCÉ (2026-11-26, STORY-1140, avant le code, prospera-stories#953) — l'export C13 du bilan aussi en CSV, à la forme
+  par objet de balance** (`prospera-bilan-service`, Q-D-19). Fiche : `stories/STORY-1140.md` (D-1140-1 → 8, section « Contrat »).
   **Ajouts seuls** sur la route existante `GET /api/v1/instance/bilan/{organisationId}/export` (identité `MOTEUR`
   seule, limitée à l'organisation du chemin : inchangé) ; l'enveloppe JSON de 1075 ne change pas.
   - **Deux paramètres de requête, facultatifs** : `format` (`json` par défaut | `csv`) ; `objet` (un objet du plan :
@@ -3453,6 +3486,18 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1140** (dixième passage de D dans `bilan-service`) :
+  - (1) **`MSYS_NO_PATHCONV=1` et `curl.exe`** : dans un script de preuve, `curl -o /c/…` n'écrit rien (le chemin POSIX
+    n'est plus converti, et `curl` est un binaire Windows). Passer les chemins de sortie par `cygpath -m`. Vécu : une
+    pile saine sans aucune réponse enregistrée, rejouée.
+  - (2) **Mutations sur un paramètre ou un import** : le service compile avec `noUnusedLocals` / `noUnusedParameters`
+    (`TS6133`) ; une mutation qui supprime l'usage d'un paramètre de contrôleur ou d'une fonction importée ne compile pas
+    (« 0 total », ou « 8 passed » sans la suite visée). La réécrire en gardant l'usage (`format === 'csv' ? undefined :
+    format`, `slice(1)`).
+  - (3) **`sed 's/…/\\uFEFF/'`** : `\u` est pour GNU sed « la lettre suivante en majuscule » ; il écrit `FEFF`. Écrire les
+    échappements par un script Python ou par l'outil d'écriture (un BOM littéral dans un test rougit aussi
+    `no-irregular-whitespace`).
 
 - **STORY-1139** (neuvième passage de D dans `bilan-service`) :
   - (1) **Deux e2e comptent en dur ce que les invariants unitaires comptent aussi** : `bilan-dossier-portee-collaborateur`
