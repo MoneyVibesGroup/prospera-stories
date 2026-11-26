@@ -1509,7 +1509,11 @@
   geste de l'utilisateur, plan §8), l'écrire dans la source de `balance-service` puis dans la recopie du fiscal : la
   ligne se calculera **sans livraison**. La demande `cnss.collecte` (348) reste **ouverte**, non servie au 26/11.
 
-- **→ C (2026-11-25, STORY-348) : la date de collecte des cotisations sociales au paquet fiscal Togo** — **ouverte**.
+- **← C : `cnss.collecte` — servie (317, balance #171, fiscal #69)** (constaté le 2026-11-26 au rituel de STORY-1139 :
+  paquet de `balance-service` `dev` `44be0c1`, recopie du fiscal `dev` `8f6b1ba`). Les cotisations sortent désormais
+  `DECLAREE`, exigibles le 15 du mois suivant : le dernier point du « Fini quand » de 348 est tenu, sans livraison de D.
+  Demande d'origine :
+- **→ C (2026-11-25, STORY-348) : la date de collecte des cotisations sociales au paquet fiscal Togo** — servie (ci-dessus).
   Le paquet 2026 ne porte la date de collecte de la CNSS (et de l'AMU, qu'elle collecte) qu'en texte
   (`cnss.amu.collecte.versement` : « au plus tard le 15 du mois suivant ») ; la retenue d'IRPP l'a structurée
   (`irpp.retenueALaSource.reversement` `{ jourLimite: 15, moisSuivant: true, article, millesime }`). Demandé : un bloc
@@ -1981,6 +1985,11 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **← C (2026-11-26, STORY-317, prospera-fiscal-service#69, `dev` `98ab317` / `8f6b1ba`) : trois specs du dossier
+  `remuneration` de D modifiées par C — acceptées par D** : `src/domain/remuneration/calcul-social.spec.ts`,
+  `src/application/remuneration/calcul-remuneration.service.spec.ts` et `test/remuneration-import.e2e-spec.ts` (elles
+  attendaient `NON_DECLAREE` ; le vrai paquet déclare désormais `cnss.collecte`). Dit par C dans « ⚠ Communs » de son
+  journal.
 - **FUSIONNÉ (2026-11-25, prospera-fiscal-service#67, `dev` `bc0c09f`, rebasée sur `origin/dev` avant la fusion) ; ANNONCÉ (2026-11-25, STORY-348, avant le code)** — branche `MNV-348`. **Aucune migration** (un champ facultatif
   `personnesACharge`, `null` par défaut, sur `lignes_remuneration` : une ligne déjà écrite se lit `null`), ni
   `app.module.ts` (`RemunerationModule` est déjà monté), ni `package.json`, ni `read-models/`, ni copie du paquet, ni
@@ -2018,6 +2027,27 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-26, STORY-1139, avant le code) — les repères de l'analyse financière, modifiables par dossier et
+  tracés** (`prospera-bilan-service`). Fiche : `stories/STORY-1139.md` (D-1139-1 → 12, tableau « Contrat » ; Q-D-23).
+  **Ajouts seuls** : aucun champ, aucune route, aucune valeur d'énumération existante ne change ni ne disparaît.
+  - **Trois routes neuves**, nichées sous le dossier, gardées comme le reste du module (`@RequiresBilanAccess`, état
+    publié) : `GET /api/v1/dossiers/{dossierId}/bilan/analyse/reperes` (`TENANT_ADMIN` | `TENANT_USER` : les 19
+    indicateurs, `version` 0 si jamais modifié, `statut` `PAQUET` | `DECLARE` | `SANS_REPERE`, `sens`, `bornes`, `source`,
+    `nature` `REGLEMENTAIRE` | `CONTRACTUEL` | `USAGE` | `AVIS_PROFESSIONNEL`, `motif`, `modifiePar`, `modifieLe`) ;
+    `GET …/analyse/reperes/{indicateur}/journal` (mêmes rôles : chaque version, `par`, `le`, `motif`, `avant`, `apres`) ;
+    **`PUT …/analyse/reperes/{indicateur}`** (`TENANT_ADMIN` seul ; corps fermé `{ versionAttendue, statut, sens?, bornes?,
+    source?, nature?, motif }` ; refus `400 INDICATEUR_INCONNU`, `409 REPERE_CONCURRENT`, `422 REPERE_INVALIDE`,
+    `422 REPERE_INCHANGE`).
+  - **Réponse d'analyse** (`GET …/bilan/analyse`, `POST …/analyse/dry-run`) : `indicateurs[].seuilApplique` gagne
+    `origine` (`PAQUET` | `DOSSIER`) et `repereDossier` (`{ version, nature, modifieLe }` ou `null`). Un repère
+    `SANS_REPERE` du dossier rend `AUCUN_REPERE_DECLARE` (valeur existante) même si le paquet en porte un.
+  - **Collection neuve `reperes_analyse`** (append-only, par organisation et dossier) : au **plan d'effacement** (par
+    `tenantId`) et au **plan d'export C13** (objet `reperes-analyse`). Aucune migration. Aucun droit neuf (rôles seuls) :
+    **rien à demander à B**. Aucun topic, aucun paquet ne change (les seize restent sans repère : aucune source sur la
+    même formule, fiche).
+  - **→ A (plus tard)** : l'écran de l'analyse peut afficher `origine` et la source du dossier, et offrir au
+    `TENANT_ADMIN` la modification et le journal.
 
 - **PUBLIÉ (2026-11-26, STORY-1138, prospera-bilan-service#193, `dev` `65eecdc`) sans écart ; ANNONCÉ (2026-11-26, avant le code, prospera-stories#937) — la liasse rapprochée de sa balance par l'empreinte des soldes**
   (`prospera-bilan-service`). Fiche : `stories/STORY-1138.md` (D-1138-1 → 11, tableau « Contrat »). **Ajouts seuls** :
@@ -3174,6 +3204,15 @@
     par B dans `prospera-plateforme/contrats/instance/`.
   - **La zone franche** : `zone-franche-togo@1.1`, qui reprend la correction des sous-totaux de `@2.2` (STORY-676, 678),
     se fera **au lot 7**.
+
+- **Q-D-23 (2026-11-26, STORY-1139) — Les repères de l'analyse : par dossier, et les repères d'usage écartés.**
+  La recherche du 26/11 (fiche, S1 → S6) ne trouve aucune norme sur la même formule que l'un des seize indicateurs : ils
+  restent « aucun repère déclaré ». **Choix par défaut appliqués** : (1) les repères se modifient **par dossier**
+  (`TENANT_ADMIN`, D-1139-3, D-1139-7), pas pour tout un cabinet ni pour toute la plateforme ; (2) les repères d'usage
+  français que la source n'attache pas à notre formule (« inférieur à 1 » pour l'endettement, « 1 à 2 » pour la liquidité,
+  Les clés de la banque) **ne sont pas importés** (D-1139-2) — un cabinet peut les déclarer sur un dossier, avec
+  `nature: USAGE`. Une réponse contraire en (1) ajoute un niveau « cabinet » (une route hors dossier) ; en (2), une
+  révision des paquets.
 
 - **Q-D-22 (2026-11-25, STORY-348) — L'AMU : qui la collecte, et sa part salariale sort-elle de la base de l'IRPP ?**
   Deux points laissés ouverts par le plan (§8, relecture du bloc `cnss` par un fiscaliste, geste de l'utilisateur).
