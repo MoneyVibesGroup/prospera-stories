@@ -2199,6 +2199,22 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-26, STORY-1128 — le contrat d'état publié figé, annoncé AVANT le code** (`platform-catalog-service` et
+  `prospera-plateforme`, branches `MNV-1128` ; fiche `stories/STORY-1128.md`, D-1128-1 → 12). Lu par tous les consommateurs
+  de l'état publié (coque et app du cabinet de **A**, gardes des modules de **C** et **D**). **Aucun octet du contrat ne
+  change** : la version figée est **1.1.0** (`contrat-etat-publie-v1.1`, `efedd3e`). Ce qui change : (1) **un octet = une
+  version** : `contrat/historique/etat-publie/versions.json` et la photo de chaque version ; la garde du gel rougit sur tout
+  changement non versionné des trois fichiers (OpenAPI, matrice, schéma de l'événement), et sur une version qui n'est pas un
+  ajout seul (rien ne disparaît ni ne change de type, de borne ou de motif ; `required` et `enum` identiques ; un champ neuf
+  jamais exigé) ; **la matrice est figée pour la majeure 1** (une cellule changée = `versionMatrice` 2, contrat 2.0.0,
+  événement `@2`) ; (2) Karapace : `etat-publie.changed.essai-value` et `.reel-value` en **`BACKWARD_TRANSITIVE`** ; (3)
+  **`prospera-plateforme/contrats/etat-publie/`** : la copie à l'étiquette, `ORIGINE.json`, étiquette
+  `contrat-etat-publie-v1.1` dans la plateforme ; la garde partagée (`garde-etat-publie-v1`) y est rejouée, **son fichier
+  ne change pas** (les douze copies restent vraies) ; (4) **comportement** : l'émetteur republie sur une montée de
+  `versionCode` seule (D-1127-10) ; au premier démarrage du catalogue livré, chaque module installé qui porte une version
+  est republié **une fois** (`numero` + 1, même état). **Inchangés** : route, événement, topics, `entitlement.changed`, BFF,
+  auth, manifestes. **→ A, C, D** : rien à faire ; tout ajout futur demande une version neuve annoncée ici.
+
 - **2026-11-26, STORY-1127 — LIVRÉ** (catalogue #84, `efedd3e` sur `dev` ; étiquette **`contrat-etat-publie-v1.1`**) :
   conforme à l'annonce ci-dessous, sans écart. Karapace : la v1 → le neuf **compatible BACKWARD**, enregistré sur les deux
   sujets. **→ C et D** : `module.referentiels` est servi ; `assurance` peut retirer son consommateur de

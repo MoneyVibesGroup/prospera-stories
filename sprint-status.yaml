@@ -2172,6 +2172,20 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1128"
+    status: "in-progress"
+    owner: "Groupe B, lot 7, n° 10 — le contrat d'état publié figé (EPIC-142) : garde du gel (historique des versions et photos, ajouts seuls, matrice figée par majeure), Karapace BACKWARD_TRANSITIVE sur etat-publie.changed.*, copie publiée et étiquetée dans prospera-plateforme ; versionCode dans la comparaison de l'émetteur ; inventaire d'EPIC-142 → 147 et 159 (platform-catalog-service, prospera-plateforme)"
+    source_doc: "prospera-stories/stories/STORY-1128.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite et contrat annoncé avant le code (2026-11-26) : version figée 1.1.0 (contrat-etat-publie-v1.1,
+      efedd3e), aucun octet du contrat ne change ; contrat/historique/etat-publie/ (versions.json, photos 1.0.0 et
+      1.1.0, empreinte canonique) et src/contrat/etat-publie.gel.spec.ts (changement non versionné, ajouts seuls,
+      matrice figée dans une majeure) ; sujets etat-publie.changed.* en BACKWARD_TRANSITIVE, compatibilité vérifiée
+      contre chaque version ; prospera-plateforme/contrats/etat-publie/ (copie à l'étiquette, ORIGINE.json, la garde
+      partagée rejouée sans se sauter), étiquette contrat-etat-publie-v1.1 dans la plateforme ; l'émetteur range et
+      compare versionCode (D-1127-10), republication une fois au démarrage. D-1128-1 → 12. Lot 7 de B, n° 10 ; fusion
+      au plus tard le 11/12 (D-L7B-5). NON SLOTTÉE.
   - range: "STORY-1127"
     status: "done"
     owner: "Groupe B, lot 7, n° 9 — les référentiels habilités dans l'état publié : module.referentiels, champ facultatif de la route et de etat-publie.changed (la forme de entitlement.changed v2), avant le gel du 11/12 (platform-catalog-service ; manifeste instance 1.1.0)"
