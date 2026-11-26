@@ -2169,6 +2169,39 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-26, STORY-1141, avant le code, cette PR de docs) — le numéro de compte imprimable sur la facture
+  (Q-D-15)** (`prospera-paiement-service`, prêté par B pour cette story, #936 ; `prospera-ventes-service`, module
+  `facturation`). Fiche : `stories/STORY-1141.md` (D-1141-1 → 11, section « Contrat »). **Ajouts seuls** : aucun champ,
+  aucune route, aucun topic existant n'est renommé ni retiré.
+  - **`paiement`, déclaration** (`POST /api/v1/comptes-encaissement` et sa route déléguée `POST
+    /api/v1/admin/organisations/{orgId}/comptes-encaissement`) : corps + **`numeroImprimable`** facultatif (chaîne,
+    80 au plus ; normalisé : espaces réduits, majuscules ; `^\+?[A-Z0-9]+( [A-Z0-9]+)*$`, 4 à 64 sans les espaces) ;
+    servi pour `BANCAIRE` et `MOBILE_MONEY` seulement ; il doit finir, sans ses espaces, par les quatre caractères
+    visibles de l'empreinte. Refus neufs : `400 COMPTE_NUMERO_IMPRIMABLE_INVALIDE`, `422
+    COMPTE_NUMERO_IMPRIMABLE_NON_SERVI`, `422 COMPTE_NUMERO_IMPRIMABLE_DISCORDANT`.
+  - **`paiement`, route neuve** `PUT /api/v1/comptes-encaissement/{compteId}/numero-imprimable` et sa route déléguée
+    `PUT /api/v1/admin/organisations/{orgId}/comptes-encaissement/{compteId}/numero-imprimable` : corps `{
+    numeroImprimable: string | null }` (clé exigée, aucune autre ; `null` retire), droit `paiement:compte:administrer` ;
+    200 la vue du compte (le même numéro reposé : 200, rien d'écrit ni de publié) ; 404 commun ; les trois refus
+    ci-dessus ; `409 ECRITURE_CONCURRENTE`. **Vue du compte** : + `numeroImprimable` (absent si rien).
+  - **`paiement.compte.changed@1`** (sujet `paiement.compte.changed-value`, BACKWARD) : + **`numeroImprimable`**
+    facultatif, **absent** quand rien n'est déclaré (jamais `null`), absent toujours pour `PI_SPI` et `MARCHAND` ; le
+    fait part aussi au changement du numéro, à la révision de son acte. Topic toujours `@1`. Pour son seul consommateur
+    (`facturation`, D) : rien à faire avant la PR de `ventes` (sa lecture ignore un champ inconnu).
+  - **Journal chaîné du compte** : acte neuf `COMPTE_ENCAISSEMENT_NUMERO_IMPRIMABLE_DECLARE` (`…_PAR_MONEY_VIBES`
+    délégué ; phrase au client) — `compteId`, `empreinteVisible`, `empreinteNumeroImprimableAvant`,
+    `empreinteNumeroImprimableApres` (SHA-256 du numéro normalisé, ou `null`) ; la déclaration gagne
+    `empreinteNumeroImprimable` quand un numéro est déclaré. Jamais le numéro en clair au journal (ineffaçable ; son
+    tamis refuse un numéro de téléphone).
+  - **Manifeste `paiement` 1.1.0 → 1.2.0** à la source (C5 : la propriété facultative du fait, la route d'écriture,
+    hors `routesLectureSeule`) — **→ B** : la recopie au catalogue (demandée dans la PR de docs finale).
+  - **`ventes` (`facturation`)** : projection `facturation_comptes_lus` + `numeroImprimable` (`null` si absent ; une
+    révision sans la clé le retire) ; facture lue (`mentions.emetteur.comptes[]`) : `numero` est le numéro déclaré,
+    en entier, quand il existe (sinon la destination PI-SPI ou l'empreinte, D-1073-6) ; + **`origineDuNumero`**
+    (`DESTINATION_PI_SPI` | `NUMERO_IMPRIMABLE` | `EMPREINTE_VISIBLE`) sur les factures émises depuis 1141. Aucune
+    route, aucun droit, aucun topic neuf ; manifeste `facturation` inchangé. Pour les lecteurs de la facture (A, écran) :
+    rien d'obligatoire (champ neuf facultatif).
+
 - **PUBLIÉ (2026-11-26, STORY-349, prospera-fiscal-service#73, `dev` `136efdf`) sans écart ; ANNONCÉ (2026-11-26,
   STORY-349, avant le code, prospera-stories#962) — les obligations sociales d'une période naissent de l'écriture de sa
   base** (`prospera-fiscal-service`, dossier `remuneration`). Fiche : `stories/STORY-349.md` (D-349-1 → 8, section
