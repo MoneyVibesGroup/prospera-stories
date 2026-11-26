@@ -1001,6 +1001,30 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Passations
 
+- **Prêté le 2026-11-26 à D, pour STORY-1141 seule : `prospera-paiement-service`** (demande de D, journal de D,
+  « → B : passation de `prospera-paiement-service` limitée à STORY-1141 » ; lot 7 de D, plan §4 bis, #934 ; Q-D-15,
+  le numéro de compte imprimable). Le prêt **commence quand D ouvre STORY-1141** (sa quatrième story, après 1138 →
+  1140) et finit par une ligne de D dans son journal (« rendu »). Pendant ce temps, B n'écrit pas dans ce dépôt : la
+  seule story de B qui y touche au lot 7 est STORY-1136 (n° 18, le consommateur de `facturation.avoir.emis@1`), en fin
+  de lot ; si elle arrivait avant le retour, elle attendrait.
+  - **Dernier commit sur `dev`** (constaté le 26/11 à 00:50) : **`e2be149`** (MNV-1073, #125, de D) — rien n'a bougé
+    depuis le retour du 25/11. **Aucune PR ouverte**, **rien en cours** chez B. Checkout du poste sur `dev`, à jour,
+    propre.
+  - **Périmètre de 1141** (D) : le DAF déclare, avec le compte, un numéro non secret et tracé « à imprimer » ; paiement
+    le publie avec le compte (`paiement.compte.changed@1` : **ajout facultatif seulement**, Karapace BACKWARD, §1.8) ;
+    aucun déchiffrement du coffre (NFR-1, AD-14). Une nouvelle version de manifeste ou de schéma ⇒ recopie au
+    catalogue : à demander à B dans le journal de D.
+  - **Pièges** : ceux de la passation du 24/11 ci-dessous (« Pièges de paiement ») valent tels quels — client de
+    Confluent testé sous Node 24 seulement (étage `verification`), `npm ci --ignore-scripts` sous Node 25,
+    `.dockerignore` garde `test/`, `/health` 503 sans `PI_SPI_*` (`scripts/recette/976/`), invariants (codes d'acte
+    réservés, inventaire fermé `ECRITURES_DARGENT`, aucune minuterie, garde sans configuration, aucun identifiant avec
+    « change », seul le service des demandes écrit `$set: { etat }`), routes `@SurfacePlateforme()` en 404 avant la
+    garde. Plus, depuis 1073 : **`EcritureDArgent.executer` passe l'entrée consignée à `publier(resultat, entree)`**,
+    et la révision publiée est le rang de l'acte au journal chaîné du compte (D-1073-10 : un compte déclaré avant
+    le 25/11 n'est republié qu'à sa prochaine vérification).
+  - **Annoncé par D, à venir** : depuis STORY-1140 (export CSV du bilan, Q-D-19), une demande à B pour le contrat dans
+    `prospera-plateforme/contrats/instance/` (D l'écrira dans son journal à ce moment ; part « moteur » de B).
+
 - **Rendus le 2026-11-25 par D, fin de STORY-1073 : `prospera-dossier-service` et `prospera-paiement-service`**
   (journal de D, « → B (2026-11-25, fin de STORY-1073) », prospera-stories #850). Constaté par la session de groupe le
   25/11 : `origin/dev` de dossier = **`4352ac3`** (MNV-1073, #58), de paiement = **`e2be149`** (MNV-1073, #125), les SHA
