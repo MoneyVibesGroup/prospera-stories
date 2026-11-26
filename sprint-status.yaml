@@ -2160,6 +2160,18 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1124"
+    status: "in-progress"
+    owner: "Groupe B, lot 7, n° 6 — le circuit sans trou : la réception et ses boîtes dans une transaction, les mouvements d'une boîte verrouillés (sorties simultanées d'une même pièce, pièce et boîte, retour, restitution, original relié), la facture désinscrite de la comptabilité retirée du fonds (document-service, module ged ; le fait comptabilite.facture.desinscrite : C)"
+    source_doc: "prospera-stories/stories/STORY-1124.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite et contrat annoncé avant le code (2026-11-26) : réception et boîtes dans une transaction ; un verrou
+      par boîte (ged_boites.mouvements écrit d'abord dans la transaction) pour la sortie d'une boîte ou d'une pièce, le
+      retour, la restitution et l'original relié (409 PIECE_SORTIE neuf) ; comptabilite.facture.desinscrite v1 consommé
+      (proposé à C, demande au journal de B) : copie jamais versée retirée du fonds (409 PIECE_RETIREE), copie versée
+      gardée, attente désinscrite jamais rangée ; vue de pièce + desinscription ; manifeste ged 1.9.0. Aucune route ni
+      droit neufs, aucun fait publié. D-1124-1 → 8. Lot 7 de B, n° 6. NON SLOTTÉE.
   - range: "STORY-1123"
     status: "done"
     owner: "Groupe B, lot 7, n° 5 — les alertes de l'archiviste : retour d'un original en retard, échéance de conservation proche, quota dépassé, écart d'intégrité et étapes d'une destruction publiés (cinq faits Kafka par l'outbox, destinataires connus de la GED, aucun contenu de pièce) ; la liste des pièces échues de tout le cabinet, servie par l'index (document-service, module ged ; cloche et e-mail : notification, D)"

@@ -1203,6 +1203,29 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-26, STORY-1124) : publier `comptabilite.facture.desinscrite` v1 à l'abandon d'un brouillard né d'une
+  facture inscrite** (`prospera-comptabilite-service`) — **ouverte**, sans urgence (la GED est prête et ne bloque sur rien).
+  Relu le 26/11 sur `dev` `e4a53cc` : `BrouillardService.abandonner` supprime le brouillard, consigne
+  `ECRITURE_ABANDONNEE` et rend la facture inscriptible (`MemoireDesChoixService.surAbandon`) dans une transaction, sans
+  aucun fait ; la GED garde donc la copie rangée par `comptabilite.facture.inscrite`, et une réinscription entre une
+  seconde fois au fonds (D-1100-3). **Demandé** :
+  - **quand** : dans la transaction de l'abandon, par l'outbox, **seulement** si le brouillard est né d'une facture (la
+    pièce du lot qui portait `inscription.ecritureId` ; `surAbandon` la trouve déjà) ; topic **`comptabilite.facture.desinscrite`**,
+    clé `organisationId`, en-têtes `eventId` et `schemaVersion` posés par le relais (comme l'inscription) ;
+  - **forme** (schéma JSON 2020-12, `additionalProperties: false`, à mettre dans `contrat/schemas/comptabilite.facture.desinscrite.v1.json`,
+    sujet neuf au registre en BACKWARD, manifeste `comptabilite` en `publie`) : `{ eventId (uuid), schemaVersion: 1,
+    organisationId, dossierId, exerciceId, ecritureId, lotId (24 hex chacun), numeroProvisoire, pieceId (64 hex, le
+    SHA-256 du fichier), motif: "BROUILLARD_ABANDONNE", desinscriteLe (date-time), desinscritePar (non vide) }`, tous
+    requis — **ni montant, ni tiers, ni ligne** ; le texte proposé à l'octet est
+    `prospera-ocr-service/contrat/consommes/comptabilite.facture.desinscrite.v1.json` (branche `MNV-1124`, puis `dev`) :
+    le prendre tel quel épargne une recopie ; s'il change, B recopie le vôtre (la GED écarte un message hors de sa copie,
+    sans rien retirer) ;
+  - **ce que fait la GED** (déjà livré par STORY-1124, groupe `ged.comptabilite`) : la copie jamais versée sort du fonds,
+    la copie versée est gardée et marquée, une attente ne se range plus ; elle n'a besoin que de `organisationId`,
+    `dossierId`, `ecritureId`, `desinscriteLe`, `eventId`.
+  **Choix par défaut de B** : tant que le fait n'est pas publié, rien ne change pour le cabinet (la copie reste, comme
+  aujourd'hui). Prévenu par message (session `moneyvibes-apps-86`).
+
 - **→ C (2026-11-26, suite de STORY-953, D-L7B-9) : information — le contrat de l'export C13 est publié dans
   `prospera-plateforme/contrats/instance/`** (`export-c13-reponse.schema.json`, `export-c13-csv.cas.json`,
   `instance-c13.openapi.json` 1.1.0 ; plateforme #41, `d68a468`, étiquette `contrats-instance-v1.1` ; « ⚠ Contrats » du 26/11). Il
@@ -2032,6 +2055,25 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-26, STORY-1124 — le circuit sans trou, annoncé AVANT le code** (`document-service`, GitHub
+  `prospera-ocr-service`, branche `MNV-1124` ; fiche `stories/STORY-1124.md`, D-1124-1 → 8). **Aucune route neuve, aucun
+  droit neuf, aucun fait publié.** Ajouts seuls :
+  - **Réception** (`POST …/ged/cabinet/fonds/{numero}/receptions`) : bordereau et boîtes dans une transaction MongoDB ;
+    réponse inchangée.
+  - **Mouvements d'une boîte verrouillés** (sortie d'une boîte ou d'une pièce, retour, restitution, original relié) : la
+    boîte s'écrit d'abord dans la transaction (`ged_boites.mouvements`), l'état se rejuge dans la session. Refus
+    inchangés (`DEJA_SORTIE`, `DEJA_RENTREE`, `BOITE_RESTITUEE`, `BOITE_SORTIE`) ; **refus neuf 409 `PIECE_SORTIE`** sur
+    `PUT …/pieces/{pieceId}/original` quand l'original est dehors.
+  - **Facture désinscrite** : la GED consomme **`comptabilite.facture.desinscrite` v1, proposé à C** (« Demandes »), dans
+    le groupe `ged.comptabilite` ; une copie jamais versée est **retirée** du fonds (liste, versement, reprises, export,
+    échues, index ; fichiers gardés ; **refus neuf 409 `PIECE_RETIREE`** sur contrôle, indexation, version, original),
+    une copie versée est **gardée** ; une attente désinscrite ne se range plus.
+  - **Vue d'une pièce** (`GET …/ged/cabinet/pieces/{pieceId}` et toute réponse qui la rend) : champ facultatif neuf
+    **`desinscription?: { ecritureId, le, issue: RETIREE | GARDEE }`**.
+  - **Manifeste `ged` 1.9.0** (`manifestes/ged.manifest.ts`, cette PR) : `comptabilite.facture.desinscrite` en
+    `consomme` ; recopié dans le service par le code, puis au catalogue. **→ A** : types à régénérer depuis l'OpenAPI
+    vivant (descriptions seules, aucun DTO de réponse neuf) ; rien à faire avant le lot 8.
 
 - **2026-11-26, suite de STORY-953 — PUBLIÉ** (plateforme #41, `d68a468` sur `dev`, étiquette **`contrats-instance-v1.1`**) :
   conforme à l'annonce ci-dessous, sans écart. Empreintes (sha256) à l'étiquette : `export-c13-reponse.schema.json`
