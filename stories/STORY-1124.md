@@ -1,6 +1,7 @@
 # STORY-1124 : Le circuit sans trou — la réception et ses boîtes d'un seul geste, les mouvements d'une boîte verrouillés, la facture désinscrite retirée du fonds
 
-Status: in-progress — fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 6 de B,
+Status: done — **livrée le 2026-11-26** : document-service **#38** (`b18d3ad` sur `dev`), catalogue **#82** (`9674aeb`,
+`ged` 1.9.0) ; voir « Livraison ». Fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 6 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, ligne 6 ; identifiant réservé D-L7B-1).
 
 **Service :** `document-service` (GitHub `prospera-ocr-service`, module `ged`) · **Points :** 3 · **Dépend de :**
@@ -110,6 +111,59 @@ doublon). Réponse inchangée.
 - **OpenAPI** : la description de `GET …/pieces/{pieceId}`, `PUT …/original` et `POST …/sorties` (refus neufs et champ
   neuf). A en régénère les types (aucun DTO de réponse neuf).
 
+## Livraison (2026-11-26)
+
+- **Code** : document-service (`prospera-ocr-service`) **#38**, trois commits sur `dev` (`e51c4d5`, `4bb6fcb`, `b18d3ad` ;
+  arbre identique à `7706782` poussé) : `src/modules/ged/cabinet/` `physique.ts` (`refusDeSortie`, `originalDehors`),
+  `depot-physique.ts` (réception en transaction ; `verrouiller` : la boîte écrite d'abord, `$inc mouvements` ; `sortir`,
+  `rentrer`, `restituer`, `lierOriginal` sous le verrou), `physique.service.ts`, `facture-desinscrite.ts` (lecture et
+  validation du fait proposé), `factures.service.ts` (`desinscrire`, note relue avant et après le rangement),
+  `depot-factures.ts` (`noterDesinscription` par un pipeline, statut `DESINSCRITE`), `factures-consumer.bootstrap.ts` (deux
+  topics, un groupe), `cabinet.service.ts` (`desinscrireUneCopie`, `exigerNonRetiree`, vue `desinscription`),
+  `recherche.ts` et `index-de-recherche.ts` (une copie retirée close comme une détruite) ; `pieces/depot-ged.ts` (copies
+  retirées hors des pages d'un fonds ; `desinscription` au schéma) ; schéma proposé dans `contrat/consommes/` et
+  `cabinet/schemas/` (`86a50e6f…2ecf`, origine « proposé à C ») ; refus `PIECE_SORTIE`, `PIECE_RETIREE`. Manifeste `ged`
+  **1.9.0** recopié depuis `prospera-stories@95d4465` (#959), empreinte épinglée.
+- **Catalogue** : `platform-catalog-service` **#82**, `9674aeb` sur `dev` : `ged` 1.9.0 recopié depuis
+  `prospera-stories@5bd506e` (seul manifeste qui change ; `manifestes:garde` verte, 48 ; spec 26/26).
+- **C** a accepté le fait le 26/11 (message de la session de groupe) : il le place dans sa **STORY-338** et reprend le
+  schéma proposé tel quel ; à sa fusion, B recopie l'octet de C (même texte attendu : rien ne change).
+- **Preuves** :
+  - Node 25 : unitaires 1 359 passés (116 suites ; 2 rouges connues du poste) ; e2e **217/217** ; lint des fichiers
+    touchés, `tsc`, build.
+  - Node 24 (étage `verification`, image depuis `git -c core.autocrlf=false archive 7706782`) : **116/116 suites**, 1 366
+    passés ; e2e **217/217**.
+  - Mutations **24/24** rouges sur assertion (règles pures, second jugement du dépôt en mémoire et en Mongo, réception
+    hors session, original relu sous le verrou, copie versée retirée, geste sur une copie retirée, note ignorée avant et
+    après le rangement, note jamais posée, attente remise, liste et filtre Mongo qui gardent la copie, index et recherche
+    qui la gardent, consommateur qui confond les topics, schéma sans le champ). Deux survivantes au premier tour (M6, M18)
+    tuées par des tests directs du dépôt ; M24 ne rougissait qu'au compilateur (le test lit sans le type inféré).
+  - **Pile `grp-b` neuve** (Mongo 7 `rs0`, Kafka 3.9, Redis, MinIO Chainguard, doublure d'auth), **41/41** : réception de
+    40 boîtes ; une réception refusée par la base (validateur posé pour la preuve) : 500, ni réception ni boîte ; **10
+    sorties simultanées d'une pièce : 1 × 201, 9 × 409** (325 ms), une sortie ouverte en base ; pièce et boîte entière
+    mêlées : 1 ; 10 sorties d'une boîte : 1 ; **10 retours : 1 × 200, 9 × 409** ; restitution et sortie simultanées (trois
+    fois) : une seule passe, jamais `RESTITUEE` avec une sortie ouverte ; original sorti déplacé : 409 `PIECE_SORTIE` ;
+    déplacement et sortie simultanés : 200 / 409 `PIECE_HORS_BOITE` ; une facture rangée depuis un vrai fait Kafka (pièce
+    comptable déposée par `POST /piece-extractions`) puis désinscrite : **RETIREE** (hors liste, 409 `PIECE_RETIREE`,
+    absente de la recherche, entrée close, version gardée) ; versée : **GARDEE** ; attente désinscrite jamais rangée ;
+    désinscription avant l'inscription : rien de rangé ; hors contrat écarté, le suivant lu.
+  - Verrou : 09:08 → 09:19 (première passe : le schéma strict, D-1124-10), 09:22 → 09:25 (`down -v`), gardé par le
+    redémarrage du poste jusqu'à 09:39 (rendu à la reprise), étage `verification` 10:04 → 10:07.
+
+### Écarts au contrat, décidés au code
+
+- **D-1124-9 — La sortie d'une pièce relit aussi la boîte de son original sous le verrou** : sans cela, un déplacement
+  de l'original et sa sortie simultanés laissaient une sortie ouverte dans l'ancienne boîte (relevé en écrivant le
+  script de preuve) ; elle rend alors 409 `PIECE_HORS_BOITE` (code existant). Le déplacement verrouille l'ancienne et la
+  nouvelle boîte, dans l'ordre des identifiants.
+- **D-1124-10 — Le schéma Mongo des pièces déclare `desinscription`** : strict, il retirait le champ de chaque écriture en
+  silence (première passe de la pile : 6 KO sur la désinscription, les doubles en mémoire verts) ; un test construit un
+  document du modèle et lit le champ.
+- **D-1124-11 — Le consommateur garde son libellé de supervision** (`comptabilite.facture.inscrite`) et son groupe : la
+  santé Kafka nomme le groupe, pas les topics.
+- **D-1124-12 — La note de désinscription se pose par un pipeline d'agrégation** (`updateOne` avec `upsert`) : la première
+  désinscription seule compte, une facture rangée reste `RANGEE`, deux notes simultanées se rejouent sur l'unique.
+
 ## Critères d'acceptation
 
 - **AC-1** : une réception s'écrit avec toutes ses boîtes ou pas du tout (transaction) ; prouvé sur la pile (une
@@ -153,5 +207,6 @@ doublon). Réponse inchangée.
 
 ## Nommé pour plus tard
 
-- La publication du fait par la comptabilité (C) ; la recopie à l'octet de son schéma dans la GED (B, à la fusion de C).
+- La publication du fait par la comptabilité (C, STORY-338, acceptée le 26/11) ; la recopie à l'octet de son schéma dans la
+  GED (B, à la fusion de C).
 - Une alerte « copie gardée, écriture abandonnée » pour l'archiviste (un fait de plus, STORY-1123).
