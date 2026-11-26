@@ -1701,6 +1701,10 @@
   le nommerait sans livraison. (2) `COTISATIONS_SOCIALES` et `RETENUE_IRPP` sont écrites par la dérivation sociale
   de D ; si le catalogue les porte un jour, il fait foi (D-349-5). (3) Pour 350 : `ObligationsModule` ne peut pas
   importer `RemunerationModule` sans `forwardRef` (cycle) ; un module de 350 peut importer les deux.
+  - **Ajout du 2026-11-26 (STORY-331), toujours non bloquant** : le point (1) a désormais un effet visible. Un paquet de
+    formulaire sert une déclaration par son `canal` et sa `taxe` (D-331-3) : tant que le canal de `RETENUE_IRPP` sort
+    `NON_DECLARE`, la retenue sur salaires (déposée sur dimana, 1102) n'a pas de format. Dès que le paquet fiscal nomme
+    ce canal, D ajoute `TG × RETENUE-IRPP` par donnée seule (D-331-9). Prévenu par SendMessage.
 
 - **← B : cloche et e-mail des cinq faits `ged.*` de la GED du cabinet (document-service #37 ; demande au journal de B,
   `main` f760f37) — reçue, hors lot 7, à placer par l'utilisateur.** Rien n'est codé par D.
@@ -2230,6 +2234,16 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-331, avant le code)** — branche `MNV-331` de `prospera-fiscal-service`, partie de
+  `origin/dev` `7d48fd9`. **Aucune migration** (aucun stockage ne change), ni `app.module.ts` (la route neuve entre dans
+  `LivrablesDeclarationController`, déjà monté), ni `package.json` (le `prebuild` appelle la même garde, étendue), ni
+  `read-models/`, ni copie du paquet fiscal, ni manifeste `declarations`. Touché : **le contrat OpenAPI** (une route
+  neuve, un refus de plus sur la route du classeur de 330, un champ `nature` sur les deux réponses du dépôt engagé :
+  « ⚠ Contrats »). Données neuves dans le dossier de D : `modules/paquets-depot/assets/manifeste-formulaires.json` et
+  `tg-tva-1.0.json` (LF, vérifiées par sha256) ; `manifeste.json` et `tg-dsf-*.json` **intacts**. **Lus, sans y écrire**
+  (dossiers de C) : `domain/obligations/version-declaration.ts` (`contenuDeclareDe`), les ports des obligations et des
+  versions. **→ C** : rien à faire pour un rebase ; `etatsActifs` (le calendrier des dépôts que lisent les échéances) ne
+  voit jamais un formulaire (D-331-2).
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#76, `dev` `7d48fd9`, sur `origin/dev` `7e2bff8`, qui n'avait pas
   bougé : aucun rebase), conforme à l'annonce, plus un fichier de D : `src/modules/coffre-secrets/garde-ad13.spec.ts`
   (la route du livrable d'une déclaration reçoit le classeur de 537, D-330-17) ; ANNONCÉ (2026-11-26, STORY-330, avant
@@ -2306,6 +2320,27 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-26, STORY-331, avant le code) — le format de canal décrit comme une donnée du paquet**
+  (`prospera-fiscal-service`, modules `paquets-depot`, `livrables-depot` et `depots`). Fiche : `stories/STORY-331.md`
+  (D-331-1 → 12, section « Contrat »).
+  - **`GET /api/v1/livrables-declaration/{obligationId}/formulaire`** (droit `fiscalite:declaration:preparer`) : 200
+    `{ obligationId, nature: 'SAISIE_FORMULAIRE', format: { pays, etat, version, checksum }, statutFormat, estampille:
+    { numero, empreinte }, champs: [{ rang, code, libelle, type: 'MONTANT' | 'PERIODE', valeur: string | null }] }` —
+    les valeurs du contenu de l'estampille (la version scellée si elle l'est), dans l'ordre du formulaire. Refus : `404
+    OBLIGATION_INTROUVABLE`, `409 DECLARATION_NON_VALIDEE`, `409 OBLIGATION_DESACTIVEE`, `422
+    FORMAT_DE_CANAL_NON_DECLARE`, `422 FORMAT_DE_CANAL_ILLISIBLE`, **`422 FORMAT_DE_CANAL_AUTRE_NATURE`** (`{ nature
+    }`), **`422 FORMAT_DE_CANAL_INCOMPLET`** (`{ champ }`), **`422 VALEUR_DE_CANAL_ABSENTE`** (`{ champ, valeur }`),
+    **`422 VALEUR_DE_CANAL_HORS_CONTRAINTE`** (`{ champ, contrainte }`), `502 PAQUET_DEPOT_INTEGRITE`, `502
+    VERSION_SCELLEE_INTROUVABLE`.
+  - **Changé** : `POST /api/v1/livrables-declaration/{obligationId}` (330) rend `422 FORMAT_DE_CANAL_AUTRE_NATURE` (`{
+    nature: 'SAISIE_FORMULAIRE' }`) sur une déclaration que seul un formulaire décrit (elle rendait
+    `FORMAT_DE_CANAL_NON_DECLARE`). `POST /api/v1/depots-declaration` et `GET /api/v1/depots-declaration/{depotId}`
+    gagnent **`nature`** (`TELEVERSEMENT_FICHIER` | `SAISIE_FORMULAIRE` | `null`) ; le `format` d'une TVA sur dimana y
+    est la référence de `TG × TVA` 1.0 (il valait `null`). Toujours aucun champ d'accusé.
+  - **Données** : le paquet de formulaire `TG × TVA` 1.0 (dimana), `statut: 'amorce'` (Q-D-28) ; le GUDEF reste `TG ×
+    DSF` 1.3. Aucun topic, droit, acte ni stockage. **→ A (plus tard)** : FE-081 lit `nature` pour choisir l'écran
+    (téléverser ou recopier) ; 332 affichera les valeurs dans l'ordre.
 
 - **PUBLIÉ (2026-11-26, STORY-330 : prospera-fiscal-service#76, `dev` `7d48fd9`) sans écart ; ANNONCÉ (2026-11-26,
   STORY-330, avant le code, prospera-stories#978, `main` 6f6b797) — le livrable d'une déclaration et le dépôt engagé**
@@ -3557,6 +3592,12 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-28 (2026-11-26, STORY-331) — Le formulaire mensuel de TVA de dimana : quelles lignes, dans quel ordre ?**
+  **Choix par défaut** (D-331-9) : les trois valeurs que le produit tient (la période, la base imposable, la TVA due),
+  dans cet ordre, au paquet `TG × TVA` 1.0 en `statut: 'amorce'` ; le relevé du formulaire réel se fait au premier dépôt
+  réel (1102). Une ligne de plus ne coûte qu'une version du paquet si sa valeur existe dans le produit ; sinon, elle reste
+  à saisir sur le portail, et le guidage (332) le dira.
 
 - **Q-D-27 (2026-11-26, STORY-330) — Engager un dépôt fait-il passer la déclaration à « Déposée » ?** **Choix par
   défaut** (D-330-7) : non. « Déposée » est la transmission (D-323-3) et reste la porte de C, avec l'accord du client et
