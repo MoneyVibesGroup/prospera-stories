@@ -137,16 +137,18 @@ reserved_ranges:
       4/4 ; mutations 22/22 ; pile grp-d saine. Q-D-23 au PO. Lot 7 de D, n° 5b (§4 bis). Détachée de la plage 1139 →
       1141 (entrée propre). Suivante : STORY-1140.
   - range: "STORY-1140"
-    status: "in_progress"
+    status: "DONE"
     owner: "Groupe D — l'export C13 du bilan aussi en CSV, à la forme par objet de balance (Q-D-19 ; prospera-bilan-service ; contrat à publier par B)"
     source_doc: "prospera-stories/stories/STORY-1140.md"
     reserved_on: "2026-11-26"
     note: >-
-      Fiche écrite et contrat annoncé avant le code (« ⚠ Contrats » du journal de D) : ?format=json|csv et ?objet= sur
-      GET /api/v1/instance/bilan/{organisationId}/export, un objet par fichier CSV (BOM, ;, CRLF, neutralisation),
-      FORMAT_NON_SERVI et OBJET_REQUIS, Cache-Control: no-store ; → B : le contrat dans
-      prospera-plateforme/contrats/instance/ (ouverte). Lot 7 de D, n° 5c (§4 bis). Détachée de la plage 1140 → 1141
-      (entrée propre).
+      🏁 DONE le 2026-11-26 — prospera-bilan-service#195 (dev c29fcc2, 7f96163) ; annonce « ⚠ Contrats » avant le code
+      (docs #953, main 67efaf9). ?format=json|csv et ?objet= sur GET /api/v1/instance/bilan/{organisationId}/export : un
+      objet par fichier CSV à la forme de balance (BOM, ;, CRLF, neutralisation), FORMAT_NON_SERVI, OBJET_REQUIS,
+      Cache-Control: no-store ; le contrat de B (plateforme #41, contrats-instance-v1.1, d68a468) recopié à l'octet, ses
+      huit cas rejoués. Node 24 : unitaires 373/373 suites (deux passes --shard), e2e 45/45 (3 592) ; mutations 32/32 ;
+      pile grp-d 15/15. Lot 7 de D, n° 5c (§4 bis). Détachée de la plage 1140 → 1141 (entrée propre). Suivante :
+      STORY-349 (319 de C fusionnée).
   - range: "STORY-1141"
     status: "RÉSERVÉ"
     owner: "Groupe D — lot 7, amendement du 26/11 : facture et paiement (1141)"
