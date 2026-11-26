@@ -74,8 +74,8 @@
    lit la balance d'une organisation par ces routes.
 8. 🏁 **Les cinq stories de balance placées en tête du lot 7 sont livrées : 1020, 1019, 1021, 1022, 1023** (564, du
    fiscal, glissée entre 1021 et 1022 par l'amendement du point 4).
-9. **Suivante : STORY-317** (les reports d'échéance administratifs, fiscal ; fiche à écrire juste avant de coder). Elle
-   sert au plus tard la demande de D (STORY-348) : le bloc `cnss.collecte` au paquet fiscal.
+9. 🚧 **STORY-317 EN COURS (26/11)** — les reports d'échéance administratifs (fiscal ; fiche écrite, D-317-1 → 8 ;
+   annonce « ⚠ Contrats » et « ⚠ Communs » avant le code). Sert la demande de D (STORY-348) : `cnss.collecte` au paquet.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -526,6 +526,20 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-317, avant le code)** — branche `MNV-317` de `prospera-fiscal-service`. **Aucune migration**
+  (deux champs facultatifs sur `obligations`, `echeanceLegale` et `report` ; une obligation antérieure se lit sans eux),
+  ni `app.module.ts`, ni `package.json`, ni `read-models/`, ni manifeste `declarations`. Touchés :
+  - **le contrat OpenAPI** : deux routes neuves et des champs ajoutés (« ⚠ Contrats ») ;
+  - **la copie du paquet fiscal** `test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`, recopiée à l'octet (LF) de
+    l'artefact de `balance-service` : **`cnss.collecte`** y entre (demande de D, STORY-348) ;
+  - **deux specs de D** (dossier `remuneration`), parce que le vrai paquet déclare désormais la collecte :
+    `src/domain/remuneration/calcul-social.spec.ts` et `src/application/remuneration/calcul-remuneration.service.spec.ts`
+    (les cotisations passent de `NON_DECLAREE` à `DECLAREE`, au 15 du mois suivant, **sans changer une ligne de code de
+    D**) ;
+  - tout le reste dans les dossiers de C (`domain/obligations`, `application/obligations`, `modules/obligations`,
+    `adapters/mongo` des obligations, `test/utils/registre-obligations-memoire.ts`).
+  **→ D** : rien à faire pour un rebase ; rien de ce que D lit ne change de nom (`irpp.traitementsSalaires`,
+  `cnss.affiliation.<TYPE>`, `cnss.amu.collecte`, `calculerIrppTraitementsSalaires`, `decimal-exact`).
 - **FUSIONNÉ (2026-11-25, prospera-fiscal-service#66, `dev` `fd34834`, rebasée sur `origin/dev` `4a1d938` avant la
   fusion), conforme à l'annonce ; ANNONCÉ (2026-11-25, STORY-564, avant le code, #921)** — branche `MNV-564` de
   `prospera-fiscal-service`. **Aucune
@@ -539,6 +553,29 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-317), ANNONCÉ avant le code** — **les reports d'échéance administratifs** (`prospera-fiscal-service`,
+  REST ; et le paquet fiscal Togo 2026). Fiche : `stories/STORY-317.md` (D-317-1 → 8). Consommateurs : les écrans du
+  calendrier (A) ; STORY-318 et 319 (C) ; le calcul social de D (`cnss.collecte`).
+  - **Changé, comme l'AC-1 le demande** : sur une obligation reportée, **`echeance`** rend la **date reportée**
+    (l'échéance applicable) ; sans report, rien ne change.
+  - **Ajouté** à `ObligationResponseDto` : **`echeanceLegale`** (`string | null`, la date du paquet) et **`report`**
+    (`{ reportId, date, echeanceLegale, decision: { reference, du }, motif, par, le } | null`) ; à `LigneCalendrierDto`
+    (`GET /obligations/calendrier`) : **`echeanceLegale`** et **`reportee`** (booléen). Le calendrier trie, filtre et
+    pagine sur l'applicable.
+  - **Routes neuves** (droit `fiscalite:declaration:valider`) : **`POST /api/v1/obligations/reports`**
+    `{ obligationIds (1 à 50, un seul dossier), date, decision: { reference, du }, motif }` → `200 { reportId, date,
+    decision, obligations[] }`, tout ou rien ; refus `400 REPORT_PORTEE_INVALIDE`, `404 OBLIGATION_INTROUVABLE`,
+    `409 OBLIGATION_DESACTIVEE` / `OBLIGATION_CLOTUREE` / `REPORT_CONCURRENT`, `422 ECHEANCE_LEGALE_ABSENTE` /
+    `REPORT_NON_POSTERIEUR` / `DECISION_POSTERIEURE`. **`POST /api/v1/obligations/{id}/report/annulation`** `{ motif }` →
+    `200` (retour à la légale), `409 AUCUN_REPORT`.
+  - **Journal chaîné** : actes **`OBLIGATION_ECHEANCE_REPORTEE`** (auteur, date de la décision, portée `{ dossierId,
+    obligations }`, légale, applicable d'avant, empreintes de la référence et du motif) et **`OBLIGATION_REPORT_ANNULE`**.
+  - **Re-dérivation** : la légale se récrit, le report reste (champ humain, AD-17) ; un report n'avance jamais une
+    échéance.
+  - **Paquet fiscal Togo 2026** (source de `balance-service`, demande de D en STORY-348) : **`cnss.collecte`**
+    `{ jourLimite: 15, moisSuivant: true, organisme: "CNSS Togo", source, aValider }` ajouté ; rien n'est renommé ni
+    retiré. **L'empreinte du paquet change** (donnée à la publication) ; copies à l'octet dans `balance-service` et
+    `prospera-fiscal-service`, celle de `dossier-service` → B.
 - **2026-11-26 (STORY-1023), PUBLIÉ** (balance-service #170, `75179cf` sur `dev`) — **conforme à l'annonce** (#930),
   avec deux ajouts écrits : les codes que le contrat taisait sont déclarés (200 du rejeu idempotent de `POST /balances`,
   201 des POST de reprise, D-1023-12) et le 403 de la garde porte `LECTURE_PLATEFORME_REFUSEE` (un rôle de cabinet est
