@@ -109,9 +109,18 @@
    D-319-1 → 11 dans la fiche. **D prévenu** (349).
 12. 🏁 **EPIC-030 fini** (315 → 319 : le calendrier du portefeuille, les échéances du paquet, les reports, les alertes, le
    responsable et la charge).
-13. 🚧 **STORY-321 en cours (26/11)** : la délégation du calcul au moteur de `balance-service` (fiscal, branche `MNV-321` ;
-   balance-service lu seulement, D-321-1) ; fiche `stories/STORY-321.md` écrite avant le code (D-321-1 → 11), contrat et
-   communs annoncés ci-dessous (« ⚠ Contrats », « ⚠ Communs »).
+13. ✅ **STORY-321 DONE (26/11)** : fiscal **#72** (`493a817` sur `dev`), annonce #955 avant le code ; **balance-service
+   non touché** (D-321-1 : la correspondance obligation → lecture du moteur reste au fiscal, celle de 326). Le calculé d'une
+   obligation vient du moteur par le port `SourceMoteurFiscal` (jeton de l'appelant, exercice de la balance des bases) :
+   `TVA` → `aPayer`, `IS_ACOMPTE` → `theorique`, **`TPU` → `tpuDue`** (`GET …/fiscal/tpu`, neuf) ; `TAF`, `TCA`, `RSH`,
+   `TPU_ACOMPTE` nommés `TAXE_NON_CALCULEE_PAR_LE_MOTEUR`. Chiffré **à la prise en charge** (même transaction ; un moteur
+   muet se nomme dans `calculMoteur`, sans montant), recalculable de `EN_PREPARATION` à `A_VALIDER` (`POST
+   /obligations/{id}/calcul` ; injoignable ⇒ `503`, rien d'écrit), **figé au visa** (`CALCUL_NON_ACTUALISABLE`) ; acte
+   `OBLIGATION_CALCUL_CONSTATE` ; `montantAttendu` humain (la dérivation ne le remet plus à `null`) ; `triplet.calcule.motif` ;
+   garde AST d'AC-2. Node 24 : e2e 13/13, 292 ; conformité 22/22, 140 ; unitaires 214 suites, 3131 ; mutations 31/31 ; pile
+   `grp-c` fiscal + balance saine. Verrou pris deux fois (08:10 → 08:23, 08:28 → 08:44). D-321-1 → 11 dans la fiche.
+14. **Suivante : STORY-324** (la validation du client capturée comme pièce, EPIC-031 ; fiche à écrire juste avant de coder ;
+   dépend de 323 ✅). Puis 325, que **330 de D attend**.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -582,7 +591,11 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-26, STORY-321, avant le code)** — branche `MNV-321` de `prospera-fiscal-service`. **Aucune
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#72, `dev` `493a817`, sur `origin/dev` `0cc79a7`)** — conforme à l'annonce
+  (contrat OpenAPI, `lecture-amont.ts` au 409 facultatif ; aucune migration). **→ D** : rien à faire pour un rebase ; toute
+  la suite (unitaires, e2e, conformité) est verte en Node 24 ; la spec chronométrée `libelle-imprime.spec.ts` (dossier de D)
+  peut rougir sous la charge d'une suite entière et passe seule.
+  **ANNONCÉ (2026-11-26, STORY-321, avant le code)** — branche `MNV-321` de `prospera-fiscal-service`. **Aucune
   migration** (un champ neuf facultatif `calculMoteur` sur `obligations`, absent ⇒ `null` ; `montantAttendu` existe déjà, à
   `null` partout : la dérivation cesse de le remettre à `null`, il passe de `$set` à `$setOnInsert`). Ni `app.module.ts`,
   ni `package.json`, ni `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touchés : **le contrat OpenAPI**
@@ -656,6 +669,8 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-321), PUBLIÉ** (fiscal #72, `493a817`) — **conforme à l'annonce** (#955). **→ A (FE-081)** : types à
+  régénérer (`calculMoteur`, `triplet.calcule.motif`, route `…/calcul`). Annonce :
 - **2026-11-26 (STORY-321), ANNONCÉ avant le code** — **le calculé d'une obligation vient du moteur de `balance-service`**
   (`prospera-fiscal-service`, REST ; `balance-service` lu seulement). Fiche : `stories/STORY-321.md` (D-321-1 → 11).
   Consommateurs : les écrans des obligations et du triplet (A, FE-081) ; STORY-328 (anomalies, lit déjà
@@ -1339,6 +1354,14 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-321, 26/11) une spec qui fige la forme d'une écriture rougit quand un champ change de nature** :
+  `mongo-registre-obligations.spec.ts` liste les champs dérivés (`$set`) et humains (`$setOnInsert`) ; passer
+  `montantAttendu` d'un côté à l'autre la rougit, et seul le Node 24 complet l'a vu (les specs ciblées ne la jouaient
+  pas). Jouer la suite entière avant de lancer la preuve Docker, pas pendant.
+- **(STORY-321)** les mutations jouées en local pendant une suite Docker chargent le poste : une spec chronométrée de D
+  (`libelle-imprime.spec.ts`, borne de 500 ms) rougit, verte seule. Ne pas lancer les deux ensemble ; une mutation qui laisse
+  un symbole inutilisé ou rétrécit un type rougit par `TS` (6 sur 28 au premier jet) : la réécrire.
 
 - **(STORY-319, 26/11) un test qui règle l'horizon par la configuration ne prouve pas l'horizon du cabinet** : la mutation
   « `horizon(null)` » (le défaut au lieu de celui de l'organisation) a survécu tant que le test passait l'horizon par le

@@ -1,7 +1,8 @@
 # STORY-321 : Le calcul délégué au moteur de `balance-service` — le calculé vient du moteur, jamais d'ici
 
-Status: in-progress — écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 5 du fiscal,
-`PLAN-LOT-7-2026-11-24.md` §3) ; contrat annoncé avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de C).
+Status: done — **livrée le 2026-11-26** : prospera-fiscal-service **#72** (`493a817` sur `dev`) ; voir « Livraison ».
+Écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 5 du fiscal,
+`PLAN-LOT-7-2026-11-24.md` §3) ; contrat annoncé avant le code (#955, « ⚠ Contrats » et « ⚠ Communs » du journal de C).
 Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-031, STORY-321).
 
 **Epic :** EPIC-031 · **Points :** 5 · **FR :** FR-F23 · **Architecture :** AD-1 (le noyau ne calcule aucun impôt), AD-4
@@ -126,6 +127,40 @@ bases, D-320-13). **Jamais un montant inventé** : ni zéro, ni montant partiel,
   traitement **facultatif** du `409` (un appelant qui ne le demande pas garde son comportement). Rien dans les dossiers
   de D.
 
+## Livraison (2026-11-26)
+
+- **fiscal** (#72, `493a817` sur `dev`, sur `0cc79a7`) — **une seule PR de code** : `balance-service` n'est pas touché
+  (D-321-1), aucun ordre de fusion à tenir. `domain/obligations/calcul-delegue.ts` (correspondance obligation → lecture du
+  moteur, constat `CALCULE` / `INDISPONIBLE` et ses motifs, gardes du recalcul, acte `OBLIGATION_CALCUL_CONSTATE`),
+  `application/obligations/calcul-obligations.service.ts` (prise en charge, recalcul), `SourceMoteurFiscal.tpu` et
+  `interpreterTpu`, 409 facultatif de `lecture-amont.ts`, `RegistreObligations.constaterCalcul` et `transitionner(…, calcul)`,
+  `montantAttendu` et `calculMoteur` en `$setOnInsert`, `triplet.calcule.motif`, route `POST /api/v1/obligations/{id}/calcul`,
+  champ `calculMoteur` ; garde `src/garde-calcul-delegue.spec.ts` (AC-2).
+- **Les AC en tests** : AC-1 (unitaire et e2e : TVA, acompte d'IS et TPU demandés au moteur avec le jeton de l'appelant sur
+  l'exercice de la balance des bases ; le triplet lit `MOTEUR` ; sur le vrai MongoDB, état, bases et calcul dans une
+  transaction, la chaîne intacte, une re-dérivation qui garde le calcul) ; AC-2 (garde AST, et ses deux mutations) ; AC-3
+  (unitaire et e2e : prise en charge qui passe avec un constat `MOTEUR_INDISPONIBLE` sans montant, recalcul en `503` sans
+  rien écrire, puis abouti ; figé au visa).
+- **Preuves** (Node 24, image `verification` de l'archive LF) : e2e **13/13 suites, 292** (6 neufs) ; `test:conformite`
+  **22/22, 140** (dont `calcul-delegue.conformite-spec.ts`, 8) ; unitaires **214 suites, 3131 tests verts** sur deux
+  passes (la première, sur `eb7293c`, rougissait la spec du registre qui exigeait encore `montantAttendu` en `$set` : corrigée
+  dans `5a2533d` ; la seconde, sur `5a2533d`, une seule suite de D chronométrée, `libelle-imprime.spec.ts` — 851 ms pour une
+  borne de 500 sous la charge des mutations —, verte seule) ; `nest build` ; **mutations 31/31** rouges sur l'assertion
+  (unitaires, e2e, et 3 sur MongoDB : la dérivation qui remet `montantAttendu` à `null`, le recalcul sans comparaison-échange,
+  la prise en charge qui ne pose pas le constat) ; §1.5 et gate : `docker compose -p grp-c` (fiscal + balance-service, archive
+  de `origin/dev` `44be0c1`) : les deux sains sans redémarrage, route montée, 0 `UnknownDependencies`, `calcul`, `transition`,
+  `bases` en 401 sans jeton, et `…/fiscal/tva`, `…/acomptes`, `…/tpu` joignables depuis le conteneur du fiscal à
+  `BALANCE_SERVICE_URL` (401 sans jeton). **Non prouvé** : un calcul servi par un `balance-service` réel avec un jeton
+  (il faudrait l'IdP, un dossier, une balance et ses cahiers) ; l'adaptateur est éprouvé contre `fetch` simulé au contrat lu
+  dans `DeclarationTvaResponseDto`, `CalendrierAcomptesResponseDto` et `TpuResponseDto`. Node 25 : les 4 suites rouges
+  connues (client Kafka natif), comme sur `origin/dev`. Lint des fichiers touchés : aucun écart neuf. Verrou pris deux fois
+  (08:10 → 08:23, 08:28 → 08:44).
+
+### Écarts au contrat, décidés au code
+
+- Aucun écart de contrat. Une précision : `triplet.calcule.message` d'une taxe que le moteur ne chiffre pas dit désormais
+  « Le moteur fiscal de la balance ne calcule pas cette taxe » (le texte n'est pas un contrat ; le code est `motif`).
+
 ## Décisions prises au contrat (contestables)
 
 - **D-321-1 — Le fiscal demande au moteur ; la correspondance obligation → lecture reste ici, `balance-service` n'est pas
@@ -187,4 +222,5 @@ jeton. Pas de preuve Kafka (aucun événement).
 
 | Date | Événement |
 |---|---|
-| 2026-11-26 | Fiche écrite, contrat et communs annoncés (PR de docs) avant le code. |
+| 2026-11-26 | Fiche écrite, contrat et communs annoncés (PR de docs #955) avant le code. |
+| 2026-11-26 | **DONE.** Code : fiscal #72 (`493a817` sur `dev`). Preuves : voir « Livraison ». |
