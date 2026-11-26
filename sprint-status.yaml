@@ -8366,8 +8366,9 @@ sprints:
         epic: "EPIC-032"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in-progress"  # 2026-11-26 (D, lot 7 n° 12) : fiche écrite et contrat annoncé avant le code ; réalignement : 682 archive le fichier de la LIASSE et le relit par URL présignée ; 333 archive la pièce de l accusé sans la relire ; 335 archive le livrable déposé d une DÉCLARATION, relit livrable et pièce par URL présignée, et rend l archive par version (pour 336) ; la copie dans document-service est demandée à B (D-335-9, Q-D-31).
+        story_path: "stories/STORY-335.md"
+        assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-336"
         title: "Dossier de contrôle à la demande"
         epic: "EPIC-032"

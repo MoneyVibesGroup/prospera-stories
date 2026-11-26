@@ -1897,6 +1897,20 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-26, STORY-335) : recevoir dans le fonds d'archives du client les pièces du dépôt d'une déclaration —
+  ouverte, à placer par la session de groupe de B.**
+  - Pourquoi : AC-1 de 335 (« archivé dans `document-service`, rattaché au dossier, à l'implantation, à l'obligation et à
+    la période ») et V9 de la salle du 19/11 (« la liasse figée, son accusé et la validation du client dans le même fonds
+    d'archives que les pièces », 1100). Le fonds est la GED de B ; sa pièce ne s'indexe aujourd'hui ni par obligation, ni
+    par implantation, ni par période, et aucun fait du fiscal n'y est consommé.
+  - Ce que D fournit (fiscal, `MNV-335`) : l'original, dans le bucket privé du fiscal (682), rattaché (`obligationId`,
+    `dossierId`, `implantationId`, `redevableId`, `taxe`, `periode`, `numero`, `empreinte` sha256), relu par URL présignée
+    re-vérifiée ; l'archive par version (`GET /api/v1/depots-declaration/archives?obligationId=…`).
+  - Ce que B choisit : la forme de la copie (un fait du fiscal, `fiscal.depot.piece-archivee`, que la GED consomme en
+    demandant les octets par une route de service du fiscal ; ou une route de dépôt de la GED que le fiscal appelle), et
+    l'indexation (obligation, implantation, période, version). D émet le fait ou appelle la route dès que B a choisi ; rien
+    n'est émis d'ici là (D-335-9). La copie ne remplace pas l'original : la preuve reste re-vérifiée au fiscal (Q-D-31).
+
 - **→ C (2026-11-26, STORY-334) : ouvrir `DEPOSEE → A_DEPOSER` sur un rejet consigné — ouverte.** Livré par D :
   fiscal #82 (`dev` `69d7e65`) ; le SHA a été envoyé à C (`moneyvibes-apps-f7`).
   - Pourquoi : AC-1 de 334 (« un rejet enregistré, l'obligation revient dans le cycle sans qu'aucune version antérieure
@@ -2479,6 +2493,13 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-335, avant le code)** — branche `MNV-335` de `prospera-fiscal-service`, partie de
+  `origin/dev` `69d7e65`. **Aucune migration** (une collection neuve, `livrables_archives_depot`, index posés par Mongoose
+  au démarrage), ni `app.module.ts` (les routes entrent dans `DepotsDeclarationController`, déjà monté ; le registre des
+  livrables archivés est fourni par `AccusesDepotModule`, fichier de D, qui n'importe toujours pas `ObligationsModule`),
+  ni `package.json`, ni `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touché parmi les communs : **le
+  contrat OpenAPI** (quatre routes neuves). **Aucun fichier de C.** Aucune minuterie neuve (garde de 318).
+
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#82, `dev` `69d7e65`, rebasée sur `origin/dev` `c459960` — 339 de C, au-dessus de `74b33ec`, qui touchait aussi le contrat OpenAPI et `ObligationsModule` : aucun conflit — avant la fusion), conforme à l'annonce ;
   ANNONCÉ (2026-11-26, STORY-334, avant le code)** — branche `MNV-334` de `prospera-fiscal-service`, partie de
   `origin/dev` `fc317a1`. **Aucune migration** (une collection neuve, `rejets_depot`, index posés par Mongoose au
@@ -2597,6 +2618,26 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-26, STORY-335, avant le code) — l'archive d'une déclaration déposée** (`prospera-fiscal-service`,
+  module `depots`). Fiche : `stories/STORY-335.md` (D-335-1 → 10, section « Contrat »). **Ajouts seuls** :
+  - **`POST /api/v1/depots-declaration/{depotId}/livrable`** (droit `fiscalite:declaration:deposer`, multipart : `fichier`
+    pour un format à fichier, aucun pour un formulaire) : 201 `{ archiveId, depotId, obligationId, dossierId,
+    implantationId, redevableId, taxe, periode, numero, empreinte, nature: FICHIER | FORMULAIRE, format, fichier: { sha256,
+    taille, type, nom }, archivePar, archiveLe, statutObligation }`. Refus neufs : **`409 LIVRABLE_NON_ARCHIVABLE`**
+    (`{ statut }`), **`409 LIVRABLE_DEJA_ARCHIVE`** (`{ archiveId }`), **`422 LIVRABLE_REQUIS`**, **`422
+    FICHIER_NON_ATTENDU`**, **`422 LIVRABLE_NON_CONFORME`** (`{ attendu, lu }`) ; et ceux du dépôt engagé (`404
+    DEPOT_INTROUVABLE`, `409 DEPOT_REMPLACE`, `409 OBLIGATION_DESACTIVEE`, `409 LIVRABLE_PERIME`, `422
+    FORMAT_DE_CANAL_NON_DECLARE`, `422 CLASSEUR_*`, `413`).
+  - **`GET /api/v1/depots-declaration/{depotId}/livrable`** (accès fiscal) : 200 `{ livrable, url, expireLe }` (URL
+    présignée éphémère, objet re-haché d'abord, 682) ; **`404 LIVRABLE_NON_ARCHIVE`**, `502 FICHIER_ARCHIVE_ALTERE`.
+  - **`GET /api/v1/depots-declaration/{depotId}/accuse/piece`** (accès fiscal) : 200 `{ accuseId, piece, url, expireLe }` ;
+    `404 ACCUSE_INTROUVABLE`, **`404 PIECE_ACCUSE_ABSENTE`**, `502 FICHIER_ARCHIVE_ALTERE`.
+  - **`GET /api/v1/depots-declaration/archives?obligationId=…`** (accès fiscal) : 200 `{ obligationId, dossierId,
+    implantationId, redevableId, taxe, periode, statutObligation, versions: [{ numero, livrable, accuse, rejet }] }` (la
+    plus récente d'abord, aucune URL) — **ce que 336 lira**.
+  - Collection neuve `livrables_archives_depot` ; acte `DEPOT_DECLARATION_LIVRABLE_ARCHIVE`. Aucun topic, aucun droit
+    neuf, aucun champ d'une route existante. **→ A (plus tard)** : FE-081 archive le livrable déposé et ouvre les pièces.
 
 - **PUBLIÉ (2026-11-26, STORY-334 : prospera-fiscal-service#82, `dev` `69d7e65`) sans écart ; ANNONCÉ (2026-11-26,
   STORY-334, avant le code, prospera-stories#1004, `main` 9bcdf01) — le rejet administratif d'un dépôt engagé**
@@ -3932,6 +3973,11 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-31 (2026-11-26, STORY-335) — La preuve du dépôt vit dans le fiscal ; le fonds du client en reçoit-il une
+  copie ?** L'AC-1 de 335 dit « dans `document-service` » ; le lot 6 a mis la preuve du dépôt dans le bucket privé du
+  fiscal (682). **Choix par défaut** (D-335-9) : l'original reste au fiscal (l'empreinte, l'URL présignée re-vérifiée) ;
+  la GED de B en reçoit une copie rattachée quand B l'aura ouverte (« → B » ci-dessus).
 
 - **Q-D-30 (2026-11-26, STORY-333) — Les majorations de retard des déclarations du mois : quel paquet les déclare ?**
   **Choix par défaut** (D-333-8) : seul le paquet de dépôt de la liasse (`TG × DSF`) porte `penalites[]`. Le retard d'une
