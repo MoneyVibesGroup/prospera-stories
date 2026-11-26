@@ -1802,7 +1802,13 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-953.md"
     reserved_on: "2026-11-16"
     note: >
-      🏁 DONE le 2026-11-16 — plateforme #17 (5a50249, étiquette contrats-instance-v1 : jalon du 14/12 tenu),
+      🏁 SUITE DONE le 2026-11-26 (groupe B, lot 7, ordre « e », D-L7B-9 ; fiche, « Suite du 2026-11-26 », D-953-10 → 15 ;
+      demande de D, STORY-1140, servie) — prospera-plateforme#41 (dev d68a468, étiquette contrats-instance-v1.1) ;
+      contrat annoncé avant la fusion (docs #957, main 329b9d4). Le contrat de l'export C13 : export-c13-reponse@1,
+      export-c13-csv.cas.json (huit règles, huit cas à l'octet), route GET …/export dans instance-c13.openapi.json 1.1.0 ;
+      ajouts seuls. Node 25 : contrats-instance 29/29, npm test 669/669, typecheck ; 7/7 mutations ; cas rejoués contre
+      balance (44be0c1) et bilan (e13d874), 8/8 chacun. Sans Docker.
+      Avant la suite : 🏁 DONE le 2026-11-16 — plateforme #17 (5a50249, étiquette contrats-instance-v1 : jalon du 14/12 tenu),
       catalogue #58 (4dfde25), contrats annoncés avant la fusion (stories #562). Node 24 : plateforme 424/0,
       catalogue 1457/1457 ; 8 mutations rouges. Pile : 5 essais simultanés avec le jeu témoin en 433 ms sans mélange ;
       effacement automatique à effacementLe, certificat vérifié par @prospera/signature et le schéma ; 4 autres

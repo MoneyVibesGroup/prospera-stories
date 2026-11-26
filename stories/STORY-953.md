@@ -166,8 +166,35 @@ renvoyait à rien.
   `agent-instance`, `centrale-service`, le BFF ou la recette.
 - [x] Contrat écrit dans sa source, fichiers régénérés (`npm run contrats:instance`), tests et mutations.
 - [x] « ⚠ Contrats » du journal de B annoncé avant la fusion (cette PR de docs ; PR de code : plateforme #41, `f1e0a20`).
-- [ ] PR de code fusionnée en rebase, étiquette `contrats-instance-v1.1`.
-- [ ] PR de docs finale (fiche, tracker, journal de B : avancement, « Réponses » → D).
+- [x] PR de code fusionnée en rebase : `prospera-plateforme` **#41** (`dev` **`d68a468`** ; arbre identique au commit testé
+  `f1e0a20`) ; étiquette **`contrats-instance-v1.1`** poussée sur `d68a468`. Annonce : stories #957 (`main` `329b9d4`).
+- [x] PR de docs finale (fiche, tracker, journal de B : avancement, « Réponses » → D). Verrou Docker non pris.
+
+### Livré
+
+- `contrats/instance/export-c13-reponse.schema.json` (`export-c13-reponse@1`), `contrats/instance/export-c13-csv.cas.json`
+  (`export-c13-csv@1` : `regles`, `cas`), `contrats/instance/instance-c13.openapi.json` 1.1.0 (route `exporter`,
+  `ExportReponse`, `RefusExport` ; `Refus` + `error?`, `details?`) ; une seule source, `scripts/contrats-instance.ts`
+  (`EXPORT_REPONSE`, `REGLES_EXPORT_CSV`, `CAS_EXPORT_CSV`, `REFUS_D_EXPORT`), le générateur écrit aussi les cas ;
+  README (tableau des contrats, étiquettes).
+- Empreintes (sha256) à l'étiquette : `export-c13-reponse.schema.json` `93074ea3…4dba`, `export-c13-csv.cas.json`
+  `2a139ec9…b1c4`, `instance-c13.openapi.json` `c128e320…3052`.
+
+### Preuves (Node 25, sans Docker)
+
+- `test/contrats-instance.test.ts` **29/29** (17 avant : 12 neufs) : fichiers à jour avec la source (le cas compris), le
+  schéma neuf en draft-07 fermé sous Ajv strict, l'OpenAPI qui porte le corps à l'identique, un export de balance
+  accepté et six écarts refusés (espace, `nombre` négatif, `collection` absente, nom d'objet hors motif, date, champ en
+  trop), chaque cas du CSV rejoué sur une lecture de référence écrite depuis les règles, BOM et CRLF de chaque cas, la
+  route (paramètres, `no-store`, statuts) et l'ordre des refus.
+- `npm test` **669/669** ; `npm run typecheck` vert.
+- **Mutations, 7/7 rouges sur l'assertion visée** (fichiers régénérés à chaque fois, pour que seul le test visé parle) :
+  la neutralisation retirée d'un cas ; `nombre` sans minimum ; `espace` ouvert ; deux refus inversés ; `no-store` retiré ;
+  le cas « aucun document » sans CRLF ; les noms de champs d'un document bornés à `^[a-z]` (`_id` refusé).
+- **Contre le code servi** (hors dépôt, `node` sur les fichiers extraits par `git show`) : les huit cas passent à l'octet
+  contre `objetEnCsv` de balance (`dev` `44be0c1`) et de bilan (`MNV-1140` `e13d874`), 8/8 chacun.
+
+## Ce qui reste
 
 ### Décisions retenues par défaut (contestables)
 
