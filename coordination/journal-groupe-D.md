@@ -306,15 +306,65 @@
       ne change pas d'un octet. L'identifiant scellé n'apparaît nulle part.
     - **Verrou Docker** : pris à 10:51 (une seule prise) et rendu à 11:22 par le trap du script autonome. B l'a repris
       aussitôt (1125). B et C ont été prévenus, sous les noms `-be` et `-f7`. Aucun conteneur, volume ni réseau `grp-d`.
-  - **→ B : recopie du manifeste `paiement` 1.2.0 au catalogue — ouverte** (« Demandes aux autres groupes »).
+  - **→ B : recopie du manifeste `paiement` 1.2.0 au catalogue — ouverte** (« Demandes aux autres groupes ») ;
+    servie (catalogue #83, dev `ce8cbc0` ; journal de B `main` 1206297).
     **`prospera-paiement-service` est rendu à B** (« Passations »). **→ A (plus tard)** : l'écran des comptes (le
     numéro à imprimer). **Q-D-26** au PO.
   - 🏁 **Les quatre stories de l'amendement du 26/11 sont faites** (1138, 1139, 1140, 1141).
   - **Suivante : D attend STORY-325 de C**, qui débloque 330 → 337. Au 26/11 à 11:25, 325 n'est pas fusionnée :
-    fiscal `origin/dev` `060c85c`, C vient de fusionner 324. **→ C : 325 — ouverte.**
+    fiscal `origin/dev` `060c85c`, C vient de fusionner 324. **→ C : 325 — ouverte** (servie : fiscal #75, `7e2bff8` ; voir STORY-330).
     - 561 attend 331 (donc 330 et 325), et 562 attend 561 : **aucune des deux n'est libre**.
     - Il en va de même de 565 (562, 341 de C) et de 1102 (332, 333).
     - Toute la suite du lot 7 de D attend 325. La session de groupe de D décide.
+
+- **STORY-330** ✅ 📨 — le port de canal asynchrone et la production du livrable : le fichier exact, estampillé de la
+  version qu'il emballe, et un dépôt engagé qui rend un identifiant, jamais un accusé (prospera-fiscal-service#76, `dev`
+  `7d48fd9` ; annonce avant le code #978, `main` 6f6b797 : fiche D-330-1 → 16, ⚠ Contrats, ⚠ Communs, Q-D-27). Plan §4,
+  n° 7 ; **la première story de D dans EPIC-032**. Rituel (2026-11-26) : aucune demande neuve à D chez A, B et C ;
+  **← C : 325 — servie (fiscal #75, 7e2bff8)** ; aucune PR ouverte ni migration en vol sur le fiscal.
+  **→ B : recopie du manifeste `paiement` 1.2.0 au catalogue — servie (catalogue #83, dev ce8cbc0 ; journal de B main
+  1206297).**
+  - **Livré** (dossiers `depots` et `livrables-depot` de D) :
+    - `POST /api/v1/livrables-declaration/{obligationId}` (droit `preparer`) : le classeur de 537, produit depuis une
+      déclaration `VALIDEE` ou au-delà ; le format est celui que le `gabarit` de la déclaration nomme, jamais la
+      requête ; le dossier est celui de la déclaration ; la liasse vient de `bilan-service` par le producteur de 537,
+      inchangé (AC-2). L'estampille `{ numero, empreinte }` (la version scellée si elle l'est, sinon le contenu
+      courant, D-325-11) part dans trois propriétés du fichier et dans `X-Declaration-Version` /
+      `X-Declaration-Empreinte`.
+    - Le port **`CanalDeDepot`** et le **dépôt assisté** : engager rend `{ depotId, mode, statut, engageLe, rejoue }`,
+      sans aucun champ d'accusé (AC-3).
+    - `POST /api/v1/depots-declaration` (droit `deposer`) et `GET /api/v1/depots-declaration/{depotId}` : l'obligation
+      reste `A_DEPOSER` (D-330-7, Q-D-27) ; `409 LIVRABLE_PERIME` ; un seul engagement en vol par version (index unique
+      partiel de `engagements_depot`) ; rejeu ⇒ 200, même identifiant ; un contenu nouveau ⇒ l'ancien `REMPLACE`, en une
+      transaction avec ses deux actes au journal chaîné (`depot-declaration:<id>`) ; la lecture dit `perime`.
+    - La **garde d'AD-12** (AC-4) : aucun nom de pays, de portail ni de guichet, commentaires compris, dans le domaine,
+      le port, l'adaptateur et les cas d'usage du dépôt ; éprouvée sur des témoins.
+    - Aucun écart au contrat annoncé. **D-330-17** : la garde d'AD-13 de 560 admet la route du livrable d'une
+      déclaration (le même classeur que 537).
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI (trois routes neuves) et `src/main.ts` (deux
+    en-têtes exposés au CORS). Aucune migration, aucun fichier de C ; `DepotsModule` et `LivrablesDepotModule` importent
+    `ObligationsModule`.
+  - **Preuves** :
+    - Node 24 (image `verification` de l'archive LF de `fb518ba`) : unitaires **231/231 suites, 3 341 tests** (1 suite
+      ignorée : BullMQ sans Redis), e2e **14/14, 325**, **`test:conformite` 26/26, 167** (dont `engagements-depot`, 7 :
+      dix engagements parallèles ⇒ un seul, remplacement tout ou rien, chaînes intactes).
+    - Node 25 : les 35 suites du dépôt, du livrable, des paquets, de la complétude et du coffre, 578 tests ; lint et
+      `tsc` 0 ; **mutations 25/25**.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** saine, les trois routes montées et en 401 sans jeton,
+      0 `UnknownDependencies`, l'index posé par l'application.
+    - **Verrou Docker** : pris à 12:39 (une seule prise), rendu à 12:48 par le trap du script autonome ; B l'a repris
+      aussitôt (1126) ; B et C prévenus (`-be`, `-f7`) ; aucun conteneur, volume ni réseau `grp-d`.
+  - **Ce qui reste** :
+    - → A (plus tard) : l'écran du livrable d'une déclaration et de son engagement (FE-081).
+    - 331 (les formulaires des déclarations du mois comme donnée du paquet), 332 (le guidage, et la vérification de
+      l'exercice de la liasse, D-330-5), 333 (l'accusé d'un dépôt engagé et sa jonction avec la chaîne de 538,
+      D-330-15), 561 (le connecteur ; l'accord du client avant d'agir, D-330-13). Q-D-27 au PO.
+    - la note « paiement 1.1.0 » de `paiement.compte.changed@1` dans
+      `prospera-plateforme/contrats/distributeur/catalogue-faits.json` est à passer à 1.2.0 (numeroImprimable, 1141) :
+      une étiquette `contrats-distributeur-v3` et sa recopie à l'octet dans
+      `prospera-ventes-service/src/socle/contrats-distributeur/` (source.ts, empreinte) ; non urgent.
+  - **Suivante : STORY-331** (le format de canal décrit comme une donnée du paquet ; dossiers de D ; fiche à écrire depuis
+    `epics-fiscalite-2026-08-03.md` juste avant de coder ; le paquet fiscal est à C, D-L7-3).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1634,7 +1684,8 @@
 
 ## Demandes aux autres groupes
 
-- **→ B (2026-11-26, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue — ouverte.**
+- **→ B (2026-11-26, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue — servie (catalogue #83, dev
+  `ce8cbc0` ; journal de B `main` 1206297).**
   - Source : `prospera-stories/manifestes/paiement.manifest.ts`, `main` 6a5d3ab (#967).
   - Cible : `platform-catalog-service/src/modules/catalog/manifeste/copies.json`, où `paiement` est encore en 1.1.0.
   - Ce qui change : `paiement.compte.changed@1` gagne `numeroImprimable`, facultatif, et part aussi au changement de ce
@@ -2179,7 +2230,10 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-26, STORY-330, avant le code)** — branche `MNV-330` de `prospera-fiscal-service`, partie de
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#76, `dev` `7d48fd9`, sur `origin/dev` `7e2bff8`, qui n'avait pas
+  bougé : aucun rebase), conforme à l'annonce, plus un fichier de D : `src/modules/coffre-secrets/garde-ad13.spec.ts`
+  (la route du livrable d'une déclaration reçoit le classeur de 537, D-330-17) ; ANNONCÉ (2026-11-26, STORY-330, avant
+  le code)** — branche `MNV-330` de `prospera-fiscal-service`, partie de
   `origin/dev` `7e2bff8`. **Aucune migration** (une collection neuve, `engagements_depot`, son index unique partiel posé
   par Mongoose au démarrage), ni `app.module.ts` (les deux contrôleurs neufs entrent dans `DepotsModule` et
   `LivrablesDepotModule`, déjà montés ; ces deux modules importent `ObligationsModule`), ni `package.json`, ni
@@ -2253,7 +2307,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-26, STORY-330, avant le code) — le livrable d'une déclaration et le dépôt engagé**
+- **PUBLIÉ (2026-11-26, STORY-330 : prospera-fiscal-service#76, `dev` `7d48fd9`) sans écart ; ANNONCÉ (2026-11-26,
+  STORY-330, avant le code, prospera-stories#978, `main` 6f6b797) — le livrable d'une déclaration et le dépôt engagé**
   (`prospera-fiscal-service`, modules `livrables-depot` et `depots`). Fiche : `stories/STORY-330.md` (D-330-1 → 16,
   section « Contrat »). **Ajouts seuls** : aucune route, aucun champ, aucun topic existant ne change ; la route de 537
   (`POST /livrables-depot/{pays}/{etat}`) et la chaîne de 538 (`/depots`) restent identiques.
@@ -3720,6 +3775,18 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-330** (fiscal) :
+  - (1) **Les copies du paquet de dépôt (`paquets-depot/assets/`, `completude-depot/assets/`) sont vérifiées par leur
+    sha256 sur les octets LF du dépôt** ; avec `core.autocrlf=true`, le checkout les écrit en CRLF et les suites du
+    livrable rougissent localement (« L'empreinte du paquet de dépôt ne correspond pas au manifeste »). Pour les
+    tests sous Node 25, réécrire les blobs (`git show HEAD:<f> > <f>`) : `git status` les dit alors « M » sans aucun
+    diff. Ne jamais les ajouter ; `git checkout -- <dossiers>` avant de rendre le worktree. L'archive LF de Docker
+    n'a pas ce problème.
+  - (2) **Une route neuve qui reçoit un fichier rougit la garde d'AD-13 de 560** (« une seule route reçoit un
+    fichier ») : elle n'est vue qu'à la suite complète. L'ajouter à `ROUTES_DE_FICHIER` avec sa raison, dans la même PR.
+  - (3) **Un motif de mutation écrit sur une ligne que prettier a coupée** n'est pas trouvé (« MOTIF INTROUVABLE ») :
+    écrire le motif sur le texte formaté (retour à la ligne compris) et rejouer la mutation seule.
 
 - **STORY-1141** (paiement, ventes) :
   - (1) **Le tamis du journal de paiement refuse une VALEUR qui a la forme d'un téléphone**, pas seulement un nom de
