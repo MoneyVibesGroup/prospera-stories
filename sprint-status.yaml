@@ -2116,12 +2116,19 @@ reserved_ranges:
       mutations rouges ; lint, tsc, build. Sans Docker (D-978-11) : la preuve de bout en bout est celle de la recette
       croisée complète de 1080. Lot 4 de B, n° 11 (EPIC-145). NON SLOTTÉE.
   - range: "STORY-979"
-    status: "in-progress"  # cinquième suite (2026-11-26, lot 7 de B, ordre « g », D-L7B-11) : paiement 1.2.0 et ged 1.10.0 au catalogue
+    status: "done"
     owner: "Groupe B, lot 6 — les droits de la facture et des archives du cabinet au catalogue de tenant d'auth, hors du jeton : facturation:parametres:modifier au DIST_DAF seul (demande de D, STORY-1065, D-1065-13) ; les sept ged:* du cabinet et le rôle neuf CAB_ARCHIVISTE (demande de C, STORY-1087, PRD des services du cabinet §2.3) ; recopie des manifestes au catalogue (facturation ; ged 1.1.0 après la fusion de C) (prospera-auth-service, prospera-platform-catalog-service)"
     source_doc: "prospera-stories/stories/STORY-979.md"
     reserved_on: "2026-11-24"
     note: >
-      🏁 QUATRIÈME SUITE DONE le 2026-11-25 (rouverte, puis refermée ; fiche, « Quatrième suite (2026-11-25) », D-979-29
+      🏁 CINQUIÈME SUITE DONE le 2026-11-26 (rouverte, puis refermée ; fiche, « Cinquième suite (2026-11-26) », D-979-35
+      → 40 ; lot 7 de B, ordre « g », D-L7B-11) — catalogue #83 (dev ce8cbc0) ; contrat annoncé avant la fusion (stories
+      #980, main 59ed625). La demande de D (STORY-1141) : paiement 1.2.0 recopié depuis prospera-stories@59ed625 (sha256
+      vérifié, code fusionné : paiement #126, 64b5838) ; ged 1.10.0 entraîné par la copie entière (« f », suite de
+      STORY-1119 ; document-service #40, 5d060aa). manifestes:garde verte (48) contre main. Aucun droit ne change ; auth
+      inchangé. Node 25 : catalogue 69/69 par chemin, complète 1630 passés (3 suites rouges connues) ; build ; 3/3
+      mutations rouges. Sans Docker (D-979-39).
+      Quatrième suite : 🏁 QUATRIÈME SUITE DONE le 2026-11-25 (rouverte, puis refermée ; fiche, « Quatrième suite (2026-11-25) », D-979-29
       → 34 ; lot 7 de B, entre la « c » et STORY-1119, D-L7B-6) — catalogue #76 (dev 66a4f6c) ; contrat annoncé avant
       la fusion (stories #913, main 0ee7144). La demande de C (STORY-1020) : le manifeste balance 1.2.0 recopié depuis
       prospera-stories@ac8e450 (sha256 vérifié), après la fusion de son code (balance-service #165, 58322c4) ; la copie

@@ -262,7 +262,8 @@ dossier de contrôle (STORY-336) ne peut que la croire.
 - [x] Contrat annoncé avant la fusion (cette PR de docs ; manifeste `ged` 1.10.0 à la source).
 - [x] PR de code fusionnée en rebase : document-service **#40** (`dev` **`5d060aa`** ; arbre identique au commit poussé
   `397870e`), manifeste `ged` 1.10.0 recopié depuis `prospera-stories@10d9d6e` (annonce #976).
-- [ ] Recopie au catalogue : avec « g » (D-1119-25).
+- [x] Recopie au catalogue : avec « g » (D-1119-25) — catalogue **#83** (`ce8cbc0` sur `dev`), `ged` 1.10.0 depuis
+  `prospera-stories@59ed625`.
 - [x] PR de docs finale (fiche, tracker, journal de B : avancement, « Réponses » → C), message à C. Verrou Docker non
   pris.
 
