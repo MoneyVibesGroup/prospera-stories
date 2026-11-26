@@ -98,9 +98,9 @@
    unitaires 209/209 suites, 3050 ; BullMQ sur vrai Redis 2/2 ; e2e 13/13, 282 ; conformité 20/20, 126 ; mutations 20/20 ;
    pile `grp-c` à **deux répliques** (2 alertes pour 2 clés après 12 balayages, faits `SENT`, reprise après arrêt sans doublon) ;
    verrou pris deux fois (03:43 → 04:00, 04:15 → 04:26). D-318-1 → 13 dans la fiche. **→ D** (notification) ci-dessous.
-11. **Suivante : STORY-319** (le responsable désigné et la vue de charge par collaborateur, fiscal ; fiche à écrire juste avant
-   de coder ; le champ humain `responsable` existe déjà, l'alerte le recopie ; la vue de charge lit `qualifierEcheance` et les
-   alertes ; re-dérivation qui garde l'affectation, AD-17). **349 de D l'attend** : prévenir D à la fusion.
+11. 🚧 **STORY-319 en cours (26/11)** : le responsable désigné et la vue de charge par collaborateur (fiscal, branche
+   `MNV-319`) ; fiche `stories/STORY-319.md` écrite avant le code (D-319-1 → 11), contrat et communs annoncés ci-dessous
+   (« ⚠ Contrats », « ⚠ Communs »). **349 de D l'attend** : prévenir D à la fusion. Elle finit EPIC-030.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -571,6 +571,13 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-319, avant le code)** — branche `MNV-319` de `prospera-fiscal-service`. **Aucune
+  migration**, aucune collection neuve, aucun index neuf ; ni `app.module.ts`, ni `package.json`, ni `read-models/`
+  (`identity_memberships` y est **lu** par un adaptateur du dossier `obligations`, le schéma ne change pas), ni copie du
+  paquet, ni manifeste `declarations`. Touché : **le contrat OpenAPI** (trois routes neuves, « ⚠ Contrats »). Tout le reste
+  dans les dossiers de C (`domain/obligations`, `application/obligations`, `modules/obligations`, `adapters/mongo`,
+  `ports`, `test/utils`, `test/obligations.e2e-spec.ts`, une spec de conformité neuve). Rien dans les dossiers de D.
+  **→ D** : rien à faire pour un rebase ; la clé de l'alerte gagne le responsable (D-319-9), le fait garde sa forme.
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#70, `dev` `cefbe20`, sur `origin/dev` `8f6b1ba`)** — conforme à l'annonce ;
   un `setImmediate` (intercepteur de journalisation, transverse) entre aussi dans la liste fermée de la garde, sans changer de
   code. **→ D** : `fiscal.declaration.deposee` part désormais par le relais BullMQ (prouvé `SENT` sur la pile à deux
@@ -625,6 +632,29 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-319), ANNONCÉ avant le code** — **le responsable désigné et la vue de charge par collaborateur**
+  (`prospera-fiscal-service`, REST ; et le sens de la clé de l'alerte de 318). Fiche : `stories/STORY-319.md`
+  (D-319-1 → 11). Consommateurs : les écrans du calendrier (A) ; STORY-349 (D) ; `prospera-notification-service` (D), à
+  venir. **Ajouts seuls**, plus une précision de comportement.
+  - **Route neuve** : **`POST /api/v1/obligations/affectation`** (droit `fiscalite:declaration:valider`)
+    `{ obligationIds (1 à 50, chacune une fois, un ou plusieurs dossiers), responsable: userId | null }` →
+    `200 { responsable, obligations: ObligationResponseDto[] }`, tout ou rien ; `null` retire. Refus : `404
+    OBLIGATION_INTROUVABLE` (même réponse hors portée), `409 OBLIGATION_DESACTIVEE` / `OBLIGATION_CLOTUREE` /
+    `AFFECTATION_CONCURRENTE`, `422 RESPONSABLE_INCONNU` (pas un membre actif de l'organisation) /
+    `RESPONSABLE_HORS_PORTEE` (le dossier n'est pas dans sa portée, `details.dossierId`).
+  - **Journal chaîné** : acte **`OBLIGATION_RESPONSABLE_AFFECTE`** (`obligation:<id>` : `dossierId`, `avant`, `apres`,
+    auteur), un par obligation changée, dans la transaction.
+  - **Routes neuves de lecture** (gate fiscale, portée de l'appelant comme le calendrier) :
+    **`GET /api/v1/obligations/charge`** (`annee`, `dossierId` facultatifs) → `{ aLa, horizonJours, tronquee,
+    collaborateurs: { responsable, nom, charge }[], sansResponsable: charge }` ; **`GET
+    /api/v1/obligations/charge/{responsable}`** (`userId` | `AUCUN`) → `{ responsable, nom, aLa, horizonJours, tronquee,
+    charge, retards: LigneCalendrierDto[] }`. `charge` : `{ enCharge, nonDatees, pasEncorePreparees,
+    enRetardDePreparation, preparees, echeancesDepassees, retards, prochaineEcheance }` sur les obligations actives non
+    déposées, toutes années (`annee` restreint).
+  - **Comportement (D-319-9)** : la clé de l'alerte devient `obligationId|état|échéance|responsable` quand il y a un
+    responsable (sans responsable : inchangée, les alertes de 318 ne se rejouent pas) — une obligation confiée alors
+    qu'elle est déjà en alerte est alertée de nouveau au balayage suivant, pour son nouveau responsable.
+    **`fiscal.obligation.alerte-echeance`** v1 ne change pas de forme.
 - **2026-11-26 (STORY-318), PUBLIÉ** (fiscal #70, `cefbe20`) — **conforme à l'annonce** (#945). Précisions (fiche, D-318-13) :
   le balayage n'alerte pas une échéance dépassée depuis plus de 31 jours (elle reste `ECHEANCE_DEPASSEE` au calendrier) ; les
   trois routes sont servies par un contrôleur à part (`AlertesEcheanceController`), mêmes chemins, même gate. Annonce :

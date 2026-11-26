@@ -7935,7 +7935,8 @@ sprints:
         epic: "EPIC-030"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-319.md"
+        status: "in_progress"  # 🚧 2026-11-26 — groupe C, lot 7 (n° 4 du fiscal, PLAN-LOT-7-2026-11-24.md §3 ; finit EPIC-030 ; 349 de D l'attend) — fiche écrite juste avant le code (D-319-1 → 11) ; contrat et communs annoncés (journal de C) : POST /obligations/affectation (droit valider, tout ou rien, acte OBLIGATION_RESPONSABLE_AFFECTE, responsable membre actif qui voit le dossier), GET /obligations/charge et /obligations/charge/{responsable} (charge et retards, obligations actives non déposées), clé de l'alerte qui gagne le responsable (fait inchangé) ; aucune migration.
         assigned_to: null
       - story_id: "STORY-320"
         title: "Alimentation depuis la balance et blocage motivé"
