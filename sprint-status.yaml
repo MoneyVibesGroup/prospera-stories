@@ -2163,6 +2163,18 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1125"
+    status: "in-progress"
+    owner: "Groupe B, lot 7, n° 7 — l'archivage se mesure et se vend : compteurs par cabinet (fonds, pièces et pages versées, volume stocké, boîtes cotées, au mois et au total), quota de l'offre posé par cabinet par Money Vibes, l'alerte de quota sur ce quota, relais du BFF pour la console (document-service, module ged ; admin-panel ; écran AP-51 : A)"
+    source_doc: "prospera-stories/stories/STORY-1125.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite et contrat annoncé avant le code (2026-11-26) : GET …/ged/plateforme/archivage, GET
+      …/ged/plateforme/cabinets/{org}/archivage, PUT …/ged/plateforme/cabinets/{org}/quota (perms du jeton : org:read,
+      entitlement:grant) ; compteurs calculés à la lecture ; quota posé tenu dans ged_quotas_cabinet, sinon celui du
+      service ; ged.quota.depasse inchangé, contre le quota du cabinet ; quotaSource sur GET …/ged/cabinet/quota et
+      l'accusé de dépôt ; BFF : GET /admin/archivage, GET /admin/orgs/{orgId}/archivage, PUT …/archivage/quota. Aucun
+      droit ni fait neufs, manifeste ged inchangé. D-1125-1 → 13. Lot 7 de B, n° 7. NON SLOTTÉE.
   - range: "STORY-1124"
     status: "done"
     owner: "Groupe B, lot 7, n° 6 — le circuit sans trou : la réception et ses boîtes dans une transaction, les mouvements d'une boîte verrouillés (sorties simultanées d'une même pièce, pièce et boîte, retour, restitution, original relié), la facture désinscrite de la comptabilité retirée du fonds (document-service, module ged ; le fait comptabilite.facture.desinscrite : C)"
