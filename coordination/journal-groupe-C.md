@@ -119,8 +119,21 @@
    `OBLIGATION_CALCUL_CONSTATE` ; `montantAttendu` humain (la dérivation ne le remet plus à `null`) ; `triplet.calcule.motif` ;
    garde AST d'AC-2. Node 24 : e2e 13/13, 292 ; conformité 22/22, 140 ; unitaires 214 suites, 3131 ; mutations 31/31 ; pile
    `grp-c` fiscal + balance saine. Verrou pris deux fois (08:10 → 08:23, 08:28 → 08:44). D-321-1 → 11 dans la fiche.
-14. **Suivante : STORY-324** (la validation du client capturée comme pièce, EPIC-031 ; fiche à écrire juste avant de coder ;
-   dépend de 323 ✅). Puis 325, que **330 de D attend**.
+14. ✅ **STORY-324 DONE (26/11)** : fiscal **#74** (`060c85c` sur `dev`, rebasée sur `136efdf` de D), annonce #963 avant le code.
+   **`POST /obligations/validations-client`** (droit `preparer`) : une pièce, un geste, 1 à 50 obligations d'un dossier ;
+   `DOCUMENT_SIGNE`, `COURRIEL`, `CAPTURE_MESSAGERIE` (WhatsApp, V6), `MENTION_MANUELLE` ; référence GED (`gedPieceId`,
+   `gedVersion`) ou libre et SHA-256, **jamais les octets** ; horodatée et attribuée par le serveur ; pièce neuve dans
+   `validations_client` (jamais récrite), pointeur `validationClient` sur chaque obligation, acte
+   `OBLIGATION_VALIDATION_CLIENT_CONSIGNEE`, une transaction, tout ou rien. **`GET|PUT
+   /obligations/validation-client/exigences/{dossierId}`** : exigée par défaut, levée motivée par l'associé (acte au journal du
+   dossier). **`A_DEPOSER → DEPOSEE`** : `409 VALIDATION_CLIENT_REQUISE` / `VALIDATION_CLIENT_PERIMEE` (le déclaré a changé
+   depuis l'accord), la pièce et le déclaré lus dans la condition d'écriture. Garde AST d'AC-3 (aucun accès de la société
+   cliente). Node 24 : unitaires 220 suites, 3187 ; e2e 13/13, 304 ; conformité 24/24, 151 ; mutations 22/22 et 7/7 MongoDB ;
+   pile `grp-c` saine. Verrou pris trois fois (09:59 → 10:03, arrêté pour rebaser sur 349 ; 10:08 → 10:17 ; 10:18 → 10:21).
+   D-324-1 → 13 dans la fiche. **→ B** (GED, information, ci-dessous) ; **D prévenu** (la porte de « Déposée », pour 333).
+15. **Suivante : STORY-325** (rectificatives versionnées, immuabilité et clôture, EPIC-031 ; fiche à écrire juste avant de
+   coder ; **330 de D l'attend**). Le modèle de 324 est prêt à être figé (D-324-12 : pièce immuable, pointeur courant remis à
+   `null` par une rectificative).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -385,6 +398,16 @@ seulement.
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-26, STORY-324) : la pièce de validation du client dans la GED (`document-service`)** — **information,
+  non bloquante**. Depuis fiscal #74 (`060c85c`), le cabinet range l'accord du client (document signé, courriel, capture) dans
+  sa GED par `POST /api/v1/ged/cabinet/pieces` (inchangé) ; le fiscal n'en garde que la référence (`gedPieceId`,
+  `gedVersion`) et le SHA-256, au format de `ged.piece.recue`. Demandé, sans urgence : (1) une nature « validation du
+  client » au plan de classement par défaut du fonds annuel (le cabinet la crée aujourd'hui par `POST …/natures`) ; (2) une
+  lecture des métadonnées d'une version par sa référence (`pieceId`, `version` → empreinte, taille, nature, dossier ; sans
+  contenu), au jeton du membre, pour que le dossier de contrôle (336) vérifie une référence sans télécharger la pièce.
+  **Choix par défaut de C** (D-324-2, D-324-3) : la référence et l'empreinte sont déclarées et attribuées ; le fiscal
+  n'appelle pas la GED. Prévenu par message.
+
 - **→ D (2026-11-26, STORY-318) : prévenir par e-mail ou dans la cloche à l'approche d'une échéance fiscale
   (`prospera-notification-service`)** — **ouverte**, sans urgence. **Publié depuis fiscal #70 (`dev` `cefbe20`).** Le fiscal produit l'alerte (une par obligation, état
   et échéance applicable) et la publie : **`fiscal.obligation.alerte-echeance`** v1 (forme au « ⚠ Contrats » ;
@@ -508,6 +531,11 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-26, STORY-1124) : publier `comptabilite.facture.desinscrite@1` depuis `prospera-comptabilite-service`**
+  (dans la transaction de `BrouillardService.abandonner`, par l'outbox, si `surAbandon` trouve la pièce qui portait
+  `inscription.ecritureId` ; schéma au journal de B et dans `prospera-ocr-service/contrat/consommes/`, à reprendre tel quel)
+  — **notée, placée en STORY-338**, la prochaine story de C dans la comptabilité (c'est le D-1100-3 que C avait nommé).
+
 - **← D (2026-11-25, STORY-348) : la date de collecte des cotisations sociales au paquet fiscal Togo** — ✅ **servie par
   STORY-317** : balance-service #171 (`44be0c1` sur `dev`), source `scripts/referentiels/sources/paquet-fiscal-togo-2026.json`,
   **`cnss.collecte`** `{ jourLimite: 15, moisSuivant: true, organisme: "CNSS Togo", source, aValider }` (la source cite le
@@ -591,7 +619,11 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-26, STORY-324, avant le code)** — branche `MNV-324` de `prospera-fiscal-service`. **Aucune
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#74, `dev` `060c85c`, rebasée sur `origin/dev` `136efdf` de D)** — conforme à
+  l'annonce : seul le contrat OpenAPI parmi les communs ; aucun fichier de D touché. **→ D** : rien à faire pour un rebase ;
+  toute la suite (unitaires, e2e, conformité) est verte en Node 24 avec 349 ; les obligations sociales de 349 passent la même
+  porte de « Déposée » (le dossier exige l'accord du client par défaut).
+  **ANNONCÉ (2026-11-26, STORY-324, avant le code)** — branche `MNV-324` de `prospera-fiscal-service`. **Aucune
   migration** (deux collections neuves, `validations_client` et `exigences_validation_client`, index posés par Mongoose
   au démarrage ; un champ facultatif `validationClient` sur `obligations`, absent ⇒ `null`). Ni `app.module.ts`, ni
   `package.json`, ni `read-models/` (la réplique des dossiers est **lue** pour la portée, comme en 319), ni copie du
@@ -681,6 +713,8 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-324), PUBLIÉ** (fiscal #74, `060c85c`) — **conforme à l'annonce** (#963), sans écart. **→ A (FE-081)** :
+  types à régénérer (`validationClient`, les quatre routes). Annonce :
 - **2026-11-26 (STORY-324), ANNONCÉ avant le code** — **la validation du client capturée comme pièce**
   (`prospera-fiscal-service`, REST). Fiche : `stories/STORY-324.md` (D-324-1 → 13). Consommateurs : l'écran du dossier
   de dépôt (A, FE-081) ; STORY-325 (C, rectificatives) ; STORY-333 et 336 (D). **Ajouts seuls**, plus une précision de
@@ -911,7 +945,10 @@ seulement.
     verte) ; les autres routes ; les routes d'instance du module `conseil` (pas dans cette story).
   - **Aucune question neuve** : Q-D-18 → 20 (D) sont répondues par le PO et valent ici (l'export au moteur seul ; `migrer`
     sans corps ; le CSV en plus). **→ B** : les contrats d'export et de `migrer` restent à publier dans
-    `prospera-plateforme/contrats/instance/` ; balance les recopiera. **→ D (information)** : balance sert le CSV par objet
+    `prospera-plateforme/contrats/instance/` ; balance les recopiera. — ✅ **servie** (relevé par STORY-324) : plateforme
+    **#41** (`dev` `d68a468`, étiquette neuve `contrats-instance-v1.1`, `contrats-instance-v1` inchangée) décrit exactement ce
+    que balance sert ; recopie facultative (le test de copie attend « contrats-instance-v1 » suivi d'une espace : l'ajuster
+    pour v1.1 le jour où une story la recopie). **→ D (information)** : balance sert le CSV par objet
     (D-1021-7) ; bilan peut prendre la même forme. **→ A** : rien (aucune route d'écran).
 
 - **2026-11-25 (STORY-1019), PUBLIÉ** (balance-service #166, `ab4e468` sur `dev`) — **conforme à l'annonce** (#904,
@@ -1392,6 +1429,15 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-324, 26/11) la garde `aucune-date-en-dur` (316) lit aussi les exemples Swagger des DTO** : un `example: 'Courriel
+  du 20/11/2026…'` l'a rougie (seule la suite entière l'a vu). Écrire les exemples sans date `JJ/MM`.
+- **(STORY-324)** une mutation « l'acte écrit hors de la session » survit à un test de panne qui ne relit que l'état :
+  relire aussi la **chaîne** après la panne (l'acte écrit avant l'échec doit disparaître avec la transaction).
+- **(STORY-324)** un e2e qui fait voir un dossier à un **collaborateur** doit signer un jeton dont le `sub` est un
+  `ObjectId` responsable du dossier : `sub: 'u1'` ne voit rien (filtre de portée, fail-closed) et la route rend 404.
+- **(STORY-324)** une PR de D fusionnée pendant la preuve Docker (349) : arrêter le script par `kill` du `bash` puis du
+  `docker run` (le `trap` rend le verrou), rebaser, relancer — jamais `kill -9`.
 
 - **(STORY-321, 26/11) une spec qui fige la forme d'une écriture rougit quand un champ change de nature** :
   `mongo-registre-obligations.spec.ts` liste les champs dérivés (`$set`) et humains (`$setOnInsert`) ; passer
