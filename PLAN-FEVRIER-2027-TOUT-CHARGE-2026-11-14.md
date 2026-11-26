@@ -7,6 +7,7 @@
 > `amendement-plan-v3-2026-11-10.md`, dont il reprend le calendrier, les plages et les règles. Il place **tous** les
 > épics ouverts du registre dans ce calendrier. Aucun client n'est nommé : « le distributeur », « l'IMF »,
 > « la compagnie d'assurance », « le cabinet ».
+> **Ajout du 2026-11-26 :** le §8 liste cinq écarts du produit cabinet relevés face à Pennylane (CH-P2 → CH-P6). Ils sont **à intégrer** : ni numéro d'épic, ni semaine, ni développeur pour l'instant.
 
 ---
 
@@ -471,6 +472,8 @@ Les dates ci-dessous sont des **dates limites proposées par ce plan**, calculé
 
 Il n'en reste aucun. Les trois chantiers de plateforme sont EPIC-262 → 264 ; la coque `prospera-app` (ancien CH-03) est EPIC-265, numérotée le 2026-11-14. Les quatre sont au tableau du §7.1 et au registre.
 
+**Ajout du 2026-11-26.** Cinq chantiers sans identifiant sont apparus en comparant le produit cabinet à Pennylane : CH-P2 → CH-P6, au §8. Ils ne sont pas encore placés.
+
 Déjà faits, donc non placés : la saisie des tables CIMA (barème corporel), les 44 manifestes (PR #441 et #444), les PRD, spines et épics des trois verticales et de l'IA commune.
 
 ### 7.3 Les plages du registre non replacées
@@ -490,3 +493,34 @@ Si un reste apparaît dans EPIC-121 → 134, il va **après février**, avec le 
 ### 7.4 Contrôle par script
 
 Le tableau du §7.1 a été vérifié par script contre le registre (`sprint-status.yaml` de cette branche, plages `reserved_ranges` y compris EPIC-262 → 264, plus la plage EPIC-245 → 261 de la branche de l'IA commune), le paiement (036, 038, 042) et la notification (063, 064) : **chaque épic ouvert du registre apparaît une fois et une seule**. Les plages entièrement `done` (106 → 109, 121 → 141) et EPIC-110 (resté libre) sont exclues du contrôle. Le même script a vérifié : zéro collision de dépôt ; aucune dépendance citée dans les sources qui commence après son épic, hors les dix couples expliqués au §3.3 ; la cohérence des fenêtres du plan du moteur et de celui de la Reprise.
+
+---
+
+## 8. Écarts relevés face à Pennylane (26/11/2026) : à intégrer
+
+> **Ajout du 2026-11-26, à la demande du PO.**
+> **Source :** l'offre cabinet de Pennylane (pennylane.com/fr, lue le 26/11) comparée au produit cabinet tel qu'il est sur les branches `origin/dev` le 26/11. Ici, « existe » veut dire fusionné, pas déployé.
+> **Statut :** **non placé.** Ces cinq chantiers n'ont ni numéro d'épic, ni semaine, ni développeur. Ils ne changent ni le §3, ni le §7.1, ni le contrôle du §7.4.
+> **Les numéros suivent la comparaison.** Le manque n° 1, les écrans en retard sur le backend, est déjà au plan (écrans de B, risque R2) : il n'est pas repris ici.
+> **Ce qui n'est pas un écart :** les fonctions propres à la France (EBICS, Chorus Pro, CVAE) et le compte pro avec cartes. Celui-ci est exclu par principe, puisque Prospera ne détient jamais les fonds (`prospera-paiement-service/README.md`).
+
+### 8.1 Les cinq chantiers
+
+| Réf. | Chantier | Ce que Pennylane propose | Ce qui existe déjà chez nous | Ce qui manque | Épics du plan qui en couvrent une part |
+|---|---|---|---|---|---|
+| **CH-P2** | **Collaboration avec la PME cliente** | portail partagé entre le cabinet et son client, demandes de justificatifs, commentaires, collecte par e-mail dédié et par application mobile | dépôt de pièces par dossier (`document-service`, `dossier-pieces`) ; OCR des captures Mobile Money ; invitations du dirigeant et des salariés côté fiscal (MNV-567 → 569) ; notifications e-mail et in-app (EPIC-056, 057) ; adaptateurs SMS, WhatsApp et push fusionnés (MNV-620 → 622) | l'espace de la PME cliente (l'« espace déclarant », FE-119, attend la coque) ; la demande de pièces du cabinet au client, avec relance et suivi ; la collecte par adresse e-mail dédiée et par WhatsApp ; les commentaires sur une pièce ou une écriture ; la photo d'une pièce depuis le téléphone du client | EPIC-265 (coque) ; EPIC-063 (passerelles WhatsApp et SMS). EPIC-220 (« portail des cabinets ») concerne l'assurance et ne couvre pas ce besoin. EPIC-234 est l'application terrain du distributeur. |
+| **CH-P3** | **Automatisation de la saisie** | règles d'affectation par tiers, actions en masse, OCR, automatisation des tâches récurrentes (« Autopilot ») | OCR Tesseract et expressions régulières (STORY-084) ; lot de factures → écriture proposée → brouillard (MNV-1097, 1100 ; FE-149) ; mémoire des choix (MNV-1098, 1099) ; suggestion de compte à partir d'un libellé (STORY-139) | des **règles d'affectation que le cabinet paramètre** (un tiers ou un libellé donne un compte, une TVA, un axe analytique), déterministes, applicables en masse, avec la provenance « règle » ; l'extraction des factures par modèle de langage quand l'OCR échoue ; la validation en masse dans le brouillard | EPIC-117 (imputation assistée, S13-S14) ; EPIC-250 (lecture des pièces) ; EPIC-254 (automatisations par règles) ; EPIC-255 (passerelle de langage). Restent à écrire : la surface « règles du cabinet » dans `comptabilite-service`, et le branchement de `piece-extraction` (`document-service`) sur EPIC-250. |
+| **CH-P4** | **Gestion interne du cabinet** | suivi des temps, rentabilité, facturation interne, suivi du portefeuille, CRM, portail client | portefeuille (recherche, « mes dossiers », archivage) ; affectation du responsable et des contributeurs ; journal du dossier ; lettre de mission déposée comme pièce (FE-064) | les missions (type, périmètre, échéances, budget d'heures) ; la lettre de mission générée puis signée ; la saisie des temps par collaborateur et par dossier ; la facturation des honoraires (forfait, au temps, échéancier) ; la rentabilité par dossier et par collaborateur ; un CRM léger pour les prospects du cabinet | aucun. `PROSPERA_MODULES_ET_ROADMAP.md` (§4.3) le classe en « phase 2 ». Les honoraires peuvent reprendre EPIC-230 (facture) et EPIC-232 (lien de paiement). |
+| **CH-P5** | **Facturation des PME clientes et facture électronique** | devis signés en ligne, factures, acomptes, factures récurrentes, relances automatisées, lien de paiement, facture électronique émise par une plateforme agréée | facturation du distributeur (`prospera-ventes-service` : factures, avoirs, numérotation sans perte, PDF, liens publics) ; demandes et liens de paiement PI-SPI et Mobile Money (`prospera-paiement-service`) | une offre **packagée pour la PME cliente d'un cabinet**, installée par le moteur, dont les ventes alimentent la comptabilité du dossier ; les devis et proformas servis ; les factures récurrentes ; les relances automatisées ; la **facture électronique certifiée OTR**, prévue après février (spine du distributeur, `ARCHITECTURE-SPINE.md` l. 634) | EPIC-230 (facture, avoir, proforma), EPIC-232 (encaissement, lien de paiement), EPIC-235 (recouvrement, relance) : tous trois sont du vertical Distributeur. Entrée extérieure à ajouter au §5 lors de l'intégration : les spécifications et l'homologation de l'OTR pour la facture certifiée. |
+| **CH-P6** | **Sécurité et ouverture** | ISO 27001, API publique documentée, plus de 300 intégrations | piste d'audit chaînée ; Swagger interne ; événements Kafka ; contrats de Connecteurs (EPIC-169, STORY-954) ; kit de reprise | la **double authentification** (rien dans `auth-service`) ; une **API publique** (clés par cabinet, droits, quotas, documentation publiée) ; l'import d'écritures et l'export du fichier des écritures dans un format d'échange | EPIC-120 (piste d'audit et fichier des écritures, S14) ; EPIC-170 → 179 (Connecteurs, après février). Ni la double authentification ni l'API publique n'ont d'épic. |
+
+### 8.2 À savoir avant de les intégrer
+
+1. **Le §7.3 est en retard sur le code.** Il dit qu'EPIC-111 → 120 (`comptabilite-service`) n'ont « aucune story encore ». Or, au 26/11, la comptabilité générale est fusionnée sur `origin/dev` : journaux, brouillard, validation, grand livre, balance dérivée, tiers, lettrage, clôture et piste d'audit (STORY-958 → 975, MNV-1094 → 1100). Seuls les écrans manquent : journal, grand livre, lettrage. De même, `sprint-status.yaml` laisse en `not_started` des stories du fiscal déjà fusionnées (STORY-315 → 328, 345 → 349). Il faut recaler ces épics au registre avant de placer CH-P3, qui s'appuie sur eux.
+2. **La charge.** Dev B est déjà le goulot des écrans (R2), et la comptabilité tombe dans la réserve de février (R10). La règle du PO (« tout charger ») place ces chantiers sans regarder la charge. Le tableau du §3.2 devra quand même les compter.
+3. **Ordre proposé** (recommandation, à contester) :
+   - CH-P6 d'abord, pour la partie double authentification : c'est court, tout cabinet l'attend, et cela ne touche qu'`auth-service` ;
+   - puis CH-P2 et CH-P3, qui tiennent la promesse d'une seule source de vérité partagée avec le client ;
+   - puis CH-P5, en reprenant les épics du distributeur ;
+   - CH-P4 en dernier, ou après février comme le prévoit la roadmap.
+4. **Numérotation.** CH-P2 → CH-P6 sont des repères provisoires : le numéro reprend celui du manque dans la comparaison. À l'intégration, il faudra réserver les épics au registre (`sprint-status.yaml`, `reserved_ranges`) et rejouer le contrôle du §7.4.
