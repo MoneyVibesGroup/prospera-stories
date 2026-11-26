@@ -171,9 +171,20 @@
     propositions : 1 × 201, 4 × 409 ; exécution en 0,7 s ; MinIO vidé des pièces détruites). Verrou 02:24 → 02:39. Fiche
     D-1121-1 → 16. Rituel : la passation de `prospera-paiement-service` à D pour STORY-1141 (← D) est servie par la
     session de groupe (`6812a4a`), pas par cette story.
-  - **4 — STORY-1122 (26/11) — en cours** : retrouver dans tous les fonds du cabinet ; fiche écrite et contrat annoncé
-    avant le code (« ⚠ Contrats »). Elle porte aussi le versement d'un fonds de plus de 1 000 pièces ; la liste des
-    pièces échues de tout le cabinet va à STORY-1123 (D-1122-11). Rituel : aucune demande neuve à B chez A, C et D.
+  - **4 — STORY-1122 (26/11) — faite** : retrouver dans tous les fonds du cabinet. **document-service #36** (`27f1e8d`
+    sur `dev`) ; **catalogue #80** (`98d6b25`, `ged` 1.7.0 recopié) ; contrat annoncé avant le code (stories #943,
+    `f7837c8`), amendé avant la fusion (#947). `GET …/ged/cabinet/recherche` dans la portée du dossier ; la recherche
+    d'un fonds servie par le même **index aveugle** (`ged_index_recherche` : jetons HMAC sous une clé du cabinet dérivée
+    de `GED_CLE_CABINET`, aucun mot en clair, aucun texte déchiffré à la recherche ; texte par mot entier, métadonnées par
+    début de mot), tenu après chaque écriture, vidé dans la transaction d'une destruction, rattrapé par la file
+    `ged-index` (`GED_INDEX_BALAYAGE_SECONDES`, tour quotidien) ; le versement d'un fonds de plus de 1 000 pièces. Aucun
+    droit neuf, aucun fait publié. Node 25 : unitaires 1318, e2e 217/217 ; Node 24 : 114/114 suites, 217/217 ; mutations
+    23/24 (+1 équivalente) ; pile `grp-b` neuve 39/39 (1 500 pièces d'avant la story indexées par le tour en 62 s,
+    versement de 1 500 lignes, pièce détruite introuvable). Verrou en trois passages (03:23 → 03:28, 03:33 → 03:40,
+    04:00 → 04:14). Fiche D-1122-1 → 16. La liste des pièces échues de tout le cabinet va à STORY-1123 (D-1122-11).
+    Rituel : aucune demande neuve à B chez A, C et D.
+  - **Suivante : STORY-1123** (n° 5 : les alertes de l'archiviste ; elle porte aussi la liste des pièces échues de tout
+    le cabinet, D-1122-11).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
     `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
@@ -1166,6 +1177,14 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-26) : FE-143 — retrouver dans tous les fonds du cabinet est servi par STORY-1122** (document-service
+  #36, `27f1e8d` sur `dev`) : `GET /api/v1/ged/cabinet/recherche` (`q`, `mois`, `nature`, `exercice`, `tiers`, `dateDu`,
+  `dateAu`, `montantMin`, `montantMax`, `reference`, `rubrique`, `fonds`, `dossierId`, `limite` ≤ 100, `curseur`) →
+  `ResultatsDeRechercheDto` (`fondsNumero`, `dossierId`, `raisonSociale`, cote de l'original) ; `GET
+  …/fonds/{numero}/recherche` garde sa forme (mêmes résultats, curseur opaque). À afficher : un texte lu se cherche par
+  mot entier, un tiers ou une référence par début de mot ; `400 CURSEUR_INVALIDE`, `503 CHIFFREMENT_INDISPONIBLE`.
+  **Types à régénérer** depuis l'OpenAPI vivant. Rien n'est relayé par le BFF. — information, rien à faire avant le
+  lot 8.
 - **→ A (2026-11-26) : FE-143 — la destruction proposée, puis visée est servie par STORY-1121** (document-service #35,
   `023446c` sur `dev` ; droits par auth #51) : `GET …/fonds/{numero}/pieces-echues` (par pages, `echeance`, `blocage`),
   `POST`/`GET …/fonds/{numero}/gels`, `POST …/gels/{numero}/levee`, `POST`/`GET …/fonds/{numero}/destructions`, `GET
@@ -1969,6 +1988,7 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
     vient pas d'une page) ; `fonds` (80 caractères au plus) et `dossierId` (24 hexadécimaux) validés (400). Un texte lu
     attendu se revoit au balayage suivant tant que sa lecture est planifiée (40 balayages au plus), avec un délai
     croissant (jusqu'à 24 h) pour une lecture en échec ou absente. Aucune autre forme ne change.
+  - **Livré le 26/11** : document-service #36 (`27f1e8d`), catalogue #80 (`98d6b25`, `ged` 1.7.0 au catalogue).
 
 - **2026-11-26, STORY-1121 — la destruction proposée, puis visée, annoncé AVANT le code** (`document-service`, GitHub
   `prospera-ocr-service`, branche `MNV-1121` ; `auth-service`, branche `MNV-1121` ; fiche `stories/STORY-1121.md`,
@@ -3694,6 +3714,19 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une pile de preuve trouve ce que les doubles en mémoire ne montrent pas : le rythme** (STORY-1122) : un délai
+  croissant dès le dépôt retardait un texte lu de plusieurs minutes, et 1 500 pièces sans lecture revues à chaque
+  balayage ralentissaient le tour (89 s au lieu de 16). Mesurer les temps sur la pile avant de figer une règle de file.
+- **La limite de débit du service (100 requêtes par minute) coupe un script de preuve qui sonde** (STORY-1122 :
+  `p.json` indéfini sur un `429`) : sonder toutes les 2 s et rejouer un `429` après `Retry-After`.
+- **Un mot de quatre lettres se trouve par hasard dans des jetons base64 mis en minuscules** : pour prouver « aucun mot
+  en clair » dans un index à jetons, chercher hors des tableaux de jetons et contrôler la forme de chaque jeton.
+- **Deux contrôleurs qui s'importent l'un l'autre** (un DTO de réponse d'un côté, un DTO de requête de l'autre) chargent
+  une classe avant sa définition (`extends undefined`) : sortir les DTO dans leur fichier (`recherche.dto.ts`).
+- **Prettier du dépôt exige LF** et le checkout est en CRLF : linter avec `--rule '{"prettier/prettier": ["error",
+  {"endOfLine": "auto"}]}'` et formater avec `prettier --end-of-line auto`.
+- **Un script de mutation Python qui imprime « → » plante sous la console cp1252** : `PYTHONIOENCODING=utf-8`.
 
 - **La garde de STORY-395 (`piece-conservation.spec`) lit TOUT `src/` pour `removeObject(`** (STORY-1121) : sous Node 25
   sur ce poste elle rougit déjà (chemins Windows), si bien que seul l'étage `verification` (Node 24) a vu l'adaptateur de
