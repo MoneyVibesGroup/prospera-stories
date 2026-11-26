@@ -1,6 +1,7 @@
 # STORY-1122 : Retrouver dans tous les fonds du cabinet — la recherche partout, et un index aveugle qui tient sur un gros fonds
 
-Status: in_progress — fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 4 de B,
+Status: done — **livrée le 2026-11-26** : document-service **#36** (`27f1e8d` sur `dev`), catalogue **#80**
+(`98d6b25`, `ged` 1.7.0) ; voir « Livraison ». Fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 4 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, ligne 4 ; identifiant réservé D-L7B-1).
 
 **Service :** `document-service` (GitHub `prospera-ocr-service`, module `ged`) · **Points :** 5 · **Dépend de :**
@@ -114,6 +115,60 @@ pièces du fonds, par pages (plus la borne de 1 000 de `piecesDuFonds`). Aucune 
   catalogue par B** après la fusion du code.
 - **OpenAPI** : DTO de réponse des deux recherches (`ResultatsDeRechercheDto`) ; A en génère les types.
 
+## Livraison (2026-11-26)
+
+- **Code** : document-service (`prospera-ocr-service`) **#36**, `27f1e8d` sur `dev` (trois commits, arbre identique à
+  `482b2e9` poussé) : `src/modules/ged/cabinet/` `recherche.ts` (mots, débuts de mot, clé d'index, jetons, entrée,
+  appariement, la pièce relue), `depot-recherche.ts` (`ged_index_recherche`, `ged_index_recherche_tour`, filtre MongoDB),
+  `index-de-recherche.ts` (indexer, après écriture, balayage, tour), `recherche.service.ts`, `recherche.controller.ts`,
+  `recherche.dto.ts` (`RechercheDto` y déménage, `ResultatsDeRechercheDto`), `recherche.planificateur.ts` (file
+  `ged-index`) ; `PhysiqueService.rechercher` délègue ; `CabinetService` indexe après ses six écritures ;
+  `DestructionService` vide l'index dans la transaction de l'acte ; `DossiersClients.dossiersDuPorteur` ;
+  `DepotGed.piecesDuFonds` par pages, `piecesParIdentifiants`, `piecesDuCabinetParPage` ; `GED_INDEX_BALAYAGE_SECONDES` ;
+  `CURSEUR_INVALIDE`. Manifeste `ged` **1.7.0** recopié depuis `prospera-stories@f7837c8` (#943), empreinte épinglée.
+- **Catalogue** : `platform-catalog-service` **#80**, `98d6b25` sur `dev` : `ged` 1.7.0 recopié depuis
+  `prospera-stories@51b6ce6` (seul manifeste qui change ; `manifestes:garde` verte, 48).
+- **Preuves** :
+  - document-service, Node 25 : unitaires 1 318 passés (114 suites ; 2 rouges connues du poste, copies CRLF de
+    `ged.service.spec`, chemins Windows de `piece-conservation.spec`) ; e2e **217/217** (17 suites ; recensement de
+    STORY-695 compris : `GET ged/cabinet/recherche` classée) ; lint des fichiers touchés, `tsc`, build.
+  - Node 24 (étage `verification`, image depuis `git -c core.autocrlf=false archive 482b2e9`) : **114/114 suites**,
+    1 321 passés ; e2e 217/217.
+  - Mutations **23/24** rouges sur assertion (+1 équivalente : un `fonds` hors portée est déjà écarté par le filtre des
+    dossiers de la portée) : texte sensible indexé, sensible montrée, portée ouverte, destruction sans vider l'index,
+    entrée détruite réécrite, tour qui tient une entrée en retard pour à jour, tour fini trop tôt, texte jamais
+    attendu, délais, clé commune aux cabinets, pièce relue, `piecesDuFonds` à une page, 503 sans clé, curseur de trop,
+    indexation non tenue, filtre MongoDB, appariement sensible, débuts de mot, ancien texte d'une version, portée du
+    fonds, lecture en attente (trois). Catalogue 2/2.
+  - **Pile `grp-b` neuve** (image depuis l'archive ; Mongo rs0, Kafka, Redis, MinIO Chainguard, doublure d'auth ;
+    `GED_INDEX_BALAYAGE_SECONDES=2`), 39/39 : quatre PDF lus par l'OCR ; « electricite » trouvée dans Alpha et Beta,
+    `q=ceet` avec fonds et client ; `tiers=eet` rien, `reference=FA-100` oui, `FA-10` non ; le collaborateur : Alpha seule,
+    `fonds=BETA` 0, recherche dans Beta 404 ; bulletin par `dupont` seulement (`salaire`, `confidentiel` : rien) ; une
+    pièce de 2015 versée, scellée, proposée, visée, accordée, **détruite par la file** : ni `q=sotral`, ni
+    `reference=FA-2015`, ni `exercice=2015`, ni dans le fonds, ni deux balayages plus tard ; **1 500 pièces insérées en
+    base sans entrée d'index** (comme avant la story) : le tour les indexe en 62 s, 15 pages par curseur, `q=introuvable`
+    trouve la 1 400ᵉ en 231 ms (plan `recherche_par_jeton`), dans le fonds aussi ; **versement de GROS : 1 500 lignes au
+    bordereau** ; `ged_index_recherche` 1 504 entrées, aucun mot en clair hors des jetons, tous HMAC de 12 caractères ;
+    l'entrée détruite vidée (`detruite`, 0 jeton, sans montant) ; le bulletin sans jeton de texte ; index créés ; OpenAPI
+    servie (`ResultatsDeRechercheDto`) ; aucune erreur au journal du service. Verrou 03:23 → 03:28, 03:33 → 03:40,
+    04:00 → 04:14 (trois passages : deux défauts trouvés par la pile, D-1122-13), `down -v`.
+- **Variable neuve** : `GED_INDEX_BALAYAGE_SECONDES` (15 ; `0` coupe).
+
+### Écarts au contrat, décidés au code
+
+- **D-1122-13 — Le rythme des textes attendus** : la pile a montré qu'un délai croissant dès le dépôt retardait un texte
+  lu de 15 s à plusieurs minutes, puis qu'une pièce SANS lecture (versée avant la lecture OCR) revue à chaque balayage
+  ralentissait le tour. Règle livrée : une lecture planifiée (`NON_TRAITE`, `EN_COURS`) se revoit au balayage suivant,
+  40 balayages au plus (dix minutes) ; une lecture en échec, partielle ou absente attend un délai doublé de 15 s à 24 h.
+- **D-1122-14 — `400 CURSEUR_INVALIDE`** (un curseur qui ne vient pas d'une page) ; `fonds` (80 caractères) et
+  `dossierId` (24 hexadécimaux) validés. Annoncé avant la fusion (stories #947).
+- **D-1122-15 — `RechercheDto` déménage** dans `recherche.dto.ts` (une importation croisée entre les deux contrôleurs se
+  serait chargée avant sa classe) ; `PhysiqueService` reçoit la recherche en dépendance facultative (sans elle, les
+  gestes papier seuls, comme les tests qui ne cherchent pas).
+- **D-1122-16 — Le tour indexe environ 25 pièces par seconde** sur la pile de preuve (relecture de la pièce, du plan et
+  de la lecture, une écriture par pièce) : un cabinet de 100 000 pièces d'avant la story est indexé en une heure environ,
+  en arrière-plan, sans bloquer le service ; la recherche le trouve au fil du tour.
+
 ## Critères d'acceptation
 
 - **AC-1** : une recherche sur tous les fonds du cabinet rend les copies trouvées avec leur fonds, leur client et la cote
@@ -148,8 +203,8 @@ pièces du fonds, par pages (plus la borne de 1 000 de `piecesDuFonds`). Aucune 
   sert à trouver une copie à consulter, et une pièce détruite n'en a plus ; sa preuve est au registre et au
   procès-verbal (STORY-1121).
 - **D-1122-6 — L'OCR n'est pas touchée** : le texte lu s'indexe par le balayage, pas par un rappel dans le lecteur ; un
-  texte lu est donc trouvable au plus `GED_INDEX_BALAYAGE_SECONDES` après sa lecture. Une écriture de pièce indexe à la
-  suite, hors transaction ; le tour quotidien rattrape ce qui manquerait.
+  texte lu est donc trouvable au balayage qui suit sa lecture (amendé au code, D-1122-13). Une écriture de pièce indexe à
+  la suite, hors transaction ; le tour quotidien rattrape ce qui manquerait.
 - **D-1122-7 — La portée de la recherche partout** est celle d'un fonds (`trouverDossier`) : tout le cabinet pour
   `TENANT_ADMIN` et `ged:fonds:gerer`, ses dossiers pour un collaborateur.
 - **D-1122-8 — L'ordre de réception par `pieceId`** (identifiant d'ordre chronologique) : un curseur stable même quand
@@ -165,6 +220,11 @@ pièces du fonds, par pages (plus la borne de 1 000 de `piecesDuFonds`). Aucune 
   module Nest commun (seul `GedModule` gagne des fournisseurs et une file), comme D-1121-16.
 
 ## Nommé pour plus tard
+
+- Un tour plus rapide (le plan du cabinet lu une fois par page, les lectures d'une page en une requête), si un cabinet
+  d'avant la story le demande (D-1122-16).
+- La rotation de `GED_CLE_CABINET` : l'index se reconstruit par le tour (D-1122-1), mais le texte et les fichiers
+  chiffrés ne se rechiffrent pas (hors du lot).
 
 - La liste des pièces échues de tout le cabinet (STORY-1123, D-1122-11).
 - Les bordereaux d'un fonds vivent dans son document (`ged_fonds_cabinet`) : au-delà d'environ 100 000 lignes de

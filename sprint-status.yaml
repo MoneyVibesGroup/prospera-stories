@@ -2139,11 +2139,18 @@ reserved_ranges:
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
   - range: "STORY-1122"
-    status: "in_progress"
+    status: "done"
     owner: "Groupe B, lot 7, n° 4 — retrouver dans tous les fonds du cabinet : une recherche sur tous les fonds dans la portée du dossier, servie (avec la recherche d'un fonds) par un index aveugle à jetons HMAC sous une clé du cabinet dérivée de GED_CLE_CABINET (aucun mot en clair en base, aucun texte déchiffré à la recherche), tenu par l'écriture des pièces, la destruction et un balayage BullMQ ; le versement d'un fonds de plus de 1 000 pièces (document-service, module ged)"
     source_doc: "prospera-stories/stories/STORY-1122.md"
     reserved_on: "2026-11-25"
     note: >
+      🏁 DONE le 2026-11-26 — document-service #36 (dev 27f1e8d), catalogue #80 (dev 98d6b25, ged 1.7.0 recopié) ;
+      contrat annoncé avant le code (stories #943, main f7837c8), amendé avant la fusion (#947 : 400 CURSEUR_INVALIDE).
+      Node 25 : unitaires 1318 (114 suites, 2 rouges connues du poste), e2e 217/217 ; Node 24 : 114/114 suites (1321),
+      217/217 ; mutations 23/24 (+1 équivalente) et 2/2 catalogue ; pile grp-b neuve 39/39 : textes lus par l'OCR trouvés
+      dans deux fonds, portée du collaborateur, bulletin par ses seules métadonnées, pièce détruite par la file absente de
+      la recherche et son entrée vidée, 1 500 pièces d'avant la story indexées par le tour (62 s), q=introuvable en 231 ms,
+      versement de 1 500 lignes, aucun mot en clair à l'index. D-1122-1 → 16. Contrat d'origine :
       Fiche écrite et contrat annoncé avant le code (2026-11-26) : GET …/ged/cabinet/recherche (critères de la recherche
       d'un fonds + fonds, dossierId ; résultats avec fondsNumero, dossierId, raisonSociale) ; GET …/fonds/{n}/recherche
       servie par le même index (texte par mot entier, métadonnées par début de mot ; plus de borne de 500 textes) ;
