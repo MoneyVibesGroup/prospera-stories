@@ -1,7 +1,8 @@
 # STORY-318 : Les alertes d'échéance et les états de retard — l'alerte part avant la majoration, une seule fois
 
-Status: in-progress — écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 3 du fiscal,
-`PLAN-LOT-7-2026-11-24.md` §3) ; contrat annoncé avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de C).
+Status: done — **livrée le 2026-11-26** : prospera-fiscal-service **#70** (`cefbe20` sur `dev`) ; voir « Livraison ».
+Écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 3 du fiscal,
+`PLAN-LOT-7-2026-11-24.md` §3) ; contrat annoncé avant le code (#945, « ⚠ Contrats » et « ⚠ Communs » du journal de C).
 
 **Epic :** EPIC-030 · **Points :** 5 · **FR :** FR-F19 · **Architecture :** AR-09, AD-18 (tout travail récurrent passe
 par la file partagée, BullMQ, clé de travail idempotente ; aucun `setInterval`, aucune minuterie applicative)
@@ -125,6 +126,46 @@ fois la majoration acquise.
   calendrier) ; aucun message ne part tant que D ne la consomme pas.
 - **319 (C)** désigne le `responsable` : l'alerte le recopie déjà ; la vue de charge lira `qualifierEcheance` et les
   alertes, sans rien changer ici.
+
+## Livraison (2026-11-26)
+
+- **fiscal** (#70, `cefbe20` sur `dev`, rebasée sur `8f6b1ba`) : `domain/obligations/alertes-echeance.ts` (`qualifierEcheance`,
+  `cleAlerte`, `faitHorizonChange`, purs ; `qualifierRetard` de 317 composé, son interface élargie à `report: { date }`),
+  `application/obligations/alertes-echeance.service.ts` (balayage, lecture, horizon), port `RegistreAlertesEcheance` et son
+  adaptateur Mongo (`alertes_echeance`, `parametres_alertes`, outbox dans la transaction), `modules/obligations/
+  alertes-echeance.planificateur.ts` et `.controller.ts`, `kafka/events/alerte-echeance-events.ts`,
+  `kafka/outbox/outbox-relay.planificateur.ts` (le relais sur BullMQ), la ligne du calendrier enrichie, `src/garde-minuteries.spec.ts`.
+- **Les AC en tests** : AC-1 (le balayage alerte celle qui entre dans l'horizon, pas les autres, avec l'horizon de SON
+  organisation ; l'horizon réglé par `PUT` change l'état au calendrier, e2e) ; AC-2 (deux balayages parallèles : une alerte, un
+  fait ; sur le vrai MongoDB, trois `produire` simultanés de la même clé : une alerte, une ligne d'outbox ; sur un vrai Redis,
+  deux « répliques » : un planificateur, un rattrapage ; **sur la pile, deux répliques du service : 2 alertes pour 2 clés
+  après 12 balayages**) ; AC-3 (sur un vrai Redis, le planificateur survit à l'arrêt et le travail dû part à la reprise ; **sur
+  la pile, les deux répliques arrêtées, une obligation entrée dans l'horizon pendant l'arrêt est alertée à la reprise, rien en
+  double**) ; AC-4 (trois obligations, trois états, au calendrier en unitaire et en e2e) ; AC-5 (garde AST : aucun
+  `setInterval`, aucun import de `node:timers`, `setTimeout` / `setImmediate` en liste fermée et comptée — quatre attentes
+  bornées).
+- **Preuves** (Node 24, image `verification` de l'archive LF de `1eedcee`, arbre identique à `cefbe20`) : unitaires **209/209
+  suites, 3050** (3 sautés) ; spec BullMQ sur un vrai Redis **2/2** ; e2e **13/13, 282** ; `test:conformite` **20/20, 126** ;
+  `nest build` ; **mutations 20/20** rouges sur l'assertion (jour de l'échéance dépassé, horizon ignoré, préparée dès
+  `A_VALIDER`, déposée non reconnue, clé sans l'état, limite décalée, report ignoré, horizon de l'organisation ignoré au
+  balayage, préparée qui alerte, aucune borne aux retards anciens, une seule page, portée ignorée, horizon hors bornes, identifiant
+  de planificateur variable, rattrapage à l'instant, cron hors UTC, relais sans concurrence globale, `setInterval` qui revient,
+  calendrier sans l'horizon de l'organisation, calendrier sans la date reportée) ; §1.5 et gate : `docker compose -p grp-c`
+  avec **deux répliques** (`fiscal-service` et `fiscal-service-b`, cron toutes les 10 s), saines (MongoDB en jeu de
+  répliques, Kafka, Redis), faits `SENT` par le relais BullMQ, Redis : un planificateur `balayage-des-echeances`, un
+  `relais-outbox`, concurrence du relais 1 ; 401 sans jeton sur les trois routes et le calendrier ; 0 `UnknownDependencies`.
+  Lint des fichiers touchés : aucun écart neuf (les 7 erreurs restantes sont celles d'`origin/dev`). Node 25 : 205/209 suites,
+  les 4 rouges sont le client Kafka natif (connus). Verrou pris deux fois (03:43 → 04:00, preuve coupée par moi sur une
+  erreur de compilation trouvée par les mutations ; 04:15 → 04:26).
+
+### Écarts au contrat, décidés au code
+
+- **D-318-13** : le balayage ne regarde pas une échéance **dépassée depuis plus de 31 jours** : une alerte sert à agir avant la
+  majoration ; sans cette borne, la première mise en service alerterait sur toutes les années passées non déposées. Ces
+  obligations restent `ECHEANCE_DEPASSEE` au calendrier.
+- Le contrôleur des alertes est **à part** (`AlertesEcheanceController`, même dossier, même gate) : les routes et leurs formes
+  sont celles annoncées.
+- Une quatrième attente bornée entre dans la liste fermée de la garde : le `setImmediate` de l'intercepteur de journalisation.
 
 ## Décisions prises au contrat (contestables)
 
