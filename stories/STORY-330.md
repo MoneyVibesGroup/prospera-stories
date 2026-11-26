@@ -1,6 +1,7 @@
 # STORY-330 : Le port de canal asynchrone et la production du livrable — le fichier exact, estampillé de la version qu'il emballe, et un dépôt engagé qui rend un identifiant, jamais un accusé
 
-Status: in-progress — fiche écrite et contrat annoncé avant le code (2026-11-26).
+Status: done (2026-11-26 — prospera-fiscal-service#76, `dev` `7d48fd9` ; lot 7 de D, n° 7) — fiche écrite et
+contrat annoncé avant le code (prospera-stories#978, `main` 6f6b797).
 Écrite le 2026-11-26 par la sous-session du groupe D juste avant de coder (lot 7 de D, n° 7,
 `PLAN-LOT-7-2026-11-24.md` §4) ; contrat et fichiers communs annoncés avant le code (« ⚠ Contrats » et « ⚠ Communs » du
 journal de D). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-032).
@@ -169,21 +170,73 @@ un « crochet inerte » qui attendait 330) ; aucune garde ne tient AC-4.
 
 ## Definition of Done
 
-- [ ] Une déclaration de liasse validée ⇒ son classeur, au format du paquet que son `gabarit` nomme, estampillé (fichier
+- [x] Une déclaration de liasse validée ⇒ son classeur, au format du paquet que son `gabarit` nomme, estampillé (fichier
       et en-têtes) ; la même déclaration déposée ⇒ l'estampille de la version scellée (e2e, vrai classeur, vrai paquet).
-- [ ] Le contenu vient de la source de la liasse (simulée en e2e, jamais recalculé) ; le dossier est celui de l'obligation.
-- [ ] Les refus de D-330-2 et D-330-3, chacun par un test.
-- [ ] Engager : `201` puis `200` au rejeu (le même identifiant) ; aucun champ d'accusé (clés figées, OpenAPI) ;
+- [x] Le contenu vient de la source de la liasse (simulée en e2e, jamais recalculé) ; le dossier est celui de l'obligation.
+- [x] Les refus de D-330-2 et D-330-3, chacun par un test.
+- [x] Engager : `201` puis `200` au rejeu (le même identifiant) ; aucun champ d'accusé (clés figées, OpenAPI) ;
       l'obligation reste à `A_DEPOSER` ; `LIVRABLE_PERIME` ; `DEPOT_NON_ENGAGEABLE` ; un déclaré changé ⇒ `perime: true`
       à la lecture, puis l'engagement nouveau remplace l'ancien.
-- [ ] **MongoDB réel** (`test:conformite`) : l'index unique partiel existe ; dix engagements parallèles de la même version
+- [x] **MongoDB réel** (`test:conformite`) : l'index unique partiel existe ; dix engagements parallèles de la même version
       ⇒ un seul ; le remplacement et ses deux actes sont tout ou rien ; la chaîne du journal est intacte.
-- [ ] La garde d'AD-12 verte sur le code, rouge sur ses témoins.
-- [ ] **Mutations** qui rougissent sur une assertion (format choisi autrement que par le gabarit ; état exigé relâché ;
+- [x] La garde d'AD-12 verte sur le code, rouge sur ses témoins.
+- [x] **Mutations** qui rougissent sur une assertion (format choisi autrement que par le gabarit ; état exigé relâché ;
       estampille du contenu courant sur une version scellée ; périmé non vu ; rejeu qui crée ; remplacement sans
       `REMPLACE` ; un champ d'accusé dans la réponse ; la garde qui ne lit plus les commentaires).
-- [ ] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
+- [x] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
       compris) sain, les trois routes en `401` sans jeton.
+
+## Livraison (2026-11-26)
+
+- **Code** : prospera-fiscal-service#76, fusionnée en rebase sur `dev` (`7d48fd9` ; arbre identique à la tête poussée
+  `fb518ba`), partie de `origin/dev` `7e2bff8` (325 de C) ; aucun rebase : `origin/dev` n'avait pas bougé à la fusion. Annonce avant le code : prospera-stories#978 (`main`
+  6f6b797). **Aucun écart au contrat annoncé.**
+- **Fichiers** (dossiers de D) : `domain/depot/depot-declaration.ts` (pur : le format lu sur le gabarit, l'état exigé,
+  l'estampille, le rejeu, le remplacement, `perime`) et son test ; `ports/canal-depot.ts`,
+  `ports/registre-engagements-depot.ts` ; `adapters/canal-depot/canal-assiste.ts` et son test ;
+  `adapters/mongo/depot-declaration.schema.ts` (collection `engagements_depot`, index unique partiel) et
+  `mongo-registre-engagements-depot.ts` ; `application/depots/declarations-en-portee.ts`,
+  `depots-declaration.service.ts` et son test ; `application/livrables-depot/livrables-declaration.service.ts` et son
+  test ; `ProduireLivrableDepot` (un paramètre facultatif : les propriétés d'estampille, D-330-1) ; les deux contrôleurs,
+  leurs DTO, `depots.module.ts` et `livrables-depot.module.ts` (importent `ObligationsModule`) ; `garde-ad12.spec.ts`,
+  `depots-declaration.openapi.spec.ts` ; `test/depots-declaration.e2e-spec.ts`,
+  `test/engagements-depot.conformite-spec.ts`, `test/utils/registre-engagements-depot-memoire.ts`. **Lus, sans
+  écriture** (dossiers de C) : `ports/registre-obligations.ts`, `ports/registre-versions-declaration.ts`,
+  `domain/obligations/version-declaration.ts`, `domain/obligations/cycle.ts`, `test/utils/registre-obligations-memoire.ts`.
+- **D-330-17 — La garde d'AD-13 de 560 admet la route du livrable d'une déclaration.** Sa liste fermée des routes qui
+  reçoivent un fichier (`src/modules/coffre-secrets/garde-ad13.spec.ts`, dossier de D) gagne
+  `livrables-declaration.controller.ts#produire` : c'est le classeur à remplir de 537, aux mêmes limites multipart, sans
+  aucun champ de plus (comme D-346-12 pour l'import de paie). Vue rouge à la suite complète sous Node 25, corrigée avant
+  le commit.
+- **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI (trois routes neuves) et `src/main.ts` (deux en-têtes
+  exposés au CORS). Aucune migration.
+- **Preuves** :
+  - Node 24 (image `verification` de l'archive LF de `fb518ba`) : unitaires **231/231 suites, 3 341 tests** (1 suite et 3 tests
+    ignorés : la spec BullMQ sans Redis ; `app.module.invariant` et `app-cablage.invariant` verts, rouges sous Node 25
+    par le seul client Kafka natif) ; e2e **14/14 suites, 325 tests** (dont `depots-declaration`, 17) ;
+    **`test:conformite` 26/26 suites, 167 tests** (dont `engagements-depot.conformite-spec.ts`, 7 : l'index unique partiel, dix
+    engagements parallèles ⇒ un seul en base et un seul acte, l'index refuse un second `ENGAGE` écrit à côté, le
+    remplacement en deux actes et deux chaînes intactes, tout ou rien sur une panne du journal, l'isolement des
+    organisations, le schéma strict).
+  - Node 25 (local) : domaine 55/55, services 13/13 et 7/7, adaptateur 3/3, OpenAPI 3/3, garde d'AD-12 12/12, e2e
+    `depots-declaration` 17/17 ; les 35 suites du dépôt, du livrable, des paquets, de la complétude et du coffre
+    **35/35, 578 tests**.
+  - **Mutations 25/25**, chacune rouge sur une assertion : format choisi autrement que par le gabarit, gabarit blanc,
+    état exigé relâché (livrable et engagement), estampille du contenu courant sur une version scellée, version scellée
+    d'un autre document, périmé non vu, rejeu qui crée, relevé non périmé, empreinte ignorée, engagement sans
+    comparer l'estampille, désactivée engagée, format de l'engagement ignoré, portée non lue, version scellée jamais
+    lue, dossier autre que celui de la déclaration, estampille absente du fichier, livrable non validé ou désactivé,
+    rejeu tu par le canal, `201` au rejeu, empreinte du fichier dans l'en-tête, un champ d'accusé dans la réponse, la
+    garde qui ne lit plus les commentaires, le remplacement pris pour une création (une première écriture de « rejeu qui crée » ne trouvait pas son motif,
+    reformaté par prettier : réécrite et rejouée seule).
+  - lint des fichiers touchés et `tsc` 0.
+  - §1.5 : pile `grp-d` du fiscal **avec Redis** (image runtime de l'archive : santé `ok` (mongodb, audit, kafka, redis), les trois routes montées et en `401` sans jeton, 0 `UnknownDependencies` sur 476 lignes de journal, l'index `un_engagement_en_vol_par_version` posé par l'application).
+  - **Verrou Docker** : pris à 12:39 (une seule prise), rendu à 12:48 par le `trap` du script autonome ; B l'a repris aussitôt (1126) ; B et C prévenus (`-be`, `-f7`) ; aucun conteneur, volume ni réseau `grp-d`.
+- **Ce qui reste** : → A (plus tard) : l'écran du livrable d'une déclaration et de son engagement (FE-081). → 331 : les
+  formulaires des déclarations du mois comme donnée du paquet (elles répondent `FORMAT_DE_CANAL_NON_DECLARE`) ; → 332 :
+  le guidage d'un dépôt engagé (et la vérification de l'exercice de la liasse, D-330-5) ; → 333 : l'accusé d'un dépôt
+  engagé, fait séparé, et sa jonction avec la chaîne de 538 (D-330-15) ; → 561 : le connecteur, l'accord du client
+  avant d'agir (D-330-13). Q-D-27 au PO.
 
 ## Questions au PO
 
