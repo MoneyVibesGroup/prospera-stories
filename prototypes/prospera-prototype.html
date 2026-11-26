@@ -3724,6 +3724,44 @@
   .ob-more .dp-tbl { margin-top: 0; }
   .ob-fold > summary { cursor: pointer; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-fg); margin: 0.5rem 0 0.4rem; }
   [data-ob-root] .dp-lg { white-space: normal; height: auto; min-height: 2.8rem; padding-top: 0.4rem; padding-bottom: 0.4rem; max-width: 100%; }
+  /* ═══ FE-040 · profil de la société (lot 7, paquet 3) ═══ */
+  [data-pf-root] .pf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem 1rem; }
+  [data-pf-root] .pf-grid .full { grid-column: 1 / -1; }
+  [data-pf-root] .pf-f { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+  [data-pf-root] .pf-f label { font-size: 0.78rem; font-weight: 700; color: var(--muted-fg); }
+  [data-pf-root] .pf-f input, [data-pf-root] .pf-f select { font: inherit; font-size: 0.9rem; height: 2.4rem; padding: 0 0.7rem; border: 1px solid var(--border-strong); border-radius: 0.5rem; background: var(--card); color: var(--foreground); min-width: 0; width: 100%; }
+  [data-pf-root] .pf-f input:focus-visible, [data-pf-root] .pf-f select:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+  [data-pf-root] .pf-f.bad input, [data-pf-root] .pf-f.bad select { border-color: var(--danger); }
+  [data-pf-root] .pf-f.need input, [data-pf-root] .pf-f.need select { border-color: var(--warning); background: color-mix(in srgb, var(--warning-soft) 40%, var(--card)); }
+  [data-pf-root] .pf-f small { font-size: 0.76rem; color: var(--muted-fg); }
+  [data-pf-root] .pf-f small.err { color: var(--danger); font-weight: 600; }
+  [data-pf-root] .pf-f small.wrn { color: var(--warning); font-weight: 600; }
+  [data-pf-root] .pf-h { margin: 0; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); }
+  [data-pf-root] .pf-sec { display: flex; flex-direction: column; gap: 0.6rem; }
+  [data-pf-root] .pf-dl { display: grid; grid-template-columns: minmax(7rem, 11rem) minmax(0, 1fr); gap: 0.45rem 1rem; margin: 0; font-size: 0.88rem; }
+  [data-pf-root] .pf-dl dt { color: var(--muted-fg); }
+  [data-pf-root] .pf-dl dd { margin: 0; overflow-wrap: anywhere; font-weight: 600; }
+  [data-pf-root] .pf-dl dd.mono { font-family: var(--font-mono); }
+  [data-pf-root] .pf-row { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 0.7fr) auto; gap: 0.5rem; align-items: end; padding: 0.55rem; border: 1px solid var(--border); border-radius: 0.5rem; }
+  [data-pf-root] .pf-row.dir { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) auto; }
+  [data-pf-root] .pf-tbl { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+  [data-pf-root] .pf-tbl th, [data-pf-root] .pf-tbl td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); }
+  [data-pf-root] .pf-tbl td.n, [data-pf-root] .pf-tbl th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  [data-pf-root] .pf-miss { color: var(--danger); font-weight: 700; font-family: inherit; }
+  [data-pf-root] details.pf-d > summary { cursor: pointer; font-weight: 700; font-size: 0.86rem; padding: 0.3rem 0; }
+  [data-pf-root] .pf-foot { display: flex; gap: 0.6rem 0.8rem; flex-wrap: wrap; align-items: center; }
+  [data-pf-root] .pf-foot .grow { flex: 1 1 auto; }
+  [data-pf-root] .pf-notice { padding: 0.6rem 0.85rem; border-radius: 0.5rem; border: 1px solid var(--success); background: var(--success-soft); font-size: 0.86rem; line-height: 1.5; }
+  [data-pf-root] .pf-notice.ko { border-color: var(--danger); background: var(--danger-soft); }
+  [data-pf-root] .pf-notice.wn { border-color: var(--warning); background: var(--warning-soft); }
+  [data-pf-root] .pf-rig { display: flex; gap: 0.5rem 1rem; flex-wrap: wrap; align-items: center; font-size: 0.8rem; color: var(--muted-fg); padding: 0.5rem 0.7rem; border: 1px dashed var(--border-strong); border-radius: 0.5rem; }
+  [data-pf-root] .pf-rig select { font: inherit; font-size: 0.8rem; height: 2rem; padding: 0 0.4rem; border: 1px solid var(--border-strong); border-radius: 0.4rem; background: var(--card); color: var(--foreground); max-width: 100%; }
+  @media (max-width: 640px) {
+    [data-pf-root] .pf-grid { grid-template-columns: minmax(0, 1fr); }
+    [data-pf-root] .pf-row, [data-pf-root] .pf-row.dir { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    [data-pf-root] .pf-dl { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
+    [data-pf-root] .pf-dl dd { margin-bottom: 0.4rem; }
+  }
   .ob-ap-txt { margin: 0; font-size: 0.9rem; line-height: 1.5; }
   /* ═══ Lot 6 : FE-149 factures → écritures, FE-150 « Repris de vos choix », FE-141 analyse financière ═══ */
   .fac-wrap { display: flex; flex-direction: column; gap: 1rem; }
@@ -5558,21 +5596,20 @@
                     <button class="btn btn-ghost btn-sm" type="button" data-dc-edit="identite">Modifier</button>
                   </div>
                   <div class="dc-panel-edit" data-dc-panel-edit="identite" hidden>
-                    <div class="dc-g2">
-                      <div class="dc-field col2"><label>Raison sociale</label><input value="Ets Kossi Distribution"></div>
-                      <div class="dc-field"><label>NIF</label><input value="1000745307" style="font-family:var(--font-mono)"></div>
-                      <div class="dc-field"><label>RCCM</label><input value="TG-LOM-2019-A-1204" style="font-family:var(--font-mono)"></div>
-                      <div class="dc-field"><label>N° CNSS</label><input value="084512" style="font-family:var(--font-mono)"></div>
-                      <div class="dc-field"><label>Forme juridique</label>
-                        <select><option>SARL — Société à responsabilité limitée</option><option>SA — Société anonyme</option><option>SAS — Société par actions simplifiée</option><option>Entreprenant / Entreprise individuelle</option></select>
-                      </div>
-                      <div class="dc-field col2"><label>Adresse du siège</label><input value="Quartier Bè-Kpota, Lomé"></div>
-                    </div>
-                    <div class="dc-edit-foot">
-                      <span class="dc-edit-note">Dernière modification le 2 août 2026 par Kofi Santos · version 4</span>
-                      <span class="grow"></span>
-                      <button class="btn btn-ghost btn-sm" type="button" data-dc-edit-cancel>Annuler</button>
-                      <button class="btn btn-primary btn-sm" type="button" data-dc-edit-save>Enregistrer</button>
+                    <!-- FE-040 (lot 7, paquet 3) : le profil de la société. Un geste principal en tête (compléter / modifier / créer),
+                         ce qui manque est nommé, le reste est derrière « Détails ». Champs, complétude, avertissements et refus viennent de
+                         balance-service (STORY-079, 422, 529) : GET|POST|PATCH /dossiers/{dossierId}/profil-societe et GET …/completude. -->
+                    <div class="dp-wrap" data-pf-root></div>
+                    <div class="dc-note" data-note style="margin-top:0.9rem">
+                      <b>FE-040 · le profil de la société.</b> Routes de <code>balance-service</code> (<code>:3007</code>, <code>/api/v1</code>), toutes sous <code>/dossiers/{dossierId}/</code> :
+                      <code>GET profil-societe</code> (404 <code>PROFIL_SOCIETE_INTROUVABLE</code> tant qu’il n’existe pas) ; <code>POST profil-societe</code> (seuls <code>raisonSociale</code>, <code>formeJuridique</code> et <code>pays</code> sont requis ; <b>409</b> <code>PROFIL_SOCIETE_DEJA_EXISTANT</code> : un dossier = une société) ;
+                      <code>PATCH profil-societe</code> (partiel, historisé, <code>version</code> incrémentée ; un champ vide ou identique <b>n’écrit rien</b>, donc <b>on corrige une valeur, on ne la vide pas</b> ; <code>actif: false</code> désactive, <b>aucune suppression</b> ; 409 <code>PROFIL_SOCIETE_MODIFIE_CONCURREMMENT</code> et <code>DOSSIER_ARCHIVE</code>) ;
+                      <code>GET profil-societe/completude</code> (<code>pretPourDsf</code>, <code>champsBloquantsManquants[]</code>, <code>champsOptionnelsManquants[]</code>). Bloquants pour la liasse : raison sociale, forme, NIF, RCCM, date de création, pays, devise, activité, capital, adresse, au moins un dirigeant.
+                      Un NIF ou un RCCM de forme douteuse, ou des parts qui ne font pas 100 %, sont des <b>avertissements</b> (la valeur est enregistrée), jamais un refus. <code>orgId</code>, <code>systemeComptable</code> et <code>regimeFiscal</code> ne se saisissent pas ici (400) : les axes sont l’écran de FE-042.
+                      <br><b>Refus lus à l’écran</b> : 400 <code>PAYS_NON_SUPPORTE</code>, <code>DATE_CREATION_FUTURE</code> ; 403 <code>ORG_CONTEXTE_REQUIS</code> ; 409 ci-dessus ; 409 <code>DOSSIER_CABINET_INCONNU</code> ne concerne que les routes historiques (dépréciées, non utilisées).
+                      <br><b>Le pré-remplissage par les statuts et la carte CFE</b> (<code>POST …/profil-societe/ocr</code>, <code>GET …/ocr/{extractionId}</code>, <code>POST …/appliquer</code>) est l’écran de <b>FE-041</b> : ici, seule sa place est réservée (le bouton « Lire les statuts »).
+                      <br><b>⚠ Manques backend</b> : (1) aucune route ne liste les pays dotés d’un paquet fiscal publié : la liste des pays est écrite en dur dans la maquette, et un pays refusé ne se découvre qu’à l’enregistrement (porteur : fiscal-service, groupe C) ; (2) la création ne peut pas lire la déclaration du dossier faite dans <code>dossier-service</code> (raison sociale, forme, activité) : le front la connaît par la fiche dossier, mais aucune route ne dit « voici ce qui est déjà connu » (porteurs : balance, groupe C, et dossier, groupe B) ; (3) <code>PATCH</code> ne permet pas de <b>vider</b> un champ : une faute de saisie sur un NIF se corrige, un NIF saisi à tort ne s’efface pas ; (4) le corps du <code>PATCH</code> ne porte pas la <code>version</code> lue : le verrou optimiste ne peut pas se prouver côté écran (balance, groupe C).
+                        <b>Chiffres de la démo</b> : le dossier est Ets Kossi Distribution, version 4 modifiée le 2 août 2026 par Kofi Santos (comme la configuration du dossier) ; tout le reste est illustratif.
                     </div>
                   </div>
 
@@ -25925,6 +25962,253 @@
       root.addEventListener('toggle', function (ev) { var d = ev.target; if (d && d.dataset && d.dataset.obFold) O.fold[d.dataset.obFold] = d.open; }, true);
       document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !ap.hidden) apFermer(); });
       window.__lot7p3 = function () { return O; };
+      rendre();
+    })();
+
+    /* ═══ FE-040 · le profil de la société (lot 7, paquet 3) ═══
+       Un geste principal par état (compléter, modifier, créer) ; ce qui manque est nommé ; le détail est derrière « Détails ».
+       Champs, complétude et avertissements : balance-service (STORY-079, 422, 529). Les codes de refus ne s'affichent jamais :
+       l'écran dit une phrase. Dossier : Ets Kossi Distribution, version 4 du 2 août 2026 par Kofi Santos ; le reste est illustratif. */
+    (function () {
+      var root = document.querySelector('[data-pf-root]');
+      if (!root) return;
+      var TODAY = '2026-11-26';
+      function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+      function ico(p) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">' + p + '</svg>'; }
+      var IC = { warn: ico('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/>'), ok: ico('<path d="M20 6 9 17l-5-5"/>'), lock: ico('<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>') };
+      var LIB = { raisonSociale: 'Raison sociale', sigle: 'Sigle', formeJuridique: 'Forme juridique', nif: 'NIF', rccm: 'RCCM', numeroCnss: 'N° CNSS', dateCreation: 'Date de création', pays: 'Pays', devise: 'Devise', objetSocial: 'Activité de la société', codeNaema: 'Code d’activité (NAEMA)', secteur: 'Secteur', capitalSocial: 'Capital', actionnaires: 'Actionnaires', adresse: 'Adresse du siège', email: 'E-mail', telephone: 'Téléphone', dirigeants: 'Dirigeant (gérant, DG…)' };
+      var BLOQ = ['raisonSociale', 'formeJuridique', 'nif', 'rccm', 'dateCreation', 'pays', 'devise', 'objetSocial', 'capitalSocial', 'adresse', 'dirigeants'];
+      var OPT = ['sigle', 'numeroCnss', 'codeNaema', 'secteur', 'email', 'telephone', 'actionnaires'];
+      var FORMES = [['SARL', 'SARL — société à responsabilité limitée'], ['SA', 'SA — société anonyme'], ['SAS', 'SAS — société par actions simplifiée'], ['SUARL', 'SUARL — SARL à associé unique'], ['EI', 'Entreprise individuelle'], ['AUTRE', 'Autre forme']];
+      var PAYS = [['TG', 'Togo']];
+      var REFUS = {
+        PAYS_NON_SUPPORTE: 'Les règles fiscales de ce pays ne sont pas encore publiées : choisissez un autre pays. Rien n’a été enregistré.',
+        DATE_CREATION_FUTURE: 'La date de création ne peut pas être dans le futur. Rien n’a été enregistré.',
+        ORG_CONTEXTE_REQUIS: 'Votre session n’est rattachée à aucun cabinet. Reconnectez-vous : droits et rattachement mettent jusqu’à 15 minutes à se mettre à jour.',
+        PROFIL_SOCIETE_MODIFIE_CONCURREMMENT: 'Quelqu’un a modifié ce profil pendant que vous le changiez. La fiche vient d’être relue : vérifiez, puis recommencez.',
+        PROFIL_SOCIETE_DEJA_EXISTANT: 'Ce dossier a déjà son profil : il vient d’être ouvert. Un dossier correspond à une seule société.',
+        DOSSIER_ARCHIVE: 'Ce dossier est archivé : le profil se lit, il ne se modifie plus.',
+        reseau: 'Le service ne répond pas. Rien n’a été enregistré : réessayez dans un instant.'
+      };
+      function complet() {
+        return { raisonSociale: 'Ets Kossi Distribution', sigle: 'EKD', formeJuridique: 'SARL', nif: '1000745307', rccm: 'TG-LOM-2019-A-1204', numeroCnss: '084512', dateCreation: '2019-03-15', pays: 'TG', devise: 'XOF',
+          objetSocial: 'Commerce de détail et distribution de produits de grande consommation', codeNaema: '4711', secteur: 'Commerce', capitalSocial: 10000000,
+          actionnaires: [{ nom: 'Komlan Kossi', type: 'PHYSIQUE', parts: 800, pourcentage: 80 }, { nom: 'Awa Mensah', type: 'PHYSIQUE', parts: 200, pourcentage: 20 }],
+          adresse: 'Quartier Bè-Kpota, Lomé', email: 'contact@kossi-distribution.tg', telephone: '+228 90 12 34 56', dirigeants: [{ nom: 'Komlan Kossi', fonction: 'Gérant', nif: '' }], version: 4, par: 'Kofi Santos', le: '2 août 2026' };
+      }
+      function incomplet() { var p = complet(); p.nif = ''; p.rccm = ''; p.adresse = ''; p.numeroCnss = ''; p.email = ''; p.version = 2; p.le = '14 novembre 2026'; return p; }
+      function vide(p) { return p == null || (typeof p === 'string' && !p.trim()) || (Array.isArray(p) && !p.some(function (e) { return e && Object.keys(e).some(function (k) { return typeof e[k] === 'string' && e[k].trim(); }); })); }
+      function manque(d) {
+        var b = BLOQ.filter(function (k) { return k === 'capitalSocial' ? d[k] == null || d[k] === '' : vide(d[k]); });
+        var o = OPT.filter(function (k) { return vide(d[k]); });
+        return { bloq: b, opt: o, pret: b.length === 0, complet: b.length === 0 && o.length === 0 };
+      }
+      function avert(d) {
+        var a = [], s = (d.actionnaires || []).reduce(function (t, x) { return t + (+x.pourcentage || 0); }, 0);
+        if ((d.actionnaires || []).length && Math.abs(s - 100) > 0.01) a.push({ champ: 'actionnaires', m: 'Les parts des actionnaires font ' + String(s).replace('.', ',') + ' % au lieu de 100 %. C’est enregistré tel quel : vérifiez.' });
+        if (!vide(d.nif) && !/^[0-9A-Za-z][0-9A-Za-z-]{5,31}$/.test(d.nif)) a.push({ champ: 'nif', m: 'Ce NIF n’a pas la forme attendue (6 à 32 lettres, chiffres ou tirets). C’est enregistré tel quel : vérifiez.' });
+        if (!vide(d.rccm) && !/^[0-9A-Za-z][0-9A-Za-z/\- ]{5,39}$/.test(d.rccm)) a.push({ champ: 'rccm', m: 'Ce RCCM n’a pas la forme attendue. C’est enregistré tel quel : vérifiez.' });
+        return a;
+      }
+      function nb(i) { return String(Math.round(i)).replace(/\B(?=(\d{3})+(?!\d))/g, String.fromCharCode(8239)) + String.fromCharCode(160) + 'F CFA'; }
+      function fr(i) { var p = String(i || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : ''; }
+      function clone(x) { return JSON.parse(JSON.stringify(x)); }
+      var P = { mode: 'complet', profil: complet(), edit: false, f: null, f0: null, manq: null, errs: {}, notice: null, err: null, suite: null, creation: false, lire: false };
+      window.__lot7p3b = function () { return P; };
+      function charger(mode) { P.mode = mode; P.edit = false; P.notice = null; P.err = null; P.suite = null; P.errs = {}; P.lire = false; P.profil = mode === 'incomplet' ? incomplet() : mode === 'aucun' ? null : complet(); }
+      function lectureSeule() { return P.mode === 'archive'; }
+      function ouvrirForm() {
+        P.creation = !P.profil; P.edit = true; P.errs = {}; P.notice = null; P.err = null; P.suite = null;
+        P.f = P.profil ? clone(P.profil) : { raisonSociale: 'Ets Kossi Distribution', formeJuridique: 'SARL', pays: 'TG', devise: 'XOF', actionnaires: [], dirigeants: [] };
+        P.f0 = clone(P.f); P.manq = manque(P.f);
+      }
+      function champ(k, type, extra) {
+        var v = P.f[k] == null ? '' : P.f[k], need = P.manq.bloq.indexOf(k) >= 0, e = P.errs[k];
+        var cls = 'pf-f' + (e ? ' bad' : need ? ' need' : '') + ((extra && extra.full) ? ' full' : '');
+        var h = '<div class="' + cls + '"><label for="pf-' + k + '">' + esc(LIB[k]) + (need ? ' <span class="dp-pill todo">à renseigner</span>' : '') + '</label>';
+        if (type === 'select') {
+          var opts = k === 'formeJuridique' ? FORMES : PAYS;
+          h += '<select id="pf-' + k + '" data-pf-f="' + k + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (v === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>';
+        } else {
+          h += '<input id="pf-' + k + '" data-pf-f="' + k + '" type="' + (type || 'text') + '" value="' + esc(v) + '"' + (extra && extra.ph ? ' placeholder="' + esc(extra.ph) + '"' : '') + (extra && extra.mono ? ' style="font-family:var(--font-mono)"' : '') + (type === 'date' ? ' max="' + TODAY + '"' : '') + (extra && extra.mode ? ' inputmode="' + extra.mode + '"' : '') + '>';
+        }
+        if (e) h += '<small class="err">' + esc(e) + '</small>';
+        else { var w = avert(P.f).filter(function (a) { return a.champ === k; })[0]; if (w) h += '<small class="wrn">' + esc(w.m) + '</small>'; else if (extra && extra.aide) h += '<small>' + esc(extra.aide) + '</small>'; }
+        return h + '</div>';
+      }
+      function actRow(a, i) {
+        return '<div class="pf-row"><div class="pf-f"><label>Nom</label><input data-pf-a="' + i + ':nom" value="' + esc(a.nom) + '"></div>' +
+          '<div class="pf-f"><label>Personne</label><select data-pf-a="' + i + ':type"><option value="PHYSIQUE"' + (a.type === 'PHYSIQUE' ? ' selected' : '') + '>physique</option><option value="MORALE"' + (a.type === 'MORALE' ? ' selected' : '') + '>morale (société)</option></select></div>' +
+          '<div class="pf-f"><label>Parts</label><input inputmode="numeric" data-pf-a="' + i + ':parts" value="' + esc(a.parts) + '"></div>' +
+          '<div class="pf-f"><label>%</label><input inputmode="decimal" data-pf-a="' + i + ':pourcentage" value="' + esc(a.pourcentage) + '"></div>' +
+          '<button class="btn btn-ghost btn-sm" type="button" data-pf-act="rmA" data-i="' + i + '" aria-label="Retirer cet actionnaire">Retirer</button></div>';
+      }
+      function dirRow(d, i) {
+        return '<div class="pf-row dir"><div class="pf-f"><label>Nom</label><input data-pf-d="' + i + ':nom" value="' + esc(d.nom) + '"></div>' +
+          '<div class="pf-f"><label>Fonction</label><input data-pf-d="' + i + ':fonction" value="' + esc(d.fonction) + '" placeholder="Gérant"></div>' +
+          '<div class="pf-f"><label>NIF (facultatif)</label><input data-pf-d="' + i + ':nif" value="' + esc(d.nif || '') + '" style="font-family:var(--font-mono)"></div>' +
+          '<button class="btn btn-ghost btn-sm" type="button" data-pf-act="rmD" data-i="' + i + '" aria-label="Retirer ce dirigeant">Retirer</button></div>';
+      }
+      function blocDir() {
+        var need = P.manq.bloq.indexOf('dirigeants') >= 0;
+        return '<div class="pf-sec full"><p class="pf-h">' + (need ? 'Qui dirige la société ? <span class="dp-pill todo">à renseigner</span>' : 'Dirigeants') + '</p>' + (P.f.dirigeants || []).map(dirRow).join('') +
+          '<div><button class="btn btn-ghost btn-sm" type="button" data-pf-act="addD">+ Ajouter un dirigeant</button></div>' + (P.errs.dirigeants ? '<small class="pf-miss">' + esc(P.errs.dirigeants) + '</small>' : '') + '</div>';
+      }
+      function blocAct() {
+        var s = (P.f.actionnaires || []).reduce(function (t, x) { return t + (+x.pourcentage || 0); }, 0), w = avert(P.f).filter(function (a) { return a.champ === 'actionnaires'; })[0];
+        return '<div class="pf-sec full"><p class="pf-h">Actionnaires <span style="font-weight:500;text-transform:none;letter-spacing:0">· total ' + String(s).replace('.', ',') + ' %</span></p>' + (P.f.actionnaires || []).map(actRow).join('') +
+          '<div><button class="btn btn-ghost btn-sm" type="button" data-pf-act="addA">+ Ajouter un actionnaire</button></div>' + (w ? '<small class="pf-miss" style="color:var(--warning)">' + esc(w.m) + '</small>' : '') + (P.errs.actionnaires ? '<small class="pf-miss">' + esc(P.errs.actionnaires) + '</small>' : '') + '</div>';
+      }
+      var TYPE = { formeJuridique: 'select', pays: 'select', dateCreation: 'date' };
+      var EXTRA = {
+        raisonSociale: { full: true }, nif: { mono: true, ph: 'Ex. 1000745307' }, rccm: { mono: true, ph: 'Ex. TG-LOM-2019-A-1204' }, numeroCnss: { mono: true },
+        objetSocial: { full: true, ph: 'Ex. Commerce de détail' }, codeNaema: { mono: true, ph: 'Ex. 4711' }, capitalSocial: { mode: 'numeric', aide: 'En francs CFA, sans décimales.', ph: 'Ex. 10000000' },
+        adresse: { full: true, ph: 'Ex. Quartier Bè-Kpota, Lomé' }, email: { ph: 'contact@exemple.tg' }, telephone: { ph: '+228 90 00 00 00' }, dateCreation: { aide: 'Le jour de l’immatriculation.' }
+      };
+      function groupe(keys) {
+        return '<div class="pf-grid">' + keys.map(function (k) {
+          if (k === 'dirigeants') return blocDir();
+          if (k === 'actionnaires') return blocAct();
+          if (k === 'devise') return '';
+          return champ(k, TYPE[k], EXTRA[k]);
+        }).join('') + '</div>';
+      }
+      function formulaire() {
+        var m = P.manq, h;
+        if (P.creation) {
+          h = '<div class="dp-card"><div><p class="dp-big">Créer le profil de la société</p><p class="dp-sub">Trois informations suffisent pour commencer, déjà remplies d’après le dossier. Le reste se complète ensuite.</p></div>' + groupe(['raisonSociale', 'formeJuridique', 'pays']) + '</div>';
+        } else if (m.bloq.length) {
+          var reste = BLOQ.concat(OPT).filter(function (k) { return m.bloq.indexOf(k) < 0 && k !== 'devise'; });
+          h = '<div class="dp-card warn"><div><p class="dp-big">À compléter pour produire la liasse</p><p class="dp-sub">' + m.bloq.length + ' information' + (m.bloq.length > 1 ? 's' : '') + ' : ' + m.bloq.map(function (k) { return LIB[k].replace(/ \(.*\)$/, '').toLowerCase(); }).join(', ') + '.</p></div>' + groupe(m.bloq) + '</div>' +
+            '<details class="pf-d"><summary>Le reste du profil (déjà rempli, à corriger au besoin)</summary><div style="margin-top:0.6rem">' + groupe(reste) + '</div></details>';
+        } else {
+          h = '<div class="dp-card">' + groupe(BLOQ.concat(OPT).filter(function (k) { return k !== 'devise'; })) + '</div>';
+        }
+        var err = P.err ? '<div class="pf-notice ko" role="alert">' + P.err + '</div>' : '';
+        var nb2 = Object.keys(P.errs).length ? '<div class="pf-notice ko" role="alert">Corrigez les champs marqués en rouge, puis enregistrez.</div>' : '';
+        return err + nb2 + h + '<div class="pf-foot"><span class="dp-sub">' + (P.creation ? 'Rien n’est enregistré tant que vous ne validez pas.' : 'Corriger une valeur est possible ; vider un champ ne l’efface pas. Chaque changement est historisé.') + '</span><span class="grow"></span>' +
+          '<button class="btn btn-ghost" type="button" data-pf-act="annuler">Annuler</button><button class="btn btn-primary dp-lg" type="button" data-pf-act="enregistrer"' + (P.creation ? '' : ' disabled') + '>' + (P.creation ? 'Créer le profil' : 'Enregistrer') + '</button></div>';
+      }
+      function ligne(k, v, mono, warn) {
+        return '<dt>' + esc(k) + '</dt><dd' + (mono ? ' class="mono"' : '') + '>' + (v ? esc(v) : '<span class="pf-miss">à renseigner</span>') + (warn ? ' <span class="dp-pill todo" title="' + esc(warn) + '">' + IC.warn + ' à vérifier</span>' : '') + '</dd>';
+      }
+      function fiche() {
+        var d = P.profil, w = avert(d), W = function (c) { var x = w.filter(function (a) { return a.champ === c; })[0]; return x ? x.m : ''; };
+        var forme = (FORMES.filter(function (f) { return f[0] === d.formeJuridique; })[0] || [0, d.formeJuridique])[1];
+        var dir = (d.dirigeants || []).filter(function (x) { return x.nom; }).map(function (x) { return x.nom + ' (' + x.fonction + ')'; }).join(' · ');
+        var tot = (d.actionnaires || []).reduce(function (t, x) { return t + (+x.pourcentage || 0); }, 0);
+        return '<div class="dp-card"><dl class="pf-dl">' + ligne('Raison sociale', d.raisonSociale) + ligne('Forme', forme) + ligne('NIF', d.nif, true, W('nif')) + ligne('RCCM', d.rccm, true, W('rccm')) +
+          ligne('Créée le', fr(d.dateCreation)) + ligne('Activité', d.objetSocial) + ligne('Capital', d.capitalSocial != null && d.capitalSocial !== '' ? nb(d.capitalSocial) : '') + ligne('Adresse du siège', d.adresse) + ligne('Dirigeant', dir) + '</dl></div>' +
+          '<details class="pf-d"><summary>Détails : autres informations, actionnaires, historique</summary><div class="dp-card" style="margin-top:0.6rem"><dl class="pf-dl">' +
+          ligne('Sigle', d.sigle) + ligne('N° CNSS', d.numeroCnss, true) + ligne('Code d’activité (NAEMA)', d.codeNaema, true) + ligne('Secteur', d.secteur) + ligne('E-mail', d.email) + ligne('Téléphone', d.telephone) + ligne('Pays et devise', 'Togo · franc CFA (XOF)') +
+          '<dt>Régime</dt><dd>Système Normal · Réel — IS <span class="dp-sub">(se règle dans « Les axes », pas ici)</span></dd></dl>' +
+          '<p class="pf-h" style="margin-top:0.8rem">Actionnaires</p>' + ((d.actionnaires || []).length ? '<table class="pf-tbl"><thead><tr><th>Nom</th><th>Personne</th><th class="n">Parts</th><th class="n">%</th></tr></thead><tbody>' + d.actionnaires.map(function (a) { return '<tr><td>' + esc(a.nom) + '</td><td>' + (a.type === 'MORALE' ? 'morale' : 'physique') + '</td><td class="n">' + esc(a.parts) + '</td><td class="n">' + esc(a.pourcentage) + '</td></tr>'; }).join('') + '<tr><th colspan="3">Total</th><th class="n">' + String(tot).replace('.', ',') + '</th></tr></tbody></table>' + (W('actionnaires') ? '<p class="dp-sub" style="color:var(--warning);font-weight:600">' + esc(W('actionnaires')) + '</p>' : '') : '<p class="dp-sub"><span class="pf-miss">à renseigner</span> (facultatif)</p>') +
+          '<p class="dp-sub" style="margin-top:0.8rem">Version ' + d.version + ' · modifiée le ' + esc(d.le) + ' par ' + esc(d.par) + '. Aucune suppression : chaque changement s’ajoute à l’historique.</p></div></details>';
+      }
+      function carte() {
+        var d = P.profil, m = d ? manque(d) : null, h;
+        var lire = '<button class="btn btn-ghost" type="button" data-pf-act="lire">Lire les statuts</button>';
+        if (lectureSeule()) {
+          h = '<div class="dp-card"><div class="dp-big">' + IC.lock + ' Ce dossier est archivé</div><p class="dp-sub">Le profil se lit, il ne se modifie plus.</p></div>';
+        } else if (!d) {
+          h = '<div class="dp-card warn"><div><p class="dp-big">Ce dossier n’a pas encore de profil</p><p class="dp-sub">Le plus rapide : lire les statuts de la société. Sinon, trois champs à valider.</p></div><div class="dp-go">' + lire + '<button class="btn btn-primary dp-lg" type="button" data-pf-act="ouvrir">Créer le profil</button></div></div>';
+        } else if (!m.pret) {
+          h = '<div class="dp-card warn"><div><p class="dp-big">' + IC.warn + ' Il manque ' + m.bloq.length + ' information' + (m.bloq.length > 1 ? 's' : '') + ' avant la liasse</p><p class="dp-sub">' + m.bloq.map(function (k) { return LIB[k].replace(/ \(.*\)$/, ''); }).join(', ') + '.</p></div><div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-pf-act="ouvrir">Compléter maintenant</button>' + lire + '</div></div>';
+        } else {
+          h = '<div class="dp-card ok"><div><p class="dp-big">' + IC.ok + ' Le profil est complet : la liasse peut être produite</p><p class="dp-sub">' + (m.opt.length ? 'Facultatif : ' + m.opt.map(function (k) { return LIB[k].replace(/ \(.*\)$/, '').toLowerCase(); }).join(', ') + '.' : 'Rien à ajouter.') + '</p></div><div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-pf-act="ouvrir">Modifier le profil</button></div></div>';
+        }
+        if (P.lire) h += '<div class="pf-notice wn">Ici s’ouvrira la lecture des statuts et de la carte CFE : les champs se rempliront d’eux-mêmes, à relire avant d’enregistrer. C’est l’écran de FE-041 (maquette suivante).</div>';
+        return h;
+      }
+      function rig() {
+        function opt(v, l) { return '<option value="' + v + '"' + (P.rig === v ? ' selected' : '') + '>' + l + '</option>'; }
+        function om(v, l) { return '<option value="' + v + '"' + (P.mode === v ? ' selected' : '') + '>' + l + '</option>'; }
+        return '<details class="pf-d"><summary>Pour la démonstration</summary><div class="pf-rig" style="margin-top:0.5rem"><label>Le dossier est : <select data-pf-rig-mode>' + om('complet', 'complet') + om('incomplet', 'incomplet (3 informations manquent)') + om('aucun', 'sans profil') + om('archive', 'archivé') + '</select></label>' +
+          '<label>Au prochain enregistrement : <select data-pf-rig-err>' + opt('', 'tout se passe bien') + opt('PAYS_NON_SUPPORTE', 'le pays est refusé') + opt('DATE_CREATION_FUTURE', 'la date est refusée') + opt('PROFIL_SOCIETE_MODIFIE_CONCURREMMENT', 'quelqu’un a modifié entre-temps') + opt('PROFIL_SOCIETE_DEJA_EXISTANT', 'le profil existe déjà') + opt('ORG_CONTEXTE_REQUIS', 'le droit est refusé') + opt('DOSSIER_ARCHIVE', 'le dossier vient d’être archivé') + opt('reseau', 'le service ne répond pas') + '</select></label></div></details>';
+      }
+      function rendre() {
+        var h = '<div class="dp-head"><div><h3>Profil de la société</h3><p>Ets Kossi Distribution · une société par dossier</p></div></div>';
+        if (P.notice) h += '<div class="pf-notice' + (P.noticeKo ? ' ko' : '') + '" role="status">' + P.notice + '</div>';
+        if (P.suite) h += '<div class="dp-card"><div class="dp-go"><span class="dp-sub">' + P.suite.txt + '</span>' + (P.suite.btn ? '<button class="btn btn-primary" type="button" data-pf-act="' + P.suite.act + '">' + P.suite.btn + '</button>' : '') + '</div></div>';
+        if (P.edit) h += formulaire();
+        else { h += carte(); if (P.profil) h += fiche(); }
+        root.innerHTML = h + rig();
+        var step = root.closest('[data-dc-panel-edit]'), bd = step && step.previousElementSibling && step.previousElementSibling.querySelector('.dc-badge');
+        if (bd) { var mm = P.profil ? manque(P.profil) : null; bd.textContent = !mm ? 'Pas de profil' : mm.pret ? 'Complet' : 'À compléter'; bd.className = 'dc-badge ' + (mm && mm.pret ? 'ok' : 'warn'); }
+        var tb = root.querySelector('[data-pf-act="enregistrer"]');
+        if (tb && !P.creation) tb.disabled = JSON.stringify(P.f) === JSON.stringify(P.f0);
+      }
+      function lireForm() {
+        P.f.capitalSocial = P.f.capitalSocial === '' || P.f.capitalSocial == null ? '' : String(P.f.capitalSocial).replace(/\s/g, '');
+      }
+      function valider() {
+        var e = {}, f = P.f;
+        if (vide(f.raisonSociale)) e.raisonSociale = 'La raison sociale est obligatoire.';
+        if (!/^[A-Za-z]{2}$/.test(f.pays || '')) e.pays = 'Choisissez un pays.';
+        if (f.dateCreation && f.dateCreation > TODAY) e.dateCreation = 'La date ne peut pas être dans le futur.';
+        if (f.telephone && !/^\+?[0-9 .-]{6,20}$/.test(f.telephone)) e.telephone = 'Entre 6 et 20 chiffres, espaces, points ou tirets.';
+        if (f.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email)) e.email = 'Cette adresse n’a pas la bonne forme.';
+        if (f.capitalSocial !== '' && f.capitalSocial != null && !/^\d+$/.test(String(f.capitalSocial).replace(/\s/g, ''))) e.capitalSocial = 'Un montant entier, en francs CFA.';
+        (f.actionnaires || []).forEach(function (a) {
+          var p = Number(String(a.pourcentage).replace(',', '.')), q = Number(a.parts);
+          if (vide(a.nom) || !(p >= 0 && p <= 100) || String(a.pourcentage) === '' || !(q >= 0) || String(a.parts) === '') e.actionnaires = 'Chaque actionnaire a un nom, un nombre de parts et un pourcentage entre 0 et 100.';
+        });
+        (f.dirigeants || []).forEach(function (d) { if (vide(d.nom) || vide(d.fonction)) e.dirigeants = 'Chaque dirigeant a un nom et une fonction (gérant, DG…).'; });
+        return e;
+      }
+      function enregistrer() {
+        lireForm(); P.errs = valider(); P.err = null;
+        if (Object.keys(P.errs).length) { rendre(); return; }
+        var c = P.rig; P.rig = '';
+        if (c) {
+          if (c === 'PROFIL_SOCIETE_MODIFIE_CONCURREMMENT') { P.profil.version++; P.profil.par = 'Awa Diallo'; P.profil.le = '26 novembre 2026'; P.edit = false; P.notice = REFUS[c]; P.noticeKo = true; }
+          else if (c === 'PROFIL_SOCIETE_DEJA_EXISTANT') { P.profil = complet(); P.mode = 'complet'; P.edit = false; P.notice = REFUS[c]; P.noticeKo = true; }
+          else if (c === 'DOSSIER_ARCHIVE') { P.mode = 'archive'; P.edit = false; P.notice = REFUS[c]; P.noticeKo = true; }
+          else if (c === 'PAYS_NON_SUPPORTE') { P.errs.pays = 'Pays non pris en charge pour le moment.'; P.err = REFUS[c]; }
+          else if (c === 'DATE_CREATION_FUTURE') { P.errs.dateCreation = 'La date ne peut pas être dans le futur.'; P.err = REFUS[c]; }
+          else P.err = REFUS[c];
+          rendre(); return;
+        }
+        if (!P.creation && JSON.stringify(P.f) === JSON.stringify(P.f0)) { P.edit = false; P.notice = 'Rien n’a changé : rien n’a été enregistré.'; P.noticeKo = false; rendre(); return; }
+        var nouveau = P.creation, d = clone(P.f);
+        d.actionnaires = (d.actionnaires || []).map(function (a) { return { nom: a.nom, type: a.type, parts: Number(a.parts), pourcentage: Number(String(a.pourcentage).replace(',', '.')) }; });
+        if (d.capitalSocial !== '' && d.capitalSocial != null) d.capitalSocial = Number(String(d.capitalSocial).replace(/\s/g, ''));
+        d.devise = 'XOF'; d.version = nouveau ? 1 : (P.profil.version + 1); d.par = 'Vous'; d.le = '26 novembre 2026';
+        P.profil = d; P.edit = false; P.mode = P.mode === 'aucun' ? 'incomplet' : P.mode;
+        var m = manque(d), w = avert(d);
+        P.notice = '<b>' + (nouveau ? 'Profil créé' : 'Modifications enregistrées') + '.</b> Version ' + d.version + '.' + (w.length ? ' ' + w.map(function (a) { return esc(a.m); }).join(' ') : ''); P.noticeKo = false;
+        P.suite = m.pret ? { txt: 'Le profil est complet. Étape suivante : confirmer le régime de la société.', btn: 'Confirmer le régime', act: 'axes' } : { txt: 'Il manque encore : ' + m.bloq.map(function (k) { return LIB[k].replace(/ \(.*\)$/, '').toLowerCase(); }).join(', ') + '.', btn: 'Compléter', act: 'ouvrir' };
+        rendre();
+      }
+      root.addEventListener('click', function (ev) {
+        var b = ev.target.closest ? ev.target.closest('[data-pf-act]') : null; if (!b) return;
+        var a = b.dataset.pfAct, i = +b.dataset.i;
+        if (a === 'ouvrir') { ouvrirForm(); rendre(); }
+        else if (a === 'annuler') { P.edit = false; P.errs = {}; P.err = null; rendre(); }
+        else if (a === 'enregistrer') enregistrer();
+        else if (a === 'lire') { P.lire = !P.lire; rendre(); }
+        else if (a === 'axes') { P.suite = { txt: 'Ici s’ouvrira l’écran « Les axes » (FE-042) : système comptable et régime fiscal proposés d’après ce profil.' }; rendre(); }
+        else if (a === 'addA') { P.f.actionnaires.push({ nom: '', type: 'PHYSIQUE', parts: '', pourcentage: '' }); rendre(); }
+        else if (a === 'rmA') { P.f.actionnaires.splice(i, 1); rendre(); }
+        else if (a === 'addD') { P.f.dirigeants.push({ nom: '', fonction: 'Gérant', nif: '' }); rendre(); }
+        else if (a === 'rmD') { P.f.dirigeants.splice(i, 1); rendre(); }
+      });
+      function maj(ev) {
+        var t = ev.target; if (!t.dataset || !P.edit) return;
+        if (t.dataset.pfF) { P.f[t.dataset.pfF] = t.value; delete P.errs[t.dataset.pfF]; }
+        else if (t.dataset.pfA) { var p = t.dataset.pfA.split(':'); P.f.actionnaires[+p[0]][p[1]] = t.value; }
+        else if (t.dataset.pfD) { var q = t.dataset.pfD.split(':'); P.f.dirigeants[+q[0]][q[1]] = t.value; }
+        else return;
+        var tb = root.querySelector('[data-pf-act="enregistrer"]');
+        if (tb && !P.creation) tb.disabled = JSON.stringify(P.f) === JSON.stringify(P.f0);
+      }
+      root.addEventListener('input', maj);
+      root.addEventListener('change', function (ev) {
+        var t = ev.target;
+        if (t.matches && t.matches('[data-pf-rig-mode]')) { charger(t.value); rendre(); }
+        else if (t.matches && t.matches('[data-pf-rig-err]')) P.rig = t.value;
+        else maj(ev);
+      });
       rendre();
     })();
 
