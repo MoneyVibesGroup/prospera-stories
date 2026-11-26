@@ -2281,6 +2281,15 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-332, avant le code)** — branche `MNV-332` de `prospera-fiscal-service`, partie de
+  `origin/dev` `6e9fbbe`. **Aucune migration** (aucun stockage ne change), ni `app.module.ts` (la route neuve entre dans
+  `DepotsDeclarationController`, déjà monté ; le service neuf est fourni par `DepotsModule`, fichier de D), ni
+  `package.json` (le `prebuild` appelle la même garde, étendue aux guidages), ni `read-models/`, ni copie du paquet
+  fiscal, ni manifeste `declarations`. Touché parmi les communs : **le contrat OpenAPI** (une route neuve : « ⚠
+  Contrats »). Données neuves dans le dossier de D : `modules/paquets-depot/assets/manifeste-guidages.json`,
+  `tg-tva-guidage-1.0.json` et `tg-dsf-guidage-1.0.json` (LF, vérifiées par sha256) ; les formats et leurs deux
+  manifestes **intacts**. **Lus, sans y écrire** (dossiers de C) : `REDEVABLE_ENTREPRISE` et `NatureRedevable`
+  (`domain/redevables/redevable.ts`), les ports des obligations et des versions. **→ C** : rien à faire pour un rebase.
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#78, `dev` `6e9fbbe`, rebasée sur `origin/dev` `9db1653` — 327
   de C, qui touchait aussi le contrat OpenAPI — avant la fusion), conforme à l'annonce ; ANNONCÉ (2026-11-26,
   STORY-331, avant le code)** — branche `MNV-331` de `prospera-fiscal-service`, partie de
@@ -2369,6 +2378,26 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-26, STORY-332, avant le code) — le dépôt guidé pas à pas** (`prospera-fiscal-service`, modules
+  `depots` et `paquets-depot`). Fiche : `stories/STORY-332.md` (D-332-1 → 12, section « Contrat »). **Ajout seul** :
+  aucune route, aucun champ, aucun topic existant ne change.
+  - **`GET /api/v1/depots-declaration/{depotId}/guidage`** (droit `fiscalite:declaration:deposer`) : 200 `{ depotId,
+    obligationId, dossierId, redevable: { id, nature: 'ENTREPRISE' | 'PERSONNE_PHYSIQUE' }, taxe, periode, nature,
+    format, guidage: { pays, etat, version, checksum, statut }, canal: { type, adresse }, estampille: { numero, empreinte
+    }, etapes: [{ rang, code, libelle, geste, consigne, valeurs: [{ rang, code, libelle, type, valeur }] | null, fichier:
+    { format, numero, empreinte, periode } | null }] }`. Les étapes viennent du paquet de guidage, dans son ordre. Les
+    valeurs sont celles du formulaire de 331, dans l'ordre du formulaire, chacune une chaîne prête à copier. `geste`
+    prend sa valeur dans une liste fermée : `SE_CONNECTER`, `OUVRIR`, `SAISIR_VALEURS`, `TELEVERSER_FICHIER`,
+    `VERIFIER`, `SOUMETTRE`, `RELEVER_ACCUSE`. Aucun geste ne demande une valeur.
+  - Refus : `404 DEPOT_INTROUVABLE`, **`409 DEPOT_REMPLACE`** (`{ remplacePar }`), `409 OBLIGATION_DESACTIVEE`, `409
+    LIVRABLE_PERIME` (`{ numero, empreinte }`), `422 FORMAT_DE_CANAL_NON_DECLARE`, **`422 GUIDAGE_NON_DECLARE`** (`{
+    champ: 'guidage', pays, etat, version }`), **`422 GUIDAGE_INCOMPLET`** (`{ champ }`), `422
+    FORMAT_DE_CANAL_INCOMPLET`, `422 VALEUR_DE_CANAL_ABSENTE`, `422 VALEUR_DE_CANAL_HORS_CONTRAINTE`, `502
+    PAQUET_DEPOT_INTEGRITE`, `502 VERSION_SCELLEE_INTROUVABLE`.
+  - **Données** : deux guidages `amorce` (Q-D-29), `TG × TVA` (dimana : six étapes, les trois valeurs dans l'ordre) et
+    `TG × DSF` (GUDEF : un seul fichier à téléverser). Aucun topic, droit, acte ni stockage. **→ A (plus tard)** :
+    FE-081 affiche les étapes et met un bouton « copier » sur chaque valeur.
 
 - **PUBLIÉ (2026-11-26, STORY-331 : prospera-fiscal-service#78, `dev` `6e9fbbe`) sans écart ; ANNONCÉ (2026-11-26,
   STORY-331, avant le code, prospera-stories#986, `main` 756fc0f) — le format de canal décrit comme une donnée du
@@ -3643,6 +3672,13 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-29 (2026-11-26, STORY-332) — Les écrans réels de dimana et du GUDEF : quelles étapes, dans quel ordre ?**
+  **Choix par défaut** : deux guidages `amorce` de six étapes (se connecter avec le compte du redevable, ouvrir,
+  reporter les valeurs ou téléverser le fichier, vérifier, valider, relever l'accusé). Ils seront relevés sur les
+  portails au premier dépôt réel (1102). Changer une étape ne coûte qu'une version du paquet de guidage, sans code et sans
+  toucher au format. Les lignes du formulaire réel que le produit ne tient pas (Q-D-28) restent à remplir sur le
+  portail, et la consigne de l'étape de saisie le dit.
 
 - **Q-D-28 (2026-11-26, STORY-331) — Le formulaire mensuel de TVA de dimana : quelles lignes, dans quel ordre ?**
   **Choix par défaut** (D-331-9) : les trois valeurs que le produit tient (la période, la base imposable, la TVA due),
