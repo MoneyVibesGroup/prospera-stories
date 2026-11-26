@@ -8161,7 +8161,7 @@ sprints:
         epic: "EPIC-034"
         points: 3
         service: "fiscal-service"
-        status: "in_progress"  # 2026-11-26 (lot 7 de D, n° 6) — fiche écrite avant le code (D-349-1 → 8), contrat et communs annoncés (journal de D) : les obligations sociales d'une période (COTISATIONS_SOCIALES, RETENUE_IRPP) dérivées de sa base de rémunération et du paquet, écrites par RegistreObligations.enregistrer (AD-17), donc au calendrier, au cycle et à la piste d'audit comme les fiscales ; déclenchées par la saisie et l'import (champ obligationsSociales ajouté à leurs réponses). Q-D-24, Q-D-25.
+        status: "done"  # 🏁 DONE le 2026-11-26 (lot 7 de D, n° 6) — prospera-fiscal-service#73 (dev a7d42cc, a145468, 136efdf) ; annonce avant le code prospera-stories#962. Les obligations sociales d’une période (COTISATIONS_SOCIALES, RETENUE_IRPP ; redevable entreprise, implantation principale) dérivées de sa base et du paquet (échéance par echeancesDe, non datée et nommée si le paquet ne la déclare pas ; canal = l’organisme du paquet ; le catalogue fait foi s’il porte le code), écrites par RegistreObligations.enregistrer (AD-17) : au calendrier du dossier et du portefeuille, au cycle et au journal chaîné comme les fiscales. Déclenchées par la saisie et l’import (CREEE comme INCHANGEE) ; paquet inaccessible : la base est écrite, la réponse dit NON_DERIVEES. Champ obligationsSociales ajouté aux deux réponses ; aucun fichier de C, aucune migration. Node 24 : unitaires 216/216 suites (3 148), e2e 13/13 (299), conformité 23/23 (144) ; mutations 14/14 ; pile grp-d avec Redis saine. Q-D-24, Q-D-25. La part de D d’EPIC-034 est finie ; l’épic se ferme avec STORY-350 (C). Suivante : STORY-1141 (325 de C non fusionnée).
         story_path: "stories/STORY-349.md"
         assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-350"
@@ -9227,7 +9227,7 @@ fiscalite_epics:
     - { id: "EPIC-031", name: "Chaîne déclarative — alimentation, cycle de vie, contrôles, piste d'audit 🏁 premier jalon vendable", frs: "FR-F22..F26, F33..F38, F51, F56, F62..F66", stories: "STORY-320..329", status: "proposed" }
     - { id: "EPIC-032", name: "Dépôt assisté, accusé et dossier de contrôle ⛔ jalon `format confirmé`", frs: "FR-F39..F45, F52..F55", stories: "STORY-330..339", status: "proposed" }
     - { id: "EPIC-033", name: "Règlement de l'impôt (préparation et rapprochement, jamais exécution)", frs: "FR-F46..F50", stories: "STORY-340..344", status: "proposed" }
-    - { id: "EPIC-034", name: "Base de rémunération et obligations sociales (import ET saisie)", frs: "FR-F27..F32", stories: "STORY-345..350 + STORY-364", status: "proposed" }
+    - { id: "EPIC-034", name: "Base de rémunération et obligations sociales (import ET saisie)", frs: "FR-F27..F32", stories: "STORY-345..350 + STORY-364", status: "in_progress" }  # 2026-11-26 : la part de D est finie (345 → 349 et 364, groupe D, lot 7 ; 349 = fiscal #73) ; reste STORY-350 (C, le rapprochement des charges sociales)
 
 atelier_balance_epics:
   prd: "docs/prd-atelier-balance-2026-07-12.md"
