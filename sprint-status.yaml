@@ -2588,13 +2588,17 @@ reserved_ranges:
       seule au manifeste. Node 24 : 1056 unitaires sur MongoDB réel, 24 e2e, build 0 ; pas de pile. Lot 3 de C, n° 5.
       NON SLOTTÉE.
   - range: "STORY-1023"
-    status: "in_progress"
+    status: "done"
     owner: "Groupe C — les contrats de la balance complétés : le dossier déclaré dans toutes les réponses (imports, cahiers, rejets, rapprochement) et la lecture inter-organisations de la plateforme (@PlatformReadOnly, AD-P16) (prospera-balance-service)"
     source_doc: "prospera-stories/stories/STORY-1023.md"
     reserved_on: "2026-11-24"
     note: >
-      EN COURS le 2026-11-25 (lot 7 de C, n° 0e) : fiche écrite, contrat annoncé avant le code (journal de C, ⚠ Contrats).
-      AVANT : Amendement du lot 6 (24/11 soir, D-L6-5), consigne de l'utilisateur. Source : TICKET-BACKEND-balance-ne-declare-pas-son-dossier
+      🏁 DONE le 2026-11-26 (lot 7 de C, n° 0e) — prospera-balance-service#170 (dev 75179cf) ; annonce « ⚠ Contrats »
+      avant le code (docs #930, main 28dc047). dossierId requis sur 39 schémas de réponse des familles de la balance
+      (balayage OpenAPI : couvertes ou écartées avec leur raison) ; trois routes GET /api/v1/plateforme/balance/… sous
+      @PlatformReadOnly (PLATFORM_ADMIN, X-Motif-Lecture, journal_lectures_plateforme avant la lecture). Node 24 :
+      300/300 suites, 5764 tests ; e2e 38/38, 2324 ; mutations 11/11 ; pile grp-c 17/17. Les cinq stories de balance du
+      lot 7 sont livrées (1020, 1019, 1021, 1022, 1023). Suivante : STORY-317. AVANT : Amendement du lot 6 (24/11 soir, D-L6-5), consigne de l'utilisateur. Source : TICKET-BACKEND-balance-ne-declare-pas-son-dossier
       (servi en partie par 906) ; spine balance §Non couvert. Fiche à écrire juste avant de coder. Lot C, n° 12 du lot 6. NON SLOTTÉE.
   - range: "STORY-1022"
     status: "done"

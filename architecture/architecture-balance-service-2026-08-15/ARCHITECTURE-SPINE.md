@@ -62,7 +62,7 @@ disposition de l'aval. Trois manières d'y arriver, une seule forme en sortie.
 | --- | --- | --- |
 | **AD-P14 — l'exercice appartient au dossier** | écosystème v1.4 | ✅ **Le STATUT est lu dans `exercices_dossier`** depuis STORY-367 ; `ExerciceAtelier` vit toujours ici, mais en **repli** et pour ce qu'il est seul à savoir (AD-10) |
 | **AD-P13 — le dossier est l'unité de travail** | écosystème v1.4 | ✅ La clé de la balance porte `dossierId` depuis STORY-236 ; les 6 collections filtrent dessus (AD-10) |
-| **AD-P16 — lecture plateforme inter-org** | écosystème v1.6 | ⛔ **Pas de route `@PlatformReadOnly` ici** — écart ouvert (§ Non couvert) |
+| **AD-P16 — lecture plateforme inter-org** | écosystème v1.6 | ✅ **STORY-1023** : `GET /api/v1/plateforme/balance/organisations/{orgId}/…` (balances d'un dossier, une balance, le journal des lectures) sous `@PlatformReadOnly()` — `PLATFORM_ADMIN` seul, organisation du chemin, motif `X-Motif-Lecture`, journal `journal_lectures_plateforme` écrit avant la lecture ; le tunnel sur site (AD-20) reste à la passerelle |
 | Capacité partagée · entitlement `(org × module)` | P7/P8 | Code de module **`balance`** ⚠️ voir AD-3 |
 | Relying-party / JWKS · Database-per-service · Outbox | écosystème | Moule commun |
 | Unités mineures entières | STORY-101 | ⚠️ **XOF : zéro décimale**, et `isSafeInteger` par ligne **et** par total |
@@ -362,7 +362,6 @@ JWT RS256 en relying-party · artefacts référentiels **embarqués dans l'image
 | `fiscal` (moteur, provisionnement) | Décrit par `architecture-fiscal-service` **côté consommateur** ⚠️ mais `CLASSES_DE_GESTION` vit **ici** (AD-5) |
 | `cahiers` en détail | Seule leur **agrégation** est portante (exclusion `A_NOUVEAUX`, AD-2) |
 | `profil-societe` | ⚠️ **En migration vers `dossier-service`** (STORY-356/357) — deux propriétaires déclarés |
-| Route de lecture plateforme | ⛔ **`AD-P16` n'est pas implémentée ici** — écart ouvert, non repris par une story |
 
 ## ⚡ Les 4 écarts encore ouverts, et ce qu'ils ont en commun
 

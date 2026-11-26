@@ -4,8 +4,12 @@
 **Ouvert par :** **FE-063** (barry thierno alhassane, 2026-08-19) — constat d'**intégration**, pas de maquette
 **Priorité :** Should — le front n'est pas bloqué, mais il perd toute possibilité de **vérifier** ce qu'il affiche
 **État :** 🟡 servi pour la balance par **STORY-906** (balance #146) : `BalanceResponseDto.dossierId`, hors du
-checksum ; question 3 (`balance.submitted`) : la balance ingérée porte le dossier résolu par l'ingestion. Reste
-ouvert pour les autres familles (imports, cahiers, rejets, rapprochement).
+checksum ; question 3 (`balance.submitted`) : la balance ingérée porte le dossier résolu par l'ingestion.
+✅ **Servi pour les familles nommées par STORY-1023** (balance-service, lot 7 de C) : `dossierId` requis sur les réponses
+JSON des familles `balances`, `balance`, `exercices`, `imports`, `cahiers`, `pieces/ocr`, `rattachement`,
+`rapprochement`, `tresorerie` (39 schémas) ; un balayage du document OpenAPI classe chaque famille sous `/dossiers`.
+**Reste ouvert** pour les familles écartées avec leur raison : `fiscal`, `immobilisations`, `inventaire`, `devises`,
+`profil-societe` (en migration vers `dossier-service`), `referentiels`.
 
 ---
 

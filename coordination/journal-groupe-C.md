@@ -61,8 +61,21 @@
    `balance.created` remis à jour (tenu par Ajv). Node 24 : unitaires 298/298 suites, 5738 ; e2e 37/37, 2291 ;
    mutations 9/9 ; pile `grp-c` 12/12 (Kafka et outbox, empreinte recalculée hors du service). Verrou pris une fois
    (23:08 → 23:19). D-1022-1 → 6 dans la fiche. **D prévenu** (SHA, forme exacte ; D-1078-10 débloqué).
-7. **STORY-1023 en cours (25/11)** : fiche écrite, contrat annoncé avant le code (« ⚠ Contrats » ci-dessous) — le
-   dossier déclaré dans les réponses des familles de la balance, trois routes de lecture plateforme (AD-P16).
+7. ✅ **STORY-1023 DONE (26/11)** : balance-service **#170** (`75179cf` sur `dev`), annonce #930 avant le code. Le
+   dossier déclaré : `dossierId` requis sur 39 schémas de réponse des familles `balances`, `balance`, `exercices`,
+   `imports`, `cahiers`, `pieces/ocr`, `rattachement`, `rapprochement`, `tresorerie` (la donnée d'abord, la route sinon) ;
+   un balayage du document OpenAPI classe chaque famille sous `/dossiers` (écartées avec leur raison : fiscal,
+   immobilisations, inventaire, devises, profil-societe, referentiels). La lecture de la plateforme (AD-P16, première du
+   programme) : `GET /api/v1/plateforme/balance/organisations/{orgId}/dossiers/{dossierId}/balances`, `…/{id}`,
+   `…/{orgId}/lectures`, sous `@PlatformReadOnly()` (`PLATFORM_ADMIN` seul, `X-Motif-Lecture`, journal écrit avant la
+   lecture, exclu de l'effacement C13). Contrat aligné sur ce qui est servi (200 du rejeu de `POST /balances`, 201 des
+   POST de reprise). Node 24 : unitaires 300/300 suites, 5764 ; e2e 38/38, 2324 ; mutations 11/11 ; pile `grp-c` 17/17 ;
+   verrou pris deux fois (01:08 → 01:18, 01:18 → 01:20). D-1023-1 → 13 dans la fiche. **→ B (information)** : la console
+   lit la balance d'une organisation par ces routes.
+8. 🏁 **Les cinq stories de balance placées en tête du lot 7 sont livrées : 1020, 1019, 1021, 1022, 1023** (564, du
+   fiscal, glissée entre 1021 et 1022 par l'amendement du point 4).
+9. **Suivante : STORY-317** (les reports d'échéance administratifs, fiscal ; fiche à écrire juste avant de coder). Elle
+   sert au plus tard la demande de D (STORY-348) : le bloc `cnss.collecte` au paquet fiscal.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -526,6 +539,11 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-1023), PUBLIÉ** (balance-service #170, `75179cf` sur `dev`) — **conforme à l'annonce** (#930),
+  avec deux ajouts écrits : les codes que le contrat taisait sont déclarés (200 du rejeu idempotent de `POST /balances`,
+  201 des POST de reprise, D-1023-12) et le 403 de la garde porte `LECTURE_PLATEFORME_REFUSEE` (un rôle de cabinet est
+  refusé avant, par le refus de rôle existant). Ajv a relevé deux écarts antérieurs, non corrigés (fiche, « Ce qui
+  reste ») : l'aperçu de l'agrégation et les écarts du rapprochement. Annonce du 25/11 :
 - **2026-11-25 (STORY-1023), ANNONCÉ avant le code** — **les contrats de la balance complétés : le dossier déclaré
   partout, la lecture inter-organisations de la plateforme** (`prospera-balance-service`, REST seulement). Fiche :
   `stories/STORY-1023.md` (contrat, D-1023-1 → 10). Consommateurs : les écrans de A (FE-063 et suivants : confronter le
@@ -1099,6 +1117,20 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-1023, 26/11) l'entrée standard de Python sous Windows est en cp1252** : un script de remplacement qui lit
+  ses paires par `json.load(sys.stdin)` depuis un heredoc écrit des accents en mojibake (`âš¡`, `Ã©`). Lire
+  `sys.stdin.buffer.read().decode('utf-8')`, ou écrire le script avec l'outil d'écriture ; réparer une ligne par
+  `ligne.encode('cp1252').decode('utf-8')`.
+- **(STORY-1023)** un DTO Swagger qui HÉRITE d'un autre et y redéclare une propriété (`declare dossierId` sous
+  `@ApiProperty`) modifie les métadonnées du parent : le schéma parent est devenu `required: [dossierId]`. Passer par
+  `OmitType(Parent, ['champ'])`, qui copie les métadonnées.
+- **(STORY-1023)** Ajv sur des corps réels d'e2e : les suites qui doublent leurs services par des objets partiels
+  rougissent à bon droit sur le schéma complet ; n'exiger le schéma complet que là où le service est réel, et le seul
+  champ visé ailleurs. Ajv a trouvé deux écarts véritables (agrégation, rapprochement) et deux codes que le contrat
+  taisait (200 / 201).
+- **(STORY-1023)** dans une pile semée à la main, `GET …/cahiers/categories` rend une liste vide : le service ne sème
+  ses catégories par défaut que depuis le référentiel du dossier ; semer une catégorie en base pour une preuve.
 
 - **(STORY-1022, 25/11) une mutation `x && false ? {…}` rougit par compilation** : TypeScript réduit la branche à
   `never` et l'accès `x.champ` ne compile plus. Écrire `x && Date.now() < 0` pour une mutation qui doit rougir sur

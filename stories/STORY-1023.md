@@ -1,6 +1,6 @@
 # STORY-1023 : les contrats de la balance complétés — le dossier déclaré partout, la lecture inter-organisations
 
-Status: in_progress
+Status: done
 
 **Plan :** `coordination/PLAN-LOT-7-2026-11-24.md` §3, amendement du 2026-11-25, n° **0e** (« contrats propres avant le
 gel du 11/12 ») ; ligne d'origine : `PLAN-LOT-6-2026-11-23.md` §4, amendement D-L6-5, n° 12 — « aucune famille de réponse
@@ -123,11 +123,68 @@ aucune ne porte sur cette story. Verrou Docker : rendu par D à 23:30.
   effacements (D-928-6).
 - **D-1023-10 — Le tunnel sur site (AD-20) n'est pas tenu ici** : balance ne sait pas si un tunnel est ouvert ; c'est la
   passerelle de l'instance qui ferme `plateforme/` hors tunnel. Écrit dans « Ce qui reste ».
+- **D-1023-11 — L'observation des e2e vérifie le dossier ; Ajv complet là où le corps est celui du vrai service.**
+  Chaque e2e des familles couvertes observe TOUT corps JSON 2xx qu'il reçoit (intercepteur Express posé avant
+  `app.init()`, `test/utils/contrat-openapi.ts`) et exige, en dernier test, le dossier de l'URL et `dossierId` requis
+  au contrat de la route. La conformité complète au schéma (Ajv) n'y est pas exigée : plusieurs suites doublent leurs
+  services par des objets partiels, que le schéma refuse à bon droit (import Sage). Elle est exigée sur les corps du vrai
+  service : rejets, balance de référence, contrôles, les trois routes de la plateforme.
+- **D-1023-12 — Le contrat aligné sur ce que le service sert, en déclarant** (AC-5, AD-27) : `POST /balances` publie
+  aussi son 200 (rejeu idempotent, `res.status`), et les trois POST de reprise (`a-nouveaux`, `affectation-resultat`,
+  `exercices/{exercice}/ouvrir`) leur 201 (POST sans `@HttpCode`) — le document ne publiait que l'autre code. Rien ne
+  change dans ce que le service répond.
+- **D-1023-13 — Quand la projection ne porte plus le dossier, celui de la route** : la règle de rattachement
+  (`SurchargeEvaluee`, type du domaine) et le paramétrage de ventilation (défauts sans document) rendent le dossier de la
+  route qui les a filtrés ; la mémoire servie sous le dossier rend le sien, et celui de la route pour un document
+  antérieur qui ne le porterait pas.
 
 ## Livraison
 
-*(à remplir à la fusion)*
+**prospera-balance-service #170**, fusionnée en rebase : **`dev` `75179cf`** (branche `b9e178f`, arbre identique).
+Annonce avant le code : prospera-stories #930 (`main` `28dc047`). **Conforme à l'annonce**, avec deux ajouts écrits :
+D-1023-12 (les codes 200/201 que le contrat taisait) et le code `LECTURE_PLATEFORME_REFUSEE` (403 de la garde, en défense
+en profondeur derrière `@Roles` : un rôle de cabinet est refusé avant, par le refus de rôle existant).
+
+- `src/common/decorators/dossier-declare.decorator.ts` : `ApiDossierDeclare()` (description commune, requis) et
+  `SansDossierDeclare<T>` (le corps d'un service avant que le contrôleur n'y pose le dossier de la route).
+- 39 schémas de réponse : la donnée d'abord (`String(doc.dossierId)` : rejets, lignes de recettes et de dépenses,
+  catégories, lots OCR, appariements), la route sinon (`exigerDossierId(dossier)` dans le contrôleur ou le service).
+  `MemoireCahiersDuDossierDto` (`OmitType` : la vue du cabinet reste intacte).
+- `src/modules/lecture-plateforme/` : `PlatformReadOnly()`, `LecturePlateformeGuard`, `JournalLecturePlateforme`
+  (`journal_lectures_plateforme`, index `{ orgId, lueLe }`), `LecturePlateformeController`, le module (dans `AppModule`).
+  `EXCLUSIONS_JUSTIFIEES` du plan d'effacement : le journal (D-1023-9). `SANS_LECTURE_DE_DOSSIER` (invariant 694) : le
+  contrôleur, avec sa raison.
+- Gardes : `lecture-plateforme.invariant.spec.ts` (toute route `plateforme/` est un GET sous le décorateur, gardé,
+  `PLATFORM_ADMIN` seul ; le décorateur nulle part ailleurs ; `PLATFORM_ADMIN` dans aucun autre `@Roles` ; ni la garde
+  d'accès ni celle du dossier) ; `openapi-contract.e2e-spec.ts` (le balayage des familles, la mémoire et les lectures de
+  la plateforme entrent au document).
+
+## Preuves
+
+| Preuve | Résultat |
+|---|---|
+| Node 24 (étage `verification`, archive du commit) — unitaires | **300/300 suites** (2 ignorées), **5764 tests** (21 ignorés) |
+| Node 24 — e2e | **38/38 suites, 2324 tests** (dont `lecture-plateforme` neuf, et le dernier test de 12 suites de familles) |
+| `npm run build` (Node 24), `tsc`, lint des fichiers touchés | verts |
+| Node 25 — unitaires | 286 suites vertes ; rouges connues sous Node 25 seulement (client Kafka natif, `app-cablage`, `devise-paquet.exhaustivite` : séparateurs Windows) |
+| Ajv sur les corps réels (AC-4) | rejets, balance de référence, contrôles, les trois routes de la plateforme : conformes |
+| Observation des e2e (AC-4) | 12 suites : chaque corps servi des familles couvertes déclare le dossier de son URL |
+| Mutations | **11/11 tuées sur une assertion** : borne basse du motif, journal en panne qui laisse lire, rôle non revérifié, organisation non vérifiée, décorateur sans la garde, `PLATFORM_ADMIN` sur une route du cabinet, journal de toutes les organisations, `dossierId` facultatif au contrat, rejet / ligne de recette / appariement au dossier faux |
+| Pile `grp-c` (mongo rs0, Kafka 3.9.0, balance REEL depuis l'image de l'archive, IdP de test) | **17/17** : service sain avec le module neuf (§1.5) ; balance, référence, rejets, catégories, comptes de ventilation déclarent le dossier de l'URL (données en base) ; opérateur servi (résumés, `no-store` ; une balance et ses lignes) ; sans motif 400, organisation mal formée 400, membre 403, moteur 403, POST 404, l'opérateur n'ouvre aucune route du cabinet ; journal relu (3 lignes, la plus récente d'abord, rien des refus) et en base (3 lignes) |
+| Docker | verrou pris à 01:08, rendu à 01:18 ; repris à 01:18, rendu à 01:20 (`trap EXIT`) ; aucun conteneur `grp-c` restant |
+
+**Premier tour de pile, écrit** : 16/17, la catégorie attendue n'existait pas (le service ne sème ses catégories par
+défaut que depuis le référentiel du dossier, que la pile ne sème pas) ; une catégorie semée en base, le second tour est
+vert.
 
 ## Ce qui reste
 
-*(à remplir à la fusion)*
+- **Familles écartées** (le ticket reste ouvert pour elles) : `fiscal`, `immobilisations`, `inventaire`, `devises`,
+  `profil-societe` (en migration vers `dossier-service`), `referentiels` — chacune à une story ; le balayage les nomme.
+- **Écarts antérieurs relevés par Ajv, non corrigés ici** (ils changeraient la forme d'autres champs) : l'aperçu de
+  l'agrégation des cahiers (`POST …/balance/depuis-cahiers`, 200) sert des lignes sans `aNouveauDebit`, `aNouveauCredit`,
+  `comptesSources`, `sourcesTotal`, que le schéma déclare requis ; `GET …/rapprochement/ecarts` sert des écarts sans
+  `devise`, déclarée requise. À traiter par une story de C (déclarer facultatif ce qui l'est, ou servir le champ).
+- **Le tunnel sur site** (AD-20, D-1023-10) : la passerelle de l'instance ferme `plateforme/` hors tunnel ouvert.
+- **→ B (information)** : la console de la plateforme peut lire la balance d'une organisation par ces trois routes ; la
+  même forme (`@PlatformReadOnly()`, motif en en-tête, journal avant lecture) vaut pour les services qui suivront.
