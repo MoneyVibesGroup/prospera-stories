@@ -2155,11 +2155,17 @@ reserved_ranges:
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
   - range: "STORY-1123"
-    status: "in_progress"
+    status: "done"
     owner: "Groupe B, lot 7, n° 5 — les alertes de l'archiviste : retour d'un original en retard, échéance de conservation proche, quota dépassé, écart d'intégrité et étapes d'une destruction publiés (cinq faits Kafka par l'outbox, destinataires connus de la GED, aucun contenu de pièce) ; la liste des pièces échues de tout le cabinet, servie par l'index (document-service, module ged ; cloche et e-mail : notification, D)"
     source_doc: "prospera-stories/stories/STORY-1123.md"
     reserved_on: "2026-11-25"
     note: >
+      🏁 DONE le 2026-11-26 — document-service #37 (dev 7e65881), catalogue #81 (dev 85aee3a, ged 1.8.0 recopié) ;
+      contrat annoncé avant le code (stories #950, main becec97). Node 25 : unitaires 1336 (2 rouges connues du poste),
+      e2e 217/217 ; Node 24 : 115/115 suites (1339), 217/217 ; mutations 13/14 (+1 équivalente), catalogue 1/1 ; pile
+      grp-b neuve : retour en retard au palier 7, échéance proche (3 pièces dont 2 échues), quota dépassé, quatre étapes de
+      destruction, écart d'intégrité, tout SENT, Kafka 8 messages valides, registre 14 sujets BACKWARD. Demande à D
+      (cloche et e-mail) au journal de B. D-1123-1 → 14. Contrat d'origine :
       Fiche écrite et contrat annoncé avant le code (2026-11-26) : ged.original.retour-en-retard (1, 7, 30 jours),
       ged.conservation.echeance-proche (par fonds et par passage, GED_ALERTE_ECHEANCE_JOURS = 90), ged.quota.depasse
       (par franchissement), ged.integrite.ecart, ged.destruction.changed ; GET …/ged/cabinet/pieces-echues (horizonJours) ;
