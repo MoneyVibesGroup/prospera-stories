@@ -171,10 +171,11 @@
     propositions : 1 × 201, 4 × 409 ; exécution en 0,7 s ; MinIO vidé des pièces détruites). Verrou 02:24 → 02:39. Fiche
     D-1121-1 → 16. Rituel : la passation de `prospera-paiement-service` à D pour STORY-1141 (← D) est servie par la
     session de groupe (`6812a4a`), pas par cette story.
-  - **Suivante : STORY-1122** (n° 4 : retrouver dans tous les fonds du cabinet ; elle peut aussi porter la liste des
-    pièces échues de tout le cabinet, nommée par 1121 ; la lecture par pages du versement et du contrôle reste à faire).
-    **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (au plus tard STORY-1130). **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans
-    `dossier-service` (servable : balance-service `c9e94c6` est sur `dev`). **Nommé pour STORY-1129** (n° 11) :
+  - **4 — STORY-1122 (26/11) — en cours** : retrouver dans tous les fonds du cabinet ; fiche écrite et contrat annoncé
+    avant le code (« ⚠ Contrats »). Elle porte aussi le versement d'un fonds de plus de 1 000 pièces ; la liste des
+    pièces échues de tout le cabinet va à STORY-1123 (D-1122-11). Rituel : aucune demande neuve à B chez A, C et D.
+  - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
+    `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
     `cabinet-moteur` et `abonnement` rejouées (D-100-4).
 
@@ -1941,6 +1942,29 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-26, STORY-1122 — retrouver dans tous les fonds du cabinet, annoncé AVANT le code** (`document-service`,
+  GitHub `prospera-ocr-service`, branche `MNV-1122` ; fiche `stories/STORY-1122.md`, D-1122-1 → 12). **Ajouts seuls**,
+  sous `/api/v1/ged/cabinet` ; le chemin de l'assurance ne change pas.
+  - **Route neuve** : `GET …/recherche` (`ged:piece:consulter`) : les critères de `…/fonds/{numero}/recherche` (`q`,
+    `mois`, `nature`, `exercice`, `tiers`, `dateDu`, `dateAu`, `montantMin`, `montantMax`, `reference`, `rubrique`,
+    `limite` ≤ 100, `curseur`) plus `fonds` et `dossierId` → `{ total, resultats, curseurSuivant? }`. Portée : tout le
+    cabinet pour `TENANT_ADMIN` et `ged:fonds:gerer`, ses dossiers pour un collaborateur. Nature sensible : absente sans
+    `ged:sensible:consulter`, appariée par ses seules métadonnées avec ; pièce détruite : jamais.
+  - **`GET …/fonds/{numero}/recherche`** : même forme ; chaque résultat **gagne** `fondsNumero`, `dossierId`,
+    `raisonSociale?` ; le curseur reste opaque (sa valeur change de forme : ne pas le fabriquer). **L'appariement
+    change** : texte lu par mot entier (sans accents ni casse), métadonnées par début de mot (trois caractères au
+    moins) ; `tiers`/`reference` par début de mot (« `tiers=eet` » ne trouve plus « CEET »). Plus de borne de 500 textes.
+  - **Index aveugle** : collection neuve `ged_index_recherche` (jetons `HMAC-SHA256` tronqués sous une clé du cabinet
+    dérivée de `GED_CLE_CABINET` ; aucun mot en clair) ; file BullMQ neuve **`ged-index`** (planificateur répétable
+    `ged-index-balayage`) ; variable neuve **`GED_INDEX_BALAYAGE_SECONDES`** (défaut 15, `0` coupe). Une recherche par
+    mots sans `GED_CLE_CABINET` : 503 `CHIFFREMENT_INDISPONIBLE` (code existant).
+  - **Versement, liste des pièces d'un fonds, reprises** : sans la borne de 1 000 ; aucune forme ne change.
+  - DTO de réponse neufs à l'OpenAPI de `document-service` (`ResultatsDeRechercheDto`). Aucun droit neuf (auth
+    inchangé), aucun fait Kafka, aucune dépendance neuve.
+  - **Manifeste `ged` 1.7.0** (`manifestes/ged.manifest.ts`, cette PR) : `GET /api/v1/ged/cabinet/recherche` en
+    `routesLectureSeule` ; recopié dans le service par le code, **puis au catalogue par B** après la fusion du code.
+    **→ A (FE-143)** : types à régénérer quand l'écran viendra. **Pour C et D** : rien.
 
 - **2026-11-26, STORY-1121 — la destruction proposée, puis visée, annoncé AVANT le code** (`document-service`, GitHub
   `prospera-ocr-service`, branche `MNV-1121` ; `auth-service`, branche `MNV-1121` ; fiche `stories/STORY-1121.md`,
