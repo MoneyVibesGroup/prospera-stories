@@ -1519,6 +1519,31 @@
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-26, STORY-1140) : publier le contrat de l'export C13 en CSV de `prospera-bilan-service` dans
+  `prospera-plateforme/contrats/instance/` — ouverte.** La réponse de l'utilisateur à Q-D-19 (25/11) le place chez B.
+  Deux services servent déjà la même forme : `balance-service` (STORY-1021, C, `b52d262`) et `bilan-service`
+  (STORY-1140) ; les deux recopieront le contrat à l'octet et s'y rangeront. **La forme exacte servie** (fiche
+  `stories/STORY-1140.md`, « Contrat » ; `stories/STORY-1021.md`, D-1021-6 → 8) :
+  - **Route** `GET /api/v1/instance/<module>/{organisationId}/export` (chemin `routesInstance.export` du manifeste),
+    identité `MOTEUR` seule, limitée à l'organisation du chemin ; requête : `format` = `json` (défaut) | `csv`, `objet` =
+    un objet du plan du module (motif `^[a-z0-9][a-z0-9-]*$`), exigé en CSV, filtre aussi le JSON.
+  - **200 `application/json`** (à nommer `export-c13-reponse@1`) : `{ schemaVersion: 1, module, organisationId (24 hex),
+    espace: 'ESSAI' | 'REEL', exporteLe (date-time), objets: [{ objet, collection, nombre (entier ≥ 0), enregistrements:
+    object[] (MongoDB Extended JSON relaxed) }] }`, objets dans l'ordre du plan d'export du module.
+  - **200 `text/csv; charset=utf-8`** : `Content-Disposition: attachment; filename="export-<module>-<objet>-<organisationId>.csv"` ;
+    BOM UTF-8, `;`, CRLF (la dernière ligne comprise), RFC 4180 ; une ligne d'en-tête (chemins des champs, dans l'ordre
+    de leur première apparition), une ligne par document ; sous-document aplati en `a.b` ; objet à une seule clé en `$`
+    = feuille (sa valeur) ; tableau en JSON ; `{}` ⇒ `{}` ; absent ou `null` ⇒ vide ; texte (noms de colonnes compris)
+    commençant par `=`, `+`, `-`, `@`, tabulation ou CR ⇒ préfixe `'`, puis échappé ; nombre, booléen, `$number…` :
+    échappés seulement ; aucun document ⇒ BOM + CRLF.
+  - **En-tête** `Cache-Control: no-store` (JSON et CSV).
+  - **Refus, dans cet ordre** : 401 ; 403 `IDENTITE_DE_SERVICE_REQUISE` | `IDENTITE_DE_SERVICE_REFUSEE` |
+    `ORGANISATION_HORS_JETON` ; 400 `FORMAT_NON_SERVI` (`details.formatsServis`) ; 400 `OBJET_REQUIS`
+    (`details.objetsServis`) ; 422 `OBJET_INCONNU` (`details.objetsServis`) ; 403 `<MODULE>_NOT_ENTITLED`
+    (`details.etatPublie`, état absent ou `NON_INSTALLE`) — aucun document lu avant le dernier.
+  - Une forme différente dans le contrat publié : bilan (et balance) s'y rangeront dans une story de reprise ; rien ne
+    bloque d'ici là.
+
 - **← C : notification sur `fiscal.obligation.alerte-echeance@1` (prévenir le responsable de l'obligation, ou à défaut
   les associés du cabinet) — reçue, hors lot 7, à placer par l'utilisateur** (2026-11-26, après STORY-318 de C : fiscal
   #70, `dev` `cefbe20` ; docs #949). Rien n'est codé par D : aucune story du lot 7 ne la porte.
@@ -2056,6 +2081,26 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-26, STORY-1140, avant le code) — l'export C13 du bilan aussi en CSV, à la forme par objet de
+  balance** (`prospera-bilan-service`, Q-D-19). Fiche : `stories/STORY-1140.md` (D-1140-1 → 8, section « Contrat »).
+  **Ajouts seuls** sur la route existante `GET /api/v1/instance/bilan/{organisationId}/export` (identité `MOTEUR`
+  seule, limitée à l'organisation du chemin : inchangé) ; l'enveloppe JSON de 1075 ne change pas.
+  - **Deux paramètres de requête, facultatifs** : `format` (`json` par défaut | `csv`) ; `objet` (un objet du plan :
+    `jeux-etats`, `snapshots-liasse`, `jeux-hypotheses`, `versions-hypotheses`, `mapping-overrides`, `exercices`,
+    `reperes-analyse`, `audit-events`), **exigé en CSV**, et qui réduit aussi le JSON à cet objet.
+  - **200 CSV** : `text/csv; charset=utf-8`, pièce jointe `export-bilan-<objet>-<organisationId>.csv` ; BOM UTF-8, `;`,
+    CRLF, RFC 4180 ; en-tête = chemins des champs dans l'ordre de leur première apparition, puis une ligne par document ;
+    sous-document `a.b`, valeur Extended JSON en feuille, tableau en JSON, absent ou `null` vide ; texte neutralisé
+    (`= + - @`, tabulation, CR ⇒ apostrophe) puis échappé, nombre et booléen seulement échappés. **La forme de balance
+    (D-1021-7), à l'octet** : mêmes vecteurs de test.
+  - **En-tête neuf** (JSON et CSV) : `Cache-Control: no-store`.
+  - **Refus, avant toute lecture** (après l'identité) : **400 `FORMAT_NON_SERVI`** (`details.formatsServis`), **400
+    `OBJET_REQUIS`** (`details.objetsServis`), **422 `OBJET_INCONNU`** (`details.objetsServis`) ; puis 403
+    `BILAN_NOT_ENTITLED` (inchangé). Deux codes neufs à `CODES_REFUS_C13` (ceux de balance).
+  - **Ce qui ne change pas** : plans C13, santé, `migrer`, import, effacement ; manifeste `bilan` (rien à recopier au
+    catalogue) ; aucun topic, aucune collection, aucun droit. **→ B** : le contrat à publier (« Demandes »). **→ A** :
+    rien (aucune route d'écran).
 
 - **PUBLIÉ (2026-11-26, STORY-1139, prospera-bilan-service#194, `dev` `027075d`) sans écart ; ANNONCÉ (2026-11-26, STORY-1139, avant le code, prospera-stories#946) — les repères de l'analyse financière, modifiables par dossier et
   tracés** (`prospera-bilan-service`). Fiche : `stories/STORY-1139.md` (D-1139-1 → 12, tableau « Contrat » ; Q-D-23).
