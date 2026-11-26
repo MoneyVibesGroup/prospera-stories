@@ -7848,7 +7848,8 @@ sprints:
         epic: "EPIC-030"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-317.md"
+        status: "in_progress"  # EN COURS le 2026-11-26 (lot 7 de C, n° 2 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-317-1 → 8) ; contrat annoncé (« ⚠ Contrats » et « ⚠ Communs » du journal de C) : echeance = l'échéance applicable, echeanceLegale et report (champ humain) ; POST /obligations/reports, POST /obligations/{id}/report/annulation ; actes OBLIGATION_ECHEANCE_REPORTEE / OBLIGATION_REPORT_ANNULE ; qualifierRetard pur (318 le prolonge) ; sert la demande de D (348) : cnss.collecte au paquet fiscal.
         assigned_to: null
   - sprint_number: 26
     start_date: "2027-06-17"
