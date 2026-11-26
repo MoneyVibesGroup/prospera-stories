@@ -1,7 +1,8 @@
 # STORY-319 : Le responsable désigné et la vue de charge par collaborateur — répartir avant l'échéance
 
-Status: in-progress — fiche écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 4 du
-fiscal, `PLAN-LOT-7-2026-11-24.md` §3) ; contrat annoncé avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de C).
+Status: done — **livrée le 2026-11-26** : prospera-fiscal-service **#71** (`0cc79a7` sur `dev`) ; voir « Livraison ».
+**EPIC-030 est fini.** Écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 4 du fiscal,
+`PLAN-LOT-7-2026-11-24.md` §3) ; contrat annoncé avant le code (#951, « ⚠ Contrats » et « ⚠ Communs » du journal de C).
 
 **Epic :** EPIC-030 (**la dernière story de l'épic**) · **Points :** 3 · **FR :** FR-F21 · **Architecture :** AD-17 (les
 champs humains survivent à la re-dérivation), AD-18 (aucune minuterie : les alertes restent au balayage de 318)
@@ -104,6 +105,38 @@ l'organisation (`qualifierEcheance`).
   (demande de 318, inchangée). Un responsable désigné après une première alerte en reçoit une à lui (D-319-9).
 - **→ A (écrans du calendrier)** : l'affectation, la vue de charge ; le nom d'un responsable au calendrier se lit dans
   les membres du cabinet (le calendrier rend l'identifiant, D-319-7).
+
+## Livraison (2026-11-26)
+
+- **fiscal** (#71, `0cc79a7` sur `dev`, sur `cefbe20`, arbre identique au commit prouvé `90d7d08`) :
+  `domain/obligations/responsable.ts` (`compterCharge`, `comparerCharges`, `comparerRetards`, `faitResponsableAffecte`, purs),
+  `application/obligations/responsables-obligations.service.ts` (affectation, résumé, vue), port `AnnuaireCollaborateurs` et son
+  adaptateur Mongo (`identity_memberships`, `identity_users`, lecture seule), `RegistreObligations.affecterResponsable` (transaction,
+  comparaison-échange, acte) et `.enCharge` (déposées écartées en requête), `modules/obligations/responsables-obligations.controller.ts`
+  et `dto/responsables.dto.ts` ; `cleAlerte` gagne le responsable (D-319-9) ; `versLigne` du calendrier exportée (les retards de la
+  vue sont des lignes du calendrier).
+- **Les AC en tests** : AC-1 (unitaire et e2e : confiées par la route, un acte par obligation changée, retrouvées au calendrier par
+  `responsable` ; sur le vrai MongoDB, l'acte au journal chaîné, la chaîne intacte, tout ou rien) ; AC-2 (unitaire et e2e : le résumé
+  par collaborateur, le plus en retard d'abord, la vue d'un collaborateur avec ses retards triés, `AUCUN`, `annee`, `dossierId`,
+  l'horizon réglé du cabinet, la portée du collaborateur) ; AC-3 (e2e par la route de dérivation ; sur le vrai MongoDB, une
+  re-dérivation qui change l'échéance garde l'affectation) ; D-319-9 (unitaire, e2e, et **sur la pile**).
+- **Preuves** (Node 24, image `verification` de l'archive LF de `90d7d08`) : unitaires **211/211 suites, 3077** (3 sautés) ; spec
+  BullMQ sur un vrai Redis **2/2** ; e2e **13/13, 286** ; `test:conformite` **21/21, 132** (dont `responsables.conformite-spec.ts`) ;
+  `nest build` ; **mutations 23/23** rouges sur l'assertion (déposée comptée en charge, prochaine échéance passée, dépassées hors des
+  retards, classement sans les retards, retards à l'envers, acte sans « avant », clé sans le responsable, clé de 318 changée, balayage
+  qui ne passe pas le responsable, membre suspendu accepté, portée du responsable ignorée, portée de l'appelant ignorée, clôturée ou
+  écartée confiée, doublon accepté, horizon du cabinet ignoré, retards non triés, plafond des retards levé, année ignorée, nom perdu,
+  comparaison-échange sans le responsable lu, ré-affectation au même récrite, déposées dans la charge Mongo) ; §1.5 et gate :
+  `docker compose -p grp-c` sain (MongoDB en jeu de répliques, Kafka, Redis), 3 routes montées, 0 `UnknownDependencies`, 401 sans
+  jeton sur les trois routes ; **D-319-9 de bout en bout** : 2 alertes et 2 faits `SENT`, l'obligation `PROCHE` confiée ⇒ une 3e
+  alerte (clé `…|EN_RETARD_DE_PREPARATION|<échéance>|<responsable>`) et un 3e fait `SENT` qui porte le responsable, rien de plus
+  après deux balayages. Node 25 : 207/211 suites (les 4 rouges : le client Kafka natif, connus). Lint des fichiers touchés : aucun
+  écart neuf. Verrou pris une fois (07:04 → 07:17, après attente de B).
+
+### Écarts au contrat, décidés au code
+
+- Aucun sur les formes annoncées. Précision : un corps d'affectation vide, en doublon ou au-delà de 50 sort en `400` (validation
+  du DTO, et `AFFECTATION_INVALIDE` si le cas d'usage est appelé sans elle).
 
 ## Décisions prises au contrat (contestables)
 

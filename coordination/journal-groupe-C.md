@@ -98,9 +98,19 @@
    unitaires 209/209 suites, 3050 ; BullMQ sur vrai Redis 2/2 ; e2e 13/13, 282 ; conformité 20/20, 126 ; mutations 20/20 ;
    pile `grp-c` à **deux répliques** (2 alertes pour 2 clés après 12 balayages, faits `SENT`, reprise après arrêt sans doublon) ;
    verrou pris deux fois (03:43 → 04:00, 04:15 → 04:26). D-318-1 → 13 dans la fiche. **→ D** (notification) ci-dessous.
-11. 🚧 **STORY-319 en cours (26/11)** : le responsable désigné et la vue de charge par collaborateur (fiscal, branche
-   `MNV-319`) ; fiche `stories/STORY-319.md` écrite avant le code (D-319-1 → 11), contrat et communs annoncés ci-dessous
-   (« ⚠ Contrats », « ⚠ Communs »). **349 de D l'attend** : prévenir D à la fusion. Elle finit EPIC-030.
+11. ✅ **STORY-319 DONE (26/11)** : fiscal **#71** (`0cc79a7` sur `dev`), annonce #951 avant le code. **`POST
+   /obligations/affectation`** (droit `valider`, 1 à 50 obligations, tout ou rien, `null` retire ; le responsable est un membre
+   **actif** du cabinet qui **voit le dossier** dans sa portée ; acte `OBLIGATION_RESPONSABLE_AFFECTE` au journal chaîné) ;
+   **`GET /obligations/charge`** et **`/obligations/charge/{responsable|AUCUN}`** (charge et retards par collaborateur, sur
+   `qualifierEcheance` et l'horizon du cabinet, obligations actives non déposées, portée de l'appelant) ; la re-dérivation garde
+   l'affectation (AD-17, prouvé sur MongoDB) ; **la clé de l'alerte suit le responsable** (D-319-9 : sans responsable, celle de 318).
+   Node 24 : unitaires 211/211 suites, 3077 ; Redis 2/2 ; e2e 13/13, 286 ; conformité 21/21, 132 ; mutations 23/23 ; pile `grp-c`
+   saine, D-319-9 de bout en bout (3e alerte et 3e fait `SENT` portant le responsable). Verrou pris une fois (07:04 → 07:17).
+   D-319-1 → 11 dans la fiche. **D prévenu** (349).
+12. 🏁 **EPIC-030 fini** (315 → 319 : le calendrier du portefeuille, les échéances du paquet, les reports, les alertes, le
+   responsable et la charge).
+13. **Suivante : STORY-321** (la délégation du calcul au moteur de `balance-service`, EPIC-031 ; fiche à écrire juste avant de
+   coder ; voir D-322-1 de 322).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -571,7 +581,10 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-26, STORY-319, avant le code)** — branche `MNV-319` de `prospera-fiscal-service`. **Aucune
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#71, `dev` `0cc79a7`, sur `origin/dev` `cefbe20`)** — conforme à l'annonce :
+  seul le contrat OpenAPI est touché parmi les communs. **→ D** : rien à faire pour un rebase ; toute la suite (unitaires, e2e,
+  conformité) est verte en Node 24.
+  **ANNONCÉ (2026-11-26, STORY-319, avant le code)** — branche `MNV-319` de `prospera-fiscal-service`. **Aucune
   migration**, aucune collection neuve, aucun index neuf ; ni `app.module.ts`, ni `package.json`, ni `read-models/`
   (`identity_memberships` y est **lu** par un adaptateur du dossier `obligations`, le schéma ne change pas), ni copie du
   paquet, ni manifeste `declarations`. Touché : **le contrat OpenAPI** (trois routes neuves, « ⚠ Contrats »). Tout le reste
@@ -632,6 +645,9 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-319), PUBLIÉ** (fiscal #71, `0cc79a7`) — **conforme à l'annonce** (#951) ; un corps d'affectation vide, en
+  doublon ou au-delà de 50 sort en `400`. Prouvé sur la pile : la clé `obligationId|état|échéance|responsable` et le fait `SENT` qui
+  porte le responsable. Annonce :
 - **2026-11-26 (STORY-319), ANNONCÉ avant le code** — **le responsable désigné et la vue de charge par collaborateur**
   (`prospera-fiscal-service`, REST ; et le sens de la clé de l'alerte de 318). Fiche : `stories/STORY-319.md`
   (D-319-1 → 11). Consommateurs : les écrans du calendrier (A) ; STORY-349 (D) ; `prospera-notification-service` (D), à
@@ -1283,6 +1299,13 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-319, 26/11) un test qui règle l'horizon par la configuration ne prouve pas l'horizon du cabinet** : la mutation
+  « `horizon(null)` » (le défaut au lieu de celui de l'organisation) a survécu tant que le test passait l'horizon par le
+  `ConfigService` ; il faut le régler par `changerHorizon` sur l'organisation, défaut différent. De même, un acte testé avec
+  `avant: null` ne prouve pas que `avant` est recopié.
+- **(STORY-319)** le script de mutations s'écrit avec des motifs d'une ligne : un `\n` dans une chaîne Python passée par heredoc
+  devient un vrai saut de ligne et casse le script.
 
 - **(STORY-318, 26/11) un `tsc` vert avant la dernière retouche ne prouve rien** : un `delete` sur une propriété `readonly`,
   écrit après le dernier `tsc --noEmit` pour satisfaire le lint, a cassé la compilation de deux specs ; les mutations (qui
