@@ -2172,6 +2172,16 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1126"
+    status: "in_progress"
+    owner: "Groupe B, lot 7, n° 8 — la recette des archives de bout en bout : le parcours UJ-2 sur pile neuve (40 boîtes reçues, cotées, numérisées dans leur lot, lues, contrôlées, versées ; une facture de 2019 retrouvée en moins de trois gestes avec la cote de son original ; une pièce sortie et rentrée ; un récolement ; la restitution et la fin de mission), la console par le BFF (prospera-recette ; document-service et BFF éprouvés)"
+    source_doc: "prospera-stories/stories/STORY-1126.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite et contrat annoncé avant la fusion (2026-11-26) : le profil de recette pose sur document-service
+      INSTANCE_ESPACE, AUTH_SERVICE_URL et GED_CLE_CABINET (interpolée depuis RECETTE_GED_CLE_CABINET, tirée par le paquet
+      dans .recette/, jamais versionnée) ; recette neuve npm run recette -- archives. Aucune route, aucun fait, aucun droit
+      ne change dans un service (sauf défaut révélé, annoncé à part). D-1126-1 → 10. Lot 7 de B, n° 8. NON SLOTTÉE.
   - range: "STORY-1125"
     status: "done"
     owner: "Groupe B, lot 7, n° 7 — l'archivage se mesure et se vend : compteurs par cabinet (fonds, pièces et pages versées, volume stocké, boîtes cotées, au mois et au total), quota de l'offre posé par cabinet par Money Vibes, l'alerte de quota sur ce quota, relais du BFF pour la console (document-service, module ged ; admin-panel ; écran AP-51 : A)"

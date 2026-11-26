@@ -2171,6 +2171,15 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-26, STORY-1126 — la GED du cabinet dans le profil de recette, annoncé AVANT la fusion** (`prospera-recette`,
+  branche `MNV-1126` ; fiche `stories/STORY-1126.md`, D-1126-1 → 10). Lu par tous ceux qui lèvent la pile de recette (A, C,
+  D). **Ajouts seuls**, des réglages : `document-service` reçoit `INSTANCE_ESPACE: ${RECETTE_ESPACE:-REEL}`,
+  `AUTH_SERVICE_URL: http://auth-service:3001/api/v1` et `GED_CLE_CABINET: ${RECETTE_GED_CLE_CABINET:-}` ; le paquet tire la
+  clé une fois dans `.recette/cle-ged-cabinet.b64` (non versionné) et la passe à chaque `docker compose` qu'il lance (comme
+  la clé de signature commune, D-1115-3) ; un compose lancé à la main garde la GED du cabinet fermée (503). Recette neuve :
+  `npm run recette -- archives` (lève `dossier-service`, `document-service`, `admin-panel` à la demande). Aucune autre
+  recette ne change ; aucune route, aucun fait ni droit d'un service (un défaut révélé par la recette sera annoncé à part).
+
 - **2026-11-26, cinquième suite de STORY-979 — LIVRÉ** (catalogue #83, `ce8cbc0` sur `dev`) : conforme à l'annonce
   ci-dessous, sans écart. `copies.json` depuis `prospera-stories@59ed625` : `paiement` 1.2.0 et `ged` 1.10.0 ; aucun
   autre manifeste. **→ A** : rien à régénérer (aucune OpenAPI du catalogue ni du BFF ne change).
