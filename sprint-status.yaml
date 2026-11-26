@@ -2138,6 +2138,18 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1123"
+    status: "in_progress"
+    owner: "Groupe B, lot 7, n° 5 — les alertes de l'archiviste : retour d'un original en retard, échéance de conservation proche, quota dépassé, écart d'intégrité et étapes d'une destruction publiés (cinq faits Kafka par l'outbox, destinataires connus de la GED, aucun contenu de pièce) ; la liste des pièces échues de tout le cabinet, servie par l'index (document-service, module ged ; cloche et e-mail : notification, D)"
+    source_doc: "prospera-stories/stories/STORY-1123.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite et contrat annoncé avant le code (2026-11-26) : ged.original.retour-en-retard (1, 7, 30 jours),
+      ged.conservation.echeance-proche (par fonds et par passage, GED_ALERTE_ECHEANCE_JOURS = 90), ged.quota.depasse
+      (par franchissement), ged.integrite.ecart, ged.destruction.changed ; GET …/ged/cabinet/pieces-echues (horizonJours) ;
+      échéance dans ged_index_recherche ; passage quotidien porté par le balayage ged-index (aucune minuterie neuve) ;
+      manifeste ged 1.8.0. Aucun droit neuf. Demande à D (notification) : cloche et e-mail. D-1123-1 → 11. Lot 7 de B,
+      n° 5. NON SLOTTÉE.
   - range: "STORY-1122"
     status: "done"
     owner: "Groupe B, lot 7, n° 4 — retrouver dans tous les fonds du cabinet : une recherche sur tous les fonds dans la portée du dossier, servie (avec la recherche d'un fonds) par un index aveugle à jetons HMAC sous une clé du cabinet dérivée de GED_CLE_CABINET (aucun mot en clair en base, aucun texte déchiffré à la recherche), tenu par l'écriture des pièces, la destruction et un balayage BullMQ ; le versement d'un fonds de plus de 1 000 pièces (document-service, module ged)"

@@ -183,8 +183,8 @@
     versement de 1 500 lignes, pièce détruite introuvable). Verrou en trois passages (03:23 → 03:28, 03:33 → 03:40,
     04:00 → 04:14). Fiche D-1122-1 → 16. La liste des pièces échues de tout le cabinet va à STORY-1123 (D-1122-11).
     Rituel : aucune demande neuve à B chez A, C et D.
-  - **Suivante : STORY-1123** (n° 5 : les alertes de l'archiviste ; elle porte aussi la liste des pièces échues de tout
-    le cabinet, D-1122-11).
+  - **5 — STORY-1123 (26/11) — en cours** : les alertes de l'archiviste ; fiche écrite, contrat annoncé avant le code
+    (« ⚠ Contrats »), manifeste `ged` 1.8.0. Rituel : aucune demande neuve à B chez A, C et D.
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
     `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
@@ -1961,6 +1961,27 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-26, STORY-1123 — les alertes de l'archiviste, annoncé AVANT le code** (`document-service`, GitHub
+  `prospera-ocr-service`, branche `MNV-1123` ; fiche `stories/STORY-1123.md`, D-1123-1 → 11). **Ajouts seuls** ; le
+  chemin de l'assurance ne change pas. Consommateur attendu : **`prospera-notification-service` (D)**, cloche et e-mail
+  (demande au § « Demandes »).
+  - **Cinq topics neufs** (outbox, dans la transaction de leur cause ; clé `organisationId` ; schémas JSON au dépôt,
+    `contrat/schemas/`, sujets neufs au registre, BACKWARD) : **`ged.original.retour-en-retard`** (une sortie non rentrée
+    à 1, 7, 30 jours de retard), **`ged.conservation.echeance-proche`** (un fait par fonds et par passage : les pièces qui
+    entrent dans l'horizon, `GED_ALERTE_ECHEANCE_JOURS` = 90, ou déjà échues), **`ged.quota.depasse`** (une fois par
+    franchissement), **`ged.integrite.ecart`** (une campagne en écart ou au journal rompu), **`ged.destruction.changed`**
+    (`PROPOSEE`, `VISEE`, `REFUSEE`, `ACCORDEE`, `ABANDONNEE`, `EXECUTEE`). Chaque fait porte `destinataires` (identifiants
+    d'utilisateur connus de la GED ; vide : à `notification` de choisir). ⛔ Aucun contenu de pièce (ni tiers, ni NIF, ni
+    montant, ni texte lu), ni motif, ni emprunteur, ni raison sociale.
+  - **Route neuve** : `GET /api/v1/ged/cabinet/pieces-echues?horizonJours=&curseur=&limite=` (`ged:fonds:gerer`) : les
+    pièces échues (et, avec l'horizon, proches) de tout le cabinet, par échéance ; les lignes de la liste d'un fonds plus
+    `echue`, `fondsNumero`, `dossierId`, `raisonSociale` ; `400 CURSEUR_INVALIDE`.
+  - **Données** : `ged_index_recherche.echeance` et `.echeanceAnnoncee` ; `ged_sorties.retardAnnonce` ; collection
+    `ged_alertes`. Variable `GED_ALERTE_ECHEANCE_JOURS`. Aucun droit neuf, aucune file ni minuterie neuve (le passage
+    quotidien est porté par le balayage `ged-index` de STORY-1122).
+  - **Manifeste `ged` 1.8.0** (cette annonce) : cinq faits publiés, une route de lecture ; recopié au catalogue par B
+    après la fusion du code.
 
 - **2026-11-26, STORY-1122 — retrouver dans tous les fonds du cabinet, annoncé AVANT le code** (`document-service`,
   GitHub `prospera-ocr-service`, branche `MNV-1122` ; fiche `stories/STORY-1122.md`, D-1122-1 → 12). **Ajouts seuls**,
