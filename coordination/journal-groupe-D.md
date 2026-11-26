@@ -2067,6 +2067,17 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-26, STORY-349, avant le code)** — branche `MNV-349` de `prospera-fiscal-service`. **Aucune
+  migration**, aucune collection, aucun index ; ni `app.module.ts` (`RemunerationModule` et `ObligationsModule` y sont
+  déjà), ni `package.json`, ni `read-models/`, ni copie du paquet, ni manifeste `declarations`. Touché : **le contrat
+  OpenAPI** (un champ ajouté à deux réponses : « ⚠ Contrats »). **Lus, sans y écrire** (dossiers de C) :
+  `ports/registre-obligations.ts` (`RegistreObligations.enregistrer`, exporté par `ObligationsModule`),
+  `domain/obligations/derivation.ts` (le type `ObligationDerivee`), `catalogue.ts` (`lireCatalogue`), `montant.ts`
+  (`modeDuMontant`), `domain/paquet-fiscal/validation-paquet.ts` (`signalementsNonValides`). Tout le reste dans le dossier
+  `remuneration` de D : `remuneration.module.ts` importe `ObligationsModule`. **→ C** : rien à faire pour un rebase ; les
+  obligations `COTISATIONS_SOCIALES` et `RETENUE_IRPP` sont écrites par la dérivation sociale (le catalogue fait foi s'il
+  les porte un jour, D-349-5) ; pour 350, `ObligationsModule` ne peut pas importer `RemunerationModule` sans
+  `forwardRef` (cycle) : le module de 350 peut importer les deux.
 - **Note de lecture (2026-11-26, après STORY-318 de C, fiscal #70, `dev` `cefbe20`)** : depuis 318, le relais de l'outbox
   du fiscal tourne sur **BullMQ** — toute pile ou tout e2e de D qui démarre le fiscal doit lever **Redis** ; une garde
   par l'AST interdit `setInterval` dans le fiscal.
@@ -2113,6 +2124,21 @@
 
 ## ⚠ Contrats
 
+- **ANNONCÉ (2026-11-26, STORY-349, avant le code) — les obligations sociales d'une période naissent de l'écriture de sa
+  base** (`prospera-fiscal-service`, dossier `remuneration`). Fiche : `stories/STORY-349.md` (D-349-1 → 8, section
+  « Contrat »). **Un champ ajouté**, aucune route neuve :
+  - `PUT /api/v1/dossiers/{dossierId}/remuneration/{periode}` et `POST …/{periode}/import` : statuts, refus et gardes
+    inchangés ; leur réponse gagne **`obligationsSociales`** (toujours présent après une écriture réussie) —
+    `DERIVEES` : `{ statut, paquet { code, version }, enregistrement { creees, actualisees, inchangees }, obligations[]
+    { taxe: COTISATIONS_SOCIALES | RETENUE_IRPP, periode, echeance | null, derivable, motifNonDerivable,
+    detailNonDerivable }, ecartees[] { taxe, motif: CATALOGUE_LA_PORTE } }` · `NON_DERIVEES` : `{ statut, refus { code,
+    message } }` (le refus du paquet, tel quel ; la base est écrite).
+  - **Au calendrier** (routes de C, inchangées) : deux obligations de plus par période qui a une base — redevable
+    `entreprise`, implantation `principale`, période `AAAA-MM`, échéance lue au paquet (`cnss.collecte`,
+    `irpp.retenueALaSource.reversement`), non datée et nommée (`ECHEANCE_ABSENTE_DU_PAQUET`) si le paquet ne la déclare
+    pas ; même cycle, mêmes actes d'audit (`OBLIGATION_DERIVEE`, `OBLIGATION_TRANSITION`…).
+  - Aucun droit, topic, collection ni migration. **→ A (écrans, plus tard)** : afficher `obligationsSociales` après la
+    saisie ou l'import (`NON_DERIVEES` : le message tel quel) ; les deux taxes au filtre du calendrier.
 - **PUBLIÉ (2026-11-26, STORY-1140, prospera-bilan-service#195, `dev` `c29fcc2`, `7f96163`) sans écart, et rangé au
   contrat de B (`contrats-instance-v1.1`, d68a468 : `export-c13-reponse@1`, `export-c13-csv@1`, recopiés à l'octet) ;
   ANNONCÉ (2026-11-26, STORY-1140, avant le code, prospera-stories#953) — l'export C13 du bilan aussi en CSV, à la forme
@@ -3289,6 +3315,17 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-24 (2026-11-26, STORY-349) — Un mois sans base de rémunération doit-il porter ses obligations sociales ?**
+  Une obligation sociale naît de la base d'une période (D-349-2) : un mois sans base n'en a pas. **Choix par défaut** :
+  non — rien ne dit au code qu'un dossier est employeur ce mois-là, et une déclaration « néant » à la CNSS n'est pas
+  sourcée au paquet. Une réponse contraire demande une donnée du dossier (« employeur depuis… ») et la règle de la
+  déclaration néant au paquet.
+- **Q-D-25 (2026-11-26, STORY-349) — Sur quoi se fonde la prise en charge d'une obligation sociale ?** Elle suit le même
+  cycle que les fiscales (D-349-7) : à la prise en charge, ses bases sont la balance du dossier qui couvre le dernier
+  jour du mois (320). **Choix par défaut** : gardé tel quel ; la base de rémunération reste son fondement de calcul (`GET
+  …/calcul`). Une réponse contraire (« les bases d'une obligation sociale sont sa base de rémunération ») touche les
+  bases de 320 et le triplet (dossier de C).
 
 - **Réponses de l'utilisateur du 2026-11-25 (après la clôture du lot 6 amendé de D), données à la session de groupe
   de D.** Chaque question garde son énoncé ci-dessous ; la réponse fait foi. **Aucune story n'est créée ni placée pour

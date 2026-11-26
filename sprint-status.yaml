@@ -8160,8 +8160,9 @@ sprints:
         epic: "EPIC-034"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-11-26 (lot 7 de D, n° 6) — fiche écrite avant le code (D-349-1 → 8), contrat et communs annoncés (journal de D) : les obligations sociales d'une période (COTISATIONS_SOCIALES, RETENUE_IRPP) dérivées de sa base de rémunération et du paquet, écrites par RegistreObligations.enregistrer (AD-17), donc au calendrier, au cycle et à la piste d'audit comme les fiscales ; déclenchées par la saisie et l'import (champ obligationsSociales ajouté à leurs réponses). Q-D-24, Q-D-25.
+        story_path: "stories/STORY-349.md"
+        assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-350"
         title: "Rapprochement des charges sociales et des comptes de personnel"
         epic: "EPIC-034"
