@@ -2163,11 +2163,17 @@ reserved_ranges:
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
   - range: "STORY-1124"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe B, lot 7, n° 6 — le circuit sans trou : la réception et ses boîtes dans une transaction, les mouvements d'une boîte verrouillés (sorties simultanées d'une même pièce, pièce et boîte, retour, restitution, original relié), la facture désinscrite de la comptabilité retirée du fonds (document-service, module ged ; le fait comptabilite.facture.desinscrite : C)"
     source_doc: "prospera-stories/stories/STORY-1124.md"
     reserved_on: "2026-11-25"
     note: >
+      🏁 DONE le 2026-11-26 — document-service #38 (dev b18d3ad), catalogue #82 (dev 9674aeb, ged 1.9.0 recopié) ;
+      contrat annoncé avant le code (stories #959, main 95d4465). Node 25 : unitaires 1359 (2 rouges connues du poste),
+      e2e 217/217 ; Node 24 : 116/116 suites (1366), 217/217 ; mutations 24/24 ; pile grp-b neuve (Mongo rs0) 41/41 :
+      10 sorties simultanées d'une pièce, 1 passe ; 10 retours, 1 passe ; restitution et sortie, une seule ; réception
+      refusée par la base sans rien écrire ; facture désinscrite RETIREE puis GARDEE sur de vrais faits Kafka. Fait
+      accepté par C (STORY-338, schéma repris tel quel). D-1124-1 → 12. Contrat d'origine :
       Fiche écrite et contrat annoncé avant le code (2026-11-26) : réception et boîtes dans une transaction ; un verrou
       par boîte (ged_boites.mouvements écrit d'abord dans la transaction) pour la sortie d'une boîte ou d'une pièce, le
       retour, la restitution et l'original relié (409 PIECE_SORTIE neuf) ; comptabilite.facture.desinscrite v1 consommé

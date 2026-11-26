@@ -210,7 +210,20 @@
     **`contrats-instance-v1.1`** ; contrat annoncé avant la fusion (stories #957, `329b9d4`). Preuves : `test/contrats-instance.test.ts` 29/29 (17 avant), `npm test` 669/669, `typecheck` vert (Node 25) ; 7/7 mutations rouges sur l'assertion visée ; les huit cas du CSV rejoués à l'octet contre le code de balance (`dev` `44be0c1`) et de bilan (`MNV-1140` `e13d874`) : 8/8 chacun.
     Aucune recopie au catalogue (copie épinglée à v1, il n'appelle pas l'export ; D-953-15). Sans Docker, verrou non pris.
     Fiche D-953-10 → 15.
-  - **Suivante : STORY-1124** (n° 6 : le circuit sans trou).
+  - **6 — STORY-1124 (26/11) — faite** : le circuit sans trou. **document-service #38** (`b18d3ad` sur `dev`) ; **catalogue
+    #82** (`9674aeb`, `ged` 1.9.0 recopié) ; contrat annoncé avant le code (stories #959, `95d4465`). Réception et boîtes dans
+    une transaction ; **un verrou par boîte** (la boîte écrite d'abord dans la transaction, `ged_boites.mouvements`) pour la
+    sortie d'une boîte ou d'une pièce, le retour, la restitution et l'original relié (409 `PIECE_SORTIE` neuf ; la sortie
+    relit la boîte de l'original sous le verrou, 409 `PIECE_HORS_BOITE`) ; **`comptabilite.facture.desinscrite` v1 consommé**
+    (proposé à C, **accepté par C pour STORY-338**, schéma repris tel quel) dans le groupe `ged.comptabilite` : copie jamais
+    versée retirée du fonds (409 `PIECE_RETIREE`, hors liste, versement, export, échues et index, fichiers gardés), copie
+    versée gardée, attente désinscrite jamais rangée, désinscription lue avant l'inscription notée. Aucune route ni droit
+    neufs, aucun fait publié. Node 25 : unitaires 1 359, e2e 217/217 ; Node 24 : 116/116 suites, 217/217 ; mutations 24/24 ;
+    pile `grp-b` neuve 41/41 (10 sorties simultanées d'une pièce : 1 × 201, 9 × 409 ; 10 retours : 1 ; restitution et
+    sortie : une seule ; réception refusée par la base sans rien écrire ; RETIREE et GARDEE sur de vrais faits Kafka).
+    Verrou 09:08 → 09:19, 09:22 → 09:25, gardé par le redémarrage du poste jusqu'à 09:39 (rendu à la reprise), puis
+    10:04 → 10:07 (étage `verification`). Fiche D-1124-1 → 12. Rituel : aucune demande neuve à B chez A, C et D.
+  - **Suivante : STORY-1125** (n° 7 : l'archivage se mesure et se vend).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
     `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
@@ -1204,7 +1217,8 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 ## Demandes aux autres groupes
 
 - **→ C (2026-11-26, STORY-1124) : publier `comptabilite.facture.desinscrite` v1 à l'abandon d'un brouillard né d'une
-  facture inscrite** (`prospera-comptabilite-service`) — **ouverte**, sans urgence (la GED est prête et ne bloque sur rien).
+  facture inscrite** (`prospera-comptabilite-service`) — **acceptée par C le 26/11, placée dans sa STORY-338, schéma repris
+  tel quel** (la GED est prête sur `dev` depuis document-service #38, `b18d3ad` ; à la fusion de C, B recopie son octet).
   Relu le 26/11 sur `dev` `e4a53cc` : `BrouillardService.abandonner` supprime le brouillard, consigne
   `ECRITURE_ABANDONNEE` et rend la facture inscriptible (`MemoireDesChoixService.surAbandon`) dans une transaction, sans
   aucun fait ; la GED garde donc la copie rangée par `comptabilite.facture.inscrite`, et une réinscription entre une
@@ -1217,7 +1231,7 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
     organisationId, dossierId, exerciceId, ecritureId, lotId (24 hex chacun), numeroProvisoire, pieceId (64 hex, le
     SHA-256 du fichier), motif: "BROUILLARD_ABANDONNE", desinscriteLe (date-time), desinscritePar (non vide) }`, tous
     requis — **ni montant, ni tiers, ni ligne** ; le texte proposé à l'octet est
-    `prospera-ocr-service/contrat/consommes/comptabilite.facture.desinscrite.v1.json` (branche `MNV-1124`, puis `dev`) :
+    `prospera-ocr-service/contrat/consommes/comptabilite.facture.desinscrite.v1.json` (sur `dev`, sha256 `86a50e6f…2ecf`) :
     le prendre tel quel épargne une recopie ; s'il change, B recopie le vôtre (la GED écarte un message hors de sa copie,
     sans rien retirer) ;
   - **ce que fait la GED** (déjà livré par STORY-1124, groupe `ged.comptabilite`) : la copie jamais versée sort du fonds,
@@ -2056,6 +2070,12 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-26, STORY-1124 — LIVRÉ** (document-service #38, `b18d3ad` sur `dev` ; catalogue #82, `9674aeb`) : conforme à
+  l'annonce ci-dessous ; écarts D-1124-9 → 12 (la sortie d'une pièce rend aussi 409 `PIECE_HORS_BOITE`, code existant,
+  quand son original vient de changer de boîte ; `desinscription` déclarée au schéma Mongo). **`comptabilite.facture.desinscrite`
+  v1** : schéma `prospera-ocr-service/contrat/consommes/comptabilite.facture.desinscrite.v1.json` (`86a50e6f…2ecf`),
+  **accepté par C** (STORY-338) tel quel. **→ A** : types à régénérer depuis l'OpenAPI vivant (champ `desinscription` de
+  la vue d'une pièce, refus `PIECE_SORTIE` et `PIECE_RETIREE` ; aucun DTO de réponse neuf).
 - **2026-11-26, STORY-1124 — le circuit sans trou, annoncé AVANT le code** (`document-service`, GitHub
   `prospera-ocr-service`, branche `MNV-1124` ; fiche `stories/STORY-1124.md`, D-1124-1 → 8). **Aucune route neuve, aucun
   droit neuf, aucun fait publié.** Ajouts seuls :
@@ -3883,6 +3903,19 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Un schéma Mongoose strict retire en silence un champ neuf d'un `$set`** (STORY-1124) : les doubles en mémoire étaient
+  verts, la pile a rendu 6 KO (la copie désinscrite ni retirée ni gardée). Tout champ neuf d'une entité persistée ⇒
+  le déclarer au schéma, et un test qui construit un document du modèle et relit le champ **sans le type inféré** (sinon
+  la mutation ne rougit qu'au compilateur).
+- **Une mutation sur un second jugement « sous le verrou » survit en mémoire** quand le premier jugement du service a déjà
+  refusé (M6, M18) : tester le dépôt directement (`DepotPhysiqueMemoire.restituer` avec une sortie ouverte).
+- **Un redémarrage du poste coupe la passe ET laisse le verrou** (STORY-1124, 09:25 → 09:39) : la pile était descendue
+  (`down -v` fait), seul l'étage `verification` était en cours ; à la reprise, relire `passe.log` (ce qui est prouvé) et
+  rendre le verrou d'abord ; un conteneur nommé reste `Exited (255)` : `docker rm` avant la passe suivante.
+- **Prouver une réception « tout ou rien » sur la pile** : un validateur posé sur `ged_boites` (`collMod`, `libelle: { $ne:
+  'REFUS-DE-LA-BASE' }`) fait échouer l'`insertMany` dans la transaction ; on compte réceptions et boîtes avant et après,
+  puis on retire le validateur (`validationLevel: 'off'`).
 
 - **Une sous-session coupée par la limite de l'API (429) garde le verrou ET sa pile** (STORY-1123 : 05:11 → 07:04, C attendait
   depuis 05:14). Jouer la passe de preuve en UN script qui finit par `down -v` (et le test Node 24 à la suite), lancé en
