@@ -1,6 +1,7 @@
 # STORY-329 : Le chemin d'un montant restitué, et l'historique complet — répondre au contrôleur sans rien reconstituer
 
-Status: in-progress — écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 9 du fiscal,
+Status: done — **livrée le 2026-11-26** : prospera-fiscal-service **#80** (`94baf9f` sur `dev`, rebasée sur
+`8d85c10`) ; voir « Livraison ». **EPIC-031 fini.** Écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 9 du fiscal,
 `PLAN-LOT-7-2026-11-24.md` §3) ; contrat et communs annoncés avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de
 C). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-031, STORY-329) et du PRD
 fiscalité (FR-F26, FR-F51, FR-F56). **Elle finit EPIC-031.**
@@ -189,8 +190,43 @@ les deux ; l'historique d'une obligation déposée, rectifiée et close relu ave
 e2e (les deux routes, la portée, un collaborateur parti, un exercice clos) ; toute la suite du fiscal, celles de D comprises ;
 mutations sur la logique neuve ; `docker compose up` du fiscal, sain (un module change de fournisseurs).
 
+## Livraison (2026-11-26)
+
+- **Dépôt** : `prospera-fiscal-service` `MNV-329` → `dev` (**#80**, `242d325` poussé, rejoué `94baf9f` sur `dev`, rebasé sur
+  `8d85c10` : STORY-331 et 332 de D, #78 et #79, sans conflit). Fichiers : `domain/obligations/chemin.ts` (la version du
+  chemin, les six étapes, le constat à l'instant de la version), `domain/obligations/historique.ts` (qui, l'état rejoué, les
+  motifs par empreinte, les textes que l'obligation garde), `application/obligations/historique-obligations.service.ts`,
+  `modules/obligations/historique-obligations.controller.ts` et `dto/historique.dto.ts`, `ports/source-chemin-balance.ts`,
+  `adapters/http/http-source-chemin-balance.ts` et `contrat-chemin-balance.ts` (le détail du moteur, la provenance),
+  `ports/textes-audit.ts`, `adapters/mongo/texte-audit.schema.ts`, `mongo-journal-audit.ts` (le paramètre `textes`), les
+  appels motivés du registre des obligations et des pièces du client, `obligations.module.ts`.
+- **Écart à l'annonce (#988), sans effet sur le contrat** : la lecture des textes n'est pas une méthode de `JournalAudit`
+  mais un **port à part**, `ports/textes-audit.ts` (`TextesAudit`, que `MongoJournalAudit` implante). Une méthode de plus
+  sur `JournalAudit` cassait un double de D (`audit-depots.service.spec.ts`, un objet `{ chaine }` typé `JournalAudit`) :
+  `ports/journal-audit.ts` n'a donc **pas** changé. Les routes, les champs et la collection sont ceux de l'annonce.
+- **Preuves** (Node 24, étage `verification`, archive LF de `242d325`) : unitaires **244/244 suites, 3619** tests ; e2e
+  **14/14, 349** (4 neufs : le chemin d'une TVA jusqu'aux pièces ; un moteur muet et une balance apportée toute faite ; version
+  inconnue, mal formée, hors portée ; l'historique d'une close avec un collaborateur parti, et une chaîne falsifiée) ;
+  conformité **28/28, 177** (neuve : `test/historique.conformite-spec.ts`, 4 tests sur MongoDB en jeu de répliques : le texte
+  écrit avec l'acte, le journal qui n'en garde que l'empreinte, une panne qui efface les deux, le texte qu'aucun chemin du
+  modèle ne récrit, l'historique d'une close relu avec ses motifs) ; `nest build` vert. **Mutations** : **65/67** en local
+  (domaine, service, contrat de balance-service, adaptateur HTTP, journal, contrôleur ; 10 réécrites qui rougissaient par
+  compilation, 6 survivantes tuées par 6 tests ajoutés) et **6/6 sur MongoDB réel** (la session des textes, les motifs du
+  retour et de l'activation, chaque texte écrit, l'index, l'immuabilité ; celle de l'index tue au démarrage du modèle, conflit
+  d'index). **Deux mutations équivalentes, justifiées** : `S4` (lire la provenance sans tester `balance.statut` : une étape
+  balance qui n'est pas `RESTITUE` a toujours `balanceId: null`, la condition restante suffit) et `S5` (l'ordre de fusion des
+  textes conservés et des textes connus : une empreinte SHA-256 désigne un seul texte, les deux sources rendent le même). La
+  garde redondante `'theorique' in e` (mutation `T7` survivante) est **retirée** : `nombre` refuse déjà un théorique absent.
+  **Pile `grp-c`** fiscal (`MNV-329`) + balance (`effdc4a`) saine : santé `ok` des deux, `…/chemin`, `…/historique` et
+  `…/versions` en `401` sans jeton, routes montées, `textes_audit` et son index `textes_du_perimetre` posés au démarrage,
+  aucune erreur d'injection, aucun redémarrage. Verrou Docker pris une fois (16:07 → 16:15).
+- **Tests touchés** : `mongo-registre-obligations.spec.ts` (trois actes motivés passent leurs textes en troisième argument) ;
+  `test/obligations.e2e-spec.ts` (le contrôleur, le service et leurs doubles ; un bloc STORY-329). **Aucun fichier de D.**
+- **D prévenu** (message).
+
 ## Progress Tracking
 
 | Date | Événement |
 |---|---|
-| 2026-11-26 | Fiche écrite, contrat et communs annoncés avant le code. |
+| 2026-11-26 | Fiche écrite, contrat et communs annoncés avant le code (#988). |
+| 2026-11-26 | **DONE.** Code : fiscal #80 (`94baf9f`). Preuves : voir « Livraison ». D prévenu. **EPIC-031 fini.** |

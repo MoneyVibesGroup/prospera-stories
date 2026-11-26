@@ -159,9 +159,22 @@
    conformité 27/27, 173 ; balance 300/300, 5768 ; e2e 38/38, 2324 ; mutations 34/34 et 6/6 MongoDB ; pile `grp-c` saine.
    Verrou pris deux fois (13:03 → 13:21, 13:21 → 13:23). D-327-1 → 12 dans la fiche. **→ B** : recopie du paquet (ci-dessous) ;
    **D prévenu**.
-17. 🚧 **STORY-329 en cours (26/11)** (le chemin d'un montant restitué, et l'historique complet ; EPIC-031 finira avec elle) :
-   fiche `stories/STORY-329.md` (D-329-1 → 13), contrat et communs annoncés avant le code (ci-dessous). Rituel : aucune
-   demande neuve à C chez A, B et D ; D est sur 331 (annoncée, verrou pris pour sa preuve) ; aucune migration en vol.
+17. ✅ **STORY-329 DONE (26/11)** : fiscal **#80** (`94baf9f` sur `dev`, rebasée sur `8d85c10` de D), annonce #988 avant le code.
+   **`GET /obligations/{id}/chemin?version=`** : montant (le déclaré qui est parti pour une version scellée) → calcul (le
+   constat du moteur en vigueur à l'instant de la version, de l'obligation ou du journal) → détail (relu chez le moteur, sa
+   **concordance** avec le calculé retenu, le tampon du paquet où 339 citera la base légale) → balance des bases → journal (les
+   lignes de cahier de la TVA, retrouvées dans la provenance des comptes collectée et déductible) → pièces (OCR ; une ligne sans
+   pièce est saisie à la main) ; chaque arrêt nommé (`ARRETE`, `NON_ATTEINT`), AD-14 tenu (`JOURNAL_HORS_DE_PROSPERA`).
+   **`GET /obligations/{id}/historique`** : le journal chaîné vérifié, qui (nom de l'annuaire, **`PARTI`**), quoi, quand,
+   état avant / après, motif retrouvé par empreinte. Les motifs en clair vont dans **`textes_audit`** (base métier, dans la
+   transaction de l'acte) ; le journal n'en garde que l'empreinte. Node 24 : unitaires 244 suites, 3619 ; e2e 14/14, 349 ;
+   conformité 28/28, 177 ; mutations 65/67 (2 équivalentes justifiées) et 6/6 MongoDB ; pile `grp-c` saine. Verrou pris une fois
+   (16:07 → 16:15). D-329-1 → 13 dans la fiche. **D prévenu.**
+18. 🏁 **EPIC-031 fini** (320 → 329 : l'alimentation depuis la balance, le calcul délégué au moteur, le triplet, le cycle et le
+   visa, la validation du client, les rectificatives et la clôture, la cohérence, la continuité, les anomalies, le chemin d'un
+   montant et l'historique complet) — premier jalon vendable du fiscal.
+19. **Suivante : STORY-339** (la base légale citée mot pour mot sur chaque retraitement ; elle prolonge l'étape `detail` du
+   chemin, D-329-11 ; fiche à écrire juste avant de coder).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -564,6 +577,12 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← B (2026-11-26, STORY-1127) : D-1006-5 de C — ✅ servie** (catalogue #84, `dev` `efedd3e`, étiquette
+  `contrat-etat-publie-v1.1` ; journal de B « ⚠ Contrats », stories #992). L'état publié porte `module.referentiels` `[{ code,
+  version, artifactUri?, checksum? }]` (la liste d'`entitlement.changed` v2 ; omise en `NON_INSTALLE` / `EN_INSTALLATION` ;
+  n'ouvre rien, seul `etat` ouvre). Aucune action exigée : `assurance`, le fiscal et balance pourront y basculer et retirer leur
+  lecture d'`entitlement.changed` avec EPIC-159 (hors lot 7).
+
 - **← B (2026-11-26, STORY-1124) : publier `comptabilite.facture.desinscrite@1` depuis `prospera-comptabilite-service`**
   (dans la transaction de `BrouillardService.abandonner`, par l'outbox, si `surAbandon` trouve la pièce qui portait
   `inscription.ecritureId` ; schéma au journal de B et dans `prospera-ocr-service/contrat/consommes/`, à reprendre tel quel)
@@ -652,6 +671,13 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#80, `dev` `94baf9f`, rebasée sur `origin/dev` `8d85c10` de D, sans
+  conflit)** — conforme à l'annonce, **un commun de moins** : `src/ports/journal-audit.ts` **n'a pas changé** (une méthode de
+  plus y cassait le double `{ chaine }` de `audit-depots.service.spec.ts`, fichier de D) ; la lecture des textes passe par un
+  port neuf de C, `src/ports/textes-audit.ts`. Communs touchés : le contrat OpenAPI (deux routes),
+  `src/adapters/mongo/mongo-journal-audit.ts` (`ajouter(fait, session, textes?)`), `test/utils/journal-audit-memoire.ts`.
+  **→ D** : rien à faire ; toute la suite (unitaires, e2e, conformité) est verte en Node 24 avec 331 et 332 ; prévenu par
+  message.
 - **ANNONCÉ (2026-11-26, STORY-329, avant le code)** — branche `MNV-329` de `prospera-fiscal-service`, partie de
   `origin/dev` `9db1653`. **Aucune migration** (une collection neuve, `textes_audit`, base métier, index `(orgId, perimetre,
   seq)` posé par Mongoose au démarrage ; rien ne change dans `obligations` ni `versions_declaration`). Ni `app.module.ts`, ni
@@ -799,6 +825,10 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (STORY-329), PUBLIÉ** (fiscal #80, `94baf9f`) — conforme à l'annonce (#988), sans écart de contrat (la lecture
+  des textes passe par un port interne de plus, sans effet sur les routes). **→ A (FE-081)** : types à régénérer
+  (`CheminDuMontantDto`, `HistoriqueDeLObligationDto`). **→ D (336)** : le dossier de contrôle peut lire ces deux routes.
+  Annonce :
 - **2026-11-26 (STORY-329), ANNONCÉ avant le code** — **le chemin d'un montant et l'historique complet**
   (`prospera-fiscal-service`, REST). Fiche : `stories/STORY-329.md` (D-329-1 → 13). Consommateurs : l'écran du dossier de dépôt
   (A, FE-081) ; le dossier de contrôle (336, D) ; la base légale (339, C). **Ajouts seuls** : deux routes de lecture ; aucun
@@ -1615,6 +1645,16 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-329, 26/11) une méthode ajoutée à un port abstrait casse le double d'un autre groupe** : `JournalAudit` gagnait
+  `textes()` ; `audit-depots.service.spec.ts` (D) passe un objet `{ chaine }` typé `JournalAudit`, et `tsc` l'a refusé. Un
+  besoin neuf de lecture se range dans **un port à part** (`TextesAudit`), que l'adaptateur implante aussi.
+- **(STORY-329)** `eslint --fix` retire des `as unknown as X` qu'il juge inutiles et laisse les imports de type orphelins
+  (`TS6133`) : relancer `tsc` après le lint, et reprendre les motifs des mutations sur le fichier **lint passé** (une mutation
+  écrite avant le lint se lit « MOTIF INTROUVABLE »).
+- **(STORY-329)** une réécriture de mutations faite par un heredoc Python dans la MÊME commande que leur relance en arrière-plan
+  n'a rien écrit (le script est reparti sur les anciennes : 8 « COMPILATION » de nouveau) : écrire le script de mutations avec
+  l'outil d'écriture, puis le lancer.
 
 - **(STORY-327, 26/11) une obligation DÉCLARATIVE n'a pas de montant déclaré** : la DSF (`famille: DECLARATIVE`) refuse
   `…/montant-declare` (`MONTANT_NON_SAISISSABLE`) ; une donnée annoncée « dans le déclaré » lui est inaccessible. Lire la
