@@ -1,6 +1,8 @@
 # STORY-333 : L'accusé d'un dépôt engagé — un document ou une simple référence, consigné une fois, horodaté, rattaché à la version déposée, et le retard qualifié à la date réelle du dépôt
 
-Status: in-progress (2026-11-26 — fiche écrite et contrat annoncé avant le code ; lot 7 de D, n° 10)
+Status: done (2026-11-26 — prospera-fiscal-service#81, `dev` `fc317a1` ; lot 7 de D, n° 10) — fiche écrite et
+contrat annoncé avant le code (prospera-stories#998, `main` 572be5d). ⚠️ AC-3 : la règle et sa preuve sont livrées ;
+la garde dans la porte du cycle est à C (acceptée, en tête de sa 339, D-333-3).
 Écrite le 2026-11-26 par la sous-session du groupe D juste avant de coder (lot 7 de D, n° 10,
 `PLAN-LOT-7-2026-11-24.md` §4 : « **d'abord réaligner** avec 537 → 539 et 688 → 691, qui la couvrent en partie (lot 6
 §3) : compléter ce qui manque, ou fermer en le disant »). Il n'existait pas de fiche : les critères viennent
@@ -165,19 +167,56 @@ réécrit ni la chaîne de 538 ni son accusé.
 
 ## Definition of Done
 
-- [ ] Un document seul, une référence seule, les deux : chacun consigné (201), horodaté, rattaché à la version déposée ;
+- [x] Un document seul, une référence seule, les deux : chacun consigné (201), horodaté, rattaché à la version déposée ;
       aucun des deux ⇒ `ACCUSE_REQUIS` ; un second envoi ⇒ `ACCUSE_DEJA_CONSIGNE` (e2e).
-- [ ] Les refus de D-333-2 et D-333-5, chacun par un test ; le document archivé avant l'écriture, supprimé si elle échoue.
-- [ ] Le retard : dans les délais, en retard (les pénalités du paquet de dépôt, la source), le report compris, sans
+- [x] Les refus de D-333-2 et D-333-5, chacun par un test ; le document archivé avant l'écriture, supprimé si elle échoue.
+- [x] Le retard : dans les délais, en retard (les pénalités du paquet de dépôt, la source), le report compris, sans
       échéance ; figé à la consignation.
-- [ ] La règle `verifierAccuseAuRecu` et le port `PreuvesDAccuse` prouvés ; `AccusesDepotModule` n'importe pas
+- [x] La règle `verifierAccuseAuRecu` et le port `PreuvesDAccuse` prouvés ; `AccusesDepotModule` n'importe pas
       `ObligationsModule`.
-- [ ] **MongoDB réel** (`test:conformite`) : l'index unique ; dix consignations parallèles ⇒ une seule et un seul acte ;
+- [x] **MongoDB réel** (`test:conformite`) : l'index unique ; dix consignations parallèles ⇒ une seule et un seul acte ;
       l'accusé et son acte tout ou rien ; schéma strict.
-- [ ] Les gardes d'AD-12 et d'AD-13 vertes.
-- [ ] **Mutations** qui rougissent sur une assertion.
-- [ ] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
+- [x] Les gardes d'AD-12 et d'AD-13 vertes.
+- [x] **Mutations** qui rougissent sur une assertion.
+- [x] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
       compris) sain, les routes neuves en `401` sans jeton.
+
+## Livraison (2026-11-26)
+
+- **Code** : prospera-fiscal-service#81, fusionnée en rebase sur `dev` (`fc317a1`), rebasée sur `origin/dev` `94baf9f`
+  (329 de C, qui touchait aussi le contrat OpenAPI : aucun conflit) avant la fusion. Annonce avant le code :
+  prospera-stories#998 (`main` 572be5d). **Aucun écart au contrat annoncé.**
+- **Un écart d'ordre, sans effet sur le contrat** (D-333-2) : les refus du dépôt engagé (relayé, écartée, périmé) sont
+  vérifiés par la règle du guidage de 332 (`verifierGuidable`), appelée telle quelle, puis « déposée »
+  (`ACCUSE_NON_CONSIGNABLE`). La fiche les listait dans un autre ordre ; aucun refus n'est ajouté ni retiré. La
+  référence refusée porte le code `REFERENCE_ACCUSE_INVALIDE` (400).
+- **Fichiers** (dossiers de D) : `domain/depot/accuse-depot.ts` (pur : la règle de la porte `verifierAccuseAuRecu`, la
+  preuve, la référence à l'octet, le type lu dans les octets, « consignable », les bornes, le retard à la date réelle,
+  l'acte) et son test ; `ports/preuves-accuse.ts`, `ports/registre-accuses-depot.ts` ;
+  `adapters/mongo/accuse-depot.schema.ts` (collection `accuses_depot`, index `un_accuse_par_version`) et
+  `mongo-registre-accuses-depot.ts` ; `modules/depots/accuses-depot.module.ts` (n'importe pas `ObligationsModule`) ;
+  `application/depots/accuses-depot.service.ts` et son test ; les trois routes dans `DepotsDeclarationController`, leurs
+  DTO (`dto/accuse-depot.dto.ts`), `depots.module.ts` ; les gardes d'AD-12 (deux ports de plus) et d'AD-13 (la route de
+  la pièce) ; `depots-declaration.openapi.spec.ts` ; `test/depots-declaration.e2e-spec.ts` (cinq cas de plus),
+  `test/accuses-depot.conformite-spec.ts`, `test/utils/registre-accuses-depot-memoire.ts`. **Lus, sans écriture**
+  (dossiers de C) : `qualifierRetard` (`domain/obligations/report-echeance.ts`), le cycle (`domain/obligations/cycle.ts`),
+  les ports des obligations et des versions.
+- **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI (trois routes neuves). Aucune migration.
+- **Preuves** :
+  - Node 24 (image `verification` de l'archive LF de `7df3823`) : unitaires **246/246 suites, 3 681 tests** (1 suite et 3 tests ignorés : la spec BullMQ sans Redis) ; e2e **14/14 suites, 354 tests** (dont `depots-declaration`) ; **`test:conformite` 29/29 suites, 183 tests** (dont `accuses-depot.conformite-spec.ts` : l'index unique, dix consignations parallèles ⇒ une seule et un seul acte, une rectificative a le sien, tout ou rien sur une panne du journal, la relecture et l'isolement, le schéma strict). Le dernier commit (`f232d9d`, trois assertions de test, aucun code de production) a été rejoué sous Node 25 : service 18/18, e2e `depots-declaration` 39/39.
+  - Node 25 (local) : domaine 44/44, service 18/18, OpenAPI 7/7, gardes d'AD-12 et d'AD-13 18/18, e2e
+    `depots-declaration` 39/39 ; les 13 suites du dépôt et du coffre **13/13** (274 tests avant les trois assertions des mutants survivants).
+  - **Mutations 26/26**, chacune rouge sur une assertion : la porte sans preuve, aucune preuve prise pour une référence, les deux pris pour un document, la référence rognée, blanche admise, caractère de contrôle admis, « À déposer » consignable, borne basse puis haute retirées, PDF sans sa signature complète, tout fichier admis, retard compté sur la légale, jour de l'échéance en retard, pénalités toujours ouvertes, source perdue, référence en clair au journal, périmé non vérifié, accusé déjà consigné vu après l'archive, pièce non archivée, orphelin non supprimé, pénalités d'un formulaire, hors portée devenu un autre refus, date de l'engagement ignorée, référence perdue dans la réponse, droit `deposer` retiré, pièce vide prise pour un document. Trois mutants restés verts au premier passage (l'accusé déjà consigné vu après l'archive, les pénalités d'un formulaire, la pièce vide) ont reçu leur assertion ; trois qui rougissaient en compilation ont été réécrits en gardant l'usage, puis les six rejoués.
+  - lint des fichiers touchés et `tsc` 0.
+  - §1.5 : pile `grp-d` du fiscal **avec Redis** (image runtime de l'archive de `7df3823`) : santé `ok` (mongodb, audit, kafka, redis) ; les trois routes neuves montées et en `401` sans jeton ; `AccusesDepotModule` initialisé ; 0 `UnknownDependencies` sur 491 lignes de journal ; les index `un_accuse_par_version` et `accuse_par_depot` posés par l'application.
+  - **Verrou Docker** : une prise, par le script autonome, de 16:31:49 à 16:46:34, rendue par son `trap`. B et C ont été prévenus (`-be`, `-f7`), après coup : une coupure réseau a interrompu la sous-session pendant la passe. Il ne reste aucun conteneur, volume ni réseau `grp-d`.
+- **Ce qui reste** :
+  - **→ C : la garde `ACCUSE_REQUIS` dans `transitionner`** — acceptée, placée en tête de 339 (après la fusion de 333).
+    Jusque-là, AC-3 n'est tenu que par la règle et sa preuve : la route générique de C laisse encore passer « Accusé
+    reçu » sans accusé (D-333-3).
+  - → 334 : le rejet administratif (`DEPOSEE → A_DEPOSER`, D-325-9) ; → 335 : l'URL présignée de la pièce ; → 1102 : le
+    premier accusé réel ; → A (plus tard) : FE-081 consigne l'accusé à l'étape `RELEVER_ACCUSE`.
+  - Q-D-30 au PO (les majorations des déclarations du mois).
 
 ## Questions au PO
 

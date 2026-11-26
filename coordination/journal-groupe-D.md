@@ -458,6 +458,52 @@
     la réaligner** avec 537 → 539 et 688 → 691, qui la couvrent en partie (plan §4, n° 10). Sa fiche est à écrire depuis
     `epics-fiscalite-2026-08-03.md` juste avant de coder. Elle prend la suite de l'étape `RELEVER_ACCUSE` du guidage
     et du dépôt engagé de 330 (D-330-15).
+- **STORY-333** ✅ 📨 — l'accusé d'un dépôt engagé : un document ou une simple référence, consigné une fois par
+  version, horodaté, rattaché à la version déposée ; le retard qualifié à la date réelle du dépôt. Code :
+  prospera-fiscal-service#81, `dev` `fc317a1`. Annonce avant le code : #998, `main` 572be5d (fiche D-333-1 → 13, ⚠
+  Contrats, ⚠ Communs, → C, Q-D-30). Plan §4, n° 10.
+  - **Réalignement** (fiche, avant le code) : 333 n'était **pas** couverte. 538 et 691 couvrent l'accusé du **dépôt de
+    liasse** (l'ancien modèle, que `bilan-service` consomme) ; manquaient l'accusé de la **déclaration** (le dépôt engagé
+    de 330, la version scellée de 325), la garde `ACCUSE_REQUIS` (le cycle de C passait `DEPOSEE → ACCUSE_RECU` sans
+    garde) et le retard à la date réelle. 688 et 690 sont sans rapport. 333 complète sans réécrire 538.
+  - **Livré** (dossier `depots` de D) :
+    - **`POST /api/v1/depots-declaration/{depotId}/accuse`** (droit `deposer`, multipart : `piece`, `reference`,
+      `deposeLe`) :
+      - un document (PDF, PNG, JPEG ou XML lu dans ses octets, archivé dans le bucket privé de 682, empreinte calculée),
+        une référence (gardée à l'octet), ou les deux (AC-1, AC-2) ; aucun ⇒ `422 ACCUSE_REQUIS` ;
+      - sur une déclaration « Déposée » ou au-delà, dont la version déposée est celle du dépôt engagé
+        (`ACCUSE_NON_CONSIGNABLE`, `LIVRABLE_PERIME`, `DEPOT_REMPLACE`, `OBLIGATION_DESACTIVEE`) ;
+      - une fois par version (`409 ACCUSE_DEJA_CONSIGNE`, index unique `un_accuse_par_version`) ; la pièce d'une
+        écriture perdue est supprimée ;
+      - `deposeLe` entre le jour de l'engagement et aujourd'hui (`DATE_DEPOT_HORS_BORNES`) ;
+      - **le retard** (AC-4) : `qualifierRetard` de C sur l'échéance applicable (le report compris) à la date réelle ;
+        `DANS_LES_DELAIS`, `EN_RETARD` ou `ECHEANCE_INCONNUE` ; les pénalités du paquet de dépôt du format, ouvertes par
+        le retard seul, jamais chiffrées ; `source: null` pour un formulaire du mois (Q-D-30) ; figé à la consignation ;
+      - acte `DEPOT_DECLARATION_ACCUSE` au journal chaîné, dans la transaction de l'accusé (la référence par son
+        empreinte seule).
+    - **`GET …/{depotId}/accuse`** et **`GET /api/v1/depots-declaration/accuses?obligationId=`** (AC-5, V2 : dossier →
+      déclaration → accusés, deux gestes).
+    - **Pour la porte de C** (D-333-3) : `AccusesDepotModule` (sans `ObligationsModule`), le port `PreuvesDAccuse`, la
+      règle `verifierAccuseAuRecu` (`409 ACCUSE_REQUIS`).
+    - **333 ne fait pas avancer le cycle** : ni « Déposée » ni « Accusé reçu » (`CycleObligationsService` n'est pas
+      exporté ; la porte reste à C).
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI seulement. Aucune migration, aucun fichier de C.
+  - **Preuves** :
+    - Node 24 : unitaires **246/246 suites, 3 681 tests** (1 suite et 3 tests ignorés : la spec BullMQ sans Redis) ; e2e **14/14 suites, 354 tests** (dont `depots-declaration`) ; **`test:conformite` 29/29 suites, 183 tests** (dont `accuses-depot.conformite-spec.ts` : l'index unique, dix consignations parallèles ⇒ une seule et un seul acte, une rectificative a le sien, tout ou rien sur une panne du journal, la relecture et l'isolement, le schéma strict). Le dernier commit (`f232d9d`, trois assertions de test, aucun code de production) a été rejoué sous Node 25 : service 18/18, e2e `depots-declaration` 39/39 ;
+    - mutations 26/26 ; lint des fichiers touchés et `tsc` 0 ;
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** (image runtime de l'archive de `7df3823`) : santé `ok` (mongodb, audit, kafka, redis) ; les trois routes neuves montées et en `401` sans jeton ; `AccusesDepotModule` initialisé ; 0 `UnknownDependencies` sur 491 lignes de journal ; les index `un_accuse_par_version` et `accuse_par_depot` posés par l'application.
+    - **Verrou Docker** : une prise, par le script autonome, de 16:31:49 à 16:46:34, rendue par son `trap`. B et C ont été prévenus (`-be`, `-f7`), après coup : une coupure réseau a interrompu la sous-session pendant la passe. Il ne reste aucun conteneur, volume ni réseau `grp-d`.
+  - **Ce qui reste** :
+    - → C : la garde `ACCUSE_REQUIS` dans `transitionner` — acceptée, placée en tête de 339 (après la fusion de 333) ;
+      SHA de la fusion envoyé à C ;
+    - Q-D-30 au PO ;
+    - → A (plus tard) : FE-081 consigne l'accusé à l'étape `RELEVER_ACCUSE` du guidage ;
+    - `prospera-assurance-service` : le consommateur `entitlement.changed` (D-1006-5, palier ④) peut être remplacé par
+      `module.referentiels` de l'état publié (B, 1127, catalogue #84 efedd3e, contrat-etat-publie-v1.1) — optionnel,
+      hors lot 7.
+  - **Suivante : STORY-334** (le rejet administratif, `DEPOSEE → A_DEPOSER`, D-325-9 ; dossiers de D). Même
+    réalignement que 333 (plan §4, n° 11) : 538 porte déjà le rejet du dépôt de liasse. Garder la version scellée, en
+    sceller une de plus à la retransmission ; l'accusé de 333 est par version.
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1777,7 +1823,8 @@
 
 ## Demandes aux autres groupes
 
-- **→ C (2026-11-26, STORY-333) : brancher la garde `ACCUSE_REQUIS` dans `CycleObligationsService.transitionner` — ouverte.**
+- **→ C (2026-11-26, STORY-333) : garde ACCUSE_REQUIS — acceptée, placée en tête de 339 (après la fusion de 333).**
+  333 est fusionnée (fiscal #81, `dev` `fc317a1`) ; le SHA a été envoyé à C (`moneyvibes-apps-f7`).
   - Pourquoi : AC-3 de 333 (« une obligation sans accusé ne passe pas à "Accusé reçu" ») ; `DEPOSEE → ACCUSE_RECU` n'a
     aujourd'hui aucune garde, et le service n'est pas exporté : D ne peut pas le garder sans toucher le dossier de C.
   - Ce que D fournit (fiscal, `MNV-333`) : le module `AccusesDepotModule` (`src/modules/depots/accuses-depot.module.ts`,
@@ -2339,7 +2386,9 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-26, STORY-333, avant le code)** — branche `MNV-333` de `prospera-fiscal-service`, partie de
+- **FUSIONNÉ (2026-11-26, prospera-fiscal-service#81, `dev` `fc317a1`, rebasée sur `origin/dev` `94baf9f` — 329 de C,
+  qui touchait aussi le contrat OpenAPI : aucun conflit — avant la fusion), conforme à l'annonce ; ANNONCÉ (2026-11-26,
+  STORY-333, avant le code)** — branche `MNV-333` de `prospera-fiscal-service`, partie de
   `origin/dev` `8d85c10`. **Aucune migration** (une collection neuve, `accuses_depot`, index posé par Mongoose au
   démarrage), ni `app.module.ts` (les routes neuves entrent dans `DepotsDeclarationController`, déjà monté ;
   `AccusesDepotModule`, neuf, est importé par `DepotsModule`, fichier de D), ni `package.json`, ni `read-models/`, ni
@@ -2446,7 +2495,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-26, STORY-333, avant le code) — l'accusé d'un dépôt engagé et le retard qualifié à la date réelle**
+- **PUBLIÉ (2026-11-26, STORY-333 : prospera-fiscal-service#81, `dev` `fc317a1`) sans écart ; ANNONCÉ (2026-11-26,
+  STORY-333, avant le code, prospera-stories#998, `main` 572be5d) — l'accusé d'un dépôt engagé et le retard qualifié à
+  la date réelle**
   (`prospera-fiscal-service`, module `depots`). Fiche : `stories/STORY-333.md` (D-333-1 → 13, section « Contrat »).
   **Ajout seul** : aucune route, aucun champ, aucun topic existant ne change.
   - **`POST /api/v1/depots-declaration/{depotId}/accuse`** (droit `fiscalite:declaration:deposer`, multipart : `piece`
@@ -3994,6 +4045,16 @@
 
 ## Pièges rencontrés
 
+- **STORY-333** (fiscal) :
+  - (1) **Un heredoc de bash qui contient du TypeScript ou du Python avec apostrophes casse la commande entière**
+    (« unexpected EOF while looking for matching `'` ») : rien n'est écrit, et rien ne le dit. Écrire les fichiers et les
+    scripts par l'outil d'écriture, puis les lancer (la règle du brief, vérifiée deux fois).
+  - (2) **Un `'﻿'` écrit par un script Python dans une chaîne non brute devient un vrai BOM dans le source** :
+    `no-irregular-whitespace` le refuse. Garder l'échappement dans le source (`/^﻿/u`).
+  - (3) **Le service de cycle de C n'est pas exporté** par `ObligationsModule` : une story de D qui doit faire avancer
+    une obligation, ou garder une transition, demande à C (export ou garde) au lieu de fournir le service dans son
+    module. 333 a fourni la preuve et la règle dans un module qui n'importe pas `ObligationsModule`, pour que C puisse
+    l'importer sans cycle.
 - **STORY-332** (fiscal) :
   - (1) **Une mutation qui laisse une variable ou un paramètre inutilisé rougit en compilation, pas sur une
     assertion.** Avec `noUnusedLocals` et `noUnusedParameters`, supprimer un appel (`verifierEstampille(depot, courante)`)
