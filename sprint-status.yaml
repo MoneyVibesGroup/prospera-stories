@@ -123,15 +123,19 @@ reserved_ranges:
       mutations 18/18. Détachée de la plage 1138 → 1141 (entrée propre). Lot 7 de D, n° 5a (§4 bis, D-1078-10). Suivante :
       STORY-1139.
   - range: "STORY-1139"
-    status: "IN_PROGRESS"
+    status: "DONE"
     owner: "Groupe D — les repères des seize indicateurs de l'analyse financière, sourcés et modifiables par dossier, chaque changement tracé (Q-D-14 ; prospera-bilan-service)"
     source_doc: "prospera-stories/stories/STORY-1139.md"
     reserved_on: "2026-11-26"
     note: >-
-      Fiche et annonce « ⚠ Contrats » avant le code (2026-11-26). Recherche du 26/11 : aucune norme sur la même formule
-      pour les seize (ils restent « aucun repère déclaré ») ; repères par dossier (TENANT_ADMIN), collection append-only
-      reperes_analyse (plans C13), origine PAQUET | DOSSIER dans seuilApplique. Lot 7 de D, n° 5b (§4 bis). Détachée de la
-      plage 1139 → 1141 (entrée propre).
+      🏁 DONE le 2026-11-26 — prospera-bilan-service#194 (dev 027075d) ; annonce « ⚠ Contrats » avant le code (docs #946,
+      main b3d9e23). Recherche du 26/11 : aucune norme sur la même formule pour les seize (ils restent « aucun repère
+      déclaré », raison par raison). Repères modifiables par dossier sans livraison (TENANT_ADMIN : DECLARE, SANS_REPERE,
+      PAQUET ; motif exigé), chaque changement une insertion append-only dans reperes_analyse (index unique pour verrou ;
+      plans C13), journal (qui, quand, avant, après, source) ; l'analyse publie seuilApplique.origine PAQUET | DOSSIER.
+      Node 24 : unitaires 372/372 suites (deux passes --shard), e2e 45/45 (43 sur f1266a1 + 4 sur 850c127) ; vrai MongoDB
+      4/4 ; mutations 22/22 ; pile grp-d saine. Q-D-23 au PO. Lot 7 de D, n° 5b (§4 bis). Détachée de la plage 1139 →
+      1141 (entrée propre). Suivante : STORY-1140.
   - range: "STORY-1140 → STORY-1141"
     status: "RÉSERVÉ"
     owner: "Groupe D — lot 7, amendement du 26/11 : bilan (1140), facture et paiement (1141)"

@@ -1,6 +1,6 @@
 # STORY-1139 : les repères des seize indicateurs de l'analyse financière, sourcés et modifiables (Q-D-14)
 
-Status: in-progress
+Status: done
 
 **Plan :** `coordination/PLAN-LOT-7-2026-11-24.md` §4 bis (amendement du 26/11), n° **5b** · **Dépôt :**
 `prospera-bilan-service` (tenu par D jusqu'au prochain plan ; `origin/dev` au départ : `65eecdc`, STORY-1138) · **Plage :**
@@ -185,6 +185,14 @@ RepereDossier {
   Le journal des repères a sa route, sous le même dossier.
 - **D-1139-12 — Aucun droit neuf, aucune demande à B** : le module ne connaît que les rôles (aucun droit fin `bilan:*`).
 
+- **D-1139-13 (au code) — Le `dry-run` applique aussi les repères du dossier** : il est niché sous le même dossier ; il
+  lit la collection, n'écrit rien (`@LectureSeule` reste vrai).
+- **D-1139-14 (au code) — L'auteur est résolu avant l'écriture** (patron des surcharges de mapping, STORY-451) : un `sub`
+  qui n'est pas un identifiant rend `403 BILAN_NOT_ENTITLED` avant qu'un octet ne soit écrit.
+- **D-1139-15 (au code) — La preuve sur un vrai MongoDB est une spec à part** (`test/mongo/reperes-analyse.mongo-spec.ts`,
+  hors des suites ordinaires, lancée avec `MONGO_URI`) : le service n'a pas de suite de conformité ; les e2e jouent le vrai
+  schéma et le vrai index unique sur une collection en mémoire (`test/utils/reperes-analyse-memoire.ts`).
+
 ## Q-D-23 (au PO, choix par défaut appliqué)
 
 1. **Le grain** : un repère par dossier (défaut). Un repère pour tous les dossiers d'un cabinet demanderait une route
@@ -193,3 +201,47 @@ RepereDossier {
    importés** (défaut, D-1139-2). Les accepter tels quels changerait le paquet (une livraison) ou demanderait un registre de
    la plateforme.
 3. Q-D-14 point 2 (une capacité de remboursement à la formule BCEAO, sur la CAFG) reste ouverte, défaut inchangé.
+
+## Livraison
+
+**prospera-bilan-service #194**, fusionnée en rebase : **`dev` `027075d`** (`65b3a28` puis `027075d` ; branche `850c127`, arbre identique). Annonce avant le code :
+prospera-stories #946 (`main` b3d9e23). **Conforme à l'annonce, sans écart.**
+
+- `analyse/reperes/` (neuf) : `reperes-analyse.types.ts` (statuts, natures, bornes 2 → 4), `reperes-analyse.validation.ts`
+  (pure : les règles de la garde de packaging réécrites, `contenuDeLaDemande`, `memeContenu`), `repere-analyse.schema.ts`
+  (collection `reperes_analyse`, index unique `repere_par_version`), `reperes-analyse.repository.ts`
+  (`DossierScopedRepository` ; `E11000` ⇒ `RepereConcurrentError`), `reperes-analyse.service.ts` (état, journal,
+  changement en une insertion, repères en vigueur), `reperes-analyse.controller.ts` (trois routes), deux DTO.
+- `analyse.seuils.ts` : `apprecierIndicateurs(…, reperesDossier)` — le repère du dossier l'emporte (`DECLARE` : ses bornes,
+  `TOUS` ; `SANS_REPERE` : rien ; `PAQUET` : le paquet) ; `seuilApplique.origine`, `repereDossier`. `analyse.service.ts` :
+  les repères en vigueur lus pour le `GET` et le `dry-run`. `bilan.module.ts` : schéma, contrôleur, service, dépôt.
+- C13 : `plan-d-effacement.ts` (par `tenantId`), `plan-d-export.ts` (objet `reperes-analyse`), et leurs invariants.
+- Invariants tenus à jour : `dossier-scope.invariant` (31 contrôleurs, 26 nichés ; le filtre du 21ᵉ prend le séparateur,
+  `reperes-analyse.controller.ts` finissant aussi par `analyse.controller.ts`), `analyse.agnosticisme` (liste fermée des
+  fichiers du module).
+- Tests neufs : validation (31), service (10), dépôt et vrai schéma (15), appréciation (7), service d'analyse (2), e2e
+  `bilan-analyse` (9, sur une collection en mémoire au vrai schéma et au vrai index unique), contrat OpenAPI (3), et
+  `test/mongo/reperes-analyse.mongo-spec.ts` (4, sur un vrai MongoDB, hors des suites ordinaires).
+
+## Preuves
+
+| Preuve | Résultat |
+|---|---|
+| Node 24 (étage `verification`, image de l'archive LF de `f1266a1`) — unitaires complets, en deux passes `--shard` | **372/372 suites** : passe 1/2 186/186 (7 624 tests, 3 ignorés), passe 2/2 186/186 (5 168 tests, 3 ignorés) — **12 792 tests verts, aucun rouge** |
+| Node 24 — e2e complets (`f1266a1`) | 43/45 suites, 3 586/3 589 : deux e2e comptaient en dur les contrôleurs gardés (25) et les objets de l'export (7) ; corrigés (`850c127`) |
+| Node 24 — seconde passe (`850c127`) : `bilan-dossier-portee-collaborateur`, `instance-c13`, `bilan-analyse`, `openapi-contract` | **4/4 suites, 1 180 tests** (les 43 autres suites e2e vertes sur `f1266a1`) |
+| Node 24 — `npm run build` | 0 |
+| §1.5 — pile `grp-d` (mongo 8.0 en jeu de répliques, kafka, image runtime de l'archive LF) | `/health` `ok` (MongoDB et Kafka `up`) ; les trois routes montées (`ReperesAnalyseController`) ; `GET`, `PUT` et journal sans jeton 401 ; 0 `UnknownDependencies` sur 569 lignes de journal ; **l'application pose l'index `repere_par_version` unique** |
+| Vrai MongoDB (`test/mongo/reperes-analyse.mongo-spec.ts`, le MongoDB de la pile) | **4/4** : index unique posé ; **dix changements simultanés partis de la version 0 : un seul passe, neuf `RepereConcurrentError`, une seule version en base** ; journal relu (avant, après, auteur) ; un autre dossier et une autre organisation n'en voient rien |
+| Unitaires neufs (Node 25) | validation 31, dépôt et vrai schéma 15, service 10, appréciation 7, service d'analyse 2 |
+| e2e (Node 25 et 24) | `bilan-analyse` : 9 neufs (déclarer puis l'analyse l'applique, `SANS_REPERE` pour ce dossier seul, journal, 409 et course de cinq PUT : 1 × 200 / 4 × 409, 422, 400, 403 `TENANT_USER`, 404 autre organisation, 409 `DOSSIER_ARCHIVE`) ; `openapi-contract` : 3 neufs (les trois réponses et l'analyse `origine: DOSSIER` décrites exactement ; énumérations nommées) |
+| Mutations | **22/22 tuées sur une assertion** (bornes non contiguës, ordre non strict, droite non couverte, source non exigée, bornes avec `SANS_REPERE`, motif non exigé, égalité sans la source, `versionAttendue` ignorée, inchangé accepté, `avant` nul, version figée à 1, `E11000` non traduit, dernières versions multiples, index non unique, `SANS_REPERE` et `DECLARE` ignorés par l'analyse, `origine` faussée, `repereDossier` non publié, repères non passés au `GET` et au `dry-run`, collection hors du plan d'effacement, `PUT` ouvert au `TENANT_USER`) |
+| Lint des fichiers touchés, `tsc` | 0 |
+| Verrou Docker | attendu (C, puis B, puis C) ; pris à 04:26, rendu à 05:01 (trap) ; seconde passe prise à 05:01, rendue à 05:03 ; B et C prévenus ; aucun conteneur, volume ni réseau `grp-d` |
+
+## Ce qui reste (hors story)
+
+- **→ A (plus tard)** : l'écran de l'analyse affiche `origine` et la source du dossier ; le `TENANT_ADMIN` y modifie un
+  repère et lit le journal.
+- **Q-D-23** au PO (le grain, les repères d'usage écartés) ; Q-D-14 point 2 (la capacité de remboursement à la formule
+  BCEAO) reste ouverte.
