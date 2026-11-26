@@ -874,6 +874,16 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-26 (← D, D-334-8, servie en tête de STORY-338), ANNONCÉ avant la fusion** — **« Déposée » revient à « À déposer »
+  sur un rejet consigné** (`prospera-fiscal-service`, REST ; PR à part, branche `MNV-334-rejet-requis`). **Ajouts seuls** :
+  `POST /api/v1/obligations/{id}/retour` admet `vers: A_DEPOSER` depuis `DEPOSEE`, et seulement depuis lui : sans rejet
+  consigné pour la version courante (`PreuvesDeRejet` de D), **409 `REJET_REQUIS`** (`details.obligationId`, `numero`) ;
+  avec lui, 200, la version n scellée intacte, `versionCourante` = `{ numero: n + 1, nature: RETRANSMISSION, versionId:
+  null }` ; l'acte `OBLIGATION_RETOUR_ARRIERE` gagne `rejetId` et `versionRetransmise` ; le dépôt suivant scelle la n + 1.
+  **`nature` gagne la valeur `RETRANSMISSION`** (versions scellées, `versionCourante`, historique, DTO de D qui lisent
+  `NATURES_VERSION`). Les autres retours au-delà du dépôt restent `RETOUR_AU_DELA_DU_DEPOT`. Aucune migration, aucun
+  fichier commun. **→ A (FE)** : une valeur d'énumération de plus. **→ D** : la retransmission que lit `RejetsDepotService`
+  porte désormais `RETRANSMISSION`.
 - **2026-11-26 (STORY-338), ANNONCÉ avant le code** — **la liaison entre l'écriture comptable et la pièce qui la justifie**
   (`prospera-comptabilite-service`, REST et Kafka). Fiche : `stories/STORY-338.md` (D-338-1 → 12). Consommateurs : le
   rapprochement des pièces (337, D, fiscal) ; la GED (B, `comptabilite.facture.desinscrite`, STORY-1124) ; l'écran de la
