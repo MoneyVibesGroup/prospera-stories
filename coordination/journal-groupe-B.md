@@ -183,8 +183,18 @@
     versement de 1 500 lignes, pièce détruite introuvable). Verrou en trois passages (03:23 → 03:28, 03:33 → 03:40,
     04:00 → 04:14). Fiche D-1122-1 → 16. La liste des pièces échues de tout le cabinet va à STORY-1123 (D-1122-11).
     Rituel : aucune demande neuve à B chez A, C et D.
-  - **5 — STORY-1123 (26/11) — en cours** : les alertes de l'archiviste ; fiche écrite, contrat annoncé avant le code
-    (« ⚠ Contrats »), manifeste `ged` 1.8.0. Rituel : aucune demande neuve à B chez A, C et D.
+  - **5 — STORY-1123 (26/11) — faite** : les alertes de l'archiviste. **document-service #37** (`7e65881` sur `dev`) ;
+    **catalogue #81** (`85aee3a`, `ged` 1.8.0 recopié) ; contrat annoncé avant le code (stories #950, `becec97`). Cinq faits
+    publiés par l'outbox dans la transaction de leur cause : `ged.original.retour-en-retard` (1, 7, 30 jours),
+    `ged.conservation.echeance-proche` (par fonds et par passage), `ged.quota.depasse` (par franchissement),
+    `ged.integrite.ecart`, `ged.destruction.changed` (six étapes) ; `destinataires` connus de la GED ; aucun contenu de pièce.
+    Passage quotidien porté par le balayage `ged-index` (aucune minuterie neuve, D-1123-3) ; l'échéance dans l'index, tenue
+    par le tour ; `GET …/ged/cabinet/pieces-echues` (tout le cabinet, par échéance : D-1122-11 servie). Quota : celui du service
+    (D-1123-4, compteurs à STORY-1125). Aucun droit neuf. Node 25 : unitaires 1 336, e2e 217/217 ; Node 24 : 115/115 suites,
+    217/217 ; mutations 13/14 (+1 équivalente) ; pile `grp-b` neuve : les cinq faits relayés et lus sur Kafka, valides, registre
+    14 sujets BACKWARD. Verrou 05:11 → 07:04 (sous-session coupée par la limite de l'API, piège) puis 07:17 → 07:26. Fiche
+    D-1123-1 → 14. **→ D** : la cloche et l'e-mail (« Demandes »). Rituel : aucune demande neuve à B chez A, C et D.
+  - **Suivante : STORY-1124** (n° 6 : le circuit sans trou).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
     `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
@@ -1177,6 +1187,29 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ D (2026-11-26, STORY-1123) : la cloche et l'e-mail des alertes de l'archiviste (`prospera-notification-service`)**
+  — **ouverte**, sans urgence (rien ne bloque B). La GED du cabinet publie cinq faits (document-service #37, schémas au
+  dépôt `prospera-ocr-service/contrat/schemas/<topic>.json`, sujets `<topic>-value` au registre en BACKWARD ; clé
+  `organisationId` ; enveloppe `eventId`, `schemaVersion: 1`, `occurredAt`, `organisationId`, `emisLe` dans la charge ;
+  forme au « ⚠ Contrats » du 26/11 et dans `stories/STORY-1123.md`). Demandé : les ajouter à la liste fermée des
+  déclencheurs (`EVENEMENTS_DECLENCHEURS`), avec un gabarit de cloche et d'e-mail chacun, envoyés aux **`destinataires`**
+  du fait (identifiants d'utilisateur ; la GED remet la liste, FR-N28).
+  | Topic | Cloche (objet) | E-mail (corps, en clair) | Destinataires |
+  |---|---|---|---|
+  | `ged.original.retour-en-retard` | « Original non rentré : {joursDeRetard} j de retard » | la boîte `{cote}` du fonds `{fondsNumero}`, retour prévu le `{retourPrevuLe}` ; palier 1, 7, 30 ; lien vers les sorties en retard | `destinataires` (qui a sorti, le responsable du dossier) |
+  | `ged.conservation.echeance-proche` | « {pieces} pièce(s) arrivent à échéance de conservation » | fonds `{fondsNumero}`, dont `{dontEchues}` déjà échues, première échéance `{premiereEcheance}`, horizon `{jusquau}` ; lien vers `GET …/ged/cabinet/pieces-echues` | `destinataires` (le responsable du dossier) |
+  | `ged.quota.depasse` | « Quota d'archivage dépassé » | `{volumeOctets}` stockés pour `{quotaOctets}` ; le dépôt n'est pas bloqué | **vide** : choix par défaut demandé, l'administrateur du cabinet (`TENANT_ADMIN`) |
+  | `ged.integrite.ecart` | « Contrôle d'intégrité : {enEcart} fonds en écart » (ou « journal rompu » si `journalOk: false`) | campagne `{campagneId}` (`{origine}`), lien vers la campagne | `destinataires` (qui l'a demandée) ; **vide** pour une campagne périodique : l'administrateur du cabinet |
+  | `ged.destruction.changed` | selon `etat` : « Destruction {destruction} à viser » (`PROPOSEE`), « visée » / « refusée » / « accordée par le client » / « abandonnée » / « exécutée, procès-verbal {procesVerbal} » | fonds `{fondsNumero}`, `{pieces}` pièce(s) ; lien vers la destruction | `destinataires` (les personnes de la destruction sauf `par`) ; **vide** pour `PROPOSEE` : les associés qui visent (si `notification` ne sait pas les trouver, l'administrateur du cabinet) |
+  Aucun fait ne porte de contenu de pièce, de nom de client, de motif ni d'emprunteur : le gabarit nomme le fonds et
+  la boîte par leurs numéros. **Choix par défaut de B** : les alertes se lisent dans l'application (`GET …/sorties?enRetard=true`,
+  `GET …/pieces-echues`, `GET …/quota`, les campagnes, les destructions) ; aucun message ne part tant que `notification` ne
+  consomme pas ces topics.
+- **→ A (2026-11-26) : FE-143 — les pièces échues de tout le cabinet sont servies par STORY-1123** (document-service
+  #37, `7e65881` sur `dev`) : `GET /api/v1/ged/cabinet/pieces-echues?horizonJours=&curseur=&limite=`
+  (`ged:fonds:gerer`) → `PiecesEchuesDuCabinetDestructionDto` (lignes de la liste d'un fonds plus `echue`, `fondsNumero`,
+  `dossierId`, `raisonSociale` ; par échéance ; `400 CURSEUR_INVALIDE`). Rien n'est relayé par le BFF. — information,
+  rien à faire avant le lot 8.
 - **→ A (2026-11-26) : FE-143 — retrouver dans tous les fonds du cabinet est servi par STORY-1122** (document-service
   #36, `27f1e8d` sur `dev`) : `GET /api/v1/ged/cabinet/recherche` (`q`, `mois`, `nature`, `exercice`, `tiers`, `dateDu`,
   `dateAu`, `montantMin`, `montantMax`, `reference`, `rubrique`, `fonds`, `dossierId`, `limite` ≤ 100, `curseur`) →
@@ -1962,6 +1995,10 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-26, STORY-1123 — LIVRÉ** (document-service #37, `7e65881` sur `dev` ; catalogue #81, `85aee3a`) : conforme
+  à l'annonce ci-dessous ; écarts D-1123-12 → 14 (curseur rendu dès qu'une page est pleine ; quota regardé au passage du
+  jour). Sujets au registre : `<topic>-value`, schémas `prospera-ocr-service/contrat/schemas/`. **Types à régénérer**
+  (A) depuis l'OpenAPI vivant : `PiecesEchuesDuCabinetDestructionDto`.
 - **2026-11-26, STORY-1123 — les alertes de l'archiviste, annoncé AVANT le code** (`document-service`, GitHub
   `prospera-ocr-service`, branche `MNV-1123` ; fiche `stories/STORY-1123.md`, D-1123-1 → 11). **Ajouts seuls** ; le
   chemin de l'assurance ne change pas. Consommateur attendu : **`prospera-notification-service` (D)**, cloche et e-mail
@@ -3735,6 +3772,23 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une sous-session coupée par la limite de l'API (429) garde le verrou ET sa pile** (STORY-1123 : 05:11 → 07:04, C attendait
+  depuis 05:14). Jouer la passe de preuve en UN script qui finit par `down -v` (et le test Node 24 à la suite), lancé en
+  arrière-plan ; ne rien laisser tourner entre deux appels.
+- **`timeout` qui tue un script de mutations laisse le fichier MUTÉ et un jest orphelin** (STORY-1123, M14 : la mutation du
+  curseur faisait boucler la spec) : `git checkout -- <fichier>`, puis `Stop-Process` des `node … jest` restés. Donner un
+  `timeout` à chaque jest du script, pas au script entier.
+- **Le contrôle d'intégrité ne lit pas `ged_versions.empreinte`** : il relit l'objet et le compare à la ligne du bordereau.
+  Pour provoquer un écart sur une pile, remplacer l'objet dans MinIO (`mc pipe m/ged-pieces/<objetCle>`).
+- **Un quota de 1 000 octets n'est pas dépassé par des PDF de 50 octets chiffrés** (82 octets pour quatre pièces) : la
+  preuve d'un quota dépose une pièce plus grosse que le quota.
+- **Un remplacement d'entrée qui doit garder un champ** (l'annonce d'une échéance) : `updateOne(filtre, [{ $replaceWith:
+  { $mergeObjects: [{ $literal: doc }, { $cond: [...] }] } }], { upsert: true })` garde `_id`, fait l'upsert, et heurte
+  l'index unique comme `replaceOne` (prouvé sur la pile, STORY-1123).
+- **Un doublon d'`_id` DANS une transaction l'annule** (la suite échoue au commit) : un état « une fois par franchissement »
+  se lit puis s'écrit dans la session (le conflit d'écriture est rejoué par la transaction), jamais par un upsert qui compte
+  sur `E11000`.
 
 - **Une pile de preuve trouve ce que les doubles en mémoire ne montrent pas : le rythme** (STORY-1122) : un délai
   croissant dès le dépôt retardait un texte lu de plusieurs minutes, et 1 500 pièces sans lecture revues à chaque

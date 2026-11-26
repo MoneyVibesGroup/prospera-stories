@@ -1,6 +1,7 @@
 # STORY-1123 : Les alertes de l'archiviste — retour en retard, échéance proche, quota dépassé, écart d'intégrité et étapes d'une destruction, publiés
 
-Status: in_progress — fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 5 de B,
+Status: done — **livrée le 2026-11-26** : document-service **#37** (`7e65881` sur `dev`), catalogue **#81** (`85aee3a`,
+`ged` 1.8.0) ; voir « Livraison ». Fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 5 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, ligne 5 ; identifiant réservé D-L7B-1).
 
 **Service :** `document-service` (GitHub `prospera-ocr-service`, module `ged`) · **Points :** 5 · **Dépend de :**
@@ -125,6 +126,58 @@ jusquau, pieces, masquees, curseur? }` :
   le code, **puis au catalogue par B** après la fusion du code.
 - **Registre** : `npm run schemas:enregistrer` (BACKWARD par sujet ; les cinq sujets sont neufs).
 - **OpenAPI** : la route neuve et son DTO de réponse ; A en génère les types.
+
+## Livraison (2026-11-26)
+
+- **Code** : document-service (`prospera-ocr-service`) **#37**, `7e65881` sur `dev` (un commit, arbre identique à `d4220d6`
+  poussé) : `src/modules/ged/cabinet/` `faits-du-cabinet.ts` (topics, constructeurs, paliers, destinataires,
+  `PublicationDuCabinet` par l'outbox), `alertes.service.ts` (`AlertesDeLArchiviste.passer`), `depot-alertes.ts`
+  (`ged_alertes`) ; `depot-recherche.ts` (`echeance`, `echeanceAnnoncee`, l'annonce gardée par l'écriture, liste par échéance,
+  fonds à annoncer, annonce dans la transaction), `index-de-recherche.ts` (l'échéance posée à l'indexation et corrigée par
+  le tour), `recherche.planificateur.ts` (le passage après le balayage), `destruction.service.ts` (six étapes publiées,
+  `piecesEchuesDuCabinet`), `integrite.service.ts` (l'écart publié avec son entrée), `depot-physique.ts` (sorties en retard,
+  palier marqué), `depot-cabinet.ts` (`resumesDesFonds`, `organisationsDuCabinet`), `dossiers-clients.ts` (`responsable`) ;
+  cinq schémas dans `contrat/schemas/` ; `GED_ALERTE_ECHEANCE_JOURS`. Manifeste `ged` **1.8.0** recopié depuis
+  `prospera-stories@becec97` (#950), empreinte épinglée.
+- **Catalogue** : `platform-catalog-service` **#81**, `85aee3a` sur `dev` : `ged` 1.8.0 recopié depuis
+  `prospera-stories@5b54ed7` (seul manifeste qui change ; `manifestes:garde` verte, 48).
+- **Preuves** :
+  - document-service, Node 25 : unitaires 1 336 passés (115 suites ; 2 rouges connues du poste, copies CRLF de
+    `ged.service.spec`, chemins Windows de `piece-conservation.spec`) ; e2e **217/217** (recensement de STORY-695 compris :
+    `GET ged/cabinet/pieces-echues` classée) ; lint des fichiers touchés, `tsc`.
+  - Node 24 (étage `verification`, image depuis `git -c core.autocrlf=false archive d4220d6`) : **115/115 suites**, 1 339
+    passés ; e2e **217/217**.
+  - Mutations **13/14** rouges sur assertion (+1 équivalente, M4 : la borne de la requête des sorties en retard est redoublée
+    par `joursDeRetard`) : palier un jour trop tard, la personne qui agit destinataire, passage rejoué, palier republié sans
+    marque, échéance annoncée deux fois, annonce perdue à la réécriture, quota réarmé qui publie, tour qui ne corrige pas,
+    indexation sans échéance, pièce relue qui ne fait pas foi, visa refusé publié `VISEE`, journal rompu sans fait, curseur
+    fabriqué accepté (la suite ne termine plus : comptée tuée). Catalogue 1/1.
+  - **Pile `grp-b` neuve** (image depuis l'archive ; Mongo rs0, Kafka, Karapace 6.2, Redis, MinIO Chainguard, doublure
+    d'auth ; `GED_INDEX_BALAYAGE_SECONDES=2`, `GED_QUOTA_CABINET_OCTETS=1000`) : échéances à l'index (2015 → 2025-12-31,
+    2016 → 2026-12-31, statuts d'un fonds ouvert : aucune) ; le passage pris par le balayage en 2,1 s ; **retour en retard**
+    (sortie prévue dix jours plus tôt : palier 7, destinataires qui a sorti et le responsable du dossier, cote, ni motif ni
+    emprunteur) ; **échéance proche** (un fait : 3 pièces dont 2 échues, première échéance 2025-12-31, horizon 2027-02-24) ;
+    **quota dépassé** (une pièce de 4 Ko : 4 098 octets pour 1 000, un fait, état `depasse`) ; marques posées (sortie au
+    palier 7, échéances annoncées) ; **une pièce réindexée garde son annonce** (le remplacement par pipeline) ; un second
+    passage le même jour ne publie rien ; `GET …/pieces-echues` : les deux de 2015, avec 60 jours la 2016 (`echue: false`),
+    `400 CURSEUR_INVALIDE`, collaborateur `403` ; **destruction** proposée, visée, accordée, exécutée par la file : quatre
+    faits dans l'ordre, destinataires sans la personne qui agit, `PVD-2026-00001`, plus aucune pièce échue, entrée détruite
+    sans échéance ; **écart d'intégrité** (un objet remplacé dans MinIO : campagne `FICHIER_MODIFIE`, un fait à qui l'a
+    demandée) ; tout `SENT` ; **Kafka** : 1 + 1 + 1 + 1 + 4 messages lus, chacun valide contre son contrat ; **registre** : 14
+    sujets enregistrés (5 neufs), `schemas:compatibilite` verte (BACKWARD) ; aucun contenu de pièce dans les faits ; aucune
+    erreur au journal du service. Verrou 05:11 → 07:04 (sous-session coupée par la limite de l'API pendant la pile, pile
+    descendue à la reprise : piège), puis une passe de 07:17 à 07:26, `down -v`.
+- **Variable neuve** : `GED_ALERTE_ECHEANCE_JOURS` (90 ; 1 → 3 650).
+
+### Écarts au contrat, décidés au code
+
+- **D-1123-12 — Le curseur de la liste du cabinet suit celui de la liste d'un fonds** : il est rendu dès qu'une page est
+  pleine ; une dernière page pleine en rend un, et la suivante est vide.
+- **D-1123-13 — Le quota se regarde au passage du jour** : le dépôt continue de dire `quotaDepasse` sur-le-champ (STORY-1087) ;
+  le fait part au passage suivant (au plus un jour).
+- **D-1123-14 — En mémoire, une panne de l'outbox n'annule pas l'écriture** (les doubles n'ont pas de transaction) : les
+  tests prouvent que l'acte n'est pas inscrit ; l'annulation de la proposition elle-même est celle de la transaction
+  MongoDB (même session que l'acte et le fait), non rejouée en panne sur la pile.
 
 ## Critères d'acceptation
 
