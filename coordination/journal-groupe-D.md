@@ -197,6 +197,28 @@
     l'analyse affiche le bloc (`message` tel quel).
   - **Suivante : STORY-1139** (les repères des seize indicateurs de l'analyse financière, sourcés et modifiables, Q-D-14 ; `prospera-bilan-service` ; plan §4 bis, n° 5b ; fiche à écrire juste avant de coder). Au 26/11 à 02:55, 319 et 325 de C ne sont pas fusionnées (fiscal `origin/dev` `d41dbe6` ; C fait 317, annonce `main` 5c56b2d, qui porte aussi `cnss.collecte` au paquet) : D reste sur 5b → 5d.
 
+- **STORY-1139** ✅ 📏 — les repères de l'analyse financière, sourcés et modifiables par dossier, chaque changement tracé
+  (prospera-bilan-service#194, `dev` `027075d` ; annonce avant le code #946, `main` b3d9e23 : fiche D-1139-1 → 15,
+  ⚠ Contrats, Q-D-23). Plan §4 bis, n° 5b (Q-D-14). Rituel (2026-11-26) : aucune demande neuve à D chez A et B ;
+  **← C : `cnss.collecte` servie** (317) ; 319 et 325 de C non fusionnées ; bilan : aucune PR ouverte, `origin/dev`
+  `65eecdc`, deux brouillons non suivis connus (`cr-map.txt`, `cr-postes.txt`) laissés.
+  - **La recherche (26/11)** : BCEAO (procédure des accords de classement, mars 2020, relue en entier : quatre ratios de
+    décision seulement), OHADA (guide d'application du SYSCOHADA : aucun ratio), Les clés de la banque (cinq pages : des
+    repères d'usage qui ne disent pas à quelle formule ils s'appliquent, ou portent sur une autre). **Aucune norme sur la
+    même formule pour les seize** : ils restent « aucun repère déclaré », raison par raison (tableau de la fiche). Aucun
+    paquet ne change.
+  - **Livré** (`bilan/analyse/reperes/`) : `GET …/analyse/reperes`, `PUT …/reperes/{indicateur}` (`TENANT_ADMIN`),
+    `GET …/{indicateur}/journal` ; collection append-only `reperes_analyse`, une insertion par changement, l'index unique
+    `(organisation, dossier, indicateur, version)` pour verrou ; l'analyse applique le repère du dossier
+    (`seuilApplique.origine`, `repereDossier`). Aucun écart au contrat annoncé.
+  - **Communs** : sans objet (le bilan est à D seul). Aucune migration, aucun droit neuf, aucun topic ; plans C13 :
+    la collection y entre (effacement par `tenantId`, export `reperes-analyse`).
+  - Preuves : Node 24 (image `verification` de l'archive LF) **unitaires 372/372 suites, 12 792 tests, aucun rouge**, en deux passes `--shard` (186 + 186) ; e2e 43/45 sur `f1266a1` (deux e2e comptaient en dur 25 contrôleurs gardés et 7 objets d'export), corrigées en `850c127` : **4/4 suites, 1 180 tests** ; `npm run build` 0 ; **vrai MongoDB 4/4** (dix changements simultanés : un seul passe, neuf 409) ; **mutations 22/22** ; lint et `tsc` 0. §1.5 : pile `grp-d` (mongo, kafka, image runtime) saine, trois routes montées, 401 sans jeton, 0 `UnknownDependencies`, l'index unique posé par l'application. **Verrou Docker** : pris à 04:26, rendu à 05:01 ; seconde passe 05:01 → 05:03 ; B et C prévenus ; aucun conteneur, volume ni réseau `grp-d`.
+  - **Ce qui reste** : → A (plus tard) l'écran (origine, source, modification et journal) ; Q-D-23 au PO.
+  - **Suivante : STORY-1140** (l'export C13 aussi en CSV, Q-D-19 ; `prospera-bilan-service` ; plan §4 bis, n° 5c ; → B : le
+    contrat dans `prospera-plateforme/contrats/instance/`). Au 26/11 vers 04:40, 319 et 325 de C ne sont pas fusionnées
+    (fiscal `origin/dev` `cefbe20`, 318) : D reste sur 5c → 5d.
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
@@ -1497,6 +1519,10 @@
 
 ## Demandes aux autres groupes
 
+- **← C : notification sur `fiscal.obligation.alerte-echeance@1` (prévenir le responsable de l'obligation, ou à défaut
+  les associés du cabinet) — reçue, hors lot 7, à placer par l'utilisateur** (2026-11-26, après STORY-318 de C : fiscal
+  #70, `dev` `cefbe20` ; docs #949). Rien n'est codé par D : aucune story du lot 7 ne la porte.
+
 - **→ C (2026-11-26, pour STORY-349) : STORY-319** (plan §5 : 349 attend 319) — **ouverte**. État constaté au journal de
   C (`origin/main`, 26/11 à 00:40) : 319 **pas commencée**. C est sur STORY-1023 (`balance-service`, annonce `main`
   28dc047), puis fera 317 → 318 → **319** ; ni fiche ni branche pour 319. Prévenir D à la fusion de 319.
@@ -1985,6 +2011,9 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **Note de lecture (2026-11-26, après STORY-318 de C, fiscal #70, `dev` `cefbe20`)** : depuis 318, le relais de l'outbox
+  du fiscal tourne sur **BullMQ** — toute pile ou tout e2e de D qui démarre le fiscal doit lever **Redis** ; une garde
+  par l'AST interdit `setInterval` dans le fiscal.
 - **← C (2026-11-26, STORY-317, prospera-fiscal-service#69, `dev` `98ab317` / `8f6b1ba`) : trois specs du dossier
   `remuneration` de D modifiées par C — acceptées par D** : `src/domain/remuneration/calcul-social.spec.ts`,
   `src/application/remuneration/calcul-remuneration.service.spec.ts` et `test/remuneration-import.e2e-spec.ts` (elles
@@ -2028,7 +2057,7 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-26, STORY-1139, avant le code) — les repères de l'analyse financière, modifiables par dossier et
+- **PUBLIÉ (2026-11-26, STORY-1139, prospera-bilan-service#194, `dev` `027075d`) sans écart ; ANNONCÉ (2026-11-26, STORY-1139, avant le code, prospera-stories#946) — les repères de l'analyse financière, modifiables par dossier et
   tracés** (`prospera-bilan-service`). Fiche : `stories/STORY-1139.md` (D-1139-1 → 12, tableau « Contrat » ; Q-D-23).
   **Ajouts seuls** : aucun champ, aucune route, aucune valeur d'énumération existante ne change ni ne disparaît.
   - **Trois routes neuves**, nichées sous le dossier, gardées comme le reste du module (`@RequiresBilanAccess`, état
@@ -3379,6 +3408,21 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1139** (neuvième passage de D dans `bilan-service`) :
+  - (1) **Deux e2e comptent en dur ce que les invariants unitaires comptent aussi** : `bilan-dossier-portee-collaborateur`
+    (contrôleurs gardés, dont ceux hors consolidation) et `instance-c13` (les objets de l'export, dans l'ordre). Un
+    contrôleur niché ou une collection au plan C13 de plus ⇒ les mettre à jour avec `dossier-scope.invariant`,
+    `plan-d-export.invariant` et `export-c13.spec` — sinon une seconde passe Docker (vécu ici).
+  - (2) **Un nom de fichier qui finit comme un autre** : `reperes-analyse.controller.ts` finit par `analyse.controller.ts`,
+    et le filtre `endsWith('analyse.controller.ts')` de l'invariant de portée en voyait deux. Filtrer avec le séparateur.
+  - (3) **`analyse.agnosticisme` coupe les mots aux lettres accentuées** : « DERNIÈRE » donne le jeton `RE` (`` ne voit
+    pas `È` comme une lettre), pris pour un code de poste. Pas de majuscules accentuées dans les commentaires du module.
+  - (4) **La garde des objets opaques de `openapi-contract` attrape un `string | null` sans `type: String`** dans un
+    `@ApiPropertyOptional` (publié `object`) : la poser sur chaque champ nullable d'un DTO de requête aussi.
+  - (5) **Le verrou s'attrape mal à une minute d'intervalle** : B et C l'ont repris entre deux essais. Tenter toutes les
+    10 s (journaliser une fois sur trente), et ne poser le `trap` de reddition qu'après la prise — un script tué en
+    attente ne doit jamais effacer le verrou d'un autre groupe.
 
 - **STORY-1138** (huitième passage de D dans `bilan-service`) :
   - (1) **Un champ neuf d'un producteur est « reçu et jeté » en silence** : la projection ne recopie que les champs que
