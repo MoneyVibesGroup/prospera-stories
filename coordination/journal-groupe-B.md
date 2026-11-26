@@ -286,8 +286,18 @@
     suites, 222/222 ; pile `grp-b-recette` neuve depuis `origin/dev` : **13/13** (numérisation des 40 boîtes 81 s, recherche et
     copie 126 ms). Verrou 12:48 → 13:02, 13:23 → 13:35, 13:44 → 13:49. Fiche D-1126-1 → 13. **La partie archives du lot 7 est
     finie.** Rituel : aucune demande neuve à B chez A, C et D.
-  - **Suivante : STORY-1127** (n° 9 : `referentiels` dans l'état publié, avant le gel du 11/12 ; D-L7B-5 : fusionnée au plus
-    tard le 09/12).
+  - **9 — STORY-1127 (26/11) — faite** : les référentiels habilités dans l'état publié. **catalogue #84** (`efedd3e` sur
+    `dev`), étiquette **`contrat-etat-publie-v1.1`** ; contrat annoncé avant le code (stories #992, `650024d`).
+    `module.referentiels` (la liste du droit, forme de `entitlement.changed` v2, `artifactUri` et `checksum` pour les modules
+    fiscaux ; omise hors installation, jamais vide) à la route, à la console (1080) et dans `etat-publie.changed@1` ; l'émetteur
+    republie sur un changement de liste (et une fois au premier démarrage, pour les droits qui en portent) ; OpenAPI 1.1.0 ;
+    manifeste `instance` 1.1.0 recopié. BFF et plateforme inchangés (D-1127-8, 9). Node 25 : 1 657 passés (3 rouges
+    connues) ; mutations 14/14 ; Node 24 : 104/104 suites, 1 676 ; pile `grp-b` neuve : Karapace v1 → neuf BACKWARD, test:schemas
+    6/6, test:socle 19/19, catalogue construit (n° 5 republié, n° 1 fiscal avec intégrité, n° 6 sur changement, second
+    démarrage muet ; route et console). Verrou 14:29 → 14:43, 14:51 → 14:52. Fiche D-1127-1 → 13. **→ C et D** prévenus
+    (message ; D tient `assurance`). Date dure tenue (fusion le 26/11, D-L7B-5). Rituel : aucune demande neuve à B chez A, C et D.
+  - **Suivante : STORY-1128** (n° 10 : le contrat d'état publié figé, inventaire d'EPIC-142 → 147 et 159 ; le 11/12 ; y porter
+    `versionCode` hors de la comparaison de l'émetteur, D-1127-10).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
     `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
     `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
@@ -2118,8 +2128,10 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   `manifestes:copier` depuis `prospera-stories@51f4803`, `manifestes:garde` verte (47). Les quatre sont recopiés **à
   leur version 1.0.0** : voir « → C » (D-972-3).
 
-- **← C (2026-11-17, STORY-1006) : les référentiels habilités dans l'état publié ?** — **lue, prise en charge, pas
-  encore servie.** Le choix par défaut de C convient : garder `entitlement.changed` pour le seul champ `referentiels`
+- **← C (2026-11-17, STORY-1006) : les référentiels habilités dans l'état publié ?** — **servie par STORY-1127** (catalogue
+  #84, `dev` `efedd3e`, étiquette `contrat-etat-publie-v1.1` ; annonce : stories #992) : `module.referentiels`, la liste de
+  `entitlement.changed` v2, à la route et dans `etat-publie.changed@1`. C et D (qui tient `assurance` depuis le lot 6)
+  prévenus par message le 26/11. Historique : **lue, prise en charge.** Le choix par défaut de C convient : garder `entitlement.changed` pour le seul champ `referentiels`
   (D-1006-5). Le contrat d'état publié est figé (`contrat-etat-publie-v1`, ajouts facultatifs seuls, BACKWARD) : un
   champ facultatif `referentiels` y entrera par une story de B au catalogue, à placer comme remplaçante du lot 3 ou au
   lot suivant. Elle sera annoncée ici avant sa fusion ; C basculera alors. **Toujours ouverte après STORY-972**
@@ -2186,6 +2198,11 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-26, STORY-1127 — LIVRÉ** (catalogue #84, `efedd3e` sur `dev` ; étiquette **`contrat-etat-publie-v1.1`**) :
+  conforme à l'annonce ci-dessous, sans écart. Karapace : la v1 → le neuf **compatible BACKWARD**, enregistré sur les deux
+  sujets. **→ C et D** : `module.referentiels` est servi ; `assurance` peut retirer son consommateur de
+  `entitlement.changed` (D-1006-5). **→ A** : rien à régénérer côté BFF.
 
 - **2026-11-26, STORY-1127 — les référentiels habilités dans l'état publié, annoncé AVANT la fusion**
   (`platform-catalog-service`, branche `MNV-1127` ; fiche `stories/STORY-1127.md`, D-1127-1 → 11). Lu par tous les
@@ -4117,6 +4134,17 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **`TaskStop` d'une tâche de fond Bash ne tue pas la boucle qu'elle a lancée** (STORY-1127) : une boucle « attendre le
+  verrou puis passer » arrêtée par `TaskStop` a survécu, a attendu la fin de la vraie passe, puis a repris le verrou à la
+  seconde où il a été rendu (14:43) pour rejouer toute la passe pendant que D attendait. Après tout `TaskStop` d'une boucle :
+  `ps -ef | grep <script>`, puis `kill` du parent ET de l'enfant ; la trappe `EXIT` de la passe a bien rendu le verrou. Ne
+  jamais lancer une boucle d'attente en tâche de fond : attendre par `timeout 175 … while [ -e verrou ]` au premier plan,
+  puis lancer la passe seule (elle prend le verrou elle-même, atomiquement).
+- **Les routes du catalogue exigent `emailVerified: true` dans le jeton** (`403 EMAIL_NOT_VERIFIED`) : une doublure JWKS de
+  preuve doit le poser, comme `iss`, `aud`, `org`, `perms`.
+- **L'émetteur de l'état publié ne compare que ce qu'il range** (`etats_emis`) : un champ neuf du fait qui doit republier
+  se range et se compare ; `versionCode` ne l'est pas (D-1127-10). Un état émis avant la livraison est republié une fois.
 
 - **Une pile de preuve à doublure d'auth cache la limite de débit d'auth** (STORY-1126) : sept stories de la GED prouvées
   contre une doublure sans limite ; la vraie pile a rendu 503 `DROITS_INDISPONIBLES` à la cinquième boîte (la GED relisait

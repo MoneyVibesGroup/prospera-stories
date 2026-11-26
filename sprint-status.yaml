@@ -2173,11 +2173,17 @@ reserved_ranges:
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
   - range: "STORY-1127"
-    status: "in_progress"
+    status: "done"
     owner: "Groupe B, lot 7, n° 9 — les référentiels habilités dans l'état publié : module.referentiels, champ facultatif de la route et de etat-publie.changed (la forme de entitlement.changed v2), avant le gel du 11/12 (platform-catalog-service ; manifeste instance 1.1.0)"
     source_doc: "prospera-stories/stories/STORY-1127.md"
     reserved_on: "2026-11-25"
     note: >
+      🏁 DONE le 2026-11-26 — platform-catalog-service #84 (dev efedd3e), étiquette contrat-etat-publie-v1.1 ; contrat
+      annoncé avant le code (stories #992, main 650024d). Node 25 : 1657 passés (3 suites rouges connues, binding) ;
+      mutations 14/14 ; Node 24 : 104/104 suites, 1676/1676, lint, build ; pile grp-b neuve : Karapace v1 → neuf compatible
+      BACKWARD (versions [1, 2]), test:schemas 6/6, test:socle 19/19 ; catalogue construit : assurance republiée n° 5 avec
+      la liste, declarations n° 1 avec l'intégrité, changement de liste n° 6, second démarrage muet, faits valides ; route
+      et console servent la liste. D-1127-1 → 13. Contrat d'origine :
       Fiche écrite et contrat annoncé avant le code (2026-11-26) : module.referentiels ({ code, version, artifactUri?,
       checksum? }[], minItems 1, la liste du droit, omise hors installation), à la route GET /etat-publie/{org}, à la
       lecture de la console et à etat-publie.changed.essai@1 / .reel@1 (schemaVersion 1, BACKWARD) ; OpenAPI du contrat
