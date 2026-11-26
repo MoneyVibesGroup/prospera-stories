@@ -33,7 +33,7 @@
   bilan ; → B : le contrat) et **1141** (le numéro de compte imprimable : paiement par une passation de B limitée à la
   story, puis ventes). Elles passent pendant que D attend C (349 attend 319, 330 attend 325). Dès qu'une des deux est
   fusionnée, D reprend le tableau §4. `zone-franche-togo@1.1` reste à placer par l'utilisateur.
-  **→ B : passation de `prospera-paiement-service` limitée à STORY-1141 — ouverte.**
+  **→ B : passation de `prospera-paiement-service` limitée à STORY-1141 — servie (#936, e2be149).**
 - **STORY-560** ✅ 🔐 — le coffre des secrets de canal, adossé au mandat écrit du client, **AD-13 amendé**
   (prospera-fiscal-service#63, `dev` `cf8b583` ; annonce avant le code #905, `main` 0f4dae3 : fiche D-560-1 → 15, AD-13
   amendé dans la spine du fiscal ; communs complétés avant la fusion #908, `main` 5a2f26c). Rituel (2026-11-25) :
@@ -171,6 +171,31 @@
     26/11 à 00:40) : 319 **pas commencée** — C fait 1023 (balance, annonce `main` 28dc047), puis 317 → 318 → **319** ;
     aucune fiche, aucune branche. La session de groupe de D décide de la suite (les autres stories de D attendent C :
     330 ← 325, puis 331 → 337 et 561 → 565).
+
+- **STORY-1138** ✅ 🔗 — la liasse rapprochée de sa balance par l'empreinte des soldes (prospera-bilan-service#193,
+  `dev` `65eecdc` ; annonce avant le code #937, `main` 69c1cfe : fiche D-1138-1 → 11, ⚠ Contrats). Plan §4 bis, n° 5a
+  (D-1078-10). Rituel (2026-11-26) : aucune demande neuve à D chez A, B et C ; 319 et 325 de C non fusionnées (fiscal
+  `origin/dev` `d41dbe6`) ; bilan : aucune PR ouverte, `origin/dev` `4317dd2`, deux brouillons non suivis connus
+  (`cr-map.txt`, `cr-postes.txt`) laissés. **← C : 1022 — vérifiée sur le code** (`d5878be` : `computeSoldesChecksumV1`,
+  `verifierSoldesChecksum`, `empreinteDesSoldes` ; les deux vecteurs recalculés hors service).
+  - **Constat avant le code** : l'empreinte publiée depuis `d5878be` était **reçue et jetée** (la projection ne recopie
+    que les champs connus ; Mongoose `strict` retire du `$set` un champ non déclaré).
+  - **Livré** (`read-models/`, `kafka/events/`, `bilan/analyse/`) : la paire lue ensemble ou pas du tout, jamais en
+    poison-pill ; deux `@Prop` sans défaut au read-model `balances_balance` ; `soldes-v1` recopié du contrat de C et
+    indexé par sa version ; bloc **`rapprochementBalance`** de la réponse d'analyse : `CONCORDANT` | `DISCORDANT` |
+    `NON_VERIFIABLE` (`VERSION_EMPREINTE_INCONNUE` : aucun recalcul ; `BALANCE_INTROUVABLE`) | `SANS_EMPREINTE`
+    (`BALANCE_SCELLEE_V1`, `EMPREINTE_NON_RECUE`) | `NON_APPLICABLE` (`JEU_SANS_BALANCE`, `SOLDES_FOURNIS`). Les soldes
+    et la balance sont ceux du document servi (jeu, ou snapshot de la version demandée). Aucun écart au contrat annoncé.
+  - **Communs** : sans objet (le bilan est à D seul). Aucune migration, aucune collection neuve, aucun module ni
+    Dockerfile ; plans C13 d'export et d'effacement inchangés (`balances_balance` y est déjà).
+  - Preuves : Node 24 (image `verification` de l'archive LF de `7680a51`) **e2e 45/45 suites, 3 565 tests**, `npm run
+    build` 0, unitaires **369/369 suites, aucun rouge**, en deux passes sur la même image : 286 suites dans la première (coupée par la borne de 40 min du script, piège 1138-2), les 83 restantes dans la seconde (518 tests verts, 2 ignorés) ; **mutations 18/18** (sur une assertion) ; lint et `tsc` 0 ; vecteurs de C écrits en
+    dur. Pas de compose (§1.5). **Verrou Docker** : pris à 01:29, rendu à 02:24 par le trap du script autonome ; seconde
+    passe prise à 02:50, rendue à 02:54 ; B et C prévenus ; aucun conteneur `grp-d` restant.
+  - **Ce qui reste** : un rejeu des deux topics de la balance sur une instance déjà en service, pour que les balances
+    projetées avant 1138 reçoivent leur empreinte (D-1138-7, geste d'exploitation). **→ A (plus tard)** : l'écran de
+    l'analyse affiche le bloc (`message` tel quel).
+  - **Suivante : STORY-1139** (les repères des seize indicateurs de l'analyse financière, sourcés et modifiables, Q-D-14 ; `prospera-bilan-service` ; plan §4 bis, n° 5b ; fiche à écrire juste avant de coder). Au 26/11 à 02:55, 319 et 325 de C ne sont pas fusionnées (fiscal `origin/dev` `d41dbe6` ; C fait 317, annonce `main` 5c56b2d, qui porte aussi `cnss.collecte` au paquet) : D reste sur 5b → 5d.
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1575,6 +1600,8 @@
   story de D lira alors l'empreinte et publiera le constat à côté des quatre contrôles.
   **← C : 1022 — servie ; D-1078-10 débloqué (bilan), à placer par l'utilisateur** (balance-service#169, `dev`
   `d5878be`, annonce #927 : `soldesChecksum` publié ; noté le 2026-11-25 par STORY-348, rien codé dans le bilan).
+  **Placé en STORY-1138 par l'utilisateur (plan §4 bis, 26/11) et livré le 2026-11-26** (prospera-bilan-service#193,
+  `dev` `65eecdc`) : l'empreinte est lue, recalculée sous `soldes-v1` et comparée — **close**.
 
 - **→ B (2026-11-24, soir) : passation de `prospera-dossier-service` et de `prospera-paiement-service`, limitée à
   STORY-1073** — **servie** (← B, #837 ; constatée par 1073) **et les deux dépôts rendus à B le 2026-11-25** (« Passations »). Sur consigne de l'utilisateur du 24/11 (soir) : « gère tout cela dans la story 1073 sans attendre la livraison de B », **D fait lui-même les deux points
@@ -1992,7 +2019,7 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-26, STORY-1138, avant le code) — la liasse rapprochée de sa balance par l'empreinte des soldes**
+- **PUBLIÉ (2026-11-26, STORY-1138, prospera-bilan-service#193, `dev` `65eecdc`) sans écart ; ANNONCÉ (2026-11-26, avant le code, prospera-stories#937) — la liasse rapprochée de sa balance par l'empreinte des soldes**
   (`prospera-bilan-service`). Fiche : `stories/STORY-1138.md` (D-1138-1 → 11, tableau « Contrat »). **Ajouts seuls** :
   aucun champ, aucune route, aucune valeur d'énumération existante ne change ni ne disparaît ; aucune collection neuve,
   aucune migration ; plans C13 d'export et d'effacement inchangés (`balances_balance` y est déjà).
@@ -3313,6 +3340,25 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-1138** (huitième passage de D dans `bilan-service`) :
+  - (1) **Un champ neuf d'un producteur est « reçu et jeté » en silence** : la projection ne recopie que les champs que
+    `versBalanceProjetable` connaît, et Mongoose (`strict`) retire du `$set` un champ que le schéma ne déclare pas —
+    aucune erreur nulle part. Un test sur le **vrai schéma** (`new Modele({...}).toObject()`) le voit ; les tests de la
+    projection, qui mockent le modèle, non.
+  - (2) **La suite unitaire complète de bilan sous Node 24 a pris plus de 40 min** (12 min au 25/11) sous la charge du
+    poste : le `timeout 2400 docker wait` du script l'a coupée à 286/369 suites, sans un rouge, et le conteneur a été
+    retiré avec sa sortie partielle. Seconde passe sur la liste des suites restantes (`comm` des fichiers `*.spec.ts`
+    et des lignes `PASS`). Attendre un conteneur par son état (`docker inspect -f '{{.State.Running}}'`) avec une borne
+    large, et copier la sortie avant de le retirer.
+  - (3) **`MSYS_NO_PATHCONV=1` casse le contexte de `docker build` en Git Bash** (« path "/c/Users/…" not found ») :
+    passer les chemins de l'hôte par `cygpath -m` (contexte, `-f`, destination de `docker cp`).
+  - (4) **`analyse.agnosticisme.spec.ts` balaie les commentaires du module d'analyse** : un mot de deux majuscules
+    (« CE dossier ») y est pris pour un code de poste du référentiel ; et la liste des fichiers du module y est fermée
+    (un fichier neuf s'y ajoute).
+  - (5) Trois mutations sur dix-huit « rougissaient » à la compilation (constante de forme devenue inutilisée,
+    rétrécissement de type perdu) : réécrites en gardant la constante lue (`!(FORME.test(x) || /^.+$/.test(x))`) et le
+    type (`version as string`), puis tuées sur une assertion.
 
 - **STORY-364** (le refus sourcé du dirigeant) :
   - (1) **Six mutations sur dix « rougissaient » sur une erreur de compilation**, pas sur une assertion. Trois causes :

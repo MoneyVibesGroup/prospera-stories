@@ -109,9 +109,22 @@ reserved_ranges:
       1136 = n° 18 (remplaçante de STORY-1116, déjà livrée au lot 6 : le consommateur de
       facturation.avoir.emis@1 dans paiement), 1137 = TICKET-BACKEND-modules-ouverts-dans-l-essai (part de B).
       Les fiches sont écrites juste avant de coder ; un identifiant non employé reste à B.
-  - range: "STORY-1138 → STORY-1141"
+  - range: "STORY-1138"
+    status: "DONE"
+    owner: "Groupe D — la liasse rapprochée de sa balance par l'empreinte des soldes (soldes-v1, STORY-1022 de C) : bloc rapprochementBalance de la réponse d'analyse (prospera-bilan-service)"
+    source_doc: "prospera-stories/stories/STORY-1138.md"
+    reserved_on: "2026-11-26"
+    note: >-
+      🏁 DONE le 2026-11-26 — prospera-bilan-service#193 (dev 65eecdc) ; annonce « ⚠ Contrats » avant le code (docs
+      #937, main 69c1cfe). soldesChecksum / soldesChecksumVersion de balance.created et balance.etat.document.change
+      gardés au read-model balances_balance (reçus et jetés jusque-là), recalculés sous la version publiée (soldes-v1,
+      vecteurs de C) sur les soldes de la liasse servie : CONCORDANT / DISCORDANT ; version inconnue NON_VERIFIABLE sans
+      recalcul ; balance v1 SANS_EMPREINTE (BALANCE_SCELLEE_V1). Node 24 : e2e 45/45 (3 565), unitaires 369/369 suites en deux passes ;
+      mutations 18/18. Détachée de la plage 1138 → 1141 (entrée propre). Lot 7 de D, n° 5a (§4 bis, D-1078-10). Suivante :
+      STORY-1139.
+  - range: "STORY-1139 → STORY-1141"
     status: "RÉSERVÉ"
-    owner: "Groupe D — lot 7, amendement du 26/11 : bilan (1138 → 1140), facture et paiement (1141)"
+    owner: "Groupe D — lot 7, amendement du 26/11 : bilan (1139, 1140), facture et paiement (1141)"
     source_doc: "prospera-stories/coordination/PLAN-LOT-7-2026-11-24.md"
     reserved_on: "2026-11-26"
     note: >-
@@ -120,6 +133,7 @@ reserved_ranges:
       modifiables (Q-D-14) ; 1140 = l'export C13 aussi en CSV (Q-D-19) ; 1141 = le numéro de compte imprimable sur la
       facture (Q-D-15 ; paiement par une passation de B limitée à la story). Les fiches sont écrites juste avant de
       coder ; chaque story met à jour sa ligne (ou s'en détache en entrée propre, au choix de la story).
+      MAJ 2026-11-26 : 1138 s'en est détachée en entrée propre (DONE, ci-dessus) ; la plage garde 1139 → 1141.
   # ── COMPLÉMENTS DE LA COMPTABILITÉ TENUE (2026-11-26) : epics-comptabilite-complements-2026-11-26.md, tiré du livre
   #    « La Boîte à Outils du Comptable » et de ses 50 modèles, croisés avec le code de origin/dev.
   - range: "EPIC-270 → EPIC-276"
