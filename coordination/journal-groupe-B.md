@@ -54,6 +54,7 @@
   | 6 | STORY-1124 | le circuit sans trou |
   | 7 | STORY-1125 | l'archivage se mesure et se vend |
   | f | STORY-1119 (suite) | la nature « validation du client » et la référence d'une version (← C, STORY-324 ; D-L7B-10) |
+  | g | STORY-979 (5ᵉ suite) | recopies `paiement` 1.2.0 et `ged` 1.10.0 au catalogue (← D, STORY-1141 ; D-L7B-11) |
   | 8 | STORY-1126 | la recette des archives de bout en bout |
   | 9 | STORY-1127 | `referentiels` dans l'état publié |
   | 10 | STORY-1128 | le contrat d'état publié figé, inventaire d'EPIC-142 → 147 et 159 |
@@ -114,6 +115,14 @@
   (document-service #33, `b7b3f91` : la story de B qui a donné aux archives leur valeur de preuve ; le plan de
   classement vient de STORY-1087, de C) ; aucun identifiant neuf ; commits `MNV-1119(ged): …` ; décisions D-1119-19 → 26
   dans sa fiche (« Suite du 2026-11-26 »). Recopie au catalogue avec « g » (D-1119-25).
+
+- **D-L7B-11 — ordre « g » : la demande de D placée après « f », avant STORY-1126** (26/11, session de groupe ; §1.1) :
+  « → B (2026-11-26, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue » (journal de D, « Demandes » ;
+  source `main` `6a5d3ab`, #967 ; code fusionné : paiement #126). Minuscule, sans Docker, dans le catalogue de B. Le même
+  geste que « a » : **cinquième suite de STORY-979** (la story des recopies de manifestes au catalogue : #71, #74, #75, #76) ;
+  aucun identifiant neuf ; commits `MNV-979(manifestes): …` ; décisions D-979-35 → 40 dans sa fiche
+  (« Cinquième suite (2026-11-26) »). La copie est entière : elle porte aussi `ged` 1.10.0 de « f » (D-1119-25). Sa PR
+  de docs finale ferme aussi la passation de `prospera-paiement-service` (prêtée à D pour STORY-1141, rendue le 26/11).
 
 - **Avancement** :
   - **a — troisième suite de STORY-979 (25/11) — faite** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
@@ -2129,6 +2138,15 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-26, cinquième suite de STORY-979 (ordre « g », D-L7B-11) — deux manifestes recopiés au catalogue, annoncé
+  AVANT la fusion** (`platform-catalog-service`, branche `MNV-979-manifestes-paiement-ged` ; fiche `stories/STORY-979.md`,
+  « Cinquième suite (2026-11-26) », D-979-35 → 40). `copies.json` depuis `main` (copie entière) : **`paiement` 1.1.0 →
+  1.2.0** (← D, STORY-1141 : `paiement.compte.changed@1` gagne `numeroImprimable` facultatif ; `PUT
+  /api/v1/comptes-encaissement/{compteId}/numero-imprimable` hors lecture seule) et **`ged` 1.9.0 → 1.10.0** (« f » :
+  `GET /api/v1/ged/cabinet/pieces/{pieceId}/versions/{version}` en `routesLectureSeule`). Aucun autre manifeste, aucun
+  droit (auth inchangé), aucune route ni aucun topic du catalogue ne change ; une base déjà semée reçoit les deux versions
+  à son prochain démarrage.
 
 - **2026-11-26, suite de STORY-1119 — LIVRÉ** (document-service #40, `5d060aa` sur `dev`) : conforme à l'annonce
   ci-dessous, sans écart. Manifeste `ged` 1.10.0 dans le service (`prospera-stories@10d9d6e`, sha256 `0a0f6826…acbb0`) ;
