@@ -434,7 +434,25 @@
     Karapace : un seul schéma). Node 24 : unitaires 121/121 suites, 1 450 passés (5 ignorés), e2e 17/17 suites, 224/224 ; mutations 6/6 et 5/5. Verrou 10:17 → 12:26 (passe
     figée, piège), 12:26 → 12:40, 13:19 → 13:34, 14:06 → 14:11 (Node 24). Fiche D-1124-27 → 36. **→ D** : « Réponses » et une
     demande non bloquante (le limiteur sur la route de service).
-  - **Suivante : STORY-1132** (n° 14 : la licence signée, premier incrément).
+  - **14 — STORY-1132 (27/11) — faite** (premier incrément d'EPIC-150) : **un paiement ouvre la licence, le suivant la
+    prolonge**. **centrale-service #2** (`75977de` sur `dev`) ; contrat annoncé avant le code (stories #1047, `1682f33`).
+    « Signée » = la mécanique de 955 (clé d'exécution `centrale`, JWS EdDSA, compteur par clé ; même famille que le
+    certificat d'effacement de 1130 ; clé de test seulement), vérifiée hors ligne par l'agent (D-1132-1). La centrale reçoit
+    `paiement.abonnement.echeance.encaissee` dans la section `faitsDePaiement` du contact de l'agent de la **plateforme**
+    (AD-25 ; `PLATEFORME` seule, sinon 403), le lit selon les règles du catalogue, dédoublonne, garde, acquitte ; le parc
+    dit quelle organisation une instance sur site sert (hébergée ⇒ aucune licence, AD-19) ; ouvrir : `ABONNEMENT`,
+    `preavisJusquau` = fin de la période payée + 30 j ; prolonger : le maximum, jamais raccourci ; perpétuel sans validité ;
+    licence réémise et inscrite au contact suivant. Paiement et auth inchangés (aucun fait neuf, aucune route
+    authentifiée : D-1132-11) ; fixture produite par le code de paiement. Node 25 59/59 ; mutations 18/18 ; Node 24 59/59 ;
+    pile `grp-b` 14/14 (l'agent passe de la n° 2 à la n° 10 en 16 s, puis à la n° 15 prolongée, même numéro qu'à la
+    centrale ; rejeu sans effet ; 403). Verrou 14:38 → 14:40. Fiche D-1132-1 → 13. **Reste nommé** (fiche) : le relais par
+    l'agent de la plateforme (STORY-1133), packages et dépendances, sanctions, perpétuel et échelonné, envoi au DSI,
+    alerte J-7, remise aux espaces. **⚠ À placer avant STORY-1133** : la clé de test `centrale-test-2026` des vecteurs de
+    la plateforme expire le **2027-01-01** (la centrale de simulation refuse alors de démarrer, et les tests qui vérifient
+    une licence après cette date rougissent) : publier de nouveaux vecteurs dans `prospera-plateforme` (part « moteur » de
+    B) avant le 08/01. Rituel : aucune demande neuve à B chez A, C et D.
+  - **Suivante : STORY-1133** (n° 15 : l'interface de l'agent publiée), précédée si la session de groupe le décide des
+    nouveaux vecteurs de test de la plateforme (ci-dessus).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -2497,6 +2515,9 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, STORY-1132 (n° 14) — LIVRÉ** (centrale-service #2, `75977de` sur `dev`) : conforme à l'annonce
+  ci-dessous, sans écart. **→ D, A** : information seulement ; aucun contrat que vous lisez ne change.
 
 - **2026-11-27, STORY-1132 (n° 14) — la licence signée, premier incrément, annoncé AVANT le code** (`centrale-service`,
   branche `MNV-1132` ; fiche `stories/STORY-1132.md`, D-1132-1 → 13). Lu par **B** seul (l'agent de la plateforme le
@@ -4689,6 +4710,16 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **La clé de test `centrale-test-2026` expire le 2027-01-01** (STORY-1132) : un test qui vérifie une licence ou un état
+  voulu à une heure de 2027 rougit (`CLE_EXPIREE`) alors que la dérivation est juste. Les tests de 1132 gardent l'heure de
+  la centrale en décembre 2026 (les échéances, elles, sont en 2027) ; de nouveaux vecteurs sont à publier avant le 08/01.
+- **Un heredoc Bash qui contient un script Python à apostrophes casse encore** (« unexpected EOF », STORY-1132) : écrire
+  le script par l'outil d'écriture, même court.
+- **Produire une fixture par le code d'un autre service sans Docker** (STORY-1132) : `ts-node` du checkout en
+  `transpileOnly`, `require` des fichiers purs (`traces-d-abonnement.ts`, `evenement-sortant.ts`), l'enveloppe refaite
+  comme `OutboxService.enfiler` avec `eventId` et `occurredAt` fixés, puis vérifiée par le garde du service :
+  `s1132/capturer-paiement.js` de la session (non versionné), le commit source écrit dans la fixture.
 
 - **Une passe sous verrou figée 2 h** (j, 27/11) : `up -d` a échoué (Docker a rendu une 500 au démarrage de Kafka), et la
   boucle d'attente de santé, bornée en tours et non en temps, ne s'arrêtait pas sur l'échec ; `timeout` de Git Bash ne tue pas
