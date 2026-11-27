@@ -8,6 +8,7 @@
 > épics ouverts du registre dans ce calendrier. Aucun client n'est nommé : « le distributeur », « l'IMF »,
 > « la compagnie d'assurance », « le cabinet ».
 > **Ajout du 2026-11-26 :** le §8 liste cinq écarts du produit cabinet relevés face à Pennylane (CH-P2 → CH-P6). Ils sont **à intégrer** : ni numéro d'épic, ni semaine, ni développeur pour l'instant.
+> **Ajout du 2026-11-27 :** CH-P2, CH-P4, CH-P5 et CH-P6 sont placés au lot 8 du groupe D (EPIC-277 → 280, `coordination/PLAN-LOT-8-2026-11-27.md`), réduits sur consigne de l'utilisateur (§8.3). **CH-P3 reste à placer.**
 
 ---
 
@@ -524,3 +525,17 @@ Le tableau du §7.1 a été vérifié par script contre le registre (`sprint-sta
    - puis CH-P5, en reprenant les épics du distributeur ;
    - CH-P4 en dernier, ou après février comme le prévoit la roadmap.
 4. **Numérotation.** CH-P2 → CH-P6 sont des repères provisoires : le numéro reprend celui du manque dans la comparaison. À l'intégration, il faudra réserver les épics au registre (`sprint-status.yaml`, `reserved_ranges`) et rejouer le contrôle du §7.4.
+
+### 8.3 Intégration du 27/11
+
+Consigne de l'utilisateur du 27/11, appliquée par `coordination/PLAN-LOT-8-2026-11-27.md` §4 :
+
+| Réf. | Épic | Groupe | Ce qui entre au lot 8 | Ce qui reste après |
+|---|---|---|---|---|
+| **CH-P6** | EPIC-277 | D | la double authentification (STORY-1171, 1172) ; l'import d'écritures (1173) | l'**API publique** (clés, quotas, documentation publiée) : remplacée au lot 8 par l'**API mobile de la PME** (1179, EPIC-278) |
+| **CH-P2** | EPIC-278 | D | les comptes de l'entreprise cliente, le téléversement de ses factures, les demandes de pièces et leurs relances, les commentaires, l'API mobile, la recette (1174 → 1180) | la **collecte par e-mail dédié et par WhatsApp** : aujourd'hui, la PME se connecte et téléverse |
+| **CH-P4** | EPIC-279 | D (et C pour EPIC-268 : 1089, 1090) | le temps passé, la facture au temps, la rentabilité, les prospects (1181 → 1184) | — |
+| **CH-P5** | EPIC-280 | D | l'offre « facturation » de la PME, le devis accepté en ligne, les factures récurrentes, les relances, les ventes dans la comptabilité du dossier (1185 → 1189) | la **facture certifiée OTR** (après février) |
+| **CH-P3** | — | — | rien | **à placer** |
+
+Le tableau du §3.2 et le contrôle du §7.4 ne sont pas rejoués : le lot 8 compte en stories, pas en épics par semaine.
