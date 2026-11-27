@@ -3724,6 +3724,75 @@
   .ob-more .dp-tbl { margin-top: 0; }
   .ob-fold > summary { cursor: pointer; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-fg); margin: 0.5rem 0 0.4rem; }
   [data-ob-root] .dp-lg { white-space: normal; height: auto; min-height: 2.8rem; padding-top: 0.4rem; padding-bottom: 0.4rem; max-width: 100%; }
+  /* ═══ FE-097 · registre des immobilisations (lot 7, paquet 3) ═══ */
+  [data-im-root] .im-tri { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; }
+  [data-im-root] .im-tri div { border: 1px solid var(--border); border-radius: 0.6rem; padding: 0.55rem 0.7rem; background: var(--card); font-size: 0.74rem; color: var(--muted-fg); min-width: 0; }
+  [data-im-root] .im-tri b { display: block; font-size: 1.12rem; color: var(--foreground); font-variant-numeric: tabular-nums; margin-top: 0.1rem; overflow-wrap: anywhere; }
+  [data-im-root] .im-tri div.net { border-color: var(--border-strong); background: var(--hover-surface); }
+  [data-im-root] .im-note { display: flex; gap: 0.5rem; align-items: flex-start; padding: 0.55rem 0.75rem; border-radius: 0.5rem; background: var(--hover-surface); border: 1px solid var(--border); font-size: 0.82rem; line-height: 1.45; }
+  [data-im-root] .im-note svg { flex: none; margin-top: 0.12rem; }
+  [data-im-root] .im-tblwrap { border: 1px solid var(--border); border-radius: 0.6rem; background: var(--card); overflow: hidden; }
+  [data-im-root] .im-tbl { width: 100%; border-collapse: collapse; font-size: 0.84rem; table-layout: fixed; }
+  [data-im-root] .im-tbl th { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted-fg); padding: 0.45rem 0.55rem; border-bottom: 1px solid var(--border-strong); text-align: left; background: var(--card); }
+  [data-im-root] .im-tbl td { padding: 0.5rem 0.55rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  [data-im-root] .im-tbl th.im-n, [data-im-root] .im-tbl td.im-n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; width: 6.6rem; }
+  [data-im-root] .im-tbl th.im-b, [data-im-root] .im-tbl td.im-b { width: auto; }
+  [data-im-root] .im-tbl tr.im-fam td { background: var(--hover-surface); font-size: 0.74rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); padding: 0.4rem 0.55rem; }
+  [data-im-root] .im-tbl tr.im-fam td code { font-size: 0.72rem; margin-right: 0.35rem; }
+  [data-im-root] .im-tbl tr.im-sub td { font-weight: 700; background: color-mix(in srgb, var(--hover-surface) 55%, var(--card)); font-size: 0.8rem; }
+  [data-im-root] .im-tbl tr.im-tot td { font-weight: 800; border-top: 2px solid var(--border-strong); border-bottom: 0; background: var(--hover-surface); }
+  [data-im-root] .im-tbl tr.im-row.out td { color: var(--muted-fg); }
+  [data-im-root] .im-tbl tr.im-row.off td { color: var(--muted-fg); text-decoration: line-through; }
+  [data-im-root] .im-tbl tr.im-row.off td .im-nm, [data-im-root] .im-tbl tr.im-row.off td small { text-decoration: line-through; }
+  [data-im-root] .im-tbl tr.im-row.sel td { background: color-mix(in srgb, var(--primary) 6%, var(--card)); }
+  [data-im-root] .im-nm { font: inherit; font-weight: 700; background: none; border: 0; padding: 0; text-align: left; color: var(--foreground); cursor: pointer; overflow-wrap: anywhere; }
+  [data-im-root] .im-nm:hover { text-decoration: underline; }
+  [data-im-root] .im-nm:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  [data-im-root] .im-tbl small { display: block; font-size: 0.74rem; color: var(--muted-fg); margin-top: 0.1rem; line-height: 1.4; overflow-wrap: anywhere; }
+  [data-im-root] .im-tbl .dp-pill { margin-top: 0.25rem; font-size: 0.7rem; padding: 0.12rem 0.5rem; white-space: normal; }
+  [data-im-root] .im-det td { background: var(--hover-surface); padding: 0.8rem 0.9rem; }
+  [data-im-root] .im-det-in { display: flex; flex-direction: column; gap: 0.8rem; white-space: normal; }
+  [data-im-root] .im-dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.4rem 1rem; margin: 0; font-size: 0.8rem; }
+  [data-im-root] .im-dl dt { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted-fg); }
+  [data-im-root] .im-dl dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+  [data-im-root] .im-jr { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8rem; }
+  [data-im-root] .im-jr li { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr); gap: 0.4rem; }
+  [data-im-root] .im-jr li i { font-style: normal; font-weight: 800; color: var(--muted-fg); }
+  [data-im-root] .im-jr li.ann span { text-decoration: line-through; color: var(--muted-fg); }
+  [data-im-root] .im-acts { display: flex; gap: 0.4rem 0.6rem; flex-wrap: wrap; align-items: center; }
+  [data-im-root] .im-form { display: flex; flex-direction: column; gap: 0.7rem; padding: 0.8rem 0.9rem; border: 1px solid var(--border-strong); border-radius: 0.6rem; background: var(--card); }
+  [data-im-root] .im-form h4 { margin: 0; font-size: 0.95rem; }
+  [data-im-root] .im-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem 0.9rem; }
+  [data-im-root] .im-grid .full { grid-column: 1 / -1; }
+  [data-im-root] .im-f { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+  [data-im-root] .im-f label { font-size: 0.78rem; font-weight: 700; color: var(--muted-fg); }
+  [data-im-root] .im-f input, [data-im-root] .im-f select { font: inherit; font-size: 0.9rem; height: 2.4rem; padding: 0 0.6rem; border: 1px solid var(--border-strong); border-radius: 0.5rem; background: var(--card); color: var(--foreground); min-width: 0; width: 100%; }
+  [data-im-root] .im-f input:focus-visible, [data-im-root] .im-f select:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+  [data-im-root] .im-f.bad input, [data-im-root] .im-f.bad select { border-color: var(--danger); }
+  [data-im-root] .im-f small { font-size: 0.76rem; color: var(--muted-fg); }
+  [data-im-root] .im-f small.err { color: var(--danger); font-weight: 600; }
+  [data-im-root] .im-lot { display: flex; flex-direction: column; gap: 0.35rem; margin: 0; padding: 0; list-style: none; font-size: 0.85rem; }
+  [data-im-root] .im-lot label { display: flex; gap: 0.5rem; align-items: center; }
+  [data-im-root] .im-lot .res { margin-left: 1.5rem; font-size: 0.78rem; color: var(--muted-fg); }
+  [data-im-root] .im-lot .res.ok { color: var(--success); font-weight: 600; }
+  [data-im-root] .im-lot .res.ko { color: var(--danger); font-weight: 600; }
+  [data-im-root] .dp-lg { white-space: normal; height: auto; min-height: 2.8rem; padding-top: 0.4rem; padding-bottom: 0.4rem; max-width: 100%; }
+  [data-im-root] .im-vide { display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
+  @media (max-width: 52rem) { [data-im-root] .im-tri { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 40rem) {
+    [data-im-root] .im-grid { grid-template-columns: 1fr; }
+    [data-im-root] .im-tbl thead { display: none; }
+    [data-im-root] .im-tbl, [data-im-root] .im-tbl tbody { display: block; }
+    [data-im-root] .im-tbl tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 0.4rem; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--border); }
+    [data-im-root] .im-tbl td { display: block; border: 0; padding: 0.15rem 0; min-width: 0; }
+    [data-im-root] .im-tbl td.im-b, [data-im-root] .im-tbl td[colspan] { grid-column: 1 / -1; }
+    [data-im-root] .im-tbl th.im-n, [data-im-root] .im-tbl td.im-n { width: auto; text-align: right; }
+    [data-im-root] .im-tbl td.im-n::before { content: attr(data-l); display: block; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted-fg); font-weight: 600; }
+    [data-im-root] .im-tbl tr.im-fam, [data-im-root] .im-tbl tr.im-det { display: block; padding: 0; }
+    [data-im-root] .im-tbl tr.im-fam td, [data-im-root] .im-tbl tr.im-det td { padding: 0.45rem 0.6rem; }
+    [data-im-root] .im-tbl .im-hide { display: none !important; }
+    [data-im-root] .im-tri b { font-size: 0.98rem; }
+  }
   /* ═══ FE-040 · profil de la société (lot 7, paquet 3) ═══ */
   [data-pf-root] .pf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem 1rem; }
   [data-pf-root] .pf-grid .full { grid-column: 1 / -1; }
@@ -6633,6 +6702,10 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg>
                       Factures <span class="count">Achats · Ventes</span>
                     </button>
+                    <button class="atl-tab" role="tab" data-atl-tab="immobilisations" aria-selected="false" title="FE-097 : le registre des immobilisations, le brut, l’amortissement cumulé et le net de chaque bien.">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg>
+                      Immobilisations <span class="count">Registre</span>
+                    </button>
                     <span class="grow"></span>
                     <span class="badge badge-active"><span class="d"></span>Module actif</span>
                   </div>
@@ -6661,6 +6734,32 @@
                     <p style="margin:0.5rem 0 0"><b>Servi par le serveur</b> : <code>compteurs</code>, <code>pieces[].lecture</code> (valeur et confiance), <code>proposition</code> (journal, tiers connu ou <code>tiersACreer</code>, compte et sa <code>source</code>, TVA, lignes, totaux), <code>signaux</code> (codes stables : <code>ECART_HT_TVA_TTC</code>, <code>TVA_ABSENTE</code>, <code>DOUBLON_PROBABLE</code>, <code>TIERS_A_CREER</code>, <code>TIERS_A_CHOISIR</code>, <code>COMPTE_A_CHOISIR</code>, <code>LECTURE_ECHOUEE</code>…), <code>inscriptible</code>. <b>Rédigé par la maquette</b> : le texte de chaque signal (le serveur publie le code, le <code>message</code> est à aligner), et l’équilibre recalculé à l’écran après une correction (demandé par la fiche). À la vente, l’OCR ne lit que l’émetteur : le client est toujours à choisir (D-1097-3). <b>Absent du contrat</b> : l’édition libre des lignes de l’écriture (ajouter, supprimer, changer un débit ou un crédit : dessinée à la demande de l’utilisateur, ticket pour C ; seuls les montants, le compte, le tiers, le journal et la TVA se corrigent à l’inscription) ; « écarter » une pièce illisible (elle reste dans le lot) ; la saisie à la main d’une pièce illisible ; le numéro d’exercice d’une date hors exercice n’est pas proposé par un geste (<code>AUTRE_EXERCICE</code> se dit, la facture se redépose là).</p>
                     <p style="margin:0.5rem 0 0"><b>FE-150</b> · la marque « Repris de vos choix » lit <code>proposition.compte.source</code> (<code>MEMOIRE_DOSSIER</code>, <code>MEMOIRE_CABINET</code>, STORY-1098 #755) et le champ facultatif <code>suggestion</code> des lignes de cahiers (STORY-1099, #758). <code>COMPTE_PAR_DEFAUT_DU_TIERS</code> n’est pas une mémoire : il porte une mention grise, pas la marque. Une mémoire écartée (compte désactivé) est dite, jamais effacée en silence (<code>COMPTE_A_CHOISIR</code>, <code>details.ecarte</code>).</p>
                   </div>
+                  </div>
+
+                  <!-- ═════ FE-097 · LE REGISTRE DES IMMOBILISATIONS (lot 7, paquet 3) ═════
+                       Brut, amortissement cumulé et net restitués par le produit : rien à calculer. Un geste principal (mettre en service ce qui attend, sinon ajouter un bien).
+                       La date de MISE EN SERVICE, jamais celle d'acquisition, ouvre l'amortissement : elle n'est jamais pré-remplie. Le registre ne publie encore rien en balance (FE-098). -->
+                  <div class="atl-panel atl-body" data-atl-panel="immobilisations" hidden>
+                    <div class="dp-wrap" data-im-root></div>
+                    <div class="dc-note" data-note style="margin-top:0.9rem">
+                      <b>FE-097 · le registre des immobilisations.</b> Routes de <code>balance-service</code> (<code>:3007</code>, <code>/api/v1</code>), sous <code>/dossiers/{dossierId}/immobilisations</code> (STORY-526 à 528, <code>done</code>) :
+                      <code>GET</code> (par page : <code>limite</code>, curseur <code>apres</code> ; lecture ouverte sur un exercice clos) ; <code>POST</code> (acquisition : <code>designation</code>, <code>compte</code>, <code>compteAmortissement</code>, <code>compteDotation</code>, <code>dateAcquisition</code>, <code>valeurOrigine</code>, <code>valeurResiduelle</code>, <code>dureeUtiliteMois</code>, <code>mode</code> <code>LINEAIRE | DEGRESSIF</code>) ;
+                      <code>GET /{id}</code> (la fiche et tous ses mouvements) ; <code>GET /{id}/plan</code> (STORY-527) ; <code>POST /{id}/mise-en-service | cession | mise-au-rebut | reevaluation | annulation</code>. Aucune route ne modifie ni ne supprime un mouvement : <b>on annule, et l’annulation s’ajoute</b> (AC-4) ; aucune n’écrit la balance (AC-6), et l’écran le dit.
+                      Les montants arrivent en unités mineures : l’écran divise par <code>10^exposant</code> (le serveur envoie <code>exposant</code> et <code>devise</code>, figée à l’acquisition).
+                      <br><b>Refus lus à l’écran, en une phrase, jamais le code</b> : 400 <code>COMPTE_HORS_PLAN_DU_DOSSIER</code>, <code>VALEUR_RESIDUELLE_INVALIDE</code>, <code>DUREE_HORS_BAREME_DEGRESSIF</code>, <code>DEVISE_DOSSIER_NON_TENUE</code> ; 409 <code>DOSSIER_ARCHIVE</code>, <code>EXERCICE_INTROUVABLE</code>, <code>EXERCICE_AMBIGU</code>, <code>EXERCICE_CLOS</code>, <code>TRANSITION_INTERDITE</code>, <code>MOUVEMENT_HORS_CHRONOLOGIE</code>, <code>MOUVEMENT_NON_ANNULABLE</code>, <code>CONFLIT_CONCURRENT</code>, <code>COEFFICIENT_DEGRESSIF_NON_PUBLIE</code> ; 403 <code>ORG_CONTEXTE_REQUIS</code> ; 404 <code>IMMOBILISATION_INTROUVABLE</code>. Le banc d’essai déclenche le conflit, le compte hors plan et la panne ; les refus de date, eux, sont réels (essayez une date de 2024 ou de 2027).
+                      <br><b>Ce qui vient du référentiel, rien n’est saisi à la main</b> : les libellés des comptes (plan SYSCOHADA révisé 2.3 du dossier), les libellés des familles (postes <code>AF</code>, <code>AJ</code>, <code>AK</code>, <code>AM</code>, <code>AN</code> du Bilan) et le barème dégressif du paquet fiscal du Togo 2026 (<code>resultatFiscal.amortissementDegressif</code>, Art. 100 CGI : 3 à 4 ans ×1,5 · 5 à 6 ans ×2 · 7 ans et plus ×2,5, matériels et outillages <b>neufs</b>), que le serveur lit et <b>fige à l’acquisition</b>.
+                      <br><b>Chiffres : aucun n’est écrit à la main.</b> Un script (30/360, plan qui part de la <b>mise en service</b>) les produit et les <b>asserte contre les écrans voisins</b> : brut / amortissements / net du registre = <b>7 225 000 · 3 725 000 · 3 500 000</b>, soit la note 3A du Bilan (<code>AD</code> + <code>AI</code> + <code>AP</code>), famille par famille (<code>AF</code> 900 000 / 600 000 / 300 000 · <code>AJ</code> 1 500 000 / 0 · <code>AK</code> 3 400 000 / 2 200 000 · <code>AM</code> 1 025 000 / 700 000 · <code>AN</code> 400 000 / 225 000) ;
+                      la cession de la camionnette (prix 300 000, valeur nette 45 000) = <code>TN</code> et <code>RO</code> du compte de résultat ; la dotation 2025 du registre (775 000) tient sous la ligne <code>RL</code> (860 000), dont le reste n’est pas porté par le registre ; le net 2024 de chaque famille retrouve celui du Bilan. Pour chaque ligne : <code>0 ≤ amortissement ≤ brut</code> et <code>net = brut − amortissement</code>, vérifiés à chaque rendu (<code>window.__lot7p3c().bad</code> est vide).
+                      Exercices du dossier de démonstration : 2019 à 2024 clos, 2025 et 2026 ouverts.
+                      <br><b>Dans l’état de départ, ce que le comptable doit voir</b> : deux licences ERP acquises le 20/11/2024 et jamais mises en service (le cas d’école de AC-2 : acheté en fin d’exercice, en service l’exercice suivant), un groupe froid <b>dégressif</b> ×2, une camionnette cédée le 30/06/2025 (plus-value 255 000) et une imprimante saisie en double puis <b>annulée</b> (barrée au journal, hors des totaux).
+                      <br><b>Ce registre ne remplace pas la saisie de secours (FE-080)</b> : un dossier repris en cours de route n’a pas de registre et renseigne sa note 3 à la main. Tant que FE-098 n’est pas livrée, l’écran dit que la note 3 ne vient pas d’ici ; <b>le jour où les deux coexistent, il y aura deux sources pour le même nombre</b> — à trancher à la livraison de FE-098.
+                      <div class="dp-gap" style="margin-top:0.6rem"><span class="dp-pill">écart</span><span><b>La liste ne porte ni amortissement cumulé, ni net, ni dotation.</b> <code>ImmobilisationDto</code> donne <code>valeurOrigine</code> mais aucun cumul : il faut <code>GET /{id}/plan</code> (<code>cumulAmortissements</code>, <code>lignes[].cumulFin</code>, <code>valeurNetteFin</code>), soit <b>un appel par bien</b> (15 ici) pour remplir un tableau de 5 colonnes. Le tableau par compte (<code>TableauDotationsDto</code>, brut et amortissements ouverture / entrées / sorties / clôture) n’existe que dans l’évènement publié vers <code>bilan-service</code>. <b>Porteur : C (<code>balance-service</code>)</b> — le cumul, le net et la dotation de l’exercice sur la ligne de la liste, ou une lecture de ce tableau.</span></div>
+                      <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b>Un terrain ne s’amortit pas, et le registre ne sait pas le dire.</b> <code>dureeUtiliteMois ≥ 1</code> est obligatoire et une valeur résiduelle égale à la valeur d’origine est refusée (<code>VALEUR_RESIDUELLE_INVALIDE</code>) : tout bien reçoit un plan. L’écran montre le terrain « Non amortissable », ce qui suppose un indicateur que le contrat n’a pas. <b>Porteur : C.</b> Question 2.</span></div>
+                      <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b>Aucune route de mise en service en lot.</b> « Mettre en service ces 2 biens » boucle sur <code>POST /{id}/mise-en-service</code>, un appel par bien ; un refus partiel (<code>CONFLIT_CONCURRENT</code>, date avant l’acquisition) est dit ligne par ligne. Pas bloquant. <b>Porteur : C</b>, confort.</span></div>
+                      <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b>Aucune durée usuelle par catégorie de bien.</b> Le paquet fiscal ne publie que le barème dégressif. L’écran propose la <b>dernière durée saisie sur le même compte du dossier</b>, jamais une durée inventée. Une table d’usages par compte est à décider. <b>Porteur : C</b> pour la route, le PO pour le contenu. Question 4.</span></div>
+                      <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b><code>compteAmortissement</code> et <code>compteDotation</code> sont obligatoires à l’acquisition et rien ne les propose.</b> L’écran les déduit (28 + le suffixe du compte d’immobilisation ; 681), puis les montre sous « Détails ». <b>Porteur : C</b> — une route de proposition lue dans le plan du dossier, ou la déduction côté serveur.</span></div>
+                      <div class="dp-gap" style="margin-top:0.4rem"><span class="dp-pill">écart</span><span><b>Les mouvements ne portent que <code>parUserId</code> (le <code>sub</code> du jeton) ; la réponse n’a pas de date d’édition.</b> « par Kofi Santos » suppose de résoudre le nom (<code>auth-service</code>, à confirmer) ; la date d’édition du cartouche est posée par l’écran, comme pour la projection (STORY-484). <code>document-service</code> (B) et <code>bilan-service</code> (D) : aucun appel dans cet écran ; la note 3 du Bilan se branche sur le registre avec FE-098 et FE-125 (D).</span></div>
+                    </div>
                   </div>
 
                   <!-- --- Onglet SOURCES : choisir d'où vient la balance --- -->
@@ -26425,5 +26524,889 @@
       rendre();
     })();
 
+
+    /* ═══ FE-097 · le registre des immobilisations (lot 7, paquet 3) ═══
+       Restituer le brut, l’amortissement cumulé et le net de chaque bien, sans que rien ne soit à calculer. Un geste principal par état :
+       mettre en service ce qui attend, sinon ajouter un bien. Routes de balance-service (STORY-526 à 528), toutes sous /dossiers/{dossierId}/immobilisations.
+       Dossier : Ets Kossi Distribution, exercice 2025. Les montants sortent de data.json (script build_data.py, transcrit du plan d’amortissement 30/360)
+       et sont ASSERTÉS contre le Bilan (AF, AJ, AK, AM, AN : 900 000 / 600 000 / 300 000, 1 500 000 / 0, 3 400 000 / 2 200 000, 1 025 000 / 700 000,
+       400 000 / 225 000), la note 3A (7 225 000 · 3 725 000 · 3 500 000) et le compte de résultat (TN 300 000, RO 45 000, RL 860 000 au plus). */
+    (function () {
+      var root = document.querySelector('[data-im-root]');
+      if (!root) return;
+      var TODAY = '2026-11-26', FIN = '2025-12-31', DEB24 = '2024-12-31';
+      var DATA = {
+"items": [
+{
+"id": "i01",
+"des": "Logiciel de gestion commerciale et de caisse",
+"cpt": "213",
+"amo": "2813",
+"acq": "2020-12-14",
+"mes": "2021-01-01",
+"brut": 400000,
+"mois": 60,
+"mode": "LINEAIRE",
+"fam": "AF",
+"cptLib": "Logiciels et sites internet",
+"amoLib": "Amortissements des logiciels et sites internet",
+"statut": "EN_SERVICE",
+"cum": 400000,
+"net": 0,
+"dot": 80000,
+"etat": "AMORTI",
+"reste": 0
+},
+{
+"id": "i02",
+"des": "Site internet vitrine",
+"cpt": "213",
+"amo": "2813",
+"acq": "2019-03-28",
+"mes": "2019-04-01",
+"brut": 200000,
+"mois": 36,
+"mode": "LINEAIRE",
+"fam": "AF",
+"cptLib": "Logiciels et sites internet",
+"amoLib": "Amortissements des logiciels et sites internet",
+"statut": "EN_SERVICE",
+"cum": 200000,
+"net": 0,
+"dot": 0,
+"etat": "AMORTI",
+"reste": 0
+},
+{
+"id": "i03",
+"des": "Licence ERP, module comptabilité",
+"cpt": "213",
+"amo": "2813",
+"acq": "2024-11-20",
+"mes": null,
+"brut": 180000,
+"mois": 60,
+"mode": "LINEAIRE",
+"fam": "AF",
+"cptLib": "Logiciels et sites internet",
+"amoLib": "Amortissements des logiciels et sites internet",
+"statut": "ACQUISE",
+"cum": 0,
+"net": 180000,
+"dot": 0,
+"etat": "NON_MIS_EN_SERVICE",
+"reste": 180000
+},
+{
+"id": "i04",
+"des": "Licence ERP, module stocks",
+"cpt": "213",
+"amo": "2813",
+"acq": "2024-11-20",
+"mes": null,
+"brut": 120000,
+"mois": 60,
+"mode": "LINEAIRE",
+"fam": "AF",
+"cptLib": "Logiciels et sites internet",
+"amoLib": "Amortissements des logiciels et sites internet",
+"statut": "ACQUISE",
+"cum": 0,
+"net": 120000,
+"dot": 0,
+"etat": "NON_MIS_EN_SERVICE",
+"reste": 120000
+},
+{
+"id": "i05",
+"des": "Terrain de Bè-Kpota (titre foncier)",
+"cpt": "22",
+"amo": "282",
+"acq": "2019-06-10",
+"mes": null,
+"brut": 1500000,
+"mois": 0,
+"mode": "NON_AMORTISSABLE",
+"fam": "AJ",
+"cptLib": "Terrains",
+"amoLib": "Amortissements des terrains",
+"statut": "EN_SERVICE",
+"cum": 0,
+"net": 1500000,
+"dot": 0,
+"etat": "NON_AMORTISSABLE",
+"reste": 0
+},
+{
+"id": "i06",
+"des": "Entrepôt de Bè-Kpota (sol propre)",
+"cpt": "231",
+"amo": "2831",
+"acq": "2021-11-05",
+"mes": "2022-01-01",
+"brut": 2000000,
+"mois": 120,
+"mode": "LINEAIRE",
+"fam": "AK",
+"cptLib": "Bâtiments industriels, agricoles, administratifs et commerciaux sur sol propre",
+"amoLib": "Amortissements des bâtiments industriels, agricoles, administratifs et commerciaux sur sol propre",
+"statut": "EN_SERVICE",
+"cum": 800000,
+"net": 1200000,
+"dot": 200000,
+"etat": "EN_COURS",
+"reste": 1200000
+},
+{
+"id": "i07",
+"des": "Aménagement du magasin de Tokoin",
+"cpt": "235",
+"amo": "2835",
+"acq": "2020-12-02",
+"mes": "2021-01-01",
+"brut": 700000,
+"mois": 60,
+"mode": "LINEAIRE",
+"fam": "AK",
+"cptLib": "Aménagements, agencements et installations techniques",
+"amoLib": "Amortissements des aménagements de bureaux",
+"statut": "EN_SERVICE",
+"cum": 700000,
+"net": 0,
+"dot": 140000,
+"etat": "AMORTI",
+"reste": 0
+},
+{
+"id": "i08",
+"des": "Aménagements du premier dépôt",
+"cpt": "235",
+"amo": "2835",
+"acq": "2019-03-25",
+"mes": "2019-04-01",
+"brut": 700000,
+"mois": 36,
+"mode": "LINEAIRE",
+"fam": "AK",
+"cptLib": "Aménagements, agencements et installations techniques",
+"amoLib": "Amortissements des aménagements de bureaux",
+"statut": "EN_SERVICE",
+"cum": 700000,
+"net": 0,
+"dot": 0,
+"etat": "AMORTI",
+"reste": 0
+},
+{
+"id": "i09",
+"des": "Mobilier de bureau et rayonnages",
+"cpt": "244",
+"amo": "2844",
+"acq": "2019-03-26",
+"mes": "2019-04-01",
+"brut": 335000,
+"mois": 60,
+"mode": "LINEAIRE",
+"fam": "AM",
+"cptLib": "Matériel et mobilier",
+"amoLib": "Amortissements du matériel et mobilier",
+"statut": "EN_SERVICE",
+"cum": 335000,
+"net": 0,
+"dot": 0,
+"etat": "AMORTI",
+"reste": 0
+},
+{
+"id": "i10",
+"des": "Matériel informatique et caisses",
+"cpt": "244",
+"amo": "2844",
+"acq": "2020-12-18",
+"mes": "2021-01-01",
+"brut": 250000,
+"mois": 60,
+"mode": "LINEAIRE",
+"fam": "AM",
+"cptLib": "Matériel et mobilier",
+"amoLib": "Amortissements du matériel et mobilier",
+"statut": "EN_SERVICE",
+"cum": 250000,
+"net": 0,
+"dot": 50000,
+"etat": "AMORTI",
+"reste": 0
+},
+{
+"id": "i11",
+"des": "Groupe froid (chambre froide)",
+"cpt": "241",
+"amo": "2841",
+"acq": "2025-01-01",
+"mes": "2025-01-01",
+"brut": 200000,
+"mois": 60,
+"mode": "DEGRESSIF",
+"coef": [
+2,
+1
+],
+"fam": "AM",
+"cptLib": "Matériel et outillage industriel et commercial",
+"amoLib": "Amortissements du matériel et outillage industriel et commercial",
+"statut": "EN_SERVICE",
+"cum": 80000,
+"net": 120000,
+"dot": 80000,
+"etat": "EN_COURS",
+"reste": 120000
+},
+{
+"id": "i12",
+"des": "Matériel de manutention",
+"cpt": "241",
+"amo": "2841",
+"acq": "2025-05-20",
+"mes": "2025-06-01",
+"brut": 240000,
+"mois": 48,
+"mode": "LINEAIRE",
+"fam": "AM",
+"cptLib": "Matériel et outillage industriel et commercial",
+"amoLib": "Amortissements du matériel et outillage industriel et commercial",
+"statut": "EN_SERVICE",
+"cum": 35000,
+"net": 205000,
+"dot": 35000,
+"etat": "EN_COURS",
+"reste": 205000
+},
+{
+"id": "i13",
+"des": "Camionnette de livraison",
+"cpt": "245",
+"amo": "2845",
+"acq": "2022-09-12",
+"mes": "2022-10-01",
+"brut": 540000,
+"mois": 36,
+"mode": "LINEAIRE",
+"fam": "AN",
+"sortie": {
+"type": "CESSION",
+"date": "2025-06-30",
+"prix": 300000,
+"cumul": 495000,
+"vnc": 45000,
+"resultat": 255000,
+"nature": "PLUS_VALUE"
+},
+"cptLib": "Matériel de transport",
+"amoLib": "Amortissements du matériel de transport",
+"statut": "CEDEE",
+"cum": 495000,
+"net": 45000,
+"dot": 90000,
+"etat": "SORTI",
+"reste": 45000
+},
+{
+"id": "i14",
+"des": "Moto de livraison",
+"cpt": "245",
+"amo": "2845",
+"acq": "2022-09-20",
+"mes": "2022-10-01",
+"brut": 80000,
+"mois": 48,
+"mode": "LINEAIRE",
+"fam": "AN",
+"cptLib": "Matériel de transport",
+"amoLib": "Amortissements du matériel de transport",
+"statut": "EN_SERVICE",
+"cum": 65000,
+"net": 15000,
+"dot": 20000,
+"etat": "EN_COURS",
+"reste": 15000
+},
+{
+"id": "i15",
+"des": "Camion plateau",
+"cpt": "245",
+"amo": "2845",
+"acq": "2023-12-14",
+"mes": "2024-01-01",
+"brut": 320000,
+"mois": 48,
+"mode": "LINEAIRE",
+"fam": "AN",
+"cptLib": "Matériel de transport",
+"amoLib": "Amortissements du matériel de transport",
+"statut": "EN_SERVICE",
+"cum": 160000,
+"net": 160000,
+"dot": 80000,
+"etat": "EN_COURS",
+"reste": 160000
+},
+{
+"id": "i16",
+"des": "Imprimante d’étiquettes (saisie en double)",
+"cpt": "244",
+"amo": "2844",
+"acq": "2025-03-14",
+"mes": null,
+"brut": 85000,
+"mois": 60,
+"mode": "LINEAIRE",
+"fam": "AM",
+"annule": true,
+"cptLib": "Matériel et mobilier",
+"amoLib": "Amortissements du matériel et mobilier",
+"statut": "ANNULEE",
+"cum": 0,
+"net": 85000,
+"dot": 0,
+"etat": "ANNULEE"
+}
+],
+"tot": {
+"AF": {
+"brut": 900000,
+"amo": 600000,
+"net": 300000,
+"dot": 80000,
+"brut24": 900000,
+"net24": 380000
+},
+"AJ": {
+"brut": 1500000,
+"amo": 0,
+"net": 1500000,
+"dot": 0,
+"brut24": 1500000,
+"net24": 1500000
+},
+"AK": {
+"brut": 3400000,
+"amo": 2200000,
+"net": 1200000,
+"dot": 340000,
+"brut24": 3400000,
+"net24": 1540000
+},
+"AM": {
+"brut": 1025000,
+"amo": 700000,
+"net": 325000,
+"dot": 165000,
+"brut24": 585000,
+"net24": 50000
+},
+"AN": {
+"brut": 400000,
+"amo": 225000,
+"net": 175000,
+"dot": 190000,
+"brut24": 940000,
+"net24": 410000
+}
+},
+"dot": 775000,
+"brut": 7225000,
+"amo": 3725000,
+"net": 3500000,
+"lib": {
+"213": "Logiciels et sites internet",
+"22": "Terrains",
+"231": "Bâtiments industriels, agricoles, administratifs et commerciaux sur sol propre",
+"235": "Aménagements, agencements et installations techniques",
+"241": "Matériel et outillage industriel et commercial",
+"244": "Matériel et mobilier",
+"245": "Matériel de transport",
+"2813": "Amortissements des logiciels et sites internet",
+"282": "Amortissements des terrains",
+"2831": "Amortissements des bâtiments industriels, agricoles, administratifs et commerciaux sur sol propre",
+"2835": "Amortissements des aménagements de bureaux",
+"2841": "Amortissements du matériel et outillage industriel et commercial",
+"2844": "Amortissements du matériel et mobilier",
+"2845": "Amortissements du matériel de transport",
+"681": "Dotations aux amortissements d'exploitation"
+}
+};
+      var NB = String.fromCharCode(8239), NBSP = String.fromCharCode(160);
+      function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+      function ico(p) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">' + p + '</svg>'; }
+      var IC = { lock: ico('<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'), info: ico('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>'), warn: ico('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/>'), ok: ico('<path d="M20 6 9 17l-5-5"/>'), arrow: ico('<path d="M5 12h14M13 6l6 6-6 6"/>') };
+      function nb(i) { var n = Math.round(i), s = String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, NB); return (n < 0 ? '−' : '') + s; }
+      function nbF(i) { return nb(i) + NBSP + 'F'; }
+      function fr(iso) { var p = String(iso || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : ''; }
+      function clone(x) { return JSON.parse(JSON.stringify(x)); }
+
+      /* ── Ce que le dossier de démonstration sait : ses exercices, son plan, le barème dégressif du paquet fiscal du Togo (Art. 100 CGI). ── */
+      var EXOS = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026].map(function (y) { return { y: y, statut: y >= 2025 ? 'OUVERT' : 'CLOS' }; });
+      function exo(iso) { var y = +String(iso).slice(0, 4); for (var i = 0; i < EXOS.length; i++) if (EXOS[i].y === y) return EXOS[i]; return null; }
+      var BAREME = [{ min: 3, max: 4, c: [3, 2] }, { min: 5, max: 6, c: [2, 1] }, { min: 7, max: null, c: [5, 2] }];
+      function coefDe(mois) {
+        if (mois % 12 !== 0) return null;
+        var a = mois / 12;
+        for (var i = 0; i < BAREME.length; i++) if (a >= BAREME[i].min && (BAREME[i].max == null || a <= BAREME[i].max)) return BAREME[i].c;
+        return null;
+      }
+      function coefTxt(c) { return String(c[0] / c[1]).replace('.', ','); }
+      var COMPTES = ['213', '231', '235', '241', '244', '245'];
+      var LIBC = DATA.lib;
+      var FAM = { AF: 'Brevets, licences, logiciels et droits similaires', AJ: 'Terrains', AK: 'Bâtiments', AM: 'Matériel, mobilier et actifs biologiques', AN: 'Matériel de transport' };
+      var FAMS = ['AF', 'AJ', 'AK', 'AM', 'AN'];
+      function famDe(cpt) { return cpt === '213' ? 'AF' : cpt === '22' ? 'AJ' : cpt.charAt(1) === '3' ? 'AK' : cpt === '245' ? 'AN' : 'AM'; }
+      function amoDe(cpt) { return '28' + cpt.slice(1); }
+      var TYPE = { ACQUISITION: 'Acquisition', MISE_EN_SERVICE: 'Mise en service', CESSION: 'Cession', MISE_AU_REBUT: 'Mise au rebut', REEVALUATION: 'Réévaluation', ANNULATION: 'Annulation' };
+      var REFUS = {
+        EXERCICE_CLOS: 'Cet exercice est clos : on n’y inscrit plus de mouvement. Choisissez une date dans un exercice ouvert.',
+        EXERCICE_INTROUVABLE: 'Aucun exercice du dossier ne couvre cette date. Ouvrez d’abord l’exercice concerné dans le dossier.',
+        EXERCICE_AMBIGU: 'Deux exercices du dossier couvrent cette date : corrigez-les dans le dossier avant de continuer.',
+        MOUVEMENT_HORS_CHRONOLOGIE: 'Cette date est antérieure au dernier mouvement de ce bien. Choisissez une date qui suit.',
+        COMPTE_HORS_PLAN_DU_DOSSIER: 'Ce compte n’existe pas dans le plan comptable de ce dossier. Choisissez-en un dans la liste. Rien n’a été enregistré.',
+        VALEUR_RESIDUELLE_INVALIDE: 'La valeur résiduelle doit rester inférieure à la valeur d’origine.',
+        DUREE_HORS_BAREME_DEGRESSIF: 'Le dégressif demande une durée en années entières, de 3 ans au moins. Choisissez linéaire, ou changez la durée.',
+        COEFFICIENT_DEGRESSIF_NON_PUBLIE: 'Les règles fiscales de ce pays ne publient pas de barème dégressif : choisissez linéaire.',
+        CONFLIT_CONCURRENT: 'Quelqu’un vient d’enregistrer un autre mouvement sur ce bien. La fiche est relue : vérifiez, puis recommencez.',
+        TRANSITION_INTERDITE: 'Ce bien n’est plus dans l’état qui permet cette action. La fiche vient d’être relue.',
+        DOSSIER_ARCHIVE: 'Ce dossier est archivé : le registre se lit, il ne se modifie plus.',
+        ORG_CONTEXTE_REQUIS: 'Votre session n’est rattachée à aucun cabinet. Reconnectez-vous : droits et rattachement mettent jusqu’à 15 minutes à se mettre à jour.',
+        DATE_REQUISE: 'Indiquez une date.',
+        reseau: 'Le service ne répond pas. Rien n’a été enregistré : réessayez dans un instant.'
+      };
+
+      /* ── Le simulateur du serveur : 30/360, part de la MISE EN SERVICE (AUDCIF). L’écran réel ne calcule rien : il lit GET …/{id}/plan. ── */
+      function parse(iso) { var p = iso.split('-'); return { y: +p[0], m: +p[1], d: +p[2] }; }
+      function days30(a, b) {
+        var A = parse(a), B = parse(b), d1 = Math.min(A.d, 30), d2 = B.d;
+        if (d2 > 30 || (B.m === 2 && d2 === new Date(B.y, 2, 0).getDate())) d2 = 30;
+        return (B.y - A.y) * 360 + (B.m - A.m) * 30 + (d2 - d1) + 1;
+      }
+      function cumAt(it, iso) {
+        if (!it.mes || it.mode === 'NON_AMORTISSABLE' || iso < it.mes) return 0;
+        var plein = it.mois * 30, j = Math.min(days30(it.mes, iso), plein), base = it.brut - (it.res || 0);
+        if (it.mode === 'LINEAIRE') return Math.round(base * j / plein);
+        return Math.min(base, Math.round(it.brut * it.coef[0] * Math.min(j, 360) / (it.coef[1] * (it.mois / 12) * 360)));
+      }
+      function situ(it, fin) {
+        if (it.annule || it.acq > fin) return null;
+        var sorti = !!(it.sortie && it.sortie.date <= fin), fe = sorti ? it.sortie.date : fin;
+        var cum = cumAt(it, fe), prec = cumAt(it, DEB24);
+        return { sorti: sorti, brut: it.brut, cum: cum, net: it.brut - cum, dot: cum - Math.min(prec, cum), sortie: sorti ? sortieDe(it, cum) : null };
+      }
+      function sortieDe(it, cum) { var vnc = it.brut - cum, r = it.sortie.prix - vnc; return { type: it.sortie.type, date: it.sortie.date, prix: it.sortie.prix, vnc: vnc, resultat: r, nature: r > 0 ? 'PLUS_VALUE' : r < 0 ? 'MOINS_VALUE' : 'NUL' }; }
+      function statutDe(it) {
+        if (it.annule) return 'ANNULEE';
+        if (it.sortie) return it.sortie.type === 'CESSION' ? 'CEDEE' : 'MISE_AU_REBUT';
+        return it.mes || it.mode === 'NON_AMORTISSABLE' ? 'EN_SERVICE' : 'ACQUISE';
+      }
+      function etatPlan(it, s) {
+        if (it.annule) return 'ANNULEE';
+        if (it.sortie && s && s.sorti) return 'SORTI';
+        if (it.mode === 'NON_AMORTISSABLE') return 'NON_AMORTISSABLE';
+        if (!it.mes) return 'NON_MIS_EN_SERVICE';
+        if (it.reeval) return 'INTERROMPU';
+        return s && s.cum >= it.brut - (it.res || 0) ? 'AMORTI' : 'EN_COURS';
+      }
+      function fabrique(r) {
+        var it = { id: r.id, des: r.des, cpt: r.cpt, amo: r.amo, acq: r.acq, mes: r.mes || null, brut: r.brut, mois: r.mois, mode: r.mode, coef: r.coef || null, res: r.residuel || 0, sortie: r.sortie ? { type: r.sortie.type, date: r.sortie.date, prix: r.sortie.prix } : null, annule: !!r.annule, reeval: null, att: { cum: r.cum, dot: r.dot, net: r.net }, mv: [] };
+        var rg = 1;
+        function mv(type, date, extra) { var m = { rang: rg++, type: type, date: date, annule: false }; for (var k in (extra || {})) m[k] = extra[k]; it.mv.push(m); }
+        mv('ACQUISITION', r.acq, { annule: !!r.annule });
+        if (r.annule) mv('ANNULATION', '2025-03-18', { vise: 1 });
+        else {
+          if (r.mes) mv('MISE_EN_SERVICE', r.mes);
+          if (r.sortie) mv(r.sortie.type, r.sortie.date, { prix: r.sortie.prix });
+        }
+        return it;
+      }
+      function depart() { return DATA.items.map(fabrique); }
+      function totaux(items) {
+        var T = { brut: 0, cum: 0, net: 0, dot: 0, par: {} };
+        FAMS.forEach(function (f) { T.par[f] = { brut: 0, cum: 0, net: 0, dot: 0, n: 0 }; });
+        items.forEach(function (it) {
+          var s = situ(it, FIN); if (!s) return;
+          var p = T.par[famDe(it.cpt)];
+          p.dot += s.dot; T.dot += s.dot;
+          if (!s.sorti) { p.brut += s.brut; p.cum += s.cum; p.net += s.net; p.n++; T.brut += s.brut; T.cum += s.cum; T.net += s.net; }
+        });
+        return T;
+      }
+      /* Assertions métier : jamais 0 <= amortissement <= brut en défaut, net = brut − amortissement, et le registre de départ = le Bilan. */
+      function verifier(items, depart_) {
+        var bad = [];
+        items.forEach(function (it) {
+          var s = situ(it, FIN); if (!s) return;
+          if (!(s.cum >= 0 && s.cum <= it.brut)) bad.push(it.id + ' : amortissement hors de 0..brut');
+          if (s.net !== it.brut - s.cum) bad.push(it.id + ' : net ≠ brut − amortissement');
+          if (depart_ && it.att && (it.att.cum !== s.cum || it.att.dot !== s.dot)) bad.push(it.id + ' : écart avec le serveur ' + it.att.cum + '/' + s.cum);
+        });
+        var T = totaux(items);
+        if (T.brut - T.cum !== T.net) bad.push('total : net ≠ brut − amortissement');
+        if (depart_) {
+          var A = { AF: [900000, 600000, 300000], AJ: [1500000, 0, 1500000], AK: [3400000, 2200000, 1200000], AM: [1025000, 700000, 325000], AN: [400000, 225000, 175000] };
+          FAMS.forEach(function (f) { var p = T.par[f]; if (p.brut !== A[f][0] || p.cum !== A[f][1] || p.net !== A[f][2]) bad.push('famille ' + f + ' ≠ Bilan'); });
+          if (T.brut !== 7225000 || T.cum !== 3725000 || T.net !== 3500000) bad.push('total ≠ note 3A du Bilan');
+          if (T.dot > 860000) bad.push('dotations du registre > RL');
+          var c = items.filter(function (i) { return i.sortie && i.sortie.date <= FIN; }).map(function (i) { return sortieDe(i, cumAt(i, i.sortie.date)); });
+          if (c.reduce(function (t, x) { return t + x.prix; }, 0) !== 300000 || c.reduce(function (t, x) { return t + x.vnc; }, 0) !== 45000) bad.push('cessions ≠ TN/RO du compte de résultat');
+        }
+        return bad;
+      }
+
+      /* ── L’état de l’écran ── */
+      var S = { mode: 'registre', err: 'aucun', items: depart(), filtre: 'tous', ouvert: null, form: null, act: null, f: {}, notice: null, erreur: null, lotRes: null, bad: [] };
+      S.bad = verifier(S.items, true);
+      if (S.bad.length && window.console) console.error('FE-097 · assertions du jeu de démonstration :', S.bad);
+      window.__lot7p3c = function () { return S; };
+      function lecture() { return S.mode === 'clos' || S.mode === 'archive'; }
+      function parId(id) { for (var i = 0; i < S.items.length; i++) if (S.items[i].id === id) return S.items[i]; return null; }
+      function pending() { return S.items.filter(function (i) { return !i.annule && statutDe(i) === 'ACQUISE'; }); }
+      function dernierMv(it) { for (var i = it.mv.length - 1; i >= 0; i--) if (!it.mv[i].annule && it.mv[i].type !== 'ANNULATION') return it.mv[i]; return null; }
+      function compteLib(c) { return c + ' · ' + (LIBC[c] || ''); }
+
+      /* ── L’en-tête et le cartouche : de qui, quel exercice, quelle unité, quand ── */
+      function cartouche() {
+        return '<div class="prj-cart"><span class="prj-cart-n"><b>Ets Kossi Distribution</b><small>NIF 1000745307 · RCCM TG-LOM-2019-A-1204 · Système normal</small></span>' +
+          '<span class="prj-cart-m"><i>Exercice</i><b>2025</b><em>du 01/01/2025 au 31/12/2025 · ouvert</em></span>' +
+          '<span class="prj-cart-m"><i>Unité</i><b>franc CFA (XOF)</b><em>montants en francs</em></span>' +
+          '<span class="prj-cart-m"><i>Édité le</i><b>' + fr(TODAY) + '</b><em>date posée par l’écran<span data-note> · la réponse du serveur n’en porte aucune</span></em></span></div>';
+      }
+      function entete() {
+        return '<div class="dp-head"><div><h3>Registre des immobilisations</h3><p>Le brut, l’amortissement cumulé et le net de chaque bien sont calculés par Prospera : vous n’avez rien à saisir ni à additionner.</p></div></div>' + cartouche();
+      }
+      function tuiles(T) {
+        return '<div class="im-tri"><div>Brut à la clôture<b>' + nb(T.brut) + '</b></div><div>Amortissements cumulés<b>' + nb(T.cum) + '</b></div><div class="net">Net<b>' + nb(T.net) + '</b></div><div>Dotation de l’exercice<b>' + nb(T.dot) + '</b></div></div>';
+      }
+      function mention() {
+        return '<div class="im-note">' + IC.info + '<span><b>Ce registre ne modifie pas encore votre balance.</b> Les dotations ne sont pas dans votre bilan, et la note 3 de la liasse ne vient pas d’ici.</span></div>';
+      }
+
+      /* ── La zone d’action : un seul geste principal ── */
+      function zoneAction() {
+        if (lecture()) {
+          return '<div class="dp-card">' + '<p class="dp-big">' + IC.lock + ' ' + (S.mode === 'clos' ? 'Cet exercice est clos : le registre se lit, il ne se modifie plus.' : 'Ce dossier est archivé : le registre se lit, il ne se modifie plus.') + '</p></div>';
+        }
+        var p = pending();
+        if (p.length) {
+          return '<div class="dp-card warn"><p class="dp-big">' + (p.length === 1 ? '1 bien attend sa mise en service.' : p.length + ' biens attendent leur mise en service.') + '</p>' +
+            '<div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-im-act="lot">Mettre en service ' + (p.length === 1 ? 'ce bien' : 'ces ' + p.length + ' biens') + '</button>' +
+            '<button class="btn btn-ghost" type="button" data-im-act="ajout">Ajouter un bien</button></div></div>';
+        }
+        return '<div class="dp-card ok"><p class="dp-big">' + IC.ok + ' Tous les biens du registre sont en service.</p>' +
+          '<div class="dp-go"><button class="btn btn-primary dp-lg" type="button" data-im-act="ajout">Ajouter un bien</button></div></div>';
+      }
+
+      /* ── Mettre en service plusieurs biens d’un coup : une seule date, jamais pré-remplie (AC-2) ── */
+      function formLot() {
+        var p = pending(), r = S.lotRes || {};
+        var lst = p.map(function (it) {
+          var ck = S.f.lot && S.f.lot[it.id] === false ? '' : ' checked';
+          var m = r[it.id] ? '<span class="res ' + (r[it.id].ok ? 'ok' : 'ko') + '">' + esc(r[it.id].m) + '</span>' : '';
+          return '<li><label><input type="checkbox" data-im-ck="' + it.id + '"' + ck + '> <span><b>' + esc(it.des) + '</b> · ' + nb(it.brut) + ' · acquis le ' + fr(it.acq) + '</span></label>' + m + '</li>';
+        }).join('');
+        var e = S.f.dateErr;
+        return '<div class="im-form"><h4>À quelle date ' + (p.length === 1 ? 'ce bien entre-t-il' : 'ces biens entrent-ils') + ' en service ?</h4>' +
+          '<ul class="im-lot">' + lst + '</ul>' +
+          '<div class="im-f' + (e ? ' bad' : '') + '"><label for="imLotDate">Date de mise en service</label><input id="imLotDate" type="date" data-im-f="date" value="' + esc(S.f.date || '') + '">' +
+          (e ? '<small class="err">' + esc(e) + '</small>' : '<small>Ce n’est pas la date d’achat : c’est ce jour-là que l’amortissement commence.</small>') + '</div>' +
+          '<div class="dp-go"><button class="btn btn-primary" type="button" data-im-act="lot-ok"' + (S.f.date ? '' : ' disabled') + '>Mettre en service</button><button class="dp-link" type="button" data-im-act="fermer">Annuler</button></div></div>';
+      }
+
+      /* ── Ajouter un bien : tout est pré-rempli à partir du dossier ; rien à calculer ── */
+      function dernierCompte() { var l = S.items.filter(function (i) { return !i.annule && i.mode !== 'NON_AMORTISSABLE'; }).sort(function (a, b) { return a.acq < b.acq ? 1 : -1; })[0]; return l ? l.cpt : '244'; }
+      function dureeDu(cpt) { var l = S.items.filter(function (i) { return i.cpt === cpt && !i.annule && i.mois; }).sort(function (a, b) { return a.acq < b.acq ? 1 : -1; })[0]; return l ? l.mois : ''; }
+      function initAjout() {
+        var c = dernierCompte();
+        S.f = { cpt: c, des: '', brut: '', acq: TODAY, mois: String(dureeDu(c)), mode: 'LINEAIRE', res: '', errs: {} };
+      }
+      function echoMois(m) { m = +m; if (!m) return ''; return m % 12 === 0 ? '= ' + (m / 12) + (m / 12 > 1 ? ' ans' : ' an') : '= ' + Math.floor(m / 12) + ' an' + (m >= 24 ? 's' : '') + ' et ' + (m % 12) + ' mois'; }
+      function formAjout() {
+        var f = S.f, E = f.errs || {};
+        function champ(k, lab, inner, aide) { return '<div class="im-f' + (E[k] ? ' bad' : '') + '"><label for="imF' + k + '">' + lab + '</label>' + inner + (E[k] ? '<small class="err">' + esc(E[k]) + '</small>' : (aide ? '<small>' + aide + '</small>' : '')) + '</div>'; }
+        var opts = COMPTES.map(function (c) { return '<option value="' + c + '"' + (f.cpt === c ? ' selected' : '') + '>' + esc(compteLib(c)) + '</option>'; }).join('');
+        var cf = coefDe(+f.mois);
+        var aideMode = f.mode === 'DEGRESSIF' ? (cf ? 'Coefficient ×' + coefTxt(cf) + ' (Art. 100 CGI, paquet fiscal du Togo), retenu et figé à l’enregistrement. Réservé au matériel et à l’outillage neufs.' : 'Le barème ne vise que des durées en années entières, de 3 ans au moins.') : '';
+        return '<div class="im-form"><h4>Ajouter un bien</h4><div class="im-grid">' +
+          champ('des', 'Désignation', '<input id="imFdes" type="text" maxlength="200" data-im-f="des" value="' + esc(f.des) + '" placeholder="Camion, logiciel, rayonnage…">') +
+          champ('cpt', 'Compte (plan du dossier)', '<select id="imFcpt" data-im-f="cpt">' + opts + '</select>', 'Le dernier compte utilisé est proposé.') +
+          champ('brut', 'Valeur d’origine (F)', '<input id="imFbrut" type="text" inputmode="numeric" data-im-f="brut" value="' + esc(f.brut) + '" placeholder="0">') +
+          champ('acq', 'Date d’acquisition', '<input id="imFacq" type="date" data-im-f="acq" value="' + esc(f.acq) + '">') +
+          champ('mois', 'Durée d’utilité (en mois)', '<input id="imFmois" type="text" inputmode="numeric" data-im-f="mois" value="' + esc(f.mois) + '"><span data-im-echo style="font-size:0.76rem;color:var(--muted-fg)">' + echoMois(f.mois) + '</span>', f.mois ? '' : 'Aucun bien sur ce compte : indiquez la durée.') +
+          champ('mode', 'Mode', '<select id="imFmode" data-im-f="mode"><option value="LINEAIRE"' + (f.mode === 'LINEAIRE' ? ' selected' : '') + '>Linéaire</option><option value="DEGRESSIF"' + (f.mode === 'DEGRESSIF' ? ' selected' : '') + '>Dégressif</option></select>', aideMode) +
+          '</div><details class="ob-fold"' + (f.det ? ' open' : '') + ' data-im-fold><summary>Détails (déjà remplis)</summary><div class="im-grid" style="margin-top:0.5rem">' +
+          champ('res', 'Valeur résiduelle (F)', '<input id="imFres" type="text" inputmode="numeric" data-im-f="res" value="' + esc(f.res) + '" placeholder="0">', 'Laissez vide s’il n’y en a pas.') +
+          '<div class="im-f"><label>Comptes d’amortissement et de dotation</label><input type="text" readonly value="' + esc(amoDe(f.cpt) + ' · 681') + '"><small>Déduits du compte, dans le plan du dossier.</small></div></div></details>' +
+          '<p style="margin:0;font-size:0.82rem;color:var(--muted-fg)">Le bien sera amorti à partir de sa <b>mise en service</b>, qui s’indique ensuite : elle n’est jamais déduite de la date d’acquisition.</p>' +
+          '<div class="dp-go"><button class="btn btn-primary" type="button" data-im-act="ajout-ok">Enregistrer le bien</button><button class="dp-link" type="button" data-im-act="fermer">Annuler</button></div></div>';
+      }
+
+      /* ── Le tableau : un bien par ligne, brut / amortissement cumulé / net restitués ── */
+      function chip(it, s) {
+        var st = statutDe(it), e = etatPlan(it, s);
+        if (st === 'ANNULEE') return '<span class="dp-pill">Annulée</span>';
+        if (st === 'ACQUISE') return '<span class="dp-pill todo">Pas encore en service</span>';
+        if (it.sortie) return '<span class="dp-pill">' + (it.sortie.type === 'CESSION' ? 'Cédé' : 'Mis au rebut') + ' le ' + fr(it.sortie.date) + (it.sortie.date > FIN ? ' (exercice ' + it.sortie.date.slice(0, 4) + ')' : '') + '</span>';
+        if (e === 'NON_AMORTISSABLE') return '<span class="dp-pill">Non amortissable</span>';
+        if (e === 'INTERROMPU') return '<span class="dp-pill todo">Plan interrompu</span>';
+        if (e === 'AMORTI') return '<span class="dp-pill done">Totalement amorti</span>';
+        return '';
+      }
+      function lignes(it) {
+        var s = situ(it, FIN), L = chip(it, s);
+        var sl2 = 'Acquis le ' + fr(it.acq) + ' · ' + (it.mes ? 'en service le ' + fr(it.mes) : it.mode === 'NON_AMORTISSABLE' ? 'pas d’amortissement' : 'mise en service à renseigner');
+        var sl3 = '';
+        if (s && s.sorti) sl3 = '<small>' + (s.sortie.type === 'CESSION' ? 'Prix ' + nb(s.sortie.prix) + ' · valeur nette ' + nb(s.sortie.vnc) + ' · ' : 'Valeur nette ' + nb(s.sortie.vnc) + ' · ') + (s.sortie.nature === 'PLUS_VALUE' ? 'plus-value ' + nb(s.sortie.resultat) : s.sortie.nature === 'MOINS_VALUE' ? 'moins-value ' + nb(-s.sortie.resultat) : 'résultat nul') + '</small>';
+        var cls = 'im-row' + (s && s.sorti ? ' out' : '') + (it.annule ? ' off' : '') + (S.ouvert === it.id ? ' sel' : '');
+        var cellN = function (v) { return '<td class="im-n">' + (v == null ? '—' : nb(v)) + '</td>'; };
+        var brut = !s || s.sorti ? null : s.brut, cum = !s || s.sorti ? null : s.cum, net = !s || s.sorti ? null : s.net;
+        if (it.annule) { brut = it.brut; cum = null; net = null; }
+        var hid = function (v) { return '<td class="im-n im-hide">' + (v == null ? '—' : nb(v)) + '</td>'; };
+        var r = '<tr class="' + cls + '"><td class="im-b"><button type="button" class="im-nm" data-im-row="' + it.id + '" aria-expanded="' + (S.ouvert === it.id) + '">' + esc(it.des) + '</button>' +
+          '<small>' + esc(compteLib(it.cpt)) + '</small><small>' + sl2 + '</small>' + sl3 + (L ? '<div>' + L + '</div>' : '') + '</td>' + cellN(brut) + cellN(cum) + cellN(net) + hid(s ? s.dot : null) + '</tr>';
+        if (S.ouvert === it.id) r += detail(it, s);
+        return r;
+      }
+      function detail(it, s) {
+        var st = statutDe(it), e = etatPlan(it, s), dg = it.mode === 'DEGRESSIF';
+        var dl = '<dl class="im-dl"><div><dt>Compte d’amortissement</dt><dd>' + esc(compteLib(it.amo)) + '</dd></div><div><dt>Compte de dotation</dt><dd>' + esc(compteLib('681')) + '</dd></div>' +
+          '<div><dt>Durée et mode</dt><dd>' + (it.mode === 'NON_AMORTISSABLE' ? 'Non amortissable' : it.mois + ' mois (' + (it.mois % 12 === 0 ? it.mois / 12 + ' ans' : echoMois(it.mois).replace('= ', '')) + ') · ' + (dg ? 'dégressif ×' + coefTxt(it.coef) + ' (Art. 100 CGI)' : 'linéaire')) + '</dd></div>' +
+          '<div><dt>Base amortissable</dt><dd>' + (it.mode === 'NON_AMORTISSABLE' ? '—' : nb(it.brut - (it.res || 0))) + '</dd></div>' +
+          '<div><dt>Dotation de l’exercice</dt><dd>' + (s ? nb(s.dot) : '—') + '</dd></div><div><dt>Reste à amortir</dt><dd>' + (it.mode === 'NON_AMORTISSABLE' || it.annule ? '—' : s && s.sorti ? '—' : nb(Math.max(0, it.brut - (it.res || 0) - (s ? s.cum : 0)))) + '</dd></div></dl>';
+        var jr = '<ul class="im-jr">' + it.mv.map(function (m) {
+          var ex = exo(m.date), tx = TYPE[m.type] + ' le ' + fr(m.date) + (m.prix != null ? ' · prix ' + nb(m.prix) : '') + (m.valeur != null ? ' · valeur ' + nb(m.valeur) : '') + (m.vise ? ' · annule le mouvement n° ' + m.vise : '') + ' · exercice ' + m.date.slice(0, 4) + (ex && ex.statut === 'CLOS' ? ' (clos)' : '') + ' · par Kofi Santos' + (m.annule ? ' · annulé' : '');
+          return '<li' + (m.annule ? ' class="ann"' : '') + '><i>' + m.rang + '</i><span>' + esc(tx) + '</span></li>';
+        }).join('') + '</ul>';
+        var note = e === 'INTERROMPU' ? '<div class="im-note">' + IC.warn + '<span>Une réévaluation a été enregistrée : Prospera ne sait pas encore la suivre, le plan s’arrête à sa date.</span></div>' : '';
+        var acts = '';
+        if (!lecture() && !it.annule && !(S.act && S.act.id === it.id)) {
+          var b = function (k, l, cl) { return '<button class="btn ' + (cl || 'btn-ghost') + ' btn-sm" type="button" data-im-do="' + k + '" data-im-id="' + it.id + '">' + l + '</button>'; };
+          if (st === 'ACQUISE') acts += b('mes', 'Mettre en service', 'btn-primary');
+          if (st === 'EN_SERVICE' && it.mode !== 'NON_AMORTISSABLE') acts += b('cession', 'Céder') + b('rebut', 'Mettre au rebut') + b('reeval', 'Réévaluer');
+          if (st === 'EN_SERVICE' && it.mode === 'NON_AMORTISSABLE') acts += b('cession', 'Céder');
+          if (dernierMv(it)) acts += b('annul', 'Annuler le dernier mouvement');
+        }
+        var plan = (st === 'ACQUISE' || it.mode === 'NON_AMORTISSABLE') ? '' : '<button class="btn btn-ghost btn-sm" type="button" data-im-act="plan" data-im-id="' + it.id + '">Voir son plan d’amortissement ' + IC.arrow + '</button>';
+        return '<tr class="im-det"><td colspan="5"><div class="im-det-in">' + dl + note + '<div><p class="dp-motif-k" style="margin:0 0 0.3rem">Journal du bien (on n’y modifie rien : on annule)</p>' + jr + '</div>' +
+          (S.act && S.act.id === it.id ? formAct(it) : '<div class="im-acts">' + acts + plan + '</div>') + '</div></td></tr>';
+      }
+      function formAct(it) {
+        var a = S.act, k = a.type, E = S.f.dateErr, t = { mes: 'Mettre en service', cession: 'Céder', rebut: 'Mettre au rebut', reeval: 'Réévaluer', annul: 'Annuler le dernier mouvement' }[k];
+        var inner = '';
+        if (k === 'annul') {
+          var m = dernierMv(it);
+          inner = '<p style="margin:0;font-size:0.85rem">Annuler <b>' + esc(TYPE[m.type].toLowerCase()) + ' du ' + fr(m.date) + '</b> ? Il reste au journal, barré : rien n’est effacé.</p>';
+        } else {
+          inner = '<div class="im-grid"><div class="im-f' + (E ? ' bad' : '') + '"><label for="imActDate">Date</label><input id="imActDate" type="date" data-im-f="date" value="' + esc(S.f.date || '') + '">' +
+            (E ? '<small class="err">' + esc(E) + '</small>' : k === 'mes' ? '<small>Ce n’est pas la date d’achat : c’est ce jour-là que l’amortissement commence.</small>' : '') + '</div>';
+          if (k === 'cession' || k === 'reeval') inner += '<div class="im-f"><label for="imActVal">' + (k === 'cession' ? 'Prix de cession (F)' : 'Valeur réévaluée (F)') + '</label><input id="imActVal" type="text" inputmode="numeric" data-im-f="val" value="' + esc(S.f.val || '') + '" placeholder="0"></div>';
+          inner += '</div>';
+        }
+        return '<div class="im-form"><h4>' + t + ' : ' + esc(it.des) + '</h4>' + inner + '<div class="dp-go"><button class="btn btn-primary" type="button" data-im-act="act-ok"' + (k === 'annul' || S.f.date ? '' : ' disabled') + '>' + (k === 'annul' ? 'Oui, annuler' : 'Enregistrer') + '</button><button class="dp-link" type="button" data-im-act="fermer">Annuler</button></div></div>';
+      }
+      function filtreOk(it) {
+        var st = statutDe(it), s = situ(it, FIN), sorti = !!(s && s.sorti) || (it.sortie && it.sortie.date <= FIN);
+        switch (S.filtre) {
+          case 'attente': return st === 'ACQUISE';
+          case 'service': return st === 'EN_SERVICE' && !!s;
+          case 'sorties': return !!it.sortie && !it.annule;
+          case 'annulees': return it.annule;
+          default: return !it.annule;
+        }
+      }
+      function chips() {
+        var n = { tous: 0, attente: 0, service: 0, sorties: 0, annulees: 0 };
+        S.items.forEach(function (it) {
+          var st = statutDe(it);
+          if (!it.annule) n.tous++; if (st === 'ACQUISE') n.attente++; if (st === 'EN_SERVICE') n.service++; if (it.sortie && !it.annule) n.sorties++; if (it.annule) n.annulees++;
+        });
+        var def = [['tous', 'Tous les biens'], ['attente', 'Pas encore en service'], ['service', 'En service'], ['sorties', 'Sortis'], ['annulees', 'Annulés']];
+        return '<div class="dp-chips" role="group" aria-label="Filtrer le registre">' + def.filter(function (d) { return d[0] === 'tous' || n[d[0]] > 0 || S.filtre === d[0]; }).map(function (d) {
+          return '<button class="dp-chip" type="button" data-im-filtre="' + d[0] + '" aria-pressed="' + (S.filtre === d[0]) + '">' + d[1] + ' <b>' + n[d[0]] + '</b></button>';
+        }).join('') + '</div>';
+      }
+      function tableau(T) {
+        var visibles = S.items.filter(filtreOk), suivant = visibles.filter(function (i) { return i.acq > FIN && !i.annule; });
+        var h = '<div class="im-tblwrap"><table class="im-tbl"><thead><tr><th class="im-b">Bien</th><th class="im-n">Brut</th><th class="im-n">Amort. cumulé</th><th class="im-n">Net</th><th class="im-n im-hide">Dotation ' + 2025 + '</th></tr></thead><tbody>';
+        var n = 0;
+        FAMS.forEach(function (f) {
+          var l = visibles.filter(function (i) { return famDe(i.cpt) === f && !(i.acq > FIN && !i.annule); });
+          if (!l.length) return;
+          n += l.length;
+          h += '<tr class="im-fam"><td colspan="5"><code>' + f + '</code>' + esc(FAM[f]) + '</td></tr>' + l.map(lignes).join('');
+          if (S.filtre === 'tous') { var p = T.par[f]; h += '<tr class="im-sub"><td class="im-b">Sous-total · ' + p.n + ' bien' + (p.n > 1 ? 's' : '') + '</td><td class="im-n">' + nb(p.brut) + '</td><td class="im-n">' + nb(p.cum) + '</td><td class="im-n">' + nb(p.net) + '</td><td class="im-n im-hide">' + nb(p.dot) + '</td></tr>'; }
+        });
+        if (!n) h += '<tr><td colspan="5" style="color:var(--muted-fg)">Aucun bien dans cette vue.</td></tr>';
+        if (S.filtre === 'tous') h += '<tr class="im-tot"><td class="im-b">Total du registre</td><td class="im-n">' + nb(T.brut) + '</td><td class="im-n">' + nb(T.cum) + '</td><td class="im-n">' + nb(T.net) + '</td><td class="im-n im-hide">' + nb(T.dot) + '</td></tr>';
+        h += '</tbody></table></div>';
+        if (suivant.length) h += '<div class="im-note">' + IC.info + '<span><b>Acquis après la clôture :</b> ' + suivant.map(function (i) { return esc(i.des) + ' (' + nb(i.brut) + ', le ' + fr(i.acq) + ')'; }).join(' · ') + '. Ils entreront dans le registre de l’exercice ' + suivant[0].acq.slice(0, 4) + '.</span></div>';
+        return h;
+      }
+      function suite() {
+        return '<div class="dp-card"><p class="dp-big">Étape suivante : le plan d’amortissement</p><p class="dp-sub">Prospera y détaille la dotation de chaque exercice, avec sa formule.</p>' +
+          '<div class="dp-go"><button class="btn btn-ghost" type="button" data-im-act="plan">Ouvrir le plan d’amortissement ' + IC.arrow + '</button></div></div>';
+      }
+      function banc() {
+        var o = function (v, l, cur) { return '<option value="' + v + '"' + (cur === v ? ' selected' : '') + '>' + l + '</option>'; };
+        return '<div class="dp-rig" data-note><b>Banc d’essai (FE-097).</b> <label>État <select data-im-rig-mode>' + o('registre', 'Registre rempli', S.mode) + o('vide', 'Aucun bien', S.mode) + o('clos', 'Exercice clos (lecture seule)', S.mode) + o('archive', 'Dossier archivé', S.mode) + o('chargement', 'Chargement', S.mode) + o('indispo', 'Service indisponible', S.mode) + o('acces', 'Accès refusé', S.mode) + '</select></label>' +
+          '<label>Prochain envoi <select data-im-rig-err>' + o('aucun', 'Accepté', S.err) + o('CONFLIT_CONCURRENT', 'Refusé : bien modifié entre-temps', S.err) + o('COMPTE_HORS_PLAN_DU_DOSSIER', 'Refusé : compte hors plan', S.err) + o('reseau', 'Service indisponible', S.err) + '</select></label>' +
+          '<button class="dp-link" type="button" data-im-act="reset">Remettre le registre de départ</button></div>';
+      }
+      function bandeau() {
+        var h = '';
+        if (S.notice) h += '<div class="dp-card ok"><p class="dp-sub" style="color:var(--foreground)">' + IC.ok + ' ' + S.notice + '</p></div>';
+        if (S.erreur) h += '<div class="dp-card ko"><p class="dp-sub" style="color:var(--foreground)">' + IC.warn + ' ' + esc(S.erreur) + '</p></div>';
+        return h;
+      }
+      function vue() {
+        if (S.mode === 'chargement') return entete() + '<div class="dp-card"><p class="dp-big"><span class="dp-spin"></span> Lecture du registre…</p></div>' + banc();
+        if (S.mode === 'indispo') return entete() + '<div class="dp-card ko"><p class="dp-big">Le registre ne répond pas.</p><p class="dp-sub">Rien n’a été perdu : réessayez dans un instant.</p><div class="dp-go"><button class="btn btn-primary" type="button" data-im-act="retry">Réessayer</button></div></div>' + banc();
+        if (S.mode === 'acces') return entete() + '<div class="dp-card ko"><p class="dp-big">' + IC.lock + ' Vous n’avez pas accès au registre de ce dossier.</p><p class="dp-sub">' + esc(REFUS.ORG_CONTEXTE_REQUIS) + '</p></div>' + banc();
+        var T = totaux(S.items), vide = !S.items.length;
+        var h = entete();
+        if (vide) {
+          h += '<div class="dp-card"><div class="im-vide"><p class="dp-big">Aucune immobilisation sur ce dossier.</p><p class="dp-sub">Si la société n’en possède pas, il n’y a rien à faire ici.</p>' + (lecture() ? '' : '<button class="btn btn-primary dp-lg" type="button" data-im-act="ajout">Ajouter un bien</button>') + '</div></div>';
+          if (S.form === 'ajout') h += formAjout();
+          return h + bandeau() + mention() + banc();
+        }
+        h += tuiles(T) + mention() + bandeau() + zoneAction();
+        if (S.form === 'lot') h += formLot();
+        if (S.form === 'ajout') h += formAjout();
+        h += chips() + tableau(T) + suite() + banc();
+        return h;
+      }
+      function rendre() {
+        var y = window.scrollY;
+        root.innerHTML = vue();
+        root.querySelectorAll('.im-tbl tr').forEach(function (tr) { var L = ['', 'Brut', 'Amort. cumulé', 'Net', 'Dotation']; Array.prototype.forEach.call(tr.children, function (td, i) { if (td.classList.contains('im-n')) td.setAttribute('data-l', L[i]); }); });
+        var b = S.bad = verifier(S.items, false); if (b.length && window.console) console.error('FE-097 · assertions :', b);
+      }
+
+      /* ── Le serveur simulé : refus, puis effet sur le registre ── */
+      function refusDate(it, date, type) {
+        if (!date) return 'DATE_REQUISE';
+        var ex = exo(date);
+        if (!ex) return 'EXERCICE_INTROUVABLE';
+        if (ex.statut === 'CLOS') return 'EXERCICE_CLOS';
+        var borne = it.acq;
+        if (type !== 'mes') { if (it.mes && it.mes > borne) borne = it.mes; }
+        if (date < borne) return 'MOUVEMENT_HORS_CHRONOLOGIE';
+        return null;
+      }
+      function poser(code) { S.erreur = REFUS[code] || REFUS.reseau; S.notice = null; }
+      function nombre(v) { var n = parseInt(String(v || '').replace(/[^0-9]/g, ''), 10); return isNaN(n) ? 0 : n; }
+      function dotDe(its) { return its.reduce(function (t, it) { var s = situ(it, FIN); return t + (s ? s.dot : 0); }, 0); }
+      function fermer() { S.form = null; S.act = null; S.f = {}; S.lotRes = null; }
+
+      function lotOk() {
+        var date = S.f.date, p = pending().filter(function (it) { return !S.f.lot || S.f.lot[it.id] !== false; });
+        S.erreur = null; S.notice = null; S.lotRes = {};
+        if (S.err === 'reseau') { poser('reseau'); return rendre(); }
+        var faits = [];
+        p.forEach(function (it, i) {
+          var c = S.err === 'CONFLIT_CONCURRENT' && i === 0 ? 'CONFLIT_CONCURRENT' : refusDate(it, date, 'mes');
+          if (c) { S.lotRes[it.id] = { ok: false, m: REFUS[c] }; return; }
+          it.mes = date; it.mv.push({ rang: it.mv.length + 1, type: 'MISE_EN_SERVICE', date: date, annule: false }); faits.push(it);
+          S.lotRes[it.id] = { ok: true, m: 'Mis en service le ' + fr(date) + '.' };
+        });
+        if (faits.length) {
+          var d = dotDe(faits);
+          S.notice = '<b>' + (faits.length === 1 ? '1 bien mis en service' : faits.length + ' biens mis en service') + ' le ' + fr(date) + '.</b> ' + (date <= FIN ? 'Leur dotation 2025 (' + nbF(d) + ') n’est pas encore dans votre balance : c’est l’étape suivante.' : 'L’amortissement commence en ' + date.slice(0, 4) + ' : rien ne change dans l’exercice 2025.');
+        }
+        if (faits.length === p.length && p.length) { S.form = null; S.lotRes = null; S.f = {}; }
+        else if (!faits.length) S.erreur = 'Aucun bien n’a été mis en service. Chaque ligne dit pourquoi.';
+        rendre();
+      }
+      function ajoutOk() {
+        var f = S.f, E = {}, mois = nombre(f.mois), brut = nombre(f.brut), res = nombre(f.res);
+        if (!String(f.des || '').trim()) E.des = 'Donnez un nom au bien.';
+        if (!brut) E.brut = 'Indiquez la valeur d’origine.';
+        if (!f.acq) E.acq = 'Indiquez la date d’acquisition.';
+        if (!mois) E.mois = 'Indiquez la durée, en mois.';
+        if (res >= brut && brut) E.res = REFUS.VALEUR_RESIDUELLE_INVALIDE;
+        if (f.mode === 'DEGRESSIF' && mois && !coefDe(mois)) E.mode = REFUS.DUREE_HORS_BAREME_DEGRESSIF;
+        S.erreur = null; S.notice = null;
+        if (f.acq && !E.acq) { var c = refusDate({ acq: f.acq }, f.acq, 'mes'); if (c) E.acq = REFUS[c]; }
+        f.errs = E;
+        if (Object.keys(E).length) return rendre();
+        if (S.err === 'reseau') { poser('reseau'); return rendre(); }
+        if (S.err === 'COMPTE_HORS_PLAN_DU_DOSSIER') { poser('COMPTE_HORS_PLAN_DU_DOSSIER'); return rendre(); }
+        var n = S.items.length + 1, id = 'n' + n;
+        var it = { id: id, des: String(f.des).trim(), cpt: f.cpt, amo: amoDe(f.cpt), acq: f.acq, mes: null, brut: brut, mois: mois, mode: f.mode, coef: f.mode === 'DEGRESSIF' ? coefDe(mois) : null, res: res, sortie: null, annule: false, reeval: null, att: null, mv: [{ rang: 1, type: 'ACQUISITION', date: f.acq, annule: false }] };
+        S.items.push(it);
+        S.notice = '<b>' + esc(it.des) + ' est enregistré.</b> Il sera amorti à partir de sa mise en service' + (f.acq > FIN ? ', dans le registre de l’exercice ' + f.acq.slice(0, 4) : '') + '.';
+        S.form = null; S.f = {}; S.filtre = 'tous'; S.ouvert = null;
+        rendre();
+      }
+      function actOk() {
+        var a = S.act, it = parId(a.id), k = a.type, date = S.f.date;
+        S.erreur = null; S.notice = null;
+        if (S.err === 'reseau') { poser('reseau'); return rendre(); }
+        if (S.err === 'CONFLIT_CONCURRENT') { poser('CONFLIT_CONCURRENT'); S.act = null; S.f = {}; return rendre(); }
+        if (k === 'annul') {
+          var m = dernierMv(it); m.annule = true;
+          it.mv.push({ rang: it.mv.length + 1, type: 'ANNULATION', date: m.date, annule: false, vise: m.rang });
+          if (m.type === 'MISE_EN_SERVICE') it.mes = null; else if (m.type === 'CESSION' || m.type === 'MISE_AU_REBUT') it.sortie = null; else if (m.type === 'REEVALUATION') it.reeval = null; else if (m.type === 'ACQUISITION') it.annule = true;
+          S.notice = '<b>Le mouvement est annulé.</b> Il reste au journal du bien, barré.';
+        } else {
+          var c = refusDate(it, date, k);
+          if (c) { S.f.dateErr = REFUS[c]; return rendre(); }
+          if (k === 'mes') { it.mes = date; it.mv.push({ rang: it.mv.length + 1, type: 'MISE_EN_SERVICE', date: date, annule: false }); S.notice = '<b>' + esc(it.des) + ' est en service depuis le ' + fr(date) + '.</b> ' + (date <= FIN ? 'Sa dotation 2025 n’est pas encore dans votre balance : c’est l’étape suivante.' : 'L’amortissement commence en ' + date.slice(0, 4) + '.'); }
+          if (k === 'cession') { var prix = nombre(S.f.val); it.sortie = { type: 'CESSION', date: date, prix: prix }; it.mv.push({ rang: it.mv.length + 1, type: 'CESSION', date: date, prix: prix, annule: false }); S.notice = '<b>Cession enregistrée le ' + fr(date) + '.</b> ' + (date > FIN ? 'Elle appartient à l’exercice ' + date.slice(0, 4) + ' : le registre 2025 ne change pas.' : 'Le résultat de cession est calculé par Prospera.'); }
+          if (k === 'rebut') { it.sortie = { type: 'MISE_AU_REBUT', date: date, prix: 0 }; it.mv.push({ rang: it.mv.length + 1, type: 'MISE_AU_REBUT', date: date, prix: 0, annule: false }); S.notice = '<b>Mise au rebut enregistrée le ' + fr(date) + '.</b>'; }
+          if (k === 'reeval') { var v = nombre(S.f.val); it.reeval = { date: date, valeur: v }; it.mv.push({ rang: it.mv.length + 1, type: 'REEVALUATION', date: date, valeur: v, annule: false }); S.notice = '<b>Réévaluation enregistrée le ' + fr(date) + '.</b> Le plan s’arrête à cette date.'; }
+        }
+        S.act = null; S.f = {};
+        rendre();
+      }
+
+      /* ── Les gestes ── */
+      function maj() {
+        var ok = root.querySelector('[data-im-act="lot-ok"]'); if (ok) ok.disabled = !S.f.date;
+        var ao = root.querySelector('[data-im-act="act-ok"]'); if (ao && S.act && S.act.type !== 'annul') ao.disabled = !S.f.date;
+        var e = root.querySelector('[data-im-echo]'); if (e) e.textContent = echoMois(S.f.mois);
+      }
+      root.addEventListener('click', function (ev) {
+        var t = ev.target.closest ? ev.target.closest('button') : null; if (!t || !root.contains(t)) return;
+        var d = t.dataset;
+        if (d.imRow) { S.ouvert = S.ouvert === d.imRow ? null : d.imRow; S.act = null; S.f = {}; return rendre(); }
+        if (d.imFiltre) { S.filtre = d.imFiltre; S.ouvert = null; return rendre(); }
+        if (d.imDo) { S.act = { type: d.imDo, id: d.imId }; S.f = {}; if (d.imDo === 'cession' || d.imDo === 'rebut' || d.imDo === 'reeval') S.f.date = TODAY; S.form = null; S.erreur = null; return rendre(); }
+        switch (d.imAct) {
+          case 'lot': S.form = 'lot'; S.f = { date: '', lot: {} }; S.lotRes = null; S.erreur = null; S.notice = null; S.act = null; return rendre();
+          case 'ajout': S.form = 'ajout'; initAjout(); S.erreur = null; S.notice = null; S.act = null; return rendre();
+          case 'fermer': fermer(); S.erreur = null; return rendre();
+          case 'lot-ok': return lotOk();
+          case 'ajout-ok': return ajoutOk();
+          case 'act-ok': return actOk();
+          case 'plan': return notify('success', 'Le plan d’amortissement', 'C’est l’écran suivant du paquet 3 (FE-098) : une maquette à part.');
+          case 'retry': S.mode = 'registre'; return rendre();
+          case 'reset': S.items = depart(); S.mode = 'registre'; S.err = 'aucun'; S.filtre = 'tous'; S.ouvert = null; fermer(); S.notice = null; S.erreur = null; return rendre();
+        }
+      });
+      root.addEventListener('input', function (ev) {
+        var t = ev.target, k = t.dataset && t.dataset.imF; if (!k) return;
+        if (k === 'brut' || k === 'res' || k === 'val') { var v = t.value.replace(/[^0-9]/g, ''); t.value = v ? v.replace(/\B(?=(\d{3})+(?!\d))/g, NBSP) : ''; S.f[k] = t.value; }
+        else if (k === 'mois') { t.value = t.value.replace(/[^0-9]/g, ''); S.f.mois = t.value; }
+        else S.f[k] = t.value;
+        if (k === 'date') S.f.dateErr = null;
+        if (S.f.errs && S.f.errs[k]) { delete S.f.errs[k]; }
+        maj();
+      });
+      root.addEventListener('change', function (ev) {
+        var t = ev.target, d = t.dataset || {};
+        if (d.imRigMode !== undefined) { S.mode = t.value; S.ouvert = null; fermer(); S.erreur = null; S.notice = null; S.items = t.value === 'vide' ? [] : (S.items.length ? S.items : depart()); return rendre(); }
+        if (d.imRigErr !== undefined) { S.err = t.value; return; }
+        if (d.imCk) { S.f.lot = S.f.lot || {}; S.f.lot[d.imCk] = t.checked; return; }
+        if (d.imF === 'cpt') { S.f.cpt = t.value; S.f.mois = String(dureeDu(t.value)); return rendre(); }
+        if (d.imF === 'mode') { S.f.mode = t.value; return rendre(); }
+      });
+      root.addEventListener('toggle', function (ev) { if (ev.target && ev.target.hasAttribute && ev.target.hasAttribute('data-im-fold')) S.f.det = ev.target.open; }, true);
+      rendre();
+    })();
   })();
 </script>
