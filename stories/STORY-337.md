@@ -1,6 +1,7 @@
 # STORY-337 : Le rapprochement des pièces justificatives, à la granularité annoncée — la part non documentée d'un montant, chiffrée par compte et par période
 
-Status: in-progress (2026-11-27 — fiche écrite et contrat annoncé avant le code ; lot 7 de D, n° 14)
+Status: done (2026-11-27 — prospera-fiscal-service#90, `dev` `680164e` ; lot 7 de D, n° 14) — fiche écrite et
+contrat annoncé avant le code (prospera-stories#1029, `main` 5d45088).
 Écrite le 2026-11-27 par la sous-session du groupe D juste avant de coder (lot 7 de D, n° 14,
 `PLAN-LOT-7-2026-11-24.md` §4). Il n'existait pas de fiche : les critères viennent d'`epics-fiscalite-2026-08-03.md`
 (EPIC-032), de la place laissée par 336 (D-336-9) et du contrat de 338 de C (« Pour STORY-337 (D) »).
@@ -163,17 +164,89 @@ rapprochementPieces: {
 
 ## Definition of Done
 
-- [ ] TVA d'une période tenue au journal : `PIECE`, deux préfixes (`443`, `445`), la part documentée et la part non
+- [x] TVA d'une période tenue au journal : `PIECE`, deux préfixes (`443`, `445`), la part documentée et la part non
       documentée par compte, les pièces, les à-nouveaux à part ; le jeton du membre transmis ; `du` et `au` du mois (e2e,
       contre une doublure HTTP de la route de 338).
-- [ ] Le repli : `COMPTE_PERIODE` aux cahiers (chiffré depuis le journal du chemin), en `403`, `404`, `5xx`, délai
+- [x] Le repli : `COMPTE_PERIODE` aux cahiers (chiffré depuis le journal du chemin), en `403`, `404`, `5xx`, délai
       dépassé, réponse invalide, sans compte publié, période non datée, exercice inconnu — le dossier reste `200`.
-- [ ] « Aucune écriture » n'est jamais « documenté » ; « aucune pièce » rend `NON_DOCUMENTE` chiffré, jamais zéro.
-- [ ] **MongoDB réel** (`test:conformite`) : l'exercice qui couvre une période (bornes incluses, cloisonnement par
+- [x] « Aucune écriture » n'est jamais « documenté » ; « aucune pièce » rend `NON_DOCUMENTE` chiffré, jamais zéro.
+- [x] **MongoDB réel** (`test:conformite`) : l'exercice qui couvre une période (bornes incluses, cloisonnement par
       organisation et par dossier, le plus récent).
-- [ ] La garde d'AD-12 verte (les deux ports neufs y entrent) ; **mutations** qui rougissent sur une assertion.
-- [ ] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
+- [x] La garde d'AD-12 verte (les deux ports neufs y entrent) ; **mutations** qui rougissent sur une assertion.
+- [x] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
       compris) sain, la route en `401` sans jeton, aucune dépendance manquante au démarrage.
+
+## Livraison (2026-11-27)
+
+- **Code** : prospera-fiscal-service#90, fusionnée en rebase sur `dev` (`680164e`), partie d'`origin/dev` `dae6a10` puis
+  rebasée sur `481a8f4` (341 de C) avant la fusion ; head `2da41dc`. Annonce avant le code : prospera-stories#1029
+  (`main` 5d45088). **Aucun écart de champ, de raison ni de statut au contrat annoncé.**
+- **Fichiers** (dossier `depots` de D, et ses ports et adaptateurs) :
+  - le domaine : `domain/depot/rapprochement-pieces.ts` (pur : comptes couverts, bornes de la période, statut d'un
+    compte et d'ensemble, à la pièce, repli compte × période chiffré depuis le journal complet du chemin, adresse) et son
+    test ;
+  - le cas d'usage : `application/depots/rapprochement-pieces.service.ts` et son test ; `dossier-controle.service.ts`
+    l'appelle après le chemin de chaque obligation ;
+  - les ports `ports/source-justification-pieces.ts`, `ports/exercices-du-dossier.ts` ; les adaptateurs
+    `adapters/http/http-source-justification-pieces.ts` (+ `contrat-justification-pieces.ts`, le contrat de 338 lu
+    strictement) et `adapters/mongo/mongo-exercices-du-dossier.ts` (le read-model `exercices_dossier`, lu) ;
+  - la réponse : `dto/rapprochement-pieces.dto.ts`, `dto/dossier-controle.dto.ts` (`rapprochementPieces` typé) ;
+    `depots.module.ts` (le cas d'usage, les deux adaptateurs, le schéma `ExerciceDossier` enregistré en lecture) ; la
+    garde d'AD-12 (les deux ports et les trois adaptateurs entrent dans son périmètre) ;
+  - les tests : `test/dossier-controle.e2e-spec.ts` (12 cas neufs), `test/exercices-du-dossier.conformite-spec.ts`,
+    `dossier-controle.openapi.spec.ts` (un cas).
+- **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI (`rapprochementPieces` typé) et `.env.example`
+  (`COMPTABILITE_SERVICE_URL`, commentée). Aucune migration, ni `app.module.ts`, ni `config/`, ni `package.json`, ni
+  `read-models/`, ni copie du paquet ; **aucun fichier de C**. Les fournisseurs de C en lecture de 336 (D-336-4) sont
+  inchangés.
+- **Preuves** :
+    - Node 24 (image `verification` de l'archive LF de `41c2cde`) : e2e **15/15 suites, 403 tests** (dont
+      `test/dossier-controle.e2e-spec.ts`, 21 cas, dont 12 de 337 : PIECE contre une doublure HTTP de la route de 338 (les
+      préfixes `443,445`, le mois, l'exercice, le jeton du membre, documenté / non documenté / aucune écriture, la pièce),
+      l'exercice aux cahiers chiffré depuis le journal du chemin, 403 / 404 / 500 / 503 / 409 (le dossier reste 200, le
+      code gardé, le message jamais recopié), le délai dépassé, une réponse hors contrat, un journal tronqué (NON_CHIFFRE),
+      aucune pièce rattachée (NON_DOCUMENTE chiffré), l'empreinte qui couvre le rapprochement) ; `test:conformite` **32/32
+      suites, 209 tests** (dont l'exercice qui couvre une période, 5 cas) ; unitaires **267/269 suites (1 ignorée : la spec
+      BullMQ sans Redis), 3 980 tests** : la seule suite rouge, `livrable-ac7.spec.ts` (STORY-537, non touchée), a dépassé
+      le délai de lecture du classeur (`CLASSEUR_TROP_COUTEUX`) sous la charge des mutations jouées en même temps sur le
+      poste ; jouée seule, elle est verte (83/83, copies du paquet réécrites en LF puis remises). La passe Node 24 de
+      contrôle n'a pas été rejouée : B tenait le verrou (STORY-1137, depuis 08:35).
+    - Node 25 (local) : règles pures 43, adaptateur contre un vrai serveur HTTP local 44, cas d'usage 10, OpenAPI 8, e2e du
+      dossier 21/21, garde d'AD-12 et service du dossier verts.
+    - **Mutations : 57 intentions, 63 mutants rouges sur une assertion** (58 sous Node 25, 5 sur MongoDB réel sous
+      Docker) :
+      - le domaine : un compte en double ; le dernier jour du mois, le mois suivant, le trimestre décalé ; l'année ou les
+        dates fixes mal datées ; « aucune écriture », « à-nouveaux seuls » et « sans chiffre » vus documentés ; le non
+        documenté et le partiel mal nommés ; les statuts d'ensemble (non chiffrés comptés, aucune écriture, aucun chiffre,
+        non documentées ignorées) ; à la pièce : un compte manquant toléré, les à-nouveaux, les pièces, la devise, la
+        source perdus ; le repli : un journal tronqué, arrêté ou incomplet chiffré, les lignes d'un autre compte, une ligne
+        sans pièce documentée, le crédit perdu, la source toujours rendue, le code et le message perdus ; l'adresse (barre
+        finale, protocole) ;
+      - l'adaptateur et le contrat : 403 vu introuvable, 429 et 3xx mal rangés, la redirection suivie, un autre jeton, les
+        comptes tronqués, le corps non borné, un code de forme libre, le délai sans borne ; une raison inconnue, un montant
+        négatif, une période mal formée, une source de pièce libre, une raison sur PIECE acceptés ;
+      - le cas d'usage : un appel sans compte, l'exercice inconnu mal nommé ou cherché sur des bornes inversées, le jeton
+        remplacé, la période perdue, la raison de la comptabilité perdue, une panne non rattrapée, l'exercice perdu au
+        repli d'un refus ; le dossier : le rapprochement d'une autre obligation ; la réponse : rapprochement nul, statut,
+        non documenté, code amont perdus ;
+      - le stockage (MongoDB réel) : l'exercice sans le dossier, sans l'organisation, le plus ancien, le premier ou le
+        dernier jour exclu.
+      - Huit mutants rougissaient d'abord en compilation (`noUnusedLocals`, un type resserré) : réécrits en gardant
+        l'intention (neuf mutants), puis rejoués rouges. Deux restaient verts (les à-nouveaux rendus à la pièce ; le corps
+        non borné, que le JSON illisible masquait) : ils ont reçu leur assertion (`2da41dc` : des à-nouveaux non nuls ; un
+        JSON valide trop gros, annoncé puis en morceaux) et ont été rejoués rouges.
+    - lint des fichiers touchés et `tsc` : 0.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** (image runtime de l'archive de `41c2cde`) : santé `ok` (mongodb, audit,
+      kafka, redis) ; `GET /api/v1/dossiers-controle` montée et en `401` sans jeton ; `DepotsModule`, `ObligationsModule`,
+      `ReadModelsModule`, `ReglementModule` initialisés ; 0 `UnknownDependencies` ni `OverwriteModelError` sur 500 lignes
+      (le schéma `ExerciceDossier` enregistré en lecture dans `DepotsModule` se résout) ; `COMPTABILITE_SERVICE_URL`
+      absente du conteneur, le défaut retenu ; **l'adaptateur réel, joué dans le conteneur** vers une comptabilité absente
+      de la pile : `{ ok: false, raison: COMPTABILITE_INDISPONIBLE }`, aucune exception. L'aller-retour avec la vraie
+      comptabilité n'est pas joué (sa pile, `dossier-service`, `auth-service`, un exercice ouvert au journal et un membre
+      à ses droits : trop lourd ici) : la route est doublée en HTTP dans l'e2e, et C a prouvé sa part sur `grp-c`.
+    - **Verrou Docker** : une prise par un script autonome, rendue par son `trap` : 04:05:17 → 04:25:01 (unitaires, e2e,
+      conformité, cinq mutations MongoDB, pile). B et C prévenus. Il ne reste aucun conteneur, volume ni réseau `grp-d`.
+
 
 ## Questions au PO
 
