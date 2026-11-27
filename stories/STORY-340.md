@@ -1,6 +1,7 @@
 # STORY-340 : Le montant à régler, net d'acomptes, de crédits et de retenues — ne jamais payer deux fois
 
-Status: in-progress — écrite le 2026-11-27 par la session du groupe C juste avant de la coder (lot 7, n° 12 du fiscal,
+Status: done — **livrée le 2026-11-27** : balance-service **#174** (`e68ae10` sur `dev`) et prospera-fiscal-service **#88**
+(`efd0992` sur `dev`, rebasée sur `a991963`) ; voir « Livraison ». Écrite le 2026-11-27 par la session du groupe C juste avant de la coder (lot 7, n° 12 du fiscal,
 `PLAN-LOT-7-2026-11-24.md` §3) ; contrat et communs annoncés avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de
 C). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-033, STORY-340) et du PRD
 fiscalité (FR-F46). Elle ouvre EPIC-033 (340 → 344).
@@ -177,8 +178,38 @@ acompte non payé nommé, l'excédent d'acomptes restitué ; une TVA en crédit 
 une rectificative : le complément ; hors portée 404) ; toute la suite du fiscal, celles de D comprises ; mutations sur la
 logique neuve ; `docker compose up` du fiscal, sain (module neuf).
 
+## Livraison (2026-11-27)
+
+- **Paquet** : balance-service **#174** (`MNV-340`, `2a24904` poussé, rejoué `e68ae10` sur `dev`) : bloc `reglement` (six
+  obligations ; LPF Art. 27, 55, 57, 60, 99 ; CGI Art. 204 ; chaque article relu dans le corpus OTR 2025), garde **R13**
+  (`valider-paquet-fiscal.mjs`), schéma, `aFaire` (le solde d'IS), `_meta.revision` ; artefact régénéré, empreinte
+  **`d620df8bf6bf43689f7a263c905965243f133d6a41e90f13290dcb737a33fca6`**, réépinglée (registre, spec, e2e). Le moteur ne lit rien
+  de neuf.
+- **Fiscal** : **#88** (`MNV-340`, `d8eedbf` poussé, rejoué `efd0992` sur `dev`, rebasé sur `a991963` de D — 335 et 336 fusionnées
+  pendant la story, fichiers disjoints). Fichiers : `domain/reglement/montant-a-regler.ts` (le calcul pur),
+  `application/reglement/montant-a-regler.service.ts` (portée, version scellée, paquet de l'obligation, calendrier de l'année
+  lu seulement si le paquet nomme des paiements), `modules/reglement/` (module, contrôleur, DTO), `domain/obligations/bases-legales.ts`
+  (`citerUneReference`, la citation de 339 factorisée ; `corpusCite` exporté), `modules/obligations/dto/historique.dto.ts`
+  (quatre DTO exportés, réemployés), `app.module.ts`, la copie du paquet ; gardes : `garde-calcul-delegue.spec.ts` (la chaîne de
+  321 couvre le règlement), `domain/reglement/aucune-regle-d-imposition.spec.ts` (aucun nombre autre que 0, aucun article, aucun
+  code d'obligation) ; invariant d'`AppModule` ; e2e dans `test/obligations.e2e-spec.ts`.
+- **Preuves** (Node 24, étage `verification`, archives LF de `f7ec598` et `2a24904`) : fiscal unitaires **255/255 suites (1
+  ignorée), 3 854** tests ; e2e **14/14, 374** (cinq neufs : une TPU déposée nette de ses acomptes payés, l'acompte non payé nommé
+  puis enregistré ; l'excédent d'acomptes et son sort, LPF Art. 57 mot pour mot ; une TVA en crédit, le crédit antérieur dans le
+  déclaré et le crédit à reporter en excédent ; une rectificative, le complément puis le trop-versé ; DSF indisponible, 401, 400,
+  404) ; conformité **31/31, 196** ; `nest build` vert, le corpus dans `dist/` ; balance-service unitaires **300/300, 5 811** ;
+  e2e **38/38, 2 324**. **Pile `grp-c`** fiscal + balance saine : santé `ok` des deux, `…/montant-a-regler` en 401 sans jeton,
+  `ReglementModule` initialisé et ses routes montées, aucune erreur d'injection (le seul « Error: » est le « Unknown topic or
+  partition » connu d'une pile neuve), aucun redémarrage. Verrou pris une fois (02:27 → 02:41). Le rebase sur `a991963` (336 de
+  D, fichiers disjoints) : `tsc` et les suites du règlement et du dossier de contrôle rejouées en local (78/78).
+- **Mutations** : fiscal **49/49** tuées (domaine 42, service 6, citation 1 — parmi elles 7 réécrites qui rougissaient par
+  compilation : un rétrécissement de type retiré ; toutes tuées ensuite sur l'assertion) ; balance-service **R13 14/14**.
+- **B prévenu** (recopie du paquet de `dossier-service` : `dev` `e68ae10`, sha256 `d620df8b…fca6`) ; **D prévenu** (empreinte,
+  `ReglementModule` et `MontantAReglerService` pour 565).
+
 ## Progress Tracking
 
 | Date | Événement |
 |---|---|
 | 2026-11-27 | Fiche écrite, contrat et communs annoncés avant le code. |
+| 2026-11-27 | **DONE.** Paquet : balance-service #174 (`e68ae10`) ; code : fiscal #88 (`efd0992`). Preuves : voir « Livraison ». B et D prévenus. |
