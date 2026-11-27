@@ -1,9 +1,12 @@
 # STORY-338 : La liaison entre l'écriture comptable et la pièce qui la justifie — descendre jusqu'à la facture
 
-Status: in-progress — écrite le 2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 11 du fiscal,
-`PLAN-LOT-7-2026-11-24.md` §3) ; contrat annoncé avant le code (« ⚠ Contrats » du journal de C). Il n'existait pas de
-fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-032, STORY-338) et du PRD fiscalité (FR-F54, FR-F53).
-Dans la même story : la demande de B **STORY-1124** (publier `comptabilite.facture.desinscrite@1`, D-1100-3 de C).
+Status: done — **livrée le 2026-11-27** : prospera-comptabilite-service **#21** (`58803f5` sur `dev`) ; en tête,
+la demande D-334-8 de D, prospera-fiscal-service **#86** (`ffd6f2a` sur `dev`) ; voir « Livraison ». Écrite le
+2026-11-26 par la session du groupe C juste avant de la coder (lot 7, n° 11 du fiscal, `PLAN-LOT-7-2026-11-24.md` §3) ;
+contrat annoncé avant le code (#1007, « ⚠ Contrats » du journal de C), celui de D-334-8 avant sa fusion (#1011). Il
+n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-032, STORY-338) et du PRD
+fiscalité (FR-F54, FR-F53). Dans la même story : la demande de B **STORY-1124** (publier
+`comptabilite.facture.desinscrite@1`, D-1100-3 de C).
 
 **Epic :** EPIC-032 · **Points :** 8 · **FR :** FR-F54 (la liaison écriture ↔ pièce, prérequise à toute restitution au
 niveau de la facture), FR-F53 (le rapprochement annonce sa granularité) · **Architecture :** AD-14 (le fiscal ne lit
@@ -145,8 +148,57 @@ desinscriteLe, desinscritePar }`, tous requis — ni montant, ni tiers, ni ligne
   la descente jusqu'à la pièce d'une balance des **cahiers** reste celle de 329 (provenance de `balance-service`, D-329-6).
 - **D-338-10 — ← B (1124) : le schéma de B tel quel**, copié à l'octet ; le fait part seulement si `surAbandon` trouve la pièce
   du lot, dans la transaction de l'abandon (pas d'abandon sans fait, pas de fait sans abandon).
-- **D-338-11 — `REJET_REQUIS` (D-334-8 de D) passe à STORY-340** : MNV-334 (fiscal #82) n'est pas fusionnée quand 338 commence,
-  et 338 ne touche pas le fiscal.
+- **D-338-11 — `REJET_REQUIS` (D-334-8 de D) : servie en tête de 338, PR à part** (amendée pendant la story) : MNV-334 (fiscal
+  #82) a fusionné pendant 338 (`dev` 69d7e65) ; le coordinateur l'a demandé, la décision « passe à 340 » de l'annonce est
+  caduque. 338 elle-même ne touche pas le fiscal.
 - **D-338-12 — La demande de A (FE-158, cinq points de commodité de l'écran)** n'entre pas dans 338 : elle n'a pas trait à la
   liaison et l'écran tient sans ; elle reste ouverte, à placer par la session de groupe (aucune autre story de C au lot 7
   n'ouvre la comptabilité).
+- **D-338-13 — Un 403 de la GED** (le membre n'a pas `ged:piece:consulter`, ou le cabinet pas le module `ged`) se dit **422
+  `PIECE_GED_NON_CONSULTABLE`** (`details.codeAmont`) : c'est la pièce que ce membre ne peut pas citer, pas un droit de la
+  comptabilité qui manque. Code ajouté au code (l'annonce ne le nommait pas).
+- **D-338-14 — Sans liaison, `periode: null`** : la granularité `COMPTE_PERIODE` est rendue sans résoudre le référentiel ni les
+  bornes de l'exercice (un dossier aux cahiers n'a pas à avoir un référentiel décidé ici) ; la tenue est lue d'abord, sur la
+  seule portée du dossier.
+- **D-338-15 — L'écriture → ses pièces** se lit sur la portée du dossier et l'exercice du chemin, comme `GET …/ecritures/{id}`
+  (STORY-962) ; la pièce → ses écritures traverse les exercices du dossier ; un index neuf sur les écritures
+  (`ecritures_par_piece_justificative`) sert cette lecture.
+
+## Livraison (2026-11-27)
+
+### En tête : la demande D-334-8 de D (fiscal #86, `ffd6f2a` sur `dev`)
+
+`CycleObligationsService.revenir` : `DEPOSEE → A_DEPOSER`, et lui seul (`verifierRetour` rend `retransmission: true`), lit
+`PreuvesDeRejet.rejetDe(orgId, id, versionCourante.numero)` et appelle `verifierRejetAuRetour` (**409 `REJET_REQUIS`**) ; la version
+n reste intacte, le pointeur passe à `versionRetransmise(n)` = `{ numero: n + 1, nature: RETRANSMISSION, versionId: null,
+rectificative: null }` dans la comparaison-échange de l'état **et** du pointeur (`MongoRegistreObligations.revenir`, `garde`) ;
+l'acte `OBLIGATION_RETOUR_ARRIERE` cite `rejetId` et `versionRetransmise` ; le dépôt suivant scelle la n + 1 ; `NATURES_VERSION`
+gagne `RETRANSMISSION` (schéma des versions, DTO). Aucune migration, aucun fichier commun.
+**Preuves** (Node 24, images depuis l'archive du commit) : unitaires **250 suites (1 ignorée), 3759** ; e2e **14/14, 361** ; conformité MongoDB
+**30/30, 190** ; mutations **8/8** (porte, numéro lu, garde, règle ouverte à tout retour, refermée, numéro n, nature) + **2/2**
+sur l'adaptateur MongoDB (garde du pointeur, pointeur posé) ; pile `grp-c` (fiscal + balance) saine, `POST …/retour` en 401 sans
+jeton, aucune erreur d'injection.
+
+### STORY-338 et ← B 1124 (comptabilité #21, `58803f5` sur `dev`)
+
+- `src/liaisons/` : `liaisons.ts` (règles pures : lignes citées, pièces d'une ligne, `justifier`, comptes), `liaison.schema.ts`
+  (`liaisons_pieces`, index unique partiel `une_liaison_en_vigueur_par_piece`), `source-ged.ts` (la métadonnée de version de la
+  GED, jeton du membre), `liaisons.service.ts`, `liaisons.controller.ts` (les cinq routes de l'annonce), `liaisons.module.ts`.
+- L'abandon (`BrouillardService.abandonner`) : `surAbandon` rend la facture désinscrite (projection positionnelle de la pièce du
+  lot), les liaisons sont retirées et `comptabilite.facture.desinscrite` part par l'outbox, dans **une** transaction.
+- `contrat/schemas/comptabilite.facture.desinscrite.v1.json` : copie à l'octet du schéma de B (sha256 `86a50e6f…2ecf`, gardée
+  par un test) ; au registre (Karapace de la pile) : **sujet neuf** `comptabilite.facture.desinscrite-value`.
+- `liaisons_pieces` au plan d'effacement C13 (l'invariant l'exigeait) ; manifeste `comptabilite` **0.6.0** (copie à l'octet
+  de `prospera-stories@0acfd14`).
+- **Preuves** (Node 24) : unitaires **71/71 suites, 1057** ; socle (vrai MongoDB rs0 + Kafka) **16/17 suites, 342/343**, dont
+  `liaisons.socle-spec.ts` 9/9 (rattacher aux lignes, doublon et pièce de saisie refusés, **dix rattachements concurrents : un
+  201, neuf 409**, GED conservée / détruite / d'un autre dossier / fermée, validée jamais réécrite, les deux sens, la
+  justification qui descend à la pièce et laisse les brouillards, `COMPTE_PERIODE` aux cahiers et sans tenue, le retrait) et le
+  fait `desinscrite` conforme au schéma de B sur un vrai abandon (`memoire.socle-spec.ts`) ; la seule rouge, la course de STORY-970 « une clôture au milieu de dix lettrages » (409 au lieu de 201 sous la charge de la suite entière), est verte deux fois sur deux jouée seule (29/29) ; mutations **23/23**
+  unitaires (5 réécrites après une compilation ou une survie : deux tests ajoutés, la saisie fait foi sur une clé égale, le
+  préfixe n'est pas une sous-chaîne) + **3/3** sur le vrai MongoDB (retirées qui justifieraient, brouillards qui justifieraient,
+  retirées dans l'autre sens) ; pile `grp-c` (`--profile comptabilite`) saine, cinq routes montées, les trois lectures en 401
+  sans jeton, aucune erreur d'injection.
+- **Pour STORY-337 (D)** : la route de la justification et ce qui fait retomber sur le compte × période sont dans « Contrat » ;
+  la granularité annoncée est celle de la réponse.
+- **Verrou** : pris deux fois (00:05 → 00:30, 00:57 → 01:08), rendu.
