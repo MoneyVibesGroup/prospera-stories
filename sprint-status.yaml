@@ -8421,8 +8421,10 @@ sprints:
         epic: "EPIC-032"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        source_doc: "prospera-stories/stories/STORY-337.md"
+        status: "in-progress"  # 🚧 2026-11-27 (lot 7 de D, n° 14) — fiche et annonce avant le code : rapprochementPieces du dossier de contrôle (336) rempli par la route de 338 de C (jeton du membre), granularité PIECE ou COMPTE_PERIODE et sa raison, jamais d échec ; comptes publiés par le chemin (329), période de l obligation, exercice du read-model ; part non documentée chiffrée par compte ; aucune écriture, aucune migration ; Q-D-35.
+        story_path: "stories/STORY-337.md"
+        assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-338"
         title: "Liaison entre écriture comptable et pièce justificative"
         epic: "EPIC-032"
