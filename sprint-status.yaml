@@ -2191,6 +2191,15 @@ reserved_ranges:
       Vecteurs v2 (étiquette vecteurs-v2 : centrale-test-2026-2036, ci-test-2026-2036, jusqu'au 2036-01-01), copiés
       dans centrale et agent ; contrats/agent/ (contrats-agent-v1) ; relais de paiement.abonnement.echeance.encaissee par
       l'exécuteur de l'agent de la plateforme. D-1133-1 → 13. NON SLOTTÉE.
+  - range: "STORY-1136"
+    status: "in-progress"
+    owner: "Groupe B, lot 7, n° 18 — l'avoir émis réduit la Créance de sa facture : paiement consomme facturation.avoir.emis@1 (← D, STORY-1066, D-1066-13 (3), D-979-14 ; la remplaçante de STORY-1116, D-L7B-3) (prospera-paiement-service)"
+    source_doc: "prospera-stories/stories/STORY-1136.md"
+    reserved_on: "2026-11-25"
+    note: >
+      EN COURS le 2026-11-27 — fiche et contrat annoncé avant la fusion du code (journal de B, « ⚠ Contrats »). Registre des
+      avoirs en ajout seul, reste dû = origine − avoirs − encaissements, crédit du tiers au-delà ; paiement.creance.changed@1
+      gagne avoirsMineur et la cause AVOIR (BACKWARD) ; manifeste paiement 1.3.0 après la fusion. NON SLOTTÉE.
   - range: "STORY-1132"
     status: "done"
     owner: "Groupe B, lot 7, n° 14 — la licence signée (EPIC-150), premier incrément : un paiement l'ouvre, le suivant la prolonge ; la centrale reçoit paiement.abonnement.echeance.encaissee par la section « faits de paiement » du contact de l'agent de la plateforme (AD-25), dérive la licence de l'instance sur site de l'organisation et la signe de sa clé d'exécution (centrale-service ; paiement et auth lus, inchangés)"
