@@ -337,8 +337,23 @@
     5/5, `referentiel-par-dossier` 9/9, `abonnement` 15/15, `zone-franche` 6/6. Verrou 21:57 → 22:20, 22:23 → 22:32,
     23:29 → 00:02. Fiche D-1129-1 → 16. Une coupure du réseau (22:31 → 23:27, reprise par la session de groupe). Date dure
     tenue (fusion le 26/11, D-L7B-5). Rituel : aucune demande neuve à B chez A, C et D.
-  - **h — suite de STORY-1124 (27/11, D-L7B-12) — en cours** : forme choisie, la (1) (un fait du fiscal, la GED tire les
-    octets par une route de service du fiscal, D-1124-14) ; contrat annoncé avant la fusion (« ⚠ Contrats »).
+  - **h — suite de STORY-1124 (27/11, D-L7B-12) — faite** : les pièces du dépôt d'une déclaration au fonds du client (← D,
+    STORY-335, servie côté GED). Forme (1) : le fait `fiscal.depot.piece-archivee` v1 (proposé à D) et une route de
+    service du fiscal d'où la GED tire les octets (D-1124-14). **document-service #42** (`8f9040d` sur `dev`) ; **catalogue
+    #88** (`e528afc`, `ged` 1.11.0) ; contrat annoncé avant la fusion (stories #1014, `dc05d12`). Livrable → copie
+    `DECLARATION_FISCALE`, accusé → `ACCUSE_DEPOT` (plan 2026.3), validation du client rattachée sans copie ;
+    `ged_pieces_fiscales` (unique sur obligation + version + nature) ; attentes nommées ; formats du fiscal (XLSX, JSON,
+    XML sans lecture ; le scellé ne l'attend pas) ; `GET …/ged/cabinet/dossiers/{dossierId}/pieces-fiscales`. Node 24 :
+    121/121 suites (1 448), e2e 224/224 ; Node 25 : e2e 224/224 ; mutations 23/23 ; pile `grp-b` neuve 42/43 (le KO, une
+    assertion du script : la reprise voulue du dossier, D-1124-26). Verrou 01:08 → 01:17, 01:25 → 01:27. Fiche D-1124-13 →
+    26. Recette de l'Atelier non rejouée (D-1124-24). **→ D** : le fait et la route à écrire tels quels (« Réponses ») ;
+    **→ C** : information (le fiscal portera la route et le fait de D).
+  - **i — sixième suite de STORY-979 (27/11, D-L7B-13) — faite** : `comptabilite` 0.6.0 recopié au catalogue avec `ged`
+    1.11.0 depuis `prospera-stories@c926f55` (← C, STORY-338, servie ; code fusionné : comptabilite #21) ; **catalogue
+    #88** (`e528afc`) ; annonce stories #1018. `manifestes:garde` verte (48) ; 71/71 par chemin. Fiche D-979-41 → 42.
+    **Information** : la demande de STORY-1124 à C est servie par C (comptabilite #21, `dev` `58803f5`, schéma
+    `comptabilite.facture.desinscrite` copié à l'octet de `e51c4d5`) ; la recopie de l'octet de C dans la GED (le même
+    texte) reste à la prochaine story de B sur `document-service`.
   - **Suivante : STORY-1130** (n° 12 : effacer le dossier de démonstration à la fin d'un essai, D-1082-10 ; `dossier-service`,
     catalogue), puis STORY-1137 (12 bis).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
@@ -1868,9 +1883,53 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ D (27/11, suite « h » de STORY-1124) : servie côté GED par document-service #42** (`8f9040d` sur `dev` ; catalogue
+  #88, `ged` 1.11.0 ; annonce : stories #1014) — votre demande « → B (2026-11-26, STORY-335) : recevoir dans le fonds
+  d'archives du client les pièces du dépôt d'une déclaration ». **Forme choisie : (1)**, un fait du fiscal et une route
+  de service du fiscal (fiche `STORY-1124.md`, « Suite du 2026-11-27 », tableau et D-1124-14 : votre outbox garde la
+  copie due dans la transaction de l'archivage ; la GED sait déjà attendre un fonds ; la forme (2) vous aurait demandé
+  une file de reprise). **Ce que D écrit dans le fiscal (dossier `depots`), à la place de `CopieAuFondsInerte`** :
+  - **(a) le fait `fiscal.depot.piece-archivee` v1**, par votre outbox, **dans la transaction** de
+    `POST …/depots-declaration/{depotId}/livrable` (nature `LIVRABLE_DEPOSE`, `piece.id` = `archiveId`), de la
+    consignation d'un accusé **avec sa pièce** (`ACCUSE_DEPOT`, `piece.id` = `accuseId` ; un accusé par référence seule
+    n'émet rien) et, quand 336 la lira, d'une validation du client **dont la référence est une pièce de la GED**
+    (`VALIDATION_CLIENT`, `pieceGed { pieceId, version, sha256 }`, un fait par obligation validée ; une référence libre
+    n'émet rien). **Schéma, à recopier à l'octet** : `prospera-ocr-service` `dev`,
+    `contrat/consommes/fiscal.depot.piece-archivee.v1.json` (sha256 LF `51838a86…3493`) ; à enregistrer au registre comme vos autres
+    faits (BACKWARD). Clé de partition `orgId` ; en-têtes `eventId`, `schemaVersion`.
+    Requis : `eventId` (uuid), `schemaVersion: 1`, `occurredAt`, `orgId`, `dossierId`, `obligationId`, `depotId` (24 hexa
+    minuscules), `implantationId`, `redevableId` (`^[A-Za-z0-9_-]{1,64}$`), `taxe` (`^[A-Z][A-Z0-9_]{0,39}$`), `periode`
+    (`AAAA`, `AAAA-MM`, `AAAA-Tn`, `AAAA-En`), `numero` (≥ 1), `nature`, `date` (`AAAA-MM-JJ` : jour du dépôt engagé, de
+    l'accusé, de l'accord) ; `piece { id, sha256, taille, type, nom }` (sha256 = **64 hexa sans le préfixe `sha256:`** ;
+    taille ≤ 15 728 640 ; type ∈ PDF, PNG, JPEG, XML, XLSX, JSON — celui lu dans les octets) **ou** `pieceGed`, jamais les
+    deux, jamais rien d'autre (ni signataire, ni auteur, ni texte libre : `additionalProperties: false`).
+  - **(b) la route de service** **`GET /api/v1/service/organisations/{orgId}/pieces-depot/{nature}/{pieceId}`**
+    (`nature` : `LIVRABLE_DEPOSE` | `ACCUSE_DEPOT`) : `Authorization: Bearer <jeton>` reconnu dans
+    **`JETONS_DE_SERVICE=document-service:<jeton>`** (32 caractères au moins, empreinte seule gardée : le patron de
+    `prospera-notification-service`, STORY-589), aucun jeton d'utilisateur, aucun droit ; **200** = les octets exacts
+    (`application/octet-stream`, `X-Empreinte-Sha256`), l'objet **relu et re-haché** avant (682) ; **404
+    `PIECE_INTROUVABLE`** (inconnue, autre organisation, nature qui ne va pas, accusé sans pièce) ; **502
+    `FICHIER_ARCHIVE_ALTERE`** ; **401 `JETON_DE_SERVICE_REQUIS`**. Côté GED : `FISCAL_SERVICE_URL`
+    (`http://fiscal-service:3012`), `FISCAL_JETON_SERVICE` (le même jeton), `FISCAL_SERVICE_DELAI_MS` (15 000).
+  - **Ce que la GED fait** (sans rien attendre de plus) : copie au fonds ouvert du dossier dont la période couvre le
+    premier jour de la période fiscale (sinon le plus récent ouvert ; sans fonds, elle attend et se range à l'ouverture),
+    `DECLARATION_FISCALE` ou `ACCUSE_DEPOT` (plan 2026.3), à contrôler ; la validation rattachée à la pièce de la GED ;
+    idempotente sur `orgId` + `obligationId` + `numero` + `nature` ; une panne de votre route **relit le message** (le
+    groupe `ged.fiscal` passe « bloqué » au troisième échec) ; un 404, un 502 altéré ou d'autres octets font attendre,
+    avec la raison. La lecture : `GET /api/v1/ged/cabinet/dossiers/{dossierId}/pieces-fiscales?obligationId=…` (au jeton
+    du membre, `ged:piece:consulter`), que 336 peut lire. Quand votre schéma est publié, B recopie votre octet (le même
+    texte attendu). Votre ligne peut passer à « servie côté B ; à écrire côté fiscal ».
+- **→ C (27/11, ordre « i », sixième suite de STORY-979) : servie par catalogue #88** (`e528afc` sur `dev` ; annonce :
+  stories #1018) — votre demande « recopier au catalogue le manifeste `comptabilite` 0.6.0 » : `copies.json` depuis
+  `prospera-stories@c926f55` (votre source `0acfd14`, inchangée depuis), avec `ged` 1.11.0 ; droits inchangés. **Et
+  information (h)** : `prospera-fiscal-service`, votre dépôt, portera une route de service et un fait neufs, écrits par D
+  dans son dossier `depots` (voir « → D » ci-dessus) ; la route de la GED que la comptabilité lit (`GET
+  …/ged/cabinet/pieces/{pieceId}/versions/{version}`) n'a pas changé. Votre ligne peut passer à « servie ».
+- **← C (27/11, STORY-338) : recopier `comptabilite` 0.6.0 au catalogue** — **reçue, placée par la session de groupe en
+  ordre « i »** (D-L7B-13). **Servie le 27/11 par catalogue #88** ; voir « → C (27/11, ordre « i ») » ci-dessus.
 - **← D (26/11, STORY-335) : recevoir dans le fonds d'archives du client les pièces du dépôt d'une déclaration** —
-  **reçue, placée par la session de groupe en ordre « h »** (D-L7B-12, suite de STORY-1124). Forme choisie : **(1)**, un
-  fait du fiscal et une route de service du fiscal (D-1124-14) ; schéma et route proposés (« ⚠ Contrats »). En cours.
+  **reçue, placée par la session de groupe en ordre « h »** (D-L7B-12, suite de STORY-1124). **Servie côté GED le 27/11
+  par document-service #42** ; voir « → D (27/11, suite « h » de STORY-1124) » ci-dessus.
 
 - **→ D (26/11, cinquième suite de STORY-979) : servie par catalogue #83** (`ce8cbc0` sur `dev` ; annonce : stories #980)
   — votre demande « → B (2026-11-26, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue » : `copies.json`
@@ -2277,6 +2336,12 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, suite « h » de STORY-1124 et ordre « i » — LIVRÉ** (document-service #42, `8f9040d` ; catalogue #88,
+  `e528afc` sur `dev`) : conforme aux deux annonces ci-dessous, sans écart de contrat. **→ D** : le fait et la route de
+  service à écrire tels quels (« Réponses ») ; jusque-là, rien n'arrive à la GED. **→ A** : `PiecesFiscalesDto` et
+  `PieceFiscaleDto` dans l'OpenAPI vivant de `document-service` (tag `ged-cabinet`) ; `GET …/natures` rend `version:
+  "2026.3"`. **→ C** : la route de « f » que la comptabilité lit est inchangée.
 
 - **2026-11-27, ordre « i » (D-L7B-13) et recopie de « h » — annoncé AVANT la fusion** (`platform-catalog-service`, branche
   `MNV-1124-fiscal`) : `copies.json` recopié depuis `prospera-stories@c926f55` ; seuls deux manifestes changent : **`ged`
@@ -4308,6 +4373,11 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Pièges rencontrés
 
+- **Une suite rouge connue du poste masque une assertion neuve** (suite « h » de STORY-1124) : `ged.service.spec` rougit sur
+  le poste (copies CRLF) avant d'atteindre la liste des schémas consommés ; un schéma consommé neuf ne s'y voit que sous
+  Node 24 (étage `verification`). Ajouter un fait consommé = mettre à jour cette liste, et lire l'étage `verification`.
+- **Un fait d'un dossier reprend les attentes de ce dossier** (D-1124-21) : une preuve qui compte les appels au fiscal
+  après un fait doit soustraire ceux de la reprise.
 - **Le filtre global du catalogue retire en silence un champ hors de sa liste blanche** (STORY-1129) : le 409 portait
   `module`, les unitaires le voyaient (ils lisent l'exception), la pile ne le servait pas. Un refus neuf du catalogue nomme
   ses précisions dans un champ de la liste (`code`, `refus`, `modules`, `planId`…) et une recette le lit sur la pile.

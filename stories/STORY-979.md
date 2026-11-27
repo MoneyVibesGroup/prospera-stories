@@ -653,3 +653,20 @@ Fusionnée en « Rebase and merge », `mergedAt` non nul, `headRefOid` = SHA pou
 - **D** : `paiement` 1.2.0 est au catalogue ; un catalogue déjà semé le reçoit à son prochain démarrage (D-979-13).
 - **C** : `ged` 1.10.0 aussi (la route de « f »).
 - **B** : STORY-1126 (n° 8, la recette des archives de bout en bout).
+
+
+## Sixième suite (2026-11-27) : le manifeste `comptabilite` 0.6.0 (avec `ged` 1.11.0)
+
+**Demande servie :** C, « → B : recopier au catalogue le manifeste `comptabilite` 0.6.0 » (journal de C, #1015, `main`
+`9149604` ; source `prospera-stories@0acfd14` ; code fusionné : comptabilite #21, STORY-338). Placée par la session de
+groupe avec « h » (D-L7B-13, ordre « i ») : aucun identifiant neuf.
+
+- **D-979-41 — Dans la recopie de « h ».** La copie est entière (`manifestes:copier`, D-979-36) : celle de `ged` 1.11.0
+  (suite « h » de STORY-1124) depuis `prospera-stories@c926f55` emporte `comptabilite` 0.6.0, déjà sur `main` et dont le
+  code est fusionné (D-979-24 tenu). Une seule PR du catalogue, deux manifestes changent, rien d'autre.
+- **D-979-42 — Le test des copies suit.** `manifestes-seed.service.spec.ts` : `comptabilite` 0.6.0 publie
+  `comptabilite.facture.desinscrite` (que `ged` consomme depuis 1.9.0) ; ses droits et familles inchangés ; `ged` 1.11.0.
+- **Livré** : **catalogue #88**, **`e528afc` sur `dev`** (fusionnée en rebase, `headRefOid` = `b1e04aa` poussé, arbre
+  identique) ; annonce avant la fusion : stories #1018 (`20b7791`). `manifestes:garde` verte (48) contre `main` ;
+  `src/modules/catalog/manifeste` 71/71 (Node 25). Sans Docker pour cette copie (le verrou de « h » n'a servi qu'à « h »).
+- **Pour la suite** : un catalogue déjà semé reçoit les deux versions à son prochain démarrage (D-979-13).

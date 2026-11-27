@@ -1,7 +1,8 @@
 # STORY-1124 : Le circuit sans trou — la réception et ses boîtes d'un seul geste, les mouvements d'une boîte verrouillés, la facture désinscrite retirée du fonds
 
-Status: done — **suite « h » en cours (2026-11-27)** : les pièces du dépôt d'une déclaration au fonds du client (← D,
-STORY-335 ; « Suite du 2026-11-27 », D-1124-13 → 24). **Livrée le 2026-11-26** : document-service **#38** (`b18d3ad` sur `dev`), catalogue **#82** (`9674aeb`,
+Status: done — **suite « h » livrée le 2026-11-27** : les pièces du dépôt d'une déclaration au fonds du client (← D,
+STORY-335 ; « Suite du 2026-11-27 », D-1124-13 → 26) : document-service **#42** (`8f9040d` sur `dev`), catalogue **#88**
+(`e528afc`, `ged` 1.11.0). **Livrée le 2026-11-26** : document-service **#38** (`b18d3ad` sur `dev`), catalogue **#82** (`9674aeb`,
 `ged` 1.9.0) ; voir « Livraison ». Fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 6 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, ligne 6 ; identifiant réservé D-L7B-1).
 
@@ -249,9 +250,10 @@ obligation, ni par implantation, ni par période. D attend la forme (port inerte
   jetons RS256 limités à une organisation, pour `MOTEUR`, `REPRISE`, `CONNECTEURS` seulement) ; fiche STORY-324 (D-324-2 :
   la validation du client est **déjà** une pièce de la GED, le fiscal n'en garde que la référence).
 - [x] Forme choisie et contrat annoncés avant la fusion (cette PR de docs ; manifeste `ged` 1.11.0 à la source).
-- [ ] PR de code fusionnée en rebase ; manifeste recopié ; preuves.
-- [ ] Recopie au catalogue ; PR de docs finale (fiche, tracker, journal : avancement, « Réponses » → D) ; message à D,
-  information à C.
+- [x] PR de code fusionnée en rebase : document-service **#42** (`dev` **`8f9040d`**) ; manifeste `ged` 1.11.0 recopié
+  depuis `prospera-stories@dc05d12` ; preuves ci-dessous.
+- [x] Recopie au catalogue : **#88** (`e528afc`), avec la demande « i » de C (`comptabilite` 0.6.0, D-L7B-13 ; annonce
+  #1018) ; PR de docs finale (fiche, tracker, journal : avancement, « Réponses » → D et → C) ; message à D, information à C.
 
 ### Les deux formes, comparées sur le code
 
@@ -390,6 +392,74 @@ obligation, ni par implantation, ni par période. D attend la forme (port inerte
   HTTP sortant se prouvent sur une pile `grp-b` neuve (vrai Kafka, doublure de la route du fiscal), et le client de
   Confluent sous Node 24 (étage `verification`). Ni l'OCR, ni les extractions, ni le module Nest commun ne changent : la
   recette de l'Atelier n'apporterait rien (D-1124-8).
+
+### Livré (27/11)
+
+- **document-service #42**, deux commits sur `dev` : `ee2302b`, **`8f9040d`** (fusionnée en rebase, `mergedAt` non nul,
+  `headRefOid` = `2719605` poussé, arbre identique). `src/modules/ged/cabinet/` : `piece-fiscale.ts` (le fait, Ajv strict,
+  règles pures : période → premier jour et exercice, fonds ouvert, origine, formats du fiscal lus dans les octets),
+  `source-pieces-fiscales.ts` (port, adaptateur HTTP borné à la taille annoncée + 1, double), `depot-pieces-fiscales.ts`
+  (`ged_pieces_fiscales`), `pieces-fiscales.service.ts`, `pieces-fiscales.controller.ts` (`PiecesFiscalesDto`),
+  `pieces-fiscales-consumer.bootstrap.ts` ; `cabinet.service.ts` (`rangerUneCopie` : format déjà jugé, lecture seulement
+  d'un format lu ; `sceller` ; `dossierOuRefus` public), `index-de-recherche.ts`, `reversibilite.ts` (extensions),
+  `cabinet.controller.ts` (reprise à l'ouverture d'un fonds) ; `pieces/depot-ged.ts` (index `une_piece_par_piece_fiscale`,
+  motif de clés `{ origine.systeme, organisationId, origine.id }` : deux index partiels ne partagent pas un motif) ;
+  `ged.config.ts`, `.env.example` (`FISCAL_SERVICE_URL`, `FISCAL_JETON_SERVICE`, `FISCAL_SERVICE_DELAI_MS`) ; schéma
+  `contrat/consommes/fiscal.depot.piece-archivee.v1.json` = `cabinet/schemas/` (sha256 LF `51838a86…3493`, origine «
+  proposé à D ») ; `parametres/ged-cabinet-2026.3.json` (`be3e8f20…8bea` ; 2026.2 inchangé) ; manifeste `ged` 1.11.0
+  recopié depuis `prospera-stories@dc05d12` (`dfd36a0b…6d72`).
+- **Catalogue #88** (`e528afc` sur `dev`) : `copies.json` depuis `prospera-stories@c926f55` ; seuls `ged` 1.11.0 et
+  `comptabilite` 0.6.0 (← C, demande « i », D-L7B-13) changent ; `manifestes:garde` verte (48).
+- Annonces : stories #1014 (`dc05d12`, avant la fusion du code) et #1018 (`20b7791`, avant la fusion du catalogue). Tel
+  qu'annoncé : aucun écart de contrat.
+
+### Écarts décidés au code
+
+- **D-1124-25 — Le motif de clés de l'index des copies du fiscal diffère de celui des factures** (`origine.systeme`
+  d'abord) : deux index partiels sur le même motif de clés ne coexistent pas partout ; l'unicité est la même.
+- **D-1124-26 — La reprise d'un dossier passe aussi à chaque fait d'un AUTRE type du même dossier**, validation du client
+  comprise : sur la pile, la validation (qui ne tire aucun octet) a fait retenter les trois attentes de D1 — c'est
+  D-1124-21, voulu ; l'assertion du script qui comptait « aucun appel au fiscal » après elle était fausse (voir Preuves).
+
+### Preuves
+
+- Node 25 (poste), par chemin : `piece-fiscale.spec.ts`, `source-pieces-fiscales.spec.ts`,
+  `pieces-fiscales-consumer.bootstrap.spec.ts` 20/20 ; `pieces-fiscales.service.spec.ts` 25/25 ;
+  `plan-cabinet.spec.ts` 9/9 ; `cabinet.service.spec.ts` et l'invariant des consommateurs 50/50 ; e2e `ged-cabinet` et
+  `dossier-portee-collaborateur` 78/78. Suite complète : unitaires 1 441 passés avant les deux corrections de tests de
+  version (2 suites rouges connues du poste : CRLF de `ged.service.spec`, chemins Windows de `piece-conservation.spec`) ;
+  **e2e 224/224** ; lint des fichiers touchés, `tsc`, build.
+- **Node 24** (étage `verification`, image depuis `git -c core.autocrlf=false archive`) : sur `ba4cfe2`, 120/121 suites —
+  la liste des schémas consommés de `ged.service.spec` ne comptait pas le fait neuf (masquée sur le poste par la copie
+  CRLF connue), corrigée par `2719605` ; sur **`2719605` : 121/121 suites, 1 448 passés** (5 ignorés) ; **e2e 224/224**.
+- **Mutations 23/23 rouges sur assertion** : rejeu, copie retrouvée par son origine, fonds fermé, trimestre, panne
+  pendant un fait (acquittée) ou une reprise (levée), empreinte, format déclaré, validation d'un autre dossier ou d'une
+  autre empreinte, lecture sans droit ou hors portée, lecture planifiée d'un classeur, scellé qui attend un classeur, index
+  qui attend son texte, 404 du fiscal pris pour une panne, tout 502 pris pour un original altéré, lecture non bornée,
+  jeton court, ouverture d'un fonds sans reprise (e2e), fait sans reprise, mauvais groupe, unicité mémoire. Trois
+  survivantes au premier tour (rejeu, origine, unicité : des gardes redondantes) tuées par trois tests neufs ; trois
+  mutants réécrits parce qu'ils ne compilaient pas.
+- **Pile `grp-b` neuve** (Mongo 7 `rs0`, Kafka 3.9, Redis, MinIO Chainguard, doublure d'auth, **doublure de la route de
+  service du fiscal** qui exige le jeton ; image depuis l'archive de `ba4cfe2`) — **42/43** : plan `2026.3` et
+  `ACCUSE_DEPOT` servis ; index `une_piece_par_piece_fiscale` (unique, partiel) et `un_rattachement_par_piece_fiscale`
+  posés ; un **classeur** rangé par un vrai fait Kafka, rattaché (obligation, implantation, période, version, fonds), lu
+  par la route de « f » (`DECLARATION_FISCALE`, type XLSX), contenu relu **à l'octet** depuis MinIO, chiffré en base,
+  **aucune lecture planifiée** ; le fiscal appelé **une fois, au jeton de service**, `accept: application/octet-stream` ;
+  **trois rejeux : une seule copie, aucun octet de plus** ; un accusé PDF `ACCUSE_DEPOT` avec sa lecture ; D2 sans fonds :
+  `SANS_FONDS` sans tirer d'octets, puis **rangé dans la réponse même de l'ouverture du fonds** ; **le fiscal en panne** :
+  rien d'écrit, `/health` 503 nomme **`ged.fiscal` bloqué**, la panne levée, le message relu est rangé ; 404 →
+  `PIECE_INTROUVABLE`, 502 → `ORIGINAL_ALTERE`, autres octets → `EMPREINTE_DIVERGENTE`, deux messages hors contrat
+  écartés, le suivant rangé ; **la validation du client rattachée à la pièce de la GED, sans copie** ; **course entre
+  l'ouverture d'un fonds et un fait du même dossier : quatre pièces rangées, aucune copie en double** ; filtres, 400, le
+  collaborateur responsable 200, hors portée 404 `DOSSIER_INCONNU` ; un fonds qui ne porte qu'un classeur contrôlé se
+  **verse et se scelle** (200). Le KO : « validation : aucun appel au fiscal » — le journal de la doublure montre que les
+  trois appels après la validation sont la reprise des trois attentes de D1 (`…05`, `…06`, `…07`), voulue (D-1124-26) ;
+  aucun appel pour la validation elle-même, aucune pièce neuve. 7 lignes d'erreur au journal du service, toutes de la
+  panne voulue (groupe bloqué, santé 503).
+- Verrou : 01:08 → 01:17 (pile, `down -v`, étage `verification`), 01:25 → 01:27 (étage `verification` sur `2719605`).
+  Aucun conteneur ni volume `grp-b` ne reste. Une boucle d'attente du verrou au premier plan a été passée en arrière-plan
+  par l'outil au bout de 180 s : arrêtée aussitôt (`TaskStop`), le verrou n'était pas pris (piège).
+- Recette de l'Atelier non rejouée (D-1124-24) : ni l'OCR, ni les extractions, ni le module Nest commun ne changent.
 
 ### Nommé pour plus tard
 

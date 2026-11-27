@@ -2121,6 +2121,9 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-979.md"
     reserved_on: "2026-11-24"
     note: >
+      🏁 SIXIÈME SUITE DONE le 2026-11-27 (fiche, « Sixième suite (2026-11-27) », D-979-41 → 42 ; lot 7 de B, ordre « i »,
+      D-L7B-13 ; demande de C, STORY-338, servie) — catalogue #88 (dev e528afc) : comptabilite 0.6.0 recopié avec ged 1.11.0
+      (« h ») depuis prospera-stories@c926f55 ; annonce stories #1018. Avant :
       🏁 CINQUIÈME SUITE DONE le 2026-11-26 (rouverte, puis refermée ; fiche, « Cinquième suite (2026-11-26) », D-979-35
       → 40 ; lot 7 de B, ordre « g », D-L7B-11) — catalogue #83 (dev ce8cbc0) ; contrat annoncé avant la fusion (stories
       #980, main 59ed625). La demande de D (STORY-1141) : paiement 1.2.0 recopié depuis prospera-stories@59ed625 (sha256
@@ -2271,11 +2274,13 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1124.md"
     reserved_on: "2026-11-25"
     note: >
-      🚧 SUITE « h » EN COURS le 2026-11-27 (groupe B, lot 7, D-L7B-12 ; fiche, « Suite du 2026-11-27 », D-1124-13 → 24 ;
-      demande de D, STORY-335) — les pièces du dépôt d'une déclaration au fonds du client : forme (1), fait
-      fiscal.depot.piece-archivee v1 proposé à D, octets tirés par une route de service du fiscal ; contrat annoncé avant
-      la fusion ; plan du cabinet 2026.3 (ACCUSE_DEPOT) ; GET …/ged/cabinet/dossiers/{dossierId}/pieces-fiscales ;
-      manifeste ged 1.11.0. Avant la suite :
+      🏁 SUITE « h » DONE le 2026-11-27 (groupe B, lot 7, D-L7B-12 ; fiche, « Suite du 2026-11-27 », D-1124-13 → 26 ;
+      demande de D, STORY-335, servie) — document-service #42 (dev 8f9040d), catalogue #88 (dev e528afc, ged 1.11.0 et
+      comptabilite 0.6.0 de « i ») ; contrat annoncé avant la fusion (stories #1014, main dc05d12 ; #1018). Forme (1) :
+      fiscal.depot.piece-archivee v1 proposé à D, octets tirés par la route de service du fiscal ; plan du cabinet 2026.3
+      (ACCUSE_DEPOT) ; GET …/ged/cabinet/dossiers/{dossierId}/pieces-fiscales. Node 24 : 121/121 suites (1448), e2e
+      224/224 ; Node 25 e2e 224/224 ; mutations 23/23 ; pile grp-b neuve 42/43 (le KO : une assertion du script, la reprise
+      voulue). Avant la suite :
       🏁 DONE le 2026-11-26 — document-service #38 (dev b18d3ad), catalogue #82 (dev 9674aeb, ged 1.9.0 recopié) ;
       contrat annoncé avant le code (stories #959, main 95d4465). Node 25 : unitaires 1359 (2 rouges connues du poste),
       e2e 217/217 ; Node 24 : 116/116 suites (1366), 217/217 ; mutations 24/24 ; pile grp-b neuve (Mongo rs0) 41/41 :
