@@ -2599,6 +2599,23 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-27, STORY-1135 (n° 17) — mettre à jour sans peur, annoncé AVANT le code** (`prospera-plateforme` étiquette
+  neuve **`contrats-agent-v1.2`**, `centrale-service`, `agent-instance` ; fiche `stories/STORY-1135.md`, D-1135-1 → 16).
+  Lu par **B** seul (centrale, agent) ; **→ C, D** : information, aucun contrat que vous lisez ne change ; **→ A** :
+  information, aucun écran débloqué (les gestes de la coque `instance` attendent les commandes d'AD-37).
+  - **`manifeste-version@1`** (neuf) : JWS `prospera-manifeste-version+jws`, signé par une clé **`ci`**, diffusé (ni
+    `instanceId` ni `audience`) : `version`, `niveauCorrectif`, `retourArriere`, `finMaintenance`, `services[]` (`nom`,
+    `image`, `empreinte`, `migrer`), `interrupteurs[]`.
+  - **`@prospera/signature` 0.2.0** : le type ci-dessus → `ci`, diffusé ; les autres types inchangés.
+  - **`contact-requete@1`** (ajout facultatif) : `miseAJour { enService, plan }` ; **`contact-reponse@1`** (ajout
+    facultatif) : `manifestes` (≤ 4), rendu seulement à un contact qui porte `miseAJour` ; sinon réponse à l'octet de 1134.
+  - **`contact.openapi.json` 1.2.0**, **`agent-executeur.openapi.json` 1.2.0** : `GET /promotion`.
+  - **Centrale** : routes d'opérateur **de simulation** (`POST /api/centrale/v1/versions`, `PUT …/instances/{id}/version-cible`,
+    `GET …/instances/{id}/mise-a-jour`) ; l'état voulu porte `fenetreDSI` (déjà au contrat) quand elle est choisie.
+  - **Agent** `agent-0.4.0` : `AGENT_EXECUTANT=compose`, `AGENT_PROJET` ; le dépôt accepte les manifestes.
+  - **Inchangés** : contrat d'état publié (1.1.0 ; `module.interrupteurs` et `config` nommés pour plus tard, D-1135-11, 12),
+    `etat-voulu@1`, `licence@1`, `etats-de-confiance.json`, `vecteurs-v2`, catalogue, paiement, auth.
+
 - **2026-11-27, STORY-1134 (n° 16) — LIVRÉ** (plateforme #45 `ed51833` `contrats-agent-v1.1` ; centrale #5 `205e71b` ; agent
   #4 `7d7c087`) : conforme à l'annonce ci-dessous, sans écart. **→ C, D** : information seulement ; **→ A** : information,
   aucun écran débloqué (le bandeau de gel de la coque viendra avec `instance.etat.modifie`).
