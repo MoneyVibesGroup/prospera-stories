@@ -1,8 +1,10 @@
 # STORY-1133 : L'interface de l'agent publiée — et des vecteurs de test qui n'expirent plus en silence
 
-Status: in-progress — fiche écrite le 2026-11-27 par une sous-session du groupe B juste avant de coder (lot 7, n° 15 de
-B, `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, deuxième partie, ligne 15 ; identifiant réservé D-L7B-1).
-**Date du plan : 08/01** (« l'instance est montée sur site en S10, le 29/01 »).
+Status: done — **livrée le 2026-11-27** : prospera-plateforme **#43** (`b98d1d0`, étiquette `vecteurs-v2`) et **#44**
+(`c481f00`, étiquette `contrats-agent-v1`), centrale-service **#3** (`a790a46`) et **#4** (`9942cf1`), agent-instance **#2**
+(`5998597`) et **#3** (`ea634af`) ; voir « Livraison ». Fiche écrite le 2026-11-27 par une sous-session du groupe B juste
+avant de coder (lot 7, n° 15 de B, `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, deuxième partie, ligne 15 ;
+identifiant réservé D-L7B-1). **Date du plan : 08/01** (« l'instance est montée sur site en S10, le 29/01 »).
 
 **Épic :** EPIC-148 (monter une instance sur site et la superviser) · voisins EPIC-149, 150, 151 · FR-13, FR-14, FR-16 ·
 AD-1, AD-6, AD-7, AD-9, AD-17, AD-19, AD-25, AD-26, AD-28, AD-34, AD-36, AD-37
@@ -158,3 +160,55 @@ n'est pas une copie (rien à faire). **Aucun dépôt de C ni de D ne les épingl
 - Les autres faits relayés (`paiement.abonnement.impayee`, `.regularise`, `abonnement.contrat.signe`) : la liste fermée
   s'élargit avec la centrale qui les traite.
 - Le contact anticipé quand des faits attendent (D-1133-12).
+
+## Livraison (2026-11-27)
+
+Contrat annoncé avant le code (prospera-stories **#1051**, `main` `e791a31`), livré sans écart. Ordre : les vecteurs
+d'abord (trois PR), puis l'interface et le relais.
+
+| PR | Poussé → sur `dev` | Ce qu'elle porte |
+|---|---|---|
+| prospera-plateforme **#43** | `39392d1` → **`b98d1d0`** (étiquette **`vecteurs-v2`**) | clés de test neuves `centrale-test-2026-2036`, `ci-test-2026-2036` (2026-01-01 → 2036-01-01, générées par le script) ; `centrale-pretendue-production` recertifiée ; `centrale-test-2026`, `ci-test-2026` retirées ; garde des 60 jours (`test/vecteurs.test.ts`) ; README |
+| centrale-service **#3** | `bd1e024` → **`a790a46`** | copie à `vecteurs-v2` (dont `@prospera/signature` : le type du certificat d'effacement de 953, ajout seul) ; jeu croisé r1 → r3 réémis ; pile de simulation sur la clé neuve ; garde des 60 jours sur la copie ; `cle.test` : fin exclusive du 2036-01-01 |
+| agent-instance **#2** | `a29ae8d` → **`5998597`** | copie à `vecteurs-v2`, jeu croisé recopié à `a790a46` ; garde des 60 jours ; pile sur la clé neuve |
+| prospera-plateforme **#44** | `a4b71ea` → **`c481f00`** (étiquette **`contrats-agent-v1`**) | `contrats/agent/` : `contact-requete@1`, `contact-reponse@1`, `contact.openapi.json` 1.0.0, `agent-executeur.openapi.json` 1.0.0, `contact.cas.json` ; source `scripts/contrats-agent.ts` (`npm run contrats:agent`) ; `test/contrats-agent.test.ts` ; README |
+| centrale-service **#4** | `ce1c00a` → **`9942cf1`** | copie à `contrats-agent-v1` ; le contact compile la copie de `contact-requete@1` ; `test/contrat-du-contact.test.ts` |
+| agent-instance **#3** | `8275e14` → **`ea634af`** | copie à `contrats-agent-v1` ; `src/executeur/relais.ts`, `kafka.ts` (client de Confluent ~1.11.0), `depot.ts` (charge, `traiterAcquittements`), `contact.ts` (acquittements déposés), `http.ts` (`relais`), `main.ts` (`AGENT_RELAIS_KAFKA`, `AGENT_RELAIS_GROUPE`) ; `agent-0.2.0` ; profil compose `relais` ; tests `relais`, `contrat-executeur` ; README |
+
+Chaque PR : `mergedAt` non nul, `headRefOid` = SHA poussé, diff vide entre la branche et `dev` après le rejeu.
+
+### Preuves
+
+- **Plateforme** (Node 25) : `npm test` **676/676** après #43 (674 avant), **697/697** après #44 ; `typecheck` vert ; le
+  script des vecteurs rejoué deux fois sans diff (reproductible) ; mutations **7/7** sur la garde (dont le témoin : l'ancien
+  certificat de 1132 remis au dossier est nommé, « fin 2027-01-01 ») et **8/8** sur le contrat de l'agent.
+- **Centrale** (Node 25) : **63/63** après #3 (59 avant), **74/74** après #4 ; `typecheck` ; mutations 5/5 (garde) et 4/4
+  (contrat).
+- **Agent** (Node 25) : **55/55** après #2, **78/78** après #3 ; `typecheck` ; mutations 5/5 (garde) et **23/23** sur le
+  relais (dédoublonnage, ordre, borne, acquittement rejoué, écart compté et journalisé, contrat du fait, tableau JSON, reçu
+  journalisé, section vide, acquittements non jugés, charge non réécrite, refus non journalisé, acquittements non déposés ;
+  Kafka : topics avant `subscribe`, `fromBeginning`, métadonnées, panne avalée, pause absente ou constante, consommateur
+  réemployé, ancien non déconnecté).
+- **Node 24** (`docker build --target verification`, archives des branches avant la recopie à l'étiquette) : agent
+  **77/78**, centrale **73/74** — le seul rouge de chacun, le test « copié à une étiquette », venait de la copie temporaire
+  faite depuis la branche de la plateforme (`origin/MNV-1133-agent`), recopiée ensuite à `contrats-agent-v1`, sans autre
+  changement qu'`ORIGINE.json`. `npm ci` du client de Confluent réussi dans l'image. Rejoué après la fusion sur les archives d'`origin/dev` (agent `ea634af`, centrale `9942cf1`) : **agent 78/78, centrale 74/74** (verrou 15:55:24 → 15:56:01).
+- **Pile `grp-b --profile relais`** (archives des branches : agent `7846a29`, centrale `91c8ed5` ; Kafka 3.9.0, centrale,
+  agent sur site, agent de la plateforme) : **9/9** —
+  - l'agent sur site applique la licence semée n° 2 (`bilan`, `balance`), signée par **`centrale-test-2026-2036`** ;
+    `fiscalite` ⇒ `MODULE_HORS_LICENCE` ;
+  - l'exécuteur de la plateforme s'abonne (`agent.relais-paiement`) ; on publie sur Kafka le fait **produit par le code de
+    paiement** (`0b8d1f2e-…-0001`, `FISCALITE`, `PI_SPI`) et un message illisible ;
+  - **15 s** plus tard, le fait est relayé et acquitté (`APPLIQUE`, journal de la centrale), le message illisible écarté
+    (`relais` : 0 en attente, 1 acquitté, 1 écarté) ;
+  - **29 s** après la publication, l'agent sur site applique la licence **n° 16** (`bilan`, `balance`, `fiscalite`,
+    `pi-spi`) : `fiscalite` ⇒ `{ ouvert: true }` — sans aucun appel à la main à la centrale ;
+  - le même fait republié, puis l'exécuteur de la plateforme redémarré (il relit l'offset 2, pas encore validé) : gardé une
+    fois, rien de neuf à relayer, la centrale n'a reçu qu'**un** contact portant des faits ; le site garde la n° 16.
+- **Verrou Docker** : 15:31:28 → 15:36:32 (une passe), `down -v`, aucun conteneur ni volume `grp-b` restant.
+
+### Écarts à la fiche
+
+- Aucun écart au contrat annoncé. Précisions : `@prospera/signature` copié à `vecteurs-v2` porte le type du certificat
+  d'effacement (953) que la copie de `point-de-decision-v1` n'avait pas (ajout seul) ; un cas du contrat (`eventId` hors du
+  motif) a été durci pendant les mutations (`evenement:00001`, plus long que 8, pour juger le motif et non la longueur).

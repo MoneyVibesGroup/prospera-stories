@@ -2182,15 +2182,19 @@ reserved_ranges:
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
   - range: "STORY-1133"
-    status: "in_progress"
+    status: "done"
     owner: "Groupe B, lot 7, n° 15 — l'interface de l'agent publiée (EPIC-148) : d'abord les vecteurs de test v2 de la plateforme (la clé centrale-test-2026 expirait le 2027-01-01) et la garde des 60 jours ; puis contrats/agent/ (le contact, les routes de l'exécuteur) et le relais réel des faits de paiement par l'agent de la plateforme (prospera-plateforme, centrale-service, agent-instance)"
     source_doc: "prospera-stories/stories/STORY-1133.md"
     reserved_on: "2026-11-25"
     note: >
-      Fiche écrite le 2026-11-27 juste avant le code ; contrat annoncé avant le code (journal de B, « ⚠ Contrats »).
-      Vecteurs v2 (étiquette vecteurs-v2 : centrale-test-2026-2036, ci-test-2026-2036, jusqu'au 2036-01-01), copiés
-      dans centrale et agent ; contrats/agent/ (contrats-agent-v1) ; relais de paiement.abonnement.echeance.encaissee par
-      l'exécuteur de l'agent de la plateforme. D-1133-1 → 13. NON SLOTTÉE.
+      🏁 DONE le 2026-11-27 — prospera-plateforme #43 (dev b98d1d0, étiquette vecteurs-v2) et #44 (dev c481f00, étiquette
+      contrats-agent-v1), centrale-service #3 (a790a46) et #4 (9942cf1), agent-instance #2 (5998597) et #3 (ea634af) ;
+      contrat annoncé avant le code (stories #1051, main e791a31). Clés de test centrale-test-2026-2036, ci-test-2026-2036
+      (→ 2036-01-01), garde des 60 jours dans les trois dépôts ; contrats/agent/ (contact-requete@1, contact-reponse@1,
+      contact.openapi.json, agent-executeur.openapi.json, cas) ; relais réel par l'exécuteur de la plateforme (Confluent,
+      agent.relais-paiement, magasin, acquittements par le volume). Node 25 : plateforme 697/697, centrale 74/74, agent
+      78/78 ; mutations 7/7, 8/8, 5/5, 4/4, 5/5, 23/23 ; pile grp-b --profile relais 9/9 (fait publié sur Kafka → fiscalite
+      ouverte sur site en 29 s, licence n° 16). D-1133-1 → 13. Suivante : STORY-1134. NON SLOTTÉE.
   - range: "STORY-1136"
     status: "in-progress"
     owner: "Groupe B, lot 7, n° 18 — l'avoir émis réduit la Créance de sa facture : paiement consomme facturation.avoir.emis@1 (← D, STORY-1066, D-1066-13 (3), D-979-14 ; la remplaçante de STORY-1116, D-L7B-3) (prospera-paiement-service)"
