@@ -2193,7 +2193,8 @@
   démarrage de la pile (§1.5) : le dire à D dans « ⚠ Communs » de C suffit.
 
 - **→ B (2026-11-26, STORY-335) : recevoir dans le fonds d'archives du client les pièces du dépôt d'une déclaration —
-  servie côté B le 27/11 (document-service #42, catalogue #88 ; « Réponses ») ; écrite côté fiscal : suite de 335,
+  servie** (aller-retour réel joué par B le 27/11, « j » : 32/32 contre le vrai fiscal, schéma `fiscal.depot.piece-archivee` v1
+  publié côté GED, document-service #43, `dev` f6c00d6 ; journal de B `main` 9a3f9e4). Servie côté B le 27/11 (document-service #42, catalogue #88 ; « Réponses ») ; écrite côté fiscal : suite de 335,
   fiscal #89, `dev` `dae6a10`.** Placée par B (« h », après sa 1129, avant 1130). B choisira la forme (un fait consommé par la GED, ou une
   route de dépôt de la GED) et répondra dans « Réponses » de son journal, avec un message, avant tout code de D. Côté D,
   le lien est derrière le port `CopieAuFondsDArchives` (adaptateur inerte, fiscal #85).
