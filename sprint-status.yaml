@@ -8216,7 +8216,8 @@ sprints:
         epic: "EPIC-033"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-341.md"
+        status: "in-progress"  # 🚧 2026-11-27 — groupe C, lot 7 (n° 13 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-341-1 → 12) ; contrat et communs annoncés (journal de C) : GET /obligations/{id}/ordre-de-reglement (sur la déclaration déposée et un montant à régler complet et positif seulement, sinon 409 nommé ; le redevable et son NIF, LPF Art. 7 ; le montant, la date limite, la caisse que le paquet nomme ; des mentions copiables ; aucun accès bancaire ; une empreinte) ; OrdreDeReglementService exporté pour 565 (D) ; garde structurelle : aucune capacité d'exécution de paiement, sous aucune forme ; paquet fiscal Togo : reglement.obligations.<CODE>.versement et reglement.ordre (R13 étendue) ; aucune migration.
         assigned_to: null
   - sprint_number: 28
     start_date: "2027-07-15"

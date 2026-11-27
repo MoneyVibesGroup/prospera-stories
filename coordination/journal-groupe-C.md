@@ -217,8 +217,11 @@
    14/14 (R13) ; pile `grp-c` saine. Verrou pris une fois (02:27 → 02:41). D-340-1 → 12 dans la fiche. **B prévenu** (recopie) ;
    **D prévenu** (empreinte, `ReglementModule` pour 565). Rituel : FE-097 de A notée (« Réponses »), la demande 349 → 331 de D
    déjà servie par 339.
-22. **Suivante : STORY-341** (l'ordre de règlement produit, jamais exécuté ; il lit `MontantAReglerService`). **FE-158 de A
-   est placée en tête de STORY-350** (décision de la session de groupe du 27/11, « Réponses »).
+22. 🚧 **STORY-341 en cours (27/11)** : l'ordre de règlement produit, jamais exécuté (fiche `stories/STORY-341.md`, D-341-1 →
+   12 ; contrat et communs annoncés ci-dessous avant le code). **Dette de preuve de 340** : la suite complète du fiscal sous
+   Node 24 rejouée sur `origin/dev` `efd0992` (le commit fusionné), sous le verrou, avant le code de 341 : résultat dans la
+   fiche de 341. **FE-158 de A est placée en tête de STORY-350** (décision de la session de groupe du 27/11) ; **FE-097 de A
+   est placée dans une PR à part de balance-service, juste après STORY-344** (même décision, « Réponses »).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -488,7 +491,9 @@ seulement.
   **`d620df8bf6bf43689f7a263c905965243f133d6a41e90f13290dcb737a33fca6`** (LF) ; elle remplace les versions précédentes (`62563b3c`
   de 339). Bloc neuf `reglement` et une ligne de `aFaire` ; rien de ce que `dossier-service` lit ne change. Prévenu par message.
 
-- **→ B (2026-11-27, STORY-338) : recopier au catalogue le manifeste `comptabilite` 0.6.0** — ouverte. Code fusionné :
+- **→ B (2026-11-27, STORY-338) : recopier au catalogue le manifeste `comptabilite` 0.6.0** — ✅ **servie par B** (ordre « i »,
+  D-L7B-13 : catalogue **#88**, `dev` `e528afc`, annonce stories #1018 ; `copies.json` depuis `prospera-stories@c926f55`, notre
+  source `0acfd14` inchangée, avec `ged` 1.11.0 ; droits inchangés ; journal de B « → C (27/11, ordre « i ») »). Code fusionné :
   prospera-comptabilite-service #21 (`58803f5`) ; source `manifestes/comptabilite.manifest.ts` (`prospera-stories@0acfd14`,
   #1007) : `publie` + `comptabilite.facture.desinscrite`, trois routes de lecture neuves (`…/ecritures/{ecritureId}/pieces`,
   `…/pieces/{pieceId}/ecritures`, `…/pieces/justification`) ; droits inchangés. Prévenu par message.
@@ -639,9 +644,9 @@ seulement.
 
 - **← A (27/11, FE-097, `prospera-balance-service`, registre des immobilisations)** : (1) la liste sans cumul, net ni dotation ;
   (2) « non amortissable » au contrat ; (3) la mise en service en lot ; (4) les durées usuelles par catégorie ; (5) les comptes
-  d'amortissement et de dotation proposés — **notée, non bloquante** (l'écran tient sans). Aucune story restante du lot 7 de C
-  n'ouvre le registre : **à placer par la session de groupe** ; proposition de C : une PR à part de balance-service après 344
-  (le point 1 d'abord), avant 350.
+  d'amortissement et de dotation proposés — **notée, non bloquante** (l'écran tient sans). **Placée par la session de groupe
+  (27/11) dans une PR à part de `balance-service`, juste après STORY-344** (fin d'EPIC-033), le point 1 d'abord, avant 350.
+  (Avant : à placer ; c'était la proposition de C.)
 
 - **← D (2026-11-26, STORY-334, D-334-8) : ouvrir `DEPOSEE → A_DEPOSER` sur un rejet consigné** — ✅ **servie en tête de
   STORY-338, PR à part** : fiscal **#86** (`ffd6f2a` sur `dev`, sur `69d7e65` de D). Dans `revenir`, de `DEPOSEE` vers
@@ -765,6 +770,20 @@ seulement.
 > OpenAPI, `package.json`, migrations, `read-models/`, copies du paquet, et tout fichier d'un dossier de D) ne change que
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
+
+- **ANNONCÉ (2026-11-27, STORY-341, avant le code)** — branche `MNV-341` de `prospera-fiscal-service`, partie d'`origin/dev`
+  `efd0992` (et `MNV-341` de `balance-service`, d'`origin/dev` `e68ae10`, pour la source du paquet). **Aucune migration**,
+  aucune collection, aucune écriture ; ni `app.module.ts`, ni `package.json`, ni `read-models/`, ni manifeste `declarations`.
+  Touchés parmi les communs : **le contrat OpenAPI** (une route neuve, `GET /obligations/{id}/ordre-de-reglement` : « ⚠
+  Contrats ») ; **la copie du paquet** (`test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`, à l'octet de
+  balance-service : `reglement.obligations.<CODE>.versement`, `reglement.ordre`) ; **`src/app.module.invariant.spec.ts`**
+  (l'export du service de l'ordre). Tout le reste dans des dossiers de C (`domain/reglement`, `application/reglement`,
+  `modules/reglement` ; `domain/redevables/garde-identifiant-fiscal.spec.ts` : l'ordre et son DTO nommés porteurs du NIF ;
+  la garde FR-F47 neuve, dans `domain/reglement`, qui lit tout `src/`). **`MontantAReglerService`** : constructeur et
+  `deLObligation` inchangés (une lecture `lire` de plus) ; `ReglementModule` importe en plus `RedevablesModule` et exporte
+  `OrdreDeReglementService`. **→ D** : rien à faire pour un rebase ; aucune classe de C instanciée par `DepotsModule` ne
+  change ; la garde FR-F47 est le témoin de 565 (AC-1) : un nom de route, de champ ou de dépendance qui paierait la ferait
+  rougir ; la suite de D est jouée en entier avant le push ; D prévenu par message (empreinte du paquet).
 
 - **FUSIONNÉ (2026-11-27, prospera-fiscal-service#88, `dev` `efd0992`, rebasée sur `origin/dev` `a991963` de D, sans
   conflit)** — conforme à l'annonce : `src/app.module.ts` (import de `ReglementModule`), le contrat OpenAPI (la route neuve),
@@ -956,6 +975,34 @@ seulement.
   clés, plus celles de l'IRPP et de la CNSS (voir « ⚠ Contrats »).
 
 ## ⚠ Contrats
+
+- **2026-11-27 (STORY-341), ANNONCÉ avant le code** — **l'ordre de règlement produit, jamais exécuté**
+  (`prospera-fiscal-service`, REST ; source du paquet fiscal Togo dans `balance-service`). Fiche : `stories/STORY-341.md`
+  (D-341-1 → 12). Consommateurs : le dépôt automatisé (565, D : il transporte l'ordre au bon redevable) ; le rapprochement
+  (342, C) ; l'écran (A) ; la copie du paquet de `dossier-service` (B). **Ajouts seuls** : une route de lecture, un champ et
+  un sous-bloc du paquet ; aucun droit, aucun événement, aucune collection ; aucun champ existant ne change ; manifeste
+  inchangé ; aucune route de `balance-service` ne change.
+  - **`GET /api/v1/obligations/{id}/ordre-de-reglement`** (rôles `TENANT_ADMIN`, `TENANT_USER`, accès fiscal, portée de
+    l'obligation ; `404 OBLIGATION_INTROUVABLE`) ⇒ `200 { nature: ORDRE_DE_REGLEMENT, execution: PAR_LE_REDEVABLE,
+    avertissement, obligationId, dossierId, taxe, libelle, periode, produitLe, redevable { redevableId, nature, designation,
+    identifiantFiscal }, montant { aRegler (> 0), devise, reference, origine, deduit, dejaRegle, chemin }, echeance {
+    dateLimite, legale, reportee }, declaration { numero, nature, versionId, deposeeLe }, versement { organisme, baseLegale,
+    aConfirmer }, regle, identifiantFiscalExige, mentions[{ code, libelle, valeur }], reserves[{ code, message }], paquet,
+    corpus, empreinte }`. **Jamais un ordre faux** : `409` nommé, sans ordre — `DECLARATION_NON_DEPOSEE`,
+    `MONTANT_A_REGLER_INDISPONIBLE` (`details.motif`), `MONTANT_A_REGLER_INCOMPLET` (`details.manques`), `RIEN_A_REGLER`
+    (`details.excedents`), `IDENTIFIANT_FISCAL_ABSENT` (LPF Art. 7), `REDEVABLE_INTROUVABLE` ; `details.chemin` → le montant
+    à régler. Réserves nommées (l'ordre reste produit) : `ORGANISME_A_CONFIRMER`, `VERSEMENT_NON_DECLARE_AU_PAQUET`,
+    `ECHEANCE_NON_DATEE`, `DEVISE_NON_DECLAREE`. Aucun accès bancaire dans l'ordre ; `empreinte` = `sha256:` de la forme
+    canonique sans `produitLe`.
+  - **En processus (565, D)** : `OrdreDeReglementService.deLObligation(acteur, id)` (exporté par `ReglementModule`) ⇒
+    `{ statut: PRODUIT, ordre } | { statut: NON_PRODUIT, motif, message, details }`.
+  - **Aucune capacité d'exécution, sous aucune forme** (AC-2) : une garde structurelle sur tout `src/` et `package.json`
+    (routes, dépendances, clients, sujets `paiement.*`, champs d'accès bancaire) — le témoin de 565 (AC-1).
+  - **Paquet fiscal Togo 2026** : **`reglement.obligations.<CODE>.versement`** `{ organisme, livre, article, millesime } |
+    { organisme: null, aConfirmer }` — `IS_ACOMPTE` et `TPU_ACOMPTE` « caisse du receveur des impôts » (LPF Art. 55, 57),
+    `RSH` « caisse du receveur chargé du recouvrement » (LPF Art. 99), `RETENUE_IRPP` « caisse du service des impôts » (LPF
+    Art. 27) ; `TVA` et `TPU` (le solde) : à confirmer (le texte ne nomme pas la caisse) ; **`reglement.ordre.identifiantFiscal`**
+    (LPF Art. 7) ; garde **R13** étendue. Le moteur de balance-service ne le lit pas. Nouvelle empreinte au « Livré ».
 
 - **2026-11-27 (STORY-340), PUBLIÉ** (fiscal #88, `efd0992` ; balance-service #174, `e68ae10`) — conforme à l'annonce
   (#1016), sans écart. **→ A** : types à régénérer depuis l'OpenAPI vivant (`MontantAReglerDto`) quand un écran lira le
@@ -1716,6 +1763,14 @@ seulement.
   ⚠️ Arrêter l'évaluation rend partie « évaluer » (FR-29).
 
 ## Questions à l'utilisateur ou au PO
+
+- **❓ 2026-11-27 — STORY-341 (D-341-5) : où se paient la TVA et le solde de TPU ?** Le corpus OTR 2025 nomme la caisse des
+  acomptes d'IS et de TPU (« caisse du receveur des impôts », LPF Art. 55 et 57), de la RSH (« caisse du receveur chargé du
+  recouvrement », Art. 99) et de la retenue d'IRPP (« caisse du service des impôts », Art. 27) ; il ne la nomme ni pour la
+  TVA (Art. 60 : la déclaration se souscrit « auprès du service des impôts ») ni pour le solde de TPU (Art. 57 : « acquitté
+  spontanément, au moment du dépôt des états financiers »). **Choix par défaut** : `aConfirmer` au paquet ; l'ordre est
+  produit avec la réserve `ORGANISME_A_CONFIRMER`, jamais un organisme supposé ; à confirmer par un fiscaliste togolais (et,
+  s'il y a lieu, le télé-paiement de l'OTR, qu'aucun texte du corpus ne décrit).
 
 - **❓ 2026-11-27 — STORY-340 (D-340-11, D-340-12) : le solde d'IS et ses crédits d'impôt.** LPF Art. 55 : le solde d'IS est
   « acquitté spontanément, au moment du dépôt de la déclaration de résultat » ; au catalogue du paquet, la DSF est déclarative
