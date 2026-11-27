@@ -1,6 +1,6 @@
 # STORY-344 : L'estimation des pénalités et majorations, comme un risque
 
-Status: in-progress — écrite le 2026-11-27 par la session du groupe C juste avant de la coder (lot 7, n° 16 du fiscal,
+Status: done — **livrée le 2026-11-27** : prospera-balance-service **#177** (`a931877` sur `dev`, le paquet) et prospera-fiscal-service **#95** (`535e190` sur `dev`) ; voir « Livraison ». **🏁 EPIC-033 fini.** Écrite le 2026-11-27 par la session du groupe C juste avant de la coder (lot 7, n° 16 du fiscal,
 `PLAN-LOT-7-2026-11-24.md` §3 ; **elle finit EPIC-033**) ; contrat et communs annoncés avant le code (« ⚠ Contrats » et
 « ⚠ Communs » du journal de C). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md`
 (EPIC-033, STORY-344), du PRD fiscalité (FR-F50 : « Les pénalités et majorations encourues (30 / 40 / 80 % selon la
@@ -212,8 +212,45 @@ quittance tardive ; un report qui efface le retard ; un déclaré nul ; une DSF 
 le montant à régler identique avant et après) ; toute la suite du fiscal, celles de D comprises ; mutations sur la logique
 neuve ; `docker compose up` du fiscal et de balance, sain (un fournisseur de plus).
 
+## Livraison (2026-11-27)
+
+- **Balance** : **#177** (`MNV-344`, `dd71348` poussé, rejoué `a931877` sur `dev`, sur `4f75f4e` — arbre identique). La source
+  `scripts/referentiels/sources/paquet-fiscal-togo-2026.json` gagne le bloc racine `penalites` (les libellés recopiés du
+  corpus, chaque règle citée par son livre, son article et son millésime) ; `paquet-fiscal.schema.json` déclare `penalites`
+  et la rubrique facultative `automatisation` (← D, 561 : `connecteurs[]` de la forme de D, aucune instance) ;
+  `valider-paquet-fiscal.mjs` gagne **R14** ; artefact régénéré par `build.mjs`, **empreinte `c29155550f66…0937c`**, épinglée
+  au registre et dans ses deux specs. Une obligation nommée par `nonChiffrees` est du catalogue **ou du règlement** (la
+  retenue d'IRPP naît de la paie, hors du catalogue : la garde l'a montré au premier essai).
+- **Fiscal** : **#95** (`MNV-344`, `f58cb3d` poussé, rejoué `535e190` sur `dev`, rebasé sur `997e29a` de D — la 561 — avant la
+  dernière passe). Fichiers : `domain/penalites/risque-de-penalites.ts` (la règle pure) et sa garde AST
+  `aucune-regle-ecrite.spec.ts`, `application/reglement/risque-de-penalites.service.ts`, la route et ses DTO
+  (`modules/reglement`), un fournisseur de `ReglementModule`, la copie du paquet (`test/fixtures/paquet-fiscal/`, à l'octet),
+  le banc e2e (le fournisseur neuf dans le module de test d'`obligations.e2e-spec.ts`). **Aucun écart de contrat à
+  l'annonce** (#1044). Le paquet de dépôt DSF de D (539) publie déjà les trois paliers de l'Art. 121 en prose : 344 ne le
+  touche pas ; les deux lectures disent la même chose.
+- **Preuves** (Node 24, étage `verification`, archives LF ; scripts autonomes, verrou pris quatre fois — 14:41 → 14:57,
+  14:57 → 15:04, 15:06 → 15:28, 15:28 → 15:31 —, rendus par leur `trap`). **Sur la base rebasée (`f58cb3d`, sur `997e29a`)** :
+  fiscal unitaires **282/283 suites (1 ignorée), 4372/4375 tests (3 ignorés), aucune rouge** ; les trois suites de minuterie
+  seules 3/3, 95 ; e2e **16/16, 426** ; conformité MongoDB 33/34 suites, 229/230 sous la charge du poste — la seule rouge, la
+  mesure de temps de STORY-315 (« tri DOSSIER » 2,39 s pour 2 s, hors du diff), **verte seule 10/10** ; `nest build` vert ;
+  pile `grp-c` saine. **Avant le rebase** (`5e520ec`, puis `f2d1735`) : unitaires 274/275, 4217 ; e2e 15/15, 418 (la première
+  passe avait relevé le fournisseur manquant au module de test : 139 tests d'une suite, corrigé) ; conformité **33/33, 223** ;
+  `nest build` vert, le corpus dans `dist/` ; balance unitaires **300/302 suites (2 ignorées), 5892 tests (21 ignorés)** ; e2e
+  **38/38, 2324** ; **pile `grp-c`** fiscal + balance saine (santé `ok` des deux ; la route montée, 401 sans jeton ; six routes du
+  règlement montées ; `ReglementModule` initialisé ; la seule « Error: » est l'« Unknown topic or partition » connu d'une pile
+  neuve ; aucun redémarrage). Aucun conteneur, volume ni réseau `grp-c`
+  restant.
+- **Mutations** (Node 25, une campagne à la fois) : fiscal **28/28 tuées** (décompte des mois et fin de mois, taux du mois,
+  arrondi, minimum, annulés, délai du canal, jour de l'échéance, premier dépôt, échéance applicable, fourchette, déclaré nul,
+  réserves, non-chiffrés, statuts, le jour de l'estimation, les versions lues) — une survivante d'abord (un dépôt le jour même
+  de l'échéance : test ajouté, tuée), cinq d'abord tuées par la compilation (réécrites, tuées sur l'assertion) ; R14
+  **12/12 tuées**.
+- **D prévenu** (« ← D : servie », la `source` qu'une instance d'`automatisation` devra porter pour R4, la copie du paquet) ;
+  **B prévenu** (nouvelle empreinte, recopie permanente).
+
 ## Progress Tracking
 
 | Date | Événement |
 |---|---|
 | 2026-11-27 | Fiche écrite, contrat et communs annoncés avant le code. |
+| 2026-11-27 | **DONE.** Balance #177 (`a931877`), fiscal #95 (`535e190`). 🏁 EPIC-033 fini. B et D prévenus. |
