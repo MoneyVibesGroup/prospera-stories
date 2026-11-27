@@ -253,9 +253,10 @@
    36/36 (fiscal) et 10/10 (R13) ; pile `grp-c` saine. Verrou pris une fois (08:59 → 09:22), rendu. D-342-1 → 14 dans la
    fiche. **B prévenu** (le droit à attribuer, ouvert ; recopie) ; **D prévenu** (empreinte, le montant net du rapproché,
    `RapprochementReglementService`).
-24. **Suivante : STORY-343** (« déposée » ≠ « payée » : elle lit les règlements rapprochés ; à poser avec elle :
-   `montant-paye` et les transitions de paiement sous `regler` une fois B servi, l'annulation motivée d'un rapprochement, et
-   l'acompte réglé par quittance lu comme payé par la TPU — D-342-9, D-342-14).
+24. 🚧 **STORY-343 en cours (27/11)** : fiche `stories/STORY-343.md` (D-343-1 → 9) et annonce avant le code (« ⚠ Contrats »,
+   « ⚠ Communs »). « Déposée » et « payée » lues chacune de son fait au calendrier du portefeuille, la mise en évidence des
+   déposées non réglées ; l'annulation motivée d'un rapprochement ; l'acompte rapproché lu par la TPU ; `montant-paye` et
+   les transitions de paiement sous `regler` si B a servi « k » avant le push (sinon `preparer`). Suivante : STORY-344.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -827,6 +828,22 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-27, STORY-343, avant le code)** — branche `MNV-343` de `prospera-fiscal-service`, partie d'`origin/dev`
+  `6cd99ee`. **Aucune migration** : la collection neuve `annulations_reglements` (dossier de C) a ses index posés par
+  Mongoose au démarrage (`(orgId, reglementId)` unique, `(orgId, dossierId, referenceBase)`), immuable ;
+  `reglements_rapproches` ne change ni de schéma ni d'index (D-343-6). Ni `app.module.ts`, ni `package.json`, ni
+  `read-models/`, ni `config/`, ni copie du paquet, ni manifeste `declarations`. Touchés parmi les communs : **le contrat
+  OpenAPI** (« ⚠ Contrats ») ; **`src/common/rbac/droits-fiscalite.ts`** (un commentaire) seulement si B a servi « k » avant
+  le push. Tout le reste dans des dossiers de C (`domain/reglement`, `domain/obligations` — dont `historique.ts`, le libellé
+  de l'acte —, `application/reglement`, `application/obligations`, `modules/reglement`, `modules/obligations`, `ports`,
+  `adapters/mongo`, `test/`). `CalendrierPortefeuilleService` gagne une dépendance (la lecture des règlements rapprochés) ;
+  `ObligationsModule` enregistre en lecture les deux collections du règlement (il ne peut pas importer `ReglementModule`).
+  **`MontantAReglerService`** garde constructeur et signatures, mais **ce qu'il lit change** : les règlements annulés ne
+  comptent plus, les acomptes rapprochés comptent pour la TPU (« ⚠ Contrats ») — **→ D (565)** : l'ordre transporté suit,
+  sans rien changer chez D. `OrdreDeReglementService` inchangé. **Aucune classe instanciée par `DepotsModule` ne change** ;
+  la garde FR-F47 passe sans modification. **→ D** : rien à faire pour un rebase ; la suite de D est jouée en entier avant
+  le push ; D prévenu par message.
+
 - **FUSIONNÉ (2026-11-27, prospera-fiscal-service#93, `dev` `6cd99ee`, rebasée sur `origin/dev` `680164e` de D — la 337 —
   avant les preuves, sans conflit)** — conforme à l'annonce, un écart : la garde FR-F47 n'a pas eu à changer (la route ne
   paie pas, son nom non plus). Communs : `src/common/rbac/droits-fiscalite.ts` et sa spec, le contrat OpenAPI (deux routes),
@@ -1061,6 +1078,28 @@ seulement.
   clés, plus celles de l'IRPP et de la CNSS (voir « ⚠ Contrats »).
 
 ## ⚠ Contrats
+
+- **2026-11-27 (STORY-343), ANNONCÉ avant le code** — **la distinction entre « déposée » et « payée »**
+  (`prospera-fiscal-service`, REST). Fiche : `stories/STORY-343.md` (D-343-1 → 9). Consommateurs : l'écran du calendrier
+  (A) ; 344 (le retard des règlements non annulés) ; 565 (D : l'ordre transporté) ; le dossier de contrôle (D, 336 :
+  `annulation`). Aucun événement ; aucun champ existant ne disparaît ; le paquet ne change pas.
+  - **`GET /api/v1/obligations/calendrier`** : chaque ligne gagne **`deposee`** (la version courante est scellée, 325 ;
+    jamais lu du paiement), **`payee`** (l'acte humain : le cycle a atteint « Payée » ; jamais lu du dépôt ni du rapproché)
+    et **`reglement { etat, miseEnEvidence, rapproche, nombre, reste, proposition, chemin }`** — `etat` : `NON_DEPOSEE`,
+    `SANS_MONTANT`, `RIEN_A_REGLER`, `DEPOSEE_SANS_REGLEMENT`, `REGLEMENT_PARTIEL`, `RESTE_A_RELIRE`, `REGLEE_A_CONFIRMER`,
+    `PAYEE` ; **mise en évidence** des déposées non payées que rien ne règle entièrement (AC-1) ; `proposition:
+    PASSER_A_PAYEE` quand le rapproché couvre le dû (jamais une transition). `etatEcheance` et la vue de charge inchangés.
+  - **`POST /api/v1/obligations/{id}/reglements/{reglementId}/annulation`** (rôles, accès fiscal, droit `regler`, portée) :
+    `{ motif }` (3 à 500) ⇒ `201` le règlement avec `annulation { motif, annulePar, annuleLe }` ; `404 REGLEMENT_INTROUVABLE`,
+    `409 REGLEMENT_DEJA_ANNULE`, `409 OBLIGATION_CLOTUREE`, `400` ; acte `OBLIGATION_REGLEMENT_ANNULE` au journal chaîné.
+  - **Règlements (342)** : chacun gagne `annulation | null` ; `GET …/reglements` gagne `annules`, et `rapproche`, `reste`,
+    `ecartPaye` ne comptent que les non-annulés ; la quittance d'un rapprochement annulé se rapproche de nouveau.
+  - **⚠ Comportement de 340 et 341 qui change** : le montant à régler et l'ordre ne comptent que les règlements non annulés ;
+    **un acompte rapproché compte pour la TPU** — chaque provenance gagne `rapproche { montant, nombre } | null`, l'acompte
+    déduit le plus grand de son payé saisi et de son rapproché, manque neuf `ACOMPTE_PAYE_DIFFERENT_DU_RAPPROCHE` s'ils
+    diffèrent.
+  - **Droit** : si B sert « k » avant le push, `POST …/montant-paye` et les transitions vers « À payer » / « Payée » passent
+    sous `fiscalite:declaration:regler` ; sinon elles restent sous `preparer` (dit au « Publié »).
 
 - **2026-11-27 (STORY-342), PUBLIÉ** (fiscal #93, `6cd99ee` ; balance-service #176, `4f75f4e`) — conforme à l'annonce (#1031),
   sans écart de contrat ; l'organisme s'écrit « caisse de l’Office » (l'apostrophe du corpus). **→ A** : types à régénérer
