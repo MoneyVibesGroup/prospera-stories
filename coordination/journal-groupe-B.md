@@ -2516,6 +2516,23 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-27, STORY-1136 (n° 18) — l'avoir émis réduit la Créance de sa facture, annoncé AVANT la fusion du code**
+  (`prospera-paiement-service`, branche `MNV-1136` ; fiche `stories/STORY-1136.md`, D-1136-1 → 11). Lu par **D**
+  (`facturation`, `recouvrement`, `pdv` lisent `paiement.creance.changed@1`) ; **→ A** : information (aucune route du BFF).
+  - **Consommation neuve** : `paiement` lit `facturation.avoir.emis@1` (groupe `paiement-avoirs`, depuis le début ; variable
+    facultative `KAFKA_AVOIRS_GROUP_ID`) et réduit la Créance `(FACTURE, factureId)` du TTC de l'avoir (clé de rejeu
+    `avoirId`) ; l'argent reçu au-delà de ce qui est dû devient le trop-perçu, crédit du tiers de cette version (D-965-6).
+    Le schéma du producteur est copié à l'octet (`contrat/consommes/`, `prospera-ventes-service@d9f4264`, sha256 `fe88f304…`).
+  - **`paiement.creance.changed@1`** (ajout seul, Karapace BACKWARD contre le schéma de 965) : `avoirsMineur` facultatif
+    (toujours publié), cause `AVOIR` (un état de plus à chaque avoir) ; `restantCertainMineur`, `restantAfficheMineur`,
+    `montantExigibleMineur`, `tropPercuMineur` comptent les avoirs (`dû = origine − avoirs`) ; `montantOrigineMineur` ne
+    bouge pas. **→ D** : une facture créditée en entier sans paiement a `restantCertainMineur` 0 (votre règlement lu dit
+    `PAYEE`, sous votre `ANNULEE_PAR_AVOIR`) ; `avoirsMineur` permet de le distinguer.
+  - **`GET /api/v1/creances/{id}/restants`** : `avoirsMineur` en plus.
+  - **Manifeste `paiement` 1.3.0** après la fusion du code, recopié au catalogue.
+  - **Inchangés** : les faits fins `.soldee` et `.troppercu.constate` (un avoir ne les émet pas), les faits et le cycle des
+    abonnements (la licence de 1132 n'est pas touchée, D-1136-10), toute route d'écriture.
+
 - **2026-11-27, STORY-1133 (n° 15) — l'interface de l'agent publiée, annoncé AVANT le code** (`prospera-plateforme`,
   `centrale-service`, `agent-instance` ; fiche `stories/STORY-1133.md`, D-1133-1 → 13). Lu par **B** seul ; **→ C, D** :
   information, aucun contrat que vous lisez ne change (aucun de vos dépôts n'épingle les vecteurs : recherche dans la
