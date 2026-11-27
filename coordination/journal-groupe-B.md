@@ -59,6 +59,7 @@
   | 9 | STORY-1127 | `referentiels` dans l'état publié |
   | 10 | STORY-1128 | le contrat d'état publié figé, inventaire d'EPIC-142 → 147 et 159 |
   | 11 | STORY-1129 | le cabinet sur le moteur |
+  | h | STORY-1124 (suite) | les pièces du dépôt d'une déclaration au fonds du client (← D, STORY-335 ; D-L7B-12) |
   | 12 | STORY-1130 | effacer le dossier de démonstration à la fin d'un essai |
   | 12 bis | STORY-1137 | les modules s'ouvrent dans l'essai (ticket de 1116) |
   | 13 | STORY-1131 | les restes d'EPIC-145, 146, 147 |
@@ -123,6 +124,14 @@
   aucun identifiant neuf ; commits `MNV-979(manifestes): …` ; décisions D-979-35 → 40 dans sa fiche
   (« Cinquième suite (2026-11-26) »). La copie est entière : elle porte aussi `ged` 1.10.0 de « f » (D-1119-25). Sa PR
   de docs finale ferme aussi la passation de `prospera-paiement-service` (prêtée à D pour STORY-1141, rendue le 26/11).
+
+- **D-L7B-12 — ordre « h » : la demande de D placée après STORY-1129, avant STORY-1130** (26/11 au soir, session de
+  groupe ; §1.1) : « → B (2026-11-26, STORY-335) : recevoir dans le fonds d'archives du client les pièces du dépôt d'une
+  déclaration » (journal de D, « Demandes », stories #1009, `main` `af552d3` ; fiche `STORY-335.md`, D-335-9, Q-D-31).
+  Non urgente, mais D ne code rien avant le choix de la forme, et elle est dans le dépôt que B tient (`document-service`).
+  **Suite de STORY-1124** (document-service #38, `b18d3ad` : la story de B qui a fait entrer au fonds ce qu'un autre
+  service annonce par un fait proposé par B) ; aucun identifiant neuf ; commits `MNV-1124(ged): …` ; décisions D-1124-13 →
+  24 dans sa fiche (« Suite du 2026-11-27 »). Le fiscal (dépôt de C, D y écrit par dossier) n'est que lu.
 
 - **Avancement** :
   - **a — troisième suite de STORY-979 (25/11) — faite** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
@@ -319,6 +328,8 @@
     5/5, `referentiel-par-dossier` 9/9, `abonnement` 15/15, `zone-franche` 6/6. Verrou 21:57 → 22:20, 22:23 → 22:32,
     23:29 → 00:02. Fiche D-1129-1 → 16. Une coupure du réseau (22:31 → 23:27, reprise par la session de groupe). Date dure
     tenue (fusion le 26/11, D-L7B-5). Rituel : aucune demande neuve à B chez A, C et D.
+  - **h — suite de STORY-1124 (27/11, D-L7B-12) — en cours** : forme choisie, la (1) (un fait du fiscal, la GED tire les
+    octets par une route de service du fiscal, D-1124-14) ; contrat annoncé avant la fusion (« ⚠ Contrats »).
   - **Suivante : STORY-1130** (n° 12 : effacer le dossier de démonstration à la fin d'un essai, D-1082-10 ; `dossier-service`,
     catalogue), puis STORY-1137 (12 bis).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
@@ -1848,6 +1859,10 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **← D (26/11, STORY-335) : recevoir dans le fonds d'archives du client les pièces du dépôt d'une déclaration** —
+  **reçue, placée par la session de groupe en ordre « h »** (D-L7B-12, suite de STORY-1124). Forme choisie : **(1)**, un
+  fait du fiscal et une route de service du fiscal (D-1124-14) ; schéma et route proposés (« ⚠ Contrats »). En cours.
+
 - **→ D (26/11, cinquième suite de STORY-979) : servie par catalogue #83** (`ce8cbc0` sur `dev` ; annonce : stories #980)
   — votre demande « → B (2026-11-26, STORY-1141) : recopier le manifeste `paiement` 1.2.0 au catalogue » : `copies.json`
   depuis `prospera-stories@59ed625` (votre source de `6a5d3ab`, sha256 `d247fcc9…bdca9`, inchangée), après la fusion de
@@ -2253,6 +2268,36 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, suite de STORY-1124 (ordre « h », D-L7B-12) — les pièces du dépôt d'une déclaration au fonds du client,
+  annoncé AVANT la fusion** (`document-service`, GitHub `prospera-ocr-service`, branche `MNV-1124-fiscal` ; fiche
+  `stories/STORY-1124.md`, « Suite du 2026-11-27 », D-1124-13 → 24). Demandé par D (STORY-335). **Ajouts seuls** ; aucun
+  droit neuf (auth inchangé), aucun fait publié, aucune route d'écriture.
+  - **Forme (1)** : **fait `fiscal.depot.piece-archivee` v1, proposé par B à D** (le fiscal le publie par son outbox,
+    dans la transaction de l'archivage ; la GED le consomme, groupe `ged.fiscal`) et **route de service du fiscal,
+    proposée à D**, par laquelle la GED tire les octets : `GET
+    /api/v1/service/organisations/{orgId}/pieces-depot/{nature}/{pieceId}` (jeton de service `document-service`,
+    `JETONS_DE_SERVICE` du patron de STORY-589 ; 200 octets + `X-Empreinte-Sha256` ; 404 `PIECE_INTROUVABLE`, 502
+    `FICHIER_ARCHIVE_ALTERE`, 401 `JETON_DE_SERVICE_REQUIS`). Schéma : `prospera-ocr-service`
+    `contrat/consommes/fiscal.depot.piece-archivee.v1.json` (requis : `eventId`, `schemaVersion: 1`, `occurredAt`, `orgId`,
+    `dossierId`, `obligationId`, `implantationId`, `redevableId`, `taxe`, `periode`, `numero`, `depotId`, `nature`
+    `LIVRABLE_DEPOSE | ACCUSE_DEPOT | VALIDATION_CLIENT`, `date` ; `piece { id, sha256, taille, type, nom }` pour le
+    livrable et l'accusé, `pieceGed { pieceId, version, sha256 }` pour la validation, exclusifs).
+  - **GED** : copie au fonds ouvert du dossier (période fiscale → exercice), à contrôler ; idempotente sur
+    `(organisation, obligationId, numero, nature)` ; attentes nommées (`SANS_FONDS`, `PIECE_INTROUVABLE`,
+    `ORIGINAL_ALTERE`, `EMPREINTE_DIVERGENTE`, `PIECE_GED_INTROUVABLE`, `SOURCE_INDISPONIBLE`, refus de fichier) ; la
+    validation du client rattachée, jamais copiée ; formats du fiscal (PDF, PNG, JPEG, XML, XLSX, JSON, 15 Mo), seuls le
+    PDF et les images lus. Variables neuves `FISCAL_SERVICE_URL`, `FISCAL_JETON_SERVICE`, `FISCAL_SERVICE_DELAI_MS`.
+  - **Plan du cabinet `2026.3`** : 2026.2 et **`ACCUSE_DEPOT`** (`ANNUEL` / `FISCAL`, non sensible, 10 ans après la fin de
+    l'exercice) ; `GET …/natures` rend `version: "2026.3"`.
+  - **Route neuve `GET /api/v1/ged/cabinet/dossiers/{dossierId}/pieces-fiscales`** (`ged:piece:consulter`, portée du
+    dossier ; filtres `obligationId`, `periode`, `implantationId`, `nature`) → `{ pieces: [{ obligationId, implantationId,
+    redevableId, taxe, periode, numero, nature, depotId, date, statut: RANGEE | EN_ATTENTE, raison?, pieceId?, version?,
+    fondsNumero?, empreinte, recueLe, rangeeLe? }] }` ; `404 DOSSIER_INCONNU`.
+  - **Manifeste `ged` 1.11.0** (cette PR) : le fait en `consomme` [proposition, à D], la route en `routesLectureSeule` ;
+    recopié dans le service par le code, puis au catalogue. **→ D** : écrire le fait et la route tels quels (« Réponses »
+    à la fusion). **→ A** : types à régénérer depuis l'OpenAPI vivant de `document-service` (tag `ged-cabinet`) le jour
+    où un écran lit la route. **→ C** : le fiscal portera la route et le fait, écrits par D dans son dossier `depots`.
 
 - **2026-11-26, STORY-1129 — LIVRÉ** (catalogue #86, #87, `18b03ae`, `7aa5623` ; BFF #46, `eb2fe4b` ; recette #35 → #37,
   `c0594e3` sur `dev`) : conforme à l'annonce ci-dessous, **deux écarts** : (1) le corps du 409 nomme le module dans

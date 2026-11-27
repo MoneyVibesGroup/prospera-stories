@@ -86,7 +86,12 @@ export const MANIFESTE_GED = {
   // (empreinte, taille, nature, dossier ; jamais le contenu), pour vérifier la référence d'une validation du client ;
   // une route de lecture neuve. Le plan de classement du cabinet passe en 2026.2 (`VALIDATION_CLIENT`), paramètre du
   // service, hors manifeste.
-  version: '1.10.0',
+  // 1.11.0 (2026-11-27, suite de STORY-1124, demande de D, STORY-335) : les pièces du dépôt d'une déclaration rangées au
+  // fonds du client (le livrable déposé et la pièce de l'accusé en copie, la validation du client rattachée), rattachées
+  // à l'obligation, l'implantation, la période et la version (`fiscal.depot.piece-archivee`, proposé à D ; les octets
+  // tirés par la route de service du fiscal) ; une route de lecture neuve. Le plan de classement du cabinet passe en
+  // 2026.3 (`ACCUSE_DEPOT`), paramètre du service, hors manifeste.
+  version: '1.11.0',
 
   // C1 : aucune dépendance dure. La GED reçoit, lit, classe, conserve et retrouve des pièces sans autre module ; une pièce
   // enregistrée sans dossier va dans la file « à rattacher » (FR-159, FR-166).
@@ -171,6 +176,7 @@ export const MANIFESTE_GED = {
     'reprise.cles-rattachement.publiees@1', // numéro de police, de sinistre, `DEC-`, numéro d'archivage d'origine (FR-215)
     'comptabilite.facture.inscrite', // STORY-1100 : une facture inscrite au brouillard, rangée en copie pré-indexée au fonds du client (si `comptabilite` est installé)
     'comptabilite.facture.desinscrite', // STORY-1124 [proposition, à C] : le brouillard né d'une facture inscrite est abandonné ; la copie jamais versée est retirée du fonds, la copie versée gardée
+    'fiscal.depot.piece-archivee', // suite de STORY-1124 [proposition, à D] : une pièce du dépôt d'une déclaration archivée au fiscal, copiée (ou rattachée) au fonds du client ; les octets tirés par la route de service du fiscal
     'dossier.updated', // STORY-1120 : un dossier client archivé (`statut: ARCHIVE`, état absolu publié par `dossier-service`) ferme ses fonds d'archives ouverts
     'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
     'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
@@ -316,6 +322,7 @@ export const MANIFESTE_GED = {
     'GET /api/v1/ged/cabinet/recherche', // STORY-1122 : retrouver une pièce dans tous les fonds du cabinet
     'GET /api/v1/ged/cabinet/pieces-echues', // STORY-1123 : les pièces échues (ou proches de l'être) de tout le cabinet
     'GET /api/v1/ged/cabinet/pieces/{pieceId}/versions/{version}', // suite de STORY-1119 : une version par sa référence, sans contenu
+    'GET /api/v1/ged/cabinet/dossiers/{dossierId}/pieces-fiscales', // suite de STORY-1124 : les pièces du dépôt d'une déclaration rattachées au dossier
     'GET /api/v1/instance/ged/{organisationId}/export',
   ],
 
