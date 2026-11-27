@@ -327,7 +327,9 @@
    **🏁 EPIC-034 fini** (345 → 350 et 364 : la base de rémunération par bénéficiaire, l'import et la saisie, le calcul
    aiguillé sur le type de bénéficiaire, le dirigeant bloqué jamais approximé, les obligations sociales au calendrier — D —,
    le rapprochement avec les comptes de personnel — C) ; `fiscalite_epics` : `done`.
-29. **Suivante : STORY-566**, la dernière du lot 7 de C (elle porte aussi l'alignement du manifeste `declarations`).
+29. 🚧 **STORY-566 en cours (27/11)**, la dernière du lot 7 de C : annonce avant le code (« ⚠ Contrats », « ⚠ Communs »,
+   fiche D-566-1 → 15) ; elle porte aussi l'alignement du manifeste `declarations` (1.1.0). Le `suivi` de D (562) :
+   vérifié, déjà servi par STORY-350 (« Réponses »).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -591,6 +593,12 @@ seulement.
   l'a fait) et demande à D toute modification, ici.
 
 ## Demandes aux autres groupes
+
+- **→ D (2026-11-27, STORY-566) : information, aucune action exigée** — l'explication de l'IRPP lit vos lignes de
+  rémunération (`RemunerationService.baseDuCalcul`) et votre calcul social de la même version
+  (`CalculRemunerationService.calculer`), en lecture ; tant que `DIRIGEANT` part sur `REMUNERATION_GERANT` et que
+  `cnss.affiliation.DIRIGEANT` n'est pas au paquet, l'explication d'un dirigeant sort `BLOQUEE` avec vos motifs (question au
+  PO ci-dessous). Si un jour l'aiguillage distingue le dirigeant salarié, rien n'est à changer chez C.
 
 - **→ B (2026-11-27, STORY-342) : attribuer le droit `fiscalite:declaration:regler` chez auth-service** — ~~ouverte~~
   **← B : servie** par auth #52 (`dev` `d037506` ; journal de B « Réponses », `main` `ac208c6`) : dans le jeton, à
@@ -961,6 +969,16 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-27, STORY-566), avant le code** — branche `MNV-566` de `prospera-fiscal-service`, rebasée sur
+  `origin/dev` juste avant la fusion (565 de D vient d'y entrer). **Aucune migration**, aucune collection, aucun événement.
+  Communs touchés : **`app.module.ts`** (le module neuf de C `ExplicationIrppModule`, lecture seule : il importe
+  `RemunerationModule` de D, `RedevablesModule`, `ReadModelsModule`, `PaquetsModule`, `HabilitationsModule`, aucun ne
+  change ; pas `ObligationsModule`) ; **le contrat OpenAPI** (une route et ses DTO) ; **la copie du paquet** (bloc
+  `irpp.leviers`) ; **le manifeste `declarations`** (copie neuve `src/vendor/manifestes/`, sha256 épinglé). Fichiers de C :
+  des dossiers neufs (`modules|application|domain/explication-irpp`). **Aucun fichier de D** :
+  `calculerIrppTraitementsSalaires` et `decimal-exact` inchangés ; `RemunerationService.baseDuCalcul` et
+  `CalculRemunerationService.calculer` employés tels que D les exporte ; aucune classe que `DepotsModule` instancie ne change.
+  La suite complète du fiscal (e2e de D comprises) se joue sur la base rebasée avant le push.
 - **FUSIONNÉ (2026-11-27, prospera-fiscal-service#98, `dev` `261217b`, sur `origin/dev` `81e7605`, qui n'avait pas bougé ;
   head `e0c0d6f`), conforme à l'annonce ; la suite complète (specs et e2e de D comprises) verte sur la nouvelle copie du
   paquet `72d2d6ed`, aucun test de D à corriger ;
@@ -1254,6 +1272,33 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-27 (STORY-566), ANNONCÉ avant le code** — **expliquer l'IRPP du dirigeant salarié et lui proposer des options
+  chiffrées** (`prospera-fiscal-service`, REST ; le paquet fiscal Togo, `prospera-balance-service` ; le manifeste
+  `declarations`). Fiche : `stories/STORY-566.md` (D-566-1 → 15).
+  - **`POST /api/v1/redevables/{id}/irpp/{annee}/explication`** (200 ; rôles `TENANT_ADMIN`, `TENANT_USER`, accès fiscal,
+    droit `fiscalite:declaration:preparer` ; AD-21) — corps `{ reponses: { <question>: boolean } (toutes, celles de 568),
+    enfantsACharge?, deductionsSurJustificatif?: { <rubrique>: francs }, options?: { <levier>: francs } }` ⇒ `{ statut:
+    DISPENSE | INDETERMINE | BLOQUEE | EXPLIQUEE, annee, redevable: { id, designation, qualite }, paquet: { code, version,
+    checksum }, verdict (568), textesDuVerdict, manques: [{ motif, objet, article, manque }], decomposition: { revenuCategoriel,
+    etapes: [{ libelle, article, millesime, operation, resultat, textes }], bareme: { tranches: [{ de, a, taux, fraction, part
+    }], sommeDesParts, impot, ecart, arrondi }, revenuNetImposable, impot, retenues: { imputees: [{ periode, beneficiaireId,
+    montant, article, base: { version, provenance, empreinte } }], total }, soldeAPayer, excedent, millesimes,
+    lienAvecLEntreprise: [{ periode, base, brut, cotisationsRetraite, cotisationsSociales, retenue }], personnesACharge } |
+    null, options: { statut: PROPOSEES, avertissement, source, applique: false, leviers: [{ code, libelle, deduction, livre,
+    article, alinea, millesime, eligibilite, contrepartie, pieces, citation, statut: CHIFFREE | NON_ELIGIBLE, motif, raison?,
+    simulation: { versement, deductionDemandee, deductionAdmise, actuelle, avecLOption, effet, effortNet } | null }] } |
+    { statut: NON_DECLAREES | ILLISIBLES, raison } | null, textes: { corpus, cites: [{ cle, livre, article, page, texte }],
+    absents } }`. **Rien n'est écrit ni appliqué.** Refus : `404 REDEVABLE_INTROUVABLE` (hors portée compris), `409
+    MANDAT_ABSENT`, `409 QUESTIONNAIRE_ABSENT_DU_PAQUET`, `400 REPONSES_INCOMPLETES | QUESTION_INCONNUE | MONTANT_INVALIDE |
+    DEDUCTION_INCONNUE`, `403`, ceux du paquet et de la rémunération.
+  - **Paquet fiscal Togo 2026** : bloc **`irpp.leviers`** `{ source, revenu, avertissement, liste: [{ code, libelle,
+    deduction, livre, article, alinea, millesime, eligibilite, contrepartie, pieces }] }` (Art. 26, 8° et 9°), garde **R16** ;
+    aucune clé existante ne change ; nouvelle empreinte (au « PUBLIÉ »).
+  - **Manifeste `declarations` 1.1.0** (`manifestes/declarations.manifest.ts`) : `droits` = `fiscalite:declaration:preparer`,
+    `valider`, `deposer`, `regler` (les huit `declarations:*` sortent : jamais émis ni vérifiés) ; `publie` +
+    `fiscal.obligation.alerte-echeance`, `fiscal.depot.piece-archivee` (Q-D-34) ; le texte du coffre (560). Copie à l'octet
+    dans le fiscal (`src/vendor/manifestes/`). **→ B** : recopie au catalogue (D-979-47 : le préfixe des droits de
+    `declarations` devient `fiscalite:`).
 - **2026-11-27 (STORY-350), PUBLIÉ** (fiscal #98, `261217b` ; balance #179, `ab2ad72`) — conforme à l'annonce (#1069), avec
   quatre précisions : `anomalies[].issue` porte aussi **`SANS_OBLIGATION`** (`obligationId` et `periode` à `null`, rien
   n'est signalé) ; `message` accompagne `SANS_BALANCE` et `DEVISE_DIFFERENTE` ; le comptabilisé est ramené à l'unité par
@@ -2254,6 +2299,15 @@ seulement.
   ⚠️ Arrêter l'évaluation rend partie « évaluer » (FR-29).
 
 ## Questions à l'utilisateur ou au PO
+
+- **❓ 2026-11-27 — STORY-566 (D-566-5) : le dirigeant SALARIÉ face au gérant majoritaire.** Une ligne de rémunération ne
+  désigne un redevable que si elle est `DIRIGEANT` ou `ASSOCIE` (563), et le calcul social range ces types sous
+  `REMUNERATION_GERANT` (CGI Art. 28 : 20 %, « sans abattement d'aucune sorte ») ; leurs cotisations attendent une
+  affiliation que le paquet ne déclare pas (`cnss.affiliation`, 364). Or un dirigeant **salarié** (directeur général de SA,
+  gérant minoritaire de SARL) relève de l'Art. 26 (le forfait de 28 %), comme un salarié. **Faut-il distinguer, sur la ligne
+  ou sur le redevable, le dirigeant salarié du gérant majoritaire, et sourcer l'affiliation CNSS des dirigeants ?**
+  **Choix par défaut** : non au lot 7 ; l'explication d'un dirigeant sort `BLOQUEE`, nommée mois par mois (jamais chiffrée
+  comme un salarié) ; elle se chiffre dès que le calcul social chiffre la ligne. À trancher avec un fiscaliste togolais.
 
 - **❓ 2026-11-27 — STORY-350 (D-350-5) : les comptes et la tolérance du rapprochement social.** Le paquet Togo 2026 rapproche
   les cotisations dues du **crédit de 431** « Sécurité sociale », la part patronale du **débit de 664** (le compte que le

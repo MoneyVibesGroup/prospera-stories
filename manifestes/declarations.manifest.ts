@@ -1,11 +1,15 @@
 // Manifeste M37 — Déclarations fiscales (format du contrat de module, clause C1, amendée le 2026-11-10,
 // le 2026-11-11 et le 2026-11-12).
+// Version 1.1.0 (2026-11-27, STORY-566, groupe C) : les droits sont ceux que `prospera-fiscal-service` vérifie
+// (`fiscalite:declaration:*`, STORY-300, 902, 342 ; émis par auth, #52) ; `publie` porte les faits que le service publie
+// (Q-D-34) ; le coffre des secrets de canal (STORY-560) est décrit. Version MINEURE : aucun octroi `declarations:*` n'a
+// jamais été émis ni vérifié ; la majeure reste réservée au renommage du refus (décision du PO du 2026-11-12).
 // Source : prospera-stories (décision du PO du 2026-11-11, réponse 7 au §9 de l'amendement du plan v3).
 // Rétro-saisie : le module est CODÉ en partie. Ce manifeste décrit ce que `prospera-fiscal-service` fait sur
 // origin/dev (f48c62c, MNV-727) ; le PRD dit ce qu'il doit faire (incréments I1 → I5). Là où les deux
 // divergent, l'écart est écrit.
-// Le propriétaire du dépôt `prospera-fiscal-service` le copie dans `src/module.manifest.ts` la semaine où il
-// y travaille ; une garde de test compare ensuite le fichier du dépôt à la copie du catalogue (C1).
+// Le propriétaire du dépôt `prospera-fiscal-service` le copie À L'OCTET dans `src/vendor/manifestes/` (avec son ORIGINE et
+// son sha256, STORY-566) ; une garde y tient ses droits égaux à ceux que le service vérifie (C1).
 // Références : PRD prds/prd-fiscalite-2026-07-31 (FR-F01 → FR-F80, NFR-F01 → NFR-F16, incréments I1 → I5) ;
 //              spine architecture/architecture-fiscal-service-2026-08-03 (AD-1 → AD-19) ;
 //              épics epics-fiscalite-2026-08-03.md (EPIC-027 → 034) ;
@@ -28,24 +32,26 @@
 //     sort (version majeure du manifeste, écrans prévenus : ils lisent le code) ;
 //   · la garde lit `entitlement.changed`, pas l'état publié (C2, AD-24) ; aucune route
 //     `instance/declarations/…` (C13) ; aucun profil compose (C10 : le service n'est même pas au compose) ;
-//   · rôles TENANT_ADMIN / TENANT_USER seulement : les six habilitations graduées de FR-F59 (lecture,
-//     préparation, contrôle, validation, dépôt, règlement) deviennent les droits ci-dessous, à ajouter à
-//     `TenantPermission` (C7).
+//   · les six habilitations graduées de FR-F59 (lecture, préparation, contrôle, validation, dépôt, règlement) :
+//     quatre sont des droits que le service vérifie et qu'auth émet (ci-dessous) ; `lire` et `controler` attendent
+//     les routes qui les exerceront (règle d'or de `droits-fiscalite.ts` : n'est déclaré qu'un droit qu'une garde vérifie).
 // - Ce qui est codé : échéances calculées (dossier × état × période), paquets fiscaux et paquets de dépôt
 //   lus au catalogue, livrable de dépôt (e-DSF, complétude, trace), dépôts avec accusé et rejet, archivage
 //   des livrables. Ce qui ne l'est pas : implantations et catalogue d'obligations dérivé (I1), cycle de vie
 //   de l'obligation et validation du client (I3), règlement et social (I5).
 // - Le CALCUL de l'impôt reste à balance-service (FR-F23, PRD §4) ; le CONTENU de la DSF reste à
 //   bilan-service. Ce module emballe, guide le dépôt, capture l'accusé et garde la preuve.
-// - Dépôt ASSISTÉ en v1 : aucun portail de la zone n'expose d'API ; aucun secret de canal n'est stocké
-//   (NFR-F05). Le règlement est préparé et rapproché, JAMAIS exécuté (§3.3).
+// - Dépôt ASSISTÉ en v1 : aucun portail de la zone n'expose d'API. Le coffre de STORY-560 garde CHIFFRÉ le secret de
+//   canal que le CLIENT dépose lui-même par le lien de son cabinet : le propriétaire dépose, le cabinet déclenche,
+//   personne ne le lit (NFR-F05, D-560-12) ; les connecteurs de dépôt automatisé (561, 562) se déclarent au paquet,
+//   aucun n'y est instancié pour le Togo. Le règlement est préparé et rapproché, JAMAIS exécuté (§3.3).
 // - La gouvernance du paquet fiscal (FR-F67 → FR-F70) est un acte de la PLATEFORME (admin-panel), pas un
 //   droit de tenant.
 // - Jalon bloquant « format confirmé » avant tout nouveau canal de dépôt : une pièce réelle par canal.
 
 export const MANIFESTE_DECLARATIONS = {
   code: 'declarations',
-  version: '1.0.0',
+  version: '1.1.0',
 
   // C1 : bilan est une dépendance DURE. La DSF, livrable principal du dépôt, est produite par bilan-service ;
   // fiscal-service l'obtient (liasse figée, contenu), la met au format du canal et la dépose. « Le service
@@ -65,23 +71,22 @@ export const MANIFESTE_DECLARATIONS = {
 
   referentielFamilies: ['syscohada-revise', 'zone-franche-togo'],
 
-  // C7 : droits de tenant proposés, un par habilitation de FR-F59 (« aucune n'implique l'autre »), plus la
-  // levée d'anomalie (FR-F66) et la base de rémunération (FR-F28). L'export de l'organisation reste réservé
-  // à instance:donnees:exporter.
+  // C7 : les droits de tenant que le service VÉRIFIE (`src/common/rbac/droits-fiscalite.ts`, `DROITS_FISCAUX`), à
+  // l'octet, et qu'auth-service émet (`CAB_ASSOCIE`, `CAB_COLLABORATEUR` ; `regler` depuis auth #52). Aucun n'implique
+  // l'autre (FR-F59). La 1.0.0 proposait huit codes `declarations:*` que rien ne vérifiait : ils sortent (STORY-566).
+  // L'export de l'organisation reste réservé à instance:donnees:exporter.
   droits: [
-    'declarations:obligation:consulter', // calendrier, échéances, obligations, dépôts, preuves, dossier de contrôle
-    'declarations:declaration:preparer', // le collaborateur prépare et soumet (FR-F34)
-    'declarations:declaration:controler', // l'expert-comptable contrôle
-    'declarations:declaration:valider', // validation humaine identifiée ; pièce du client (FR-F35, NFR-F02)
-    'declarations:depot:enregistrer', // livrable, dépôt assisté, accusé, rejet (FR-F39 → FR-F45)
-    'declarations:reglement:preparer', // ordre ou instructions de règlement, rapprochement ; jamais d'exécution
-    'declarations:anomalie:lever', // levée motivée et journalisée (FR-F66)
-    'declarations:remuneration:saisir', // base de rémunération, import et saisie (FR-F27 → FR-F29)
+    'fiscalite:declaration:preparer', // préparer : livrables, rejets, base de rémunération, explication de l'IRPP (566)
+    'fiscalite:declaration:valider', // valider : la base réglementaire, le visa, les reports, l'affectation
+    'fiscalite:declaration:deposer', // déposer : transmettre, consigner l'accusé ; le coffre des secrets de canal (560)
+    'fiscalite:declaration:regler', // rapprocher un règlement fait par le redevable ; jamais d'exécution (342, 343)
   ],
 
   // C5 : faits publiés et consommés, tels qu'ils existent sur origin/dev (topics sans suffixe de version).
   publie: [
     'fiscal.declaration.deposee', // lu par bilan-service (la liasse passe « déposée »)
+    'fiscal.obligation.alerte-echeance', // STORY-318 : une alerte d'échéance par (obligation, état, échéance)
+    'fiscal.depot.piece-archivee', // STORY-335 : la preuve du dépôt archivée, lue par la GED (`ged` 1.11.0)
     'instance.journal@1', // à ajouter ; le journal d'audit fiscal reste dans sa base séparée `fiscal_audit`
   ],
   consomme: [
