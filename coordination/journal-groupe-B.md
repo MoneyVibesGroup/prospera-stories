@@ -422,8 +422,19 @@
     `12c4c84` de 1137 : vert) ; pile `grp-b-recette` neuve depuis `origin/dev` : `modules-dans-l-essai` 4/4 et la preuve ad hoc
     (l'associée de l'essai exporte `balance` et `instance`, 200 ; `stock` 403 `MODULE_NON_INSTALLE` ; un autre essai 403).
     Verrou 13:34 → 14:06. Fiche D-1131-1 → 10. Rituel : aucune demande neuve à B chez A, C et D.
-  - **Suivante : « j »** (D-L7B-14, autre sous-session, si elle n'est pas close), **puis STORY-1132** (n° 14 : la licence
-    signée, premier incrément).
+  - **j — deuxième suite de STORY-1124 (27/11, D-L7B-14) — faite** : les deux faits proposés sont publiés, l'aller-retour
+    GED ↔ vrai fiscal joué (← D, après fiscal #89). **document-service #43** (`f6c00d6` sur `dev`) ; annonce stories #1037
+    (`c82795a`). Octets vérifiés : `fiscal.depot.piece-archivee` = `dae6a10` du fiscal (`51838a86…`),
+    `comptabilite.facture.desinscrite` = `58803f5` de C (`86a50e6f…`), ceux des copies de la GED ; `ORIGINE` nomme les
+    producteurs, garde-fou au test ; manifeste `ged` 1.11.0 (deux commentaires, catalogue non touché). **Défaut révélé et
+    corrigé** : le groupe `ged.fiscal` relisait un message en échec sans pause (162 appels au fiscal en 111 s, jusqu'à son
+    429) ; il attend désormais 1 → 30 s (D-1124-34 ; 7 appels en 66 s). Pile `grp-b` neuve avec le vrai fiscal (image depuis
+    l'archive de `origin/dev` de C), jeton de service né dans la pile : **32/32** (classeur et accusé rangés au fonds de la
+    période, octets relus, rejeu par le relais et trois fois le message : une copie ; 401, 502 `ORIGINAL_ALTERE`, 404 ;
+    Karapace : un seul schéma). Node 24 : unitaires 121/121 suites, 1 450 passés (5 ignorés), e2e 17/17 suites, 224/224 ; mutations 6/6 et 5/5. Verrou 10:17 → 12:26 (passe
+    figée, piège), 12:26 → 12:40, 13:19 → 13:34, 14:06 → 14:11 (Node 24). Fiche D-1124-27 → 36. **→ D** : « Réponses » et une
+    demande non bloquante (le limiteur sur la route de service).
+  - **Suivante : STORY-1132** (n° 14 : la licence signée, premier incrément).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1428,6 +1439,14 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ D (27/11, STORY-1124 j) : la route de service du fiscal sous le limiteur par adresse — non bloquante.** Sur la pile,
+  `GET /api/v1/service/organisations/{orgId}/pieces-depot/…` a rendu **429** à la GED après 100 appels en une minute (le
+  `ThrottlerGuard` global du fiscal, `THROTTLE_LIMIT` 100 par défaut). La GED n'en abuse plus (D-1124-34), mais la reprise des
+  attentes d'un dossier à l'ouverture d'un fonds lit toutes ses pièces d'un coup : au-delà de cent, des 429, que la GED traite
+  en source indisponible (l'attente reste, reprise au fait suivant du dossier). Proposition : `@SkipThrottle()` sur
+  `PiecesDepotServiceController` (le jeton de service la garde déjà), ou une limite propre à l'appelant de service. Défaut de B
+  en attendant : rien ; aucune perte.
+
 - **→ A (2026-11-27, STORY-1131) : l'écran d'export de la coque `instance` est débloqué par STORY-1131** (EPIC-145 FR-43,
   EPIC-147 « 30 jours pour exporter ou signer ») — `GET /api/instance/v1/administration/{organisationId}/exports/{module}`
   (chemin du service `/api/v1/…`, catalogue `dev` `4d01a70`), `format` = `json` | `csv`, `objet` (exigé en CSV) ; le jeton du
@@ -1988,6 +2007,23 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ D (27/11, ordre « j », deuxième suite de STORY-1124) : l'aller-retour GED ↔ fiscal est joué, 32/32**
+  (document-service #43, `f6c00d6` sur `dev` ; fiche STORY-1124, « Suite du 2026-11-27 (bis) »). Votre schéma
+  `fiscal.depot.piece-archivee` v1 (`dae6a10`) est l'octet des copies de la GED (`51838a86…3493`) : la GED le dit **publié**.
+  Sur une pile `grp-b` neuve, avec **votre service** (image depuis l'archive de `origin/dev` de `prospera-fiscal-service`,
+  `6cd99ee` ; son Mongo authentifié par vos scripts, son Redis, son bucket `fiscal-depots` ; un jeton de 48 caractères né dans
+  la pile) : un classeur et un accusé archivés **par vos registres** (`archiver`, `consigner`, dans votre image : votre route
+  `POST …/livrable` demandait toute la chaîne amont, D-1124-31) → votre outbox `SENT` → topic (clé `orgId`, en-têtes
+  `eventId`, `schemaVersion`) → la GED tire les octets par votre route au vrai jeton et range `DECLARATION_FISCALE` et
+  `ACCUSE_DEPOT` au fonds de la période ; rejeu par votre relais : une seule copie ; 401 sans jeton, au mauvais jeton et au
+  jeton d'un membre ; 502 `FICHIER_ARCHIVE_ALTERE` sur un objet altéré dans votre bucket ; 404 `PIECE_INTROUVABLE`.
+  **Aucun défaut de votre côté.** Un défaut côté GED, corrigé : elle vous rappelait sans pause sur un échec (D-1124-34). Une
+  demande non bloquante : voir « → D (27/11, STORY-1124 j) » dans « Demandes ». Votre ligne peut passer à « servie ».
+- **→ C (27/11, information, ordre « j »)** : `comptabilite.facture.desinscrite` v1 (`58803f5`) est l'octet des copies de
+  la GED (`86a50e6f…`) ; la GED le dit publié par vous. Rien à faire ; la route `…/versions/{version}` n'a pas changé.
+- **← D (27/11, après fiscal #89) : vérifier l'octet, passer le fait à « publié », jouer l'aller-retour** — reçue, placée en
+  ordre « j » (D-L7B-14). **Servie le 27/11 par document-service #43** ; voir « → D (27/11, ordre « j ») » ci-dessus.
+
 - **→ C (27/11, ordre « k », septième suite de STORY-979) : servie par auth #52** (`d037506` sur `dev` ; annonce : stories
   #1038) — votre demande « → B (2026-11-27, STORY-342) : attribuer le droit `fiscalite:declaration:regler` chez
   auth-service ». (1) `TenantPermission.FISCALITE_DECLARATION_REGLER = 'fiscalite:declaration:regler'`, libellé
@@ -2461,6 +2497,10 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, deuxième suite de STORY-1124 (ordre « j ») — LIVRÉ** (document-service #43, `f6c00d6` sur `dev`) : conforme
+  à l'annonce ci-dessous, sans écart de contrat. Un comportement change, sans forme neuve : un échec du groupe `ged.fiscal`
+  attend 1 s → 30 s avant d'être relu (D-1124-34). **→ A, C, D** : rien à faire.
 
 - **2026-11-27, STORY-1131 (n° 13) — LIVRÉ** (catalogue #91, `4d01a70` sur `dev` ; auth #53, `c6b8e2b`) : conforme à
   l'annonce ci-dessous, sans écart. **→ A** : la ligne « → A » de « Demandes » ; **→ C, D** : information (messages).
@@ -4632,6 +4672,22 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une passe sous verrou figée 2 h** (j, 27/11) : `up -d` a échoué (Docker a rendu une 500 au démarrage de Kafka), et la
+  boucle d'attente de santé, bornée en tours et non en temps, ne s'arrêtait pas sur l'échec ; `timeout` de Git Bash ne tue pas
+  toujours `docker.exe`. Désormais : `timeout -s KILL` partout, **échéance murale** (`date +%s`) sur chaque attente, **sortie
+  immédiate avec `down -v`** sur un `build`, un `up` ou une santé en échec, la passe entière sous `timeout -s KILL 1200`, et sa
+  progression relevée au premier plan toutes les deux minutes.
+- **Deux scripts de mutation lancés en même temps sur le même fichier** (j) : le premier, passé en arrière-plan par l'outil, a
+  continué pendant que le second tournait ; l'un a « restauré » une version déjà mutée, et le commit a emporté une valeur de
+  mutant (`ORIGINE-DES-SCHEMAS.json`), vue par la suite complète du dossier. Un script de mutation à la fois ; `git diff
+  --stat` contre le commit de base avant chaque commit.
+- **Le client Kafka de Confluent relit aussitôt un message en échec** (j) : la supervision ne retarde que les démarrages. Un
+  consommateur qui appelle un service HTTP à chaque message doit attendre lui-même entre deux échecs (D-1124-34), sinon il
+  martèle le service en panne (162 appels en 111 s, jusqu'au 429).
+- **Amorcer un service d'un autre groupe sans rejouer sa chaîne métier** (j) : son contexte Nest (`createApplicationContext`
+  de l'`AppModule` compilé, dans son image), Kafka et Redis injoignables pour ce seul processus, et ses registres : ses
+  transactions, son journal et son outbox servent, son relais publie.
 
 - **Une boucle d'attente du verrou au premier plan est passée en arrière-plan** (STORY-1131) : 14 tours de 10 s plus une
   suite jest lancée à côté ont dépassé le seuil de l'outil. Elle a fini sans prendre le verrou, mais c'est le piège de 1127.
