@@ -8,7 +8,7 @@
 > épics ouverts du registre dans ce calendrier. Aucun client n'est nommé : « le distributeur », « l'IMF »,
 > « la compagnie d'assurance », « le cabinet ».
 > **Ajout du 2026-11-26 :** le §8 liste cinq écarts du produit cabinet relevés face à Pennylane (CH-P2 → CH-P6). Ils sont **à intégrer** : ni numéro d'épic, ni semaine, ni développeur pour l'instant.
-> **Ajout du 2026-11-27 :** CH-P2, CH-P4, CH-P5 et CH-P6 sont placés au lot 8 du groupe D (EPIC-277 → 280, `coordination/PLAN-LOT-8-2026-11-27.md`), réduits sur consigne de l'utilisateur (§8.3). **CH-P3 reste à placer.**
+> **Ajout du 2026-11-27 :** CH-P2, CH-P3, CH-P4, CH-P5 et CH-P6 sont placés au lot 8 du groupe D (EPIC-277 → 281, `coordination/PLAN-LOT-8-2026-11-27.md`), réduits sur consigne de l'utilisateur (§8.3). La suite du moteur (EPIC-144, 148, 152, 153, 154, 157, 158) est placée au lot 8 du groupe B ; EPIC-153, 154 et 158 passent de Dev A à B, EPIC-156 reste à Dev A.
 
 ---
 
@@ -536,6 +536,11 @@ Consigne de l'utilisateur du 27/11, appliquée par `coordination/PLAN-LOT-8-2026
 | **CH-P2** | EPIC-278 | D | les comptes de l'entreprise cliente, le téléversement de ses factures, les demandes de pièces et leurs relances, les commentaires, l'API mobile, la recette (1174 → 1180) | la **collecte par e-mail dédié et par WhatsApp** : aujourd'hui, la PME se connecte et téléverse |
 | **CH-P4** | EPIC-279 | D (et C pour EPIC-268 : 1089, 1090) | le temps passé, la facture au temps, la rentabilité, les prospects (1181 → 1184) | — |
 | **CH-P5** | EPIC-280 | D | l'offre « facturation » de la PME, le devis accepté en ligne, les factures récurrentes, les relances, les ventes dans la comptabilité du dossier (1185 → 1189) | la **facture certifiée OTR** (après février) |
-| **CH-P3** | — | — | rien | **à placer** |
+| **CH-P3** | EPIC-281 | D | les règles d'affectation du cabinet, leur application aux écritures proposées, les actions en masse dans le brouillard, les écritures récurrentes (1203 → 1206) ; la lecture d'une pièce par le modèle de langage quand l'OCR échoue (1207), si EPIC-250 et 255 de Dev A sont sur `dev` | les agents sous mandat (EPIC-254, Dev A), qui pourront lire les règles du cabinet |
+
+**La suite du moteur, au lot 8 de B** (même plan, §2.2) : le montage sur site et la supervision (EPIC-148, STORY-1190,
+1191), désinstaller et réinstaller (EPIC-144, 1192), les correctifs (EPIC-152, 1193 → 1195), la sauvegarde et la
+restauration (EPIC-153, 1196, 1197), le support à distance (EPIC-154, 1198), les consentements et le niveau 0
+(EPIC-157, 1199, 1200), l'apprentissage (EPIC-158, 1201, 1202). Backend seulement ; les écrans restent à A.
 
 Le tableau du §3.2 et le contrôle du §7.4 ne sont pas rejoués : le lot 8 compte en stories, pas en épics par semaine.
