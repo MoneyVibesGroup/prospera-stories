@@ -1,6 +1,7 @@
 # STORY-1124 : Le circuit sans trou — la réception et ses boîtes d'un seul geste, les mouvements d'une boîte verrouillés, la facture désinscrite retirée du fonds
 
-Status: done — **suite « h » livrée le 2026-11-27** : les pièces du dépôt d'une déclaration au fonds du client (← D,
+Status: done — **suite « j » en cours le 2026-11-27** (← D, après fiscal #89 : les deux faits proposés publiés,
+l'aller-retour GED ↔ fiscal joué ; « Suite du 2026-11-27 (bis) », D-1124-27 → 33). **Suite « h » livrée le 2026-11-27** : les pièces du dépôt d'une déclaration au fonds du client (← D,
 STORY-335 ; « Suite du 2026-11-27 », D-1124-13 → 26) : document-service **#42** (`8f9040d` sur `dev`), catalogue **#88**
 (`e528afc`, `ged` 1.11.0). **Livrée le 2026-11-26** : document-service **#38** (`b18d3ad` sur `dev`), catalogue **#82** (`9674aeb`,
 `ged` 1.9.0) ; voir « Livraison ». Fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 6 de B,
@@ -467,3 +468,92 @@ obligation, ni par implantation, ni par période. D attend la forme (port inerte
   de D dans la GED (B).
 - Une reprise périodique des attentes `SOURCE_INDISPONIBLE` d'un dossier qui ne reçoit plus de fait ni de fonds (aujourd'hui
   : à l'ouverture d'un fonds ou au fait suivant du dossier).
+
+## Suite du 2026-11-27 (bis) — les deux faits proposés sont publiés, et l'aller-retour GED ↔ fiscal est joué (groupe B, lot 7, ordre « j »)
+
+**Demande :** D (après la fusion de la suite de 335 côté fiscal : `prospera-fiscal-service` #89, `dev` `dae6a10` ; docs
+#1023, #1028, `main` `5a07107`) ; placée par la session de groupe après STORY-1137 et la demande « k », avant STORY-1131
+(D-L7B-14). **Aucun identifiant neuf.** Et l'information de C (« i », comptabilite #21, `dev` `58803f5`) : la recopie de
+l'octet de `comptabilite.facture.desinscrite` « reste à la prochaine story de B sur `document-service` ».
+**Dépôt :** `document-service` (GitHub `prospera-ocr-service`, module `ged`), branche `MNV-1124-j`, commits
+`MNV-1124(ged): …` · **Lus seulement :** `prospera-fiscal-service` et `prospera-comptabilite-service` (dépôts de C ; B n'y
+écrit rien) · **Exécutée par :** groupe B.
+
+**Pourquoi :** la GED décrit encore les deux faits comme des propositions (manifeste `[proposition, à C]`, `[proposition, à
+D]` ; `contrat/ORIGINE-DES-SCHEMAS.json` : « PROPOSÉ à … ; la source sera … ») alors que leurs producteurs les publient ; et
+l'aller-retour réel — le fait écrit par l'outbox du fiscal, les octets tirés par la vraie route de service, au vrai jeton —
+n'a jamais été joué : la preuve de « h » doublait la route (D-1124-24).
+
+### Où en est-on
+
+- [x] Rituel : journaux de A, C, D (aucune demande neuve à B hors de celles placées : « k » est servie à part, dans
+  `auth-service`) ; `document-service` sur `dev` à jour (`8f9040d`), propre.
+- [x] Relu avant d'écrire : les deux octets (ci-dessous) ; dans la GED, `contrat/ORIGINE-DES-SCHEMAS.json`,
+  `piece-fiscale.spec.ts` et `factures.service.spec.ts` (les gardes d'octet des faits consommés), `module.manifest.ts`,
+  `socle/manifestes/sources-des-manifestes.ts`, `.env.example` ; dans le fiscal (`origin/dev`, lecture seule) :
+  `Dockerfile`, `config/env.validation.ts`, `mongo/` (son Mongo authentifié, provisionné par ses scripts),
+  `modules/depots/depots.module.ts`, `application/depots/archives-depot.service.ts` et `accuses-depot.service.ts`,
+  `adapters/mongo/mongo-registre-livrables-archives.ts` et `mongo-registre-accuses-depot.ts` (le livrable, son acte au
+  journal chaîné et le fait dans l'outbox, une transaction), `kafka/events/piece-archivee-events.ts`,
+  `kafka/outbox/outbox-relay.*` (relais BullMQ sur Redis), `domain/depot/pieces-depot-service.ts` (le jeton de
+  service, la route) ; la surcouche `prospera-recette/docker-compose.fiscal.yml` (STORY-901).
+- [ ] Annonce (cette PR de docs, avant le code) ; PR de code fusionnée en rebase ; aller-retour sur pile `grp-b` neuve ;
+  PR de docs finale (« Réponses » → D, information à C).
+
+### Les octets, vérifiés
+
+| Fait | Producteur (`origin/dev`, blob en LF) | Copies de la GED (`contrat/consommes/`, `cabinet/schemas/`) |
+|---|---|---|
+| `fiscal.depot.piece-archivee` v1 | `prospera-fiscal-service@dae6a10` (#89 ; `dev` `6cd99ee` le porte, inchangé), `src/kafka/events/fiscal.depot.piece-archivee.v1.json` : `51838a86…3493` | `51838a86…3493`, les deux |
+| `comptabilite.facture.desinscrite` v1 | `prospera-comptabilite-service@58803f5` (#21), `contrat/schemas/comptabilite.facture.desinscrite.v1.json` : `86a50e6f…2ecf` | `86a50e6f…2ecf`, les deux |
+
+Aucune recopie de texte : les producteurs ont repris l'octet de B.
+
+### Décisions retenues par défaut (contestables)
+
+- **D-1124-27 — La demande « j » se rattache à STORY-1124**, comme « h » (D-1124-13) : elle en achève le circuit (publier
+  ce qui était proposé, jouer l'aller-retour que la doublure remplaçait). Aucun identifiant neuf (D-L7B-14).
+- **D-1124-28 — Le texte des schémas ne change pas ; leur origine, si.** La description des deux schémas dit encore
+  « proposé par B à … » : c'est l'octet que les producteurs publient, et le réécrire dans la GED casserait la copie à
+  l'octet (§1.8). Seule `ORIGINE-DES-SCHEMAS.json` (`origines`) passe de « PROPOSÉ à … ; la source sera … » au producteur
+  publié, dépôt@commit et chemin — la forme de `comptabilite.facture.inscrite` (D-1100-4) ; les commentaires du code
+  (`piece-fiscale.ts`, `facture-desinscrite.ts`, le consommateur des factures) et les titres des tests suivent.
+- **D-1124-29 — Un garde-fou de plus, sur le patron des faits consommés.** Chaque fait consommé a déjà sa garde d'octet
+  (copie = image d'exécution = empreinte épinglée = `ORIGINE`). Le test exige en plus que l'origine des deux faits **nomme
+  son producteur à un commit** (`^prospera-fiscal-service@[0-9a-f]{7}`, `^prospera-comptabilite-service@[0-9a-f]{7}`) et ne
+  dise plus « PROPOSÉ » : une origine qui retomberait en proposition, ou une copie changée sans sa source, rougit. Le test
+  ne lit pas le dépôt du producteur (la CI n'en a pas le checkout) : la comparaison avec l'octet du producteur est le geste
+  de la story, noté ici.
+- **D-1124-30 — Le manifeste `ged` reste 1.11.0 ; aucune recopie au catalogue.** Seuls deux commentaires changent
+  (`[proposition, à C]` → `[publié par C, comptabilite #21]`, `[proposition, à D]` → `[publié par D, fiscal #89]`) et une
+  ligne d'historique ; aucune valeur (la liste `consomme` est la même). Le catalogue copie des valeurs (`copies.json`, la
+  garde compare champ par champ) : sa copie est identique, une version neuve n'aurait rien à porter. La source
+  (`prospera-stories/manifestes/ged.manifest.ts`, cette PR) est recopiée à l'octet dans le service avec sa nouvelle
+  empreinte (`sources-des-manifestes.ts`).
+- **D-1124-31 — L'aller-retour se joue contre le vrai fiscal.** Image construite depuis `git -c core.autocrlf=false archive
+  origin/dev` du dépôt de C ; ses dépendances relues : **aucun Postgres** ; son MongoDB authentifié en replica set, monté
+  par ses propres scripts (`mongo/`, comme la recette, STORY-901), Kafka, Redis (le relais de l'outbox est une tâche
+  BullMQ), MinIO (son bucket privé `fiscal-depots`, créé à son démarrage), un JWKS (la doublure d'auth). **Le dépôt** :
+  la route `POST …/depots-declaration/{depotId}/livrable` exige la chaîne entière en amont (l'obligation du portefeuille,
+  la déclaration figée lue chez `bilan-service`, le guidage du paquet de dépôt, l'engagement, l'estampille du classeur) —
+  disproportionné pour prouver la copie. L'archivage est donc fait **par le code du fiscal lui-même**, dans son image :
+  ses registres (`archiver`, `consigner` : l'objet dans son bucket, puis le livrable ou l'accusé, son acte au journal
+  chaîné et le fait dans l'outbox, en une transaction), ses constructeurs du fait (`construirePieceArchivee`,
+  `enveloppePieceArchivee`) — les appels mêmes du service après ses préconditions. Le relais du fiscal publie ; la GED
+  consomme et tire les octets par la vraie route, au vrai jeton. Le livrable est un vrai classeur (le gabarit DSF des
+  fixtures du fiscal), l'accusé un PDF.
+- **D-1124-32 — Le jeton de service naît dans la pile.** Un conteneur d'amorce tire 48 caractères aléatoires dans un volume
+  de la pile ; le fiscal (`JETONS_DE_SERVICE=document-service:<jeton>`) et la GED (`FISCAL_JETON_SERVICE`) le lisent au
+  démarrage. Il n'est écrit ni dans un fichier versionné, ni dans le compose, ni sur l'hôte ; le volume part au `down -v`.
+- **D-1124-33 — Le registre confirme l'identité.** Karapace sur le Kafka de la pile : le schéma du fiscal (son fichier)
+  enregistré sous `fiscal.depot.piece-archivee-value`, puis la copie de la GED soumise au même sujet — le registre rend le
+  même identifiant (aucune version neuve). L'enregistrement réel du fait au registre de la plateforme reste au producteur.
+
+### Preuves attendues
+
+Sur une pile `grp-b` neuve : le classeur et l'accusé archivés par le fiscal → le fait sur le topic (clé `orgId`, en-têtes
+`eventId`, `schemaVersion`) → la GED range `DECLARATION_FISCALE` et `ACCUSE_DEPOT` au fonds de la période, octets relus à
+l'identique, empreinte = `X-Empreinte-Sha256` ; le rejeu du fait (même message, trois fois) ne range rien de plus ; la route
+refuse un mauvais jeton (401 `JETON_DE_SERVICE_REQUIS`) et la GED au mauvais jeton n'écrit rien (message relu, `ged.fiscal`
+bloqué), puis range au bon ; un objet altéré dans le bucket du fiscal → 502 `FICHIER_ARCHIVE_ALTERE` → attente
+`ORIGINAL_ALTERE` ; une pièce inconnue → 404 `PIECE_INTROUVABLE`. Puis l'étage `verification` (Node 24) de la GED.
