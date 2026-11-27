@@ -1,6 +1,6 @@
 # STORY-562 : Suivre le parcours d'une déclaration déposée et rapporter l'accusé — le fait séparé que le port attendait déjà
 
-Status: in-progress (2026-11-27 — lot 7 de D, n° 16 ; fiche réalignée et contrat annoncé avant le code)
+Status: done (2026-11-27 — prospera-fiscal-service#96, `dev` `81e7605` ; lot 7 de D, n° 16) — fiche réalignée et contrat annoncé avant le code (prospera-stories#1050, `main` 5c2e983).
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `fiscal-service` (`:3012`) — adaptateur de canal, travaux récurrents
@@ -232,6 +232,78 @@ démarrage ; deux champs à défaut sur `accuses_depot` et `rejets_depot`). Ni `
 `ConnecteurDepotModule`, importé par `DepotsModule`), ni `package.json` (BullMQ est déjà là), ni `redis/files.ts` de C
 (le nom de la file vit dans le module de D), ni `config/`, ni `read-models/`, ni copie du paquet, ni fichier de C. La
 garde des minuteries de 318 n'a pas de ligne neuve.
+
+## Livraison (2026-11-27)
+
+**Code** : prospera-fiscal-service#96, `dev` `81e7605` (head `f2110da`, rebasée sur `origin/dev` `535e190`). Annonce
+avant le code : prospera-stories#1050, `main` 5c2e983.
+
+### Ce qui est livré
+
+- **Le suivi récurrent** (AD-18) : la file `fiscal-suivi-depot`, un planificateur BullMQ à identifiant fixe (toutes les
+  5 min, concurrence globale 1), 20 suivis au plus par tour, chacun réservé (5 min) ; l'état vit dans MongoDB
+  (`suivis_connecteur`, un par dépôt) : ni un redémarrage ni une perte de Redis ne perd un suivi. Aucune minuterie
+  neuve (garde de 318 inchangée).
+- **La lecture** (`domain/connecteur-depot/suivi.ts`, pure) : le parcours déclaré du suivi, puis l'écran lu, et une
+  issue parmi quatre — `ACCUSE_DISPONIBLE` (chaque preuve déclarée lue : référence, pièce bornée à 15 Mo), `REJET`
+  (motif **à l'octet**), `EN_COURS`, `INDETERMINE` (avec sa raison). Le second facteur et l'anti-robot arrêtent le
+  suivi.
+- **Le même fait, par le même noyau** (D-562-1) : `consignerPour` de 333 et de 334, appelé par la route (saisie) et par
+  le suivi (relevé). L'accusé et le rejet gagnent `source` (`SAISIE` | `RELEVE`) et `releve { connecteur, version }` ;
+  le fait `fiscal.depot.piece-archivee` est celui de 335, inchangé.
+- **La saisie gagne**, avant tout appel au portail ; **l'arrêt** à l'échéance déclarée ; **l'attente** de « Déposée »
+  (la porte de C) ; l'arrêt sur un dépôt relayé, un mandat qui ne couvre pas `SUIVRE`, un suivi qui n'est plus
+  déclaré.
+- **Le coffre** : `emettrePourSuivre` (l'acte `SUIVRE`, sans jeton d'utilisateur, émetteur `suivi-depot`).
+- **Les routes du cabinet** : `GET /connecteurs-depot/depots/{depotId}/suivi`, `GET /connecteurs-depot/suivis/a-traiter`.
+- **Le contrat du bloc** : la clé `suivi` validée (D-562-3) ; et, en commit à part, la concordance avec le schéma de C
+  (344, balance #177) : une `source` facultative (R4) et `champs` facultatif ; `attend` reste exigé (C le rendra requis).
+- **Deux petits commits à part** : `@SkipThrottle()` sur la route de service de la GED (demande de B) ; « → B (h) »
+  servie au journal.
+
+### Les critères
+
+| AC | Preuve |
+|---|---|
+| 1 — suivi jusqu'à une issue ou l'arrêt | table et porte : accusé publié plus tard, lu `EN_COURS` puis consigné à l'intervalle ; échéance ; BullMQ réel dans la pile |
+| 2 — le même fait qu'un accusé saisi | table : même enregistrement (hors identifiants, horodatage, source) et même fait `piece-archivee` |
+| 3 — la source tracée | `source: RELEVE`, `releve { connecteur, version }` ; `SAISIE` pour la route |
+| 4 — un rejet au motif verbatim | table, lecture et porte : espaces et ponctuation conservés ; `MOTIF_ILLISIBLE` sinon |
+| 5 — `INDETERMINE` remonte, jamais un accusé par défaut | écran illisible, dérive, preuve manquante : aucune écriture, suivi « à traiter » |
+| 6 — la saisie manuelle arrête le suivi | table et porte : `SAISIE_MANUELLE`, aucun appel au portail |
+| 7 — le rythme déclaré | intervalle 15 à 1 440 min ; une lecture pas encore due n'est pas faite ; conformité MongoDB |
+| 8 — sans connecteur, rien ne change | un suivi seulement derrière un `DEPOSE` qui le déclare ; suites 333 → 337 vertes |
+
+### Preuves
+
+Toutes sur la branche rebasée localement sur `origin/dev` `535e190` (C 344), sans conflit et sans push forcé : `MNV-562-verif`, dont l'arbre est celui de `dev` après la fusion.
+
+- **Node 24.22.3** (étage `verification`, archive `0cbbd77`) :
+  - unitaires, toute la suite (le câblage du module racine compris) : 286/287 suites (1 ignorée), 4 442 tests verts (3 ignorés) ;
+  - e2e : 16/16 suites, 426 tests ;
+  - `test:conformite` sur `mongo-fiscal` en jeu de répliques : 35/35 suites, 237 tests (dont `suivis-connecteur.conformite-spec.ts` : dix ouvertures et dix réservations parallèles, la fin une fois, la chaîne vérifiée).
+- **Mutations sous Node 25**, sur le code neuf : 56 intentions, en 63 écritures, toutes rouges sur une assertion.
+  - Cinq premières écritures ne compilaient pas (un symbole laissé inutilisé, un type non rétréci) : 5, 23, 36, 46 et 55, réécrites. La 5 réécrite rougit par un refus du contrat (le parcours de dépôt d'essai refusé).
+  - Quatre survivaient et ont reçu une assertion : un accusé lu des jours plus tard garde la date du dépôt ; une saisie qui passe pendant la lecture gagne ; un accusé relevé déjà consigné termine le suivi ; `source` et `releve` requis au contrat (la 56, `source?:`, était un mutant équivalent pour Swagger : réécrite en `required: false`).
+- **Mutations sur MongoDB réel**, toutes rouges : M1 (la fin écrite sans exiger `EN_COURS`), M2 (la réservation ignorée), M3 (l'ouverture concurrente non dédoublonnée), M4 (`trouver` sans l'organisation), M5 (les lectures gardées au-delà de 20).
+- **§1.5, pile `grp-d` avec Redis** (`docker compose -p grp-d`, archive `f20598d`) : saine (MongoDB en jeu de répliques, audit, Kafka, Redis). Les deux routes neuves et la santé répondent 401 sans jeton. Le planificateur `suivi-des-depots` est posé dans Redis (`bull:fiscal-suivi-depot:repeat:suivi-des-depots`). Chaque module est initialisé une fois, sans erreur d'injection ni de planification, et aucune valeur d'essai n'apparaît dans les journaux du service.
+- **Porte `gate562.js`** : le code compilé de l'image, sous Node 24, dans le conteneur, contre le portail simulé étendu (accusé publié plus tard, rejet, portail dérivé, second facteur) et la **vraie file BullMQ** du Redis de la pile. Résultat 17/17 :
+  - deux répliques posent un seul planificateur ;
+  - le premier tour lit le suivi dû (`EN_COURS`) ; le tour suivant consigne l'accusé avec sa pièce, par le noyau de 333, avec le fait `piece-archivee` ;
+  - le rejet au motif à l'octet, la dérive, le second facteur, l'attente de « Déposée », la saisie qui gagne, l'échéance, le mandat sans `SUIVRE` ;
+  - aucune valeur d'essai dans les registres, et le bouclage refusé en production.
+  - La première passe (`0cbbd77`) avait échoué sur une course **de la porte** (le premier tour du planificateur partait avant qu'elle avance son horloge) ; corrigée dans le script, rejouée seule.
+- Le dernier commit (`f20598d`, quatre assertions armées dans deux specs) est vert sous Node 25 (24/24 et 9/9) ; la suite Node 24 complète a tourné sur `0cbbd77`, qui ne diffère que de ces deux specs.
+- lint des fichiers touchés : 0 erreur ; `tsc` : 0.
+- Verrou Docker : pris à 15:58 et 18:46, rendu par le `trap` à 16:10 et 18:48. B et C ont été prévenus ; aucun conteneur `grp-d` ne reste.
+
+### Écarts à l'annonce
+
+Aucun écart au contrat annoncé (#1050) : deux routes neuves, `source` et `releve` sur l'accusé et le rejet, le contrat OpenAPI seul parmi les communs, aucune migration. Trois précisions :
+
+- le contrat du bloc a été aligné sur le schéma de C (344, balance #177), en commit à part : une `source` facultative (R4) sur le bloc, le connecteur, son rythme et son suivi, et `champs` facultatif ; `attend` reste exigé par D, et C le rendra requis ;
+- le port `ConnecteurDeDepot` gagne `lireSuivi`, et la lecture rend aussi l'intervalle déclaré (`intervalleMin`) ;
+- le suivi vit dans `DepotsModule` (il emploie le noyau de 333 et de 334) ; le registre des suivis est fourni et exporté par `ConnecteurDepotModule`, qui l'ouvre derrière un `DEPOSE`.
 
 ### Question au PO
 

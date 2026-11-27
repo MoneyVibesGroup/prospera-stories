@@ -822,6 +822,29 @@
     `parcours_connecteur` — issue `DEPOSE`, `referencePortail`, connecteur et version —, la clé réservée `suivi` du bloc
     et l'acte `SUIVRE` du mandat ; son suivi récurrent passe par BullMQ, AD-18).
 
+- **STORY-562** ✅ 📨 — suivre le parcours d'une déclaration déposée et rapporter l'accusé. Code :
+  prospera-fiscal-service#96, `dev` `81e7605`. Annonce avant le code : #1050, `main` 5c2e983 (fiche D-562-1 → 12,
+  ⚠ Contrats, ⚠ Communs, → C, Q-D-37). Plan §4, n° 16.
+  - **Livré** (dossiers `connecteur-depot` et `depots` de D) : le suivi récurrent BullMQ (`fiscal-suivi-depot`, AD-18,
+    aucune minuterie), quatre issues par lecture, l'accusé et le rejet relevés consignés par **le noyau de 333 et de
+    334** (même enregistrement, même acte, même fait `piece-archivee`), `source` / `releve` sur l'accusé et le rejet,
+    la saisie du cabinet qui gagne, l'arrêt à l'échéance, l'attente de « Déposée », l'acte `SUIVRE` du coffre sans jeton
+    d'utilisateur, deux routes du cabinet.
+  - **Communs** : le contrat OpenAPI seul. Aucune migration (collection neuve `suivis_connecteur`, deux champs à
+    défaut). Ni `app.module.ts`, ni `package.json`, ni `redis/files.ts`, ni `config/`, ni copie du paquet, ni fichier de
+    C ; la garde des minuteries de 318 inchangée.
+  - **Concordance avec C (344, balance #177)**, en commit à part : D accepte une `source` facultative (R4) et `champs`
+    facultatif ; `attend` reste exigé par D, et C le rendra requis.
+  - **Deux demandes de B** (après « j »), en commits à part : `@SkipThrottle()` sur la route de service de la GED (aucun
+    429 au-delà de 100 appels, les routes des membres restent limitées) ; « → B (h) » passée à « servie ».
+  - **Preuves** : toutes sur l'arbre rebasé sur `535e190`, identique à celui de `dev` `81e7605`. Sous Node 24 : unitaires 286/287 suites, 4 442 tests ; e2e 16/16, 426 ; conformité 35/35, 237. Mutations : 56/56 rouges sous Node 25 (63 écritures ; cinq réécrites après une compilation, quatre survivantes armées), plus M1 → M5 sur MongoDB. Pile `grp-d` avec Redis saine, le planificateur posé dans Redis ; porte `gate562.js` 17/17 contre le portail simulé et la vraie file BullMQ (la première passe a échoué sur une course de la porte elle-même, corrigée et rejouée seule). Verrou pris à 15:58 et 18:46, rendu par le `trap` à 16:10 et 18:48 ; B et C prévenus.
+  - **Ce qui reste** :
+    - → C (suivi) — reçue, placée par C au plus tard en 566 (« Demandes ») ;
+    - Q-D-37 au PO (un fait pour un suivi arrêté ou indéterminé) ;
+    - le relevé réel des écrans de suivi est un geste de 1102 ; le paquet Togo reste sans bloc.
+  - **Suivante : STORY-565** (le dépôt automatisé sert les deux redevables, et le règlement reste produit, jamais
+    exécuté ; 341 de C servie).
+
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
   d'assurance et trois de distributeur, au backend, les deux verticaux alternés : 1065 (la facture juste (3)), 1066
   (l'avoir), 1067 (la commande (3)), puis 1068 → 1071 (l'assurance : `sinistres` lit `provision.changed@1`,
@@ -2138,8 +2161,8 @@
 
 ## Demandes aux autres groupes
 
-- **→ C (2026-11-27, STORY-561) : déclarer la rubrique `automatisation` au schéma du paquet fiscal — ouverte, non
-  bloquante.** Le connecteur de dépôt (561) lit, dans le paquet de l'obligation, une rubrique racine **facultative**
+- **→ C (2026-11-27, STORY-561) : déclarer la rubrique `automatisation` au schéma du paquet fiscal — servie (C 344,
+  balance #177, `dev` a931877 ; fiscal #95, `dev` 535e190 ; concordance vérifiée par D en 562).** Le connecteur de dépôt (561) lit, dans le paquet de l'obligation, une rubrique racine **facultative**
   `automatisation` (forme : `stories/STORY-561.md`, « Le contrat du bloc ») : des connecteurs, chacun avec son `code`
   (le canal au coffre de 560), le `canal` et les `obligations` du catalogue qu'il sert, l'adresse du portail, ses
   conditions d'utilisation (texte, date de relevé, source), son rythme, ses marqueurs et son parcours. Le schéma de
@@ -2149,7 +2172,8 @@
   l'attend. Quand C l'aura déclarée, une recopie du paquet n'est pas nécessaire tant qu'aucune instance n'existe.
   **Reçue par C** (complément de 342) : placée au plus tard en 344. 561 est livrée sur un double du paquet (fiscal#92,
   `dev` `997e29a`) ; la demande reste ouverte jusqu'à la fusion de C.
-  - **Complément du 2026-11-27 (STORY-562)** : la clé `suivi` de chaque connecteur, réservée par 561, reçoit sa forme
+  - **Complément du 2026-11-27 (STORY-562) — → C (suivi) — reçue, placée par C au plus tard en 566** (C rendra aussi
+    `attend` requis sur chaque étape). La clé `suivi` de chaque connecteur, réservée par 561, reçoit sa forme
     (`stories/STORY-562.md`, D-562-3 : `rythme`, `parcours`, `issues`, `accuse`, `rejet`) ; même règle — facultative,
     aucune instance au paquet Togo. 562 se livre sur un double du paquet ; rien ne l'attend.
 
@@ -2662,6 +2686,10 @@
 
 ## Réponses aux demandes reçues
 
+- **← B : le limiteur global sur la route de service de la GED — servie** (2026-11-27, STORY-562, commit à part de
+  prospera-fiscal-service#96, `dev` `81e7605`) : `@SkipThrottle()` sur `PiecesDepotServiceController` ; un test prouve
+  150 appels dans la minute sans 429, 401 sans jeton de service, et le 101e appel d'une route des membres en 429.
+
 - **← B : « h » — servie** (2026-11-27 ; document-service #42, `dev` `8f9040d` ; catalogue #88, `dev` `e528afc`, `ged`
   1.11.0 ; journal de B, « Réponses » → D, `main` e3eaf4d ; `STORY-1124.md`, « Suite du 2026-11-27 »). Forme (1) : le
   fait `fiscal.depot.piece-archivee` v1 du fiscal, la GED tire les octets par une route de service du fiscal. Côté D :
@@ -2789,7 +2817,8 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-27, STORY-562, avant le code)** — branche `MNV-562` de `prospera-fiscal-service`, partie
+- **FUSIONNÉ (2026-11-27, prospera-fiscal-service#96, `dev` `81e7605`, rebasée sur `origin/dev` `535e190` ; head `f2110da`), conforme à l'annonce (rebasée localement sur 535e190 sans conflit, sans push forcé : la fusion `--rebase` a rejoué la branche, et l'arbre de `dev` est identique à l'arbre rebasé et éprouvé, 6a521db) ;
+  ANNONCÉ (2026-11-27, STORY-562, avant le code)** — branche `MNV-562` de `prospera-fiscal-service`, partie
   d'`origin/dev` `997e29a`. **Aucune migration** : une collection neuve de D, `suivis_connecteur` (index unique par
   dépôt, posé par Mongoose au démarrage), et deux champs à défaut (`source`, `releve`) sur `accuses_depot` et
   `rejets_depot`. Touché parmi les communs : **le contrat OpenAPI** seul (« ⚠ Contrats »). Ni `app.module.ts` (la file
@@ -2974,7 +3003,7 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-27, STORY-562, avant le code) — le suivi du parcours d'un dépôt automatisé, et l'accusé ou le
+- **PUBLIÉ (2026-11-27, STORY-562 : prospera-fiscal-service#96, `dev` `81e7605`) sans écart ; ANNONCÉ (2026-11-27, STORY-562, avant le code) — le suivi du parcours d'un dépôt automatisé, et l'accusé ou le
   rejet relevé** (`prospera-fiscal-service`, modules `connecteur-depot` et `depots`). Fiche : `stories/STORY-562.md`
   (D-562-1 → 12). **Ajouts seuls** :
   - routes neuves : `GET /api/v1/connecteurs-depot/depots/{depotId}/suivi` (état `EN_COURS` | `TERMINE`, fin
@@ -4412,6 +4441,11 @@
 
 ## Questions à l'utilisateur ou au PO
 
+- **Q-D-37 (2026-11-27, STORY-562) — faut-il un fait pour qu'on apprenne qu'un suivi s'arrête ou ne sait pas lire ?**
+  La notification est hors périmètre ; le cabinet le voit dans le produit (`GET /connecteurs-depot/suivis/a-traiter`,
+  D-562-7). **Choix par défaut** : aucun fait neuf ; un fait `fiscal.depot.suivi-arrete` se publiera si la chaîne de
+  notification le demande.
+
 - **Q-D-36 (2026-11-27, STORY-561) — le connecteur doit-il piloter un navigateur ?** Au lot 7, il parle HTTP au
   portail (D-561-1). Si le relevé du premier dépôt réel (1102) montre que dimana ou le GUDEF n'acceptent qu'un
   navigateur, un pilote de navigateur se branchera derrière le même port, avec le même bloc en donnée (et une dépendance
@@ -4674,6 +4708,17 @@
 
 ## Pièges rencontrés
 
+- **STORY-562** (fiscal) :
+  - (1) **Un heredoc bash qui contient un script Python avec des `${…}` et des apostrophes échoue** (« unexpected EOF »)
+    sans rien écrire : les scripts d'édition vont dans un fichier (outil d'écriture), jamais en heredoc (le brief le dit).
+  - (2) **Un `print` de Python sur la console Windows (cp1252) plante sur « → »** : le lanceur de mutations s'arrête au
+    premier nom non ASCII (le fichier muté est restauré par le `finally`). Lancer avec `PYTHONIOENCODING=utf-8`.
+  - (3) **Un script de porte copié dans `/tmp` du conteneur ne trouve pas `bullmq`** (`require` part du dossier du
+    script) : `require(require.resolve('bullmq', { paths: [process.cwd()] }))`, avec `docker exec -w /app`. En local, le
+    `dist` du scratchpad demande `NODE_PATH` vers les `node_modules` du worktree.
+  - (4) **Une branche poussée ne se rebase pas sans force** : la travailler rebasée sous `-verif`, et pousser chaque
+    commit sur la branche d'origine par un worktree temporaire (`git worktree add <scratchpad> MNV-<n>`,
+    `cherry-pick`, push normal) ; le diff entre les deux n'est alors que les fichiers de l'autre groupe.
 - **STORY-561** (fiscal) :
   - (1) **`eslint --fix` lancé sur un dossier entier (`src/application`) récrit aussi les fichiers de C** : il a retiré
     des assertions de type dans deux specs d'`obligations` (et `tsc` rougit, TS6133). Ne lancer `--fix` que sur ses
