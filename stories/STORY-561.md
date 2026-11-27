@@ -1,6 +1,7 @@
 # STORY-561 : Le connecteur de dépôt automatisé — un adaptateur de plus derrière le port AD-12, déclaré par pays, et qui retombe sur l'assisté quand il n'est pas déclaré
 
-Status: in-progress
+Status: done (2026-11-27 — prospera-fiscal-service#92, `dev` `997e29a` ; lot 7 de D, n° 15) — fiche réalignée et
+contrat annoncé avant le code (prospera-stories#1033, `main` b8a30d5).
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `fiscal-service` (`:3012`) — adaptateur de canal
@@ -315,6 +316,85 @@ sous-chaîne du corps ou un statut, jamais une expression (AD-2).
 `livrable-ac7.spec.ts` a été rejouée **seule** sous Node 24.22.3 (étage `verification`, archive d'`origin/dev`
 `680164e`) : 1/1 suite, **83/83**, sans `CLASSEUR_TROP_COUTEUX`. Le rouge de 337 venait de la charge du poste, pas du
 code de 537.
+
+## Livraison (2026-11-27)
+
+**Code** : prospera-fiscal-service#92, `dev` `997e29a` (head `9a951af`, rebasée sur `origin/dev` `57c7504`). Annonce avant
+le code : prospera-stories#1033, `main` b8a30d5.
+
+### Ce qui est livré
+
+- **L'aiguillage** (`adapters/canal-depot/canal-aiguille.ts`) est l'adaptateur du port `CanalDeDepot` que `DepotsModule`
+  fournit. Il engage en assisté (raison nommée dans `chemin`) tout ce qui n'est pas « un connecteur déclaré et complet,
+  des conditions acceptées, un coffre qui autorise le dépôt, une version jamais engagée ». Sinon, il engage en `AUTOMATISE`
+  et joue le parcours. Toute erreur de la préparation donne l'assisté (`CONNECTEUR_INDISPONIBLE`), toute erreur du
+  parcours aussi (`CONNECTEUR_EN_ECHEC`). ⛔ Aucun engagement que l'assisté accepte n'est refusé.
+- **Le connecteur** (`connecteur-depot`, dossiers neufs de D) :
+  - le contrat du bloc `automatisation` (`domain/connecteur-depot/contrat-automatisation.ts`) est strict : chaque refus
+    `AUTOMATISATION_INCOMPLETE` nomme le connecteur, l'étape et le champ (AC-7) ;
+  - le parcours (`parcours.ts`) est joué pas à pas, par un environnement injecté : marqueurs (le second facteur et
+    l'anti-robot passent en premier), dérive, retentatives bornées hors envoi, envoi jamais rejoué, durée bornée,
+    autorisation du coffre relue avant chaque étape ;
+  - le pilote HTTP (`pilote-http.ts`, `fetch` de Node, aucune dépendance) : l'adresse déclarée seule, aucune redirection
+    suivie, cookies le temps d'un parcours, délai par `AbortSignal`, écran borné à 2 Mo ;
+  - l'attente bornée entre deux actions (5 s au plus), inscrite à la garde 318 ;
+  - le parcours rangé (`parcours_connecteur`, index unique `(organisation, depotId)` : une réservation avant tout appel)
+    et les conditions acceptées (`conditions_connecteur`), chaque écriture avec son acte au journal chaîné ;
+  - le coffre de 560 est consommé tel quel (`emettre` puis `utiliser`), plus une lecture `repliPourDeposer` (l'état du
+    canal pour `DEPOSER`, sans écriture).
+- **Les routes** : `chemin` dans `POST /depots-declaration` ; `GET /connecteurs-depot/declarations/{obligationId}`,
+  `POST …/conditions`, `GET /connecteurs-depot/depots/{depotId}/parcours` et `GET /connecteurs-depot/sante`.
+- **Le paquet Togo** n'a aucun bloc. Le dépôt reste donc assisté partout, ce que prouve un témoin sur la copie à
+  l'octet (AC-1). Le bloc réel suivra le relevé de 1102.
+
+### Les critères
+
+| AC | Preuve |
+|---|---|
+| 1 — sans connecteur, l'assisté à l'identique | table (`AUCUN_CONNECTEUR`, aucun appel au portail, mode `ASSISTE`) ; e2e (la copie Togo, réponse d'aujourd'hui plus `chemin`) ; suites 330 → 337 vertes (seules les attentes de 330 lisent en plus `chemin`) |
+| 2 — secrets absents, mandat manquant ou expiré | table : `COFFRE_NON_CONFIGURE`, `MANDAT_ABSENT`, `MANDAT_EXPIRE`, `MANDAT_REVOQUE`, `MANDAT_NON_COUVRANT`, `SECRET_ABSENT`, `SECRET_EXPIRE`, `SECRET_REVOQUE` ; e2e |
+| 3 — échec en cours : l'assisté à l'étape atteinte | table : `DERIVE`, `SESSION_EXPIREE`, `PORTAIL_INDISPONIBLE`, `REFUS_DU_PORTAIL`, `AUTORISATION_RETIREE`, `DUREE_DEPASSEE`, `VALEURS_INCOMPLETES`, `CONNECTEUR_EN_ECHEC` (les étapes franchies gardées) |
+| 4 — MFA : passation sur l'étape exacte | table : `SECOND_FACTEUR`, `CONTROLE_ANTI_ROBOT`, `REPRISE_DECLAREE`, `ISSUE_INCERTAINE` |
+| 5 — rejeu sans second dépôt | table et e2e : le même `depotId`, un seul envoi ; conformité : dix réservations parallèles, une seule |
+| 6 — le domaine reste agnostique | `garde-ad12.spec.ts` étendue aux dossiers du connecteur ; D-560-2 vert |
+| 7 — un parcours incomplet nomme l'étape et le champ | contrat (57 cas) ; table (bloc incomplet, champ absent du formulaire) |
+| 8 — le journal reconstitue le dépôt, sans secret | table, e2e et conformité : `COMMENCE`, une `ETAPE` par étape, `TERMINE` ; aucune trace de l'identifiant ni du mot de passe d'essai |
+| 9 — les conditions affichées et acceptées avant l'activation | service et e2e : empreinte exacte, datée, attribuée, `CONDITIONS_PERIMEES`, une nouvelle acceptation après un nouveau relevé |
+
+### Preuves
+
+Toutes sur l'arbre rebasé localement sur `origin/dev` `57c7504` (`00212d9`). Cet arbre est identique à celui de `dev` `997e29a` : `git diff` vide.
+
+- **Node 24.22.3** (étage `verification`) :
+  - unitaires : 279/280 suites (1 ignorée), 4334 tests verts (3 ignorés) ;
+  - e2e : 16/16 suites, 421 tests ;
+  - `test:conformite` sur `mongo-fiscal` en jeu de répliques : 34/34 suites, 230 tests.
+- **La première passe complète a trouvé deux rouges**, corrigés avant la fusion (9a951af) :
+  - la garde des droits du contrôleur du connecteur n'était pas fournie, et le câblage du module racine ne la résolvait pas. `ConnecteurDepotModule` importe désormais `HabilitationsModule` ;
+  - les attentes de 330 (service et e2e) ne connaissaient pas encore `chemin`.
+- **Mutations sous Node 25**, sur le code neuf : 71 intentions, en 83 écritures. Douze ont été réécrites parce que la première ne compilait pas (`noUnusedParameters`, TS6133). Toutes rougissent sur une assertion. Les cinq qui survivaient ont reçu un test :
+  - l'identifiant seul dans l'adresse ;
+  - l'écran attendu sans le marqueur d'acceptation ;
+  - le mandat qui ne couvre que `DEPOSER` ;
+  - l'écran qui ne finit pas ;
+  - le rejeu d'un dépôt automatisé après un repli, qui rend son parcours et non la raison du repli.
+- **Mutations sur MongoDB réel**, toutes rouges : M1 (la fin écrite sans exiger `EN_COURS`), M2b (la réservation perdue non relue), M3b (`trouver` sans l'organisation) et M4b (l'acceptation concurrente non idempotente). M2 à M4 ont été réécrites (`|| erreur`, `$or`) parce que la première écriture ne compilait pas.
+- **§1.5, pile `grp-d` avec Redis** (`docker compose -p grp-d`, l'archive de la branche rebasée) : saine (MongoDB en jeu de répliques, audit, Kafka, Redis). Quatre routes sans jeton répondent 401. Chaque module est initialisé une fois, sans erreur d'injection, et aucune valeur d'essai n'apparaît dans les journaux du service.
+- **Porte `gate561.js`** : le code compilé de l'image, dans le conteneur, contre un portail simulé sur le bouclage. Les identifiants sont tirés au hasard ; aucun secret réel, aucun portail réel. Résultat 28/28 :
+  - un dépôt `DEPOSE` (une référence relevée, un seul envoi), le rejeu sans envoi, le parcours et son journal (`COMMENCE`, trois `ETAPE`, `TERMINE`) ;
+  - les 11 raisons du repli avant tout geste, les 8 replis en cours, les 4 reprises humaines ;
+  - le bouclage refusé en production.
+- lint des fichiers touchés : 0 ; `tsc` : 0.
+- **Dette de 337 levée** : `livrable-ac7.spec.ts` rejouée seule sous Node 24 (`680164e`), 83/83.
+- Verrou Docker : pris trois fois (14:11, 14:25, 14:40), rendu à chaque fois, la dernière à 14:41. B et C ont été prévenus ; aucun conteneur `grp-d` ne reste.
+
+### Écarts à l'annonce
+
+Aucun écart au contrat annoncé (#1033) : les ajouts de l'OpenAPI et la ligne de `garde-minuteries.spec.ts` sont ceux de l'annonce, sans migration ni fichier de C. Trois précisions de forme :
+
+- le port du registre s'appelle `ports/registre-connecteur-depot.ts` (annoncé `registre-parcours-connecteur.ts`), parce qu'il range les parcours **et** les conditions ;
+- `ConnecteurDepotModule` importe, sans les modifier, `HabilitationsModule` (la garde des droits), `ObligationsModule` et `PaquetsModule`, en lecture comme `DepotsModule` ;
+- le coffre de 560 gagne une lecture, `repliPourDeposer`, sans écriture.
 
 ## Questions au PO
 

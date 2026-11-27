@@ -794,6 +794,34 @@
 
 ### Lot 6 (ouvert le 2026-11-24)
 
+- **STORY-561** ✅ 📨 — le connecteur de dépôt automatisé, un adaptateur de plus derrière le port AD-12, déclaré par pays,
+  qui retombe sur l'assisté quand il n'est pas déclaré. Code : prospera-fiscal-service#92, `dev` `997e29a`. Fiche
+  réalignée et annonce avant le code : #1033, `main` b8a30d5 (D-561-1 → 13, table du repli, contrat du bloc, ⚠ Contrats,
+  ⚠ Communs, → C, Q-D-36). Plan §4, n° 15. **Dette de 337 levée** : `livrable-ac7.spec.ts` rejouée seule sous Node 24
+  (`680164e`), 83/83.
+  - **Livré** (dossiers neufs de D `connecteur-depot`, plus `adapters/canal-depot`) : l'aiguillage `CanalAiguille`
+    derrière `CanalDeDepot` (l'assisté, raison nommée dans `chemin`, avant tout geste : `AUCUN_CONNECTEUR`,
+    `AUTOMATISATION_INCOMPLETE`, `CONDITIONS_NON_ACCEPTEES`, les raisons du coffre, `VERSION_DEJA_ENGAGEE`,
+    `CONNECTEUR_INDISPONIBLE`) ; le connecteur HTTP (D-561-1) qui joue le parcours déclaré au bloc `automatisation` du
+    paquet fiscal du pays (D-561-2) : marqueurs, dérive, reprise humaine sur l'étape exacte (second facteur, anti-robot,
+    point déclaré, envoi incertain), envoi jamais rejoué, une tentative par version, rythme et durée bornés ; le coffre
+    de 560 consommé (jeton d'usage, `repliPourDeposer`) ; les collections `parcours_connecteur` et
+    `conditions_connecteur`, chaque écriture avec son acte au journal chaîné, sans valeur ; les conditions d'utilisation
+    acceptées par empreinte ; la santé (taux de repli). Mode `AUTOMATISE`. Le paquet Togo n'a pas de bloc : assisté
+    partout.
+  - **Communs** : le contrat OpenAPI (ajouts seuls) ; `src/garde-minuteries.spec.ts` (une ligne : l'attente bornée).
+    Aucune migration, aucun fichier de C, ni `app.module.ts`, ni `package.json`, ni copie du paquet.
+  - **Preuves** : toutes sur l'arbre rebasé sur `57c7504`, identique à celui de `dev` `997e29a`. Sous Node 24 : unitaires 279/280 suites, 4334 tests ; e2e 16/16, 421 ; conformité 34/34, 230. La première passe a trouvé deux rouges, corrigés avant la fusion : `HabilitationsModule` manquait au module du connecteur, et les attentes de 330 ne lisaient pas `chemin`. Mutations : 71/71 rouges sous Node 25 (83 écritures, douze réécrites après une compilation, cinq survivantes armées), plus M1, M2b, M3b et M4b sur MongoDB. Pile `grp-d` avec Redis saine ; porte `gate561.js` 28/28 contre le portail simulé (un dépôt, le rejeu, le journal, chaque repli et chaque reprise). Verrou pris à 14:11, 14:25 et 14:40, rendu à chaque fois (le dernier à 14:41) ; B et C prévenus.
+  - **Ce qui reste** :
+    - → C : déclarer la rubrique `automatisation` au schéma du paquet (« Demandes », ouverte, non bloquante).
+    - Q-D-36 au PO (un pilote de navigateur, si le relevé de 1102 l'exige).
+    - Le relevé réel de dimana et du GUDEF (adresse, écrans, marqueurs, point de reprise) : un geste de 1102 ; aucun
+      portail réel n'a été appelé.
+    - → A (plus tard) : l'écran du dépôt lit `chemin` ; l'écran du connecteur affiche les conditions avant l'activation.
+  - **Suivante : STORY-562** (suivre le parcours d'une déclaration déposée et rapporter l'accusé ; elle lit
+    `parcours_connecteur` — issue `DEPOSE`, `referencePortail`, connecteur et version —, la clé réservée `suivi` du bloc
+    et l'acte `SUIVRE` du mandat ; son suivi récurrent passe par BullMQ, AD-18).
+
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
   d'assurance et trois de distributeur, au backend, les deux verticaux alternés : 1065 (la facture juste (3)), 1066
   (l'avoir), 1067 (la commande (3)), puis 1068 → 1071 (l'assurance : `sinistres` lit `provision.changed@1`,
@@ -2756,7 +2784,8 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-27, STORY-561, avant le code)** — branche `MNV-561` de `prospera-fiscal-service`, partie
+- **FUSIONNÉ (2026-11-27, prospera-fiscal-service#92, `dev` `997e29a`, rebasée sur `origin/dev` `57c7504` avant la fusion ; head `9a951af`), conforme à l'annonce (rebasée localement sur 57c7504 sans conflit, sans push forcé : la fusion `--rebase` a rejoué la branche, et l'arbre de `dev` est identique à l'arbre rebasé et éprouvé) ;
+  ANNONCÉ (2026-11-27, STORY-561, avant le code)** — branche `MNV-561` de `prospera-fiscal-service`, partie
   d'`origin/dev` `680164e`. **Aucune migration** : deux collections neuves de D, `parcours_connecteur` et
   `conditions_connecteur`, dont les index uniques sont posés par Mongoose au démarrage (patron d'`engagements_depot`).
   Ni `app.module.ts` (le module neuf `connecteur-depot`, dossier de D, est importé par `DepotsModule`, déjà monté), ni
@@ -2930,7 +2959,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-27, STORY-561, avant le code) — le connecteur de dépôt automatisé, derrière le port AD-12**
+- **PUBLIÉ (2026-11-27, STORY-561 : prospera-fiscal-service#92, `dev` `997e29a`) sans écart ; ANNONCÉ (2026-11-27,
+  STORY-561, avant le code, prospera-stories#1033, `main` b8a30d5) — le connecteur de dépôt automatisé, derrière le port AD-12**
   (`prospera-fiscal-service`, modules `depots` et `connecteur-depot`, neuf). Fiche : `stories/STORY-561.md`
   (« Réalignement du 2026-11-27 », D-561-1 → 13, la table du repli, le contrat du bloc). **Ajouts seuls** :
   - `POST /api/v1/depots-declaration` : la réponse gagne `chemin { suivi: ASSISTE | AUTOMATISE, raison, issue, etape,
@@ -4615,6 +4645,27 @@
 
 ## Pièges rencontrés
 
+- **STORY-561** (fiscal) :
+  - (1) **`eslint --fix` lancé sur un dossier entier (`src/application`) récrit aussi les fichiers de C** : il a retiré
+    des assertions de type dans deux specs d'`obligations` (et `tsc` rougit, TS6133). Ne lancer `--fix` que sur ses
+    fichiers, par leur nom ; vérifier `git status` après, et `git checkout --` ce qui n'est pas à soi.
+  - (2) **Une e2e qui lit les paquets de dépôt rend 502 sous Node 25 local** : les copies sont en CRLF dans le worktree,
+    leur empreinte ne correspond plus (`INTEGRITE_ARTEFACT`). Les réécrire en LF par `git show HEAD:<chemin>` le temps
+    des preuves locales, ne jamais les committer, puis `git checkout --`.
+  - (3) **`AbortSignal.timeout` sous Node 25** : l'erreur de `fetch` n'a pas toujours le nom `TimeoutError` ; il est
+    parfois dans sa `cause`. Lire les deux.
+  - (4) **Une mutation qui retire un opérande laisse un paramètre inutilisé** (`noUnusedParameters`) : elle rougit en
+    compilation ; la réécrire en gardant le paramètre vivant (patron du piège (2) de 337).
+  - (5) **Un script de preuve qui attend le verrou ne doit pas courir pendant les mutations locales** : le tuer avant
+    qu'il prenne le verrou (aucun `trap` n'est encore posé, rien à rendre), lancer les mutations, puis le relancer.
+  - (6) **Les suites d'un module ne voient pas le câblage du module racine** : un contrôleur neuf dont la garde
+    (`DroitsFiscauxGuard`) exige `JournalHabilitations` passe ses propres specs et son e2e (module de test monté à la
+    main), mais rougit `app-cablage.invariant.spec.ts`, et l'application ne démarrerait pas. Toute route sous
+    `@ExigeDroitFiscal` : importer `HabilitationsModule`. Jouer la suite unitaire **complète** sous Node 24 avant la
+    fusion, pas seulement celle du dossier.
+  - (7) **`kill -TERM` d'un script de preuve pendant un `docker run` : le `trap … EXIT` ne court pas** (bash attend
+    l'enfant ; `timeout` le tue). Ajouter `trap 'exit 143' TERM INT HUP` à côté du `trap … EXIT`. Sinon, nettoyer à la
+    main (conteneurs, réseau, image, puis le verrou s'il est à soi) et prévenir B et C.
 - **STORY-337** (fiscal) :
   - (1) **`eslint --fix` retire une assertion de type `as unknown as Port` qu'il juge inutile**, puis l'import de type
     devient inutilisé et `tsc` rougit (TS6196) : relancer `tsc` après chaque `--fix`, et retirer l'import.
