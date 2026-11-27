@@ -2181,6 +2181,14 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1132"
+    status: "in-progress"
+    owner: "Groupe B, lot 7, n° 14 — la licence signée (EPIC-150), premier incrément : un paiement l'ouvre, le suivant la prolonge ; la centrale reçoit paiement.abonnement.echeance.encaissee par la section « faits de paiement » du contact de l'agent de la plateforme (AD-25), dérive la licence de l'instance sur site de l'organisation et la signe de sa clé d'exécution (centrale-service ; paiement et auth lus, inchangés)"
+    source_doc: "prospera-stories/stories/STORY-1132.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite le 2026-11-27 juste avant le code ; contrat annoncé avant le code (journal de B, « ⚠ Contrats »).
+      D-1132-1 → 13. NON SLOTTÉE.
   - range: "STORY-1131"
     status: "done"
     owner: "Groupe B, lot 7, n° 13 — les restes d'EPIC-145, 146, 147, premier incrément : l'Administration exporte, module par module, dans tout état (ESSAI_TERMINE compris) ; l'export C13 du module instance servi (D-1128-9) ; droitsEffectifs par le module qui ouvre le droit (D-979-47) ; instance:donnees:exporter à l'associé et au DG (platform-catalog-service, auth-service)"
