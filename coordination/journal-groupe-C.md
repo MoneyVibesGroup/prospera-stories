@@ -327,9 +327,46 @@
    **🏁 EPIC-034 fini** (345 → 350 et 364 : la base de rémunération par bénéficiaire, l'import et la saisie, le calcul
    aiguillé sur le type de bénéficiaire, le dirigeant bloqué jamais approximé, les obligations sociales au calendrier — D —,
    le rapprochement avec les comptes de personnel — C) ; `fiscalite_epics` : `done`.
-29. 🚧 **STORY-566 en cours (27/11)**, la dernière du lot 7 de C : annonce avant le code (« ⚠ Contrats », « ⚠ Communs »,
-   fiche D-566-1 → 15) ; elle porte aussi l'alignement du manifeste `declarations` (1.1.0). Le `suivi` de D (562) :
-   vérifié, déjà servi par STORY-350 (« Réponses »).
+29. ✅ **STORY-566 DONE (27/11)** (n° 18 et dernière du fiscal) : balance-service **#180** (`1bc539d` sur `dev`) et fiscal
+   **#99** (`31dd81f` sur `dev`, rebasée sur `eff2afe` de D — la 565) ; annonce #1074 avant le code (`main` `3359e91`).
+   **`POST /redevables/{id}/irpp/{annee}/explication`** (droit `preparer`, AD-21 ; sans mandat : 422 `MANDAT_ABSENT`) :
+   **d'abord le verdict** de 568 (dispensé ou indéterminé : c'est toute l'explication) ; la déclaration due, **le décompte du
+   brut au solde** par le calcul de 564 (signature inchangée) sur les lignes de l'année qui désignent ce redevable et le
+   calcul social de D de la même version — chaque étape avec son article, son millésime et son texte cité mot pour mot
+   (corpus de 339), le barème tranche par tranche, la somme des parts face à l'impôt et l'écart publié, les retenues de
+   l'employeur tracées jusqu'à leur ligne, le lien avec l'entreprise mois par mois ; `BLOQUEE`, tout nommé, sinon (mois
+   sans base, ligne que le calcul social ne chiffre pas, charges de famille non renseignées…). **Les options** du paquet
+   (`irpp.leviers` : retraite volontaire, Art. 26, 8° ; assurance vie, Art. 26, 9° ; garde **R16**) simulées à côté de la
+   situation actuelle, l'impôt évité et l'effort net ; non éligible : un motif, jamais un gain ; **rien n'est appliqué**.
+   ⚠️ Aujourd'hui l'explication d'un dirigeant sort `BLOQUEE` (le calcul social range `DIRIGEANT` sous l'Art. 28 et le
+   paquet ne déclare pas son affiliation) : question au PO. **Manifeste `declarations` 1.1.0** (droits
+   `fiscalite:declaration:*`, `publie` aligné, coffre de 560), copié à l'octet dans le fiscal. Le `suivi` de D (562) :
+   vérifié, déjà servi par 350. Empreinte du paquet **`8da471cc…5970`**. Node 24 (base rebasée) : fiscal 300/301 suites,
+   4 618 ; e2e 18/18, 437 ; conformité 36/36, 240 ; balance 301/303, 5 985 ; e2e 38/38, 2 336 ; mutations 22/22 et 9/9 ; pile
+   `grp-c` saine (route montée, 401 sans jeton). Verrou pris une fois (20:54 → 21:12), rendu. D-566-1 → 15 dans la fiche.
+   **B prévenu** (recopies du paquet et du manifeste) ; **D prévenu**.
+30. 🏁 **Le lot 7 de C est fini** (27/11). **Bilan : 23 stories** — les cinq de balance en tête (1020, 1019, 1021, 1022,
+   1023) et les dix-huit du fiscal (564, 317, 318, 319, 321, 324, 325, 327, 329, 339, 338, 340, 341, 342, 343, 344, 350,
+   566 ; 338 dans la comptabilité) —, **plus FE-097 et FE-158 de A** (balance #178, comptabilité #22) **et les deux demandes
+   de D servies dans le cycle des obligations, `ACCUSE_REQUIS` et `REJET_REQUIS`** (fiscal #83 et #86). Épics finis :
+   EPIC-030, 031, 033, 034. Le lot 8 de C ne commence que sur l'ordre de l'utilisateur (plan du lot 8).
+   **Ce qui reste ouvert :**
+   - **Questions au PO** (« Questions ») : le dirigeant salarié face au gérant majoritaire (566) ; les comptes et la
+     tolérance du rapprochement social (350) ; le terrain et les durées usuelles du registre (FE-097) ; **le solde d'IS et ses
+     crédits d'impôt** (340, D-340-11 et 12) ; où se paient la TVA et le solde de TPU (341 — le texte y a répondu en 342,
+     reste à confirmer).
+   - **Demandes aux autres groupes** : → B, recopier au catalogue le manifeste `declarations` 1.1.0 (566) et le manifeste
+     `balance` 1.2.0 (1020) ; → B, la recette `atelier-balance` doit octroyer `conseil` (1019) ; → B, la recopie
+     permanente du paquet dans `dossier-service` (dernière empreinte `8da471cc`) ; → D, la cloche et l'e-mail de
+     l'alerte d'échéance (318 — placée au lot 8 de C, STORY-1165, dans le dépôt prêté par D). Reçue, non servie : **FE-098 de
+     A** (`balance-service`, plan d'amortissement, quatre points, non bloquante) — à placer au lot 8.
+   - **Nommés, non faits** : **D-350-10** (relier le calculé du triplet d'une obligation sociale au calcul social) ; le
+     **solde d'IS** (crédits d'impôt non imputés, 340) ; les biens **non amortissables** au registre
+     (`PERIMETRE_DU_REGISTRE`, M9 de 526) et les **durées usuelles** (`DUREES_USUELLES_NON_SOURCEES`, CGI Art. 100 sans
+     table) ; la mise en service en lot (`UN_MOUVEMENT_PAR_REQUETE`).
+   **Dépôts tenus par C et leur dernier SHA sur `dev`** : `prospera-balance-service` **`1bc539d`** (566) ;
+   `prospera-fiscal-service` **`31dd81f`** (566 ; partagé par dossier avec D, D-L7-1) ; `prospera-comptabilite-service`
+   **`69ea8ab`** (FE-158). `document-service` est à B depuis le lot 7 (#848).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -510,6 +547,10 @@ porte l'état de C** (consigne de l'utilisateur du 23/11 : « mets-toi à jour a
 
 ## Dépôts tenus
 
+**Lot 7 (fini le 2026-11-27)** : `prospera-balance-service` (`dev` `1bc539d`), `prospera-fiscal-service` (`dev`
+`31dd81f`, partagé par dossier avec D, D-L7-1), `prospera-comptabilite-service` (`dev` `69ea8ab`) ; le paquet fiscal Togo
+(D-L7-3). `document-service` passé à B (#848).
+
 **Lot 6 (D-L6-1 → 3)** : `prospera-comptabilite-service`, `prospera-balance-service` (cahiers),
 `document-service`, **`prospera-fiscal-service`** (repris de A pour ce lot). L'assurance (`prospera-sinistres-service`,
 `prospera-assurance-service`) passe à D (passation ci-dessous).
@@ -593,6 +634,13 @@ seulement.
   l'a fait) et demande à D toute modification, ici.
 
 ## Demandes aux autres groupes
+
+- **→ B (2026-11-27, STORY-566) : recopier au catalogue le manifeste `declarations` 1.1.0** — **ouverte**, non bloquante
+  (le fiscal ne lit pas le catalogue pour ses droits). Source `manifestes/declarations.manifest.ts` (`main` `3359e91`, blob
+  LF sha256 `5adf76d6…d56d`) : droits `fiscalite:declaration:preparer | valider | deposer | regler` (les huit
+  `declarations:*` sortent), `publie` + `fiscal.obligation.alerte-echeance`, `fiscal.depot.piece-archivee`. C'est le point (3)
+  de la demande de 342 et ton ordre « k » ; D-979-47 (le préfixe des droits du module) est à régler à la recopie. Message
+  envoyé. Le paquet révisé (`8da471cc`, balance `1bc539d`) suit la recopie permanente de `dossier-service`.
 
 - **→ D (2026-11-27, STORY-566) : information, aucune action exigée** — l'explication de l'IRPP lit vos lignes de
   rémunération (`RemunerationService.baseDuCalcul`) et votre calcul social de la même version
@@ -784,6 +832,11 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← A (2026-11-27, FE-098, `prospera-balance-service`, plan d'amortissement) : quatre écarts** (relire la dernière
+  publication du tableau, désigner la contrepartie d'une balance `NON_VENTILABLE`, les biens sortis dans le cumul, la ligne
+  de l'exercice suivant l'arrêté) — **reçue, non servie au lot 7** (non bloquante ; aucune story du lot ne la portait, la
+  session de groupe ne l'a pas placée). **À placer au lot 8** de C, avec les autres demandes restées à placer.
+
 - **← D (2026-11-27, STORY-562, D-562-3) : déclarer au schéma du paquet le sous-schéma facultatif `suivi` du connecteur** —
   ✅ **servie par STORY-350** (la première story de C qui touche le paquet) : balance-service **#179** (`ab2ad72` sur `dev`),
   `scripts/referentiels/paquet-fiscal.schema.json`, sous `automatisation.connecteurs[].suivi` (la clé réservée par 561) :
@@ -802,7 +855,9 @@ seulement.
   réservé à 562) ; **aucune instance** au paquet Togo. ⚠ Une instance future doit porter une **`source`** (au connecteur, par
   exemple) qui couvre ses valeurs numériques : le balayage R4 vaut pour tout le paquet (prouvé par la spec). Message envoyé à D.
 
-- **← B (27/11, ordre « k ») : le manifeste `declarations` à aligner dans sa prochaine version** — **notée** : ses codes
+- **← B (27/11, ordre « k ») : le manifeste `declarations` à aligner dans sa prochaine version** — ✅ **servie par
+  STORY-566** (manifeste 1.1.0, `main` `3359e91` ; copie du fiscal #99, `31dd81f` ; recopie au catalogue demandée à B). Texte
+  d'origine — **notée** : ses codes
   `declarations:*` deviendront ceux que le fiscal vérifie (`fiscalite:declaration:preparer`, `valider`, `deposer`,
   `regler`) à la prochaine version du manifeste (avec Q-D-34 et le texte du coffre de 560), puis « → B » pour la recopie
   au catalogue. Aucune story du lot 7 ne la porte encore.
@@ -969,7 +1024,10 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-27, STORY-566), avant le code** — branche `MNV-566` de `prospera-fiscal-service`, rebasée sur
+- **FUSIONNÉ (2026-11-27, prospera-fiscal-service#99, `dev` `31dd81f`, sur `origin/dev` `eff2afe`, qui n'a pas bougé
+  pendant les preuves ; head `aa22bc4`), conforme à l'annonce ; la suite complète (specs et e2e de D comprises) verte sur la
+  nouvelle copie du paquet `8da471cc`, aucun test de D à corriger ;
+  ANNONCÉ (2026-11-27, STORY-566), avant le code** — branche `MNV-566` de `prospera-fiscal-service`, rebasée sur
   `origin/dev` juste avant la fusion (565 de D vient d'y entrer). **Aucune migration**, aucune collection, aucun événement.
   Communs touchés : **`app.module.ts`** (le module neuf de C `ExplicationIrppModule`, lecture seule : il importe
   `RemunerationModule` de D, `RedevablesModule`, `ReadModelsModule`, `PaquetsModule`, `HabilitationsModule`, aucun ne
@@ -1272,6 +1330,11 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-27 (STORY-566), PUBLIÉ** (fiscal #99, `31dd81f` ; balance #180, `1bc539d`) — conforme à l'annonce (#1074), une
+  précision : `MANDAT_ABSENT` et `QUESTIONNAIRE_ABSENT_DU_PAQUET` rendent **422** (nature `REGLE_METIER`), pas 409. Paquet :
+  empreinte `8da471cc68cc5eff10175c80060ef275423b48b5eab8ac7316f1bcc7eba95970`. Manifeste `declarations` 1.1.0 : source
+  `main` `3359e91`, copie du fiscal `src/vendor/manifestes/declarations.manifest.ts` (sha256 `5adf76d6…d56d`). **→ B** :
+  recopie au catalogue (message envoyé).
 - **2026-11-27 (STORY-566), ANNONCÉ avant le code** — **expliquer l'IRPP du dirigeant salarié et lui proposer des options
   chiffrées** (`prospera-fiscal-service`, REST ; le paquet fiscal Togo, `prospera-balance-service` ; le manifeste
   `declarations`). Fiche : `stories/STORY-566.md` (D-566-1 → 15).
