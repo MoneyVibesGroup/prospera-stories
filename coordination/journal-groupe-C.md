@@ -313,12 +313,21 @@
    commit fusionné) : unitaires 73/73 suites, 1 086 ; `test:socle` 18/18, 355 ; `nest build` vert ; pile `grp-c` saine
    (routes montées, 401 sans jeton) ; mutations 13/13 tuées (deux réécrites après avoir rougi par compilation). Verrou pris
    une fois (18:55 → 19:08), rendu. Aucune session de A joignable : **A prévenu par ce journal**.
-28. 🚧 **STORY-350** (n° 17 du fiscal, **finit EPIC-034**) : fiche écrite juste avant le code (D-350-1 → 12) ; contrat et
-   communs annoncés ci-dessous. Le rapprochement des charges sociales calculées (348, totaux sans nom) avec les comptes de
-   personnel de la balance de référence (431, 664, 447), par couples déclarés au paquet ; un écart hors tolérance est une
-   anomalie `RAPPROCHEMENT_SOCIAL_ECART` (avertissement) qui nomme les deux valeurs. Le paquet est touché : **← D (562,
-   D-562-3)** y est servie (le `suivi` au schéma). **Suivante : STORY-566**, la dernière du lot (elle porte aussi
-   l'alignement du manifeste `declarations`).
+28. ✅ **STORY-350 DONE (27/11)** (n° 17 du fiscal) : balance-service **#179** (`ab2ad72` sur `dev`) et fiscal **#98**
+   (`261217b` sur `dev`, sur `81e7605` de D) ; annonce #1069 avant le code. `POST /exercices/{id}/rapprochement-social` : les
+   **totaux** du calcul social de D (348, lu par son API, jamais écrit ; AD-21) sur les mois de l'exercice face aux
+   **mouvements de l'exercice** des comptes de personnel de la balance de référence au dernier jour (1117), par couples du
+   paquet (`rapprochementSocial`, R15 : 431 au crédit, 664 au débit, 447 au crédit, tolérance de travail 1 000) ; un mois
+   sans base nommé, jamais compté pour zéro ; des lignes bloquées ⇒ `INCOMPLET` ; un écart ⇒ l'avertissement
+   `RAPPROCHEMENT_SOCIAL_ECART`, qui nomme les deux valeurs, sur l'obligation sociale de la dernière période. Module neuf de
+   C (importe `RemunerationModule` et `ObligationsModule`, sans cycle). **← D (562, D-562-3) servie** : le `suivi` au schéma
+   du paquet, sans instance. Empreinte du paquet **`72d2d6ed…56af`**. Node 24 (image `verification`, arbres identiques aux commits fusionnés, base fiscal `81e7605`) : fiscal unitaires 289/290 suites (1 ignorée), 4 502 ; e2e 17/17, 431 ; conformité 35/35, 237 — specs et e2e de D comprises, vertes avec la nouvelle copie du paquet ; `nest build` vert ; balance unitaires 301/303 (2 ignorées), 5 967 ; e2e 38/38, 2 336 ; pile `grp-c` (balance + fiscal) saine : route montée, module initialisé, 401 sans jeton, aucune erreur d'injection, aucun redémarrage ; mutations 20/20 (fiscal ; une réécrite après avoir rougi par compilation) et 12/12 (balance : R15 et deux bornes du `suivi`). Verrou pris une fois (19:51 → 20:13), rendu. D-350-1 → 12 dans la fiche
+   (D-350-10 : le lien du calculé du triplet au calcul social reste à faire). **B prévenu** (recopie, empreinte) ; **D
+   prévenu** (350, EPIC-034, 562).
+   **🏁 EPIC-034 fini** (345 → 350 et 364 : la base de rémunération par bénéficiaire, l'import et la saisie, le calcul
+   aiguillé sur le type de bénéficiaire, le dirigeant bloqué jamais approximé, les obligations sociales au calendrier — D —,
+   le rapprochement avec les comptes de personnel — C) ; `fiscalite_epics` : `done`.
+29. **Suivante : STORY-566**, la dernière du lot 7 de C (elle porte aussi l'alignement du manifeste `declarations`).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -767,6 +776,16 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← D (2026-11-27, STORY-562, D-562-3) : déclarer au schéma du paquet le sous-schéma facultatif `suivi` du connecteur** —
+  ✅ **servie par STORY-350** (la première story de C qui touche le paquet) : balance-service **#179** (`ab2ad72` sur `dev`),
+  `scripts/referentiels/paquet-fiscal.schema.json`, sous `automatisation.connecteurs[].suivi` (la clé réservée par 561) :
+  `rythme { premiereLectureApresMin 1–1440, intervalleMin 15–1440, arretApresJours 1–90, entiers, source? }`, `parcours`
+  (gestes `S_AUTHENTIFIER | OUVRIR | SAISIR`, jamais `SOUMETTRE` ; **`attend` requis sur chaque étape**, décision de la
+  session de groupe), `issues { accuse, rejet, enCours }` (marqueurs `{ contient }` et/ou `{ statut }` 100–599), `accuse`
+  (une référence `{ entre, et }`, une pièce `{ chemin }`, ou les deux), `rejet { motif { entre, et } }`, `source?`.
+  **Aucune instance** au paquet Togo ; ce que le schéma de C ne sait pas dire (la dernière étape est l'écran lu, la valeur
+  `DEPOT|referencePortail`) reste à la validation stricte de D. Empreinte `72d2d6ed…56af`. D et B prévenus par message.
+
 - **← D (2026-11-27, STORY-561) : déclarer la rubrique `automatisation` au schéma du paquet fiscal** — ✅ **servie par
   STORY-344** (balance-service #177, `a931877`) : `paquet-fiscal.schema.json` déclare la rubrique racine **facultative**
   `automatisation` (`required: ["connecteurs"]` ; chaque connecteur : `code` en minuscules et tirets, `version`, `canal`,
@@ -942,7 +961,10 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
-- **2026-11-27 (STORY-350), ANNONCÉ avant le code** — branche `MNV-350` de `prospera-fiscal-service`, partie d'`origin/dev`
+- **FUSIONNÉ (2026-11-27, prospera-fiscal-service#98, `dev` `261217b`, sur `origin/dev` `81e7605`, qui n'avait pas bougé ;
+  head `e0c0d6f`), conforme à l'annonce ; la suite complète (specs et e2e de D comprises) verte sur la nouvelle copie du
+  paquet `72d2d6ed`, aucun test de D à corriger ;
+  ANNONCÉ (2026-11-27, STORY-350), avant le code** — branche `MNV-350` de `prospera-fiscal-service`, partie d'`origin/dev`
   à jour. **Aucune migration**, aucune collection, aucun événement. Communs touchés : **`app.module.ts`** (le module neuf de C
   `RapprochementSocialModule`, qui importe `RemunerationModule` de D en lecture, `ObligationsModule` et `ExercicesModule` :
   ni l'un ni l'autre ne change, aucun `forwardRef`) ; **le contrat OpenAPI** (une route et ses DTO, « ⚠ Contrats ») ; **la
@@ -1232,6 +1254,12 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-27 (STORY-350), PUBLIÉ** (fiscal #98, `261217b` ; balance #179, `ab2ad72`) — conforme à l'annonce (#1069), avec
+  quatre précisions : `anomalies[].issue` porte aussi **`SANS_OBLIGATION`** (`obligationId` et `periode` à `null`, rien
+  n'est signalé) ; `message` accompagne `SANS_BALANCE` et `DEVISE_DIFFERENTE` ; le comptabilisé est ramené à l'unité par
+  l'`exposant` de la devise de la balance ; l'explication de l'anomalie tient dans la borne de 500 caractères du registre
+  (328). Refus : `502 BALANCE_AMONT_INVALIDE` si la balance relue n'est pas la balance désignée (id, version, empreinte,
+  devise). Paquet : empreinte `72d2d6ed5e6d909bf15c9a406620830a06090f7000c8e470be1f004148e356af`.
 - **2026-11-27 (STORY-350), ANNONCÉ avant le code** — **le rapprochement des charges sociales avec les comptes de
   personnel** (`prospera-fiscal-service`, REST ; et le paquet fiscal Togo, `prospera-balance-service`). Fiche :
   `stories/STORY-350.md` (D-350-1 → 12).
@@ -2227,6 +2255,12 @@ seulement.
 
 ## Questions à l'utilisateur ou au PO
 
+- **❓ 2026-11-27 — STORY-350 (D-350-5) : les comptes et la tolérance du rapprochement social.** Le paquet Togo 2026 rapproche
+  les cotisations dues du **crédit de 431** « Sécurité sociale », la part patronale du **débit de 664** (le compte que le
+  paquet range déjà à `CNSS_PATRONALE`), les retenues d'IRPP du **crédit de 447** « État, impôts retenus à la source » (447
+  peut porter d'autres retenues : l'écart le montre), avec une tolérance de travail de 1 000 F. **Choix par défaut** : ces
+  trois couples, à confirmer par un expert-comptable togolais ; une autre valeur entre au paquet, sans livraison du fiscal.
+
 - **❓ 2026-11-27 — FE-097 de A (D-FE097-4, D-FE097-5) : le terrain et les durées usuelles.** (a) Le registre des
   immobilisations doit-il tenir les biens **non amortissables** (terrains, sauf gisements et terrains agricoles, que le plan
   amortit en 282) ? STORY-526 (M9) les a exclus ; les admettre change le plan (527), la publication des dotations et la
@@ -2409,6 +2443,17 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-350, 27/11) `eslint --fix` retire un `as unknown as string` qu'il juge inutile**
+  (`no-unnecessary-type-assertion`), puis `no-unsafe-assignment` refuse le `expect.stringContaining(…)` laissé nu dans un
+  `toMatchObject` : passer par une variable `const x: unknown = expect.stringContaining(…)`.
+- **(STORY-350)** un `cat > fichier` sans heredoc dans une commande composée attend l'entrée standard : la commande se fige
+  jusqu'au délai de l'outil (elle est passée en arrière-plan, rien n'a été créé). Écrire les fichiers par l'outil d'écriture.
+- **(FE-158, 27/11)** une deuxième campagne de mutations a été lancée sur le même checkout avant la fin de la première (sur
+  d'autres fichiers, sans dommage : vérifié par `git status`, propre). Le piège de 339 vaut toujours : attendre le `FIN` du
+  fichier `.txt` de la campagne, pas la fin apparente de son journal.
+- **(STORY-350)** balance-service sert la balance de référence **sans lignes** (`GET …/balances/reference`, 1117) : les
+  lignes se lisent par `GET …/balances/{id}`, en vérifiant que la balance relue est la balance désignée.
 
 - **(FE-097 de A, 27/11) une propriété `@ApiPropertyOptional({ type: XDto, description })` se publie en `allOf: [{ $ref }]`**,
   pas en `$ref` direct : un test du contrat qui lit `.$ref` reçoit `undefined`. Lire `p.$ref ?? p.allOf?.[0].$ref` (le patron
