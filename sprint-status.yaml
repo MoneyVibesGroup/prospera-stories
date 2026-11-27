@@ -8420,8 +8420,9 @@ sprints:
         epic: "EPIC-034"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 🚧 2026-11-27 — groupe C, lot 7 (n° 17 du fiscal, PLAN-LOT-7-2026-11-24.md §3 ; finit EPIC-034) — fiche écrite juste avant le code (D-350-1 → 12) ; contrat et communs annoncés (journal de C) : POST /exercices/{id}/rapprochement-social, les totaux du calcul social (348) face aux mouvements des comptes de personnel de la balance de référence (431, 664, 447), par couples du paquet (rubrique rapprochementSocial, garde R15) ; anomalie RAPPROCHEMENT_SOCIAL_ECART (avertissement) ; ← D (562, D-562-3) : suivi au schéma du paquet ; aucune migration. En tête, PR à part : FE-158 de A servie (comptabilite #22).
+        story_path: "stories/STORY-350.md"
+        assigned_to: "Groupe C (lot 7, PLAN-LOT-7-2026-11-24.md §3)"
       - story_id: "STORY-330"
         title: "Port de canal asynchrone et production du livrable"
         epic: "EPIC-032"

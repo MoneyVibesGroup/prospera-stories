@@ -302,8 +302,23 @@
    2336 ; `nest build` vert ; mutations 33/33 tuées (quatre rougissaient d'abord par compilation, réécrites et tuées par les
    tests). Verrou pris une fois (16:10 → 16:21), rendu. Aucune session de A joignable : **A prévenu par ce journal**
    (« Réponses », « ⚠ Contrats »).
-27. **Suivante : STORY-350**, avec **FE-158 de A en tête**, dans une PR à part de `prospera-comptabilite-service`, avant
-   350 (décision de la session de groupe du 27/11) ; puis **STORY-566**.
+27. ✅ **Demande FE-158 de A servie (27/11)**, PR à part en tête de STORY-350 (décision de la session de groupe) :
+   prospera-comptabilite-service **#22** (`69ea8ab` sur `dev`), annonce #1063 avant le code ; aucun identifiant neuf (pas de
+   fiche STORY : la demande de A et ce journal font foi, D-FE158-1 → 6 au « ⚠ Contrats »). **(3) et (1)** `GET
+   /dossiers/{dossierId}/exercice-ouvert` : l'exercice que dossier-service tient ouvert, sa tenue si elle est choisie, la
+   **tenue proposée** (SMT ⇒ cahiers, sinon journal ; sans système décidé, le refus nommé) ; **(2)** `GET /moi/droits` : les
+   droits du manifeste que le membre détient. **Nommés, non changés** : la liste des lots garde son 200
+   (`LISTE_SANS_REFUS_D_ETAT`, la sonde est `GET …/tenue`) ; les messages étaient déjà servis. Aucune écriture, aucun
+   événement, aucune migration, aucun droit neuf, manifeste inchangé. Node 24 (image `verification`, arbre identique au
+   commit fusionné) : unitaires 73/73 suites, 1 086 ; `test:socle` 18/18, 355 ; `nest build` vert ; pile `grp-c` saine
+   (routes montées, 401 sans jeton) ; mutations 13/13 tuées (deux réécrites après avoir rougi par compilation). Verrou pris
+   une fois (18:55 → 19:08), rendu. Aucune session de A joignable : **A prévenu par ce journal**.
+28. 🚧 **STORY-350** (n° 17 du fiscal, **finit EPIC-034**) : fiche écrite juste avant le code (D-350-1 → 12) ; contrat et
+   communs annoncés ci-dessous. Le rapprochement des charges sociales calculées (348, totaux sans nom) avec les comptes de
+   personnel de la balance de référence (431, 664, 447), par couples déclarés au paquet ; un écart hors tolérance est une
+   anomalie `RAPPROCHEMENT_SOCIAL_ECART` (avertissement) qui nomme les deux valeurs. Le paquet est touché : **← D (562,
+   D-562-3)** y est servie (le `suivi` au schéma). **Suivante : STORY-566**, la dernière du lot (elle porte aussi
+   l'alignement du manifeste `declarations`).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -583,7 +598,10 @@ seulement.
   (`fiscalite:declaration:*`) — écart antérieur à 342 ; **choix par défaut** : le noter à la prochaine version du manifeste
   (avec Q-D-34 et le texte du coffre de 560), sans retarder (1) et (2). Prévenu par message.
 
-- **→ B (2026-11-27, STORY-342) : recopier le paquet fiscal Togo 2026 dans `dossier-service`** — demande permanente de B
+- **→ B (2026-11-27, STORY-342, puis 344) : recopier le paquet fiscal Togo 2026 dans `dossier-service`** — ✅ **servie
+  (`c2915555`)** par B : dossier-service **#62** (`dev` `9541fad`, depuis balance `a931877`, sha256 `c2915555…937c`) ;
+  journal de B (prospera-stories #1066, `main` `89f2562`). La recopie reste **permanente** : une révision du paquet se signale
+  à B par message (SHA et empreinte), sans rouvrir de ligne ici. Texte d'origine : demande permanente de B
   (27/11), signalée par message. Source : balance-service `dev` `4f75f4e` (#176),
   `src/modules/referentiel/assets/paquet-fiscal-togo-2026.json`, sha256
   **`4959061a28feb884a7efbc77f6249a80b95e6023bba0adc4104075db1a96e3e2`** (LF) ; elle remplace `6eebc02f` (341).
@@ -795,9 +813,23 @@ seulement.
   exigé ; le dépôt suivant scelle la n + 1. `NATURES_VERSION` gagne `RETRANSMISSION` (votre `RetransmissionDto` le rend ; sa
   description « quand le retour du cycle sera ouvert (C) » est à mettre à jour chez vous). Les doublures de C passent
   `PreuvesDeRejet` (par défaut : aucun rejet). Prévenu par message.
-- **← A (25/11, FE-158)** : **placée en tête de STORY-350** — décision de la session de groupe de C (27/11) : une PR à part de
-  `prospera-comptabilite-service`, avant le code de 350 ; si 350 ne peut pas la porter, elle passe en fin de lot, après 566.
-  (Avant : ouverte, D-338-12 — elle n'entrait pas dans 338.)
+- **← A (25/11, FE-158, `prospera-comptabilite-service`)** — ✅ **servie (27/11), en partie et nommée** :
+  prospera-comptabilite-service **#22** (`69ea8ab` sur `dev`), PR à part en tête de STORY-350 (décision de la session de
+  groupe), annonce #1063. Contrat au « ⚠ Contrats » (2026-11-27, ← A, FE-158). Point par point :
+  1. **servi** — la **tenue proposée** : `GET /api/v1/dossiers/{dossierId}/exercice-ouvert` rend `tenueProposee { tenue,
+     regle: SMT_AUX_CAHIERS_SINON_JOURNAL, referentiel?, refus? }` (la règle de la maquette validée le 25/11 ; sans système
+     décidé : `tenue: null` et `REFERENTIEL_NON_DECIDE` avec sa phrase). Pas une proposition du registre de l'IA : ne pas la
+     citer dans `proposition`.
+  2. **servi** — `GET /api/v1/moi/droits` ⇒ `{ organisationId, droits }`, les droits du manifeste que le membre détient (la
+     même lecture que la garde) : griser « Tenir au journal » sans `comptabilite:exercice:ouvrir`.
+  3. **servi** — la même route rend l'**exercice ouvert** du dossier (`exercice`, `null` s'il n'y en a pas) et sa `tenue`
+     (`null` tant qu'elle n'est pas choisie).
+  4. **déjà servi** — chaque refus porte `message`, une phrase en français, depuis STORY-958 ; aucun texte n'a changé.
+  5. **non servi tel quel**, motif **`LISTE_SANS_REFUS_D_ETAT`** : la liste des lots garde son 200 (une liste ne refuse pas
+     sur l'état de l'exercice ; un 404 casserait ses lecteurs). La sonde existe : `GET …/exercices/{id}/tenue` (404
+     `EXERCICE_NON_OUVERT`), ou `tenue: null` de la route neuve.
+  **→ A** : types à régénérer depuis l'OpenAPI vivant (`ExerciceOuvertDto`, `TenueProposeeDto`, `RefusNommeDto`,
+  `DroitsDuMembreDto`). (Avant : placée en tête de STORY-350 par la session de groupe ; ouverte, D-338-12.)
 - **← D (2026-11-26, STORY-333, D-333-3) : brancher la garde `ACCUSE_REQUIS` dans `CycleObligationsService.transitionner`** —
   ✅ **servie en tête de STORY-339, PR à part** : fiscal **#83** (`74b33ec` sur `dev`, sur `fc317a1` de D). À `vers ===
   'ACCUSE_RECU'`, après les gardes d'état et les anomalies : `verifierAccuseAuRecu(await preuves.accuseDe(orgId, id,
@@ -909,6 +941,17 @@ seulement.
 > OpenAPI, `package.json`, migrations, `read-models/`, copies du paquet, et tout fichier d'un dossier de D) ne change que
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
+
+- **2026-11-27 (STORY-350), ANNONCÉ avant le code** — branche `MNV-350` de `prospera-fiscal-service`, partie d'`origin/dev`
+  à jour. **Aucune migration**, aucune collection, aucun événement. Communs touchés : **`app.module.ts`** (le module neuf de C
+  `RapprochementSocialModule`, qui importe `RemunerationModule` de D en lecture, `ObligationsModule` et `ExercicesModule` :
+  ni l'un ni l'autre ne change, aucun `forwardRef`) ; **le contrat OpenAPI** (une route et ses DTO, « ⚠ Contrats ») ; **la
+  copie du paquet** (`test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`, nouvelle empreinte : bloc
+  `rapprochementSocial`). Fichiers de C : `domain/obligations/anomalies.ts` (un code **ajouté**, `RAPPROCHEMENT_SOCIAL_ECART`)
+  et des dossiers neufs (`modules|application|domain/rapprochement-social`, `ports/source-lignes-balance.ts`, un adaptateur
+  HTTP neuf). **Aucun fichier de D** ; `CalculRemunerationService` est employé tel que D l'exporte pour 350 ; aucune classe que
+  `DepotsModule` instancie ne change. La suite complète du fiscal (e2e de D comprises) se joue sur la base rebasée avant le
+  push ; un test de D qui rougirait sur l'empreinte du paquet sera corrigé dans la PR et dit ici, D prévenu.
 
 - **FUSIONNÉ (2026-11-27, prospera-fiscal-service#95, `dev` `535e190`, rebasée sur `origin/dev` `997e29a` de D — la 561 —
   juste avant la fusion ; head `f58cb3d`, arbre identique)** — conforme à l'annonce. Communs : le contrat OpenAPI (la route
@@ -1189,6 +1232,34 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-27 (STORY-350), ANNONCÉ avant le code** — **le rapprochement des charges sociales avec les comptes de
+  personnel** (`prospera-fiscal-service`, REST ; et le paquet fiscal Togo, `prospera-balance-service`). Fiche :
+  `stories/STORY-350.md` (D-350-1 → 12).
+  - **`POST /api/v1/exercices/{exerciceId}/rapprochement-social`** (200 ; rôles `TENANT_ADMIN`, `TENANT_USER`, accès fiscal,
+    droit `fiscalite:declaration:preparer`, comme 1101) ⇒ `{ exerciceId, dossierId, defini, message?, statut: RAPPROCHE |
+    SANS_BALANCE | DEVISE_DIFFERENTE | NON_DEFINI, balance: { balanceId, version, checksum } | null, couples: [{ code,
+    libelle, obligation, calcule, comptabilise, ecart, tolerance, statut: CONFORME | ECART | INCOMPLET, comptes: [{ compte,
+    montant }], periodes, periodesSansBase, periodesIncompletes }], anomalies: [{ obligationId, periode, code, issue: POSEE |
+    RETIREE | INCHANGEE }] }`. **Des totaux par compte de personnel, aucune ligne nominative** (AD-21). Le calculé : la somme
+    des totaux du calcul social de D (348) sur les mois de l'exercice ; un mois sans base est nommé, jamais compté pour zéro ;
+    un mois aux lignes bloquées rend le couple `INCOMPLET`. Le comptabilisé : les mouvements de l'exercice des comptes du
+    couple dans la balance de référence au dernier jour de l'exercice (1117), lue avec ses lignes. Refus : `404
+    EXERCICE_INTROUVABLE` (hors portée compris), `403`, ceux de la balance et du paquet.
+  - **L'anomalie** `RAPPROCHEMENT_SOCIAL_ECART` (code **ajouté** au catalogue, `SIGNALEE`, **`AVERTISSEMENT`**, ne bloque
+    aucune étape, levable en motivant), posée sur l'obligation `COTISATIONS_SOCIALES` ou `RETENUE_IRPP` de la **dernière
+    période** de l'exercice ; elle nomme les deux valeurs, l'écart et la tolérance ; retirée quand tous les couples du code
+    sont conformes. Elle se lit dans les anomalies de l'obligation (328), sans autre changement de leur contrat.
+  - **Le paquet fiscal Togo 2026** (balance-service, source et artefact) : rubrique racine **`rapprochementSocial { _note,
+    couples: [{ code, libelle, obligation, calcule: COTISATIONS_TOTALES | COTISATIONS_EMPLOYEUR | RETENUES_IRPP, comptes {
+    prefixes, mouvement: CREDIT | DEBIT }, tolerance }], source }`**, garde **R15** ; trois couples (431 au crédit, 664 au
+    débit, 447 au crédit ; tolérance de travail `{ absolue: 1000 }`, à confirmer). **← D (562, D-562-3)** : le sous-schéma
+    `suivi` sous `automatisation.connecteurs[]` (forme de `stories/STORY-562.md`, `attend` requis sur chaque étape), sans
+    instance. Nouvelle empreinte ⇒ **B** (recopie permanente) et **D** prévenus par message.
+- **2026-11-27 (← A, FE-158), PUBLIÉ** (prospera-comptabilite-service #22, `69ea8ab`) — conforme à l'annonce (#1063), sans
+  écart de contrat. Précisions : `GET /moi/droits` refuse un jeton sans organisation (`403 DROIT_INSUFFISANT`, défense en
+  profondeur : la garde de l'état publié le refuse avant) ; `exercice-ouvert` refuse un identifiant de dossier malformé (`400
+  IDENTIFIANT_MALFORME`) et rend `401` sans jeton. **→ A** : types à régénérer depuis l'OpenAPI vivant (`ExerciceOuvertDto`,
+  `TenueProposeeDto`, `RefusNommeDto`, `DroitsDuMembreDto`).
 - **2026-11-27 (← A, FE-158), ANNONCÉ avant le code** — **l'ouverture d'un exercice lue pour l'écran de A**
   (`prospera-comptabilite-service`, REST ; PR à part en tête de STORY-350, décision de la session de groupe). Pas de fiche
   STORY (aucun identifiant neuf au lot 7) : la demande de A (`frontend-stories/FE-158.md`, « À écrire à C ») et ce journal
