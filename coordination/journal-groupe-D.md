@@ -763,10 +763,30 @@
   - **Suivante : STORY-337** (le rapprochement des pièces justificatives, à la granularité annoncée ; il lit la route de
     338 de C, servie : comptabilite #21, `dev` 58803f5, et remplit `rapprochementPieces`).
 
-- **STORY-337** 🚧 — le rapprochement des pièces justificatives, à la granularité annoncée : `rapprochementPieces` de
-  chaque obligation du dossier de contrôle (336) n'est plus `null`. Fiche et annonce avant le code (D-337-1 → 11,
-  ⚠ Contrats, ⚠ Communs, → C information, Q-D-35). Plan §4, n° 14. Code : branche `MNV-337` de
-  `prospera-fiscal-service` (en cours).
+- **STORY-337** ✅ 📨 — le rapprochement des pièces justificatives, à la granularité annoncée : `rapprochementPieces` de
+  chaque obligation du dossier de contrôle (336) n'est plus `null`. Code : prospera-fiscal-service#90, `dev` `680164e`.
+  Annonce avant le code : #1029, `main` 5d45088 (fiche D-337-1 → 11, ⚠ Contrats, ⚠ Communs, → C information, Q-D-35).
+  Plan §4, n° 14.
+  - **Livré** (dossier `depots` de D) : les comptes que le chemin nomme (329 : `443`, `445` pour la TVA, des préfixes),
+    la période de l'obligation (mois, trimestre, année), l'exercice qui la couvre (read-model `exercices_dossier`, lu),
+    la justification de la comptabilité (338 de C, jeton du membre, délai et corps bornés, aucune redirection suivie) ;
+    `PIECE` (documenté, à-nouveaux à part, non documenté, pièces, par compte) ou `COMPTE_PERIODE` et sa raison (dix
+    raisons, `codeAmont`), **jamais d'échec** ; le repli chiffré depuis le journal complet du chemin
+    (`PROVENANCE_DE_LA_BALANCE`), `NON_CHIFFRE` sinon ; `AUCUNE_ECRITURE` n'est jamais « documenté ».
+  - **Communs** : le contrat OpenAPI, `.env.example`. Aucune migration, aucun fichier de C ; `config/` non touché
+    (`COMPTABILITE_SERVICE_URL` lue par l'adaptateur).
+  - **Preuves** : Node 24 e2e 15/15 suites, 403 tests ; `test:conformite` 32/32, 209 ; unitaires 267/269
+    suites, 3 980 tests (`livrable-ac7.spec.ts`, non touchée, rouge sur `CLASSEUR_TROP_COUTEUX` sous la charge des
+    mutations locales, verte seule) ; mutations 63/63 rouges (58 sous Node 25, 5 sur MongoDB réel ; huit réécrites après
+    une compilation, deux survivantes armées de leur assertion) ; pile `grp-d` avec Redis saine, la route en 401,
+    l'adaptateur réel dans le conteneur rend un repli nommé ; verrou 04:05 → 04:25, rendu, B et C prévenus.
+  - **Ce qui reste** :
+    - Q-D-35 au PO (les comptes des obligations que le moteur ne chiffre pas) ; → C information (« Demandes »).
+    - L'aller-retour avec la vraie comptabilité n'est pas joué sur `grp-d` (sa pile, un dossier ouvert au journal et un
+      membre aux droits de la comptabilité : trop lourd ici) ; la route est doublée en HTTP dans l'e2e, l'adaptateur réel
+      joué dans le conteneur du fiscal contre une comptabilité absente (repli nommé).
+    - → A (plus tard) : l'écran du dossier de contrôle lit `rapprochementPieces`.
+  - **Suivante : STORY-561**.
   - **Diagnostic** (fiche) : aucun rapprochement des pièces n'existait ; les comptes de la TVA sont déjà nommés par le
     chemin (329 : l'étape `balance`, depuis `tva.declaration.comptes` du paquet : `443`, `445`), la route de 338 existe
     côté comptabilité, le journal du chemin porte la pièce de chaque ligne des cahiers ; personne ne les assemblait ni ne
@@ -2726,7 +2746,8 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-27, STORY-337, avant le code)** — branche `MNV-337` de `prospera-fiscal-service`, partie
+- **FUSIONNÉ (2026-11-27, prospera-fiscal-service#90, `dev` `680164e`, rebasée sur `origin/dev` `481a8f4` (341 de C, qui touchait aussi le contrat OpenAPI : aucun conflit) avant la fusion ; head `2da41dc`), conforme à l'annonce ;
+  ANNONCÉ (2026-11-27, STORY-337, avant le code)** — branche `MNV-337` de `prospera-fiscal-service`, partie
   d'`origin/dev` `dae6a10`. **Aucune migration**, aucune collection, aucun index, aucune écriture ; ni `app.module.ts` (le
   cas d'usage entre dans `DepotsModule`, fichier de D, déjà monté), ni `config/` (`COMPTABILITE_SERVICE_URL` est lue par
   un fournisseur de `DepotsModule`, patron du coffre de 560 et des jetons de 335), ni `package.json`, ni `read-models/`
@@ -2885,7 +2906,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-27, STORY-337, avant le code) — le rapprochement des pièces justificatives**
+- **PUBLIÉ (2026-11-27, STORY-337 : prospera-fiscal-service#90, `dev` `680164e`) sans écart ; ANNONCÉ (2026-11-27,
+  STORY-337, avant le code, prospera-stories#1029, `main` 5d45088) — le rapprochement des pièces justificatives**
   (`prospera-fiscal-service`, module `depots`). Fiche : `stories/STORY-337.md` (D-337-1 → 11, section « Contrat »).
   - **Champ changé** : `GET /api/v1/dossiers-controle` — `obligations[].rapprochementPieces` passe de `null` à `{
     granularite: PIECE | COMPTE_PERIODE, raison, codeAmont, message, statut: DOCUMENTE | PARTIELLEMENT_DOCUMENTE |
@@ -4545,6 +4567,15 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **STORY-337** (fiscal) :
+  - (1) **`eslint --fix` retire une assertion de type `as unknown as Port` qu'il juge inutile**, puis l'import de type
+    devient inutilisé et `tsc` rougit (TS6196) : relancer `tsc` après chaque `--fix`, et retirer l'import.
+  - (2) **Une mutation qui remplace un calcul par une constante laisse ses variables inutilisées** (`noUnusedLocals`) :
+    elle rougit en compilation ; la réécrire en gardant les variables vivantes (`dernierJour(a, m) - 1`).
+  - (3) **Ne pas jouer les mutations locales pendant la passe unitaire Node 24** : sous cette charge,
+    `livrable-ac7.spec.ts` dépasse le délai de lecture du classeur (`CLASSEUR_TROP_COUTEUX`, 83 rouges) et chaque jest
+    local prend une minute. Lancer les mutations après l'étape `UNIT24` du script (elles peuvent courir pendant l'e2e).
 
 - **Suite de STORY-335** (fiscal) :
   - (1) **Le pilote §1.5 d'une route se monte dans l'image, jamais dans l'archive** : un fichier `*.conformite-spec.ts`
