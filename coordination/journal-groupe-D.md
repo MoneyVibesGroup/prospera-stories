@@ -839,11 +839,33 @@
     429 au-delà de 100 appels, les routes des membres restent limitées) ; « → B (h) » passée à « servie ».
   - **Preuves** : toutes sur l'arbre rebasé sur `535e190`, identique à celui de `dev` `81e7605`. Sous Node 24 : unitaires 286/287 suites, 4 442 tests ; e2e 16/16, 426 ; conformité 35/35, 237. Mutations : 56/56 rouges sous Node 25 (63 écritures ; cinq réécrites après une compilation, quatre survivantes armées), plus M1 → M5 sur MongoDB. Pile `grp-d` avec Redis saine, le planificateur posé dans Redis ; porte `gate562.js` 17/17 contre le portail simulé et la vraie file BullMQ (la première passe a échoué sur une course de la porte elle-même, corrigée et rejouée seule). Verrou pris à 15:58 et 18:46, rendu par le `trap` à 16:10 et 18:48 ; B et C prévenus.
   - **Ce qui reste** :
-    - → C (suivi) — reçue, placée par C au plus tard en 566 (« Demandes ») ;
+    - → C (suivi) — servie (C 350, balance #179 ; fiscal #98, `dev` `261217b`) ;
     - Q-D-37 au PO (un fait pour un suivi arrêté ou indéterminé) ;
     - le relevé réel des écrans de suivi est un geste de 1102 ; le paquet Togo reste sans bloc.
   - **Suivante : STORY-565** (le dépôt automatisé sert les deux redevables, et le règlement reste produit, jamais
     exécuté ; 341 de C servie).
+
+- **STORY-565** ✅ 📨 — le dépôt automatisé sert les deux redevables, et le règlement reste produit, jamais exécuté.
+  Code : prospera-fiscal-service#97, `dev` `eff2afe`. Annonce avant le code : #1068, `main` b65d15a (fiche
+  D-565-1 → 10, ⚠ Contrats, ⚠ Communs — une migration en vol, Q-D-38). Plan §4, n° 17. **EPIC-032 fini.**
+  - **Livré** (dossiers `coffre-secrets`, `connecteur-depot` et `depots` de D) : le coffre par redevable (portée,
+    `?redevable=`, migration `migrate:portee-coffre-redevable`) ; le connecteur qui passe le redevable de la déclaration
+    au coffre sans branche par nature et envoie son NIF (`REDEVABLE|identifiantFiscal`) ; l'ordre de 341 (C) transporté
+    tel quel au parcours ; le motif de dispense au refus d'une déclaration non due ; la section du règlement du dossier
+    de contrôle (342, 343 de C, annulés compris, sans dupliquer le triplet de 322), en commit à part ; une garde de D.
+  - **Communs** : une migration (`src/migrate-portee-coffre-redevable.ts`, script dans `package.json`) et le contrat
+    OpenAPI. Lus sans écriture : `RedevablesModule`, `ReglementModule` (C). Aucun fichier de C ; la garde FR-F47 de C
+    verte sans modification. Aucune migration n'est plus en vol.
+  - **← C : 350 — servie** (fiscal #98, `dev` `261217b`, paquet `72d2d6ed…56af`) : `suivi` déclaré au schéma ⇒
+    « → C (suivi) » passée à « servie » ; MNV-565 rebasée dessus localement (`-verif`), sans conflit, sans push forcé.
+    `CalculRemunerationService` (lu par `RapprochementSocialModule` de C) n'est pas touché par 565.
+  - **Preuves** : Node 24 unitaires 294/295 suites, 4 552 tests ; e2e 17/17, 431 ; conformité 36/36, 240 ; mutations 20/20 ; pile `grp-d` saine avec Redis, migration jouée deux fois, porte 18/18 (deux redevables, l'ordre remis, la section du règlement) ; arbre de `dev` identique à l'arbre éprouvé (`32204c9`).
+  - **Ce qui reste** :
+    - Q-D-38 au PO (un verdict « doit déclarer » stocké avant le dépôt du dirigeant ? défaut : non) ;
+    - la migration se joue une fois par environnement, après le déploiement (avant : le coffre de l'entreprise ne se lit
+      plus, le dépôt reste assisté — jamais un dépôt sans mandat) ;
+    - le relevé réel des écrans (dimana pour les déclarations, GUDEF pour la liasse) reste un geste de 1102.
+  - **Suivante : STORY-1102** (geste de l'utilisateur : un cabinet pilote et ses accès).
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
   d'assurance et trois de distributeur, au backend, les deux verticaux alternés : 1065 (la facture juste (3)), 1066
@@ -2172,7 +2194,7 @@
   l'attend. Quand C l'aura déclarée, une recopie du paquet n'est pas nécessaire tant qu'aucune instance n'existe.
   **Reçue par C** (complément de 342) : placée au plus tard en 344. 561 est livrée sur un double du paquet (fiscal#92,
   `dev` `997e29a`) ; la demande reste ouverte jusqu'à la fusion de C.
-  - **Complément du 2026-11-27 (STORY-562) — → C (suivi) — reçue, placée par C au plus tard en 566** (C rendra aussi
+  - **Complément du 2026-11-27 (STORY-562) — → C (suivi) — servie (C 350, balance #179)** (fiscal #98, `dev` `261217b` ; paquet `72d2d6ed…56af` : `suivi` déclaré sous `automatisation.connecteurs[]`, sans instance ; constaté par la 565 de D) (C rendra aussi
     `attend` requis sur chaque étape). La clé `suivi` de chaque connecteur, réservée par 561, reçoit sa forme
     (`stories/STORY-562.md`, D-562-3 : `rythme`, `parcours`, `issues`, `accuse`, `rejet`) ; même règle — facultative,
     aucune instance au paquet Togo. 562 se livre sur un double du paquet ; rien ne l'attend.
@@ -2818,7 +2840,8 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-27, STORY-565, avant le code)** — branche `MNV-565` de `prospera-fiscal-service`, partie
+- **FUSIONNÉ (2026-11-27, prospera-fiscal-service#97, `dev` `eff2afe`, rebasée sur `origin/dev` `261217b` ; head `e37302a`), conforme à l'annonce, un écart de forme (le détail de la portée sur toutes les raisons du coffre) ; rebasée localement sur 261217b sans conflit, sans push forcé, arbre de `dev` identique à l'arbre éprouvé (32204c9) ; la migration n'est plus en vol ;
+  ANNONCÉ (2026-11-27, STORY-565, avant le code)** — branche `MNV-565` de `prospera-fiscal-service`, partie
   d'`origin/dev` `81e7605`. **Une migration en vol** (D-565-2) : `src/migrate-portee-coffre-redevable.ts` et son script
   `migrate:portee-coffre-redevable` dans **`package.json`** — la portée du coffre (560) gagne le redevable : rangement de
   `redevableId: 'entreprise'` sur les canaux et jetons sans ce champ, index unique `coffre_une_portee_redevable` créé
@@ -3015,7 +3038,7 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-27, STORY-565, avant le code) — le dépôt automatisé sert les deux redevables, et le règlement
+- **PUBLIÉ (2026-11-27, STORY-565 : prospera-fiscal-service#97, `dev` `eff2afe`) avec un ajout de forme (le détail `{ redevableId, canal }` sur toutes les raisons du coffre au repli, pas seulement `MANDAT_ABSENT`) ; ANNONCÉ (2026-11-27, STORY-565, avant le code) — le dépôt automatisé sert les deux redevables, et le règlement
   reste produit, jamais exécuté** (`prospera-fiscal-service`, modules `coffre-secrets`, `connecteur-depot` et `depots`).
   Fiche : `stories/STORY-565.md` (D-565-1 → 10). **Ajouts, sauf la portée du coffre** :
   - coffre : le paramètre de requête facultatif `redevable` sur les routes `…/dossiers/{dossierId}/coffre/…` (absent :
@@ -4743,6 +4766,16 @@
 
 ## Pièges rencontrés
 
+- **STORY-565** (fiscal) :
+  - (1) **Changer la clé d'unicité d'une collection déjà en service demande une migration** : Mongoose crée le nouvel
+    index au démarrage mais ne supprime jamais l'ancien, qui refuse alors la seconde portée (patron de 563). Créer le
+    nouveau avant de supprimer l'ancien ; ranger la valeur par défaut sur les documents existants, sans quoi un filtre
+    exact ne les lit plus.
+  - (2) **Une mutation qui rend un paramètre inutile rougit en compilation** (`noUnusedParameters`, déjà le piège (4) de
+    561) : cinq mutations de 565 l'ont refait ; les écrire en gardant chaque paramètre lu.
+  - (3) **Un contexte de chiffrement (AAD) ou un périmètre d'audit qui gagne une dimension** : garder à l'octet ceux de
+    l'existant (l'entreprise), sinon aucun secret déjà rangé ne se déchiffre plus ; seule la portée neuve nomme la
+    dimension neuve.
 - **STORY-562** (fiscal) :
   - (1) **Un heredoc bash qui contient un script Python avec des `${…}` et des apostrophes échoue** (« unexpected EOF »)
     sans rien écrire : les scripts d'édition vont dans un fichier (outil d'écriture), jamais en heredoc (le brief le dit).
