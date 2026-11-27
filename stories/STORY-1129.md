@@ -1,6 +1,8 @@
 # STORY-1129 : Le cabinet sur le moteur (EPIC-144, 159) — le `PUT` d'octroi n'installe plus ce que le moteur sait installer ; les recettes croisées installent par le moteur
 
-Status: in-progress — fiche écrite le 2026-11-26 par la session du groupe B juste avant de coder (lot 7, n° 11 de B,
+Status: done — **livrée le 2026-11-26** : platform-catalog-service **#86** et **#87** (`18b03ae`, `7aa5623` sur `dev`),
+prospera-admin-panel-service **#46** (`eb2fe4b`), prospera-recette **#35**, **#36**, **#37** (`d06173f`, `6fc9467`, `c0594e3`) ;
+voir « Livraison ». Fiche écrite le 2026-11-26 par la session du groupe B juste avant de coder (lot 7, n° 11 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, deuxième partie, ligne 11 ; identifiant réservé D-L7B-1).
 **Date dure : fusionnée au plus tard le 18/12** (jalon « cabinet sur le moteur », plan §3, D-L7B-5).
 
@@ -80,7 +82,7 @@ les recettes croisées doivent le prouver.
 | 2 | La sanction (`SUSPENDED`), sa levée et la réécriture d'un module **installé** sont inchangées ; un module que le moteur ne sait pas vérifier garde le passage transitoire (plan `CONSOLE_PUT`, vérifications différées), dit déprécié | unitaires (cas existants verts) ; recettes `cabinet-moteur`, `zone-franche`, `archives` non touchée |
 | 3 | « Le moteur sait vérifier » = le manifeste ne déclare aucune vérification, ou `INSTALLATION_SERVICES` donne une adresse au module ; lu à chaque `PUT`, aucune liste dans le code | unitaires de la règle pure, mutations |
 | 4 | Le `PUT` du BFF relaie les refus du moteur avec leur code (`INSTALLATION_PAR_LE_MOTEUR`, `MODULE_DEPENDANCE_MANQUANTE` et ses refus, `INSTALLATION_EN_COURS`, `INSTALLATION_INACHEVEE` et son plan) ; OpenAPI du BFF et du catalogue à jour | unitaires et e2e du BFF ; recette `cabinet-moteur` par le BFF |
-| 5 | `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES` (pile de recette ; `.env.essai.example` du catalogue) ; FR-6 de `cabinet-moteur` éprouvé sur `declarations` | gardes `profil-de-recette.spec`, `espace-essai.spec` ; recette |
+| 5 | `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES` (pile de recette ; **pas** `.env.essai.example`, D-1129-11) ; FR-6 de `cabinet-moteur` éprouvé sur `declarations` | gardes `profil-de-recette.spec`, `espace-essai.spec` ; recette |
 | 6 | Les recettes installent `balance`, `bilan`, `comptabilite`, `conseil` **par l'offre et `POST /installations`** (une aide partagée) ; le `PUT` n'y sert plus qu'aux modules sans adresse et à la sanction | unitaires de l'aide ; `cabinet-moteur`, `atelier-balance`, `zone-franche`, `referentiel-par-dossier`, `comptabilite`, `abonnement` vertes sur pile neuve depuis `origin/dev` |
 
 ## Contrat annoncé avant le code (2026-11-26)
@@ -154,3 +156,84 @@ les recettes croisées doivent le prouver.
 - Le retrait des consommateurs de `entitlement.changed` (inventaire de STORY-1128, EPIC-159) ; l'app du cabinet sur l'état
   publié par la vraie route (A) ; le panneau des droits d'AP-05 (A).
 - Désinstaller et réinstaller (FR-39, lot 8) ; les interrupteurs (EPIC-151, STORY-1135).
+
+## Livraison (2026-11-26)
+
+### Ce qui a été livré
+
+- **Catalogue** — #86 (`18b03ae`) : `voie-d-installation.ts` (`leMoteurSaitVerifier`, règle pure),
+  `LectureDuCatalogue.leMoteurSaitVerifier` (manifeste en vigueur + `INSTALLATION_SERVICES`), le refus dans
+  `PassageParLeMoteur` après la cohérence et la branche « installé », avant `noterAcquis` et le plan ; OpenAPI du `PUT`
+  (description, 409). #87 (`7aa5623`) : le module en cause est dans **`modules`** (D-1129-12).
+- **BFF** — #46 (`eb2fe4b`) : le `PUT …/entitlements/{module}` passe ses échecs par `rethrowDecisionDuMoteur` ;
+  `CODES_DU_MOTEUR` gagne `INSTALLATION_PAR_LE_MOTEUR` ; OpenAPI (description, 409).
+- **Recette** — #35 (`d06173f`) : `src/moteur.ts` (`installerParLeMoteur`, `offreAChoisir`, `echecDuPlan`,
+  `MODULES_VERIFIES_PAR_LA_PILE`), `conseil` dans `INSTALLATION_SERVICES`, `cabinet-moteur` (refus du `PUT` au catalogue et par
+  le BFF, `conseil` installé par le moteur, FR-6 sur `declarations`), cinq recettes réécrites, README. #36 (`6fc9467`) et #37
+  (`c0594e3`) : ce que la pile neuve a montré (D-1129-13 → 15).
+
+### Preuves
+
+- **Catalogue, Node 25** : `voie-d-installation.spec` + `passage-par-le-moteur.service.spec` 22/22 ; complète **1 716 passés**,
+  3 suites rouges connues du poste (binding de Confluent : `app-cablage`, `kafka-producer`, `outbox-relay`) ; `tsc`, lint de
+  `src/installation/`, build ; **mutations 9/9 tuées** (refus retiré, règle pure ×3, autre adresse comptée, code changé,
+  `modules` retiré, refus avant la branche « installé », refus après `noterAcquis`).
+- **Catalogue, Node 24** (étage `verification`, archive d'`origin/dev` `18b03ae`) : **106/106 suites, 1 735/1 735**, lint 0,
+  build 0 ; rejoué sur `7aa5623` (passe 3).
+- **BFF, Node 25** : unitaires **744/744** (51 suites), e2e **308/308** (18 suites), `tsc`, lint, build ; **mutations 2/2**.
+- **Recette** : `npm test` **189/189** (18 suites), `npm run verifier` vert ; **mutations 9/9** (R4 a d'abord survécu : un
+  test de plus).
+- **Pile `grp-b-recette` neuve, volumes neufs, images depuis les archives d'`origin/dev`** (auth `e9c32c1`, kyc `9cef9cb`,
+  catalogue `18b03ae` puis `7aa5623`, notification `749b3cd`, paiement `64b5838`, dossier `645a699`, balance `effdc4a` puis
+  `61997fd`, bilan `7f96163`, BFF `eb2fe4b`, document `57f9581`, comptabilité `e4a53cc`, fiscal `74b33ec` puis `69d7e65`), fiscal
+  en surcouche :
+  - passe 1 (21:57 → 22:20, recette `d06173f`) : **`atelier-balance` verte** (balance et bilan des trois cabinets, puis
+    `conseil`, par le plan) ; `abonnement` rouge (`SERVICE_INJOIGNABLE` : balance-service pas levé, D-1129-13) ; `zone-franche`
+    rouge sur un contrôle de plus du fiscal de C (D-1129-15) ; `cabinet-moteur` et `comptabilite` rouges en `read ECONNRESET`
+    (le relais de ports du poste) ; `referentiel-par-dossier` rouge en `403 ABONNEMENT_EXPIRE` (D-1129-14) ;
+  - passe 2 (22:23 → 22:32, recette `6fc9467`, une suite par lancement) : **`comptabilite` 5/5** (balance et comptabilité par le
+    plan) ; `cabinet-moteur` 10 passés, un rouge : le corps du 409 sans `module` (D-1129-12) ; puis la coupure du réseau
+    (`docker compose up` en échec au `globalSetup`, rien d'éprouvé) ;
+  - passe 3 (23:29 → 00:02, catalogue `7aa5623`, recette `c0594e3`) : **`cabinet-moteur` 11 passés** (2 sautés : la
+    démonstration C13, essai seulement) — le `PUT` de `conseil` refusé 409 `INSTALLATION_PAR_LE_MOTEUR` au catalogue
+    (`modules: ['conseil']`) et par le BFF (`details.modules`), aucun droit, aucun acquis, `NON_INSTALLE` ; `conseil` installé
+    par le moteur, `aucun-scenario-applique` et `gate-conseil` `VERT`, droit `moteur:<plan>`, `EN_SERVICE` ; FR-6 sur
+    `declarations` (`SERVICE_NON_CONFIGURE`, `EN_ATTENTE`) ; sanction et levée inchangées ; **`referentiel-par-dossier` 9/9** ;
+    **`abonnement` 15/15** (les acquis du contrat installés par le plan, terme, échéance, palier, packs ; prolongation ;
+    impayé ; options `microfinance` et `assurance` par le `PUT` transitoire) ; **`zone-franche` 6/6** ;
+  - `down -v` à chaque fin, aucun conteneur `grp-b-*` restant, verrou rendu à chaque passe.
+
+### Décisions prises au code
+
+- **D-1129-11 — `.env.essai.example` ne nomme pas `conseil`.** Sa garde (`espace-essai.spec`, D-972-6) veut qu'un module
+  nommé serve ses routes C13 d'import et d'effacement : balance-service ne sert que les deux vérifications de `conseil`
+  (`instance-conseil.controller.ts`), pas son `import` ni son `effacement`. Nommé, `conseil` laisserait un effacement d'essai
+  `EN_COURS` (D-953-4). Dans l'essai, `conseil` garde donc le passage transitoire ; il quittera le `PUT` quand C servira ces
+  routes (information à C). Écart à l'annonce, écrit au « ⚠ Contrats » livré.
+- **D-1129-12 — Le module en cause est dans `modules`, pas `module`.** Le filtre global du catalogue ne laisse passer qu'une
+  liste blanche de champs (`code`, `refus`, `modules`, `planId`…, STORY-944) : `module` était retiré en silence (la pile l'a
+  montré, les unitaires non : ils lisent l'exception avant le filtre). Corps servi : `{ statusCode, error, message, code,
+  modules }` ; le BFF le relaie dans `details.modules`. Écart à l'annonce, écrit au « ⚠ Contrats » livré.
+- **D-1129-13 — Une recette qui installe par le plan lève les services qui vérifient.** `abonnement` installait par le `PUT`
+  sans lever balance-service ; le plan appelle ses vérifications : injoignable n'est jamais une réussite. La recette lève
+  `dossier-service`, `balance-service` et `bilan-service` avant la première installation.
+- **D-1129-14 — La création du premier dossier attend l'état publié.** L'état publié `EN_SERVICE` arrive à `dossier-service`
+  par Kafka ; avant, il ne voit que l'installation et tient le cabinet en lecture seule (`403 ABONNEMENT_EXPIRE`, D-918-2).
+  Un seul plan pour `balance` et `bilan` resserre la course que deux `PUT` successifs laissaient large. La recette rejoue la
+  création sur ce seul refus.
+- **D-1129-15 — `zone-franche` éprouve le contrôle TVA parmi les autres.** Le fiscal de C contrôle aussi la continuité du
+  crédit de TVA (STORY-327, paquet `412770f5`) : un contrôle de plus, `NON_EXECUTE` sans période précédente. La recette
+  garde ce qu'elle prouve (la tolérance du paquet lue, aucun contrôle sans tolérance) sans compter les contrôles.
+- **D-1129-16 — La passe se joue une suite par lancement** après la passe 1 : un `read ECONNRESET` du poste dans une suite ne
+  fait plus rougir les suivantes, et chaque journal dit sa suite.
+
+### Ce qui reste (et à qui)
+
+- **A** : `INSTALLATION_PAR_LE_MOTEUR` dans `GRANT_REFUSAL_CODES` du panneau des droits d'AP-05 (une phrase ; sinon la phrase
+  générique) ; son « Octroyer » ne vaut plus que pour les modules sans vérifications servies ; `Idempotency-Key` dans
+  `installation-client.ts` et le gate réel d'AP-55 rejoué (le CORS l'accepte depuis BFF #44).
+- **Les propriétaires des modules sans adresse** : chacun quitte le `PUT` le jour où son service sert ses vérifications
+  (`declarations` : C et D ; `ged` : B ; `paiement`, `notification`…), par son adresse dans `INSTALLATION_SERVICES`. `conseil`
+  dans l'essai : quand balance-service servira ses routes C13 d'import et d'effacement (C).
+- La réécriture d'un module installé par le `PUT` (référentiels, configuration) attend une route du moteur (EPIC-151,
+  STORY-1135 ; FR-39, lot 8). Le retrait de `entitlement.changed` : inventaire de STORY-1128.

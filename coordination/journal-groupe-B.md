@@ -307,12 +307,22 @@
     20:38 → 20:44. Fiche D-1128-1 → 15, et **l'inventaire d'EPIC-142 → 147 et 159** (livré, story, SHA, reste, à qui ; ce qui
     reste avant de retirer `entitlement.changed`) pour STORY-1131. Date dure tenue (fusion le 26/11, D-L7B-5). Deux coupures
     du réseau pendant la story (reprises par la session de groupe). Rituel : aucune demande neuve à B chez A, C et D.
-  - **Suivante : STORY-1129** (n° 11 : le cabinet sur le moteur ; le 18/12 ; `conseil` dans `INSTALLATION_SERVICES`, FR-6 de
-    `cabinet-moteur` sur `declarations`, recettes rejouées, D-100-4).
+  - **11 — STORY-1129 (26/11) — faite** : le cabinet sur le moteur. **catalogue #86, #87** (`18b03ae`, `7aa5623` sur `dev`),
+    **BFF #46** (`eb2fe4b`), **recette #35, #36, #37** (`d06173f`, `6fc9467`, `c0594e3`) ; contrat annoncé avant le code
+    (stories #1005, `c89a3f6`). Le `PUT` d'octroi n'installe plus un module que le moteur sait vérifier (aucune vérification
+    au manifeste, ou une adresse dans `INSTALLATION_SERVICES`) : 409 `INSTALLATION_PAR_LE_MOTEUR` (`modules`), rien d'écrit ;
+    sanction, levée, réécriture d'un module installé et passage transitoire des modules sans adresse inchangés ; le `PUT` du
+    BFF relaie les codes du moteur ; `conseil=http://balance-service:3007` (D-100-4 refermée) ; six recettes par l'offre et
+    `POST /installations` (`src/moteur.ts`). AP-55 livrée (A) : rien n'est gardé derrière un drapeau (D-1129-1). Node 25 :
+    catalogue 1 716 passés (3 rouges connues), BFF 744/744 et e2e 308/308, recette 189/189 ; mutations 9/9, 2/2, 9/9 ; Node 24
+    106/106 suites, 1 735 ; pile `grp-b-recette` neuve (trois passes) : `cabinet-moteur` 11, `atelier-balance`, `comptabilite`
+    5/5, `referentiel-par-dossier` 9/9, `abonnement` 15/15, `zone-franche` 6/6. Verrou 21:57 → 22:20, 22:23 → 22:32,
+    23:29 → 00:02. Fiche D-1129-1 → 16. Une coupure du réseau (22:31 → 23:27, reprise par la session de groupe). Date dure
+    tenue (fusion le 26/11, D-L7B-5). Rituel : aucune demande neuve à B chez A, C et D.
+  - **Suivante : STORY-1130** (n° 12 : effacer le dossier de démonstration à la fin d'un essai, D-1082-10 ; `dossier-service`,
+    catalogue), puis STORY-1137 (12 bis).
   - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
-    `c9e94c6` est sur `dev` ; au plus tard STORY-1130). **Nommé pour STORY-1129** (n° 11) :
-    `conseil=http://balance-service:3007` dans `INSTALLATION_SERVICES`, FR-6 de `cabinet-moteur` sur `declarations`,
-    `cabinet-moteur` et `abonnement` rejouées (D-100-4).
+    `c9e94c6` est sur `dev` ; au plus tard STORY-1130).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1317,6 +1327,25 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-26, STORY-1129) : le cabinet est sur le moteur ; ce qui reste à A** — (1) le panneau des droits d'AP-05
+  (`features/entitlements`, qui appelle `PUT /catalog/entitlements/…` directement) reçoit désormais **409
+  `INSTALLATION_PAR_LE_MOTEUR`** (`modules`) pour un module que le moteur sait vérifier (dans une pile comme celle de la
+  recette : `balance`, `bilan`, `comptabilite`, `conseil`) : ajouter le code à `GRANT_REFUSAL_CODES` avec une phrase
+  (« Ce module s'installe par l'offre : “Installer l'offre” ») ; sans cela la phrase générique, rien ne casse ; sa sanction,
+  sa levée et sa révocation sont inchangées ; (2) le `PUT` du BFF (`/admin/orgs/{id}/entitlements/{m}`) relaie les codes du
+  moteur dans `details` : types à régénérer si la console l'appelle un jour ; (3) **rappel AP-55** : `Idempotency-Key` dans
+  `installation-client.ts` (et `mise-en-service-client.ts`), puis le gate réel rejoué : le CORS du BFF l'accepte depuis #44.
+  — **information** (aucune route ne manque ; le jalon du 18/12 côté backend est livré).
+- **→ C (2026-11-26, STORY-1129) : `conseil` est sur le moteur dans la recette** — `atelier-balance` l'installe par le plan
+  (ses deux vérifications `VERT`) ; tout `PUT` de `balance`, `bilan`, `comptabilite`, `conseil` dans la pile rend 409
+  `INSTALLATION_PAR_LE_MOTEUR`. Dans l'espace d'essai, `conseil` n'a pas d'adresse (D-1129-11) : balance-service ne sert pas
+  `POST /api/v1/instance/conseil/{org}/import` ni `…/effacement` ; le jour où il les sert, dites-le à B, qui l'ajoutera à
+  `.env.essai.example`. `zone-franche` compte désormais votre contrôle `CONTINUITE_CREDIT_TVA` sans rougir (D-1129-15). —
+  information (message envoyé).
+- **→ D (2026-11-26, STORY-1129)** : même règle pour vos modules qui ont une adresse dans un espace (`commande`, `terrain`,
+  `assureur-fictif` dans `.env.essai.example`) : par l'offre et `POST /installations`, plus par le `PUT`. Vos services ne
+  changent pas. — information (message envoyé).
+
 - **→ A (2026-11-26, STORY-1128) : relire `contrat-etat-publie-v1.1`, et brancher la doublure de la coque sur la copie
   publiée** — **information, non bloquante.** Le seul écart à la v1 que A a relue est `module.referentiels` (facultatif,
   STORY-1127). Le contrat est figé (un octet = une version, règle dans le README du catalogue). La coque (AD-23) et l'app du
@@ -2224,6 +2253,13 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-26, STORY-1129 — LIVRÉ** (catalogue #86, #87, `18b03ae`, `7aa5623` ; BFF #46, `eb2fe4b` ; recette #35 → #37,
+  `c0594e3` sur `dev`) : conforme à l'annonce ci-dessous, **deux écarts** : (1) le corps du 409 nomme le module dans
+  **`modules: [module]`** (le filtre global du catalogue ne laisse passer que sa liste blanche ; `module` n'est pas servi,
+  D-1129-12) ; le BFF le relaie dans `details.modules` ; (2) **`.env.essai.example` inchangé** : `conseil` n'y est pas
+  (balance-service ne sert pas ses routes C13 d'import et d'effacement, D-972-6, D-1129-11). **→ A** : ajouter le code à
+  `GRANT_REFUSAL_CODES` ; régénérer les types du BFF si le 409 est lu. **→ C, D** : rien à faire hors de vos recettes.
 
 - **2026-11-26, STORY-1129 — le cabinet sur le moteur : le `PUT` d'octroi n'installe plus ce que le moteur sait
   installer, annoncé AVANT le code** (`platform-catalog-service`, `admin-panel`, `prospera-recette`, branches `MNV-1129` ;
@@ -4209,6 +4245,18 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Le filtre global du catalogue retire en silence un champ hors de sa liste blanche** (STORY-1129) : le 409 portait
+  `module`, les unitaires le voyaient (ils lisent l'exception), la pile ne le servait pas. Un refus neuf du catalogue nomme
+  ses précisions dans un champ de la liste (`code`, `refus`, `modules`, `planId`…) et une recette le lit sur la pile.
+- **Installer par le plan, c'est appeler les vérifications** (STORY-1129) : une recette qui passait par le `PUT` d'un module
+  à adresse sans lever son service rougit en `SERVICE_INJOIGNABLE` ; lever les services qui vérifient avant le plan.
+- **Un seul plan pour deux modules resserre la course de l'état publié** : le service lecteur (dossier) ne voit `EN_SERVICE`
+  que quelques secondes après `TERMINE` ; une création juste après rend `403 ABONNEMENT_EXPIRE`. Rejouer sur ce seul refus.
+- **Une passe de plusieurs suites en un lancement** : un `read ECONNRESET` du poste dans l'une rougit les suivantes ; jouer
+  une suite par `npm run recette` (`PASSE_UNE_A_UNE`), chaque journal la sienne.
+- **Une attente au premier plan de plus de ~3 min passe en arrière-plan** (l'outil la déplace) et `TaskStop` ne la tue pas :
+  boucles de 165 s au plus, puis `ps -ef | grep` et `kill`.
 
 - **Karapace rend `50003` (« Error while forwarding the request to the master ») juste après sa santé** (STORY-1128) : un
   premier `POST /subjects/…` lancé dès `healthy` échoue ; l'enregistrement du script, quelques secondes plus tard, passe.

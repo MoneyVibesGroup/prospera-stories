@@ -2173,11 +2173,18 @@ reserved_ranges:
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
   - range: "STORY-1129"
-    status: "in-progress"
+    status: "done"
     owner: "Groupe B, lot 7, n° 11 — le cabinet sur le moteur (EPIC-144, 159) : le PUT d'octroi n'installe plus un module que le moteur sait vérifier (409 INSTALLATION_PAR_LE_MOTEUR ; sanction, levée et réécriture gardées), le BFF relaie les refus du moteur, conseil dans INSTALLATION_SERVICES, recettes croisées installées par l'offre et POST /installations (platform-catalog-service, admin-panel, prospera-recette)"
     source_doc: "prospera-stories/stories/STORY-1129.md"
     reserved_on: "2026-11-25"
     note: >
+      🏁 DONE le 2026-11-26 — platform-catalog-service #86, #87 (dev 18b03ae, 7aa5623), prospera-admin-panel-service #46
+      (dev eb2fe4b), prospera-recette #35, #36, #37 (dev d06173f, 6fc9467, c0594e3) ; contrat annoncé avant le code (stories
+      #1005, main c89a3f6). Le 409 nomme le module dans modules (liste blanche du filtre, D-1129-12) ; .env.essai.example
+      inchangé (D-1129-11). Node 25 : catalogue 1716 passés (3 suites rouges connues, binding), BFF 744/744 + e2e 308/308,
+      recette 189/189 ; mutations 9/9, 2/2, 9/9 ; Node 24 : 106/106 suites, 1735/1735, lint, build ; pile grp-b-recette
+      neuve depuis origin/dev : cabinet-moteur 11 passés (2 sautés, essai), atelier-balance verte, comptabilite 5/5,
+      referentiel-par-dossier 9/9, abonnement 15/15, zone-franche 6/6. D-1129-1 → 16. Contrat d'origine :
       Fiche écrite et contrat annoncé avant le code (2026-11-26) : AP-55 livrée (A, a18dda1) ; la console n'écrit plus
       par le PUT du BFF (le panneau des droits d'AP-05 appelle le catalogue, code inconnu = phrase générique). Le PUT du
       catalogue refuse 409 INSTALLATION_PAR_LE_MOTEUR l'installation d'un module que le moteur sait vérifier (aucune
