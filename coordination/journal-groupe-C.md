@@ -235,8 +235,10 @@
    rendu. D-341-1 → 12 dans la fiche. **B prévenu** (recopie) ; **D prévenu** (empreinte, `OrdreDeReglementService` pour 565).
    **FE-158 de A est placée en tête de STORY-350** ; **FE-097 de A, dans une PR à part de balance-service juste après
    STORY-344** (décisions de la session de groupe du 27/11, « Réponses »).
-23. **Suivante : STORY-342** (le rapprochement du règlement, et le refus d'une imputation incohérente ; il exercera
-   `fiscalite:declaration:regler`, D-341-10).
+23. 🚧 **STORY-342 en cours (27/11)** — le rapprochement du règlement, et le refus d'une imputation incohérente. Fiche
+   `stories/STORY-342.md` (D-342-1 → 14), contrat et communs annoncés ci-dessous avant le code ; droit neuf
+   `fiscalite:declaration:regler` (**→ B** : l'attribuer, « Demandes ») ; paquet : `reglement.canaux`, `reglement.quittance`
+   (LPF Art. 460, 462) et la caisse de la TVA et du solde de TPU (Art. 460, D-342-12).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -500,6 +502,18 @@ seulement.
   l'a fait) et demande à D toute modification, ici.
 
 ## Demandes aux autres groupes
+
+- **→ B (2026-11-27, STORY-342) : attribuer le droit `fiscalite:declaration:regler` chez auth-service** — ouverte,
+  **bloquante pour l'usage réel de la route** (pas pour la livraison). fiscal-service le vérifie (`@ExigeDroitFiscal`) sur
+  `POST /api/v1/obligations/{id}/reglements` (rapprocher un règlement constaté, FR-F48) ; aucun droit ne l'implique (FR-F59) :
+  tant qu'auth ne l'émet pas, la route refuse à tous `403 DROIT_FISCAL_REFUSE` (voulu : plus de compatibilité par le rôle
+  depuis 902). Demandé : (1) `TenantPermission.FISCALITE_DECLARATION_REGLER = 'fiscalite:declaration:regler'` (codes
+  identiques à l'octet, libellé proposé « Rapprocher le règlement d'une déclaration fiscale ») ; (2) la table d'accès du
+  cabinet : **choix par défaut, `CAB_ASSOCIE` et `CAB_COLLABORATEUR`** (au PRD fiscalité §8, c'est la collaboratrice qui
+  rapproche ; l'associé garde `valider` et `deposer` seul) ; (3) le manifeste `declarations` : il porte déjà
+  `declarations:reglement:preparer`, et ses codes (`declarations:*`) ne sont pas ceux que le service vérifie
+  (`fiscalite:declaration:*`) — écart antérieur à 342 ; **choix par défaut** : le noter à la prochaine version du manifeste
+  (avec Q-D-34 et le texte du coffre de 560), sans retarder (1) et (2). Prévenu par message.
 
 - **→ B (2026-11-27, STORY-341) : recopier le paquet fiscal Togo 2026 dans `dossier-service`** — ouverte, sans urgence.
   Source : balance-service `dev` `53e1595` (#175), `src/modules/referentiel/assets/paquet-fiscal-togo-2026.json`, sha256
@@ -790,6 +804,25 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-27, STORY-342, avant le code)** — branche `MNV-342` de `prospera-fiscal-service`, partie d'`origin/dev`
+  `481a8f4` (et `MNV-342` de `balance-service`, d'`origin/dev` `53e1595`, pour la source du paquet). **Aucune migration** : la
+  collection neuve `reglements_rapproches` (dossier de C) a ses deux index uniques posés par Mongoose au démarrage (patron de
+  `rejets_depot`) ; ni `app.module.ts`, ni `package.json`, ni `read-models/`, ni `config/`, ni manifeste `declarations`.
+  Touchés parmi les communs : **`src/common/rbac/droits-fiscalite.ts`** et sa spec (le droit neuf
+  `fiscalite:declaration:regler`, quatrième de `DROITS_FISCAUX`) ; **le contrat OpenAPI** (deux routes neuves,
+  `…/reglements` : « ⚠ Contrats ») ; **la copie du paquet** (`test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`, à
+  l'octet de balance-service) ; **`src/app.module.invariant.spec.ts`** (l'export du service du rapprochement). Tout le reste
+  dans des dossiers de C (`domain/reglement`, `application/reglement`, `modules/reglement`, `adapters/mongo` : schéma et
+  registre neufs, `domain/obligations/historique.ts` : le libellé de l'acte ; la garde FR-F47 : une route de consignation de
+  plus, avec sa raison ; la garde AD-21 : deux porteurs ; `test/obligations.e2e-spec.ts`, un double et une suite de
+  conformité neufs). `MontantAReglerService` gagne une dépendance fournie dans `ReglementModule` (`deLObligation` et `lire`
+  inchangés) ; `OrdreDeReglementService` inchangé dans son constructeur et sa signature. **Comportement de 340 qui change**
+  (« ⚠ Contrats ») : le montant à régler compte les règlements rapprochés. **→ D** : rien à faire pour un rebase ; aucune
+  classe de C instanciée par `DepotsModule` ne change ; `test/utils/rs256.ts` n'est pas touché (les jetons des suites de D
+  gardent leurs droits) ; 565 transportera le reste, net de ce qui est rapproché ; le dossier de contrôle (336) pourra lire
+  `RapprochementReglementService` ; la suite de D est jouée en entier avant le push ; D prévenu par message (empreinte du
+  paquet).
+
 - **FUSIONNÉ (2026-11-27, prospera-fiscal-service#91, `dev` `481a8f4`, rebasée sur `origin/dev` `dae6a10` de D — la suite de
   335 —, sans conflit)** — conforme à l'annonce : le contrat OpenAPI (la route neuve), la copie du paquet (`6eebc02f…baa7`, de
   balance-service #175 `53e1595`), `src/app.module.invariant.spec.ts`. Aucun fichier de D ; aucune migration ; aucune classe
@@ -999,6 +1032,37 @@ seulement.
   clés, plus celles de l'IRPP et de la CNSS (voir « ⚠ Contrats »).
 
 ## ⚠ Contrats
+
+- **2026-11-27 (STORY-342), ANNONCÉ avant le code** — **le rapprochement du règlement, et le refus d'une imputation
+  incohérente** (`prospera-fiscal-service`, REST ; source du paquet fiscal Togo dans `balance-service`). Fiche :
+  `stories/STORY-342.md` (D-342-1 → 14). Consommateurs : 343 (« déposée » ≠ « payée ») ; 344 (le retard) ; 565 (D : l'ordre
+  dit le reste) ; le dossier de contrôle (D, 336) ; l'écran (A) ; la copie du paquet de `dossier-service` (B). Aucun
+  événement ; aucun champ existant ne disparaît ; aucune route de `balance-service` ne change.
+  - **Droit neuf `fiscalite:declaration:regler`** (FR-F59), qu'aucun autre n'implique ; attribution chez auth-service (**→ B**,
+    « Demandes » ; défaut : associé et collaborateur). Sans lui : `403 DROIT_FISCAL_REFUSE`, journalisé.
+  - **`POST /api/v1/obligations/{id}/reglements`** (rôles, accès fiscal, `regler`, portée ; `404 OBLIGATION_INTROUVABLE`) :
+    `{ reference, montant (> 0), regleLe (AAAA-MM-JJ, pas dans le futur), canal (code du paquet), imputation { taxe, periode,
+    identifiantFiscal } }` ⇒ `201 { reglementId, obligationId, dossierId, rang, reference, montant, regleLe, canal { code,
+    libelle, baseLegale, delaiSupplementaireJours }, declaration { numero, versionId }, rapprochement { du, dejaRapproche,
+    reste, dateLimite, empreinteOrdre }, signalements[{ code: RESTE_A_REGLER | REGLE_APRES_LA_DATE_LIMITE | RESERVE_DU_CANAL,
+    message, details }], quittance, paquet, rapprochePar, rapprocheLe }`. **Refusé, jamais corrigé** : `409
+    IMPUTATION_INCOHERENTE` (`details.motifs[{ code: AUTRE_TAXE | AUTRE_PERIODE | AUTRE_REDEVABLE |
+    MONTANT_SUPERIEUR_AU_RESTE, attendu, declare }]`, tous ensemble, rien d'écrit) ; `409 DECLARATION_NON_DEPOSEE`,
+    `MONTANT_A_REGLER_INDISPONIBLE`, `MONTANT_A_REGLER_INCOMPLET`, `REDEVABLE_INTROUVABLE`, `IDENTIFIANT_FISCAL_ABSENT`,
+    `OBLIGATION_CLOTUREE`, `OBLIGATION_DESACTIVEE`, `QUITTANCE_DEJA_RAPPROCHEE` (`details.obligationId`),
+    `RAPPROCHEMENT_CONCURRENT` ; `400` (corps, `CANAL_INCONNU` avec `details.canaux`, `DATE_DE_REGLEMENT_INVALIDE`). Ni le
+    payé du triplet ni le cycle ne changent ; acte `OBLIGATION_REGLEMENT_RAPPROCHE` au journal chaîné.
+  - **`GET /api/v1/obligations/{id}/reglements`** ⇒ `200 { obligationId, du, rapproche, reste, paye, ecartPaye, motif, chemin,
+    reglements[] }`.
+  - **⚠ Comportement de 340 et 341 qui change** : `GET …/montant-a-regler` gagne `rapproche { montant, nombre, chemin } |
+    null` ; `aRegler = max(0, dû − max(payé, rapproché))` ; payé et rapproché différents ⇒ manque
+    `PAYE_DIFFERENT_DU_RAPPROCHE` (`complet: false`) ; l'ordre (`…/ordre-de-reglement`) suit : `montant.dejaRegle` = le plus
+    grand des deux, `409 RIEN_A_REGLER` une fois rapproché en entier, `409 MONTANT_A_REGLER_INCOMPLET` sur l'écart.
+  - **En processus** : `RapprochementReglementService` (exporté par `ReglementModule`) — `rapprocher`, `deLObligation`.
+  - **Paquet fiscal Togo 2026** : **`reglement.canaux`** (`NUMERAIRE`, `CHEQUE` + réserve LPF Art. 461, `VIREMENT_POSTAL`,
+    `MANDAT`, `BILLET_A_ORDRE`, `OBLIGATION_CAUTIONNEE` + réserve Art. 463, `TELEPAIEMENT` + délai de trois jours ; LPF
+    Art. 460), **`reglement.quittance`** (Art. 462), **`TVA.versement`** et **`TPU.versement`** : « caisse de l'Office »
+    (Art. 460) ; garde **R13** étendue. Le moteur de balance-service ne le lit pas. Nouvelle empreinte au « Livré ».
 
 - **2026-11-27 (STORY-341), PUBLIÉ** (fiscal #91, `481a8f4` ; balance-service #175, `53e1595`) — conforme à l'annonce (#1025),
   sans écart. **→ A** : types à régénérer depuis l'OpenAPI vivant (`OrdreDeReglementDto`) quand un écran lira l'ordre. **→ D
@@ -1791,6 +1855,11 @@ seulement.
 
 ## Questions à l'utilisateur ou au PO
 
+- **2026-11-27 — STORY-342 (D-342-12) : réponse trouvée au texte pour la question du dessous.** LPF Art. 460 : « Les
+  impôts et taxes visés par la législation fiscale sont payables à la caisse de l'Office » — règle générale de toutes les
+  impositions ; 342 l'inscrit au paquet pour la TVA et le solde de TPU (« caisse de l'Office », cité), et l'ordre ne porte
+  plus la réserve `ORGANISME_A_CONFIRMER` pour elles. Reste à valider par un fiscaliste, comme tout le paquet ; le
+  télé-paiement, lui, est nommé par le même article (délai supplémentaire de trois jours), sans portail décrit.
 - **❓ 2026-11-27 — STORY-341 (D-341-5) : où se paient la TVA et le solde de TPU ?** Le corpus OTR 2025 nomme la caisse des
   acomptes d'IS et de TPU (« caisse du receveur des impôts », LPF Art. 55 et 57), de la RSH (« caisse du receveur chargé du
   recouvrement », Art. 99) et de la retenue d'IRPP (« caisse du service des impôts », Art. 27) ; il ne la nomme ni pour la

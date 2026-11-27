@@ -8240,7 +8240,8 @@ sprints:
         epic: "EPIC-033"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-342.md"
+        status: "in_progress"  # 🚧 2026-11-27 — groupe C, lot 7 (n° 14 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-342-1 → 14) ; contrat et communs annoncés (journal de C) : POST /obligations/{id}/reglements (la quittance — référence, montant, date, canal du paquet, imputation — rapprochée de l'ordre de l'obligation ; 409 IMPUTATION_INCOHERENTE nommant AUTRE_TAXE, AUTRE_PERIODE, AUTRE_REDEVABLE, MONTANT_SUPERIEUR_AU_RESTE, jamais corrigée ; signalés : reste à régler, réglé après la date limite, réserve du canal) et GET …/reglements ; droit neuf fiscalite:declaration:regler (→ B : l'attribuer) ; le montant à régler compte ce qui est rapproché ; paquet fiscal Togo : reglement.canaux, reglement.quittance (LPF Art. 460, 462), caisse de l'Office pour la TVA et le solde de TPU ; aucune migration.
         assigned_to: null
       - story_id: "STORY-343"
         title: "Distinction « déposée » et « payée »"
