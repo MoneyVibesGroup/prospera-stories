@@ -477,7 +477,23 @@
     recette 35/35 (reste dû réduit en 3,2 à 3,7 s, crédit du tiers 50 000), conformité 29/29 (10 livraisons simultanées ⇒ 1
     réduction), `test:schemas` 17/17. Verrou 15:38 → 15:55. Fiche D-1136-1 → 11. **→ D** : « Réponses ». Rituel : aucune
     demande neuve à B chez A, C et D.
-  - **Suivante : STORY-1134** (n° 16 : l'instance garde la confiance, coupée de Money Vibes, EPIC-149).
+  - **16 — STORY-1134 (27/11) — faite** (premier incrément d'EPIC-149) : **l'instance garde la confiance, coupée de Money
+    Vibes**. **plateforme #45** (`ed51833`, étiquette **`contrats-agent-v1.1`**), **centrale #5** (`205e71b`), **agent #4**
+    (`7d7c087`, `agent-0.3.0`) ; contrat annoncé avant le code (stories #1058, `f53e359`). États de confiance nommés sur
+    l'horloge scellée depuis le dernier contact vu (`NORMAL`, `SILENCE` à 7 j, `GEL` à `gelApresJours`, `RECUL_LOCAL`) et
+    matrice ouvert / fermé publiée (`etats-de-confiance.json` : en gel, ni installation ni mise à jour ; le travail quotidien
+    jamais fermé) — **STORY-1135 la lit** ; contact préparé (compteur, empreinte chaînée avec un aléa) ; miroir qui n'avance
+    que (`AGENT_MIROIR`) et recul local ; centrale témoin (`409 CONFIANCE_EN_ANOMALIE` sur recul, bifurcation, recul local) ;
+    rotation et révocation sans appel (certificats de clé et fichiers d'urgence par le dépôt) ; **numéros d'heure de
+    référence par clé** (défaut trouvé : la rotation de la clé aurait été refusée). Node 25 : plateforme 709/709, centrale
+    89/89, agent 103/103 ; mutations 9/9, 10/10, 30/30 ; Node 24 vert ; pile `grp-b` **21/21** (centrale coupée, +31 j par
+    `/simulation/horloge` ⇒ gel sans rien fermer du travail quotidien, urgence déposée hors ligne, gel levé au premier
+    contact, jumeau vu en bifurcation). Verrou 18:41 → 18:45. Fiche D-1134-1 → 14 ; reste nommé (ré-ancrage, prolongation,
+    `instance.etat.modifie` et bandeau de gel, consentements, ré-émission sous la remplaçante). Rituel : aucune demande neuve
+    à B chez A, C et D (la demande permanente de C, paquet fiscal dans `dossier-service`, attend la prochaine story de B sur
+    ce dépôt). Coupure réseau (ENOTFOUND) pendant la story, reprise sans perte.
+  - **Suivante : STORY-1135** (n° 17 : mettre à jour sans peur, premier incrément, EPIC-151 ; elle juge `METTRE_A_JOUR` par
+    la matrice de `contrats-agent-v1.1`).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -2550,6 +2566,10 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, STORY-1134 (n° 16) — LIVRÉ** (plateforme #45 `ed51833` `contrats-agent-v1.1` ; centrale #5 `205e71b` ; agent
+  #4 `7d7c087`) : conforme à l'annonce ci-dessous, sans écart. **→ C, D** : information seulement ; **→ A** : information,
+  aucun écran débloqué (le bandeau de gel de la coque viendra avec `instance.etat.modifie`).
 
 - **2026-11-27, STORY-1134 (n° 16) — l'instance garde la confiance, coupée de Money Vibes, annoncé AVANT le code**
   (`prospera-plateforme` étiquette neuve **`contrats-agent-v1.1`**, `centrale-service`, `agent-instance` ; fiche
@@ -4807,6 +4827,14 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **L'agent comparait le numéro d'une heure de référence sans regarder sa clé** (STORY-1134) : AD-7 dit « croît par clé » ;
+  une clé renouvelée de la centrale repart de 1, et toutes ses heures auraient été refusées `HEURE_ANTERIEURE`. Tout compteur
+  d'artefact signé se garde **par `kid`** (`numerosParCle`), un magasin ancien rattaché à la clé de sa licence.
+- **Le résumé d'un état se compare AVANT de préparer le contact** (STORY-1134, test du jumeau) : préparer journalise
+  `CONTACT_PREPARE`, ce qui change la tête du journal ; deux magasins « identiques » ne le sont plus après.
+- **Volumes créés à la main dans une preuve** (`docker volume create grp-b_jumeau-*`) : sans les étiquettes de compose,
+  `down -v` ne les supprime pas ; la trappe de la passe les supprime nommément.
 
 - **Paiement, garde de STORY-284 (aucune conversion)** : elle refuse tout identifiant qui contient `taux`, **même
   `tauxTvaPourDixMille` comme clé d'objet dans une spec de `src/`** (le champ du schéma de `facturation`). Écrire la TVA d'un
