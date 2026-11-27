@@ -1,8 +1,8 @@
 # STORY-979 : les droits de la facture et des archives du cabinet au catalogue de tenant d'auth
 
-Status: in-progress (septième suite, « Septième suite (2026-11-27) », en fin de fiche ; rouverte et refermée six fois
-pour ses suites : « Suite du 2026-11-24 », « Suite du 2026-11-24 (soir) », « Suite du 2026-11-25 », « Quatrième suite
-(2026-11-25) », « Cinquième suite (2026-11-26) » et « Sixième suite (2026-11-27) »)
+Status: done (rouverte et refermée sept fois pour ses suites, en fin de fiche : « Suite du 2026-11-24 », « Suite du
+2026-11-24 (soir) », « Suite du 2026-11-25 », « Quatrième suite (2026-11-25) », « Cinquième suite (2026-11-26) »,
+« Sixième suite (2026-11-27) » et « Septième suite (2026-11-27) »)
 
 **Complexité :** faible (huit droits neufs au catalogue de tenant, hors du jeton ; un rôle du socle neuf ; une ligne
 d'ajout à l'annexe B ; la copie des manifestes du catalogue ; aucun champ, aucune route, aucun topic)
@@ -740,3 +740,47 @@ tenant (catalogue, BFF, recette, dossier, kyc, GED : `git grep` vide), donc aucu
   jeton » est faite sans pile : `test/auth.e2e-spec.ts` signe le jeton par la vraie chaîne (`AuthService`,
   `TokenService`, le vrai `TenantRolesService` sur le socle livré) et le décode. Une pile n'ajouterait que le fiscal, dont
   la garde est déjà prouvée par C avec ce code dans `perms[]` (fiscal #93). Verrou non pris.
+
+### Livraison de la septième suite (27/11)
+
+Fusionnée en « Rebase and merge », `mergedAt` non nul, `headRefOid` = SHA poussé, arbre de la branche identique à `dev`
+après rejeu :
+
+- **auth #52** : **`d037506` sur `dev`** (tête de la PR `4e427ac`). Fichiers : `src/common/rbac/tenant-permission.enum.ts`
+  (code, libellé, commentaires du jeton), `src/common/rbac/droits-hors-jeton.ts` (commentaire : 25 codes du jeton),
+  `src/modules/rbac/table-d-acces-cabinet.ts`, `src/modules/rbac/tenant-system-roles.ts` (descriptions) ; tests du
+  catalogue, de la borne, de la table d'accès, du socle, de la résolution, du catalogue de composition, et
+  `test/auth.e2e-spec.ts` (jeton signé).
+- Contrat annoncé avant la fusion : stories #1038 (fiche, tracker rouvert, « ⚠ Contrats »), `df5f813` sur `main`.
+- C prévenue par message (`moneyvibes-apps-f7`), avec le n° de PR et le SHA sur `dev`.
+
+### Preuves de la septième suite (27/11)
+
+- **Sans Docker** (D-979-49) : aucun module, aucune dépendance, aucun Dockerfile touchés ; verrou non pris.
+- **Auth, Node 25, tests relancés par chemin** (`src/common/rbac`, `src/modules/rbac`, `droits`, `organization-roles`) :
+  **23 suites, 408/408**. Ils vérifient : le code au catalogue, **dans le jeton**, au format, module `declarations`,
+  libellé ; la section `fiscalite` du catalogue = les quatre `DROITS_FISCAUX` du fiscal, dans son ordre ; 25 codes du
+  jeton, 168 au catalogue ; borne 42 ; le droit détenu par l'associé et le collaborateur, par eux seuls ; leurs jetons
+  (quatre et deux droits fiscaux), celui de l'archiviste vide ; la résolution le met dans `perms[]` et `droits` ; le
+  catalogue de composition l'offre sous `declarations`.
+- **Jeton réel** (`test/auth.e2e-spec.ts`, la vraie chaîne d'émission sur le socle livré, jeton signé RS256 puis décodé) :
+  un `CAB_COLLABORATEUR` porte `perms: ["fiscalite:declaration:preparer", "fiscalite:declaration:regler"]`, un
+  `CAB_ASSOCIE` les quatre droits fiscaux, un `CAB_ARCHIVISTE` `[]` ; fichier 13/13.
+- **Suite complète (Node 25)** : 102 suites, **1 468 passés**, 4 suites rouges connues (binding natif de Confluent :
+  `app-cablage.invariant.spec.ts` et trois `src/kafka/*`). **e2e** : 19 suites, 271/273 ; les deux rouges (`health`,
+  `auth-register`) le sont aussi sur `dev` sans la suite (contre-épreuve : poste sans Mongo, Redis ni Kafka). `tsc
+  --noEmit`, lint des onze fichiers touchés (hors `CR` du checkout) et build : verts.
+- **Mutations : 5/5 rouges sur assertion**, aucune par compilation : `regler` retiré au collaborateur (5 tests), donné
+  aussi à l'archiviste (5), retiré de la table (7), code mal écrit `…:reglement` (7), libellé changé (2).
+- **Copies entre dépôts** : le code lu par la garde fiscale (`DroitFiscal.REGLER`, fiscal `dev` `6cd99ee`) est celui
+  d'auth, à l'octet. Aucune autre copie (D-979-48).
+
+### Pour la suite (27/11, septième suite)
+
+- **C** : un membre d'un cabinet rapproche un règlement dès son prochain jeton émis par une image d'auth reconstruite
+  depuis `dev` (`d037506`) ; la double lecture du fiscal peut journaliser un écart attendu jusqu'à ce jeton (D-979-48).
+  Le point (3) : aligner les codes du manifeste `declarations` sur `fiscalite:declaration:*` (dont `regler`) dans sa
+  prochaine version (D-979-47), puis **B** la recopie au catalogue.
+- **B**, le même jour : `filtrerDroitsEffectifs` du catalogue garde un droit par son préfixe ; avec `declarations` seul
+  ouvert, les `fiscalite:*` restent hors de `droitsEffectifs` (D-979-47). À régler avec la recopie du manifeste aligné
+  (la règle de `MODULES_DU_PREFIXE` d'auth), pas avant.

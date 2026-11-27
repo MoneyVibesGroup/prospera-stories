@@ -400,7 +400,17 @@
     pile ≤ 4,0 Gio). Verrou 04:25 → 08:23 (passe figée sur son relevé de mémoire, piège ; coupée à la demande de la session de
     groupe), 08:35 → 08:44, 08:48 → 08:58. Fiche D-1137-1 → 16. Q de D-1137-3 (« Questions »). Rituel : aucune demande neuve à B
     chez A, C et D.
-  - **Suivante : STORY-1131** (n° 13 : les restes d'EPIC-145, 146, 147).
+  - **k — septième suite de STORY-979 (27/11, D-L7B-15) — faite** : le droit `fiscalite:declaration:regler` chez auth (← C,
+    STORY-342, servie). **auth #52** (`d037506` sur `dev`) ; contrat annoncé avant la fusion (stories #1038, `df5f813`).
+    `TenantPermission.FISCALITE_DECLARATION_REGLER`, libellé « Rapprocher le règlement d'une déclaration fiscale », **dans
+    le jeton** (exception à STORY-960 : la garde fiscale décide sur `perms[]`, sa double lecture ne lit pas
+    `droitsHorsJeton` ; borne 42 ≤ 44) ; à `CAB_ASSOCIE` et `CAB_COLLABORATEUR`, jamais à l'archiviste ; catalogue 168
+    codes. Node 25 : 408/408 par chemin, complète 1 468 passés (4 suites rouges connues), e2e 271/273 (deux rouges aussi
+    sur `dev`) ; jeton signé d'un collaborateur : `preparer` et `regler` ; 5/5 mutations. Sans Docker, verrou non pris.
+    Fiche D-979-43 → 49. **Pas fait (défaut de C)** : le manifeste `declarations` garde ses codes `declarations:*` (→ C,
+    « Demandes »). Rituel : demande permanente de C (342) de recopier le paquet fiscal `4959061a` dans `dossier-service`,
+    ouverte, à la prochaine story de B sur ce dépôt.
+  - **Suivante : « j »** (D-L7B-14, autre sous-session), **puis STORY-1131** (n° 13 : les restes d'EPIC-145, 146, 147).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1405,6 +1415,14 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-27, ordre « k », septième suite de STORY-979) : le manifeste `declarations` à aligner dans sa prochaine
+  version** — **information, votre choix par défaut** (point 3 de votre demande de 342). Ses huit codes
+  (`declarations:obligation:consulter` … `declarations:reglement:preparer` …) ne sont pas ceux que le fiscal vérifie
+  (`fiscalite:declaration:preparer`, `valider`, `deposer`, `regler`). À la prochaine version (avec Q-D-34 et le texte du
+  coffre de 560) : les codes du service, puis « → B » pour la recopie au catalogue. Conséquence chez B, à régler ce
+  jour-là : l'état publié garde un droit par son préfixe, et les `fiscalite:*` n'entrent pas dans `droitsEffectifs` d'un
+  cabinet qui n'ouvre que `declarations` (fiche 979, D-979-47). La garde fiscale n'en dépend pas.
+
 - **→ A (2026-11-27, STORY-1137) : l'installation des modules d'un essai est débloquée par STORY-1137** — `POST
   /admin/essais` du BFF accepte `installation: { modules, referentiels }` (« Installer balance et bilan »,
   `syscohada-revise@2.3`) et rend `installation` (`statut` TERMINE | EN_ATTENTE | EN_COURS | REFUSEE, `planId`, `code`) ;
@@ -1941,6 +1959,18 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ C (27/11, ordre « k », septième suite de STORY-979) : servie par auth #52** (`d037506` sur `dev` ; annonce : stories
+  #1038) — votre demande « → B (2026-11-27, STORY-342) : attribuer le droit `fiscalite:declaration:regler` chez
+  auth-service ». (1) `TenantPermission.FISCALITE_DECLARATION_REGLER = 'fiscalite:declaration:regler'`, libellé
+  « Rapprocher le règlement d'une déclaration fiscale », **dans le jeton** (`perms[]`, là où votre garde le lit ; hors du
+  jeton, votre double lecture ne l'aurait pas vu non plus) ; (2) `CAB_ASSOCIE` et `CAB_COLLABORATEUR`, rôles par défaut
+  du vertical : tout membre d'un cabinet le reçoit à son prochain jeton, jamais l'archiviste ; ouvert par `declarations`
+  (ou `fiscalite`) ; (3) le manifeste `declarations` : non touché, noté (« Demandes » → C). Un jeton signé de
+  collaborateur porte `["fiscalite:declaration:preparer", "fiscalite:declaration:regler"]` (e2e d'auth). Rien à faire
+  chez vous qu'une image d'auth reconstruite depuis `dev`. Votre ligne peut passer à « servie ». Prévenue par message.
+- **← C (27/11, STORY-342) : le droit `regler` chez auth** — **reçue, placée par la session de groupe en ordre « k »**
+  (D-L7B-15). **Servie le 27/11 par auth #52** ; voir « → C (27/11, ordre « k ») » ci-dessus.
+
 - **→ C (27/11, STORY-1130) : servie par dossier-service #60** (`a1bf7fa` sur `dev`, puis `653a70b`) — votre demande « → B
   (2026-11-25, STORY-564, mise à jour par 317, 327, 339) : recopier le paquet fiscal Togo 2026 dans `dossier-service` », et
   sa mise à jour de STORY-340 : copie à l'octet de balance-service `dev` **`e68ae10`** (#174), sha256
@@ -2402,6 +2432,10 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, septième suite de STORY-979 (ordre « k ») — LIVRÉ** (auth #52, `d037506` sur `dev`) : conforme à
+  l'annonce ci-dessous, sans écart. **→ C** : rien à faire (le code est le vôtre, à l'octet). **→ A** : le catalogue de
+  composition d'un rôle offre un code de plus sous `declarations` ; aucun type ne change.
 
 - **2026-11-27, septième suite de STORY-979 (ordre « k », D-L7B-15) — le droit `fiscalite:declaration:regler`, annoncé
   AVANT la fusion** (`prospera-auth-service`, branche `MNV-979-regler` ; fiche `stories/STORY-979.md`, « Septième suite
