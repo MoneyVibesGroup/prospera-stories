@@ -60,6 +60,7 @@
   | 10 | STORY-1128 | le contrat d'état publié figé, inventaire d'EPIC-142 → 147 et 159 |
   | 11 | STORY-1129 | le cabinet sur le moteur |
   | h | STORY-1124 (suite) | les pièces du dépôt d'une déclaration au fonds du client (← D, STORY-335 ; D-L7B-12) |
+  | i | STORY-979 (6ᵉ suite) | recopie `comptabilite` 0.6.0 au catalogue, avec « h » (← C, STORY-338 ; D-L7B-13) |
   | 12 | STORY-1130 | effacer le dossier de démonstration à la fin d'un essai |
   | 12 bis | STORY-1137 | les modules s'ouvrent dans l'essai (ticket de 1116) |
   | 13 | STORY-1131 | les restes d'EPIC-145, 146, 147 |
@@ -132,6 +133,14 @@
   **Suite de STORY-1124** (document-service #38, `b18d3ad` : la story de B qui a fait entrer au fonds ce qu'un autre
   service annonce par un fait proposé par B) ; aucun identifiant neuf ; commits `MNV-1124(ged): …` ; décisions D-1124-13 →
   24 dans sa fiche (« Suite du 2026-11-27 »). Le fiscal (dépôt de C, D y écrit par dossier) n'est que lu.
+
+- **D-L7B-13 — ordre « i » : la demande de C placée avec « h »** (27/11, session de groupe ; §1.1) : « → B : recopier au
+  catalogue le manifeste `comptabilite` 0.6.0 » (journal de C, #1015, `main` `9149604` ; source `prospera-stories@0acfd14`,
+  code fusionné : comptabilite #21, STORY-338). La recopie de `ged` 1.11.0 de « h » est entière (`manifestes:copier`) :
+  elle emporte `comptabilite` 0.6.0, déjà sur `main`. **Suite de STORY-979** (la story des recopies au catalogue) ; aucun
+  identifiant neuf ; même PR du catalogue que « h ». La route que la comptabilité lit dans la GED (`GET
+  …/ged/cabinet/pieces/{pieceId}/versions/{version}` : empreinte, nature, dossierId, etat, version) n'est pas touchée par
+  « h ».
 
 - **Avancement** :
   - **a — troisième suite de STORY-979 (25/11) — faite** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
@@ -2268,6 +2277,14 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, ordre « i » (D-L7B-13) et recopie de « h » — annoncé AVANT la fusion** (`platform-catalog-service`, branche
+  `MNV-1124-fiscal`) : `copies.json` recopié depuis `prospera-stories@c926f55` ; seuls deux manifestes changent : **`ged`
+  1.10.0 → 1.11.0** (`fiscal.depot.piece-archivee` en `consomme`, `GET …/ged/cabinet/dossiers/{dossierId}/pieces-fiscales`
+  en lecture seule ; code fusionné : document-service #42, `8f9040d`) et **`comptabilite` 0.5.0 → 0.6.0** (← C : publie
+  `comptabilite.facture.desinscrite`, trois routes de lecture neuves ; droits inchangés ; code fusionné : comptabilite
+  #21). Aucune route ni topic du catalogue ne change de forme ; une base déjà semée reçoit les deux versions à son
+  prochain démarrage. **→ A, C, D** : rien à faire.
 
 - **2026-11-27, suite de STORY-1124 (ordre « h », D-L7B-12) — les pièces du dépôt d'une déclaration au fonds du client,
   annoncé AVANT la fusion** (`document-service`, GitHub `prospera-ocr-service`, branche `MNV-1124-fiscal` ; fiche
