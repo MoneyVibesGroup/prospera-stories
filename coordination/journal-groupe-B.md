@@ -354,10 +354,19 @@
     **Information** : la demande de STORY-1124 à C est servie par C (comptabilite #21, `dev` `58803f5`, schéma
     `comptabilite.facture.desinscrite` copié à l'octet de `e51c4d5`) ; la recopie de l'octet de C dans la GED (le même
     texte) reste à la prochaine story de B sur `document-service`.
-  - **Suivante : STORY-1130** (n° 12 : effacer le dossier de démonstration à la fin d'un essai, D-1082-10 ; `dossier-service`,
-    catalogue), puis STORY-1137 (12 bis).
-  - **À venir, ← C** : la recopie du paquet fiscal de STORY-564 dans `dossier-service` (servable : balance-service
-    `c9e94c6` est sur `dev` ; au plus tard STORY-1130).
+  - **12 — STORY-1130 (27/11) — faite** : effacer le dossier de démonstration à la fin d'un essai (D-1082-10 refermée).
+    **dossier-service #60** (`a1bf7fa`, `653a70b` sur `dev`) ; **catalogue #89** (`14c644d`) ; contrat annoncé avant la fusion
+    (stories #1021, `da2dc7f`). `POST /api/v1/instance/dossier/{organisationId}/effacement` (moteur seul, essai seul,
+    `effacement-c13-*@1` copiés à l'octet et jugés par le schéma copié) efface TOUT ce que le service tient de
+    l'organisation (plan gardé par un invariant sur tous les schémas, journal par le pilote, outbox par `payload.orgId`,
+    personnes orphelines ; `DEJA_EFFACE` au rejeu) ; au catalogue, `dossier` est **propriétaire du socle** de chaque essai,
+    en tête, à la route que le moteur fixe et à l'adresse de **`SOCLE_SERVICES`** (aucun certificat sans lui ; un plan ouvert
+    avant la livraison le gagne). **← C (STORY-564 → 340) servie** : paquet fiscal `e68ae10` / `d620df8b…` en LF,
+    `.gitattributes` `-text` (« Réponses »). Node 25 : dossier e2e 405/405 ; Node 24 : dossier 120/120 suites, catalogue
+    106/107 (suite non touchée, verte seule) ; mutations 20/20 et 9/9 ; pile `grp-b` neuve 24/24 (certificat signé nommant
+    `dossier`, 22 enregistrements, 671 ms). Verrou en quatre passes courtes (02:41 → 03:08). Fiche D-1130-1 → 15. Rituel :
+    aucune demande neuve à B chez A, C et D (la mise à jour 340 de C transmise par la session de groupe, servie ici).
+  - **Suivante : STORY-1137** (12 bis : les modules s'ouvrent dans l'essai, ticket de 1116), puis STORY-1131 (n° 13).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1883,6 +1892,14 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ C (27/11, STORY-1130) : servie par dossier-service #60** (`a1bf7fa` sur `dev`, puis `653a70b`) — votre demande « → B
+  (2026-11-25, STORY-564, mise à jour par 317, 327, 339) : recopier le paquet fiscal Togo 2026 dans `dossier-service` », et
+  sa mise à jour de STORY-340 : copie à l'octet de balance-service `dev` **`e68ae10`** (#174), sha256
+  **`d620df8bf6bf43689f7a263c905965243f133d6a41e90f13290dcb737a33fca6`**, en LF (`git -c core.autocrlf=false show`) ;
+  `.gitattributes` : `src/modules/portefeuille/echeance/assets/** -text` ; empreinte reportée. `_meta.consommateurs` et
+  `acomptesProvisionnels.echeances` inchangés ; Node 24 120/120 suites sur l'archive en LF. Prévenu par message
+  (`moneyvibes-apps-f7`). Pour la prochaine version : une story de B sur `dossier-service`, ou une demande ici.
+
 - **→ D (27/11, suite « h » de STORY-1124) : servie côté GED par document-service #42** (`8f9040d` sur `dev` ; catalogue
   #88, `ged` 1.11.0 ; annonce : stories #1014) — votre demande « → B (2026-11-26, STORY-335) : recevoir dans le fonds
   d'archives du client les pièces du dépôt d'une déclaration ». **Forme choisie : (1)**, un fait du fiscal et une route
@@ -2336,6 +2353,12 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, STORY-1130 — LIVRÉ** (dossier-service #60, `a1bf7fa`, `653a70b` ; catalogue #89, `14c644d` sur `dev`) :
+  conforme à l'annonce ci-dessous, **un écart** : le paquet fiscal recopié est celui de **STORY-340 de C** (`e68ae10`,
+  sha256 `d620df8b…3fca6`, bloc `reglement` en plus), signalé pendant la story, au lieu de `61997fd` / `62563b3c…` ; ce que
+  `dossier-service` lit est inchangé. **→ A** : la console des essais montre `dossier` en tête des propriétaires. **→ C,
+  D** : rien à faire.
 
 - **2026-11-27, STORY-1130 — effacer le dossier de démonstration à la fin d'un essai (D-1082-10), annoncé AVANT la fusion**
   (`dossier-service`, `platform-catalog-service`, branches `MNV-1130` ; fiche `stories/STORY-1130.md`, D-1130-1 → 15). Lu
@@ -4395,6 +4418,16 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Un script de preuve qui lève avant `client.close()` garde Node en vie** (STORY-1130) : la passe a attendu le `timeout`
+  du script, verrou tenu, après un `E11000` du semis (deux organisations dont les quatre derniers caractères étaient
+  égaux). Finir le script par `process.exit` dans `catch` et `then`, et tirer les clefs de preuve de l'identifiant entier.
+- **Une suite de minuteries rougit sous la charge de l'étage `verification` du catalogue** (`jetons-du-moteur.spec`, non
+  touchée, 1 test sur 1 746) : verte seule trois fois sur trois dans la même image. La rejouer seule avant d'accuser le diff.
+- **Une mutation du registre survit si le double ignore `upsert`** (STORY-1130) : un faux `updateOne` qui crée toujours la
+  ligne rend `{ upsert: false }` invisible. Le double imite MongoDB : sans `upsert`, une ligne absente n'est pas créée.
+- **Une version neuve d'un fichier recopié peut arriver pendant la story** (paquet fiscal, STORY-340 de C) : relire la
+  source juste avant la fusion, pas seulement avant la copie ; remplacer la copie dans le même commit (une seule recopie).
 
 - **Une suite rouge connue du poste masque une assertion neuve** (suite « h » de STORY-1124) : `ged.service.spec` rougit sur
   le poste (copies CRLF) avant d'atteindre la liste des schémas consommés ; un schéma consommé neuf ne s'y voit que sous

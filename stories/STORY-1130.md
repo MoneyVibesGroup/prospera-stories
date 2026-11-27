@@ -1,6 +1,8 @@
 # STORY-1130 : Effacer le dossier de démonstration à la fin d'un essai (D-1082-10) — `dossier-service` propriétaire du socle dans le plan d'effacement
 
-Status: in-progress — fiche écrite le 2026-11-27 par la sous-session du groupe B juste avant de coder (lot 7, n° 12 de B,
+Status: done — **livrée le 2026-11-27** : prospera-dossier-service **#60** (`a1bf7fa`, `653a70b` sur `dev`),
+platform-catalog-service **#89** (`14c644d` sur `dev`) ; voir « Livraison ». Fiche écrite le 2026-11-27 par la sous-session
+du groupe B juste avant de coder (lot 7, n° 12 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, deuxième partie, ligne 12 ; identifiant réservé D-L7B-1).
 **Avant le certificat d'essai** (plan §1).
 
@@ -15,7 +17,7 @@ qui reste »), 953 (D-953-1 → 8, suite « e »), 1112, 1128 (« Inventaire »,
 démonstration à la fin d'un essai (D-1082-10) → STORY-1130 »), 1129 ; `prospera-plateforme@contrats-instance-v1.1`
 (`contrats/instance/effacement-c13-demande`, `-accuse`, `certificat-effacement`, `jeu-demonstration`) ; plan d'effacement
 de balance (C, `plan-d-effacement.ts`, D-928-6 → 8, lu seulement) ; journal de B (pièges, « Suivante : STORY-1130 ») ;
-journal de C (« → B (STORY-564 …) », servie ici) ; code sur `origin/dev` : dossier `645a699`, catalogue `e528afc`.
+journal de C (« → B (STORY-564 …) », servie ici, et STORY-340, `e68ae10`) ; code sur `origin/dev` : dossier `645a699`, catalogue `e528afc`.
 
 ---
 
@@ -117,12 +119,14 @@ effacée alors que ses dossiers restaient — dont tout dossier que le prospect 
   (balance ses projections du dossier, D-928-7). Ce qui arrive **après** l'accusé — l'état publié `DESINSTALLE` que la
   partie A recalcule à la fin du plan, projeté dans `etats_publies_cabinet` et `org_droits` — est un fait du moteur, sans
   donnée du prospect ; il reste. Nommé, comme pour balance.
-- **D-1130-13 — Le paquet fiscal de STORY-564 recopié ici** (← C, servie) : `balance-service` `origin/dev` **`61997fd`**
-  (#173, STORY-339), sha256 **`62563b3c…5e94415`** (relu juste avant la copie : aucune version plus récente), par `git -c
-  core.autocrlf=false show`, en LF ; `.gitattributes` gagne `src/modules/portefeuille/echeance/assets/** -text` (fin du
-  piège des 9 suites rouges) ; l'empreinte reportée dans `paquet-fiscal.util.ts`. Rubriques ajoutées seulement (IRPP, CNSS,
-  `coherence`, `rapprochementAnnuel`, `continuite`, `basesLegales`) ; `_meta.consommateurs` nomme toujours
-  `dossier-service` et `acomptesProvisionnels.echeances` est identique : aucun comportement ne change.
+- **D-1130-13 — Le paquet fiscal de STORY-564 recopié ici** (← C, servie) : `balance-service` `origin/dev` **`e68ae10`**
+  (#174, STORY-340), sha256 **`d620df8b…3fca6`** — la version la plus récente, relue juste avant la copie et remplacée en
+  cours de story (la session de groupe a signalé 340 après une première copie de `61997fd` / `62563b3c…`, jamais fusionnée :
+  une seule recopie au final) —, par `git -c core.autocrlf=false show`, en LF ; `.gitattributes` gagne
+  `src/modules/portefeuille/echeance/assets/** -text` (fin du piège des 9 suites rouges) ; l'empreinte reportée dans
+  `paquet-fiscal.util.ts`. Rubriques ajoutées seulement (IRPP, CNSS, `coherence`, `rapprochementAnnuel`, `continuite`,
+  `basesLegales`, `reglement`) ; `_meta.consommateurs` nomme toujours `dossier-service`, `acomptesProvisionnels` et
+  `depot` sont identiques : aucun comportement ne change.
 - **D-1130-14 — Aucun contrat publié ne change de forme.** `certificat-effacement@1` et `essai-prospect.openapi.json`
   (`proprietaires[].module`, chaîne libre) gardent leurs octets ; la valeur `dossier` y apparaît. Le contrat d'état publié
   (figé, STORY-1128) n'est pas touché. Le BFF relaie le plan champ par champ (`module` libre) : inchangé.
@@ -138,6 +142,56 @@ effacée alors que ses dossiers restaient — dont tout dossier que le prospect 
   `MOTIF_NON_SERVI`, 400 `ORGANISATION_INCOHERENTE`. Aucun événement neuf ni changé. Paquet fiscal embarqué recopié.
 - **`platform-catalog-service`** : variable neuve **`SOCLE_SERVICES`** (facultative) ; le plan d'effacement compte
   `dossier` en tête de chaque essai (valeur neuve de `proprietaires[].module` et du certificat, forme inchangée).
+
+## Livraison
+
+- **dossier-service #60** — `a1bf7fa` (le paquet fiscal, D-1130-13) et `653a70b` (l'effacement C13) sur `dev`, rejoués à
+  l'identique (arbre de `6deac11` = `origin/dev`). **Catalogue #89** — `14c644d` sur `dev` (arbre de `f8c9c7f`). Contrat annoncé
+  avant la fusion (stories #1021, `da2dc7f`), sans écart, sauf la source du paquet : `e68ae10` / `d620df8b…` (STORY-340 de C,
+  signalée pendant la story) au lieu de `61997fd` / `62563b3c…`.
+
+## Preuves
+
+- **dossier-service, Node 25** : `tsc` propre ; lint des fichiers touchés propre ; suites par chemin (`demonstration`,
+  `common/erreurs`, gate STORY-363, `portefeuille/echeance`) 9/9, 124 ; complète **113/120 suites, 1 931 passés** (les 7 rouges
+  connues du poste : 6 binding de Confluent, `registre-pays.coherence`) ; e2e **11/11 suites, 405/405** (10 neufs :
+  `test/effacement.e2e-spec.ts`, vraie chaîne RS256 → gardes → garde du moteur → service → `EffaceurMongo` sur une base en
+  mémoire). Neufs : invariant du plan (6), effaceur (5), contrat copié et juge (21), service (10), fabrique de refus (+1).
+- **dossier-service, Node 24** (étage `verification`, archive en LF) : **120/120 suites, 1 947 passés** ; lint du dépôt 0 ;
+  build 0 ; e2e **405/405**. Le paquet embarqué de l'archive a l'empreinte `d620df8b…` : la garde de byte-identité passe.
+- **Catalogue, Node 25** : `tsc` propre ; lint propre ; `src/essai` et `src/config` 10/10 suites, 160 ; complète **104/107
+  suites, 1 727 passés** (les 3 rouges connues, binding) ; e2e `jetons-du-moteur` **10/10** (1 neuf : l'effacement du socle
+  part à l'adresse de `SOCLE_SERVICES`, sous le jeton de son organisation, accusé lu au contrat).
+- **Catalogue, Node 24** : **106/107 suites, 1 745 passés** ; lint 0, build 0 ; la suite rouge, `jetons-du-moteur.spec`
+  (non touchée), est verte seule trois fois sur trois dans la même image (minuteries sous la charge de la suite complète :
+  piège).
+- **Mutations, rouges sur une assertion** : dossier **20/20** (étape des messages retirée ; forme ObjectId perdue ; personne
+  gardée effacée ; personnes jamais effacées ; membres lus après l'effacement ; `DEJA_EFFACE` sur des données revenues ; date
+  du rejeu prise à la demande ; motif, organisation, schéma non jugés ; registre sans `upsert` ; espace non redit ;
+  `additionalProperties`, motif, requis, `enum`, `maxLength` du juge ; garde du moteur retirée ; identité admise vide ;
+  ancienne empreinte du paquet) — quatre réécrites d'abord pour compiler, et une survivante (le double du registre ignorait
+  `upsert`) tuée après correction du double ; catalogue **9/9** (socle en queue ; socle absent ; route du socle tirée du
+  manifeste ; adresse du socle dans `INSTALLATION_SERVICES` ; `avecLeSocle` muet ; plan figé rouvert ; plan complété non
+  écrit ; `SOCLE_SERVICES` lu dans `INSTALLATION_SERVICES` ; dédoublonnage retiré).
+- **Pile `grp-b` neuve** (images `runtime` des deux branches depuis `git -c core.autocrlf=false archive` ; Mongo rs0, Kafka,
+  Redis ; doublure d'auth : JWKS RS256 et `POST /interne/jetons-de-service` au secret du moteur ; catalogue et dossier en
+  espace d'essai, `SOCLE_SERVICES=dossier=http://dossier-service:3009`, clé Ed25519 de la pile) : les deux services
+  `healthy` ; **24/24 contrôles** :
+  - deux essais : le dossier de démonstration et ses exercices 2024, 2025 créés par les vraies routes du moteur ; des copies
+    des voisins, un fil, deux personnes (l'une dans les deux essais) ; 21 enregistrements de l'essai échu dans 11
+    collections ;
+  - `GET …/essais/{org}/effacement` 404 `EFFACEMENT_INCONNU`, puis `POST` : **200 `EFFACE` en 671 ms**, `dossier` en tête,
+    **22 enregistrements** (21 + la personne) ; chaque collection du plan à 0 ; la personne des deux essais reste ; l'autre
+    essai intact (journal append-only compris) ; le registre `effacements_c13` tenu ;
+  - le **certificat** signé (Ed25519 vérifié) nomme `instance:EFFACE`, `dossier:EFFACE` (22) ; l'ordre rejoué rend le même ;
+    `dossier-service` rejoué en direct : `DEJA_EFFACE`, la date et le décompte du premier ;
+  - refus sur la vraie chaîne : l'administratrice de l'essai 403 `IDENTITE_DE_SERVICE_REQUISE` ; le jeton du moteur d'une
+    autre organisation 403 `ORGANISATION_HORS_JETON` ; `FIN_CONTRAT` 422 `MOTIF_NON_SERVI` ; l'autre essai pas encore échu
+    409 `EFFACEMENT_PREMATURE` ; rien d'effacé.
+  - Journaux : aucune erreur chez `dossier-service` ; une au catalogue, attendue (pas de MinIO dans la pile). `down -v`.
+- **Verrou Docker** : 02:41 → 02:49 (une première passe, script de preuve fautif), 02:50 → 02:51 (la preuve), 02:52 → 02:55
+  (Node 24 dossier), 03:04 → 03:08 (Node 24 catalogue), une minute pour rejouer la suite rouge ; aucun conteneur `grp-b`
+  restant.
 
 ## Hors de cette story
 
