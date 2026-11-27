@@ -2337,6 +2337,29 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-27, STORY-1130 — effacer le dossier de démonstration à la fin d'un essai (D-1082-10), annoncé AVANT la fusion**
+  (`dossier-service`, `platform-catalog-service`, branches `MNV-1130` ; fiche `stories/STORY-1130.md`, D-1130-1 → 15). Lu
+  par qui déploie l'espace d'essai et par qui lit le plan d'effacement (**A**, la console des essais par le BFF).
+  - **`dossier-service`** : route neuve **`POST /api/v1/instance/dossier/{organisationId}/effacement`**, au moteur seul
+    (`@AdmetIdentitesDeService('MOTEUR')`, organisation du chemin), **espace d'essai seulement** (403
+    `ESPACE_REEL_REFUSE` avant le corps) : `effacement-c13-demande@1` → `effacement-c13-accuse@1` (`module: "dossier"`),
+    copiés à l'octet de `prospera-plateforme@contrats-instance-v1.1` dans `src/vendor/contrats-instance/`. Efface **tout** ce
+    que le service tient de l'organisation (dossiers, journal par le pilote, exercices, axes, périmètre, copies des voisins,
+    messages sortants par `payload.orgId`, la personne dont c'était la dernière appartenance) ; rejouée : `DEJA_EFFACE`.
+    Refus : 422 `SCHEMA_NON_CONFORME` (`details.erreurs`), 400 `ORGANISATION_INCOHERENTE`, 422 `MOTIF_NON_SERVI`
+    (`FIN_CONTRAT`) ; 401, 403 `IDENTITE_DE_SERVICE_REQUISE`, `ORGANISATION_HORS_JETON`, `IDENTITE_DE_SERVICE_REFUSEE`.
+    Aucun événement neuf ni changé. Le paquet fiscal Togo 2026 embarqué recopié (← C, STORY-564 : `61997fd`, `62563b3c…`).
+  - **`platform-catalog-service`** : variable neuve, facultative, **`SOCLE_SERVICES`** (`dossier=http://dossier-service:3009`,
+    même forme qu'`INSTALLATION_SERVICES`, jamais confondue avec elle) ; le plan d'effacement d'**un essai** compte
+    **`dossier` en tête** de ses propriétaires, à la route que le moteur fixe (`PROPRIETAIRES_DU_SOCLE`) ; sans adresse ou
+    injoignable, le plan reste `EN_COURS` et aucun certificat ne sort (D-953-4). Un plan ouvert avant la livraison gagne le
+    socle. `essai-prospect.openapi.json` et `certificat-effacement@1` **inchangés** (la valeur `dossier` apparaît dans
+    `proprietaires[].module`) ; le contrat d'état publié n'est pas touché ; le BFF ne change pas. `.env.essai.example`
+    pose `SOCLE_SERVICES`.
+  - **→ A** : la console des essais montre un propriétaire de plus (`dossier`, en tête) ; aucun type ne change. **→ C, D** :
+    rien à faire ; une recette qui jouera l'effacement d'un essai jusqu'au certificat pose `SOCLE_SERVICES` sur le catalogue
+    de l'essai.
+
 - **2026-11-27, suite « h » de STORY-1124 et ordre « i » — LIVRÉ** (document-service #42, `8f9040d` ; catalogue #88,
   `e528afc` sur `dev`) : conforme aux deux annonces ci-dessous, sans écart de contrat. **→ D** : le fait et la route de
   service à écrire tels quels (« Réponses ») ; jusque-là, rien n'arrive à la GED. **→ A** : `PiecesFiscalesDto` et
