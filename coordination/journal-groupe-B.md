@@ -366,6 +366,7 @@
     106/107 (suite non touchée, verte seule) ; mutations 20/20 et 9/9 ; pile `grp-b` neuve 24/24 (certificat signé nommant
     `dossier`, 22 enregistrements, 671 ms). Verrou en quatre passes courtes (02:41 → 03:08). Fiche D-1130-1 → 15. Rituel :
     aucune demande neuve à B chez A, C et D (la mise à jour 340 de C transmise par la session de groupe, servie ici).
+  - **12 bis — STORY-1137 (27/11) — en cours** : fiche et annonce avant le code (D-1137-1 → 13 ; Q de D-1137-3).
   - **Suivante : STORY-1137** (12 bis : les modules s'ouvrent dans l'essai, ticket de 1116), puis STORY-1131 (n° 13).
 
 ### Lot 6 (ouvert le 2026-11-24)
@@ -1371,6 +1372,15 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-27, STORY-1137) : la garde de `balance-service` sans KYC dans l'essai** (ticket « modules ouverts dans
+  l'essai », point 3 ; D-L7B-4) — **déjà servie par STORY-1019** (`ab4e468`) : rien à faire. STORY-1137 lève
+  `balance-essai` (`INSTANCE_ESPACE=ESSAI`) dans la pile de la recette, installé par le moteur de l'essai à l'ouverture,
+  et un prospect sans KYC y lit les balances du jeu du cabinet. Un défaut révélé deviendrait un ticket et une demande ici.
+  — information (message envoyé).
+- **→ D (2026-11-27, STORY-1137) : la garde de `bilan-service` sans KYC dans l'essai** (même ticket, point 3) — **déjà
+  servie par STORY-1079** (`7ed3335`, Q-D-17 confirmée) : rien à faire. `bilan-essai` est levé de même et ouvert par le
+  prospect. — information (message envoyé).
+
 - **→ A (2026-11-26, STORY-1129) : le cabinet est sur le moteur ; ce qui reste à A** — (1) le panneau des droits d'AP-05
   (`features/entitlements`, qui appelle `PUT /catalog/entitlements/…` directement) reçoit désormais **409
   `INSTALLATION_PAR_LE_MOTEUR`** (`modules`) pour un module que le moteur sait vérifier (dans une pile comme celle de la
@@ -2353,6 +2363,27 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, STORY-1137 — les modules s'ouvrent dans l'essai (ticket de 1116, D-L7B-4), annoncé AVANT le code**
+  (`platform-catalog-service`, `admin-panel`, `dossier-service`, `prospera-recette`, branches `MNV-1137` ; fiche
+  `stories/STORY-1137.md`, D-1137-1 → 13). Lu par **A** (console des essais, AP-57) et par qui déploie l'espace d'essai.
+  - **Catalogue — `essai-prospect.openapi.json` 1.2.0 → 1.3.0** (ajouts facultatifs) : `POST /api/v1/essais` accepte
+    **`installation: { modules: string[] (1 → 20), referentiels?: { <module>: [{ code, version }] } }`** ; l'essai (lecture,
+    liste, réponse de l'ordre) rend **`installation: { demandes, modules, statut: TERMINE | EN_ATTENTE | EN_COURS | REFUSEE,
+    planId?, code? }`**. L'ouverture choisit l'offre (dépendances dures ajoutées) et joue un plan du moteur avant de
+    répondre (point de décision, vérifications FR-6, droit `moteur:<plan>`), puis importe le jeu, puis invite
+    l'administrateur. Refus neufs, rien d'écrit : **422 `MODULE_INCONNU`** (`modules`), **400 `REFERENTIELS_HORS_DEMANDE`** ;
+    `ESSAI_DIVERGENT` (409) s'étend à une installation demandée autrement. L'image porte les **jeux des verticales**
+    (`cabinet-demo-togo`, `grossiste-golfe`, `-petit`, `-grand`, `assurance-compagnie-demo-reduite`, à leur étiquette de
+    `prospera-plateforme`) : `GET /api/v1/jeux-demonstration` en rend six. Contrat d'état publié, événements, autres routes :
+    **inchangés**.
+  - **BFF — `POST /api/v1/admin/essais`** : `installation` facultatif (même forme), relayé tel quel ; `EssaiDto` gagne
+    `installation` ; `MODULE_INCONNU` et `REFERENTIELS_HORS_DEMANDE` traversent par leur code.
+  - **`dossier-service`** : aucune route ne change ; sur une instance `INSTANCE_ESPACE=ESSAI`, la garde ne lit plus le KYC
+    (Q-D-17 confirmée) ; au réel, inchangé.
+  - **→ A** : la console peut envoyer `installation` (« Installer balance et bilan », `syscohada-revise@2.3`) et montrer
+    `installation.statut` ; types à régénérer depuis l'OpenAPI du BFF ; sans cela rien ne change. **→ C, D** : rien à faire
+    (vos gardes de 1019 et 1079 sont rejouées sur la pile de l'essai).
 
 - **2026-11-27, STORY-1130 — LIVRÉ** (dossier-service #60, `a1bf7fa`, `653a70b` ; catalogue #89, `14c644d` sur `dev`) :
   conforme à l'annonce ci-dessous, **un écart** : le paquet fiscal recopié est celui de **STORY-340 de C** (`e68ae10`,
@@ -4361,6 +4392,15 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   requis ajouté, un type changé ou une propriété retirée sont refusés (`npm run schemas:compatibilite`, code 1).
 
 ## Questions à l'utilisateur ou au PO
+
+- **STORY-1137, D-1137-3 — comment un module s'installe-t-il dans l'essai d'un prospect ?** (ouverte, architecture ; ticket
+  « modules ouverts dans l'essai », point 2) Deux voies : (a) **l'ordre d'ouverture porte les modules** (et leurs
+  référentiels) et le moteur de l'essai les installe avant de répondre, en un geste ; (b) le BFF relaie l'offre et les
+  plans au catalogue de l'essai (`?espace=ESSAI`), et la console installe après l'ouverture avec les écrans d'AP-55.
+  **Choix retenu par défaut : (a)**, appliqué par STORY-1137 (le geste unique de D-1112-3, la démo du 15/01 sans écran neuf
+  pour l'installation ; rien n'est déduit du jeu : `balance` et `bilan` exigent un référentiel). (b) reste possible plus
+  tard, à côté de (a), pour ajouter un module pendant l'essai. Le KYC dans l'essai n'est plus une question : **Q-D-17
+  confirmée** (25/11) pour balance, bilan et dossier.
 
 - **STORY-1128, D-1128-11 — la ligne « Contrat d'état publié » de `REGLES-DES-GROUPES.md` §3** (ouverte) : elle dit « figé
   (étiquette `contrat-etat-publie-v1`) : ajouts seulement, tout ajout facultatif (compatibilité BACKWARD vérifiée au

@@ -2175,6 +2175,13 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1137"
+    status: "in-progress"
+    owner: "Groupe B, lot 7, n° 12 bis — les modules s'ouvrent dans l'essai (ticket de STORY-1116, D-L7B-4) : les jeux des verticales dans l'image du catalogue, l'ouverture d'un essai installe par le moteur les modules de l'ordre, la garde de dossier-service sans KYC dans l'essai (Q-D-17), la recette lève dossier, balance et bilan dans l'espace d'essai (platform-catalog-service, admin-panel, dossier-service, prospera-recette)"
+    source_doc: "prospera-stories/stories/STORY-1137.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche et annonce avant le code le 2026-11-27 (D-1137-1 → 13 ; question de D-1137-3 au journal de B). NON SLOTTÉE.
   - range: "STORY-1130"
     status: "done"
     owner: "Groupe B, lot 7, n° 12 — effacer le dossier de démonstration à la fin d'un essai (D-1082-10) : dossier-service sert son effacement C13 (tout ce qu'il tient de l'organisation, au moteur seul, essai seul) et devient propriétaire du socle du plan d'effacement du catalogue (SOCLE_SERVICES, dossier en tête) ; paquet fiscal Togo 2026 recopié (← C, STORY-564 → 340) (dossier-service, platform-catalog-service)"
