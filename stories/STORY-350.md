@@ -1,6 +1,6 @@
 # STORY-350 : Le rapprochement des charges sociales avec les comptes de personnel
 
-Status: in-progress — écrite le 2026-11-27 par la session du groupe C juste avant de la coder (lot 7, n° 17 du fiscal,
+Status: done — **livrée le 2026-11-27** : prospera-balance-service **#179** (`ab2ad72` sur `dev`, le paquet) et prospera-fiscal-service **#98** (`261217b` sur `dev`) ; voir « Livraison ». **🏁 EPIC-034 fini.** Écrite le 2026-11-27 par la session du groupe C juste avant de la coder (lot 7, n° 17 du fiscal,
 `PLAN-LOT-7-2026-11-24.md` §3 ; **elle finit EPIC-034**, que D a laissé `in_progress` après 349). Il n'existait pas de
 fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-034, STORY-350) et de ce que D a laissé pour elle
 (STORY-348, D-348-12 : « `CalculRemunerationService` est exporté pour STORY-350, qui lit les totaux sans nom du calcul » ;
@@ -125,3 +125,25 @@ code ajouté, de C). Aucun fichier de D ; aucune migration.
 Les trois couples et la tolérance de 1 000 F sont des **valeurs de travail** : 431 au crédit pour les cotisations dues,
 664 au débit pour la part patronale, 447 au crédit pour les retenues d'IRPP (447 peut porter d'autres retenues : l'écart le
 montrera, à lever en motivant). **Choix par défaut** : ces trois couples, à confirmer par un expert-comptable togolais.
+
+## Livraison (2026-11-27)
+
+**Code** : balance-service **#179** (`ab2ad72` sur `dev`) — rubrique `rapprochementSocial` au paquet Togo 2026 (trois
+couples : 431 au crédit, 664 au débit, 447 au crédit ; tolérance de travail `{ absolue: 1000 }`), garde **R15**, et **← D
+(562, D-562-3)** le sous-schéma `suivi` sous `automatisation.connecteurs[]` (sans instance) ; empreinte **`72d2d6ed…56af`**
+(remplace `c2915555`). fiscal-service **#98** (`261217b` sur `dev`) — `POST /api/v1/exercices/{exerciceId}/rapprochement-social`,
+module neuf de C `RapprochementSocialModule`, domaine pur `domain/rapprochement-social`, port `SourceLignesBalance` et son
+adaptateur HTTP (`GET …/balances/{id}` : la balance relue doit être la balance désignée — id, version, empreinte, devise),
+code d'anomalie `RAPPROCHEMENT_SOCIAL_ECART` ajouté, copie du paquet à jour.
+
+**Écarts avec l'annonce (précisions, aucun changement de forme)** : `anomalies[].issue` porte aussi **`SANS_OBLIGATION`**
+(aucune obligation de ce code dans l'exercice : `obligationId` et `periode` à `null`, rien n'est signalé) ; un
+`message` accompagne `SANS_BALANCE` et `DEVISE_DIFFERENTE` ; les montants comptabilisés sont ramenés à l'unité par
+l'`exposant` de la devise de la balance (XOF : 0) ; l'explication de l'anomalie tient en 500 caractères (la borne du
+registre de 328) : une phrase par couple en écart.
+
+**Preuves** : Node 24 (image `verification`, arbres identiques aux commits fusionnés, base fiscal `81e7605`) : fiscal unitaires 289/290 suites (1 ignorée), 4 502 ; e2e 17/17, 431 ; conformité 35/35, 237 — specs et e2e de D comprises, vertes avec la nouvelle copie du paquet ; `nest build` vert ; balance unitaires 301/303 (2 ignorées), 5 967 ; e2e 38/38, 2 336 ; pile `grp-c` (balance + fiscal) saine : route montée, module initialisé, 401 sans jeton, aucune erreur d'injection, aucun redémarrage ; mutations 20/20 (fiscal ; une réécrite après avoir rougi par compilation) et 12/12 (balance : R15 et deux bornes du `suivi`). Verrou pris une fois (19:51 → 20:13), rendu.
+
+**Non prouvé** : aucun gate de bout en bout avec une vraie paie et une vraie balance de dossier (les e2e doublent le calcul
+social et balance-service ; la conformité des anomalies signalées est celle de 328, inchangée). Les couples et la tolérance
+sont des valeurs de travail (question au PO).
