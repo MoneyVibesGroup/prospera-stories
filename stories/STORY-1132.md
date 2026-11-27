@@ -1,6 +1,7 @@
 # STORY-1132 : La licence signée — premier incrément : un paiement l'ouvre, le suivant la prolonge
 
-Status: in-progress — fiche écrite le 2026-11-27 par une sous-session du groupe B juste avant de coder (lot 7, n° 14 de B,
+Status: done — **livrée le 2026-11-27** : centrale-service **#2** (`75977de` sur `dev`) ; voir « Livraison ». Fiche
+écrite le 2026-11-27 par une sous-session du groupe B juste avant de coder (lot 7, n° 14 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, deuxième partie, ligne 14 ; identifiant réservé D-L7B-1).
 **Date du plan : 08/01** (« la mise en service vend une licence »).
 
@@ -144,6 +145,54 @@ Lu par **B** seul (l'agent de la plateforme le parlera, STORY-1133) ; informatio
 - **D-1132-13 — La licence est réémise au contact suivant de l'instance, pas au paiement** (AD-1 : la centrale ne pousse
   rien) ; c'est la règle de 955 (« réémise si son contenu change »). « Dans la minute » ne vaut que pour une sanction
   (AD-25), hors de cet incrément.
+
+## Livraison (2026-11-27)
+
+**centrale-service #2** — `MNV-1132`, poussé `60249a3`, fusionné en rebase le 2026-11-27 à 14:40 (`mergedAt` non nul,
+`headRefOid` = `60249a3`), rejoué sur `dev` en **`75977de`** (diff vide entre les deux). Contrat annoncé avant le code
+(prospera-stories #1047, `main` `1682f33`), livré sans écart.
+
+| Fichier | Ce qu'il porte |
+|---|---|
+| `src/faits-de-paiement.ts` (neuf) | liste fermée des topics relayés ; `lireEcheanceEncaissee` (règles du catalogue, codes traduits) ; `echeanceSuivante` (recopiée de paiement) ; `deriver` (ouvrir, prolonger, perpétuel, échelonné, `miseAJour`) ; `RecepteurDeFaitsDePaiement` (rôle `PLATEFORME`, un fait par transaction, dédoublonnage, acquittement) |
+| `src/registre.ts` | colonnes `organisation_id` (index unique) et `role` (migration d'une base de 955) ; tables `faits_de_paiement` et `licences_emises` ; file des transactions (D-1132-12) |
+| `src/emetteur.ts` | la file passe au registre ; chaque licence neuve inscrite dans la transaction de son numéro |
+| `src/http.ts` | section `faitsDePaiement` du corps fermé, `403 FAITS_DE_PAIEMENT_HORS_PLATEFORME`, réponse `faitsDePaiement[]` ; 128 Kio |
+| `src/main.ts`, `semis/simulation.json` | le récepteur ; l'instance sur site sert `6650c0ffee00000000000001`, l'instance `plateforme-money-vibes` (`PLATEFORME`) |
+| `test/faits-de-paiement.test.ts` (14), `test/http.test.ts` (+4), `test/aide.ts` | ouvrir, prolonger, rediffusion, perpétuel, échelonné, `miseAJour`, rejeu, hébergée, packages, illisible, `eventId` divergent, hors plateforme, concurrence, parc, migration ; la section au contact |
+| `test/fixtures/paiement-echeance-encaissee.json` | quatre faits produits par le code de paiement (`origin/dev` `64b5838`), `ts-node` en `transpileOnly` sur le checkout, enveloppe d'`OutboxService.enfiler` vérifiée par `verifierEvenementSortant` ; une échéance non soldée ne publie rien |
+| `README.md` | « Les faits de paiement : ouvrir, prolonger » |
+
+### Preuves
+
+- **Node 25** (poste) : `npm test` **59/59** (41 avant) ; `typecheck` vert. Le jeu croisé r1 → r3 est reproduit à l'octet
+  (`croise.test.ts`), les 16 vecteurs rendent leur verdict.
+- **Mutations 18/18** rouges : 17 sur une assertion, 1 sur l'erreur qu'elle provoque (la file du registre retirée : SQLite
+  refuse la transaction imbriquée dans le test de concurrence) ; dont : prolonger qui raccourcit, préavis nul, quantième non
+  rabattu, perpétuel oublié, `miseAJour` qui recule, rôle non jugé, dédoublonnage retiré, `eventId` divergent accepté,
+  `orgId` lu au lieu de l'abonnée, codes non traduits, module ouvert en perpétuel, périodicité non jugée, licence émise non
+  inscrite, instance inconnue non jugée, plus de 50 faits, hors plateforme à 200, organisation de la plateforme servie
+  (rouge seulement après l'ajout d'un test : la première passe l'a vue survivre).
+- **Node 24** (`docker build --target verification`, archive de la branche) : **59/59**.
+- **Pile `grp-b`** (centrale construite depuis l'archive de `MNV-1132`, agent exécuteur + contact depuis l'archive
+  d'`origin/dev` `db1dd58`, `docker compose up -d --build` sain) : **14/14** —
+  - l'agent applique la licence semée (n° 2 : `bilan`, `balance`) ; `GET /decision?module=fiscalite` ⇒ `MODULE_HORS_LICENCE` ;
+  - le contact de la plateforme porte deux faits : `APPLIQUE` (`fiscalite`, `pi-spi` `OUVERT`) et `SANS_INSTANCE_SUR_SITE` ;
+  - **16 s plus tard**, au contact suivant, l'agent a vérifié hors ligne et appliqué la licence **n° 10** (`bilan`,
+    `balance`, `fiscalite`, `pi-spi`) ; `fiscalite` ⇒ `{ ouvert: true }` ; à la centrale, elle porte `fiscalite` jusqu'au
+    2027-03-10 ;
+  - la prolongation (`bilan`, échéance du 31 janvier) : `PROLONGE` ; l'agent applique la **n° 15**, celle que la centrale a
+    inscrite sous le **même numéro**, `bilan` jusqu'au 2027-03-30 (licences émises, toutes instances : 2, 6, 10,
+    15 ; la n° 6 est celle de l'instance de la plateforme, module `instance`) ;
+  - le fait rejoué : `dejaVu`, même acquittement ; deux contacts plus tard, toujours la n° 15, aucune licence de plus ;
+  - l'instance sur site qui porte des faits : `403 FAITS_DE_PAIEMENT_HORS_PLATEFORME` ; journal de l'agent `INTACT`.
+- **Verrou Docker** : 14:38:10 → 14:40:13 (une passe), `down -v`, aucun conteneur ni volume `grp-b` restant.
+
+### Écarts à la fiche
+
+- Aucun écart au contrat annoncé. Une précision : la licence n° 6 de la pile est celle de l'instance de la plateforme
+  (module `instance` seul) : la plateforme reçoit une licence tant que le schéma de l'état voulu l'exige (« Nommé pour plus
+  tard »).
 
 ## Nommé pour plus tard
 
