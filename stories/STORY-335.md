@@ -1,6 +1,9 @@
 # STORY-335 : L'archive d'une déclaration déposée — le livrable déposé et la pièce de l'accusé, relus par URL présignée, et l'archive par version que le dossier de contrôle lira
 
-Status: in-progress (2026-11-26) — fiche écrite et contrat annoncé avant le code.
+Status: done (2026-11-27 — prospera-fiscal-service#85, `dev` `108221e` ; lot 7 de D, n° 12) — fiche écrite et
+contrat annoncé avant le code (prospera-stories#1009, `main` af552d3). ⚠️ AC-1 (« dans `document-service` ») et V9 :
+la copie au fonds d'archives du client est demandée à B (« h », D-335-9) ; l'original est archivé, rattaché et relu
+par URL présignée dans le fiscal.
 Écrite le 2026-11-26 par la sous-session du groupe D juste avant de coder (lot 7 de D, n° 12,
 `PLAN-LOT-7-2026-11-24.md` §4 : « même réalignement, en partie » — avec 537 → 539 et 688 → 691, lot 6 §3). Il
 n'existait pas de fiche : les critères viennent d'`epics-fiscalite-2026-08-03.md` (EPIC-032) et de la salle des
@@ -149,16 +152,81 @@ taxe et à la période, que 336 lira. Ce qui n'est pas dans les dossiers de D : 
 
 ## Definition of Done
 
-- [ ] Un livrable à fichier conforme archivé (201), relu par URL présignée ; non conforme, absent, en trop, déjà archivé,
+- [x] Un livrable à fichier conforme archivé (201), relu par URL présignée ; non conforme, absent, en trop, déjà archivé,
       non déposé : chacun refusé par un test ; un formulaire archivé sans fichier, ses valeurs relues à l'octet (e2e).
-- [ ] La pièce de l'accusé relue par URL présignée ; un accusé par référence seule ⇒ `PIECE_ACCUSE_ABSENTE` ; un objet
+- [x] La pièce de l'accusé relue par URL présignée ; un accusé par référence seule ⇒ `PIECE_ACCUSE_ABSENTE` ; un objet
       altéré ⇒ `FICHIER_ARCHIVE_ALTERE`, jamais une URL.
-- [ ] L'archive par version : livrable, accusé, rejet, la plus récente d'abord, les rattachements de la déclaration.
-- [ ] **MongoDB réel** (`test:conformite`) : l'index unique ; dix archivages parallèles ⇒ un seul et un seul acte ;
+- [x] L'archive par version : livrable, accusé, rejet, la plus récente d'abord, les rattachements de la déclaration.
+- [x] **MongoDB réel** (`test:conformite`) : l'index unique ; dix archivages parallèles ⇒ un seul et un seul acte ;
       l'archive et son acte tout ou rien ; schéma strict.
-- [ ] Les gardes d'AD-12 et d'AD-13 vertes ; **mutations** qui rougissent sur une assertion.
-- [ ] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
+- [x] Les gardes d'AD-12 et d'AD-13 vertes ; **mutations** qui rougissent sur une assertion.
+- [x] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
       compris) sain, les routes neuves en `401` sans jeton.
+
+## Livraison (2026-11-27)
+
+- **Code** : prospera-fiscal-service#85, fusionnée en rebase sur `dev` (`108221e`), rebasée sur `origin/dev` `ffd6f2a` (C #86, D-334-8 servie) sans conflit avant la fusion ; un commit à part met à jour la description de `RetransmissionDto`. Annonce avant le code :
+  prospera-stories#1009 (`main` af552d3). **Aucun écart de route, de champ ni de code de refus au contrat annoncé.**
+- **Trois précisions, sans effet sur le contrat** :
+  - le rejet de l'archive par version est rendu entier, avec son motif (la projection de 334 telle quelle), et non « sans
+    les textes » comme D-335-6 le disait : le dossier de contrôle (336) doit montrer le motif (334, AC-2) ;
+  - un format engagé qu'aucun manifeste ne publie plus répond `422 PAQUET_DEPOT_NON_PUBLIE` (le code existant), détails `{
+    pays, etat, version }` ;
+  - **le lien vers la GED est derrière un port** (`CopieAuFondsDArchives`, `ports/copie-fonds-archives.ts`), branché sur un
+    adaptateur inerte (`adapters/fonds-archives/copie-inerte.ts`) et appelé après l'archivage du livrable. Si la copie
+    échoue, l'archivage n'échoue pas. C'est la consigne de la session de groupe après la réponse de B, qui a placé la
+    demande en « h ». D branchera l'adaptateur que la forme choisie par B demandera.
+- **Fichiers** (dossiers de D) :
+  - le domaine : `domain/depot/archive-depot.ts` (pur : « archivable », le fichier selon la nature, l'estampille du
+    fichier, le formulaire sérialisé, l'acte, l'archive par version) et son test ;
+  - les ports `ports/registre-livrables-archives.ts` et `ports/copie-fonds-archives.ts`, l'adaptateur
+    `adapters/fonds-archives/copie-inerte.ts` ;
+  - le stockage : `adapters/mongo/livrable-archive.schema.ts` (collection `livrables_archives_depot`, index
+    `un_livrable_par_version` et `livrable_par_depot`) et `mongo-registre-livrables-archives.ts` ;
+  - le cas d'usage : `application/depots/archives-depot.service.ts` et son test ;
+  - les quatre routes dans `DepotsDeclarationController`, leurs DTO (`dto/archive-depot.dto.ts`), les bornes du multipart
+    (`depots.constants.ts`) ; `accuses-depot.module.ts` porte le registre (et l'exporte) ; `depots.module.ts` ;
+  - les gardes d'AD-12 (deux ports et l'adaptateur) et d'AD-13 (la route du livrable) ; `depots-declaration.openapi.spec.ts` ;
+  - les tests : `test/depots-declaration.e2e-spec.ts` (huit cas), `test/livrables-archives.conformite-spec.ts`,
+    `test/utils/registre-livrables-archives-memoire.ts` ; l'archive en mémoire de 333 mesure et signe désormais pour de vrai.
+- **Lu, sans écriture** (dossiers de C) : les obligations et leurs versions, par les ports de C.
+- **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI (quatre routes neuves). Aucune migration.
+- **Preuves** :
+    - Node 24 (image `verification` de l'archive LF de `91d7069`) : unitaires **252/253 suites, 3 798 tests** (1 suite et 3
+      tests ignorés : la spec BullMQ sans Redis) ; **`test:conformite` 31/31 suites, 195 tests** (dont
+      `livrables-archives.conformite-spec.ts` : les deux index, dix archivages parallèles ⇒ un seul livrable et un seul acte,
+      ni la clé ni le nom du fichier au journal, une rectificative a le sien, tout ou rien sur une panne du journal, la
+      relecture par version, par dépôt et par déclaration avec les rattachements, l'isolement, le schéma strict) ; e2e
+      **13/14 suites, 368/369** : le seul rouge est un délai, `CLASSEUR_TROP_COUTEUX` sur la production du classeur (le fil
+      isolé de 537 dépasse sa durée de 30 s) sous la charge du poste (les mutations tournaient en même temps). Une seconde
+      passe, sur `f645baf`, a montré cinq rouges de la même cause : chaque cas de 335 produisait son classeur. L'e2e le
+      produit désormais une seule fois (`418a22d`). Tout a été rejoué
+      sur l'archive LF de `e55baa5` (rebasée sur `ffd6f2a`, C #86 ; l'e2e produit désormais le classeur une seule fois) : unitaires **252/253 suites, 3 807 tests** ; e2e **14/14 suites, 369 tests** ; `test:conformite` **31/31 suites, 196 tests** ; la pile `grp-d` rejouée elle aussi (santé `ok`, les quatre routes en `401`, 0 erreur sur 505 lignes, les index posés).
+    - Node 25 (local) : les 21 suites du dépôt et du coffre, **450 tests** (domaine de l'archive 26, service 21, OpenAPI 9,
+      gardes d'AD-12 et d'AD-13) ; e2e `depots-declaration` **52/52** (huit cas de 335).
+    - **Mutations 33/33**, chacune rouge sur une assertion :
+      - le domaine : « À déposer » archivable, puis « Déposée » refusée ; un format à fichier sans fichier admis ; un
+        formulaire avec fichier admis ; l'obligation, la version, puis l'empreinte de l'estampille non comparées ; la version
+        comparée après `trim` ; une propriété absente lue comme une chaîne vide ; l'estampille, puis les valeurs perdues dans
+        le formulaire sérialisé ; la taille perdue dans l'acte ; l'archive triée en ordre croissant, puis lexical ; le rejet
+        perdu ; les versions sans livrable ignorées ;
+      - le service : le périmé non vérifié ; « archivable » non vérifié ; l'estampille du fichier non lue ; un livrable déjà
+        archivé vu après l'archive ; l'orphelin non supprimé ; l'implantation perdue ; l'empreinte calculée sur d'autres
+        octets ; une URL sans re-hachage ; une pièce absente dite autrement ; une copie au fonds dont l'échec fait échouer
+        l'archivage ; une copie jamais demandée ; une relecture hors de la portée ; l'archive par version sans les accusés ;
+      - la route et le stockage : le droit `deposer` retiré ; un fichier vide pris pour un fichier ; la clé publiée dans la
+        réponse ; le doublon d'un autre index pris pour celui de la version (MongoDB réel, sous Docker) : rouge sur une assertion (1 échec sur 6) ; une première écriture, qui retirait le test du doublon, rougissait en compilation (un import devenu inutile).
+      - Six mutants rougissaient d'abord en compilation (un membre privé ou un import devenus inutiles, un `null`, du code
+        inatteignable) : ils ont été réécrits en gardant l'intention, puis rejoués. Un seul est resté vert au premier
+        passage (le fichier vide) : il a reçu son assertion (e2e) et a été rejoué.
+    - lint des fichiers touchés et `tsc` : 0.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** (image runtime de l'archive de `91d7069`) :
+      - santé `ok` (mongodb, audit, kafka, redis) ;
+      - les quatre routes neuves montées et en `401` sans jeton (celles de 330 → 334 aussi) ;
+      - `DepotsModule`, `AccusesDepotModule` et `ObligationsModule` initialisés ; 0 `UnknownDependencies` sur 511 lignes de journal ;
+      - les index `un_livrable_par_version` et `livrable_par_depot` posés par l'application.
+    - **Verrou Docker** : trois prises par des scripts autonomes, chacune rendue par son `trap` : 00:30:18 → 00:48:05 (passe 1, `91d7069`), 00:48:27 → 00:56:44 (l'e2e rejoué et la mutation du registre), 01:18:16 → 01:25:48 (passe finale sur `e55baa5`). Un quatrième script, lancé puis arrêté avant toute prise, quand C a fusionné #86. B et C prévenus à chaque reddition. Il ne reste aucun conteneur, volume ni réseau
+      `grp-d`.
 
 ## Questions au PO
 
