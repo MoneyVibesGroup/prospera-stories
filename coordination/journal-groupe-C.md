@@ -849,6 +849,16 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-27, STORY-344, avant le code)** — branche `MNV-344` de `prospera-fiscal-service`, partie d'`origin/dev`
+  `57c7504`. **Aucune migration, aucune collection, aucune écriture.** Touchés parmi les communs : **le contrat OpenAPI**
+  (la route `GET /obligations/{id}/risque-de-penalites` et ses DTO, « ⚠ Contrats ») et **la copie du paquet**
+  (`test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`, recopiée de balance-service à l'octet : un bloc `penalites`
+  de plus). Ni `app.module.ts`, ni `package.json`, ni `read-models/`, ni `config/`, ni manifeste `declarations`, ni fichier
+  de D. Dans des dossiers de C : `domain/penalites` (neuf), `application/reglement` (`RisqueDePenalitesService`, neuf),
+  `modules/reglement` (un fournisseur et une route de plus). `MontantAReglerService`, `OrdreDeReglementService`,
+  `RapprochementReglementService` et les classes instanciées par `DepotsModule` ne changent pas. **→ D** : rien à faire ;
+  la suite complète (e2e de D comprises) sera jouée avant le push ; si un test de D lit l'empreinte de la copie, il suivra
+  dans la PR (dit ici avant la fusion).
 - **COMPLÉTÉ AVANT LA FUSION (2026-11-27, STORY-343)** — « k » servie par B pendant la story (auth #52, `dev` `d037506`) :
   la bascule est faite. Communs en plus de l'annonce : **`src/common/rbac/droits-fiscalite.ts`** (un commentaire, aucune
   valeur) et **`test/utils/rs256.ts`** (`permsDuCabinet` porte `fiscalite:declaration:regler` pour `TENANT_ADMIN` et
@@ -1112,6 +1122,27 @@ seulement.
   clés, plus celles de l'IRPP et de la CNSS (voir « ⚠ Contrats »).
 
 ## ⚠ Contrats
+
+- **2026-11-27 (STORY-344), ANNONCÉ avant le code** — **l'estimation des pénalités et majorations, comme un risque**
+  (`prospera-fiscal-service`, REST ; source du paquet fiscal Togo dans `balance-service`). Fiche : `stories/STORY-344.md`
+  (D-344-1 → 12). Consommateurs : l'écran (A) ; la copie du paquet de `dossier-service` (B, recopie permanente). Aucun
+  événement ; aucune écriture ; aucun champ existant ne change ni ne disparaît ; le montant à régler, l'ordre, les
+  règlements, le calendrier et le cycle sont inchangés.
+  - **`GET /api/v1/obligations/{id}/risque-de-penalites[?aLa=AAAA-MM-JJ]`** (rôles, accès fiscal, portée ; `404
+    OBLIGATION_INTROUVABLE` ; `aLa` jamais passé, `400 DATE_D_ESTIMATION_INVALIDE`) ⇒ `200 { nature: RISQUE_ESTIME,
+    avertissement, statut: RISQUE_ESTIME | AUCUN_RISQUE_ESTIME | NON_ESTIMABLE, motif, echeance { applicable, legale,
+    reportee }, retards { declaration, paiement }, composantes[{ code, nature: RETARD_DE_PAIEMENT | RETARD_DE_DECLARATION,
+    libelle, baseLegale, estimation { minimum, maximum }, assiette, portions[], paliers[], amende }], nonChiffres[],
+    reserves[], estimation { minimum, maximum } | null, devise, chemins, paquet, corpus }`. Retard de paiement : LPF
+    Art. 115 (10 % le premier mois, + 1 % par mois, mois commencé compté entier, minimum 1 000 F), sur le reste du montant
+    à régler et sur chaque quittance réglée après la date limite de son canal ; retard de déclaration : LPF Art. 121, les
+    **paliers 30 / 40 / 80 %**, tous montrés, aucun retenu (la gravité est un fait de l'Administration), ou l'amende de
+    l'Art. 113, 5) sur un déclaré nul ; nommés sans chiffre : Art. 113, 1) (DSF, segment non lu), Art. 153 (retenue
+    d'IRPP, sanction pénale). Le retard se lit sur l'échéance applicable (317, 318) et sur le premier dépôt (325, 343).
+  - **Paquet fiscal Togo 2026** : bloc racine neuf **`penalites`** (`retardDePaiement`, `retardDeDeclaration` et ses
+    `paliers`, `sansBaseTaxable`, `nonChiffrees`), garde **R14** ; **← D (561)** : la rubrique racine facultative
+    **`automatisation`** déclarée au schéma, sans instance. Le moteur de balance-service ne lit pas ces blocs. Nouvelle
+    empreinte au « Livré » (B prévenu pour la recopie).
 
 - **2026-11-27 (STORY-343), PUBLIÉ** (fiscal #94, `57c7504`) — conforme à l'annonce (#1036), deux écarts : le motif
   d'annulation suit les bornes d'un motif de version (**10** à 500) ; la bascule sous `regler` est faite (« k » servie, auth
