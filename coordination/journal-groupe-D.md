@@ -659,6 +659,73 @@
   - **Suivante : STORY-336** (le dossier de contrôle à la demande ; dossiers de D). Il lit l'archive par obligation et
     par version (`GET /api/v1/depots-declaration/archives`, ou `ArchivesDepotService.deLaDeclaration`).
 
+- **STORY-336** ✅ 📨 — le dossier de contrôle à la demande : sur un périmètre (dossier, année, redevable, taxe,
+  période), en une action, tout ce qu'un contrôleur peut demander, et l'intégrité des chaînes d'audit couvertes
+  attestée. Code : prospera-fiscal-service#87, `dev` `a991963`. Annonce avant le code : #1020, `main` e75e593 (fiche
+  D-336-1 → 12, ⚠ Contrats, ⚠ Communs, → C information, Q-D-33). Plan §4, n° 13.
+  - **Diagnostic** (fiche, avant le code) : aucun dossier de contrôle n'existait (le seul `dossierDeControle` du code
+    est une variable de l'e2e de 328). Tout ce qu'il rend existait **par obligation** : versions (325), visa (323), pièces
+    du client (324), archive par version (335), triplet (322), anomalies motivées (328), chemin et bases légales (329,
+    339), `verifierChaine` (299). 336 **assemble** sur un périmètre, atteste et signe ; une seule méthode neuve hors du
+    dossier, `RegistreEngagementsDepot.deLObligation` (lecture).
+  - **Livré** (dossier `depots` de D) :
+    - **`GET /api/v1/dossiers-controle?dossierId=…&annee=…[&redevableId=…][&taxe=…][&periode=…]`** (accès fiscal, 10/min) :
+      - le dossier lu d'abord chez `dossier-service` (hors portée : `404 DOSSIER_INTROUVABLE`, rien d'autre n'est lu) ;
+        désactivées comprises, avec leur motif ; au-delà de 100 obligations, `422 PERIMETRE_TROP_LARGE` ;
+      - pour chaque obligation : l'article qui la fonde, la version courante, les versions scellées, le visa et les
+        pièces du client, les dépôts engagés, l'archive par version (livrable, accusé, rejet et son motif), le triplet
+        (le règlement constaté), les anomalies levées avec leur motif, le chemin du montant (`detail.basesLegales`,
+        les pièces) ; `rapprochementPieces: null`, la place de 337 ;
+      - `integrite` : la chaîne de chaque obligation et de chacun de ses dépôts, vérifiée (première rupture nommée,
+        empreinte de tête, entrées rendues pour un recalcul hors du produit), l'empreinte de chaque version scellée
+        recalculée ; `ATTESTEE`, `ROMPUE` (toujours en 200) ou `RIEN_A_ATTESTER` ;
+      - `empreinte` : le SHA-256 de la forme canonique de la réponse, ce champ retiré.
+    - Aucune écriture, aucune collection, aucun acte, aucun fait (D-336-3, Q-D-33).
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI seulement. Aucune migration, aucun fichier de C ;
+    le chemin et les pièces du client sont fournis en lecture dans `DepotsModule` (D-336-4, accord de C ci-dessous).
+  - **Preuves** :
+    - Node 24 (image `verification` de l'archive LF de `7cf09cd`) : unitaires **255/256 suites, 3 841 tests (1 suite et 3 tests ignorés : la spec BullMQ sans Redis)** ; e2e **15/15 suites, 378 tests** (dont
+      `test/dossier-controle.e2e-spec.ts`, 9 cas : 401, les 400, 404 hors portée avant toute lecture, AC-1 en une action,
+      AC-2 attestée, rompue sur une entrée réécrite, rompue sur une version au contenu changé, périmètre vide, 422) ;
+      `test:conformite` **31/31 suites, 197 tests** (dont `deLObligation` : ordre, `ENGAGE` et `REMPLACE`, cloisonnement par organisation,
+      plan sur l'index `depots_par_obligation`).
+    - Node 25 (local) : règles pures 18, service 9, OpenAPI 7, e2e du dossier 9/9 ; les suites du dépôt, du coffre et
+      des gardes (24 suites, 484 tests) vertes une fois les copies du paquet réécrites en LF (piège connu des fins de
+      ligne : 65 rouges avant, tous sur l'empreinte du paquet de dépôt ; `application/depots` rejoué 8/8, 163).
+    - **Mutations 43/43**, chacune rouge sur une assertion :
+      - le domaine : le redevable par défaut ; une chaîne vide gardée ; la taxe, puis la période ignorées ; la taxe sans
+        casse ; la borne à 100 ; les nombres du refus ; des lots de trois ; le dernier lot perdu ; la rupture toujours
+        nulle ; la tête prise à la première entrée ; une chaîne vide sans genèse ; le journal non rendu ; le dépôt perdu ;
+        une version toujours intacte ; les chaînes, puis les versions ignorées au statut ; un périmètre vide attesté ; le
+        champ `empreinte` compté dans l'empreinte ; une forme non canonique ;
+      - le service : la portée du dossier non lue ; les désactivées exclues ; le redevable non transmis ; la borne
+        contournée ; le périmètre non filtré ; les chaînes des dépôts ignorées ; la chaîne d'un dépôt lue sous
+        l'obligation ; les versions non attestées ; l'auteur perdu ; le chemin d'une autre obligation ; un lot lu en partie ;
+        le double mémoire qui rend les dépôts de toutes les obligations ;
+      - la route et la réponse : l'empreinte calculée sur autre chose ; le rejet, la désactivation, la levée, le visa, la
+        rupture perdus ; une période sans format ; une année sans borne basse ; la taxe non transmise ;
+      - le stockage (MongoDB réel, sous Docker) : `deLObligation` trié du plus récent ; sans l'organisation.
+      - Quatre mutants rougissaient d'abord en compilation (un import, un paramètre devenus inutiles) : ils ont été
+        réécrits en gardant l'intention, puis rejoués. Un seul est resté vert au premier passage (le double mémoire qui
+        rend les dépôts de toutes les obligations) : il a reçu son assertion (service, `1e6ec93`, une spec unitaire seule,
+        jouée sous Node 25) et a été rejoué rouge.
+    - lint des fichiers touchés et `tsc` : 0.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** (image runtime de l'archive de `7cf09cd`) : santé `ok` (mongodb, audit, kafka, redis) ; `GET /api/v1/dossiers-controle` montée et en `401` sans jeton (les
+      archives de 335 et le chemin de 329 aussi) ; `DepotsModule`, `ObligationsModule`, `AccusesDepotModule`, `PaquetsModule`
+      initialisés, 0 `UnknownDependencies` ni `OverwriteModelError` sur 526 lignes de journal (les fournisseurs de C en
+      lecture dans `DepotsModule` se résolvent) ; l'index `depots_par_obligation` posé.
+    - **Verrou Docker** : deux prises par des scripts autonomes, chacune rendue par son `trap` : 01:53:24 → 02:12:29 (passe 1 sur `7cf09cd` : unitaires, e2e, conformité, deux mutations MongoDB, pile) et 02:12:50 → 02:16:18 (la mutation MongoDB réécrite). B et C prévenus. Il ne reste aucun conteneur, volume ni réseau `grp-d`.
+  - **Ce qui reste** :
+    - → 337 : `rapprochementPieces` (la route de 338 de C) ;
+    - → C (plus tard) : le montant à régler (340), l'ordre (341) et le rapprochement du règlement (342) rejoindront la
+      section du règlement quand C les aura livrés ;
+    - → A (plus tard) : l'écran et l'export du dossier de contrôle (`DossierDeControleDto`) ;
+    - la suite de 335 (le fait `fiscal.depot.piece-archivee` et la route de service, « h » servie par B) : sous-session
+      dédiée ; la lecture de la GED (`…/pieces-fiscales?obligationId=…`) n'est qu'une référence facultative du dossier ;
+    - Q-D-33 au PO.
+  - **Suivante : STORY-337** (le rapprochement des pièces justificatives, à la granularité annoncée ; il lit la route de
+    338 de C, servie : comptabilite #21, `dev` 58803f5, et remplit `rapprochementPieces`).
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
@@ -1978,7 +2045,8 @@
 ## Demandes aux autres groupes
 
 - **→ C (2026-11-27, STORY-336) : information, non bloquante — exporter, si C le préfère,
-  `HistoriqueObligationsService` et `RegistreValidationsClient` depuis `ObligationsModule`.** Le dossier de contrôle lit le
+  `HistoriqueObligationsService` et `RegistreValidationsClient` depuis `ObligationsModule` — répondue par C (27/11) : pas
+  d'export pour l'instant, accord ci-dessous (« Réponses »).** Le dossier de contrôle lit le
   chemin d'un montant (329, 339) et les pièces de validation du client (324) ; `ObligationsModule` ne les exporte pas, et
   D les fournit donc lui-même dans `DepotsModule`, en lecture, avec les adaptateurs de C (D-336-4), sans toucher un fichier
   de C. Si C exporte les deux, D importera au lieu de fournir (une ligne). Un constructeur qui change chez C se verra au
@@ -2477,6 +2545,14 @@
 
 ## Réponses aux demandes reçues
 
+- **336 — accord avec C sur les fournisseurs de C fournis en lecture par `DepotsModule`** (2026-11-27, réponse de C
+  relayée par la session de groupe). D garde son approche : `DepotsModule` fournit lui-même, en lecture,
+  `HistoriqueObligationsService`, `RegistreValidationsClient`, `MongoRegistreValidationsClient`, `HttpSourceCheminBalance`
+  et `MongoAnnuaireCollaborateurs` ; C ne les exporte pas pour l'instant et la PR de D n'attend pas C. **C s'engage**,
+  pour ces cinq classes : tout changement d'un constructeur, d'une dépendance injectée ou d'une signature est annoncé dans
+  « ⚠ Communs » de C et envoyé à D par message, **avant la fusion** ; avant chaque push, C joue toute la suite du fiscal,
+  l'e2e de D compris (`test/dossier-controle.e2e-spec.ts`). Si D veut un jour l'export, il le demande à C (une petite PR).
+
 - **D-334-8 → C : servie (C #86, ffd6f2a)** (2026-11-27). `CycleObligationsService.revenir` : `DEPOSEE → A_DEPOSER`
   exige `PreuvesDeRejet.rejetDe(orgId, id, versionCourante.numero)`, sinon `409 REJET_REQUIS` (`{ obligationId, numero
   }`) ; le pointeur passe à `{ numero: n + 1, nature: 'RETRANSMISSION', versionId: null, rectificative: null }` ; l'acte
@@ -2590,7 +2666,8 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-27, STORY-336, avant le code)** — branche `MNV-336` de `prospera-fiscal-service`, partie de
+- **FUSIONNÉ (2026-11-27, prospera-fiscal-service#87, `dev` `a991963`, partie d'`origin/dev` `108221e`, à jour au moment de la fusion (aucun rebase nécessaire) ; head `1e6ec93`, arbre identique), conforme à l'annonce ;
+  ANNONCÉ (2026-11-27, STORY-336, avant le code)** — branche `MNV-336` de `prospera-fiscal-service`, partie de
   `origin/dev` `108221e`. **Aucune migration**, aucune collection, aucune écriture ; ni `app.module.ts` (la route entre
   dans `DepotsModule`, fichier de D, déjà monté), ni `package.json`, ni `read-models/` (deux schémas lus, `IdentityUser` et
   `IdentityMembership`, enregistrés en lecture dans `DepotsModule` pour l'annuaire du chemin), ni copie du paquet, ni
@@ -2726,7 +2803,8 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-27, STORY-336, avant le code) — le dossier de contrôle à la demande** (`prospera-fiscal-service`,
+- **PUBLIÉ (2026-11-27, STORY-336 : prospera-fiscal-service#87, `dev` `a991963`) sans écart ; ANNONCÉ (2026-11-27,
+  STORY-336, avant le code, prospera-stories#1020, `main` e75e593) — le dossier de contrôle à la demande** (`prospera-fiscal-service`,
   module `depots`). Fiche : `stories/STORY-336.md` (D-336-1 → 12, section « Contrat »). **Ajouts seuls** :
   - **`GET /api/v1/dossiers-controle?dossierId=…&annee=…[&redevableId=…][&taxe=…][&periode=…]`** (accès fiscal, throttle
     10/min) : 200 `{ perimetre, produitLe, produitPar, exigenceValidationClient, obligations: [{ …ce qui situe
