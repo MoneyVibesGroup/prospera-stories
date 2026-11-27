@@ -2147,6 +2147,8 @@
   rubriques), sans l'exiger. ⛔ **Aucune instance au paquet Togo** : rien n'est relevé sur dimana ni sur le GUDEF (le
   relevé est un geste de 1102). D valide lui-même le bloc à la lecture et teste contre un double du paquet : rien ne
   l'attend. Quand C l'aura déclarée, une recopie du paquet n'est pas nécessaire tant qu'aucune instance n'existe.
+  **Reçue par C** (complément de 342) : placée au plus tard en 344. 561 est livrée sur un double du paquet (fiscal#92,
+  `dev` `997e29a`) ; la demande reste ouverte jusqu'à la fusion de C.
 
 - **→ C (2026-11-27, STORY-337) : information, non bloquante — relier chaque obligation du catalogue du paquet à ses
   comptes, si le PO le veut (Q-D-35).** Le rapprochement des pièces lit les comptes que le chemin nomme (le moteur, depuis
