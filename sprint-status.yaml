@@ -8256,7 +8256,8 @@ sprints:
         epic: "EPIC-033"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-343.md"
+        status: "in_progress"  # 🚧 2026-11-27 — groupe C, lot 7 (n° 15 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-343-1 → 9) ; contrat et communs annoncés (journal de C) : au calendrier du portefeuille, deposee (la version courante scellée) et payee (l'acte humain) lus chacun de son fait, reglement { etat, miseEnEvidence, rapproche, nombre, reste, proposition } — les déposées non réglées mises en évidence, « Payée » proposée, jamais posée par le système ; POST /obligations/{id}/reglements/{reglementId}/annulation (motif, droit regler, collection immuable annulations_reglements, acte au journal chaîné ; la quittance se rapproche de nouveau) ; les annulés ne comptent plus, l'acompte rapproché compte pour la TPU (manque ACOMPTE_PAYE_DIFFERENT_DU_RAPPROCHE) ; montant-paye et transitions de paiement sous regler si B sert « k » ; aucune migration.
         assigned_to: null
       - story_id: "STORY-344"
         title: "Estimation des pénalités et majorations comme risque"
