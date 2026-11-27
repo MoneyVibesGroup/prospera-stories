@@ -465,6 +465,18 @@
     paiement, publié sur Kafka, est acquitté en 15 s et ouvre `fiscalite` sur site en 29 s (licence n° 16), rejeu sans effet.
     Verrou 15:31 → 15:36. Fiche D-1133-1 → 13. `sante` et `migrer` d'`instance` : pas ici (D-1133-11 : `migrer` → STORY-1135,
     `sante` → la supervision d'EPIC-148). Rituel : aucune demande neuve à B chez A, C et D.
+  - **18 — STORY-1136 (27/11) — faite** (la remplaçante de STORY-1116, D-L7B-3 ; ← D, STORY-1066, D-1066-13 (3)) :
+    **l'avoir émis réduit la Créance de sa facture**. **paiement #127** (`0067c2c` sur `dev`) ; contrat annoncé avant la
+    fusion (stories #1052, `f836480`) ; manifeste `paiement` **1.3.0** (stories #1055, `b7eb9a8`) recopié au **catalogue #92**
+    (`480c445`). Consommateur de `facturation.avoir.emis@1` (groupe `paiement-avoirs`, clé `avoirId`) ; registre des avoirs
+    en ajout seul, sommé au seul lieu des restants : reste dû = origine − avoirs − encaissements, le montant d'origine figé ;
+    au-delà, l'argent reçu devient le trop-perçu (crédit du tiers de cette version) ; écriture d'argent tracée
+    (`CREANCE_REDUITE_PAR_AVOIR`), état absolu cause `AVOIR`, `avoirsMineur` facultatif (BACKWARD) ; un avoir avant sa
+    Créance est compté à la naissance (D-1136-4). La licence de 1132 n'est pas touchée (D-1136-10). Les deux e2e rouges sur
+    `e2be149` réparés (MNV-957, MNV-965). Node 25 e2e 386/386 ; mutations 21/21 ; Node 24 354/354 suites ; pile `grp-b` :
+    recette 35/35 (reste dû réduit en 3,2 à 3,7 s, crédit du tiers 50 000), conformité 29/29 (10 livraisons simultanées ⇒ 1
+    réduction), `test:schemas` 17/17. Verrou 15:38 → 15:55. Fiche D-1136-1 → 11. **→ D** : « Réponses ». Rituel : aucune
+    demande neuve à B chez A, C et D.
   - **Suivante : STORY-1134** (n° 16 : l'instance garde la confiance, coupée de Money Vibes, EPIC-149).
 
 ### Lot 6 (ouvert le 2026-11-24)
@@ -532,7 +544,7 @@
        la section `facturation` d'auth ; `manifestes:garde` verte (48).
      Node 25 : auth 36 suites 592/592, complète 1 448 passés (4 suites rouges connues) ; catalogue 1 607 passés (3
      connues) ; 5/5 mutations. **Sans Docker** (D-979-15) : verrou non pris.
-  - **Demande ouverte, à servir par B après le lot 6 : le consommateur de `facturation.avoir.emis@1` dans `paiement`**
+  - ~~Demande ouverte~~ **Servie le 27/11 par STORY-1136** (paiement #127, `0067c2c`) : le consommateur de `facturation.avoir.emis@1` dans `paiement`
     (point (3) de D, STORY-1066 ; D-979-14) : une **story neuve**, placée par la session de groupe **après les sept
     stories du lot 6** (1080, 1112, 1113, 1114, 1103, 1115, 1116), sous un **identifiant neuf réservé à l'écriture de
     sa fiche** (au-delà de la marque haute ; la plage de B 930 → 979 est épuisée). Aucun identifiant n'est réservé ici.
@@ -2038,6 +2050,16 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Réponses aux demandes reçues
 
+- **→ D (27/11, STORY-1136 ; votre demande de STORY-1066, point (3), D-979-14) : `paiement` consomme
+  `facturation.avoir.emis@1`** (paiement #127, `0067c2c` sur `dev` ; fiche STORY-1136). L'avoir réduit la Créance
+  `(FACTURE, factureId)` du TTC crédité en moins de 5 s (3,2 à 3,7 s sur la pile, publication comprise) ; clé de rejeu
+  `avoirId` ; au-delà du reste dû, l'argent reçu devient le trop-perçu, crédit du tiers de cette version (les statuts
+  `IMPUTE` / `REMBOURSE` attendent `paiement.credit-tiers.changed@1`). Votre schéma est copié à l'octet
+  (`contrat/consommes/`, `d9f4264`, sha256 `fe88f304…`) et enregistré tel quel au registre de la recette. **Ce que vous
+  lisez** : `paiement.creance.changed@1` gagne `avoirsMineur` (facultatif, toujours publié) et la cause `AVOIR` ;
+  `restantCertainMineur` compte les avoirs : une facture créditée en entier sans paiement a un reste dû 0 (votre règlement
+  dit `PAYEE`, sous votre `ANNULEE_PAR_AVOIR`). Rien à faire de votre côté.
+
 - **→ D (27/11, ordre « j », deuxième suite de STORY-1124) : l'aller-retour GED ↔ fiscal est joué, 32/32**
   (document-service #43, `f6c00d6` sur `dev` ; fiche STORY-1124, « Suite du 2026-11-27 (bis) »). Votre schéma
   `fiscal.depot.piece-archivee` v1 (`dae6a10`) est l'octet des copies de la GED (`51838a86…3493`) : la GED le dit **publié**.
@@ -2528,6 +2550,9 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, STORY-1136 (n° 18) — LIVRÉ** (paiement #127, `0067c2c` sur `dev` ; manifeste 1.3.0, stories #1055 ;
+  catalogue #92, `480c445`) : conforme à l'annonce ci-dessous, sans écart. **→ D** : « Réponses ».
 
 - **2026-11-27, STORY-1133 (n° 15) — LIVRÉ** (plateforme #43 `b98d1d0` `vecteurs-v2`, #44 `c481f00` `contrats-agent-v1` ;
   centrale #3 `a790a46`, #4 `9942cf1` ; agent #2 `5998597`, #3 `ea634af`) : conforme à l'annonce ci-dessous, sans écart.
@@ -4764,6 +4789,16 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Paiement, garde de STORY-284 (aucune conversion)** : elle refuse tout identifiant qui contient `taux`, **même
+  `tauxTvaPourDixMille` comme clé d'objet dans une spec de `src/`** (le champ du schéma de `facturation`). Écrire la TVA d'un
+  fait de test par `JSON.parse('…')` (STORY-1136).
+- **Paiement, l'e2e réécrit `docs/recette-uj1-mesures.md`** à chaque passage : le remettre (`git checkout`) avant un commit
+  (STORY-1136).
+- **Une recette de pile qui dure plus de ~150 s se lance en arrière-plan** sous `timeout` (le premier passage de 1136, au
+  premier plan sous `timeout 170`, a été coupé au milieu ; le second, en arrière-plan, a fini) (STORY-1136).
+- **Catalogue : `manifestes-seed.service.spec.ts` épingle la version de chaque manifeste recopié** : une recopie
+  (`manifestes:copier`) le fait rougir ; amender l'assertion de la version précédente avec la nouvelle (STORY-1136).
 
 - **Une copie faite depuis une BRANCHE de la plateforme fait rougir « copié à une étiquette »** (STORY-1133) : c'est
   voulu pour éprouver un contrat avant de le figer (`ETIQUETTE=origin/MNV-<n> npm run plateforme:copier`), mais il faut
