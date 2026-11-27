@@ -71,6 +71,7 @@
   | 16 | STORY-1134 | l'instance garde la confiance, coupée de Money Vibes |
   | 17 | STORY-1135 | mettre à jour sans peur, premier incrément |
   | 18 | STORY-1136 | le consommateur de `facturation.avoir.emis@1` dans `paiement` |
+  | l | STORY-1130 (suite) | recopie permanente du paquet fiscal Togo 2026 dans `dossier-service`, fin de lot (← C, STORY-564 → 344 ; D-L7B-16) |
 
 - **D-L7B-6 — deux demandes de C placées par la session de groupe (25/11)** (§1.1 : une demande adressée à B passe
   avant la story suivante ; aucun identifiant neuf) :
@@ -163,6 +164,15 @@
   puis le même geste que STORY-1121) ; aucun identifiant neuf ; commits `MNV-979(auth): …` ; décisions D-979-43 → 49 dans
   sa fiche (« Septième suite (2026-11-27) »). Le point (3) de C (le manifeste `declarations`) est noté, pas fait (choix
   par défaut de C).
+
+- **D-L7B-16 — ordre « l » : la recopie permanente du paquet fiscal, faite en fin de lot 7** (27/11, session de groupe ;
+  §1.1) : la demande de C « → B (2026-11-25, STORY-564) : recopier le paquet fiscal Togo 2026 dans `dossier-service` »,
+  servie par STORY-1130 (`e68ae10`, `d620df8b…`) puis devenue permanente (341, 342, 344 de C : « à la prochaine story de B
+  dans `dossier-service`, sinon en fin de lot »). Aucune story de B n'y est revenue après 1137 : elle se fait en fin de lot,
+  avec la version la plus récente relue au moment de copier (balance-service `origin/dev` `a931877`, #177, STORY-344 ; plus
+  récente que le journal de C, qui nommait encore `4959061a` de 342). **Suite de STORY-1130** (la story qui a servi la
+  demande et posé `.gitattributes` `-text`) ; pas une story du plan, aucun identifiant neuf ; commit `MNV-1130(portefeuille): …`.
+  La recopie **reste permanente pour le lot 8** : à chaque story de B dans `dossier-service`, ou en fin de lot.
 
 - **Avancement** :
   - **a — troisième suite de STORY-979 (25/11) — faite** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
@@ -492,6 +502,15 @@
     `instance.etat.modifie` et bandeau de gel, consentements, ré-émission sous la remplaçante). Rituel : aucune demande neuve
     à B chez A, C et D (la demande permanente de C, paquet fiscal dans `dossier-service`, attend la prochaine story de B sur
     ce dépôt). Coupure réseau (ENOTFOUND) pendant la story, reprise sans perte.
+  - **l — suite de STORY-1130 (27/11, D-L7B-16) — faite** : le paquet fiscal Togo 2026 recopié à l'octet dans
+    `dossier-service` (← C, STORY-564 → 344, servie). **dossier-service #62** (`9541fad` sur `dev`) : balance-service
+    `origin/dev` **`a931877`** (#177), sha256 LF **`c29155550f66b25f90f806dbc24f23fda453dbd8e9f6ec69e2904fb800d0937c`** (remplace
+    `d620df8b…`), vérifiée sur le fichier, le blob indexé et `origin/dev` après fusion ; `.gitattributes` `-text` inchangé ;
+    empreinte reportée dans `paquet-fiscal.util.ts`. Ajouts seulement (`reglement` : versement, ordre, canaux, quittance ;
+    `penalites`), lus par fiscal-service ; `_meta.consommateurs`, `acomptesProvisionnels` et `depot` intacts : aucun contrat
+    touché. Node 25 : `src/modules/portefeuille` 7/7 suites, 136 tests ; lint des fichiers touchés, `nest build` 0 ; mutation
+    (ancienne empreinte) 13 rouges ; `registre-pays.coherence` rouge à l'identique sur `dev` (piège connu). Sans Docker,
+    verrou non pris. Recopie permanente pour le lot 8 (D-L7B-16).
   - **Suivante : STORY-1135** (n° 17 : mettre à jour sans peur, premier incrément, EPIC-151 ; elle juge `METTRE_A_JOUR` par
     la matrice de `contrats-agent-v1.1`).
 
@@ -1498,7 +1517,11 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
-- **→ D (27/11, STORY-1124 j) : la route de service du fiscal sous le limiteur par adresse — non bloquante.** Sur la pile,
+- **→ D (27/11, STORY-1124 j) : la route de service du fiscal sous le limiteur par adresse — non bloquante.** — ✅ **servie
+  par D** (STORY-562, prospera-fiscal-service **#96**, `dev` `81e7605` ; journal de D, #1065, `main` `02823a8`) :
+  `@SkipThrottle()` sur `PiecesDepotServiceController` ; `pieces-depot-service.limiteur.spec.ts` : 150 appels par minute
+  sans 429, mutation rouge. Aucun changement de la route ni du fait ; D a aussi marqué « h » servie chez lui. Texte
+  d'origine : Sur la pile,
   `GET /api/v1/service/organisations/{orgId}/pieces-depot/…` a rendu **429** à la GED après 100 appels en une minute (le
   `ThrottlerGuard` global du fiscal, `THROTTLE_LIMIT` 100 par défaut). La GED n'en abuse plus (D-1124-34), mais la reprise des
   attentes d'un dossier à l'ouverture d'un fonds lit toutes ses pièces d'un coup : au-delà de cent, des 429, que la GED traite
@@ -2104,6 +2127,15 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   chez vous qu'une image d'auth reconstruite depuis `dev`. Votre ligne peut passer à « servie ». Prévenue par message.
 - **← C (27/11, STORY-342) : le droit `regler` chez auth** — **reçue, placée par la session de groupe en ordre « k »**
   (D-L7B-15). **Servie le 27/11 par auth #52** ; voir « → C (27/11, ordre « k ») » ci-dessus.
+
+- **→ C (27/11, ordre « l », D-L7B-16) : recopie du paquet fiscal servie par dossier-service #62** (`9541fad` sur `dev`) —
+  votre demande permanente (STORY-564, servie par 1130 ; versions de 341, 342 et 344) : copie à l'octet de balance-service
+  `origin/dev` **`a931877`** (#177, STORY-344), sha256 **`c29155550f66b25f90f806dbc24f23fda453dbd8e9f6ec69e2904fb800d0937c`**, en
+  LF (`git -c core.autocrlf=false show`), relue sur `origin/dev` de `dossier-service` après la fusion ; elle remplace
+  `d620df8b…` (340) et couvre `6eebc02f` (341) et `4959061a` (342). `.gitattributes` `-text` garde l'octet ; empreinte
+  reportée dans `paquet-fiscal.util.ts` ; rien de ce que `dossier-service` lit ne change. **La recopie reste permanente
+  pour le lot 8** : à chaque story de B dans `dossier-service`, sinon en fin de lot, avec la version la plus récente du
+  moment ; votre ligne « Demandes » peut passer à « servie (`c2915555`) ». Prévenu par message (`moneyvibes-apps-f7`).
 
 - **→ C (27/11, STORY-1130) : servie par dossier-service #60** (`a1bf7fa` sur `dev`, puis `653a70b`) — votre demande « → B
   (2026-11-25, STORY-564, mise à jour par 317, 327, 339) : recopier le paquet fiscal Togo 2026 dans `dossier-service` », et
