@@ -2195,6 +2195,15 @@ reserved_ranges:
       agent.relais-paiement, magasin, acquittements par le volume). Node 25 : plateforme 697/697, centrale 74/74, agent
       78/78 ; mutations 7/7, 8/8, 5/5, 4/4, 5/5, 23/23 ; pile grp-b --profile relais 9/9 (fait publié sur Kafka → fiscalite
       ouverte sur site en 29 s, licence n° 16). D-1133-1 → 13. Suivante : STORY-1134. NON SLOTTÉE.
+  - range: "STORY-1134"
+    status: "in_progress"
+    owner: "Groupe B, lot 7, n° 16 — l'instance garde la confiance, coupée de Money Vibes (EPIC-149), premier incrément : états de confiance nommés et période de grâce jusqu'au gel, compteur et miroir qui n'avance que (recul local), centrale témoin, rotation et révocation des clés sans appel (agent-instance, centrale-service, prospera-plateforme contrats-agent-v1.1)"
+    source_doc: "prospera-stories/stories/STORY-1134.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite le 2026-11-27 juste avant le code ; contrat annoncé avant le code (journal de B, « ⚠ Contrats ») :
+      contrats-agent-v1.1 (contact-requete confiance, contact-reponse certificats, 409 CONFIANCE_EN_ANOMALIE, GET
+      /confiance, POST /simulation/horloge en simulation seulement, etats-de-confiance.json). D-1134-1 → 14. NON SLOTTÉE.
   - range: "STORY-1136"
     status: "done"
     owner: "Groupe B, lot 7, n° 18 — l'avoir émis réduit la Créance de sa facture : paiement consomme facturation.avoir.emis@1 (← D, STORY-1066, D-1066-13 (3), D-979-14 ; la remplaçante de STORY-1116, D-L7B-3) (prospera-paiement-service)"

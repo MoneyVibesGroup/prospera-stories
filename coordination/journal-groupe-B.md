@@ -2551,6 +2551,24 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-27, STORY-1134 (n° 16) — l'instance garde la confiance, coupée de Money Vibes, annoncé AVANT le code**
+  (`prospera-plateforme` étiquette neuve **`contrats-agent-v1.1`**, `centrale-service`, `agent-instance` ; fiche
+  `stories/STORY-1134.md`, D-1134-1 → 14). Lu par **B** seul (centrale, agent ; STORY-1135 lira la matrice) ; **→ C, D** :
+  information, aucun contrat que vous lisez ne change ; **→ A** : information, aucun écran débloqué (le bandeau de gel de la
+  coque vient avec le raccordement aux espaces).
+  - **`contact-requete@1`** (ajout facultatif) : `confiance { compteur, empreinte, empreintePrecedente, etat, niveauAncrage }`,
+    `etat` ∈ `NORMAL` | `SILENCE` | `GEL` | `RECUL_LOCAL`.
+  - **`contact-reponse@1`** (ajout facultatif) : `certificats` (≤ 8 JWS de la racine), rendu seulement à un contact qui porte
+    `confiance` ; sinon réponse à l'octet de 1133.
+  - **`contact.openapi.json` 1.1.0** : `409 CONFIANCE_EN_ANOMALIE` (`{ code, nature }`, recul, bifurcation, recul local) :
+    ni état voulu ni licence, anomalie ouverte jusqu'au ré-ancrage.
+  - **`agent-executeur.openapi.json` 1.1.0** : `GET /confiance` ; `POST /simulation/horloge` (racine de test seulement, `404`
+    ailleurs).
+  - **`etats-de-confiance.json`** (neuf) : seuils (silence 7 j, gel 30 j par défaut), états, opérations, matrice ouvert /
+    fermé.
+  - **Agent** `agent-0.3.0` : `AGENT_MIROIR` (facultatif) ; le dépôt accepte aussi certificats de clé et fichiers d'urgence.
+  - **Inchangés** : contrat d'état publié (1.1.0), `etat-voulu@1`, `licence@1`, `vecteurs-v2`, paiement, catalogue, auth.
+
 - **2026-11-27, STORY-1136 (n° 18) — LIVRÉ** (paiement #127, `0067c2c` sur `dev` ; manifeste 1.3.0, stories #1055 ;
   catalogue #92, `480c445`) : conforme à l'annonce ci-dessous, sans écart. **→ D** : « Réponses ».
 
