@@ -38,7 +38,7 @@
 | 10 → 12 | **FE-081, FE-096, FE-095** | le dépôt et son accusé, le classeur e-DSF, le rejet | ✅ | ✅ validée (25/11) | février |
 | 12 bis | **FE-112** | la liste des obligations fiscales du dossier (question 9 du paquet 2, validée le 25/11) | fiscal ✅ | ✅ validée (26/11) ; se code avant FE-081 | février |
 | 13, 14 | **FE-040, FE-041** | le profil de la société, pré-rempli par la lecture des documents | ✅ | ✅ validées (26/11) | février |
-| 15, 16 | **FE-097, FE-098** | le registre des immobilisations, le plan d'amortissement | 526 → 528 ✅ | FE-097 ✅ validée (27/11), FE-098 ⏳ | février |
+| 15, 16 | **FE-097, FE-098** | le registre des immobilisations, le plan d'amortissement | 526 → 528 ✅ | ✅ validées (27/11) | février |
 | 17 | **FE-084** | l'inventaire de clôture | 534, 535 ✅ | ⏳ | février |
 | 18 → 20 | **FE-116, FE-117, FE-118** | la liquidation et la TPU relues, les déficits, le régime dérogatoire | ✅ | ⏳ | février |
 | 21 | **FE-077** | l'export de l'état de rapprochement | STORY-1020 (C) | ⏳ | quand C l'a livrée |

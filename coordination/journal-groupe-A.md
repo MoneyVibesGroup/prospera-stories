@@ -860,6 +860,17 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   bien (route chez C, contenu à fixer par le PO) ; (5) `compteAmortissement` et `compteDotation` sont obligatoires à
   l'acquisition et jamais proposés : l'écran les déduit (28 + suffixe du compte, 681). Détail dans `frontend-stories/FE-097.md`,
   « Écarts backend ». À placer au lot 7 de C quand il l'ouvre, avant le code de FE-097 si possible (le point 1 surtout).
+- → C (27/11, FE-098, `prospera-balance-service`, plan d'amortissement) — **ouverte, non bloquante** (maquette validée le 27/11 ;
+  s'ajoute aux points 1 à 5 de FE-097, dont le point 1 est en partie servi par le contrat annoncé en `edde498`) : (1) aucune
+  route ne relit la dernière publication du tableau (l'aperçu est un `POST`) : l'écran ne sait pas dire « tableau déjà envoyé »
+  à la réouverture ; (2) une balance qui porte une partie des dotations rend `NON_VENTILABLE` et rien ne s'écrit : pouvoir
+  désigner la contrepartie (décision de produit prise : rien d'écrit d'office, l'écart montré) ; (3) `confrontation[].registre`
+  ne dit pas si les biens sortis entrent dans le cumul à la clôture ; (4) l'exercice ouvert après celui de l'arrêté a-t-il sa
+  ligne dans le plan ? À confirmer. Détail dans `frontend-stories/FE-098.md`, « Écarts backend ».
+- → D (27/11, FE-098, `prospera-bilan-service`, FE-125) — **ouverte, non bloquante** : la note 3 du Bilan ne cite pas sa source ;
+  aucune route ne la rend avec le registre, l'empreinte et la version de la balance, ni n'accuse réception de
+  `evenementTableau`. À prendre avec FE-125 ; à la livraison, confirmer avec A que le registre remplace la saisie de secours de
+  FE-080 (lecture seule).
 ## Questions à l'utilisateur ou au PO
 
 - **Parcours réel du dossier de financement (2026-11-21), avec le choix retenu par défaut** (aucune ne bloque l'écriture des fiches) :
