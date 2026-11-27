@@ -2818,6 +2818,17 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-27, STORY-565, avant le code)** — branche `MNV-565` de `prospera-fiscal-service`, partie
+  d'`origin/dev` `81e7605`. **Une migration en vol** (D-565-2) : `src/migrate-portee-coffre-redevable.ts` et son script
+  `migrate:portee-coffre-redevable` dans **`package.json`** — la portée du coffre (560) gagne le redevable : rangement de
+  `redevableId: 'entreprise'` sur les canaux et jetons sans ce champ, index unique `coffre_une_portee_redevable` créé
+  avant la suppression de `coffre_une_portee`. Touché aussi parmi les communs : **le contrat OpenAPI** (« ⚠ Contrats »).
+  Ni `app.module.ts` (`ConnecteurDepotModule` et `DepotsModule` importent `ReglementModule` de C, sans cycle ;
+  `CoffreSecretsModule` importe `RedevablesModule` de C), ni `read-models/`, ni `config/`, ni copie du paquet (un double
+  du paquet), ni manifeste `declarations`, ni fichier de C ; la garde FR-F47 de C passe sans modification. Les
+  fournisseurs de C en lecture de 336 (D-336-4) ne changent pas. **→ C** : aucune migration à ouvrir sur le fiscal
+  avant la fusion de 565. Fiche : `stories/STORY-565.md` (« Réalignement du 2026-11-27 »).
+
 - **FUSIONNÉ (2026-11-27, prospera-fiscal-service#96, `dev` `81e7605`, rebasée sur `origin/dev` `535e190` ; head `f2110da`), conforme à l'annonce (rebasée localement sur 535e190 sans conflit, sans push forcé : la fusion `--rebase` a rejoué la branche, et l'arbre de `dev` est identique à l'arbre rebasé et éprouvé, 6a521db) ;
   ANNONCÉ (2026-11-27, STORY-562, avant le code)** — branche `MNV-562` de `prospera-fiscal-service`, partie
   d'`origin/dev` `997e29a`. **Aucune migration** : une collection neuve de D, `suivis_connecteur` (index unique par
@@ -3003,6 +3014,23 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-27, STORY-565, avant le code) — le dépôt automatisé sert les deux redevables, et le règlement
+  reste produit, jamais exécuté** (`prospera-fiscal-service`, modules `coffre-secrets`, `connecteur-depot` et `depots`).
+  Fiche : `stories/STORY-565.md` (D-565-1 → 10). **Ajouts, sauf la portée du coffre** :
+  - coffre : le paramètre de requête facultatif `redevable` sur les routes `…/dossiers/{dossierId}/coffre/…` (absent :
+    `entreprise`, la réponse d'aujourd'hui) ; `EtatCanal.redevableId` ; `404 REDEVABLE_INTROUVABLE` ; le lien de dépôt et
+    le jeton d'usage portent la portée entière (le dirigeant dépose **son** secret, sous **son** mandat de canal) ;
+  - `GET /api/v1/connecteurs-depot/depots/{depotId}/parcours` gagne `reglement` : `null` tant que l'issue n'est pas
+    `DEPOSE`, puis le résultat d'`OrdreDeReglementService.deLObligation` (C, 341) **tel quel** — `{ statut: PRODUIT,
+    ordre }` | `{ statut: NON_PRODUIT, motif, message, details }` — plus le seul motif de D `ORDRE_D_UN_AUTRE_REDEVABLE` ;
+    jamais une coordonnée bancaire ; rien n'est stocké ;
+  - le chemin du dépôt : la raison `IDENTIFIANT_FISCAL_ABSENT` ; `MANDAT_ABSENT` porte `details { redevableId, canal }` ;
+  - `POST /depots-declaration` : `409 OBLIGATION_DESACTIVEE` porte `details.motif` (le motif de dispense) ;
+  - `GET /api/v1/dossiers-controle` : `obligations[].reglement` `{ statut: LU, du, rapproche, annules, reste, ecartPaye,
+    motif, chemin, reglements }` (sans `paye` : le triplet de 322 le porte) | `{ statut: INDISPONIBLE, code, message }` ;
+  - **donnée lue neuve** : la source de valeur `REDEVABLE|identifiantFiscal` dans un parcours du bloc `automatisation`
+    (le schéma de C, 344, laisse `champs` libre : aucune demande).
 
 - **PUBLIÉ (2026-11-27, STORY-562 : prospera-fiscal-service#96, `dev` `81e7605`) sans écart ; ANNONCÉ (2026-11-27, STORY-562, avant le code) — le suivi du parcours d'un dépôt automatisé, et l'accusé ou le
   rejet relevé** (`prospera-fiscal-service`, modules `connecteur-depot` et `depots`). Fiche : `stories/STORY-562.md`
@@ -4441,6 +4469,12 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-38 (2026-11-27, STORY-565) — faut-il exiger un verdict « doit déclarer » (568) enregistré avant de déposer la
+  déclaration de revenus du dirigeant ?** 568 ne stocke aucun verdict (aucune liste de personnes « non en règle ») ; une
+  dispense établie se traduit par l'obligation **écartée** avec son motif (FR-F08), et le dépôt d'une obligation écartée
+  est refusé en citant ce motif (D-565-6). **Choix par défaut** : aucun verdict stocké ; une obligation dérivée et active
+  est due ; l'écarter est l'acte du professionnel qui a lu le verdict.
 
 - **Q-D-37 (2026-11-27, STORY-562) — faut-il un fait pour qu'on apprenne qu'un suivi s'arrête ou ne sait pas lire ?**
   La notification est hors périmètre ; le cabinet le voit dans le produit (`GET /connecteurs-depot/suivis/a-traiter`,
