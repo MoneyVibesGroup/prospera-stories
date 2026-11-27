@@ -63,6 +63,7 @@
   | i | STORY-979 (6ᵉ suite) | recopie `comptabilite` 0.6.0 au catalogue, avec « h » (← C, STORY-338 ; D-L7B-13) |
   | 12 | STORY-1130 | effacer le dossier de démonstration à la fin d'un essai |
   | 12 bis | STORY-1137 | les modules s'ouvrent dans l'essai (ticket de 1116) |
+  | j | STORY-1124 (2ᵉ suite) | les faits proposés publiés, l'aller-retour GED ↔ fiscal joué (← D, après fiscal #89 ; D-L7B-14) |
   | 13 | STORY-1131 | les restes d'EPIC-145, 146, 147 |
   | 14 | STORY-1132 | la licence signée, premier incrément |
   | 15 | STORY-1133 | l'interface de l'agent publiée |
@@ -141,6 +142,16 @@
   identifiant neuf ; même PR du catalogue que « h ». La route que la comptabilité lit dans la GED (`GET
   …/ged/cabinet/pieces/{pieceId}/versions/{version}` : empreinte, nature, dossierId, etat, version) n'est pas touchée par
   « h ».
+
+- **D-L7B-14 — ordre « j » : la suite de « h » placée après STORY-1137 et « k », avant STORY-1131** (27/11, session de
+  groupe ; §1.1) : D a fusionné le fait et la route dans le fiscal (`prospera-fiscal-service` #89, `dev` `dae6a10` ; docs
+  #1023, #1028, `main` `5a07107`) et n'a pas joué l'aller-retour. Trois gestes dans `document-service` : vérifier que
+  l'octet du fiscal et celui de C (`comptabilite.facture.desinscrite`, comptabilite #21, `58803f5`) sont ceux de la GED,
+  passer les deux faits de « proposition » à « publié », et jouer l'aller-retour réel sur une pile `grp-b` neuve, avec
+  le vrai fiscal (image depuis l'archive de `origin/dev` du dépôt de C, lecture seule) et un jeton de service né dans la
+  pile. **Deuxième suite de STORY-1124** (la story de « h ») ; aucun identifiant neuf ; commits `MNV-1124(ged): …` ;
+  décisions D-1124-27 → 33 dans sa fiche (« Suite du 2026-11-27 (bis) »). « k » (droit `regler`, `auth-service`) est servie
+  à part, par une autre sous-session.
 
 - **Avancement** :
   - **a — troisième suite de STORY-979 (25/11) — faite** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
@@ -2380,6 +2391,21 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, deuxième suite de STORY-1124 (ordre « j », D-L7B-14) — les deux faits proposés sont PUBLIÉS, annoncé
+  AVANT la fusion** (`document-service`, GitHub `prospera-ocr-service`, branche `MNV-1124-j` ; fiche `stories/STORY-1124.md`,
+  « Suite du 2026-11-27 (bis) », D-1124-27 → 33). **Aucun changement de forme** : ni schéma, ni route, ni droit, ni fait
+  publié ; le manifeste `ged` reste **1.11.0** (deux commentaires, aucune valeur : D-1124-30), le catalogue n'est pas
+  touché.
+  - **`fiscal.depot.piece-archivee` v1 — publié par D** (`prospera-fiscal-service` #89, `dev` `dae6a10`,
+    `src/kafka/events/fiscal.depot.piece-archivee.v1.json`) : sha256 LF `51838a86…3493`, **l'octet des deux copies de la
+    GED** ; consommé dans le groupe `ged.fiscal`, octets tirés par `GET
+    /api/v1/service/organisations/{orgId}/pieces-depot/{nature}/{pieceId}` (`FISCAL_SERVICE_URL`, `FISCAL_JETON_SERVICE`).
+  - **`comptabilite.facture.desinscrite` v1 — publié par C** (`prospera-comptabilite-service` #21, `dev` `58803f5`,
+    `contrat/schemas/`) : sha256 LF `86a50e6f…2ecf`, l'octet des deux copies de la GED (groupe `ged.comptabilite`).
+  - `contrat/ORIGINE-DES-SCHEMAS.json` nomme ces deux sources ; manifeste `[proposition, à …]` → `[publié par …]`.
+  - **→ D** : rien à faire avant le résultat de l'aller-retour (« Réponses » à la fin). **→ C** : rien à faire ; la route
+    `GET …/ged/cabinet/pieces/{pieceId}/versions/{version}` que la comptabilité lit n'est pas touchée. **→ A** : rien.
 
 - **2026-11-27, STORY-1137 — LIVRÉ** (dossier-service #61, `2f6e058` ; catalogue #90, `12c4c84` ; BFF #47, `7ac4db4` ; recette #38,
   `7999caf` sur `dev`) : conforme à l'annonce ci-dessous, **un ajout** : le BFF juge lui-même la forme des référentiels (400

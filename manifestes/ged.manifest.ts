@@ -91,6 +91,9 @@ export const MANIFESTE_GED = {
   // à l'obligation, l'implantation, la période et la version (`fiscal.depot.piece-archivee`, proposé à D ; les octets
   // tirés par la route de service du fiscal) ; une route de lecture neuve. Le plan de classement du cabinet passe en
   // 2026.3 (`ACCUSE_DEPOT`), paramètre du service, hors manifeste.
+  //   Même version (2026-11-27, demande « j », D-1124-30) : les deux faits proposés sont publiés par leurs producteurs
+  //   (`comptabilite.facture.desinscrite`, comptabilite #21 ; `fiscal.depot.piece-archivee`, fiscal #89), à l'octet
+  //   des copies de la GED ; seuls ces commentaires changent, aucune valeur.
   version: '1.11.0',
 
   // C1 : aucune dépendance dure. La GED reçoit, lit, classe, conserve et retrouve des pièces sans autre module ; une pièce
@@ -175,8 +178,8 @@ export const MANIFESTE_GED = {
     'sinistres.acces-sante.retire@1',
     'reprise.cles-rattachement.publiees@1', // numéro de police, de sinistre, `DEC-`, numéro d'archivage d'origine (FR-215)
     'comptabilite.facture.inscrite', // STORY-1100 : une facture inscrite au brouillard, rangée en copie pré-indexée au fonds du client (si `comptabilite` est installé)
-    'comptabilite.facture.desinscrite', // STORY-1124 [proposition, à C] : le brouillard né d'une facture inscrite est abandonné ; la copie jamais versée est retirée du fonds, la copie versée gardée
-    'fiscal.depot.piece-archivee', // suite de STORY-1124 [proposition, à D] : une pièce du dépôt d'une déclaration archivée au fiscal, copiée (ou rattachée) au fonds du client ; les octets tirés par la route de service du fiscal
+    'comptabilite.facture.desinscrite', // STORY-1124 [publié par C, comptabilite #21] : le brouillard né d'une facture inscrite est abandonné ; la copie jamais versée est retirée du fonds, la copie versée gardée
+    'fiscal.depot.piece-archivee', // suite de STORY-1124 [publié par D, fiscal #89] : une pièce du dépôt d'une déclaration archivée au fiscal, copiée (ou rattachée) au fonds du client ; les octets tirés par la route de service du fiscal
     'dossier.updated', // STORY-1120 : un dossier client archivé (`statut: ARCHIVE`, état absolu publié par `dossier-service`) ferme ses fonds d'archives ouverts
     'ia.proposition.statut.change@1', // [AD-5, AD-41 de la spine IA] statut écrit par `ia` (expiration comprise), pour l'affichage
     'ia.capacite.changed@1', // [AD-32 de la spine IA] état absolu d'une capacité : coupée, dégradée, en service
