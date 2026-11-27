@@ -4,6 +4,9 @@ Status: done (2026-11-27 — prospera-fiscal-service#85, `dev` `108221e` ; lot 7
 contrat annoncé avant le code (prospera-stories#1009, `main` af552d3). ⚠️ AC-1 (« dans `document-service` ») et V9 :
 la copie au fonds d'archives du client est demandée à B (« h », D-335-9) ; l'original est archivé, rattaché et relu
 par URL présignée dans le fiscal.
+**Suite du 2026-11-27** (« h » servie par B : document-service #42, catalogue #88) : le fait
+`fiscal.depot.piece-archivee` v1 par l'outbox, dans la transaction de l'archivage, et la route de service qui sert
+les octets à la GED ; AC-1 et V9 tenus dans `document-service` (section « Suite du 2026-11-27 », D-335-11 → 19).
 Écrite le 2026-11-26 par la sous-session du groupe D juste avant de coder (lot 7 de D, n° 12,
 `PLAN-LOT-7-2026-11-24.md` §4 : « même réalignement, en partie » — avec 537 → 539 et 688 → 691, lot 6 §3). Il
 n'existait pas de fiche : les critères viennent d'`epics-fiscalite-2026-08-03.md` (EPIC-032) et de la salle des
@@ -228,9 +231,138 @@ taxe et à la période, que 336 lira. Ce qui n'est pas dans les dossiers de D : 
     - **Verrou Docker** : trois prises par des scripts autonomes, chacune rendue par son `trap` : 00:30:18 → 00:48:05 (passe 1, `91d7069`), 00:48:27 → 00:56:44 (l'e2e rejoué et la mutation du registre), 01:18:16 → 01:25:48 (passe finale sur `e55baa5`). Un quatrième script, lancé puis arrêté avant toute prise, quand C a fusionné #86. B et C prévenus à chaque reddition. Il ne reste aucun conteneur, volume ni réseau
       `grp-d`.
 
+## Suite du 2026-11-27 — la copie au fonds d'archives du client (« h » servie par B)
+
+**Pourquoi :** 335 a été livrée (fiscal #85, `dev` `108221e`) avec l'AC-1 « dans `document-service` » et la V9 tenues
+**dans le fiscal seulement** : le lien vers la GED passait par le port `CopieAuFondsDArchives`, branché sur l'adaptateur
+inerte `CopieAuFondsInerte` (D-335-9, Q-D-31). B a servi la demande « h » le 27/11 par la **forme (1)** :
+document-service #42 (`dev` `8f9040d`) consomme `fiscal.depot.piece-archivee` v1 et tire les octets par une route de
+service du fiscal ; catalogue #88 (`ged` 1.11.0, le fait en `consomme`). Détail : journal de B, « Réponses » → D
+(`prospera-stories` `main` e3eaf4d) ; fiche `STORY-1124.md`, « Suite du 2026-11-27 » (D-1124-13 → 26). Cette suite écrit
+la part du fiscal, dans le dossier `depots` de D, sans identifiant neuf. Branche `MNV-335-suite`, commits `MNV-335(fiscal):
+…`, partie d'`origin/dev` `a991963` (336).
+
+### Diagnostic (relu dans le code, fiscal `dev` `a991963`)
+
+| Ce que B attend | Ce que le fiscal a | Écart |
+| --- | --- | --- |
+| Le fait `fiscal.depot.piece-archivee` v1, par l'outbox, **dans la transaction** de l'archivage du livrable | `ArchivesDepotService.archiver` écrit le livrable et son acte au journal chaîné dans **une** transaction (`MongoRegistreLivrablesArchives.archiver`), puis appelle `CopieAuFondsDArchives.copier` **après**, hors transaction, échec avalé ; l'adaptateur est inerte | Rien ne sort ; un « après » perdrait la copie sur une panne |
+| Le même fait à la consignation d'un accusé **avec sa pièce** | `MongoRegistreAccusesDepot.consigner` : l'accusé et son acte, une transaction ; aucun appel au port | Rien ne sort |
+| `VALIDATION_CLIENT` avec `pieceGed { pieceId, version, sha256 }` « quand 336 la lira » | La consignation est chez C (`RegistreValidationsClient`, dossier `obligations`) ; la référence gardée est `{ gedPieceId, gedVersion }`, **sans l'empreinte** de la pièce de la GED | Hors des dossiers de D, et le schéma exige `sha256` : **laissé à plus tard** (D-335-14) |
+| La route `GET /api/v1/service/organisations/{orgId}/pieces-depot/{nature}/{pieceId}` au jeton de service | Aucune route de service ; aucune garde de jeton de service dans le fiscal (il n'en est qu'**appelant**, vers notification : `NOTIFICATION_JETON_DE_SERVICE`) ; le patron de STORY-589 vit dans `prospera-notification-service` (`config/jetons-de-service.ts`, `common/guards/jeton-de-service.guard.ts`) | À écrire (patron recopié, pas importé) |
+| Les octets relus et re-hachés avant d'être servis (682) | `ArchiveLivrables.mesurer` relit et hache en flux, borné à taille + 1, **sans garder les octets** ; `verifierFichierArchive` rend `502 FICHIER_ARCHIVE_ALTERE` | Une lecture qui garde les octets, sur le même parcours |
+| Retrouver la pièce par son identifiant (`archiveId`, `accuseId`) | Les registres lisent par dépôt, par version, par obligation | Une lecture par identifiant, dans l'organisation |
+| Le schéma « où le fiscal publie ses faits » | Les faits produits sont des **contrats TypeScript** dans `src/kafka/events/` (`declaration-events.ts`, `alerte-echeance-events.ts`) ; aucun schéma JSON, aucun registre de schémas (pas de Karapace dans la pile du fiscal) | Le schéma de B recopié à l'octet à côté du contrat TS, gardé par son sha256 |
+| Le fait au catalogue | `ged` 1.11.0 (catalogue #88) le porte en `consomme` ; le manifeste `declarations` (C5 `publie`) ne le porte pas — ni `fiscal.obligation.alerte-echeance` de 318 : il n'a pas changé depuis le 12/11 et n'est pas recopié dans le fiscal | Annoncé dans « ⚠ Contrats » ; la mise à jour du manifeste reste à placer (Q-D-34) |
+
+### Critères d'acceptation de la suite
+
+1. **(AC-1, dans `document-service`)** **Étant donné** un dépôt engagé dont le livrable s'archive (`POST
+   …/depots-declaration/{depotId}/livrable`) **alors** le livrable, son acte au journal chaîné **et** une ligne d'outbox
+   `fiscal.depot.piece-archivee` (`nature: LIVRABLE_DEPOSE`, `piece.id` = `archiveId`) commitent **ensemble ou pas du
+   tout** ; le relais la publie (clé `orgId`, en-têtes `eventId`, `schemaVersion`) ; un second archivage refusé
+   (`LIVRABLE_DEJA_ARCHIVE`) n'émet rien.
+2. **(AC-1)** **Étant donné** un accusé consigné **avec sa pièce** **alors** le même fait part dans la transaction de la
+   consignation (`nature: ACCUSE_DEPOT`, `piece.id` = `accuseId`) ; un accusé par référence seule n'émet rien.
+3. **(contrat)** Chaque fait émis est **valide contre le schéma de B recopié à l'octet** (sha256 LF `51838a86…3493`) :
+   `piece.sha256` en 64 hexadécimaux sans `sha256:`, `taille`, `type` (celui lu dans les octets), `nom` ; rien d'autre
+   (`additionalProperties: false`), ni signataire, ni auteur, ni texte libre.
+4. **(route de service)** `GET /api/v1/service/organisations/{orgId}/pieces-depot/{nature}/{pieceId}` au jeton de
+   `document-service` : **200** les octets exacts, relus et re-hachés d'abord, `X-Empreinte-Sha256` = l'empreinte du fait ;
+   **401 `JETON_DE_SERVICE_REQUIS`** sans jeton, avec un jeton inconnu ou un jeton d'utilisateur ; **404
+   `PIECE_INTROUVABLE`** (inconnue, autre organisation, nature qui ne va pas, accusé sans pièce, identifiant mal formé) ;
+   **502 `FICHIER_ARCHIVE_ALTERE`** sur un objet absent ou altéré.
+5. **(V9, en partie)** La GED de B consomme le fait et tire les octets : la copie entre au fonds du client, rattachée à
+   l'obligation, l'implantation, la période et la version. La validation du client y sera **rattachée** plus tard
+   (D-335-14).
+
+### Décisions de la suite (contestables)
+
+- **D-335-11 — Le port inerte retiré ; le fait dans la transaction.** `CopieAuFondsDArchives` et `CopieAuFondsInerte`
+  disparaissent : la copie n'est plus un « après » qui avale son échec, c'est un fait de l'outbox écrit **sous la même
+  session** que le livrable (ou l'accusé) et son acte. Un rollback l'efface ; un commit le garde, le relais le livre au
+  moins une fois (681, 318). La forme (1) de B, telle quelle (D-1124-14).
+- **D-335-12 — Le cas d'usage construit le fait, le registre l'écrit** (patron de 681 : `declarationDeposee` passé à
+  `RegistreDepots.transitionner`). `kafka/events/piece-archivee-events.ts` (contrat TS, pur) ; `archiver(orgId, livrable,
+  fait?)` et `consigner(orgId, accuse, fait?)` reçoivent l'enveloppe (`eventId` neuf, clé `orgId`, `schemaVersion: 1`) et
+  l'écrivent par `OutboxService.enqueue` dans leur transaction ; un rejeu de `withTransaction` garde le même `eventId`.
+  Topic `fiscal.depot.piece-archivee`, sans suffixe de version (comme 681 et 318).
+- **D-335-13 — Ce que le fait dit.** Les rattachements viennent du livrable archivé, et de la déclaration pour l'accusé
+  (implantation, redevable, taxe, période) ; `numero` = la version ; `depotId` = le dépôt engagé ; `date` = le jour civil
+  de l'engagement du dépôt pour le livrable, `deposeLe` (la date réelle du dépôt portée par l'accusé) pour l'accusé ;
+  `occurredAt` = l'instant de l'archivage ou de la consignation ; `piece.sha256` = l'empreinte de 682 sans son préfixe.
+  Aucune garde de forme à la production : les données viennent de registres typés dont les formes sont celles du schéma ;
+  les tests valident chaque fait construit contre le schéma.
+- **D-335-14 — `VALIDATION_CLIENT` laissée à plus tard.** La consignation d'une pièce du client est chez C (324,
+  `RegistreValidationsClient`, dossier `obligations`) et la référence gardée (`{ gedPieceId, gedVersion }`) n'a pas
+  l'empreinte de la pièce que `pieceGed.sha256` exige. L'émettre demanderait d'écrire dans un fichier de C et de lire la
+  GED à la consignation. Le contrat TS porte déjà la nature et `pieceGed` (le schéma les accepte) ; aucun fait
+  `VALIDATION_CLIENT` n'est émis. À placer par l'utilisateur (→ C, plus tard).
+- **D-335-15 — Le jeton de service, patron de STORY-589, dans le dossier de D.** `JETONS_DE_SERVICE=document-service:<jeton>`
+  est lu par un fournisseur de `DepotsModule` (patron du coffre de 560, aucune ligne de `config/`) et analysé **au
+  démarrage** : un appelant hors de la liste fermée (`document-service` seul), un doublon, un jeton de moins de 32
+  caractères ou deux appelants sur un jeton font échouer le boot en nommant la faute, jamais le jeton. Seule l'empreinte
+  SHA-256 survit ; la comparaison est à temps constant et parcourt toutes les empreintes. Absente : la route refuse tout
+  (401) et le service démarre. La route est `@Public()` pour la chaîne des jetons d'utilisateur et gardée par
+  `JetonDeServiceGuard` : un jeton d'utilisateur n'y vaut rien.
+- **D-335-16 — Un seul 404.** `PIECE_INTROUVABLE` pour une pièce inconnue, d'une autre organisation, d'une autre nature,
+  un accusé sans pièce, et un `orgId` ou un `pieceId` mal formé ou une nature inconnue : la route ne dit pas lequel
+  (anti-énumération, comme `HORS_ORGANISATION`).
+- **D-335-17 — Les octets relus en entier, sur le parcours de `mesurer`.** `ArchiveLivrables.lire(cle, plafond)` relit
+  l'objet en flux, le hache et garde ses octets, borné à taille + 1 ; `verifierFichierArchive` (682, le code des URL
+  présignées de 335) juge avant que rien ne parte : `502 FICHIER_ARCHIVE_ALTERE` si l'objet manque ou diffère. 200 :
+  `Content-Type: application/octet-stream`, `X-Empreinte-Sha256` (64 hexadécimaux), `Cache-Control: no-store`. Le stockage
+  absent : `503 STOCKAGE_INDISPONIBLE` (la GED relit le message).
+- **D-335-18 — Le schéma à l'octet, à côté du contrat TS.** `src/kafka/events/fiscal.depot.piece-archivee.v1.json`,
+  recopié depuis `prospera-ocr-service` `dev` (`contrat/consommes/`), sha256 LF `51838a86…3493`, gardé par un test (fins de
+  ligne normalisées). Le fiscal n'a pas de registre de schémas : « enregistrer au registre » (B) n'a pas d'objet ici. Un
+  validateur minimal du sous-ensemble employé (types, motifs, bornes, `const`, `enum`, `required`,
+  `additionalProperties`, `if`/`then`/`else`) juge chaque fait construit dans les tests : Ajv 8 n'est pas une dépendance du
+  fiscal, et aucune dépendance neuve n'entre (`package.json` intact).
+- **D-335-19 — Le manifeste `declarations` n'est pas touché.** Catalogue #88 couvre le fait côté consommateur (`ged`
+  1.11.0) ; côté producteur, `publie` ne porte ni ce fait ni celui de 318, le manifeste n'a pas changé depuis le 12/11 et
+  il n'est pas recopié dans le fiscal. Le contrat est annoncé dans « ⚠ Contrats » ; la version du manifeste (C5 : les
+  deux faits) reste à placer (Q-D-34).
+
+### Contrat (annoncé avant le code)
+
+| | |
+| --- | --- |
+| **Fait publié (neuf)** | `fiscal.depot.piece-archivee` v1 — outbox du fiscal, dans la transaction de l'archivage du livrable (`LIVRABLE_DEPOSE`, `piece.id` = `archiveId`) et de la consignation d'un accusé avec pièce (`ACCUSE_DEPOT`, `piece.id` = `accuseId`) ; clé `orgId` ; en-têtes `eventId`, `schemaVersion` ; schéma de B à l'octet (sha256 LF `51838a86…3493`) ; consommé par `document-service` (groupe `ged.fiscal`) |
+| **Route de service (neuve)** | `GET /api/v1/service/organisations/{orgId}/pieces-depot/{nature}/{pieceId}` — `nature` : `LIVRABLE_DEPOSE` \| `ACCUSE_DEPOT` ; `Authorization: Bearer <jeton de service>` ; aucun jeton d'utilisateur, aucun droit |
+| Réponse 200 | les octets exacts, `Content-Type: application/octet-stream`, `X-Empreinte-Sha256: <64 hexa>`, `Cache-Control: no-store` |
+| Refus | **`401 JETON_DE_SERVICE_REQUIS`** · **`404 PIECE_INTROUVABLE`** · `502 FICHIER_ARCHIVE_ALTERE` · `503 STOCKAGE_INDISPONIBLE` · `429` |
+| **Variable (neuve)** | `JETONS_DE_SERVICE=document-service:<jeton>` (32 caractères au moins ; absente : la route refuse tout) ; côté GED : `FISCAL_SERVICE_URL`, `FISCAL_JETON_SERVICE` (le même jeton) |
+| Aucun | collection, index, migration, droit, champ d'une route existante ; les routes de 335 ne changent pas |
+
+### Ce que la suite ne fait PAS
+
+- ⛔ Elle n'émet aucun fait `VALIDATION_CLIENT` et ne touche aucun fichier de C (D-335-14).
+- ⛔ Elle ne change ni le manifeste `declarations` (Q-D-34), ni `package.json`, ni `app.module.ts`, ni `config/`.
+- ⛔ Elle ne remplace pas l'original : la preuve reste au fiscal, re-vérifiée à chaque lecture (Q-D-31) ; la copie de la
+  GED n'en est qu'un reflet.
+
+### Definition of Done de la suite
+
+- [ ] Le fait part dans la transaction de l'archivage et de la consignation avec pièce, et pas autrement (unitaires,
+      e2e) ; sur **MongoDB réel** (`test:conformite`) : livrable, acte et ligne d'outbox tout ou rien ; dix archivages
+      parallèles ⇒ un seul fait.
+- [ ] Chaque fait construit valide contre le schéma recopié, dont le sha256 LF est gardé par un test.
+- [ ] La route : 200 (octets et empreinte), 401, 404 (chaque cas), 502 ; l'analyse de `JETONS_DE_SERVICE` refuse au
+      démarrage ce qu'elle doit refuser ; la liste fermée des routes publiques le dit.
+- [ ] **Mutations** rouges sur une assertion ; lint des fichiers touchés et `tsc` : 0.
+- [ ] Node 24 : unitaires, e2e, `test:conformite` ; §1.5 : pile `grp-d` du fiscal **avec Redis**, le fait écrit à
+      l'outbox **et publié** sur Kafka, la route en 200 avec la bonne empreinte, 401 sans jeton, 404.
+
 ## Questions au PO
 
 - **Q-D-31 — La preuve du dépôt vit dans le fiscal ; le fonds du client en reçoit-il une copie ?** L'AC-1 dit « dans
   `document-service` » ; le lot 6 a mis la preuve du dépôt dans le bucket privé du fiscal (682), re-vérifiée à chaque
   lecture. **Choix par défaut** (D-335-9) : l'original reste au fiscal (la preuve, l'empreinte, l'URL présignée) ; la
   GED de B en reçoit une copie rattachée, quand B l'aura ouverte (« → B », journal de D).
+
+- **Q-D-34 — Le manifeste `declarations` doit-il publier ses faits ?** Son `publie` (C5) ne porte ni
+  `fiscal.depot.piece-archivee` (cette suite) ni `fiscal.obligation.alerte-echeance` (318) ; il n'a pas changé depuis le
+  12/11 et n'est pas recopié dans le fiscal. **Choix par défaut** (D-335-19) : la suite ne le touche pas ; la GED porte
+  le fait en `consomme` (`ged` 1.11.0). Une version du manifeste (les deux faits), recopiée au catalogue par B, est à
+  placer par l'utilisateur.

@@ -2053,7 +2053,8 @@
   démarrage de la pile (§1.5) : le dire à D dans « ⚠ Communs » de C suffit.
 
 - **→ B (2026-11-26, STORY-335) : recevoir dans le fonds d'archives du client les pièces du dépôt d'une déclaration —
-  ouverte, placée par B (« h », après sa 1129, avant 1130).** B choisira la forme (un fait consommé par la GED, ou une
+  servie côté B le 27/11 (document-service #42, catalogue #88 ; « Réponses ») ; à écrire côté fiscal : suite de 335,
+  en cours.** Placée par B (« h », après sa 1129, avant 1130). B choisira la forme (un fait consommé par la GED, ou une
   route de dépôt de la GED) et répondra dans « Réponses » de son journal, avec un message, avant tout code de D. Côté D,
   le lien est derrière le port `CopieAuFondsDArchives` (adaptateur inerte, fiscal #85).
   - Pourquoi : AC-1 de 335 (« archivé dans `document-service`, rattaché au dossier, à l'implantation, à l'obligation et à
@@ -2545,6 +2546,11 @@
 
 ## Réponses aux demandes reçues
 
+- **← B : « h » — servie** (2026-11-27 ; document-service #42, `dev` `8f9040d` ; catalogue #88, `dev` `e528afc`, `ged`
+  1.11.0 ; journal de B, « Réponses » → D, `main` e3eaf4d ; `STORY-1124.md`, « Suite du 2026-11-27 »). Forme (1) : le
+  fait `fiscal.depot.piece-archivee` v1 du fiscal, la GED tire les octets par une route de service du fiscal. Côté D :
+  suite de 335 (`MNV-335-suite`, annoncée dans « ⚠ Contrats » et « ⚠ Communs ») ; `CopieAuFondsInerte` retiré.
+
 - **336 — accord avec C sur les fournisseurs de C fournis en lecture par `DepotsModule`** (2026-11-27, réponse de C
   relayée par la session de groupe). D garde son approche : `DepotsModule` fournit lui-même, en lecture,
   `HistoriqueObligationsService`, `RegistreValidationsClient`, `MongoRegistreValidationsClient`, `HttpSourceCheminBalance`
@@ -2665,6 +2671,16 @@
 > OpenAPI, `package.json`, migrations, `read-models/`, copies du paquet, et tout fichier d'un dossier de C) ne change
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
+
+- **ANNONCÉ (2026-11-27, suite de STORY-335, avant le code)** — branche `MNV-335-suite` de `prospera-fiscal-service`,
+  partie d'`origin/dev` `efd0992` (340 de C). **Aucune migration**, aucune collection, aucun index ; ni `app.module.ts`
+  (la route entre dans un contrôleur neuf de `DepotsModule`, déjà monté), ni `config/` (la variable est lue par un
+  fournisseur de `DepotsModule`, patron du coffre de 560), ni `package.json` (aucune dépendance neuve), ni `read-models/`,
+  ni copie du paquet, ni manifeste `declarations`. Touchés parmi les communs : **le contrat OpenAPI** (une route neuve),
+  **`src/garde-acces-client.spec.ts`** (une ligne à la liste fermée des routes `@Public()`, avec sa raison : la route de
+  service, gardée par le jeton de service) et **`.env.example`** (`JETONS_DE_SERVICE`, commentée, sans valeur). **Aucun
+  fichier de C.** Aucune minuterie neuve (garde de 318). `src/kafka/events/` reçoit deux fichiers neufs (le contrat TS et
+  le schéma), sans toucher ceux de 681 et 318.
 
 - **FUSIONNÉ (2026-11-27, prospera-fiscal-service#87, `dev` `a991963`, partie d'`origin/dev` `108221e`, à jour au moment de la fusion (aucun rebase nécessaire) ; head `1e6ec93`, arbre identique), conforme à l'annonce ;
   ANNONCÉ (2026-11-27, STORY-336, avant le code)** — branche `MNV-336` de `prospera-fiscal-service`, partie de
@@ -2802,6 +2818,23 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-27, suite de STORY-335, avant le code) — la copie des pièces du dépôt au fonds d'archives du
+  client** (`prospera-fiscal-service`, module `depots` ; « h » servie par B, forme (1)). Fiche : `stories/STORY-335.md`,
+  « Suite du 2026-11-27 » (D-335-11 → 19). **Ajouts seuls** :
+  - **Fait publié neuf `fiscal.depot.piece-archivee` v1** (topic sans suffixe, clé `orgId`, en-têtes `eventId` et
+    `schemaVersion`), écrit par l'outbox **dans la transaction** de l'archivage du livrable (`LIVRABLE_DEPOSE`, `piece.id`
+    = `archiveId`) et de la consignation d'un accusé avec pièce (`ACCUSE_DEPOT`, `piece.id` = `accuseId`). Schéma de B
+    recopié à l'octet (`prospera-ocr-service` `dev`, `contrat/consommes/`, sha256 LF `51838a86…3493`) dans
+    `src/kafka/events/`. `VALIDATION_CLIENT` n'est pas émis (D-335-14). Consommateur : `document-service` (groupe
+    `ged.fiscal`). Catalogue : `ged` 1.11.0 le porte en `consomme` ; le manifeste `declarations` n'est pas touché (Q-D-34).
+  - **Route de service neuve `GET /api/v1/service/organisations/{orgId}/pieces-depot/{nature}/{pieceId}`** (`nature` :
+    `LIVRABLE_DEPOSE` | `ACCUSE_DEPOT`) au jeton de service de `document-service` (`JETONS_DE_SERVICE=document-service:<jeton>`,
+    32 caractères au moins, patron de STORY-589) : 200 octets exacts relus et re-hachés, `X-Empreinte-Sha256` ; **`401
+    JETON_DE_SERVICE_REQUIS`**, **`404 PIECE_INTROUVABLE`**, `502 FICHIER_ARCHIVE_ALTERE`, `503`. Aucun jeton
+    d'utilisateur, aucun droit.
+  - Aucune collection, aucun index, aucun droit, aucun champ d'une route existante. **→ B** : rien à faire de plus
+    (`FISCAL_SERVICE_URL`, `FISCAL_JETON_SERVICE` côté GED).
 
 - **PUBLIÉ (2026-11-27, STORY-336 : prospera-fiscal-service#87, `dev` `a991963`) sans écart ; ANNONCÉ (2026-11-27,
   STORY-336, avant le code, prospera-stories#1020, `main` e75e593) — le dossier de contrôle à la demande** (`prospera-fiscal-service`,
@@ -4173,6 +4206,12 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-34 (2026-11-27, suite de STORY-335) — Le manifeste `declarations` doit-il publier ses faits ?** Son `publie`
+  (C5) ne porte ni `fiscal.depot.piece-archivee` (suite de 335) ni `fiscal.obligation.alerte-echeance` (318) ; il n'a pas
+  changé depuis le 12/11 et n'est pas recopié dans le fiscal. **Choix par défaut** (D-335-19) : non touché ; la GED porte
+  le fait en `consomme` (`ged` 1.11.0). Une version du manifeste, recopiée au catalogue par B, est à placer par
+  l'utilisateur.
 
 - **Q-D-33 (2026-11-27, STORY-336) — La production d'un dossier de contrôle se trace-t-elle ?** Qui l'a produit, quand,
   sur quel périmètre, avec quelle empreinte. **Choix par défaut** (D-336-3) : non, c'est une lecture ; l'empreinte rendue
