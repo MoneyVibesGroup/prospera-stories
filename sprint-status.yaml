@@ -2181,6 +2181,16 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1133"
+    status: "in_progress"
+    owner: "Groupe B, lot 7, n° 15 — l'interface de l'agent publiée (EPIC-148) : d'abord les vecteurs de test v2 de la plateforme (la clé centrale-test-2026 expirait le 2027-01-01) et la garde des 60 jours ; puis contrats/agent/ (le contact, les routes de l'exécuteur) et le relais réel des faits de paiement par l'agent de la plateforme (prospera-plateforme, centrale-service, agent-instance)"
+    source_doc: "prospera-stories/stories/STORY-1133.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite le 2026-11-27 juste avant le code ; contrat annoncé avant le code (journal de B, « ⚠ Contrats »).
+      Vecteurs v2 (étiquette vecteurs-v2 : centrale-test-2026-2036, ci-test-2026-2036, jusqu'au 2036-01-01), copiés
+      dans centrale et agent ; contrats/agent/ (contrats-agent-v1) ; relais de paiement.abonnement.echeance.encaissee par
+      l'exécuteur de l'agent de la plateforme. D-1133-1 → 13. NON SLOTTÉE.
   - range: "STORY-1132"
     status: "done"
     owner: "Groupe B, lot 7, n° 14 — la licence signée (EPIC-150), premier incrément : un paiement l'ouvre, le suivant la prolonge ; la centrale reçoit paiement.abonnement.echeance.encaissee par la section « faits de paiement » du contact de l'agent de la plateforme (AD-25), dérive la licence de l'instance sur site de l'organisation et la signe de sa clé d'exécution (centrale-service ; paiement et auth lus, inchangés)"
