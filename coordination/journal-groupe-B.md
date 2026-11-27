@@ -366,8 +366,19 @@
     106/107 (suite non touchée, verte seule) ; mutations 20/20 et 9/9 ; pile `grp-b` neuve 24/24 (certificat signé nommant
     `dossier`, 22 enregistrements, 671 ms). Verrou en quatre passes courtes (02:41 → 03:08). Fiche D-1130-1 → 15. Rituel :
     aucune demande neuve à B chez A, C et D (la mise à jour 340 de C transmise par la session de groupe, servie ici).
-  - **12 bis — STORY-1137 (27/11) — en cours** : fiche et annonce avant le code (D-1137-1 → 13 ; Q de D-1137-3).
-  - **Suivante : STORY-1137** (12 bis : les modules s'ouvrent dans l'essai, ticket de 1116), puis STORY-1131 (n° 13).
+  - **12 bis — STORY-1137 (27/11) — faite** : les modules s'ouvrent dans l'essai (ticket de 1116, refermé). **dossier-service
+    #61** (`2f6e058` sur `dev`), **catalogue #90** (`be072bc`, `3454f13`, `12c4c84`), **BFF #47** (`7ac4db4`), **recette #38**
+    (`e83c737`, `7999caf`) ; contrat annoncé avant le code (stories #1027, `cf8e2c5`). L'image du catalogue porte les cinq jeux
+    publiés ; `POST /essais` accepte `installation` (modules, référentiels) : l'offre, puis un plan du moteur avant l'import du
+    jeu et l'invitation, l'issue gardée (`essai-prospect` 1.3.0) ; le BFF relaie ; la garde de dossier ne lit pas le KYC dans
+    l'essai (Q-D-17) ; la pile lève `dossier-essai`, `balance-essai`, `bilan-essai`. Node 25 : catalogue 1 802/1 804 (3 rouges
+    connues), BFF 759/759 et 309/309, recette 195/195, dossier acces 53/53 et e2e 14/14 ; mutations 23/23, 15/15, 9/9, 6/6 ;
+    Node 24 : dossier 120/120 (1 955), catalogue 1 821/1 822 (le rouge corrigé) ; pile `grp-b-recette` neuve depuis `origin/dev` :
+    `modules-dans-l-essai` 4/4, `cinq-essais` 6/6 (cinq prospects lisent chacun son jeu sans KYC, 60 lectures croisées refusées ;
+    pile ≤ 4,0 Gio). Verrou 04:25 → 08:23 (passe figée sur son relevé de mémoire, piège ; coupée à la demande de la session de
+    groupe), 08:35 → 08:44, 08:48 → 08:58. Fiche D-1137-1 → 16. Q de D-1137-3 (« Questions »). Rituel : aucune demande neuve à B
+    chez A, C et D.
+  - **Suivante : STORY-1131** (n° 13 : les restes d'EPIC-145, 146, 147).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1372,6 +1383,12 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Demandes aux autres groupes
 
+- **→ A (2026-11-27, STORY-1137) : l'installation des modules d'un essai est débloquée par STORY-1137** — `POST
+  /admin/essais` du BFF accepte `installation: { modules, referentiels }` (« Installer balance et bilan »,
+  `syscohada-revise@2.3`) et rend `installation` (`statut` TERMINE | EN_ATTENTE | EN_COURS | REFUSEE, `planId`, `code`) ;
+  route servie et relayée, prouvée par un appel réel au BFF (`modules-dans-l-essai`, pile neuve). L'écran (AP-57) est à A ;
+  types à régénérer. — information.
+
 - **→ C (2026-11-27, STORY-1137) : la garde de `balance-service` sans KYC dans l'essai** (ticket « modules ouverts dans
   l'essai », point 3 ; D-L7B-4) — **déjà servie par STORY-1019** (`ab4e468`) : rien à faire. STORY-1137 lève
   `balance-essai` (`INSTANCE_ESPACE=ESSAI`) dans la pile de la recette, installé par le moteur de l'essai à l'ouverture,
@@ -2363,6 +2380,12 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, STORY-1137 — LIVRÉ** (dossier-service #61, `2f6e058` ; catalogue #90, `12c4c84` ; BFF #47, `7ac4db4` ; recette #38,
+  `7999caf` sur `dev`) : conforme à l'annonce ci-dessous, **un ajout** : le BFF juge lui-même la forme des référentiels (400
+  `REFERENTIELS_INVALIDES`, le code du catalogue) avant la naissance (D-1137-16) ; les référentiels de l'ordre ne sont jamais
+  rendus (D-1137-15). **→ A** : `EssaiInstallationDto` et `EssaiInstallationRequestDto` dans l'OpenAPI du BFF.
+  **→ C, D** : rien à faire.
 
 - **2026-11-27, STORY-1137 — les modules s'ouvrent dans l'essai (ticket de 1116, D-L7B-4), annoncé AVANT le code**
   (`platform-catalog-service`, `admin-panel`, `dossier-service`, `prospera-recette`, branches `MNV-1137` ; fiche
@@ -4458,6 +4481,20 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Un relevé de mémoire en `Start-Job` a figé la passe près de quatre heures, verrou tenu** (STORY-1137, 04:32 → 08:19) : le
+  `finally` attendait l'arrêt du travail (`docker stats` en boucle) avant le `down -v`. Relever la mémoire par un processus
+  séparé, BORNÉ en tours, tué par son PID ; et un `timeout` sur CHAQUE commande Docker de la passe (`passe.sh` de 1137).
+- **Les routes d'administration du catalogue sont sous `/api/v1/catalog/…`** (`admin/referentiels`, `entitlements`), celles du
+  moteur et de l'essai à la racine (`/api/v1/installations`, `/essais`, `/jeux-demonstration`) : une recette qui vise le catalogue
+  de l'essai par `ESSAI.catalogue` (`…/api/v1`) ajoute `/catalog` aux premières (404 « Cannot POST »).
+- **Un `Dockerfile` lu par un test n'existe pas dans l'étage `verification`** de l'image : une garde du checkout se saute quand
+  le fichier manque, sinon Node 24 rougit en `ENOENT`.
+- **Un fichier de schéma qui importe un service du moteur crée un cycle d'import** (`Cannot read properties of undefined
+  (reading 'name')` au chargement d'un `@InjectModel`) : les énumérations partagées par un schéma vont dans un fichier sans
+  import (`statuts-d-installation.ts`).
+- **Un champ `type: Object` neuf d'un schéma du catalogue rougit `schemas-sans-chemin-mixed.spec`** : l'inscrire comme objet libre
+  voulu, avec sa raison.
 
 - **Un script de preuve qui lève avant `client.close()` garde Node en vie** (STORY-1130) : la passe a attendu le `timeout`
   du script, verrou tenu, après un `E11000` du semis (deux organisations dont les quatre derniers caractères étaient

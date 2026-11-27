@@ -69,3 +69,10 @@ jouée à blanc comme 1115.
   pile `grp-c` (deux instances) : un prospect sans KYC lit dans l'essai, la même requête sur l'instance réelle rend
   `403 KYC_NOT_APPROVED`. **Pour la recette (B)** : `INSTANCE_ESPACE=ESSAI` sur le `balance-service` de l'essai. Restent :
   points 1, 2 (B) et 3 `dossier-service` (B).
+- 2026-11-27 — **points 1, 2, 3 `dossier-service` et la recette : FAITS par STORY-1137** (dossier-service #61, catalogue #90,
+  BFF #47, recette #38). (1) L'image du catalogue porte les jeux des verticales publiés ; (2) l'ordre d'ouverture porte
+  `installation` (modules, référentiels) et le moteur de l'essai les installe par l'offre et un plan avant l'import du jeu
+  (`essai-prospect` 1.3.0 ; question D-1137-3 au journal de B : relayer aussi l'offre et les plans à l'essai ?) ; (3) la garde
+  de `dossier-service` ne lit plus le KYC dans l'essai (Q-D-17 confirmée) ; la pile de recette lève `dossier`, `balance` et
+  `bilan` dans l'espace d'essai : `modules-dans-l-essai` 4/4 sur pile neuve depuis `origin/dev` (cinq prospects lisent chacun
+  son jeu, et lui seul ; 3,6 → 4,0 Gio). **Ticket refermé.** Reste à A : la console qui envoie `installation`.
