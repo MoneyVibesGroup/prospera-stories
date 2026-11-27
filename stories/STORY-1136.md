@@ -1,6 +1,6 @@
 # STORY-1136 : L'avoir émis réduit la Créance de sa facture — `paiement` consomme `facturation.avoir.emis@1`
 
-Status: in-progress — fiche écrite le 2026-11-27 par une sous-session du groupe B juste avant de coder (lot 7, n° 18 de B,
+Status: done — **livrée le 2026-11-27** : paiement **#127** (`0067c2c` sur `dev`), manifeste 1.3.0 recopié au catalogue (#92, `480c445`) ; voir « Livraison ». Fiche écrite le 2026-11-27 par une sous-session du groupe B juste avant de coder (lot 7, n° 18 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, deuxième partie, ligne 18 : la première remplaçante de STORY-1116,
 déjà livrée au lot 6 ; D-L7B-3 ; identifiant réservé D-L7B-1).
 
@@ -115,3 +115,56 @@ balance âgée ; et l'avoir d'une facture déjà payée ne laisse aucun crédit 
 - **→ D** (information) : `facturation` lit `restantCertainMineur` : une facture créditée en entier sans paiement passe
   `PAYEE` au règlement lu, sous votre `ANNULEE_PAR_AVOIR` ; `avoirsMineur` est là si vous voulez le distinguer.
   `recouvrement` et `pdv` lisent un reste dû réduit, sans rien changer.
+
+## Livraison (2026-11-27)
+
+- **paiement #127**, fusionnée en rebase : `6afb260` sur la branche, **`0067c2c` sur `dev`** ; contrat annoncé avant la
+  fusion (prospera-stories **#1052**, `main` `f836480`), sans écart.
+  - `src/application/creances/avoir-emis.ts` (la forme du fait), `reduire-la-creance-par-l-avoir.usecase.ts`
+    (`ReduireLaCreanceParLAvoir`, acte `CREANCE_REDUITE_PAR_AVOIR`, auteur `FAIT_D_AVOIR`), `registre-des-avoirs.service.ts` ;
+    `src/modules/creances/schemas/avoir-de-creance.schema.ts` (`avoirs_de_creance`, ajout seul) ; `src/modules/avoirs-emis/`
+    (consommateur, groupe `paiement-avoirs`) ; `restants-de-creance.ts` (`avoirs`), `soldes-de-creance.service.ts`,
+    `etat-de-creance.ts` (cause `AVOIR`, `avoirsMineur`), `ouvrir-la-creance.usecase.ts` (restants relus dans la session),
+    `restants.vue.ts` ; `contrat/schemas/paiement.creance.changed.json` ; `contrat/consommes/facturation.avoir.emis.json` et
+    `contrat/ORIGINE-DES-SCHEMAS.json` ; `scripts/recette/1136/` ; gardes mises à jour (`ECRITURES_DARGENT`, changeurs de
+    Créance, 8 consommateurs supervisés, groupes).
+  - e2e réparés (D-1136-11) : `test/health.e2e-spec.ts` (`listTopics`), `test/notifications-webhook.e2e-spec.ts`
+    (`EtatsDeCreance`).
+- **Manifeste `paiement` 1.3.0** : prospera-stories **#1055** (`main` `b7eb9a8`) ; **recopié au catalogue** :
+  platform-catalog-service **#92** (`de37d07` sur la branche, **`480c445` sur `dev`**), seule la version de `paiement`
+  change, `manifestes:garde` verte (48) contre `b7eb9a8`.
+
+## Preuves
+
+- **Poste (Node 25)** : `tsc` vert ; lint des fichiers touchés vert ; unitaires : 340 suites vertes, 4 760 tests passés ;
+  les 13 suites rouges sont celles qui chargent le client de Confluent (binding absent sous Node 25, connues) ; **e2e 30/30
+  suites, 386/386** (dont `health` et `notifications-webhook`, rouges sur `e2be149`).
+- **Mutations : 21/21 rougissent** (domaine 3, sommes 2, registre 2, cas d'usage 10, lecture 2, ouverture 1, état 1) ;
+  catalogue 1/1 (la copie remise à 1.2.0).
+- **Node 24** (étage `verification`, image de l'archive `core.autocrlf=false` du commit, conteneur nommé) : **354/354
+  suites, 4 846 passés**, 2 sautés.
+- **Pile `grp-b`** (`scripts/recette/976/pile-976.yml`, image `runtime` du commit) :
+  - **recette `scripts/recette/1136/` : 35/35** — les deux schémas de `ventes` enregistrés au registre (BACKWARD) et relus
+    identiques ; l'avoir A1 conforme au schéma du registre réduit le reste dû relu par l'API en **3,2 à 3,7 s** (publication
+    par `kafka-console-producer` comprise ; FR-48 : < 5 s), montant d'origine inchangé ; état révision 2 cause `AVOIR`
+    conforme au schéma de `paiement.creance.changed@1` ; trois rejeux, rien d'écrit ; le second avoir solde A (reste dû 0,
+    aucun crédit, `OUVERTE`) ; l'avoir avant la facture B inscrit sans état, la Créance de B naît en le comptant (chaîne :
+    l'avoir au rang 1, la naissance au rang 2) ; facture C déclarée puis validée par un autre membre, puis l'avoir C1 :
+    **crédit du tiers 50 000** (trop-perçu, compteurs du tiers) ; l'avoir d'un autre tiers ignoré et journalisé, le
+    suivant passe ; `/health` 200, groupe `paiement-avoirs` sans retard.
+  - **conformité 29/29** sur le vrai MongoDB en jeu de répliques (`avoirs-emis` 6/6 : rejeux, deux avoirs, l'avoir avant la
+    Créance, **10 livraisons simultanées ⇒ 1 réduction**, 10 avoirs différents simultanés ⇒ tous comptés, révisions 1 → 11 ;
+    `factures-emises`, `etats-de-creance`, `creances-ouverture`, `journal-audit` verts).
+  - **`test:schemas` 17/17** sur Karapace 6.2 : le schéma de 1136 est compatible avec celui de 965 et s'y enregistre ;
+    `avoirsMineur` rendu requis y est refusé.
+- **Verrou Docker** pris de façon atomique à 15:38 (libre), pile descendue (`down -v`), conteneur de vérification retiré,
+  aucun conteneur, volume ni réseau `grp-b` restant ; **rendu à 15:55**.
+
+## Pour la suite (nommé, non fait)
+
+- `paiement.credit-tiers.changed@1` (le crédit du tiers comme objet : origine `AVOIR`, imputation, remboursement par un
+  ordre à deux personnes) et les statuts `IMPUTE` / `REMBOURSE` de l'avoir lus par `facturation` (D-1066-14).
+- La fenêtre de D-1136-4 (naissance et avoir commis au même instant) : un état republié au rejeu si l'état publié ne
+  compte pas tous les avoirs inscrits.
+- `avoirsMineur` dans les faits fins `.soldee` et `.troppercu.constate`, si un consommateur en a besoin.
+- Les avoirs du freelance (`facturation.avoir-freelance.emis@1`, AD-31) et sur un `RVC-`.
