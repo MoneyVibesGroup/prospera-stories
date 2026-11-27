@@ -1,6 +1,6 @@
 # STORY-566 : Expliquer l'impôt du dirigeant salarié, et lui proposer des options chiffrées — le patron de STORY-096/097, appliqué à une personne physique
 
-Status: in-progress (groupe C, lot 7, n° 18 et dernière du fiscal — annoncée le 2026-11-27 avant le code)
+Status: done (2026-11-27 — groupe C, lot 7, n° 18 et dernière du fiscal ; balance-service #180, prospera-fiscal-service #99)
 
 **Épic :** EPIC-024 — Simulation & conseil fiscal
 **Service :** `fiscal-service` (`:3012`)
@@ -216,3 +216,54 @@ La fiche d'août reste le cahier des charges. Ce qui existe depuis, et sur quoi 
 fiscal : `app.module.ts`, le contrat OpenAPI (la route et ses DTO), la copie du paquet, le manifeste `declarations` (copie
 neuve). Aucune migration, aucune collection, aucun événement ; aucun fichier de D ; aucune classe que `DepotsModule`
 instancie ne change ; `calculerIrppTraitementsSalaires` inchangée.
+
+## Livraison et preuves (2026-11-27)
+
+**Livré :** prospera-balance-service **#180**, fusionnée en rebase (head `8c5cded`, rejouée sur `dev` en **`1bc539d`**,
+arbre identique) ; prospera-fiscal-service **#99**, rebasée sur `origin/dev` `eff2afe` (la 565 de D) avant les preuves,
+fusionnée en rebase (head `aa22bc4`, rejouée sur `dev` en **`31dd81f`**, arbre identique ; `origin/dev` n'a pas bougé
+pendant les preuves). Annonce « ⚠ Contrats » et « ⚠ Communs » avant le code : prospera-stories **#1074** (`main`
+`3359e91`, qui porte aussi la source du manifeste `declarations` 1.1.0). **Livré conforme à l'annonce**, une précision :
+`MANDAT_ABSENT` et `QUESTIONNAIRE_ABSENT_DU_PAQUET` rendent **422** (nature `REGLE_METIER` du service), pas 409.
+
+- **Le paquet** : `node scripts/referentiels/build.mjs` passe (R1 → R16) ; artefact `paquet-fiscal-togo-2026.json`
+  **sha256 `8da471cc68cc5eff10175c80060ef275423b48b5eab8ac7316f1bcc7eba95970`** (avant : `72d2d6ed…56af`), réépinglé
+  (registre, `referentiel-registry.spec`, `referentiel.e2e-spec`) ; copie du fiscal à l'octet. Textes relus dans le corpus
+  (CGI Art. 26, p. 25 : 8° et 9°).
+- **balance-service, Node 24** (étage `verification`, image de `git -c core.autocrlf=false archive` de `8c5cded`) :
+  **unitaires 301/303 suites (2 ignorées), 5 985 tests** ; **e2e 38/38, 2 336**. Spec neuve « R16 » : le paquet réel accepté
+  (deux leviers, aucun nombre) et **quinze refus nommés** par la vraie garde (sans article, article à la forme libre, sans
+  référence, `aConfirmer`, sans éligibilité, sans contrepartie, sans pièce, déduction inconnue, déduction d'un autre
+  article, code en double, en minuscules, revenu non couvert, avertissement vide, source vide, liste vide) + toutes les
+  fautes d'un coup. **Mutations de la garde 9/9 tuées.**
+- **prospera-fiscal-service, Node 24** (image de l'archive de `aa22bc4`, base `eff2afe`) : **unitaires 300/301 suites
+  (1 ignorée), 4 618 tests** ; **e2e 18/18, 437** ; **conformité 36/36, 240** (MongoDB réel) — specs et e2e de D comprises,
+  vertes avec la nouvelle copie du paquet ; `nest build` 0. Specs neuves : domaine (37 : AC-1 → AC-7 sur le paquet réel,
+  montants calculés à la main — 645 000, 571 800 avec la retraite volontaire, 606 000 avec l'assurance vie et deux
+  enfants — ; la retenue imputée égale à celle du calcul social de D ; un dirigeant rangé sous l'Art. 28 bloqué, 24 manques
+  nommés), garde AST d'AC-7 (3), service (11 : mêmes versions de base, AD-21, textes à l'octet, dispense sans lecture,
+  mandat, refus de 568, aucun écrivain injecté), lecteur des références (11), module (4 : une route, `preparer`, pas
+  `ObligationsModule`), manifeste (5 : empreinte, droits = `DROITS_FISCAUX`, faits publiés), e2e (6 : 200 EXPLIQUEE,
+  BLOQUEE du dirigeant, DISPENSE, 403, 422 / 404, 400 / 401).
+- **Mutations du fiscal 22/22 tuées par un test** (dispense traitée comme due, mois sans base compté pour zéro, cotisations
+  ou retenue bloquées ignorées, personnes à charge de la dernière ligne ou supposées nulles, toute réponse « oui » prise
+  pour un revenu, écart réduit, gain nul montré, plafond atteint ignoré, déjà justifié non déduit, effort net faux, enfants
+  requis non attrapés, empreinte de la base perdue, revenu non concerné ignoré, levier sans contrepartie admis, lignes
+  d'autres bénéficiaires, calcul social d'une autre version, bases lues malgré la dispense, mandat non exigé, alinéa pris
+  pour un article, LPF lu comme CGI). Onze rougissaient d'abord à la compilation (ou, pour les enfants requis, à la
+  collecte de la suite) : réécrites, puis tuées par les tests.
+- Lint des fichiers touchés : 0 ; `tsc --noEmit` : rien de neuf. **Pile `grp-c`** (balance + fiscal, compose racine +
+  `docker-compose.fiscal.yml`) : saine, route montée, `ExplicationIrppModule` initialisé, **401 sans jeton**, aucune
+  erreur d'injection, aucun redémarrage ; le paquet de l'image balance porte `RETRAITE_VOLONTAIRE,ASSURANCE_VIE`.
+- **Verrou Docker** : pris à 20:54:38, rendu à 21:12:18 par le `trap` du script autonome ; aucun conteneur `grp-c`
+  restant.
+
+## Ce qui reste
+
+- **Question au PO** (journal de C) : distinguer le dirigeant salarié du gérant majoritaire, et sourcer l'affiliation CNSS
+  des dirigeants — sans quoi l'explication d'un dirigeant reste `BLOQUEE` (nommée), D-566-5.
+- **→ B** : recopier le manifeste `declarations` 1.1.0 au catalogue (message envoyé) ; la recopie permanente du paquet
+  `8da471cc` dans `dossier-service`.
+- L'arbitrage rémunération / dividendes (l'optimisation conjointe), les revenus non couverts (Art. 27, 28, fonciers,
+  capitaux mobiliers), un document de justification généré : hors périmètre, une fiche chacun.
+- La relecture des deux leviers et de leurs contreparties par un fiscaliste togolais.
