@@ -253,10 +253,23 @@
    36/36 (fiscal) et 10/10 (R13) ; pile `grp-c` saine. Verrou pris une fois (08:59 → 09:22), rendu. D-342-1 → 14 dans la
    fiche. **B prévenu** (le droit à attribuer, ouvert ; recopie) ; **D prévenu** (empreinte, le montant net du rapproché,
    `RapprochementReglementService`).
-24. 🚧 **STORY-343 en cours (27/11)** : fiche `stories/STORY-343.md` (D-343-1 → 9) et annonce avant le code (« ⚠ Contrats »,
-   « ⚠ Communs »). « Déposée » et « payée » lues chacune de son fait au calendrier du portefeuille, la mise en évidence des
-   déposées non réglées ; l'annulation motivée d'un rapprochement ; l'acompte rapproché lu par la TPU ; `montant-paye` et
-   les transitions de paiement sous `regler` si B a servi « k » avant le push (sinon `preparer`). Suivante : STORY-344.
+24. ✅ **STORY-343 DONE (27/11)** : fiscal **#94** (`57c7504` sur `dev`, sur `6cd99ee`), annonce #1036 avant le code, communs
+   complétés avant la fusion #1042. Au **calendrier du portefeuille**, chaque ligne porte **`deposee`** (la version courante
+   scellée, 325 ; sans pointeur, le cycle) et **`payee`** (l'acte humain : le cycle a atteint « Payée »), lus chacun de son
+   fait, jamais l'un de l'autre, et **`reglement { etat, miseEnEvidence, rapproche, nombre, reste, proposition, chemin }`** :
+   `DEPOSEE_SANS_REGLEMENT`, `REGLEMENT_PARTIEL`, `RESTE_A_RELIRE` **mis en évidence** ; `REGLEE_A_CONFIRMER` **propose**
+   `PASSER_A_PAYEE`, jamais posée par le système (la garde FR-F47 inchangée, verte). **Annulation motivée** d'un
+   rapprochement (`POST …/reglements/{reglementId}/annulation`, `regler`, motif 10 à 500) : collection immuable
+   `annulations_reglements`, acte au journal chaîné, la pièce reste et ne compte plus ; la quittance se rapproche de nouveau
+   (clé d'occurrence, index inchangé, aucune migration). **L'acompte rapproché compte pour la TPU** (manque neuf
+   `ACOMPTE_PAYE_DIFFERENT_DU_RAPPROCHE`). **« k » servie par B pendant la story** (auth #52) : `montant-paye`, « À payer » et
+   « Payée » sous `regler` ; `test/utils/rs256.ts` comme auth émet. Node 24 : unitaires 268/271 suites sous la charge (trois
+   suites de minuterie hors du diff, vertes seules 3/3, 95), 4182 tests ; e2e 15/15, 413 ; conformité 33/33, 223 ; mutations
+   34/34 ; pile `grp-c` saine. Verrou pris deux fois (12:40 → 13:13, 13:14 → 13:19), rendu. D-343-1 → 9 dans la fiche.
+   **D prévenu** (le montant à régler, `annulation`, `rs256.ts`) ; **B prévenu**.
+25. **Suivante : STORY-344** (les pénalités et majorations comme un risque : elle lit le retard des règlements **non
+   annulés** ; elle sert la demande `automatisation` de D, 561, si elle touche le paquet — au plus tard elle ; FE-097 de A
+   juste après elle, dans une PR à part de balance-service).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -521,7 +534,10 @@ seulement.
 
 ## Demandes aux autres groupes
 
-- **→ B (2026-11-27, STORY-342) : attribuer le droit `fiscalite:declaration:regler` chez auth-service** — ouverte,
+- **→ B (2026-11-27, STORY-342) : attribuer le droit `fiscalite:declaration:regler` chez auth-service** — ~~ouverte~~
+  **← B : servie** par auth #52 (`dev` `d037506` ; journal de B « Réponses », `main` `ac208c6`) : dans le jeton, à
+  `CAB_ASSOCIE` et `CAB_COLLABORATEUR`, jamais à l'archiviste ; (3) le manifeste `declarations` est noté pour sa prochaine
+  version (journal de B, « → C »). Employée par STORY-343 (fiscal #94). Texte d'origine :
   **bloquante pour l'usage réel de la route** (pas pour la livraison). fiscal-service le vérifie (`@ExigeDroitFiscal`) sur
   `POST /api/v1/obligations/{id}/reglements` (rapprocher un règlement constaté, FR-F48) ; aucun droit ne l'implique (FR-F59) :
   tant qu'auth ne l'émet pas, la route refuse à tous `403 DROIT_FISCAL_REFUSE` (voulu : plus de compatibilité par le rôle
@@ -699,6 +715,11 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← B (27/11, ordre « k ») : le manifeste `declarations` à aligner dans sa prochaine version** — **notée** : ses codes
+  `declarations:*` deviendront ceux que le fiscal vérifie (`fiscalite:declaration:preparer`, `valider`, `deposer`,
+  `regler`) à la prochaine version du manifeste (avec Q-D-34 et le texte du coffre de 560), puis « → B » pour la recopie
+  au catalogue. Aucune story du lot 7 ne la porte encore.
+
 - **← A (27/11, FE-097, `prospera-balance-service`, registre des immobilisations)** : (1) la liste sans cumul, net ni dotation ;
   (2) « non amortissable » au contrat ; (3) la mise en service en lot ; (4) les durées usuelles par catégorie ; (5) les comptes
   d'amortissement et de dotation proposés — **notée, non bloquante** (l'écran tient sans). **Placée par la session de groupe
@@ -836,6 +857,11 @@ seulement.
   `obligations.controller.ts` (`montant-paye` sous `regler`). Branche `MNV-343` poussée (`d41f65c`, sur `origin/dev`
   `6cd99ee`). **→ D** : rien à faire pour un rebase ; un test de D qui passerait à « À payer », « Payée » ou au payé avec un
   jeu de droits explicite sans `regler` recevrait 403 (aucun aujourd'hui).
+- **FUSIONNÉ (2026-11-27, prospera-fiscal-service#94, `dev` `57c7504`, sur `origin/dev` `6cd99ee`, à jour au moment de la
+  fusion ; head `d41f65c`, arbre identique)** — conforme à l'annonce et à son complément. Communs : le contrat OpenAPI,
+  `src/common/rbac/droits-fiscalite.ts` (un commentaire), `test/utils/rs256.ts`. Aucun fichier de D, aucune migration,
+  aucune classe instanciée par `DepotsModule` ne change. **→ D** : rien à faire pour un rebase ; toute la suite verte en
+  Node 24 sur le commit fusionné ; prévenu par message.
 - **ANNONCÉ (2026-11-27, STORY-343, avant le code)** — branche `MNV-343` de `prospera-fiscal-service`, partie d'`origin/dev`
   `6cd99ee`. **Aucune migration** : la collection neuve `annulations_reglements` (dossier de C) a ses index posés par
   Mongoose au démarrage (`(orgId, reglementId)` unique, `(orgId, dossierId, referenceBase)`), immuable ;
@@ -1087,6 +1113,11 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-27 (STORY-343), PUBLIÉ** (fiscal #94, `57c7504`) — conforme à l'annonce (#1036), deux écarts : le motif
+  d'annulation suit les bornes d'un motif de version (**10** à 500) ; la bascule sous `regler` est faite (« k » servie, auth
+  #52). **→ A** : types à régénérer depuis l'OpenAPI vivant (`LignePortefeuilleDto`, `ReglementDeLaLigneDto`,
+  `AnnulerReglementDto`, `annulation` et `annules` des règlements, `rapproche` de la provenance) quand l'écran du
+  calendrier montrera « déposée » et « payée ». **→ D** : le montant à régler et l'ordre nets des seuls non-annulés.
 - **2026-11-27 (STORY-343), ANNONCÉ avant le code** — **la distinction entre « déposée » et « payée »**
   (`prospera-fiscal-service`, REST). Fiche : `stories/STORY-343.md` (D-343-1 → 9). Consommateurs : l'écran du calendrier
   (A) ; 344 (le retard des règlements non annulés) ; 565 (D : l'ordre transporté) ; le dossier de contrôle (D, 336 :
