@@ -1,6 +1,6 @@
 # STORY-341 : L'ordre de règlement produit, jamais exécuté — la chaîne financière reste chez le client
 
-Status: in-progress — écrite le 2026-11-27 par la session du groupe C juste avant de la coder (lot 7, n° 13 du fiscal,
+Status: done — **livrée le 2026-11-27** : balance-service **#175** (`53e1595` sur `dev`) et prospera-fiscal-service **#91** (`481a8f4` sur `dev`, rebasée sur `dae6a10` de D) ; voir « Livraison ». Écrite le 2026-11-27 par la session du groupe C juste avant de la coder (lot 7, n° 13 du fiscal,
 `PLAN-LOT-7-2026-11-24.md` §3) ; contrat et communs annoncés avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de
 C). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-033, STORY-341), du PRD
 fiscalité (FR-F47, §3.3 « Le règlement n'est pas le dépôt ») et de la fiche STORY-565 de D, qui transporte cet ordre.
@@ -182,8 +182,45 @@ un acompte non payé : 409 `MONTANT_A_REGLER_INCOMPLET` ; avant le dépôt : 409
 l'empreinte stable) ; toute la suite du fiscal, celles de D comprises ; mutations sur la logique neuve ; `docker compose up`
 du fiscal, sain (le module change d'imports).
 
+## Dette de preuve de STORY-340 (soldée avant le code, 2026-11-27)
+
+340 (fiscal #88) avait été rebasée sur la 336 de D après ses preuves, sans rejouer la suite complète sur le commit fusionné.
+Rejouée sous le verrou (02:55 → 03:04), Node 24, étage `verification`, archive LF d'**`origin/dev` `efd0992`** (le commit
+fusionné de 340) : unitaires **258/259 suites (1 ignorée), 3 888 tests (3 ignorés)** ; e2e **15/15, 383** ; conformité
+MongoDB (jeu de répliques) **31/31, 197** ; `nest build` vert, le corpus dans `dist/`. **Tout vert : aucun correctif
+nécessaire**, aucune PR séparée.
+
+## Livraison (2026-11-27)
+
+- **Paquet** : balance-service **#175** (`MNV-341`, `cec9c3b` poussé, rejoué `53e1595` sur `dev`) : `versement` des six
+  obligations du bloc (quatre caisses nommées par le texte, deux à confirmer), `reglement.ordre.identifiantFiscal` (LPF Art. 7),
+  garde **R13** étendue, schéma, `_meta.revision` ; artefact régénéré, empreinte **`6eebc02f6712feece1913bd62303955ce9741ff1ac5fc58cfe34ab3f15e7baa7`**, réépinglée (registre, spec, e2e).
+- **Fiscal** : **#91** (`MNV-341`, `952fb18` poussé, rejoué `481a8f4` sur `dev`, rebasé sur `dae6a10` de D — la suite de 335,
+  fichiers disjoints). Fichiers : `domain/reglement/ordre-de-reglement.ts` (la projection pure),
+  `application/reglement/ordre-de-reglement.service.ts`, `MontantAReglerService.lire` (constructeur et `deLObligation`
+  inchangés), `modules/reglement/` (route, DTO, module : `RedevablesModule` importé, `OrdreDeReglementService` exporté), la
+  garde FR-F47 `domain/reglement/garde-aucune-execution-de-paiement.spec.ts`, la garde AD-21 (deux porteurs nommés),
+  l'invariant d'`AppModule`, e2e dans `test/obligations.e2e-spec.ts`, la copie du paquet.
+- **Preuves** (Node 24, étage `verification`) : sur `a1a18d1` (avant le rebase) unitaires 261/262 suites, 3 927 ; e2e 15/15,
+  387 ; conformité 31/31, 197 ; `nest build` vert ; balance-service unitaires **300/300, 5 826** ; e2e **38/38, 2 324** ;
+  **pile `grp-c`** fiscal + balance saine (santé `ok` des deux, `…/ordre-de-reglement` en 401 sans jeton, `ReglementModule`
+  initialisé, quatre routes montées dont la neuve, aucune erreur d'injection — les trois « Error: » sont l'« Unknown topic or
+  partition » connu d'une pile neuve —, aucun redémarrage). **Rejouées sur le commit rebasé `952fb18`** (archive LF) :
+  unitaires **265/266 (1 ignorée) suites, 3966 tests** ; e2e **15/15, 391** ; conformité **31/31, 204** ; `nest build` vert. Verrou pris trois fois
+  (02:55 → 03:04 la dette ; 03:24 → 03:44 ; 03:46 → 03:56), rendu ; aucun conteneur `grp-c` restant.
+- **Mutations** : fiscal **28/28** tuées (domaine 20, service 5, contrôleur 2, garde 1 — sept réécrites qui rougissaient par
+  compilation, toutes tuées ensuite sur l'assertion) ; balance-service **R13 11/11**.
+- **B prévenu** (recopie du paquet de `dossier-service` : `dev` `53e1595`, sha256 `6eebc02f…baa7`) ; **D prévenu** (empreinte ;
+  `OrdreDeReglementService` pour 565 ; la garde FR-F47 témoin de son AC-1).
+- **Ce que 565 (D) lit** : `OrdreDeReglementService.deLObligation(acteur, id)` ⇒ `PRODUIT` : `redevable { redevableId, nature,
+  designation, identifiantFiscal }`, `taxe`, `periode`, `montant.aRegler` et `devise`, `echeance.dateLimite`, `versement.organisme`
+  (ou la réserve), `mentions`, `empreinte` — jamais une coordonnée bancaire (AC-5 de 565) ; `NON_PRODUIT` : le motif et ce qui
+  manque. Rien d'autre n'est exigé de C pour 565.
+
 ## Progress Tracking
 
 | Date | Événement |
 |---|---|
 | 2026-11-27 | Fiche écrite, contrat et communs annoncés avant le code. |
+| 2026-11-27 | Dette de preuve de 340 soldée (tout vert sur `efd0992`). |
+| 2026-11-27 | **DONE.** Paquet : balance-service #175 (`53e1595`) ; code : fiscal #91 (`481a8f4`). Preuves : voir « Livraison ». B et D prévenus. |

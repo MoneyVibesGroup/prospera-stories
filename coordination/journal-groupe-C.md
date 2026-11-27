@@ -217,11 +217,26 @@
    14/14 (R13) ; pile `grp-c` saine. Verrou pris une fois (02:27 → 02:41). D-340-1 → 12 dans la fiche. **B prévenu** (recopie) ;
    **D prévenu** (empreinte, `ReglementModule` pour 565). Rituel : FE-097 de A notée (« Réponses »), la demande 349 → 331 de D
    déjà servie par 339.
-22. 🚧 **STORY-341 en cours (27/11)** : l'ordre de règlement produit, jamais exécuté (fiche `stories/STORY-341.md`, D-341-1 →
-   12 ; contrat et communs annoncés ci-dessous avant le code). **Dette de preuve de 340** : la suite complète du fiscal sous
-   Node 24 rejouée sur `origin/dev` `efd0992` (le commit fusionné), sous le verrou, avant le code de 341 : résultat dans la
-   fiche de 341. **FE-158 de A est placée en tête de STORY-350** (décision de la session de groupe du 27/11) ; **FE-097 de A
-   est placée dans une PR à part de balance-service, juste après STORY-344** (même décision, « Réponses »).
+22. ✅ **STORY-341 DONE (27/11)** : balance-service **#175** (`53e1595` sur `dev`, le paquet) et fiscal **#91** (`481a8f4` sur
+   `dev`, rebasée sur `dae6a10` de D), annonce #1025 avant le code. **Dette de preuve de 340 soldée d'abord** : la suite complète
+   du fiscal sous Node 24 sur `origin/dev` `efd0992` (le commit fusionné de 340) — unitaires 258 suites, 3888 ; e2e 15/15, 383 ;
+   conformité 31/31, 197 ; `nest build` vert : **tout vert, aucun correctif**. **`GET /obligations/{id}/ordre-de-reglement`**
+   (module `reglement`) : **produit, jamais exécuté** (`execution: PAR_LE_REDEVABLE`) — sur la déclaration **déposée** et un
+   montant à régler (340) **complet et positif** seulement ; sinon **409 nommé, sans ordre** (`DECLARATION_NON_DEPOSEE`,
+   `MONTANT_A_REGLER_INDISPONIBLE`, `MONTANT_A_REGLER_INCOMPLET` avec les manques, `RIEN_A_REGLER` avec les excédents,
+   `IDENTIFIANT_FISCAL_ABSENT` — LPF Art. 7 —, `REDEVABLE_INTROUVABLE`) ; le redevable et son **NIF**, le montant net et ce qui
+   en est déduit, l'échéance applicable, la version déposée, **la caisse que le paquet nomme** (bloc `versement`, R13 étendue :
+   receveur des impôts pour les acomptes d'IS et de TPU, receveur chargé du recouvrement pour la RSH, service des impôts pour la
+   retenue d'IRPP ; TVA et solde de TPU **à confirmer**, réserve `ORGANISME_A_CONFIRMER`), des **mentions copiables**, une
+   **empreinte** ; aucun accès bancaire. **Garde structurelle FR-F47** : aucune route qui paie, aucune dépendance, aucun client ni
+   sujet de paiement, aucun champ d'accès bancaire (le témoin de 565, AC-1). `OrdreDeReglementService` exporté pour 565 (D).
+   Empreinte du paquet **`6eebc02f…baa7`**. Node 24 : fiscal unitaires 265/266 (1 ignorée) suites, 3966 ; e2e 15/15, 391 ; conformité 31/31, 204 ; balance
+   300/300, 5826 ; e2e 38/38, 2324 ; mutations 28/28 (fiscal) et 11/11 (R13) ; pile `grp-c` saine. Verrou pris trois fois,
+   rendu. D-341-1 → 12 dans la fiche. **B prévenu** (recopie) ; **D prévenu** (empreinte, `OrdreDeReglementService` pour 565).
+   **FE-158 de A est placée en tête de STORY-350** ; **FE-097 de A, dans une PR à part de balance-service juste après
+   STORY-344** (décisions de la session de groupe du 27/11, « Réponses »).
+23. **Suivante : STORY-342** (le rapprochement du règlement, et le refus d'une imputation incohérente ; il exercera
+   `fiscalite:declaration:regler`, D-341-10).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -486,7 +501,11 @@ seulement.
 
 ## Demandes aux autres groupes
 
-- **→ B (2026-11-27, STORY-340) : recopier le paquet fiscal Togo 2026 dans `dossier-service`** — ouverte, sans urgence.
+- **→ B (2026-11-27, STORY-341) : recopier le paquet fiscal Togo 2026 dans `dossier-service`** — ouverte, sans urgence.
+  Source : balance-service `dev` `53e1595` (#175), `src/modules/referentiel/assets/paquet-fiscal-togo-2026.json`, sha256
+  **`6eebc02f6712feece1913bd62303955ce9741ff1ac5fc58cfe34ab3f15e7baa7`** (LF) ; elle remplace `d620df8b` (340). `reglement.obligations.<CODE>.versement` et `reglement.ordre` ; rien de ce
+  que `dossier-service` lit ne change. Prévenu par message.
+- **→ B (2026-11-27, STORY-340) : recopier le paquet fiscal Togo 2026 dans `dossier-service`** — remplacée par la ligne du dessus (341).
   Source : balance-service `dev` `e68ae10` (#174), `src/modules/referentiel/assets/paquet-fiscal-togo-2026.json`, sha256
   **`d620df8bf6bf43689f7a263c905965243f133d6a41e90f13290dcb737a33fca6`** (LF) ; elle remplace les versions précédentes (`62563b3c`
   de 339). Bloc neuf `reglement` et une ligne de `aFaire` ; rien de ce que `dossier-service` lit ne change. Prévenu par message.
@@ -771,6 +790,11 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **FUSIONNÉ (2026-11-27, prospera-fiscal-service#91, `dev` `481a8f4`, rebasée sur `origin/dev` `dae6a10` de D — la suite de
+  335 —, sans conflit)** — conforme à l'annonce : le contrat OpenAPI (la route neuve), la copie du paquet (`6eebc02f…baa7`, de
+  balance-service #175 `53e1595`), `src/app.module.invariant.spec.ts`. Aucun fichier de D ; aucune migration ; aucune classe
+  instanciée par `DepotsModule` ne change. La garde FR-F47 passe sur la suite de 335 (route de service, jeton, fait neufs).
+  **→ D** : rien à faire pour un rebase ; toute la suite verte en Node 24 sur le commit rebasé ; prévenu par message.
 - **ANNONCÉ (2026-11-27, STORY-341, avant le code)** — branche `MNV-341` de `prospera-fiscal-service`, partie d'`origin/dev`
   `efd0992` (et `MNV-341` de `balance-service`, d'`origin/dev` `e68ae10`, pour la source du paquet). **Aucune migration**,
   aucune collection, aucune écriture ; ni `app.module.ts`, ni `package.json`, ni `read-models/`, ni manifeste `declarations`.
@@ -976,6 +1000,9 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-27 (STORY-341), PUBLIÉ** (fiscal #91, `481a8f4` ; balance-service #175, `53e1595`) — conforme à l'annonce (#1025),
+  sans écart. **→ A** : types à régénérer depuis l'OpenAPI vivant (`OrdreDeReglementDto`) quand un écran lira l'ordre. **→ D
+  (565)** : `OrdreDeReglementService` exporté par `ReglementModule`. **→ B** : recopie du paquet (`6eebc02f`, « Demandes »).
 - **2026-11-27 (STORY-341), ANNONCÉ avant le code** — **l'ordre de règlement produit, jamais exécuté**
   (`prospera-fiscal-service`, REST ; source du paquet fiscal Togo dans `balance-service`). Fiche : `stories/STORY-341.md`
   (D-341-1 → 12). Consommateurs : le dépôt automatisé (565, D : il transporte l'ordre au bon redevable) ; le rapprochement
