@@ -726,6 +726,43 @@
   - **Suivante : STORY-337** (le rapprochement des pièces justificatives, à la granularité annoncée ; il lit la route de
     338 de C, servie : comptabilite #21, `dev` 58803f5, et remplit `rapprochementPieces`).
 
+- **STORY-335, suite du 2026-11-27** ✅ 📨 — la copie des pièces du dépôt au fonds d'archives du client (« h » servie par
+  B, forme (1)). Code : prospera-fiscal-service#89, `dev` `dae6a10`. Annonce avant le code : #1023, `main` ed59786 (fiche
+  « Suite du 2026-11-27 », D-335-11 → 19, ⚠ Contrats, ⚠ Communs, Q-D-34).
+  - **Diagnostic** (fiche, avant le code) : 335 tenait AC-1 et V9 dans le fiscal seulement ; le lien vers la GED passait
+    par un port inerte, appelé **après** la transaction. B a choisi la forme (1) : un fait du fiscal, la GED tire les
+    octets par une route de service du fiscal.
+  - **Livré** (dossier `depots` de D, et un contrat neuf dans `kafka/events/`) :
+    - **le fait `fiscal.depot.piece-archivee` v1**, construit par le cas d'usage et écrit par le registre dans l'outbox
+      **sous la session** du livrable (`LIVRABLE_DEPOSE`, `piece.id` = `archiveId`, `date` = le jour du dépôt engagé) et de
+      l'accusé avec pièce (`ACCUSE_DEPOT`, `piece.id` = `accuseId`, `date` = `deposeLe`) ; rien sur un refus ni pour un
+      accusé par référence seule ; schéma de B recopié à l'octet (`51838a86…3493`, gardé par un test) ; `CopieAuFondsInerte`
+      et son port retirés ;
+    - **la route `GET /api/v1/service/organisations/{orgId}/pieces-depot/{nature}/{pieceId}`**, `@Public()` pour la chaîne
+      des jetons d'utilisateur et gardée par `JetonDeServiceGuard` (`JETONS_DE_SERVICE=document-service:<jeton>`, patron de
+      589 : analysé au démarrage par un fournisseur de `DepotsModule`, empreinte seule, comparaison à temps constant) :
+      200 octets relus en entier et re-hachés (`ArchiveLivrables.lire`, le parcours de `mesurer`) + `X-Empreinte-Sha256`,
+      `401 JETON_DE_SERVICE_REQUIS`, `404 PIECE_INTROUVABLE` (un seul), `502 FICHIER_ARCHIVE_ALTERE`.
+  - **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI, `src/garde-acces-client.spec.ts` (une ligne),
+    `.env.example`. Aucune migration, aucun fichier de C, ni `app.module.ts`, ni `config/`, ni `package.json`.
+  - **Preuves** :
+    - Node 24 (archive LF de `63b08fd`) : unitaires 262/263 suites, 3 926 tests ; e2e **15/15 suites, 387 tests**
+      (`dossier-controle` de 336 compris) ; `test:conformite` 31/31 suites, 204 tests.
+    - Mutations **46/46** rouges sur une assertion (42 sous Node 25, 4 sur MongoDB réel) ; cinq réécrites après une
+      compilation ; aucun survivant.
+    - §1.5, pile `grp-d` avec Redis : deux faits écrits à l'outbox, passés `SENT` par le relais du service, lus sur Kafka
+      (clé `orgId`, en-têtes, payload identique) ; la route 200 (empreinte et octets justes), 401, 404, 502 ; 0 erreur
+      sur 592 lignes. L'aller-retour avec la GED de B n'est pas joué (sa pile et un fonds ouvert par un membre : trop
+      lourd ici) : la GED a prouvé sa part sur `grp-b` avec une doublure de cette route.
+    - Verrou : 03:10:20 → 03:24:43, rendu par le `trap` ; B et C prévenus ; aucun conteneur `grp-d` restant.
+  - **Ce qui reste** :
+    - → C (plus tard, à placer par l'utilisateur) : `VALIDATION_CLIENT` avec `pieceGed { pieceId, version, sha256 }` —
+      la consignation est dans le dossier `obligations` de C, et la référence gardée n'a pas l'empreinte de la pièce de la
+      GED (D-335-14) ;
+    - Q-D-34 : le manifeste `declarations` (C5 `publie`) ne porte ni ce fait ni celui de 318.
+  - **Suivante : STORY-337** (le rapprochement des pièces justificatives, à la granularité annoncée ; il lit la route de
+    338 de C, servie : comptabilite #21, `dev` 58803f5, et remplit `rapprochementPieces`).
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
@@ -2053,8 +2090,8 @@
   démarrage de la pile (§1.5) : le dire à D dans « ⚠ Communs » de C suffit.
 
 - **→ B (2026-11-26, STORY-335) : recevoir dans le fonds d'archives du client les pièces du dépôt d'une déclaration —
-  servie côté B le 27/11 (document-service #42, catalogue #88 ; « Réponses ») ; à écrire côté fiscal : suite de 335,
-  en cours.** Placée par B (« h », après sa 1129, avant 1130). B choisira la forme (un fait consommé par la GED, ou une
+  servie côté B le 27/11 (document-service #42, catalogue #88 ; « Réponses ») ; écrite côté fiscal : suite de 335,
+  fiscal #89, `dev` `dae6a10`.** Placée par B (« h », après sa 1129, avant 1130). B choisira la forme (un fait consommé par la GED, ou une
   route de dépôt de la GED) et répondra dans « Réponses » de son journal, avec un message, avant tout code de D. Côté D,
   le lien est derrière le port `CopieAuFondsDArchives` (adaptateur inerte, fiscal #85).
   - Pourquoi : AC-1 de 335 (« archivé dans `document-service`, rattaché au dossier, à l'implantation, à l'obligation et à
@@ -2549,7 +2586,8 @@
 - **← B : « h » — servie** (2026-11-27 ; document-service #42, `dev` `8f9040d` ; catalogue #88, `dev` `e528afc`, `ged`
   1.11.0 ; journal de B, « Réponses » → D, `main` e3eaf4d ; `STORY-1124.md`, « Suite du 2026-11-27 »). Forme (1) : le
   fait `fiscal.depot.piece-archivee` v1 du fiscal, la GED tire les octets par une route de service du fiscal. Côté D :
-  suite de 335 (`MNV-335-suite`, annoncée dans « ⚠ Contrats » et « ⚠ Communs ») ; `CopieAuFondsInerte` retiré.
+  suite de 335 (`MNV-335-suite`, annoncée dans « ⚠ Contrats » et « ⚠ Communs ») ; `CopieAuFondsInerte` retiré. **Écrite :
+  fiscal #89, `dev` `dae6a10`** ; B prévenu par message (SHA, topic, route, noms des variables).
 
 - **336 — accord avec C sur les fournisseurs de C fournis en lecture par `DepotsModule`** (2026-11-27, réponse de C
   relayée par la session de groupe). D garde son approche : `DepotsModule` fournit lui-même, en lecture,
@@ -2672,7 +2710,9 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
-- **ANNONCÉ (2026-11-27, suite de STORY-335, avant le code)** — branche `MNV-335-suite` de `prospera-fiscal-service`,
+- **FUSIONNÉ (2026-11-27, prospera-fiscal-service#89, `dev` `dae6a10`, partie d'`origin/dev` `efd0992`, à jour au
+  moment de la fusion (aucun rebase nécessaire) ; head `63b08fd`, arbre identique), conforme à l'annonce ;
+  ANNONCÉ (2026-11-27, suite de STORY-335, avant le code)** — branche `MNV-335-suite` de `prospera-fiscal-service`,
   partie d'`origin/dev` `efd0992` (340 de C). **Aucune migration**, aucune collection, aucun index ; ni `app.module.ts`
   (la route entre dans un contrôleur neuf de `DepotsModule`, déjà monté), ni `config/` (la variable est lue par un
   fournisseur de `DepotsModule`, patron du coffre de 560), ni `package.json` (aucune dépendance neuve), ni `read-models/`,
@@ -2819,8 +2859,9 @@
 
 ## ⚠ Contrats
 
-- **ANNONCÉ (2026-11-27, suite de STORY-335, avant le code) — la copie des pièces du dépôt au fonds d'archives du
-  client** (`prospera-fiscal-service`, module `depots` ; « h » servie par B, forme (1)). Fiche : `stories/STORY-335.md`,
+- **PUBLIÉ (2026-11-27, suite de STORY-335 : prospera-fiscal-service#89, `dev` `dae6a10`) sans écart ; ANNONCÉ
+  (2026-11-27, suite de STORY-335, avant le code, prospera-stories#1023, `main` ed59786) — la copie des pièces du dépôt
+  au fonds d'archives du client** (`prospera-fiscal-service`, module `depots` ; « h » servie par B, forme (1)). Fiche : `stories/STORY-335.md`,
   « Suite du 2026-11-27 » (D-335-11 → 19). **Ajouts seuls** :
   - **Fait publié neuf `fiscal.depot.piece-archivee` v1** (topic sans suffixe, clé `orgId`, en-têtes `eventId` et
     `schemaVersion`), écrit par l'outbox **dans la transaction** de l'archivage du livrable (`LIVRABLE_DEPOSE`, `piece.id`
@@ -4458,6 +4499,15 @@
   « totales » attribuées à quelqu'un d'autre lèvent l'alerte CM-2.
 
 ## Pièges rencontrés
+
+- **Suite de STORY-335** (fiscal) :
+  - (1) **Le pilote §1.5 d'une route se monte dans l'image, jamais dans l'archive** : un fichier `*.conformite-spec.ts`
+    copié dans l'archive serait joué par `test:conformite` sans la pile, et rougirait. Le monter (`--mount … readonly`)
+    au seul `docker run` du pilote, sur le réseau de la pile (`grp-d_default`).
+  - (2) **Le statut publié de l'outbox du fiscal est `SENT`**, pas `PUBLISHED` : le compilateur le dit (`OutboxStatus`).
+  - (3) **Une mutation sur un décorateur ou sur un appel unique rougit d'abord en compilation** (`noUnusedLocals`,
+    `noUnusedParameters`, TS1329 pour un décorateur sans paramètre) : garder l'import vivant (`empreinteHexadecimale(autre
+    chose)`), ou nommer le paramètre `_cible`.
 
 - **STORY-333** (fiscal) :
   - (1) **Un heredoc de bash qui contient du TypeScript ou du Python avec apostrophes casse la commande entière**
