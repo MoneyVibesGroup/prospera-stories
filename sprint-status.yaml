@@ -2176,18 +2176,18 @@ reserved_ranges:
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
   - range: "STORY-1130"
-    status: "in-progress"
-    owner: "Groupe B, lot 7, n° 12 — effacer le dossier de démonstration à la fin d'un essai (D-1082-10) : dossier-service sert son effacement C13 (tout ce qu'il tient de l'organisation, au moteur seul, essai seul) et devient propriétaire du socle du plan d'effacement du catalogue (SOCLE_SERVICES, dossier en tête) ; paquet fiscal Togo 2026 recopié (← C, STORY-564) (dossier-service, platform-catalog-service)"
+    status: "done"
+    owner: "Groupe B, lot 7, n° 12 — effacer le dossier de démonstration à la fin d'un essai (D-1082-10) : dossier-service sert son effacement C13 (tout ce qu'il tient de l'organisation, au moteur seul, essai seul) et devient propriétaire du socle du plan d'effacement du catalogue (SOCLE_SERVICES, dossier en tête) ; paquet fiscal Togo 2026 recopié (← C, STORY-564 → 340) (dossier-service, platform-catalog-service)"
     source_doc: "prospera-stories/stories/STORY-1130.md"
     reserved_on: "2026-11-25"
     note: >
-      Fiche écrite et contrat annoncé avant la fusion (2026-11-27) : route POST /api/v1/instance/dossier/{organisationId}/effacement
-      (effacement-c13-demande@1 → accuse@1, module dossier ; plan d'effacement gardé par un invariant sur tous les schémas,
-      journal par le pilote, outbox par payload.orgId, personnes orphelines ; registre effacements_c13, DEJA_EFFACE) ;
-      catalogue : PROPRIETAIRES_DU_SOCLE (dossier, route fixée par le moteur), SOCLE_SERVICES, dossier en tête de chaque
-      essai, plan EN_COURS sans lui, plan ouvert avant la livraison complété. Demande de C (STORY-564) servie : paquet
-      fiscal 61997fd / 62563b3c en LF, .gitattributes -text. D-1130-1 → 15. Lot 7 de B, n° 12 ; suivante STORY-1137.
-      NON SLOTTÉE.
+      🏁 DONE le 2026-11-27 — prospera-dossier-service #60 (dev a1bf7fa, 653a70b), platform-catalog-service #89 (dev
+      14c644d) ; contrat annoncé avant la fusion (stories #1021, main da2dc7f). Paquet fiscal recopié depuis balance-service
+      e68ae10 (STORY-340, sha256 d620df8b, LF, .gitattributes -text) au lieu de 61997fd annoncé (version signalée pendant la
+      story, une seule recopie). Node 25 : dossier 113/120 suites (7 rouges connues), e2e 405/405 ; catalogue 104/107 (3
+      connues), e2e jetons-du-moteur 10/10 ; Node 24 : dossier 120/120 (1947), e2e 405/405 ; catalogue 106/107 (1745 ;
+      jetons-du-moteur verte seule 3/3) ; mutations 20/20 et 9/9 ; pile grp-b neuve 24/24 (effacement en 671 ms, 22
+      enregistrements, certificat signé nommant dossier, rejeux, refus). D-1130-1 → 15. Suivante : STORY-1137. NON SLOTTÉE.
   - range: "STORY-1129"
     status: "done"
     owner: "Groupe B, lot 7, n° 11 — le cabinet sur le moteur (EPIC-144, 159) : le PUT d'octroi n'installe plus un module que le moteur sait vérifier (409 INSTALLATION_PAR_LE_MOTEUR ; sanction, levée et réécriture gardées), le BFF relaie les refus du moteur, conseil dans INSTALLATION_SERVICES, recettes croisées installées par l'offre et POST /installations (platform-catalog-service, admin-panel, prospera-recette)"
