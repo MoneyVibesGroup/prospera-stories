@@ -89,7 +89,7 @@ reglement: {
 ### `POST /api/v1/obligations/{id}/reglements/{reglementId}/annulation` — annuler un rapprochement (D-342-14, 1)
 
 Rôles `TENANT_ADMIN`, `TENANT_USER`, accès fiscal, droit **`fiscalite:declaration:regler`** (`403 DROIT_FISCAL_REFUSE`,
-journalisé) ; portée de l'obligation (`404 OBLIGATION_INTROUVABLE`). Corps `{ motif }` (3 à 500 caractères, sans caractère
+journalisé) ; portée de l'obligation (`404 OBLIGATION_INTROUVABLE`). Corps `{ motif }` (10 à 500 caractères, sans caractère
 invisible, comme le motif d'une rectificative). Réponse **`201`** : le règlement rapproché, avec
 `annulation: { motif, annulePar, annuleLe }`. Refus : `404 REGLEMENT_INTROUVABLE` (pas un règlement de cette obligation) ;
 `409 REGLEMENT_DEJA_ANNULE` ; `409 OBLIGATION_CLOTUREE` ; `400` (motif). La pièce reste, son rang aussi ; l'acte
@@ -119,6 +119,12 @@ Relu au journal de B (« Réponses ») juste avant le push. **Demande « k » se
 `fiscalite:declaration:regler` à `CAB_ASSOCIE` et `CAB_COLLABORATEUR`) : `POST …/montant-paye` et les transitions vers
 « À payer » et « Payée » passent sous **`regler`** (et le retour qui quitte « À payer » ou « Payée », par la règle de 325).
 **Pas servie** : elles restent sous `preparer`, et la fiche le dit.
+
+**→ Servie avant le push** (auth #52, `dev` `d037506` ; journal de B, `main` `ac208c6`) : **la bascule est faite**.
+`DROIT_PAR_ARRIVEE` passe « À payer » et « Payée » sous `regler` (le retour qui les quitte suit, par la règle de 325) ;
+`POST …/montant-paye` exige `regler`. Les jetons des suites (`test/utils/rs256.ts`, `permsDuCabinet`) portent désormais ce
+qu'auth émet : `regler` pour l'associé et le collaborateur (une valeur de plus, aucun droit retiré : les suites de D
+gardent les leurs).
 
 ## Persistance et fichiers communs (D-L7-2)
 
@@ -158,7 +164,8 @@ passe **sans modification** (l'annulation ne paie pas, son nom non plus).
   tous les non-annulés — la règle même de 342. Si ce dû a été lu sur une autre version que la courante (une rectificative
   déposée depuis) : `reste: null`, `RESTE_A_RELIRE`, et `chemin` mène à la lecture exacte.
 - **D-343-5 — L'annulation motivée d'un rapprochement : un acte neuf, la pièce reste** (D-342-14, 1). Sous `regler` ; un
-  motif (3 à 500 caractères) ; un document de `annulations_reglements` (immuable, un par règlement : `409
+  motif (10 à 500 caractères, les bornes d'un motif de version de 325 — l'annonce disait 3 : écart corrigé) ; un document
+  de `annulations_reglements` (immuable, un par règlement : `409
   REGLEMENT_DEJA_ANNULE`) et l'acte `OBLIGATION_REGLEMENT_ANNULE` au journal chaîné, dans une transaction. Le règlement
   annulé reste lisible, son rang aussi ; il ne compte plus nulle part (reste, montant à régler, ordre, calendrier, 344).
   Refusée sur une close (325, AC-3) ; admise sur une écartée (on doit pouvoir défaire une erreur pour rapprocher la
@@ -172,7 +179,8 @@ passe **sans modification** (l'annulation ne paie pas, son nom non plus).
   l'acompte : le plus grand de son payé saisi et de son rapproché non annulé ; leur écart rend le montant incomplet
   (`ACOMPTE_PAYE_DIFFERENT_DU_RAPPROCHE`), jamais une déduction choisie au hasard.
 - **D-343-8 — Le droit des transitions de paiement suit l'attribution de B** (D-342-9) : voir « Le droit des transitions de
-  paiement ». Basculer avant l'attribution fermerait « À payer », « Payée » et le payé à tout le monde.
+  paiement ». Basculer avant l'attribution fermerait « À payer », « Payée » et le payé à tout le monde. **B a servi
+  « k » pendant la story (auth #52) : basculé.**
 - **D-343-9 — Hors périmètre, nommé.** (1) Un filtre du calendrier par état de règlement (une requête jointe sur deux
   collections ; le filtre `statuts=DEPOSEE,ACCUSE_RECU,A_PAYER` existe déjà). (2) La vue de charge (319) : elle écarte les
   déposées. (3) L'écran (A). (4) La section du règlement du dossier de contrôle (D, 336) : elle lira `annulation`. (5) Les

@@ -828,6 +828,14 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **COMPLÉTÉ AVANT LA FUSION (2026-11-27, STORY-343)** — « k » servie par B pendant la story (auth #52, `dev` `d037506`) :
+  la bascule est faite. Communs en plus de l'annonce : **`src/common/rbac/droits-fiscalite.ts`** (un commentaire, aucune
+  valeur) et **`test/utils/rs256.ts`** (`permsDuCabinet` porte `fiscalite:declaration:regler` pour `TENANT_ADMIN` et
+  `TENANT_USER`, comme auth l'émet : une valeur de plus, aucune retirée — les suites de D gardent leurs droits et passent
+  en entier, Node 24 : e2e 15/15, 413). Dans des fichiers de C : `droits-du-cycle.ts` (« À payer », « Payée » sous `regler`),
+  `obligations.controller.ts` (`montant-paye` sous `regler`). Branche `MNV-343` poussée (`d41f65c`, sur `origin/dev`
+  `6cd99ee`). **→ D** : rien à faire pour un rebase ; un test de D qui passerait à « À payer », « Payée » ou au payé avec un
+  jeu de droits explicite sans `regler` recevrait 403 (aucun aujourd'hui).
 - **ANNONCÉ (2026-11-27, STORY-343, avant le code)** — branche `MNV-343` de `prospera-fiscal-service`, partie d'`origin/dev`
   `6cd99ee`. **Aucune migration** : la collection neuve `annulations_reglements` (dossier de C) a ses index posés par
   Mongoose au démarrage (`(orgId, reglementId)` unique, `(orgId, dossierId, referenceBase)`), immuable ;
