@@ -2271,6 +2271,11 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1124.md"
     reserved_on: "2026-11-25"
     note: >
+      🚧 SUITE « h » EN COURS le 2026-11-27 (groupe B, lot 7, D-L7B-12 ; fiche, « Suite du 2026-11-27 », D-1124-13 → 24 ;
+      demande de D, STORY-335) — les pièces du dépôt d'une déclaration au fonds du client : forme (1), fait
+      fiscal.depot.piece-archivee v1 proposé à D, octets tirés par une route de service du fiscal ; contrat annoncé avant
+      la fusion ; plan du cabinet 2026.3 (ACCUSE_DEPOT) ; GET …/ged/cabinet/dossiers/{dossierId}/pieces-fiscales ;
+      manifeste ged 1.11.0. Avant la suite :
       🏁 DONE le 2026-11-26 — document-service #38 (dev b18d3ad), catalogue #82 (dev 9674aeb, ged 1.9.0 recopié) ;
       contrat annoncé avant le code (stories #959, main 95d4465). Node 25 : unitaires 1359 (2 rouges connues du poste),
       e2e 217/217 ; Node 24 : 116/116 suites (1366), 217/217 ; mutations 24/24 ; pile grp-b neuve (Mongo rs0) 41/41 :

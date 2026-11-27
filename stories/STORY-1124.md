@@ -1,6 +1,7 @@
 # STORY-1124 : Le circuit sans trou — la réception et ses boîtes d'un seul geste, les mouvements d'une boîte verrouillés, la facture désinscrite retirée du fonds
 
-Status: done — **livrée le 2026-11-26** : document-service **#38** (`b18d3ad` sur `dev`), catalogue **#82** (`9674aeb`,
+Status: done — **suite « h » en cours (2026-11-27)** : les pièces du dépôt d'une déclaration au fonds du client (← D,
+STORY-335 ; « Suite du 2026-11-27 », D-1124-13 → 24). **Livrée le 2026-11-26** : document-service **#38** (`b18d3ad` sur `dev`), catalogue **#82** (`9674aeb`,
 `ged` 1.9.0) ; voir « Livraison ». Fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 6 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, ligne 6 ; identifiant réservé D-L7B-1).
 
@@ -210,3 +211,189 @@ doublon). Réponse inchangée.
 - La publication du fait par la comptabilité (C, STORY-338, acceptée le 26/11) ; la recopie à l'octet de son schéma dans la
   GED (B, à la fusion de C).
 - Une alerte « copie gardée, écriture abandonnée » pour l'archiviste (un fait de plus, STORY-1123).
+
+## Suite du 2026-11-27 — les pièces du dépôt d'une déclaration au fonds du client (groupe B, lot 7, ordre « h »)
+
+**Demande :** D, STORY-335 (journal de D, « Demandes aux autres groupes » : « → B (2026-11-26, STORY-335) : recevoir dans
+le fonds d'archives du client les pièces du dépôt d'une déclaration », stories #1009, `main` `af552d3` ; fiche
+`STORY-335.md`, D-335-9, Q-D-31 ; le bucket privé du fiscal : STORY-682) ; placée par la session de groupe après
+STORY-1129, avant STORY-1130 (D-L7B-12). **Aucun identifiant neuf.**
+**Dépôt :** `document-service` (GitHub `prospera-ocr-service`, module `ged`), branche `MNV-1124-fiscal`, commits
+`MNV-1124(ged): …` ; le catalogue pour la recopie du manifeste · **Lu seulement :** `prospera-fiscal-service` (le dépôt
+de C, où D travaille par dossier ; B n'y écrit rien) · **Exécutée par :** groupe B.
+
+**Pourquoi :** l'AC-1 de 335 veut le livrable déposé et l'accusé « archivés dans `document-service`, rattachés au
+dossier, à l'implantation, à l'obligation et à la période », et la V9 de la salle du 19/11 veut « la liasse figée, son
+accusé et la validation du client dans le même fonds d'archives que les pièces ». Le fiscal tient l'original dans son
+bucket privé (682), re-vérifié à chaque lecture ; la GED ne reçoit rien du fiscal, et sa pièce ne s'indexe ni par
+obligation, ni par implantation, ni par période. D attend la forme (port inerte `CopieAuFondsDArchives`, `MNV-335`).
+
+### Où en est-on
+
+- [x] Rituel : journaux de A, C, D (aucune demande neuve à B hors de celle-ci) ; `document-service` sur `dev` à jour
+  (`57f9581`), propre ; verrou tenu par C (STORY-338) au rituel.
+- [x] Relu avant d'écrire (le code, pas les fiches) : dans la GED, `factures-consumer.bootstrap.ts`, `factures.service.ts`,
+  `facture-inscrite.ts`, `depot-factures.ts` (le fait consommé, l'attente `SANS_FONDS` rangée à l'ouverture du fonds,
+  l'unicité par l'origine), `cabinet.service.ts` (`rangerUneCopie`, `controlerFichier`, `sceller`, `pieceAccessible`,
+  `metadonneesDeVersion`), `pieces/depot-ged.ts` (index `une_piece_par_ecriture_comptable`), `reception/controles.ts` et
+  `parametres/ged-2026.3.json` (**formats acceptés : JPEG, PNG, WEBP, PDF ; 8 Mo**), `lectures/` (la lecture d'une
+  version, exigée au scellé), `cabinet/droits.ts` (`SourceDesDroitsHttp`), `parametres/ged-cabinet-2026.2.json`,
+  `kafka/supervision-consommateur.util.ts` (un message en échec est relu, le groupe « bloqué » au troisième), l'outbox de
+  1123 ; dans le fiscal (branche `MNV-335` de D, lecture seule) : `ports/copie-fonds-archives.ts` et l'adaptateur inerte,
+  `domain/depot/archive-depot.ts` (`RattachementDeclaration`, le livrable `FICHIER` = classeur XLSX ou `FORMULAIRE` =
+  JSON, 15 Mo), `domain/depot/accuse-depot.ts` (la pièce de l'accusé : PDF, PNG, JPEG, XML), `kafka/outbox/` et
+  `kafka/events/declaration-events.ts` (l'outbox du fiscal, son fait `fiscal.declaration.deposee`, ses conventions
+  `orgId`, `occurredAt`), `adapters/http/http-envoi-invitations.ts` (le fiscal appelle déjà un service avec un jeton de
+  service) ; dans l'écosystème : `prospera-notification-service/src/config/jetons-de-service.ts` (STORY-589 :
+  `JETONS_DE_SERVICE=<appelant>:<jeton>`, empreinte seule) et `auth-service/src/modules/identites-de-service/` (STORY-948 :
+  jetons RS256 limités à une organisation, pour `MOTEUR`, `REPRISE`, `CONNECTEURS` seulement) ; fiche STORY-324 (D-324-2 :
+  la validation du client est **déjà** une pièce de la GED, le fiscal n'en garde que la référence).
+- [x] Forme choisie et contrat annoncés avant la fusion (cette PR de docs ; manifeste `ged` 1.11.0 à la source).
+- [ ] PR de code fusionnée en rebase ; manifeste recopié ; preuves.
+- [ ] Recopie au catalogue ; PR de docs finale (fiche, tracker, journal : avancement, « Réponses » → D) ; message à D,
+  information à C.
+
+### Les deux formes, comparées sur le code
+
+| | (1) un fait du fiscal, la GED tire les octets | (2) une route de dépôt de la GED, le fiscal l'appelle |
+|---|---|---|
+| **Rien ne se perd** | Le fait s'écrit dans l'**outbox du fiscal, dans la transaction** de l'archivage (comme `fiscal.declaration.deposee`, 681) : la copie est due dès que l'original existe, et le relais la livre au moins une fois. | Le fiscal appelle **après** son écriture (le port de D l'appelle hors transaction et avale l'échec) : une GED arrêtée perd la copie, sauf si D écrit une file de reprise — une seconde outbox. |
+| **Pas de fonds ouvert** | La GED sait déjà attendre : le fait garde sa place (`SANS_FONDS`), il se range à l'ouverture du fonds (patron des factures, 1100) ; les octets ne se tirent qu'à ce moment. | La GED devrait garder les octets en attente (un stockage de plus) ou refuser, et le fiscal réessaierait sans savoir quand un fonds s'ouvre. |
+| **Idempotence** | Rejeu du fait : la clé `(orgId, obligationId, numero, nature)` et l'origine de la pièce, uniques. | La même clé, sur la route. Équivalent. |
+| **Ce que la GED sait déjà** | Un consommateur supervisé (client de Confluent, jamais attendu à l'amorçage), la lecture validée d'un fait (Ajv, schéma copié à l'octet), `rangerUneCopie` (copie chiffrée, pré-indexée, reliée à son origine, à contrôler), l'attente et son rangement. Il manque l'adaptateur qui tire les octets. | `POST …/ged/cabinet/pieces` existe, mais **au jeton d'un membre** et sous ses droits `ged:*` (lus chez auth) : un collaborateur fiscal sans droit de la GED ne copierait rien, et un fait ou un rejeu n'a pas de membre. Il faudrait une route neuve, sous une authentification de service neuve dans la GED. |
+| **Authentification de service** | Le fiscal sert une route `/api/v1/service/…` au jeton de service de `document-service` (patron de notification, STORY-589, que le fiscal pratique déjà comme appelant) ; la GED garde un jeton. | La GED sert une route au jeton de service du fiscal (même patron, de l'autre côté). Équivalent. |
+| **La validation du client** | Aucun octet à tirer : la pièce est déjà dans la GED (D-324-2) ; le fait porte sa référence, la GED la **rattache**. Le même fait, la même clé. | Une seconde route (rattacher sans fichier). |
+| **Preuve** | La GED re-hache les octets tirés contre le SHA-256 du fait (64 hexadécimaux, format de `ged.piece.recue`) : une copie qui ne concorde pas n'entre pas. | Le fiscal déclare l'empreinte dans la requête ; même contrôle. Équivalent. |
+| **Ce que D écrit** | Le fait dans l'outbox (un adaptateur du port inerte, trois appels) et une route de lecture de service. | L'appel HTTP, et la file de reprise sinon la copie se perd. |
+
+**Choix : la forme (1)** (D-1124-14).
+
+### Contrat (annoncé avant la fusion)
+
+- **Fait consommé `fiscal.depot.piece-archivee` v1 — proposé par B à D** (schéma JSON 2020-12,
+  `additionalProperties: false`, dans `prospera-ocr-service` : `contrat/consommes/fiscal.depot.piece-archivee.v1.json` et
+  `src/modules/ged/cabinet/schemas/`, origine « proposé à D » ; D le recopie à l'octet dans le fiscal, et la GED recopiera
+  l'octet de D à sa publication). Publié par l'**outbox du fiscal, dans la transaction** de l'archivage du livrable
+  (`POST …/depots-declaration/{depotId}/livrable`), de la consignation d'un accusé **avec sa pièce** (333) et, quand 336
+  la lira, de la consignation d'une validation du client **dont la référence est une pièce de la GED** (324). Un fait par
+  pièce et par obligation. Clé de partition `orgId` ; en-têtes `eventId`, `schemaVersion`. État absolu, aucun contenu, ni
+  signataire, ni auteur, ni texte libre.
+  - Requis : `eventId` (uuid), `schemaVersion: 1`, `occurredAt` (date-time), `orgId`, `dossierId`, `obligationId`,
+    `depotId` (24 hexadécimaux minuscules), `implantationId`, `redevableId` (`^[A-Za-z0-9_-]{1,64}$` : `principale`,
+    `entreprise`…), `taxe` (`^[A-Z][A-Z0-9_]{0,39}$`), `periode` (`AAAA`, `AAAA-MM`, `AAAA-Tn`, `AAAA-En`), `numero`
+    (entier ≥ 1 : la version de la déclaration), `nature` (`LIVRABLE_DEPOSE` | `ACCUSE_DEPOT` | `VALIDATION_CLIENT`),
+    `date` (`AAAA-MM-JJ` : le jour du dépôt engagé, la date de l'accusé, le jour de l'accord).
+  - `LIVRABLE_DEPOSE`, `ACCUSE_DEPOT` : **`piece`** requis = `{ id (archiveId ou accuseId, 24 hexa), sha256 (64 hexa,
+    sans préfixe), taille (1 → 15 728 640), type (application/pdf | image/png | image/jpeg | application/xml |
+    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet | application/json), nom (1 → 255) }` ;
+    `pieceGed` interdit.
+  - `VALIDATION_CLIENT` : **`pieceGed`** requis = `{ pieceId (24 hexa), version (≥ 1), sha256 (64 hexa) }` (la
+    référence que la GED a rendue, D-324-2) ; `piece` interdit. Une validation à référence libre (hors GED) ne s'émet pas.
+- **Route de service du fiscal, proposée à D** (D l'écrit dans son dossier `depots`) : **`GET
+  /api/v1/service/organisations/{orgId}/pieces-depot/{nature}/{pieceId}`** (`nature` : `LIVRABLE_DEPOSE` |
+  `ACCUSE_DEPOT` ; `pieceId` : `piece.id` du fait) ; `Authorization: Bearer <jeton de service>`, le fiscal reconnaît
+  `JETONS_DE_SERVICE=document-service:<jeton>` (32 caractères au moins, empreinte seule gardée : patron de STORY-589),
+  aucun jeton d'utilisateur, aucun droit. **200** : le corps = les octets exacts, `Content-Type:
+  application/octet-stream`, `X-Empreinte-Sha256: <64 hexa>` ; l'objet est **relu et re-haché** avant d'être servi
+  (682). **404 `PIECE_INTROUVABLE`** (inconnue, autre organisation, nature qui ne va pas avec l'identifiant, accusé sans
+  pièce) ; **502 `FICHIER_ARCHIVE_ALTERE`** ; **401 `JETON_DE_SERVICE_REQUIS`** ; 503.
+- **Côté GED** (consommateur, groupe **`ged.fiscal`**) :
+  - **Idempotence** : un rattachement par `(organisation, obligationId, numero, nature)` (collection neuve
+    `ged_pieces_fiscales`, index unique) et une copie par origine (`origine.systeme = fiscal`, `origine.id =
+    <obligationId>:<numero>:<nature>`, index unique partiel neuf `une_piece_par_piece_fiscale`) : un rejeu ne range
+    jamais deux fois ; un rejeu dont l'empreinte diffère ne change rien (journalisé).
+  - **Rangement** : le fonds **ouvert** du dossier dont la période couvre le début de la période fiscale, sinon le plus
+    récent ouvert ; sans fonds, le fait **attend** (`SANS_FONDS`) et se range à l'ouverture d'un fonds du dossier. Copie
+    chiffrée, `source: FISCAL`, pré-indexée (`exercice` = l'année de la période, `date`, `reference` = `<taxe>
+    <periode>`), reliée à son origine, **à contrôler** avant le versement (comme une facture, 1100). Nature :
+    `LIVRABLE_DEPOSE` → **`DECLARATION_FISCALE`** (au plan depuis 1087), `ACCUSE_DEPOT` → **`ACCUSE_DEPOT`** (neuve).
+    `VALIDATION_CLIENT` : la pièce de la GED est **rattachée**, jamais copiée (même cabinet, même dossier, la version
+    et son empreinte doivent concorder).
+  - **Les octets** : tirés par la route de service du fiscal (`FISCAL_SERVICE_URL`, `FISCAL_JETON_SERVICE`,
+    `FISCAL_SERVICE_DELAI_MS`, 15 000 ms par défaut) ; taille et SHA-256 recalculés contre le fait. Attentes nommées :
+    `SANS_FONDS`, `PIECE_INTROUVABLE` (404), `ORIGINAL_ALTERE` (502), `EMPREINTE_DIVERGENTE`, `PIECE_GED_INTROUVABLE`,
+    le code d'un fichier refusé, `SOURCE_INDISPONIBLE`. Une panne du fiscal (injoignable, délai, 5xx, non configuré)
+    pendant la lecture d'un fait : le message est **relu** (le groupe passe « bloqué » au troisième échec, `/health` le
+    dit) ; pendant une reprise d'attentes : l'attente reste, `SOURCE_INDISPONIBLE`. Les attentes d'un dossier se
+    reprennent à l'ouverture d'un fonds et à chaque fait du même dossier.
+  - **Formats d'une copie du fiscal** : ceux du fiscal (PDF, PNG, JPEG, XML, XLSX, JSON), jugés sur les octets et
+    conformes au `type` du fait, 15 Mo au plus ; la GED ne lit (OCR, couche texte) que le PDF et les images : un
+    classeur, un XML ou un JSON n'a pas de lecture, et le scellé d'un bordereau ne l'attend pas.
+- **Plan de classement du cabinet `ged-cabinet-2026.3`** (2026.2 ne change pas d'un octet) : 2026.2 et une nature
+  **`ACCUSE_DEPOT`** « Accusé de dépôt d'une déclaration » — `ANNUEL` / `FISCAL` (après `VALIDATION_CLIENT`), non
+  sensible, 10 ans après la fin de l'exercice ; servie à tous les fonds ; un code déjà pris par un cabinet reste le sien
+  (D-1119-21). `GET …/ged/cabinet/natures` rend `version: "2026.3"`.
+- **Route neuve `GET /api/v1/ged/cabinet/dossiers/{dossierId}/pieces-fiscales`** (jeton du membre ;
+  `ged:piece:consulter` ; portée du dossier) ; filtres facultatifs `obligationId`, `periode`, `implantationId`, `nature`
+  → `200 { pieces: [{ obligationId, implantationId, redevableId, taxe, periode, numero, nature, depotId, date, statut:
+  RANGEE | EN_ATTENTE, raison?, pieceId?, version?, fondsNumero?, empreinte, recueLe, rangeeLe? }] }` (période puis
+  version, la plus récente d'abord ; 500 au plus). Refus : `403 DROIT_INSUFFISANT`, `403 GED_NOT_ENTITLED`, `404
+  DOSSIER_INCONNU` (hors portée compris), `400` (filtre invalide).
+- **Manifeste `ged` 1.11.0** (`manifestes/ged.manifest.ts`, cette PR) : `fiscal.depot.piece-archivee` en `consomme`
+  [proposition, à D] ; la route en `routesLectureSeule`. Recopié dans le service par le code, puis au catalogue. Aucun
+  droit neuf (auth inchangé), aucun fait publié, aucune route d'écriture.
+
+### Décisions retenues par défaut (contestables)
+
+- **D-1124-13 — La demande se rattache à STORY-1124.** C'est la story de B qui a fait entrer au fonds du client ce
+  qu'un autre service lui annonce par un fait qu'elle a proposé (`comptabilite.facture.desinscrite`, accepté par C) : le
+  circuit sans trou de la copie. STORY-1100 (la facture inscrite) est une story de C ; STORY-1119 (« f ») porte la
+  preuve, pas la réception. Aucun identifiant neuf (D-L7B-12).
+- **D-1124-14 — La forme (1) : un fait du fiscal, la GED tire les octets par une route de service du fiscal.** Voir le
+  tableau. La raison qui décide : le fiscal a déjà une **outbox transactionnelle**, la GED a déjà un **consommateur qui
+  attend son fonds** ; la forme (2) demandait à D une file de reprise (sans elle, une GED arrêtée perd la copie) et à la
+  GED un stockage des octets en attente ou un refus sans fin. Le coût de (1) est une route de lecture de service dans le
+  fiscal ; celui de (2), une route d'écriture de service dans la GED, plus la reprise.
+- **D-1124-15 — Le schéma suit les conventions du producteur.** Le topic est au fiscal : `orgId` et `occurredAt` comme
+  `fiscal.declaration.deposee` (681), pas `organisationId` comme les faits de la comptabilité. Un fait par pièce et par
+  obligation (une validation qui porte sur trois déclarations donne trois faits) : la clé d'idempotence est celle que D
+  demandait, `obligationId` + `numero` + nature. `piece` et `pieceGed` s'excluent par la nature (`if`/`then`/`else`,
+  vérifié sous Ajv strict). Aucun texte libre, ni signataire, ni auteur : la GED range sous `systeme:fiscal`, la trace de
+  qui a archivé reste au journal chaîné du fiscal.
+- **D-1124-16 — L'authentification : le jeton de service par appelant, pas l'identité de service d'auth.** Le patron de
+  `prospera-notification-service` (STORY-589 : `JETONS_DE_SERVICE=<appelant>:<jeton>`, 32 caractères au moins, seule
+  l'empreinte gardée, refus au démarrage d'un jeton trop court) est celui que le fiscal pratique déjà comme appelant ;
+  l'identité de service d'auth (STORY-948) est réservée au moteur, à la Reprise et aux Connecteurs et demanderait un jeton
+  par organisation à chaque copie. La route du fiscal n'accepte aucun jeton d'utilisateur.
+- **D-1124-17 — Deux unicités.** Le rattachement `(organisation, obligationId, numero, nature)` est l'idempotence que D
+  demande ; l'origine de la copie (`fiscal`, `<obligationId>:<numero>:<nature>`) la double dans la collection des pièces,
+  pour qu'une course (le fait et la reprise d'une attente, deux consommateurs) ne range jamais deux copies (patron de
+  `une_piece_par_ecriture_comptable`, 1100).
+- **D-1124-18 — Le fonds et l'index, comme une facture.** Le fonds ouvert dont la période couvre le premier jour de la
+  période fiscale (une DSF de `2025` va au fonds de l'exercice 2025, même déposée en 2026), sinon le plus récent ouvert ;
+  un fonds fermé ne reçoit rien (1120). `exercice` = l'année de la période (le plan exige l'exercice d'une pièce annuelle)
+  ; la conservation (10 ans après la fin de l'exercice) et l'échéance de destruction s'en déduisent (1121) ; `reference`
+  = `<taxe> <periode>` entre dans l'index aveugle (1122) par ses mots. La copie reste **à contrôler** : l'IA ni un fait ne
+  contrôlent jamais (FR-165).
+- **D-1124-19 — Une nature neuve pour l'accusé, aucune pour le livrable.** `DECLARATION_FISCALE` est au plan depuis 1087
+  et dit exactement le livrable déposé ; l'accusé n'est ni une quittance ni un avis d'imposition : `ACCUSE_DEPOT`, au plan
+  `2026.3` (D-1119-20 : une version neuve de la table, servie à tous les fonds). La validation du client garde la nature
+  que le cabinet lui a donnée en la rangeant (`VALIDATION_CLIENT` d'ordinaire, « f »).
+- **D-1124-20 — Les formats du fiscal, sans lecture pour ceux que la GED ne lit pas.** Le livrable est un classeur XLSX
+  ou un JSON, l'accusé peut être un XML : la GED les refusait (`FORMAT_NON_ACCEPTE`, 8 Mo). La copie du fiscal accepte
+  ses six formats et 15 Mo (sa propre limite), jugés sur les octets ; les paramètres de la GED (`ged-2026.3`, ceux des
+  dépôts des membres) ne changent pas. Une lecture OCR d'un classeur échouerait et irait « à refaire » : elle n'est pas
+  planifiée ; le scellé n'attend une lecture que pour un format lu (PDF, images). L'OCR, les extractions et la lecture
+  ne changent pas.
+- **D-1124-21 — Une panne du fiscal relit le message ; un refus du fiscal fait attendre.** Injoignable, délai, 5xx ou
+  configuration absente : le message n'est pas acquitté (la supervision le relit, avec son délai croissant, et `/health`
+  nomme le groupe bloqué) — rien ne se perd et la panne se voit. `404`, `502 FICHIER_ARCHIVE_ALTERE`, une empreinte ou une
+  taille qui ne concordent pas, un fichier refusé : l'attente garde sa raison, la partition continue. Les attentes d'un
+  dossier se reprennent à l'ouverture d'un fonds et à chaque fait du même dossier (aucune minuterie neuve).
+- **D-1124-22 — Une lecture des rattachements par dossier.** « Retrouver toute pièce depuis l'obligation » (FR-F45) : la
+  route rend les rattachements d'un dossier, filtrés par obligation, période, implantation ou nature, avec la pièce de la
+  GED et sa version (que `…/versions/{version}` de « f » sait vérifier), ou la raison d'une attente. Sous la garde de la
+  pièce (`ged:piece:consulter`, portée du dossier), comme la recherche (1122).
+- **D-1124-23 — Manifeste `ged` 1.11.0 ; la recopie au catalogue dans cette suite.** Un fait consommé et une route de
+  lecture neufs. Le fait est marqué « proposition, à D » jusqu'à sa publication par le fiscal.
+- **D-1124-24 — Docker pour la preuve ; la recette de l'Atelier n'est pas rejouée.** Un consommateur neuf et un appel
+  HTTP sortant se prouvent sur une pile `grp-b` neuve (vrai Kafka, doublure de la route du fiscal), et le client de
+  Confluent sous Node 24 (étage `verification`). Ni l'OCR, ni les extractions, ni le module Nest commun ne changent : la
+  recette de l'Atelier n'apporterait rien (D-1124-8).
+
+### Nommé pour plus tard
+
+- Le fait et la route dans le fiscal (**D**, à la place de l'adaptateur inerte de 335), puis la recopie à l'octet du schéma
+  de D dans la GED (B).
+- Une reprise périodique des attentes `SOURCE_INDISPONIBLE` d'un dossier qui ne reçoit plus de fait ni de fonds (aujourd'hui
+  : à l'ouverture d'un fonds ou au fait suivant du dossier).
