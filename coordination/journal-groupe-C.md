@@ -201,11 +201,24 @@
    brouillard né d'une facture, dans sa transaction (schéma de B à l'octet ; sujet neuf au registre). Manifeste `comptabilite`
    **0.6.0**. Comptabilité Node 24 : unitaires 71/71 suites, 1057 ; socle 16/17 suites, 342/343 ; la seule rouge, la course de STORY-970 « une clôture au milieu de dix lettrages » (409 au lieu de 201 sous la charge de la suite entière), est verte deux fois sur deux jouée seule (29/29) ; mutations 23/23 et 3/3 MongoDB ;
    pile `grp-c` saine. Verrou pris deux fois (00:05 → 00:30, 00:57 → 01:08). D-338-1 → 15 dans la fiche. **B et D prévenus** (SendMessage).
-21. 🚧 **STORY-340 en cours (27/11)** (le montant à régler, net d'acomptes, de crédits et de retenues ; fiscal et la source
-   du paquet dans balance-service ; ouvre EPIC-033) : fiche écrite, contrat et communs annoncés avant le code (ci-dessous).
-   Rituel : aucune demande neuve à C chez B et D ; chez A, **FE-097** (27/11, registre des immobilisations de
-   balance-service, non bloquante) est notée dans « Réponses » ; la demande de D (349 → 331, l'organisme de la retenue
-   d'IRPP, « au plus tard 340 ») est déjà servie par 339.
+21. ✅ **STORY-340 DONE (27/11)** : balance-service **#174** (`e68ae10` sur `dev`, le paquet) et fiscal **#88** (`efd0992` sur
+   `dev`, rebasée sur `a991963` de D), annonce #1016 avant le code. **`GET /obligations/{id}/montant-a-regler`**, module neuf
+   **`reglement`** (dossier de C, D-L7-1 ; exporte `MontantAReglerService` pour 341 et 565 de D) : la **référence** (le déclaré
+   de la version scellée courante ; avant le dépôt, le déclaré, sinon le calculé du triplet ; jamais un calculé après le dépôt),
+   les **imputations** que le paquet de l'obligation déclare (bloc neuf **`reglement`**, garde **R13** : les payés des
+   `TPU_ACOMPTE` de l'année sur la TPU, LPF Art. 57 ; le crédit de TVA antérieur, déjà dans le déclaré, montré et jamais déduit
+   deux fois, CGI Art. 204 ; `IS_ACOMPTE`, `TPU_ACOMPTE`, `RSH`, `RETENUE_IRPP` sans imputation), le **déjà réglé** (le
+   complément d'une rectificative) ; **jamais un dû négatif** : `EXCEDENT_D_ACOMPTES` (remboursé sous déduction, LPF Art. 57),
+   `CREDIT_DE_TVA_A_REPORTER` (CGI Art. 204), `TROP_VERSE` (sort non déclaré, nommé) ; chaque déduction tracée (obligation,
+   période, payé, chemin de 329) et citée mot pour mot (citation de 339 factorisée) ; ce qui ne se lit pas n'est pas déduit et
+   se nomme (`complet`, `manques`). Gardes AST : le règlement dans la chaîne de 321 ; aucun nombre autre que 0, aucun article ni
+   code d'obligation dans `domain/reglement`. Empreinte du paquet **`d620df8b…fca6`**. Node 24 : fiscal unitaires 255 suites,
+   3854 ; e2e 14/14, 374 ; conformité 31/31, 196 ; balance 300/300, 5811 ; e2e 38/38, 2324 ; mutations 49/49 (fiscal) et
+   14/14 (R13) ; pile `grp-c` saine. Verrou pris une fois (02:27 → 02:41). D-340-1 → 12 dans la fiche. **B prévenu** (recopie) ;
+   **D prévenu** (empreinte, `ReglementModule` pour 565). Rituel : FE-097 de A notée (« Réponses »), la demande 349 → 331 de D
+   déjà servie par 339.
+22. **Suivante : STORY-341** (l'ordre de règlement produit, jamais exécuté ; il lit `MontantAReglerService`). **FE-158 de A
+   est placée en tête de STORY-350** (décision de la session de groupe du 27/11, « Réponses »).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -470,6 +483,11 @@ seulement.
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-27, STORY-340) : recopier le paquet fiscal Togo 2026 dans `dossier-service`** — ouverte, sans urgence.
+  Source : balance-service `dev` `e68ae10` (#174), `src/modules/referentiel/assets/paquet-fiscal-togo-2026.json`, sha256
+  **`d620df8bf6bf43689f7a263c905965243f133d6a41e90f13290dcb737a33fca6`** (LF) ; elle remplace les versions précédentes (`62563b3c`
+  de 339). Bloc neuf `reglement` et une ligne de `aFaire` ; rien de ce que `dossier-service` lit ne change. Prévenu par message.
+
 - **→ B (2026-11-27, STORY-338) : recopier au catalogue le manifeste `comptabilite` 0.6.0** — ouverte. Code fusionné :
   prospera-comptabilite-service #21 (`58803f5`) ; source `manifestes/comptabilite.manifest.ts` (`prospera-stories@0acfd14`,
   #1007) : `publie` + `comptabilite.facture.desinscrite`, trois routes de lecture neuves (`…/ecritures/{ecritureId}/pieces`,
@@ -633,8 +651,9 @@ seulement.
   exigé ; le dépôt suivant scelle la n + 1. `NATURES_VERSION` gagne `RETRANSMISSION` (votre `RetransmissionDto` le rend ; sa
   description « quand le retour du cycle sera ouvert (C) » est à mettre à jour chez vous). Les doublures de C passent
   `PreuvesDeRejet` (par défaut : aucun rejet). Prévenu par message.
-- **← A (25/11, FE-158)** : toujours ouverte (D-338-12) — elle n'entre pas dans 338 ; aucune autre story de C au lot 7 n'ouvre la
-  comptabilité : à placer par la session de groupe.
+- **← A (25/11, FE-158)** : **placée en tête de STORY-350** — décision de la session de groupe de C (27/11) : une PR à part de
+  `prospera-comptabilite-service`, avant le code de 350 ; si 350 ne peut pas la porter, elle passe en fin de lot, après 566.
+  (Avant : ouverte, D-338-12 — elle n'entrait pas dans 338.)
 - **← D (2026-11-26, STORY-333, D-333-3) : brancher la garde `ACCUSE_REQUIS` dans `CycleObligationsService.transitionner`** —
   ✅ **servie en tête de STORY-339, PR à part** : fiscal **#83** (`74b33ec` sur `dev`, sur `fc317a1` de D). À `vers ===
   'ACCUSE_RECU'`, après les gardes d'état et les anomalies : `verifierAccuseAuRecu(await preuves.accuseDe(orgId, id,
@@ -747,6 +766,11 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **FUSIONNÉ (2026-11-27, prospera-fiscal-service#88, `dev` `efd0992`, rebasée sur `origin/dev` `a991963` de D, sans
+  conflit)** — conforme à l'annonce : `src/app.module.ts` (import de `ReglementModule`), le contrat OpenAPI (la route neuve),
+  la copie du paquet (`d620df8b…fca6`, de balance-service #174 `e68ae10`). Aucun fichier de D ; aucune migration. Pendant la
+  story, D a fusionné 335 (`108221e`) et 336 (`a991963`) : fichiers disjoints. **→ D** : rien à faire pour un rebase ; toute la
+  suite verte en Node 24 ; prévenu par message.
 - **ANNONCÉ (2026-11-27, STORY-340, avant le code)** — branche `MNV-340` de `prospera-fiscal-service`, partie de
   `origin/dev` `ffd6f2a` (et `MNV-340` de `balance-service`, de `origin/dev` `61997fd`, pour la source du paquet). **Aucune
   migration**, aucune collection, aucune écriture ; ni `package.json`, ni `read-models/`, ni manifeste `declarations`.
@@ -933,6 +957,10 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-27 (STORY-340), PUBLIÉ** (fiscal #88, `efd0992` ; balance-service #174, `e68ae10`) — conforme à l'annonce
+  (#1016), sans écart. **→ A** : types à régénérer depuis l'OpenAPI vivant (`MontantAReglerDto`) quand un écran lira le
+  règlement. **→ D (565)** : `MontantAReglerService` est exporté par `ReglementModule`. **→ B** : recopie du paquet
+  (`d620df8b`, « Demandes »).
 - **2026-11-27 (STORY-340), ANNONCÉ avant le code** — **le montant à régler, net d'acomptes, de crédits et de retenues**
   (`prospera-fiscal-service`, REST ; source du paquet fiscal Togo dans `balance-service`). Fiche : `stories/STORY-340.md`
   (D-340-1 → 12). Consommateurs : l'ordre de règlement (341, C) ; le dépôt automatisé (565, D) ; l'écran (A) ; la copie du
@@ -1689,6 +1717,15 @@ seulement.
 
 ## Questions à l'utilisateur ou au PO
 
+- **❓ 2026-11-27 — STORY-340 (D-340-11, D-340-12) : le solde d'IS et ses crédits d'impôt.** LPF Art. 55 : le solde d'IS est
+  « acquitté spontanément, au moment du dépôt de la déclaration de résultat » ; au catalogue du paquet, la DSF est déclarative
+  (sans montant) et aucune obligation ne porte ce solde. Le moteur de balance-service le liquide déjà (`GET …/fiscal/liquidation` :
+  max(IS ; MFP) − acomptes − crédits d'impôt), sur ses propres enregistrements d'acomptes et de crédits, distincts des payés des
+  `IS_ACOMPTE` du fiscal. Faut-il une obligation `IS_SOLDE` (avec la DSF au réel), chiffrée par cette liquidation, ses acomptes
+  pris des payés du fiscal ? **Choix par défaut** : nommé, non codé au lot 7 ; à placer. De même pour les retenues subies
+  attestées (LPF Art. 99) et l'IRPP de la personne (déclaratif ; l'imputation des retenues de l'employeur est le calcul de 564,
+  que 566 expliquera).
+
 - **❓ 2026-11-18 — STORY-1016, décisions contestables (D-1016-1 → 10, fiche).** Les quatre qui comptent : D-1016-4 (rien
   ne part sans provision ouverte : un corporel jamais ouvert à la main n'est pas aligné), D-1016-6 (le corporel propose
   aussi : le montant est celui du gestionnaire), D-1016-7 (`GREC` propose comme `GEST`, le seuil glissant s'applique à lui),
@@ -1840,6 +1877,16 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-340, 27/11) `git reset --soft origin/dev` pour réunir ses commits, après un `fetch` qui a avancé `dev`** : le commit
+  « réuni » contenait l'**inverse** des commits de D fusionnés entre-temps (335 : 38 fichiers, 3 055 suppressions). Réunir sur
+  **sa base d'origine** (`git reset --soft <base>`, puis `rebase origin/dev`), et lire `git show --stat` avant de pousser.
+- **(STORY-340)** un `python - <<'EOF'` qui remplace une regex (`\b`, `\.`) avale les antislashs : `AssertionError: 0`. L'outil
+  d'édition pour les motifs à antislash.
+- **(STORY-340)** une attente `timeout 590 … until grep -q ^FIN` qui expire rend la main **avec le code 0** : la notification
+  ne dit pas que la campagne est finie. Relire `^FIN` dans le fichier avant de conclure.
+- **(STORY-340)** une mutation qui retire un rétrécissement de type (`estNature`, `texte`) ne compile plus (7 sur 49 au premier
+  jet) : garder le garde et ajouter une condition (`&& x !== 'AVOIR'`), puis `as Type` au point d'usage (`avant2`).
 
 - **(STORY-338, 27/11) un banc de conformité qui réemploie une taxe déjà déposée par un autre cas** : `obligation('TVA')` du banc
   des versions retrouve l'obligation que le premier cas a déjà scellée en version 1 ; un dépôt de plus rejoue le numéro 1
