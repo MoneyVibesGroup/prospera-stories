@@ -7,6 +7,7 @@ par URL présignée dans le fiscal.
 **Suite du 2026-11-27** (« h » servie par B : document-service #42, catalogue #88) : le fait
 `fiscal.depot.piece-archivee` v1 par l'outbox, dans la transaction de l'archivage, et la route de service qui sert
 les octets à la GED ; AC-1 et V9 tenus dans `document-service` (section « Suite du 2026-11-27 », D-335-11 → 19).
+**Suite livrée le 2026-11-27** : prospera-fiscal-service#89, `dev` `dae6a10` (annonce #1023, `main` ed59786).
 Écrite le 2026-11-26 par la sous-session du groupe D juste avant de coder (lot 7 de D, n° 12,
 `PLAN-LOT-7-2026-11-24.md` §4 : « même réalignement, en partie » — avec 537 → 539 et 688 → 691, lot 6 §3). Il
 n'existait pas de fiche : les critères viennent d'`epics-fiscalite-2026-08-03.md` (EPIC-032) et de la salle des
@@ -344,15 +345,91 @@ la part du fiscal, dans le dossier `depots` de D, sans identifiant neuf. Branche
 
 ### Definition of Done de la suite
 
-- [ ] Le fait part dans la transaction de l'archivage et de la consignation avec pièce, et pas autrement (unitaires,
+- [x] Le fait part dans la transaction de l'archivage et de la consignation avec pièce, et pas autrement (unitaires,
       e2e) ; sur **MongoDB réel** (`test:conformite`) : livrable, acte et ligne d'outbox tout ou rien ; dix archivages
       parallèles ⇒ un seul fait.
-- [ ] Chaque fait construit valide contre le schéma recopié, dont le sha256 LF est gardé par un test.
-- [ ] La route : 200 (octets et empreinte), 401, 404 (chaque cas), 502 ; l'analyse de `JETONS_DE_SERVICE` refuse au
+- [x] Chaque fait construit valide contre le schéma recopié, dont le sha256 LF est gardé par un test.
+- [x] La route : 200 (octets et empreinte), 401, 404 (chaque cas), 502 ; l'analyse de `JETONS_DE_SERVICE` refuse au
       démarrage ce qu'elle doit refuser ; la liste fermée des routes publiques le dit.
-- [ ] **Mutations** rouges sur une assertion ; lint des fichiers touchés et `tsc` : 0.
-- [ ] Node 24 : unitaires, e2e, `test:conformite` ; §1.5 : pile `grp-d` du fiscal **avec Redis**, le fait écrit à
+- [x] **Mutations** rouges sur une assertion ; lint des fichiers touchés et `tsc` : 0.
+- [x] Node 24 : unitaires, e2e, `test:conformite` ; §1.5 : pile `grp-d` du fiscal **avec Redis**, le fait écrit à
       l'outbox **et publié** sur Kafka, la route en 200 avec la bonne empreinte, 401 sans jeton, 404.
+
+### Livraison de la suite (2026-11-27)
+
+- **Code** : prospera-fiscal-service#89, fusionnée en rebase sur `dev` (`dae6a10`), partie d'`origin/dev` `efd0992` (340 de C), à jour au moment de la fusion (aucun rebase nécessaire) ; head `63b08fd`, arbre identique. Annonce avant le code :
+  prospera-stories#1023 (`main` ed59786). **Aucun écart de route, de champ, de code de refus ni de fait au contrat
+  annoncé.**
+- **Deux précisions, sans effet sur le contrat** :
+  - le contrôle « deux appelants, un jeton » de 589 n'est pas repris : la liste fermée n'a qu'un appelant
+    (`document-service`), un doublon est déjà refusé par son nom ; il reviendra avec un second appelant ;
+  - la route est sous le plafond global du service (100 requêtes par minute et par IP, `429`), comme toute route.
+- **Fichiers** (dossiers de D, et un fichier neuf dans `kafka/events/`) :
+  - le domaine : `domain/depot/pieces-depot-service.ts` (pur : les natures servies, le 404 unique, l'empreinte sans
+    préfixe, l'analyse de `JETONS_DE_SERVICE` et l'appelant d'un en-tête, patron de 589) et son test ;
+  - le contrat du fait : `kafka/events/piece-archivee-events.ts` (contrat TS, construction pure, enveloppe d'outbox) et
+    `kafka/events/fiscal.depot.piece-archivee.v1.json` (le schéma de B à l'octet), et leur test ;
+  - les ports : `archive-livrables.ts` (`lire`), `registre-livrables-archives.ts` et `registre-accuses-depot.ts` (le fait
+    en paramètre, `parIdentifiant`) ; **retirés** : `ports/copie-fonds-archives.ts`, `adapters/fonds-archives/copie-inerte.ts` ;
+  - les adaptateurs : `minio-archive-livrables.ts` (`lire` sur le parcours de `mesurer`), `mongo-registre-livrables-archives.ts`
+    et `mongo-registre-accuses-depot.ts` (`OutboxService.enqueue` sous la session ; `parIdentifiant`) ;
+  - les cas d'usage : `archives-depot.service.ts` (le fait du livrable ; `servirPiece`) et `accuses-depot.service.ts` (le
+    fait d'un accusé avec pièce) ;
+  - la route : `modules/depots/pieces-depot-service.controller.ts`, `jeton-de-service.guard.ts` (garde et
+    `JetonsDeServiceConnus`), `depots.module.ts` (le contrôleur, le fournisseur qui lit la variable, la garde) ;
+  - les tests : `pieces-depot-service.spec.ts`, `piece-archivee-events.spec.ts`, `jeton-de-service.guard.spec.ts`,
+    `pieces-depot-service.openapi.spec.ts`, `archives-depot.service.spec.ts`, `minio-archive-livrables.spec.ts`,
+    `test/depots-declaration.e2e-spec.ts` (quatre cas), `test/livrables-archives.conformite-spec.ts`,
+    `test/accuses-depot.conformite-spec.ts`, `test/utils/valider-schema.ts` (le validateur minimal), les doubles mémoire
+    (l'outbox en mémoire : `faits`) ; la garde d'AD-12 couvre le contrat du fait.
+- **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI (une route), `src/garde-acces-client.spec.ts` (une
+  ligne), `.env.example` (`JETONS_DE_SERVICE`, commentée, sans valeur). Aucune migration, aucun fichier de C.
+- **Preuves** :
+    - Node 24 (image `verification` de l'archive LF de `63b08fd`, partie d'`efd0992`, 340 de C) : unitaires **262/263
+      suites, 3 926 tests** (1 suite et 3 tests ignorés : la spec BullMQ sans Redis) ; e2e **15/15 suites, 387 tests**
+      (`dossier-controle` de 336 compris ; dont les quatre cas de la suite dans `depots-declaration`) ;
+      **`test:conformite` 31/31 suites, 204 tests** (dont, sur MongoDB réel : le livrable, puis l'accusé avec pièce, son
+      acte et son fait d'outbox tout ou rien ; une panne du journal, puis de l'outbox, n'écrit rien ; dix archivages, puis
+      dix consignations parallèles ⇒ un seul fait ; la lecture par identifiant, cloisonnée).
+    - Node 25 (local) : e2e `depots-declaration` et `dossier-controle` **65/65** ; les suites du dépôt, des adaptateurs,
+      de Kafka et des gardes 117/121 (les 4 rouges chargent le client Kafka natif : `app.module.invariant`,
+      `app-cablage`, `kafka-producer`, `outbox-relay`, vertes sous Node 24).
+    - **Mutations 46/46**, chacune rouge sur une assertion (42 sous Node 25, 4 sur MongoDB réel sous Docker) :
+      - le jeton de service : un appelant hors liste, un doublon, 31 caractères, un appelant vide admis ; la valeur non
+        rognée ; la fin de l'en-tête non ancrée ; la casse du schéma exigée ; toute empreinte égale ; un en-tête absent ou
+        multiple admis ; le clair gardé au lieu de l'empreinte ;
+      - le domaine : le préfixe gardé ; toute nature servie ; le 404 devenu 422 ; l'identifiant sans motif ;
+      - le fait : un topic suffixé ; l'empreinte d'autre chose ; la clé du dossier ; l'instant du moment ; un type neutre ;
+        l'implantation perdue ; l'`eventId` de l'enveloppe ;
+      - les cas d'usage : le fait non passé au registre (livrable, accusé) ; la nature de l'accusé ; la date de
+        l'archivage, de la consignation ; `piece.id` du dépôt (livrable, accusé) ; la taxe perdue ; une lecture non bornée ;
+        aucun re-hachage ; l'empreinte d'autre chose ; d'autres octets ; l'organisation sans motif ;
+      - la route et la garde : un autre code de refus ; l'appelant non posé ; sans `X-Empreinte-Sha256` ; le cache permis ;
+        `@Public()` sans effet ; MinIO : les octets non gardés, la lecture nommée « mesurer » ; le double mémoire qui
+        garde un fait sans livrable ;
+      - MongoDB réel : le fait écrit hors de la session, avant l'acte (livrable, accusé) ; la lecture par identifiant sans
+        l'organisation (livrable, accusé).
+      - Cinq mutants rougissaient d'abord en compilation (un import ou une variable devenus inutiles, un décorateur sans
+        paramètre) : réécrits en gardant l'intention, puis rejoués rouges. Aucun survivant.
+    - lint des fichiers touchés et `tsc` : 0.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** (image runtime de l'archive de `63b08fd`, `JETONS_DE_SERVICE` posé par
+      une surcouche avec un jeton factice tiré pour la preuve) :
+      - santé `ok` (mongodb, audit, kafka, redis) ; la route montée, en `401 JETON_DE_SERVICE_REQUIS` sans jeton ;
+        `DepotsModule`, `AccusesDepotModule`, `ObligationsModule`, `ReglementModule` initialisés ; 0 `UnknownDependencies`
+        sur 592 lignes de journal ; le jeton absent du journal ;
+      - un pilote (un fichier de test monté dans l'image, jamais commité) archive un livrable et consigne un accusé avec
+        pièce par les vrais registres (MongoDB `rs-fiscal`, MinIO `fiscal-depots`) : **deux faits écrits à l'outbox**,
+        valides contre le schéma, **passés `SENT` par le relais BullMQ du service** (0 nouvelle tentative) ; **lus sur Kafka**
+        par un consommateur neuf : clé `orgId`, en-têtes `eventId` et `schemaVersion: 1`, payload identique à l'outbox ;
+      - la route, au jeton de service : **200**, `application/octet-stream`, `X-Empreinte-Sha256` égal au SHA-256 des
+        octets, octets identiques (le livrable et la pièce de l'accusé) ; **401** sans jeton et avec un jeton inconnu ;
+        **404 `PIECE_INTROUVABLE`** pour une pièce inconnue, une autre organisation, une autre nature ; **502
+        `FICHIER_ARCHIVE_ALTERE`** après une altération de l'objet dans MinIO.
+      - L'aller-retour avec `document-service` de B n'est pas joué : la GED demande sa propre pile (MongoDB `rs0`, MinIO,
+        doublure d'auth) et un fonds ouvert par un membre avant de ranger une copie. La pile `grp-d` s'arrête au côté
+        fiscal ; la GED a prouvé sa part sur `grp-b` avec une doublure de cette route (D-1124-24).
+    - **Verrou Docker** : une prise par un script autonome, rendue par son `trap` : 03:10:20 → 03:24:43. B et C prévenus.
+      Il ne reste aucun conteneur, volume ni réseau `grp-d`.
 
 ## Questions au PO
 
