@@ -2149,6 +2149,9 @@
   l'attend. Quand C l'aura déclarée, une recopie du paquet n'est pas nécessaire tant qu'aucune instance n'existe.
   **Reçue par C** (complément de 342) : placée au plus tard en 344. 561 est livrée sur un double du paquet (fiscal#92,
   `dev` `997e29a`) ; la demande reste ouverte jusqu'à la fusion de C.
+  - **Complément du 2026-11-27 (STORY-562)** : la clé `suivi` de chaque connecteur, réservée par 561, reçoit sa forme
+    (`stories/STORY-562.md`, D-562-3 : `rythme`, `parcours`, `issues`, `accuse`, `rejet`) ; même règle — facultative,
+    aucune instance au paquet Togo. 562 se livre sur un double du paquet ; rien ne l'attend.
 
 - **→ C (2026-11-27, STORY-337) : information, non bloquante — relier chaque obligation du catalogue du paquet à ses
   comptes, si le PO le veut (Q-D-35).** Le rapprochement des pièces lit les comptes que le chemin nomme (le moteur, depuis
@@ -2786,6 +2789,16 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-27, STORY-562, avant le code)** — branche `MNV-562` de `prospera-fiscal-service`, partie
+  d'`origin/dev` `997e29a`. **Aucune migration** : une collection neuve de D, `suivis_connecteur` (index unique par
+  dépôt, posé par Mongoose au démarrage), et deux champs à défaut (`source`, `releve`) sur `accuses_depot` et
+  `rejets_depot`. Touché parmi les communs : **le contrat OpenAPI** seul (« ⚠ Contrats »). Ni `app.module.ts` (la file
+  BullMQ `fiscal-suivi-depot` se déclare dans `ConnecteurDepotModule`, importé par `DepotsModule`), ni `package.json`
+  (BullMQ est déjà une dépendance, 318), ni `redis/files.ts` de C (le nom de la file vit dans le module de D), ni
+  `config/`, ni `read-models/`, ni copie du paquet (D-562-11 : un double du paquet), ni manifeste `declarations`, ni
+  fichier de C ; la garde des minuteries de 318 n'a pas de ligne neuve. Les fournisseurs de C en lecture de 336
+  (D-336-4) ne changent pas. Fiche : `stories/STORY-562.md` (« Réalignement du 2026-11-27 »).
+
 - **FUSIONNÉ (2026-11-27, prospera-fiscal-service#92, `dev` `997e29a`, rebasée sur `origin/dev` `57c7504` avant la fusion ; head `9a951af`), conforme à l'annonce (rebasée localement sur 57c7504 sans conflit, sans push forcé : la fusion `--rebase` a rejoué la branche, et l'arbre de `dev` est identique à l'arbre rebasé et éprouvé) ;
   ANNONCÉ (2026-11-27, STORY-561, avant le code)** — branche `MNV-561` de `prospera-fiscal-service`, partie
   d'`origin/dev` `680164e`. **Aucune migration** : deux collections neuves de D, `parcours_connecteur` et
@@ -2960,6 +2973,20 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-27, STORY-562, avant le code) — le suivi du parcours d'un dépôt automatisé, et l'accusé ou le
+  rejet relevé** (`prospera-fiscal-service`, modules `connecteur-depot` et `depots`). Fiche : `stories/STORY-562.md`
+  (D-562-1 → 12). **Ajouts seuls** :
+  - routes neuves : `GET /api/v1/connecteurs-depot/depots/{depotId}/suivi` (état `EN_COURS` | `TERMINE`, fin
+    `ACCUSE_CONSIGNE` | `REJET_CONSIGNE` | `SAISIE_MANUELLE` | `ARRETE`, raison, prochaine lecture, les 20 dernières
+    lectures et leur issue `ACCUSE_DISPONIBLE` | `REJET` | `EN_COURS` | `INDETERMINE`) ; 404 `SUIVI_INTROUVABLE` ;
+    `GET /api/v1/connecteurs-depot/suivis/a-traiter` (100 au plus) ;
+  - l'accusé et le rejet (`GET /depots-declaration/{depotId}/accuse`, `…/accuses`, `…/{depotId}/rejet`, `…/rejets`)
+    gagnent `source` (`SAISIE` | `RELEVE`) et `releve { connecteur, version } | null` ;
+  - **donnée lue neuve** : la clé `suivi` du connecteur du bloc `automatisation` (réservée par 561), de la forme de la
+    fiche ; aucune instance au paquet Togo ;
+  - aucun fait Kafka neuf : un accusé relevé avec sa pièce porte `fiscal.depot.piece-archivee` (`ACCUSE_DEPOT`) **à
+    l'identique** d'un accusé saisi (D-562-1).
 
 - **PUBLIÉ (2026-11-27, STORY-561 : prospera-fiscal-service#92, `dev` `997e29a`) sans écart ; ANNONCÉ (2026-11-27,
   STORY-561, avant le code, prospera-stories#1033, `main` b8a30d5) — le connecteur de dépôt automatisé, derrière le port AD-12**
