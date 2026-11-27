@@ -619,6 +619,12 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← A (27/11, FE-097, `prospera-balance-service`, registre des immobilisations)** : (1) la liste sans cumul, net ni dotation ;
+  (2) « non amortissable » au contrat ; (3) la mise en service en lot ; (4) les durées usuelles par catégorie ; (5) les comptes
+  d'amortissement et de dotation proposés — **notée, non bloquante** (l'écran tient sans). Aucune story restante du lot 7 de C
+  n'ouvre le registre : **à placer par la session de groupe** ; proposition de C : une PR à part de balance-service après 344
+  (le point 1 d'abord), avant 350.
+
 - **← D (2026-11-26, STORY-334, D-334-8) : ouvrir `DEPOSEE → A_DEPOSER` sur un rejet consigné** — ✅ **servie en tête de
   STORY-338, PR à part** : fiscal **#86** (`ffd6f2a` sur `dev`, sur `69d7e65` de D). Dans `revenir`, de `DEPOSEE` vers
   `A_DEPOSER` seulement : `verifierRejetAuRetour(await rejets.rejetDe(orgId, id, versionCourante.numero), { obligationId, numero })` ;
