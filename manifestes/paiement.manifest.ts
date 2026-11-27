@@ -1,3 +1,4 @@
+// Amendé le 2026-11-27 (STORY-1136, groupe B) : C5, `facturation.avoir.emis@1` (déjà déclaré en `consomme`) est servi — l'avoir réduit la Créance `(FACTURE, factureId)` du TTC crédité (reste dû = origine − avoirs − encaissements, AD-7), et l'argent reçu au-delà devient le trop-perçu, crédit du tiers de cette version (D-965-6) ; `paiement.creance.changed@1` gagne `avoirsMineur`, propriété facultative (toujours publiée), et la cause `AVOIR` (Karapace BACKWARD) ; topic toujours `@1` ; version 1.2.0 → 1.3.0 (un ajout, une mineure).
 // Amendé le 2026-11-26 (STORY-1141, groupe D, dépôt prêté par B) : C5, `paiement.compte.changed@1` gagne `numeroImprimable`, propriété facultative (le numéro « à imprimer » déclaré par le DAF avec le compte, non secret, tracé, jamais tiré du coffre ; Q-D-15), et le fait part aussi au changement de ce numéro (route d'écriture neuve `PUT /api/v1/comptes-encaissement/{compteId}/numero-imprimable`, droit `paiement:compte:administrer`, hors lecture seule) ; topic toujours `@1` ; version 1.1.0 → 1.2.0 (un ajout, une mineure).
 // Amendé le 2026-11-24 (STORY-1073, groupe D, dépôt prêté par B) : C5, + `paiement.compte.changed@1` publié (l'état imprimable d'un compte d'encaissement, sans aucun secret du coffre ; lu par `facturation`, Q-D-12, D-Q12-1) ; version 1.0.0 → 1.1.0 (un ajout, une mineure).
 // Manifeste M33 — Encaissements & PI-SPI (format du contrat de module, clause C1, amendée le 2026-11-10, le
@@ -80,7 +81,7 @@
 
 export const MANIFESTE_PAIEMENT = {
   code: 'paiement',
-  version: '1.2.0',
+  version: '1.3.0',
 
   depends: [],
 
@@ -138,7 +139,7 @@ export const MANIFESTE_PAIEMENT = {
     'paiement.creance.anomalie.constatee',
     // Nouveaux, 2026-11-13 (voir l'en-tête) :
     'paiement.compte.changed@1', // [STORY-1073] état imprimable d'un compte d'encaissement (nature, titulaire, fournisseur, empreinte visible, destination PI-SPI, vérifié ; révision = rang de l'acte du compte) ; jamais un secret ; consommé par facturation ; [STORY-1141] + numeroImprimable facultatif (le numéro « à imprimer » déclaré par le DAF, non secret, BANCAIRE et MOBILE_MONEY), publié aussi à son changement
-    'paiement.creance.changed@1', // état absolu : tiers, source, périmètre, composantes, reste dû, montantExigible, lueLe, échéance, ancienneté (FR-247 ; IMF AD-6)
+    'paiement.creance.changed@1', // état absolu : tiers, source, périmètre, composantes, reste dû, montantExigible, lueLe, échéance, ancienneté (FR-247 ; IMF AD-6) ; [STORY-1136] + avoirsMineur facultatif et la cause AVOIR (le reste dû compte les avoirs de la facture)
     'paiement.credit-tiers.changed@1', // solde, origine (avance, acompte, trop-perçu, avoir), imputations (FR-248)
     'paiement.encaissement.changed@1', // état absolu d'un encaissement ; consommé par la microfinance (spine IMF, AD-9)
     'paiement.ordre-decaissement.changed@1', // ordreId, numeroEssai, état EN_COURS, EXECUTE, REJETE ou INCONNU (spine IMF AD-5)
@@ -164,7 +165,7 @@ export const MANIFESTE_PAIEMENT = {
     'connecteurs.domaine.changed@1', // domaine `paiement.encaissements` (ci-dessous)
     // Sources de créance, distributeur (FR-247, FR-216) :
     'facturation.facture.emise@1', // ouvre la Créance `FACTURE` ; émetteur freelance ⇒ périmètre du freelance (FR-224)
-    'facturation.avoir.emis@1', // réduit la Créance, ou crée un crédit du tiers sur une facture payée (FR-248)
+    'facturation.avoir.emis@1', // réduit la Créance, ou crée un crédit du tiers sur une facture payée (FR-248) ; [STORY-1136] servi : groupe paiement-avoirs, clé avoirId
     'facturation.facture.reprise@1', // ouvre la Créance au reste dû repris de Sage (FR-216)
     // ⚠️ Le relevé de vente qui constate le dû du freelance (FR-97) n'a pas encore de fait nommé chez
     // `facturation` : à ajouter à son manifeste par la story du relevé [À CONFIRMER].
