@@ -1977,6 +1977,13 @@
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-27, STORY-336) : information, non bloquante — exporter, si C le préfère,
+  `HistoriqueObligationsService` et `RegistreValidationsClient` depuis `ObligationsModule`.** Le dossier de contrôle lit le
+  chemin d'un montant (329, 339) et les pièces de validation du client (324) ; `ObligationsModule` ne les exporte pas, et
+  D les fournit donc lui-même dans `DepotsModule`, en lecture, avec les adaptateurs de C (D-336-4), sans toucher un fichier
+  de C. Si C exporte les deux, D importera au lieu de fournir (une ligne). Un constructeur qui change chez C se verra au
+  démarrage de la pile (§1.5) : le dire à D dans « ⚠ Communs » de C suffit.
+
 - **→ B (2026-11-26, STORY-335) : recevoir dans le fonds d'archives du client les pièces du dépôt d'une déclaration —
   ouverte, placée par B (« h », après sa 1129, avant 1130).** B choisira la forme (un fait consommé par la GED, ou une
   route de dépôt de la GED) et répondra dans « Réponses » de son journal, avec un message, avant tout code de D. Côté D,
@@ -2583,6 +2590,15 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-27, STORY-336, avant le code)** — branche `MNV-336` de `prospera-fiscal-service`, partie de
+  `origin/dev` `108221e`. **Aucune migration**, aucune collection, aucune écriture ; ni `app.module.ts` (la route entre
+  dans `DepotsModule`, fichier de D, déjà monté), ni `package.json`, ni `read-models/` (deux schémas lus, `IdentityUser` et
+  `IdentityMembership`, enregistrés en lecture dans `DepotsModule` pour l'annuaire du chemin), ni copie du paquet, ni
+  manifeste `declarations`. Touché parmi les communs : **le contrat OpenAPI** (une route neuve). **Aucun fichier de C** :
+  `HistoriqueObligationsService` (le chemin) et `RegistreValidationsClient` (les pièces du client), que `ObligationsModule`
+  n'exporte pas, sont **fournis en lecture** par `DepotsModule` avec les adaptateurs de C (D-336-4). Aucune minuterie neuve
+  (garde de 318).
+
 - **FUSIONNÉ (2026-11-27, prospera-fiscal-service#85, `dev` `108221e`, rebasée sur `origin/dev` `ffd6f2a` (C #86, D-334-8 servie) sans conflit avant la fusion ; un commit à part met à jour la description de `RetransmissionDto`), conforme à l'annonce ;
   ANNONCÉ (2026-11-26, STORY-335, avant le code)** — branche `MNV-335` de `prospera-fiscal-service`, partie de
   `origin/dev` `69d7e65`. **Aucune migration** (une collection neuve, `livrables_archives_depot`, index posés par Mongoose
@@ -2709,6 +2725,20 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-27, STORY-336, avant le code) — le dossier de contrôle à la demande** (`prospera-fiscal-service`,
+  module `depots`). Fiche : `stories/STORY-336.md` (D-336-1 → 12, section « Contrat »). **Ajouts seuls** :
+  - **`GET /api/v1/dossiers-controle?dossierId=…&annee=…[&redevableId=…][&taxe=…][&periode=…]`** (accès fiscal, throttle
+    10/min) : 200 `{ perimetre, produitLe, produitPar, exigenceValidationClient, obligations: [{ …ce qui situe
+    l'obligation, baseLegale, versionCourante, versions, validations: { visa, client }, depots, archive (335), triplet,
+    anomalies, chemin (329, `detail.basesLegales` de 339), rapprochementPieces: null }], integrite: { statut: ATTESTEE |
+    ROMPUE | RIEN_A_ATTESTER, chaines: [{ perimetre, obligationId, depotId, intacte, entrees, rupture, tete, journal }],
+    versions: [{ obligationId, numero, empreinte, recalculee, intacte }] }, empreinte }`. Refus : `404 DOSSIER_INTROUVABLE`
+    (même réponse hors portée), **`422 PERIMETRE_TROP_LARGE`** (`{ obligations, maximum: 100 }`), `400`, `403`, `429`,
+    `503`.
+  - Aucune collection, aucun acte au journal, aucun topic, aucun droit, aucun champ d'une route existante. **→ A (plus
+    tard)** : l'écran et l'export du dossier de contrôle ; types à régénérer depuis l'OpenAPI vivant
+    (`DossierDeControleDto`). **→ 337** : `rapprochementPieces` est sa place (D-336-9).
 
 - **PUBLIÉ (2026-11-27, STORY-335 : prospera-fiscal-service#85, `dev` `108221e`) sans écart ; ANNONCÉ (2026-11-26,
   STORY-335, avant le code, prospera-stories#1009, `main` af552d3) — l'archive d'une déclaration déposée** (`prospera-fiscal-service`,
@@ -4065,6 +4095,11 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-33 (2026-11-27, STORY-336) — La production d'un dossier de contrôle se trace-t-elle ?** Qui l'a produit, quand,
+  sur quel périmètre, avec quelle empreinte. **Choix par défaut** (D-336-3) : non, c'est une lecture ; l'empreinte rendue
+  prouve qu'un exemplaire remis n'a pas été retouché. Si oui : un acte au journal chaîné d'un périmètre
+  `dossier-controle:<dossierId>`.
 
 - **Q-D-31 (2026-11-26, STORY-335) — La preuve du dépôt vit dans le fiscal ; le fonds du client en reçoit-il une
   copie ?** L'AC-1 de 335 dit « dans `document-service` » ; le lot 6 a mis la preuve du dépôt dans le bucket privé du
