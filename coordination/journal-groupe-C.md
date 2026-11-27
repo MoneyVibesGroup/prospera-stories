@@ -1189,6 +1189,42 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-27 (← A, FE-158), ANNONCÉ avant le code** — **l'ouverture d'un exercice lue pour l'écran de A**
+  (`prospera-comptabilite-service`, REST ; PR à part en tête de STORY-350, décision de la session de groupe). Pas de fiche
+  STORY (aucun identifiant neuf au lot 7) : la demande de A (`frontend-stories/FE-158.md`, « À écrire à C ») et ce journal
+  font foi ; décisions D-FE158-1 → 6 ci-dessous. Consommateur : la carte « Tenue de l'exercice » (A, FE-158) et l'onglet
+  Factures (FE-149). Aucun événement, aucune écriture, aucune migration, aucun module ni dépendance neufs ; aucune route ni
+  aucun champ existant ne change ; le manifeste ne bouge pas (aucun droit neuf).
+  - **(3) et (1) servis (D-FE158-1, 2)** — **`GET /api/v1/dossiers/{dossierId}/exercice-ouvert`** (lecture, tout membre dont
+    la portée couvre le dossier) ⇒ `200 { dossierId, exercice: { exerciceId, libelle, debut, fin, statut } | null, tenue:
+    TenueDExercice | null, tenueProposee: { tenue: CAHIERS | JOURNAL | null, regle: 'SMT_AUX_CAHIERS_SINON_JOURNAL',
+    referentiel?, refus? { code, message } } | null }`. L'exercice est celui que `dossier-service` tient OUVERT (Q8 : un au
+    plus), lu par ses axes (`GET /dossiers/{id}/axes` sans `exerciceId`, jeton du membre) ; aucun ⇒ `exercice`, `tenue` et
+    `tenueProposee` à `null`. `tenue` est la vue de `GET …/exercices/{id}/tenue`, `null` tant qu'aucune tenue n'est choisie.
+    **La tenue proposée** est la règle de la maquette validée le 25/11 (FE-158, question 1, choix par défaut retenu) : SMT ⇒
+    `CAHIERS`, SN, SFD-BCEAO et CIMA ⇒ `JOURNAL` ; elle ne lit pas l'exercice précédent (D-M158-6). Jamais devinée : sans
+    système décidé (`REFERENTIEL_NON_DECIDE`) ou sur une famille inconnue (`REFERENTIEL_INCONNU`), `tenue: null` et le
+    `refus` nommé, avec son message — l'ouverture refuserait de même. **Ce n'est pas une proposition du registre de l'IA**
+    (AD-5 : ni `propositionId` ni capacité) : rien ne change à la provenance consignée (« choisi par l'utilisateur »),
+    `proposition` reste à ne pas envoyer (D-M158-4). Refus : ceux de `GET …/tenues` (400, 403, 404 `DOSSIER_INTROUVABLE`,
+    503 `DOSSIER_SERVICE_INDISPONIBLE`, réponse des axes hors contrat comprise).
+  - **(2) servi (D-FE158-3)** — **`GET /api/v1/moi/droits`** (lecture, tout membre) ⇒ `200 { organisationId, droits: [...] }` :
+    les droits du **manifeste `comptabilite`** que le membre détient dans l'organisation de son jeton, lus comme la garde les
+    lit (`GET /moi/droits` d'auth-service, `droits ∪ droitsHorsJeton`, même cache), dans l'ordre du manifeste. L'écran grise
+    « Tenir au journal » si `comptabilite:exercice:ouvrir` manque. Le serveur reste juge : la garde revérifie à chaque geste.
+    Refus : 403 des gardes ; 503 `DROITS_INDISPONIBLES` (l'écran garde alors le bouton ouvert, comme aujourd'hui).
+  - **(5) servi par une sonde, la liste inchangée (D-FE158-4)** — `GET …/exercices/{exerciceId}/factures/lots` garde son
+    contrat (200 et la liste, vide avant l'ouverture) : motif **`LISTE_SANS_REFUS_D_ETAT`** — une liste ne refuse pas sur
+    l'état de l'exercice, et faire d'un 200 un 404 casserait les lecteurs actuels de la route. L'onglet Factures sait avant le
+    dépôt par **`GET …/exercices/{exerciceId}/tenue`** (404 `EXERCICE_NON_OUVERT` depuis STORY-959 ; `tenue: CAHIERS` ⇒ « ce
+    client tient ses cahiers ») ou par la route neuve (`tenue: null`).
+  - **(4) déjà servi (D-FE158-5)** — chaque refus du service porte, depuis STORY-958, `{ statusCode, error, code, message,
+    details? }` avec une phrase en français (dont `REFERENTIEL_NON_DECIDE`, `REFERENTIEL_INCONNU`, `EMAIL_NOT_VERIFIED`,
+    `COMPTABILITE_NOT_ENTITLED`, `ABONNEMENT_EXPIRE`, `KYC_NOT_APPROVED`, `DROIT_INSUFFISANT`). Aucun texte ne change : l'écran
+    tient ses phrases dans `fr.json` (AC-7 de FE-158) et peut afficher `message` en dernier recours.
+  - **D-FE158-6** : la route lit les axes par un port à part (`SourceDeLExerciceOuvert`), que l'adaptateur HTTP de
+    `dossier-service` implante aussi (patron du piège de 329) : `SourceDuDossier` ne change pas.
+
 - **2026-11-27 (← A, FE-097), PUBLIÉ** (balance-service #178, `8884bf3`) — conforme à l'annonce (#1054), sans écart de
   contrat. Précisions : la borne d'une page est jugée sur « biens en service à la clôture × exercices du dossier commencés au
   plus tard à la clôture » (20 000) ; les propositions du registre se lisent sur les **20** dernières acquisitions du compte
