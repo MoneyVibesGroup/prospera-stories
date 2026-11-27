@@ -1,6 +1,7 @@
 # STORY-1135 : Mettre à jour sans peur — premier incrément : essayer, promouvoir, revenir
 
-Status: in_progress — fiche écrite le 2026-11-27 par une sous-session du groupe B juste avant de coder (lot 7, n° 17 de B,
+Status: done — **livrée le 2026-11-27** : prospera-plateforme **#46** (`fe278b6`, étiquette `contrats-agent-v1.2`),
+centrale-service **#6** (`010bdca`), agent-instance **#5** (`b40d965`, `agent-0.4.0`) ; voir « Livraison ». Fiche écrite le 2026-11-27 par une sous-session du groupe B juste avant de coder (lot 7, n° 17 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, deuxième partie, ligne 17 ; identifiant réservé D-L7B-1).
 **Date du plan : 22/01** (« la mise en service de février, S13, 19/02 »).
 
@@ -199,3 +200,63 @@ coque `instance` attend les commandes d'AD-37 ; la console attend des routes aut
   (EPIC-152 : hors vagues, 72 h, par fichier en gel) ; le **message au DSI** en langage simple (`annonceMiseAJour`).
 - `instance.etat.modifie` (`retourArriereEnCours`, `miseAJourAnnoncee`) et l'état publié par instance (version de plateforme)
   avec le raccordement aux espaces (EPIC-148).
+
+## Livraison (2026-11-27)
+
+Contrat annoncé avant le code (prospera-stories **#1067**, `main` `2c74384`), livré avec un seul écart (ci-dessous).
+
+| PR | Poussé → sur `dev` | Ce qu'elle porte |
+|---|---|---|
+| prospera-plateforme **#46** | `79b7daf` → **`fe278b6`** (étiquette **`contrats-agent-v1.2`**) | `manifeste-version@1` (neuf), `contact-requete@1` + `miseAJour`, `contact-reponse@1` + `manifestes`, `contact.openapi.json` 1.2.0, `agent-executeur.openapi.json` 1.2.0 (`GET /promotion`) ; source `scripts/contrats-agent.ts` ; `@prospera/signature` : `prospera-manifeste-version+jws` → `ci`, `TYPES_DIFFUSES` ; tests `diffuse.test.ts`, `contrats-agent.test.ts` ; README |
+| centrale-service **#6** | `c9ceff5` → **`010bdca`** | copie à `contrats-agent-v1.2` ; `src/versions.ts` ; tables `versions_publiees`, `rapports_de_mise_a_jour` ; `fenetreDSI` dans l'état voulu quand elle est posée ; `manifestes` rendus au contact qui porte `miseAJour` ; routes d'opérateur de simulation ; `CENTRALE_CERTIFICATS_CI` ; `test/versions.test.ts` ; README |
+| agent-instance **#5** | `ac78ade` → **`b40d965`** | `agent-0.4.0` ; `src/executeur/versions.ts`, `promotion.ts`, `executant.ts` ; `appliquer.ts` (la cible et la fenêtre gardées), `depot.ts` (manifestes, `miseAJour`), `contact.ts` (manifestes déposés), `http.ts` (`/promotion`), `main.ts` (tour de promotion, `AGENT_EXECUTANT`, `AGENT_PROJET`…) ; Dockerfile (docker 27.5.1 et son greffon compose) ; `docker-compose.promotion.yml` ; `test/temoin/` ; `scripts/manifeste-de-simulation.ts` ; tests `promotion`, `versions`, `executant`, `/promotion`, dépôt des manifestes ; README |
+
+Chaque PR : rebasée sur `origin/dev` juste avant la fusion, `mergedAt` non nul, `headRefOid` = SHA poussé, diff vide entre la
+branche et `dev` après le rejeu. L'étiquette est posée sur `fe278b6` ; centrale et agent recopiés à elle avant leur fusion.
+
+### Preuves
+
+- **Plateforme** (Node 25) : `npm test` **731/731** (709 avant), `typecheck` vert ; mutations **9/9** (le manifeste signé par
+  la centrale, jugé sur l'instance, tout type diffusé ; sur la source du contrat, chacune régénérée puis jugée : manifeste
+  ouvert, empreinte sans `sha256:`, `migrer` facultatif, plus de 4 manifestes, plan facultatif, version `x.y`).
+- **Centrale** (Node 25) : **100/100** (89 avant), `typecheck` ; mutations **10/10** (publié sans vérification, autres octets
+  acceptés, cible non publiée, fenêtre à l'envers, opérateur hors simulation, manifeste rendu à qui sert la cible, jamais
+  rendu avant la première mise en place, rapport non gardé, fenêtre non émise, fenêtre gardée quand la cible n'en porte plus).
+- **Agent** (Node 25) : **139/139** (103 avant), `typecheck` ; mutations **35/35** (gel à la création et à chaque étape, retour
+  bloqué en gel, installation jugée comme le travail quotidien, cible plus ancienne appliquée, version en échec réessayée,
+  sans date, fenêtre à venir ou passée, deux promotions en 7 jours, correctif retenu, `AVEC_PERTE` qui revient ou s'arrête
+  dans l'essai, retour du réel seulement dans l'essai ou sans le réel, migration du réel après la bascule, santé du réel
+  sautée, interrupteurs éteints, fenêtre de retour non ouverte, étape doublée à la reprise, retour en échec non arrêté,
+  comparaison en texte, niveau de correctif ignoré, `AVEC_PERTE` sur la plateforme, manifeste en conflit, ordre du dépôt,
+  empreinte d'image non comparée, `unhealthy`, `starting` pris pour sain, délai de santé, migrer tous les services,
+  `--pull` permis, manifestes non déposés, charge sans `miseAJour`, fenêtre non gardée).
+- **Node 24** (`docker build --target verification` depuis l'archive des branches à l'étiquette, puis `npm test` dans
+  l'image) : centrale **100/100**, agent **139/139**.
+- **Pile `grp-b`** (archives des branches ; centrale, exécuteur avec le socket Docker et `docker compose`, contact sans
+  socket ; un module témoin en quatre versions, manifestes signés par la clé de CI de **test**) : **33/33** —
+  - l'exécuteur a `docker compose` dans son image ; le contact n'a pas le socket ; quatre versions publiées (`201`) ;
+  - **première mise en place** 1.0.0 (`INSTALLATION`) : `PROMUE`, le réel sert `temoin:1.0.0` ;
+  - **essayer, échouer et revenir** : 1.2.0 (saine dans l'essai, malade dans le réel) dans la fenêtre du DSI — `VERIFIER →
+    ESSAYER → MIGRER_ESSAI → SANTE_ESSAI → ATTENDRE_DATE → MIGRER_REEL → BASCULER → SANTE_REEL:ECHEC → REVENIR_REEL` ⇒
+    `REVENUE` (`SANTE_EN_ECHEC`) ; le réel est revenu à 1.0.0 **sain**, l'essai aussi ; 1.2.0 n'est pas réessayée
+    (`VERSION_EN_ECHEC`) ;
+  - **essayer, réussir et promouvoir** : 1.1.0 `PROMUE`, le réel sert 1.1.0 sain, précédente 1.0.0, interrupteur allumé,
+    7 jours pour revenir ; la centrale garde le rapport (`enService` 1.1.0) ;
+  - **refus en gel** : 1.3.0 visée à J+20 — posée dans l'essai (1.3.0) à côté du réel (1.1.0), attend `FENETRE_A_VENIR` ;
+    centrale coupée, `POST /simulation/horloge` +31 j ⇒ `GEL` (`METTRE_A_JOUR` fermée) ; la promotion `MISE_A_JOUR_FERMEE`
+    (`GEL`), le plan reste à `ATTENDRE_DATE` sous le verrou `PROMOTION_EN_COURS`, le réel n'a pas changé ; le travail
+    quotidien reste ouvert (`/decision` de `bilan`).
+- **Verrou Docker** : 19:34 → 19:51 (trois passes de la pile, dont deux perdues : voir « Écarts » et les pièges du journal),
+  20:13 → 20:14 (Node 24) ; `down -v` de la pile et des deux projets de l'instance, images du témoin et de vérification
+  supprimées : aucun conteneur ni volume `grp-b` restant.
+
+### Écarts à la fiche
+
+- **`@prospera/signature` garde sa version 0.1.0** (l'annonce disait 0.2.0) : `point-de-decision` l'épingle à l'octet
+  (`"@prospera/signature": "0.1.0"`), et une version neuve fait échouer `npm ci` dans les images de l'agent et de la centrale
+  (404 sur le registre public). Le type ajouté reste un ajout ; l'étiquette `contrats-agent-v1.2` date la copie.
+- **L'exécuteur rejoint le groupe du socket** (`group_add: ["0"]`) au lieu de tourner en root : root rendait le volume
+  d'échange illisible au contact (`EACCES`). Le profil de simulation seulement ; la posture de production (exécuteur
+  minimal, AD-36) vient avec le montage (STORY-1190).
+- La centrale refuse un manifeste signé par sa propre clé `CLE_INCONNUE` (elle ne connaît que les certificats de CI) ;
+  l'agent, qui connaît les deux, le refuse `USAGE_NON_COUVERT`. Les deux tiennent la règle d'AD-7.
