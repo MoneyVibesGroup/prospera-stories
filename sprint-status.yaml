@@ -8405,7 +8405,7 @@ sprints:
         epic: "EPIC-032"
         points: 5
         service: "fiscal-service"
-        status: "in-progress"  # 2026-11-27 (D, lot 7 n° 13) : fiche écrite et contrat annoncé avant le code ; diagnostic : aucun dossier de contrôle n existait ; tout ce qu il rend existe par obligation (versions 325, visa 323, pièces du client 324, archive 335, triplet 322, anomalies 328, chemin 329/339) ; 336 assemble sur un périmètre, atteste les chaînes d audit couvertes et les versions scellées, et rend l empreinte du dossier. Le jalon « format confirmé » est levé (plan §1).
+        status: "done"  # 🏁 DONE le 2026-11-27 (lot 7 de D, n° 13) — prospera-fiscal-service#87 (dev a991963) ; annonce avant le code prospera-stories#1020. GET /api/v1/dossiers-controle : sur un périmètre (dossier, année, redevable, taxe, période), pour chaque obligation versions, visa et pièces du client, dépôts engagés, archive par version (335), triplet, anomalies motivées, chemin et bases légales (329, 339) ; intégrité des chaînes d audit couvertes et des versions scellées attestée (ATTESTEE, ROMPUE, RIEN_A_ATTESTER) ; empreinte du dossier ; place de 337 (rapprochementPieces). Aucune écriture, aucune migration. Q-D-33. — Avant : in-progress (fiche et annonce, #1020).
         story_path: "stories/STORY-336.md"
         assigned_to: "Groupe D (lot 7, PLAN-LOT-7-2026-11-24.md §4)"
       - story_id: "STORY-337"

@@ -1,6 +1,7 @@
 # STORY-336 : Le dossier de contrôle à la demande — en une action, tout ce qu'un contrôleur peut demander sur un périmètre, et l'intégrité des chaînes d'audit attestée
 
-Status: in-progress (2026-11-27) — fiche écrite et contrat annoncé avant le code.
+Status: done (2026-11-27 — prospera-fiscal-service#87, `dev` `a991963` ; lot 7 de D, n° 13) — fiche écrite et
+contrat annoncé avant le code (prospera-stories#1020, `main` e75e593).
 Écrite le 2026-11-27 par la sous-session du groupe D juste avant de coder (lot 7 de D, n° 13,
 `PLAN-LOT-7-2026-11-24.md` §4). Il n'existait pas de fiche : les critères viennent d'`epics-fiscalite-2026-08-03.md`
 (EPIC-032), et des stories qui renvoient au dossier de contrôle (322, 323, 324, 328, 329, 334, 335, 339, 1101, 1119).
@@ -157,15 +158,76 @@ périmètre, en une réponse :
 
 ## Definition of Done
 
-- [ ] Un périmètre (dossier, année, taxe, période) rend, pour chaque obligation, versions, validations, dépôts,
+- [x] Un périmètre (dossier, année, taxe, période) rend, pour chaque obligation, versions, validations, dépôts,
       accusés, rejets, livrables, triplet, anomalies levées avec leur motif, chemin avec `detail.basesLegales` et pièces
       (e2e) ; un dossier hors portée ⇒ `404` avant toute lecture d'obligation ; plus de 100 obligations ⇒ `422`.
-- [ ] Les chaînes intactes ⇒ `ATTESTEE` ; une entrée altérée, une entrée manquante, une version au contenu changé ⇒
+- [x] Les chaînes intactes ⇒ `ATTESTEE` ; une entrée altérée, une entrée manquante, une version au contenu changé ⇒
       `ROMPUE`, la rupture nommée ; un périmètre vide ⇒ `RIEN_A_ATTESTER` ; l'empreinte du dossier se recalcule.
-- [ ] **MongoDB réel** (`test:conformite`) : `deLObligation` des dépôts engagés (ordre, isolement par organisation).
-- [ ] La garde d'AD-12 verte ; **mutations** qui rougissent sur une assertion.
-- [ ] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
+- [x] **MongoDB réel** (`test:conformite`) : `deLObligation` des dépôts engagés (ordre, isolement par organisation).
+- [x] La garde d'AD-12 verte ; **mutations** qui rougissent sur une assertion.
+- [x] Node 24 : unitaires, e2e, `test:conformite` ; lint et `tsc` ; §1.5 : `docker compose -p grp-d` du fiscal (Redis
       compris) sain, la route neuve en `401` sans jeton, aucune dépendance manquante au démarrage.
+
+## Livraison (2026-11-27)
+
+- **Code** : prospera-fiscal-service#87, fusionnée en rebase sur `dev` (`a991963`), partie d'`origin/dev` `108221e`, à jour au moment de la fusion (aucun rebase nécessaire) ; head `1e6ec93`, arbre identique. Annonce avant le code :
+  prospera-stories#1020 (`main` e75e593). **Aucun écart de route, de champ ni de code de refus au contrat annoncé.**
+- **Deux précisions, sans effet sur le contrat** :
+  - l'empreinte du dossier est calculée sur la réponse **telle qu'elle part** (le DTO), par la règle pure
+    `empreinteDuDossier` : un tiers retire `empreinte`, sérialise la forme canonique (JSON à clés triées, sans espace) et
+    retrouve le SHA-256 (prouvé en e2e) ;
+  - l'archive par version est rendue par le DTO de 335 (`ArchiveDeLaDeclarationDto`) : la clé d'un objet archivé n'y est
+    jamais (prouvé en e2e).
+- **Accord avec C (27/11, D-336-4)** : `DepotsModule` fournit lui-même, en lecture, `HistoriqueObligationsService`,
+  `RegistreValidationsClient` (`MongoRegistreValidationsClient`), `HttpSourceCheminBalance` et `MongoAnnuaireCollaborateurs`.
+  C ne les exporte pas pour l'instant ; il annonce dans « ⚠ Communs » et par message, avant la fusion, tout changement de
+  leurs constructeurs, dépendances injectées ou signatures, et joue toute la suite du fiscal (l'e2e de D compris) avant
+  chaque push. L'export reste possible, sur demande de D (une petite PR de C).
+- **Fichiers** (dossiers de D) :
+  - le domaine : `domain/depot/dossier-controle.ts` (pur : périmètre, borne, lots, attestation d'une chaîne et d'une
+    version, statut, empreinte du dossier) et son test ;
+  - le cas d'usage : `application/depots/dossier-controle.service.ts` et son test ;
+  - la route : `modules/depots/dossier-controle.controller.ts`, `dto/dossier-controle.dto.ts`,
+    `dossier-controle.openapi.spec.ts` ; `depots.module.ts` (le contrôleur, le cas d'usage, les fournisseurs de C en
+    lecture, `PaquetsModule`, cinq schémas enregistrés en lecture) ;
+  - le port `RegistreEngagementsDepot.deLObligation`, son adaptateur Mongo et son double mémoire ;
+  - les tests : `test/dossier-controle.e2e-spec.ts`, un cas dans `test/engagements-depot.conformite-spec.ts`.
+- **Lu, sans écriture** (dossiers de C) : les obligations, leurs versions, les pièces du client et l'exigence, le chemin du
+  montant ; les règles pures `tripletDe`, `anomaliesDe`, `empreinteDuContenu`.
+- **Communs** (D-L7-2, annoncés avant le code) : le contrat OpenAPI (une route neuve). Aucune migration, aucun
+  `app.module.ts`, aucun fichier de C. `CopieAuFondsInerte` non touché (suite de 335).
+  - **Preuves** :
+    - Node 24 (image `verification` de l'archive LF de `7cf09cd`) : unitaires **255/256 suites, 3 841 tests (1 suite et 3 tests ignorés : la spec BullMQ sans Redis)** ; e2e **15/15 suites, 378 tests** (dont
+      `test/dossier-controle.e2e-spec.ts`, 9 cas : 401, les 400, 404 hors portée avant toute lecture, AC-1 en une action,
+      AC-2 attestée, rompue sur une entrée réécrite, rompue sur une version au contenu changé, périmètre vide, 422) ;
+      `test:conformite` **31/31 suites, 197 tests** (dont `deLObligation` : ordre, `ENGAGE` et `REMPLACE`, cloisonnement par organisation,
+      plan sur l'index `depots_par_obligation`).
+    - Node 25 (local) : règles pures 18, service 9, OpenAPI 7, e2e du dossier 9/9 ; les suites du dépôt, du coffre et
+      des gardes (24 suites, 484 tests) vertes une fois les copies du paquet réécrites en LF (piège connu des fins de
+      ligne : 65 rouges avant, tous sur l'empreinte du paquet de dépôt ; `application/depots` rejoué 8/8, 163).
+    - **Mutations 43/43**, chacune rouge sur une assertion :
+      - le domaine : le redevable par défaut ; une chaîne vide gardée ; la taxe, puis la période ignorées ; la taxe sans
+        casse ; la borne à 100 ; les nombres du refus ; des lots de trois ; le dernier lot perdu ; la rupture toujours
+        nulle ; la tête prise à la première entrée ; une chaîne vide sans genèse ; le journal non rendu ; le dépôt perdu ;
+        une version toujours intacte ; les chaînes, puis les versions ignorées au statut ; un périmètre vide attesté ; le
+        champ `empreinte` compté dans l'empreinte ; une forme non canonique ;
+      - le service : la portée du dossier non lue ; les désactivées exclues ; le redevable non transmis ; la borne
+        contournée ; le périmètre non filtré ; les chaînes des dépôts ignorées ; la chaîne d'un dépôt lue sous
+        l'obligation ; les versions non attestées ; l'auteur perdu ; le chemin d'une autre obligation ; un lot lu en partie ;
+        le double mémoire qui rend les dépôts de toutes les obligations ;
+      - la route et la réponse : l'empreinte calculée sur autre chose ; le rejet, la désactivation, la levée, le visa, la
+        rupture perdus ; une période sans format ; une année sans borne basse ; la taxe non transmise ;
+      - le stockage (MongoDB réel, sous Docker) : `deLObligation` trié du plus récent ; sans l'organisation.
+      - Quatre mutants rougissaient d'abord en compilation (un import, un paramètre devenus inutiles) : ils ont été
+        réécrits en gardant l'intention, puis rejoués. Un seul est resté vert au premier passage (le double mémoire qui
+        rend les dépôts de toutes les obligations) : il a reçu son assertion (service, `1e6ec93`, une spec unitaire seule,
+        jouée sous Node 25) et a été rejoué rouge.
+    - lint des fichiers touchés et `tsc` : 0.
+    - §1.5 : pile `grp-d` du fiscal **avec Redis** (image runtime de l'archive de `7cf09cd`) : santé `ok` (mongodb, audit, kafka, redis) ; `GET /api/v1/dossiers-controle` montée et en `401` sans jeton (les
+      archives de 335 et le chemin de 329 aussi) ; `DepotsModule`, `ObligationsModule`, `AccusesDepotModule`, `PaquetsModule`
+      initialisés, 0 `UnknownDependencies` ni `OverwriteModelError` sur 526 lignes de journal (les fournisseurs de C en
+      lecture dans `DepotsModule` se résolvent) ; l'index `depots_par_obligation` posé.
+    - **Verrou Docker** : deux prises par des scripts autonomes, chacune rendue par son `trap` : 01:53:24 → 02:12:29 (passe 1 sur `7cf09cd` : unitaires, e2e, conformité, deux mutations MongoDB, pile) et 02:12:50 → 02:16:18 (la mutation MongoDB réécrite). B et C prévenus. Il ne reste aucun conteneur, volume ni réseau `grp-d`.
 
 ## Questions au PO
 
