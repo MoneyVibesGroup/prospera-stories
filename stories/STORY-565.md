@@ -1,6 +1,6 @@
 # STORY-565 : Le dépôt automatisé sert les deux redevables — et le règlement reste produit, jamais exécuté
 
-Status: in-progress
+Status: done (2026-11-27 — prospera-fiscal-service#97, `dev` `eff2afe` ; lot 7 de D, n° 17 ; EPIC-032 fini) — fiche réalignée et contrat annoncé avant le code (prospera-stories#1068, `main` b65d15a).
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `fiscal-service` (`:3012`) — adaptateur de canal
@@ -211,3 +211,55 @@ Ajouts seuls, sauf la portée du coffre :
 - Le contrat OpenAPI.
 - Lus sans écriture : `RedevablesModule`, `ReglementModule` (C). Aucun fichier de C modifié ; la garde FR-F47 de C passe
   sans modification.
+
+## Livraison (2026-11-27)
+
+**Code** : prospera-fiscal-service#97, `dev` `eff2afe` (head `e37302a`, rebasée sur `origin/dev` `261217b`). Annonce
+avant le code : prospera-stories#1068, `main` b65d15a.
+
+### Ce qui est livré
+
+- **Le coffre par redevable** (D-565-1, D-565-2) : la portée `{organisation, dossier, redevable, canal}` ; `?redevable=`
+  sur les routes du coffre (absent : `entreprise`, la réponse d'avant) ; `REDEVABLE_INTROUVABLE` hors du dossier ;
+  `EtatCanal.redevableId`. L'entreprise garde à l'octet son contexte de chiffrement et son périmètre d'audit ; le
+  dirigeant a les siens. La migration `npm run migrate:portee-coffre-redevable` range l'entreprise, crée l'index par
+  redevable avant de supprimer l'ancien, et se rejoue sans effet.
+- **Le connecteur sert les deux redevables par le même adaptateur** (AC-2, D-565-3) : le redevable de la déclaration va
+  au coffre, sans aucune branche par nature ; `MANDAT_ABSENT` nomme la portée (`redevableId`, `canal`).
+- **Le NIF du redevable** (D-565-4) : la source `REDEVABLE|identifiantFiscal` (seul nom permis, dépôt seulement), lue
+  dans la liste des redevables du dossier (563) ; inconnu : `IDENTIFIANT_FISCAL_ABSENT`, avant tout jeton.
+- **GUDEF ≠ dimana** (D-565-5) : le connecteur est celui du canal de la déclaration ; une table le prouve.
+- **Non due** (D-565-6) : `OBLIGATION_DESACTIVEE` cite le motif de dispense, pour les deux redevables.
+- **L'ordre transporté** (D-565-7) : `GET /connecteurs-depot/depots/{depotId}/parcours` gagne `reglement` — `null` avant
+  `DEPOSE`, puis le résultat d'`OrdreDeReglementService.deLObligation` (C, 341) tel quel ; un refus est nommé ;
+  `ORDRE_D_UN_AUTRE_REDEVABLE` ; rien n'est stocké, rien n'est payé.
+- **La section du règlement du dossier de contrôle** (D-565-8, commit à part) : le rapprochement de C (342, 343),
+  annulés compris, sans le payé que porte le triplet de 322 ; `INDISPONIBLE` nommé si la lecture est refusée.
+- **La garde de D** (`garde-ordre-transporte.spec.ts`) : aucune branche par nature dans le chemin du dépôt ; rien du
+  règlement écrit ; de 341, seulement `deLObligation` ; aucun champ d'accès bancaire. La garde FR-F47 de C passe sans
+  modification.
+- **Le portail simulé** gagne un second compte (le dirigeant : ses identifiants, sa session, son NIF).
+
+### Les critères
+
+| AC | Preuve |
+|---|---|
+| 1 — aucune capacité d'exécution de paiement | la garde de C (`garde-aucune-execution-de-paiement.spec.ts`) verte sans modification ; la garde de D |
+| 2 — le même adaptateur, aucune branche par nature | table des deux redevables (même connecteur, deux comptes, deux NIF, deux références) ; garde de D ; porte |
+| 3 — le mandat de l'entreprise ne suffit pas pour le dirigeant | table, coffre et porte : `MANDAT_ABSENT` avec la portée, le portail jamais appelé ; l'inverse aussi |
+| 4 — sans canal, le dépôt assisté | table : `AUCUN_CONNECTEUR`, l'engagement assisté fait |
+| 5 — l'ordre au bon redevable, jamais une coordonnée bancaire | table et porte : l'ordre de 341 remis tel quel, `ORDRE_D_UN_AUTRE_REDEVABLE` ; garde |
+| 6 — « déposée » ≠ « payée », « payée » acte humain | 343 de C inchangé ; la garde de D : aucune transition, aucun « Payé » écrit |
+| 7 — une déclaration non due ne se dépose pas | `OBLIGATION_DESACTIVEE` et le motif de dispense, pour les deux redevables |
+
+### Preuves
+
+- **Node 24** (image `verification` de l'archive LF de l'arbre rebasé `32204c9`, identique à l'arbre de `dev`) : unitaires **294/295 suites** (1 ignorée), **4 552 tests** ; e2e **17/17**, **431** ; `test:conformite` **36/36**, **240** (dont `coffre-redevable.conformite-spec.ts` : l'index unique par redevable, dix attestations parallèles pour une seule portée, la migration sur une collection d'avant 565).
+- **Mutations 20/20 tuées** (Node 25, unitaires) : portée, AAD, périmètre d'audit et redevable vérifié du coffre ; le redevable passé au coffre, au jeton et au suivi ; le NIF absent, vide ou d'un autre redevable ; l'ordre d'un autre redevable, derrière un parcours non déposé, un refus non nommé ; la portée nommée au repli ; le contrat du bloc ; la section du dossier (annulés, refus nommé) ; le motif de dispense ; la migration (ancien index, entreprise rangée). Cinq ont d'abord rougi en compilation (paramètre devenu inutile) et ont été réécrites.
+- **Lint** des fichiers touchés et **`tsc`** : propres. La garde FR-F47 de C passe **sans modification**.
+- **Pile `grp-d`** (§1.5, sous le verrou, Redis compris) : saine ; les trois routes neuves ou étendues rendent 401 sans jeton ; la migration jouée deux fois sur la base de la pile (idempotente) ; **porte 18/18 sous Node 24** avec le code compilé : les deux redevables déposés par le même connecteur contre le portail simulé à deux comptes (deux connexions, deux NIF, deux références), le mandat de l'entreprise qui ne couvre pas le dirigeant, le NIF inconnu replié avant tout appel, l'ordre remis (nommé avant « Déposée », puis celui de chaque redevable, aucun accès bancaire), la section du règlement sans le payé ; journaux : 0 erreur de câblage, 0 fuite d'identifiant.
+
+### Écarts à l'annonce
+
+- Le détail `{ redevableId, canal }` est porté par **toutes** les raisons du coffre au repli (pas seulement `MANDAT_ABSENT`) : un ajout de forme ; l'e2e de 561 l'attend désormais.
+- Rebasée sur la 350 de C (`261217b`), localement sur `MNV-565-verif`, sans conflit et sans push forcé ; la fusion `--rebase` a rejoué la branche et l'arbre de `dev` est l'arbre éprouvé.
