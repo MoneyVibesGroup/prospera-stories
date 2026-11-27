@@ -188,7 +188,7 @@ reserved_ranges:
       collecte par e-mail dédié ou WhatsApp, ni facture certifiée OTR. CH-P3 n'est pas placé.
   - range: "STORY-1165 → STORY-1170"
     status: "RÉSERVÉ"
-    owner: "Groupe C, lot 8 — 1165 alerte d'échéance fiscale (notification), 1166 cloche et e-mail des faits ged.*, 1167 VALIDATION_CLIENT avec pieceGed (D-335-14), 1168 zone-franche-togo@1.1, 1169 déclaration CNSS mensuelle, 1170 ordres de virement des salaires"
+    owner: "Groupe C, lot 8 — 1165 alerte d'échéance fiscale (notification), 1166 cloche et e-mail des faits ged.*, 1167 VALIDATION_CLIENT avec pieceGed (D-335-14), 1168 zone-franche-togo@1.1, 1169 déclaration CNSS mensuelle (DRC) — sortie du lot 8 sur consigne de l'utilisateur du 27/11, à placer plus tard, 1170 ordres de virement des salaires"
     source_doc: "prospera-stories/coordination/PLAN-LOT-8-2026-11-27.md"
     reserved_on: "2026-11-27"
     note: >-
