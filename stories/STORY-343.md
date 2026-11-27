@@ -1,6 +1,6 @@
 # STORY-343 : La distinction entre « déposée » et « payée »
 
-Status: in-progress — écrite le 2026-11-27 par la session du groupe C juste avant de la coder (lot 7, n° 15 du fiscal,
+Status: done — **livrée le 2026-11-27** : prospera-fiscal-service **#94** (`57c7504` sur `dev`) ; voir « Livraison ». Écrite le 2026-11-27 par la session du groupe C juste avant de la coder (lot 7, n° 15 du fiscal,
 `PLAN-LOT-7-2026-11-24.md` §3) ; contrat et communs annoncés avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de
 C). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-033, STORY-343), du PRD
 fiscalité (FR-F49 : « Le système distingue explicitement « déposée » et « payée », et met en évidence les obligations
@@ -201,8 +201,42 @@ payée, non déposée ; l'annulation : 201, le reste qui remonte, la quittance r
 l'acompte rapproché lu par la TPU) ; toute la suite du fiscal, celles de D comprises ; mutations sur la logique neuve ;
 `docker compose up` du fiscal, sain (des modules changent de fournisseurs).
 
+## Livraison (2026-11-27)
+
+- **Fiscal** : **#94** (`MNV-343`, `d41f65c` poussé, rejoué `57c7504` sur `dev`, sur `6cd99ee` — `origin/dev` n'avait pas
+  bougé ; arbre identique au commit prouvé). Fichiers : `domain/reglement/situation-au-calendrier.ts` (la règle pure de la
+  ligne : `deposee`, `payee`, `reglement`), `reglement-rapproche.ts` (l'annulation, la clé d'occurrence, les non-annulés),
+  `montant-a-regler.ts` (les annulés exclus, l'acompte rapproché, le manque neuf), le port `SourceReglementsRapproches` et
+  `RegistreReglements` (annuler, compter les annulations d'une référence, lire plusieurs obligations), le schéma
+  `annulations_reglements` et les adaptateurs Mongo (le registre et une lecture seule pour `ObligationsModule`), la route
+  d'annulation et ses DTO, la ligne du calendrier (`LignePortefeuilleDto`), `CalendrierPortefeuilleService` (une
+  dépendance de plus : une lecture des règlements par page), la projection du calendrier (famille, pointeur de version,
+  déclaré), le libellé de l'acte (329), `droits-du-cycle.ts` et `montant-paye` sous `regler`, les doubles, la conformité et
+  les e2e. Communs : le contrat OpenAPI, `droits-fiscalite.ts` (un commentaire), `test/utils/rs256.ts` (complétés avant la
+  fusion, #1042). **Écarts à l'annonce** : le motif d'annulation suit les bornes d'un motif de version (10 à 500, pas 3) ;
+  la bascule de `regler` est faite (B a servi « k » pendant la story, auth #52).
+- **Preuves** (Node 24, étage `verification`, archives LF ; verrou pris deux fois, 12:40 → 13:13 et 13:14 → 13:19, scripts
+  autonomes, rendus par leur `trap`) : unitaires **268/271 suites (1 ignorée), 4173/4182 tests (3 ignorés)** sous la charge
+  du poste (une campagne de mutations en parallèle) — les trois suites rouges, toutes de minuterie ou de délai et hors du
+  diff (`balayage-lineaire`, `livrable-notes`, `http-source-justification-pieces` de D), **vertes seules : 3/3, 95** ; e2e
+  **15/15, 413** (sur le commit final ; la première passe avait relevé trois attentes de test à corriger : la ligne de 315
+  qui porte désormais la situation, le journal que le double en mémoire n'écrit pas, le 400 du motif sans code) ;
+  conformité MongoDB (jeu de répliques) **33/33, 223** (dont l'annulation tout ou rien, dix annulations parallèles → une,
+  la quittance annulée rapprochée de nouveau en cinq parallèles → une, la lecture groupée, la projection du calendrier) ;
+  `nest build` vert, le corpus dans `dist/` ; **pile `grp-c`** fiscal + balance saine (santé `ok` des deux ; calendrier,
+  `…/reglements`, annulation, `montant-paye`, transition en 401 sans jeton ; huit routes montées ; `ReglementModule`,
+  `ObligationsModule`, `HabilitationsModule` initialisés ; les treize « Error: » sont l'« Unknown topic or partition »
+  connu d'une pile neuve ; aucun redémarrage). Aucun conteneur, volume ni réseau `grp-c` restant.
+- **Mutations** (Node 25, une campagne à la fois) : **34/34 tuées** — situation 12, annulation et clé 9, montant 5,
+  services 4, calendrier 2, droits 2 ; six d'abord tuées par la compilation (variable devenue inutile), réécrites et tuées
+  sur l'assertion.
+- **D prévenu** (le montant à régler net des seuls non-annulés, l'acompte rapproché, `annulation` pour 336, `rs256.ts`) ;
+  **B prévenu** (« k » marquée servie ; le manifeste `declarations` noté ; paquet inchangé).
+
 ## Progress Tracking
 
 | Date | Événement |
 |---|---|
 | 2026-11-27 | Fiche écrite, contrat et communs annoncés avant le code. |
+| 2026-11-27 | « k » servie par B (auth #52) : bascule ; communs complétés avant la fusion (#1042). |
+| 2026-11-27 | **DONE.** Fiscal #94 (`57c7504`). Preuves : voir « Livraison ». B et D prévenus. |
