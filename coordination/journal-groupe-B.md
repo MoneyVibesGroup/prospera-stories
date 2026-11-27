@@ -410,7 +410,20 @@
     Fiche D-979-43 → 49. **Pas fait (défaut de C)** : le manifeste `declarations` garde ses codes `declarations:*` (→ C,
     « Demandes »). Rituel : demande permanente de C (342) de recopier le paquet fiscal `4959061a` dans `dossier-service`,
     ouverte, à la prochaine story de B sur ce dépôt.
-  - **Suivante : « j »** (D-L7B-14, autre sous-session), **puis STORY-1131** (n° 13 : les restes d'EPIC-145, 146, 147).
+  - **13 — STORY-1131 (27/11) — faite** (premier incrément des restes d'EPIC-145 → 147) : l'Administration exporte, module par
+    module, dans tout état (`ESSAI_TERMINE` compris). **catalogue #91** (`4d01a70` sur `dev`), **auth #53** (`c6b8e2b`) ; contrat
+    annoncé avant la fusion (stories #1041, `71a3245`). `GET /api/v1/administration/{org}/exports/{module}` (détenteur de
+    `instance:donnees:exporter`, état publié ≠ `NON_INSTALLE`, le module appelé à sa route du manifeste sous le jeton du moteur,
+    relayé) ; l'export C13 du module `instance` servi (D-1128-9 : `import`, `effacement` jamais appelés, `sante`, `migrer` →
+    STORY-1133) ; `droitsEffectifs` : `fiscalite:*` ouvert par `declarations` (D-979-47, côté catalogue) ;
+    `instance:donnees:exporter` à `CAB_ASSOCIE` et `DIST_DG` ; copies `contrats-instance-v1.1`. Interrupteurs et `config` →
+    STORY-1135 (D-1128-10, D-1131-4). BFF inchangé. Node 25 : catalogue 1 849/1 850 (3 rouges connues), auth 1 469/1 470 (4
+    connues) ; mutations 17/17 et 3/3 ; **Node 24, étage `verification` complet du catalogue : 111/111 suites, 1 867** (rejoue
+    `12c4c84` de 1137 : vert) ; pile `grp-b-recette` neuve depuis `origin/dev` : `modules-dans-l-essai` 4/4 et la preuve ad hoc
+    (l'associée de l'essai exporte `balance` et `instance`, 200 ; `stock` 403 `MODULE_NON_INSTALLE` ; un autre essai 403).
+    Verrou 13:34 → 14:06. Fiche D-1131-1 → 10. Rituel : aucune demande neuve à B chez A, C et D.
+  - **Suivante : « j »** (D-L7B-14, autre sous-session, si elle n'est pas close), **puis STORY-1132** (n° 14 : la licence
+    signée, premier incrément).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -1414,6 +1427,22 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   membre qui reçoit le rôle par défaut (l'API d'administration rend le `tenantRole` stocké, pas le rôle effectif).
 
 ## Demandes aux autres groupes
+
+- **→ A (2026-11-27, STORY-1131) : l'écran d'export de la coque `instance` est débloqué par STORY-1131** (EPIC-145 FR-43,
+  EPIC-147 « 30 jours pour exporter ou signer ») — `GET /api/instance/v1/administration/{organisationId}/exports/{module}`
+  (chemin du service `/api/v1/…`, catalogue `dev` `4d01a70`), `format` = `json` | `csv`, `objet` (exigé en CSV) ; le jeton du
+  membre doit porter `instance:donnees:exporter` (associé du cabinet, DG du distributeur, ou attribué par l'organisation) ;
+  ouvert dans tout état publié sauf `NON_INSTALLE` (la liste des modules : l'état publié). Réponse : `export-c13-reponse@1`
+  (JSON) ou le fichier CSV (`Content-Disposition`) ; refus : 403 `DROIT_EXPORT_REQUIS` | `MODULE_NON_INSTALLE` |
+  `ORGANISATION_HORS_JETON`, 404 `MODULE_INCONNU`, 400/422 du module (`FORMAT_NON_SERVI`, `OBJET_REQUIS`, `OBJET_INCONNU`),
+  502/503 `EXPORT_INDISPONIBLE` (`details.raison`). Types : `prospera-plateforme@contrats-instance-v1.1`
+  (`instance-c13.openapi.json`, `export-c13-reponse.schema.json`). Prouvé par un appel réel sur pile neuve (fiche 1131,
+  « Preuves »). Aussi : un cabinet qui n'ouvre que `declarations` voit désormais ses `fiscalite:*` dans `droitsEffectifs`.
+- **→ C (2026-11-27, STORY-1131) : information** — D-979-47 est réglé côté catalogue (`fiscalite:*` effectif quand
+  `declarations` ou `fiscalite` est ouvert) ; votre alignement du manifeste `declarations` reste à votre prochaine version,
+  puis B le recopie. La partie A appelle vos routes d'export C13 sous le jeton du moteur (forme inchangée). Message envoyé.
+- **→ D (2026-11-27, STORY-1131) : information** — même relais pour vos exports C13 (bilan, STORY-1140 ; Q-D-18 : le moteur
+  seul, conservé). Message envoyé.
 
 - **→ C (2026-11-27, ordre « k », septième suite de STORY-979) : le manifeste `declarations` à aligner dans sa prochaine
   version** — **information, votre choix par défaut** (point 3 de votre demande de 342). Ses huit codes
@@ -2432,6 +2461,9 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, STORY-1131 (n° 13) — LIVRÉ** (catalogue #91, `4d01a70` sur `dev` ; auth #53, `c6b8e2b`) : conforme à
+  l'annonce ci-dessous, sans écart. **→ A** : la ligne « → A » de « Demandes » ; **→ C, D** : information (messages).
 
 - **2026-11-27, STORY-1131 (n° 13) — l'export par l'Administration, annoncé AVANT la fusion** (`platform-catalog-service`,
   `prospera-auth-service`, branches `MNV-1131` ; fiche `stories/STORY-1131.md`, D-1131-1 → 8). Lu par **A** (coque `instance` :
@@ -4530,6 +4562,11 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## Questions à l'utilisateur ou au PO
 
+- **STORY-1131, D-1131-5 — qui exporte les données d'une organisation par défaut ?** (ouverte) **Choix retenu par défaut,
+  appliqué** : l'associé du cabinet (donc l'administrateur d'un cabinet et le premier administrateur d'un essai de cabinet)
+  et le DG du distributeur ; pas l'administrateur du distributeur (`DIST_ADMIN` ne lit aucune donnée métier, annexe B) ;
+  toute organisation peut l'attribuer à d'autres rôles (STORY-167).
+
 - **STORY-1137, D-1137-3 — comment un module s'installe-t-il dans l'essai d'un prospect ?** (ouverte, architecture ; ticket
   « modules ouverts dans l'essai », point 2) Deux voies : (a) **l'ordre d'ouverture porte les modules** (et leurs
   référentiels) et le moteur de l'essai les installe avant de répondre, en un geste ; (b) le BFF relaie l'offre et les
@@ -4595,6 +4632,14 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une boucle d'attente du verrou au premier plan est passée en arrière-plan** (STORY-1131) : 14 tours de 10 s plus une
+  suite jest lancée à côté ont dépassé le seuil de l'outil. Elle a fini sans prendre le verrou, mais c'est le piège de 1127.
+  Tours plus courts (≤ 100 s) et rien de lourd en parallèle pendant l'attente.
+- **Une mutation qui laisse un paramètre inutilisé rougit au compilateur, pas sur une assertion** (STORY-1131, `TS6133`) :
+  écrire la mutation pour qu'elle compile (`&& organisationId === ''`).
+- **`docker create … sh /script.sh` sous Git Bash** : MSYS réécrit `/script.sh` en `C:/Program Files/Git/script.sh`
+  (STORY-1131) ; poser `MSYS_NO_PATHCONV=1`.
 
 - **Un relevé de mémoire en `Start-Job` a figé la passe près de quatre heures, verrou tenu** (STORY-1137, 04:32 → 08:19) : le
   `finally` attendait l'arrêt du travail (`docker stats` en boucle) avant le `down -v`. Relever la mémoire par un processus

@@ -1,6 +1,7 @@
 # STORY-1131 : Les restes d'EPIC-145, 146, 147 — premier incrément : l'Administration exporte, module par module, dans tout état (`ESSAI_TERMINE` compris)
 
-Status: in-progress — fiche écrite le 2026-11-27 par une sous-session du groupe B juste avant de coder (lot 7, n° 13 de B,
+Status: done — **livrée le 2026-11-27** : platform-catalog-service **#91** (`4d01a70` sur `dev`), prospera-auth-service
+**#53** (`c6b8e2b` sur `dev`) ; voir « Livraison ». Fiche écrite le 2026-11-27 par une sous-session du groupe B juste avant de coder (lot 7, n° 13 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, deuxième partie, ligne 13 ; identifiant réservé D-L7B-1).
 **Date du plan : 08/01.**
 
@@ -141,6 +142,70 @@ C13 déclarées, contrats `contrats-instance-v1.1`). Le reste est nommé, avec s
   - le **test de copie de la garde** dans `document-service` : dépôt tenu en ce moment par une autre sous-session de B
     (« j ») → la prochaine story de B sur ce dépôt ;
   - les **écrans** → A (ligne « → A »).
+
+## Livraison (2026-11-27)
+
+Fusionnées en « Rebase and merge », `mergedAt` non nul, `headRefOid` = SHA poussé, arbre de la branche identique à `dev` :
+**platform-catalog-service #91** (tête `3dca258`, **`4d01a70` sur `dev`**) ; **prospera-auth-service #53** (tête `df1bcfc`,
+**`c6b8e2b` sur `dev`**). Contrat annoncé avant la fusion : stories #1041 (`main` `71a3245`). Conforme à l'annonce, sans écart.
+
+- **Catalogue** : `src/administration/` (`administration.module.ts`, `administration.controller.ts` : `InstanceC13Controller`,
+  `AdministrationController` ; `export-de-l-instance.ts` : plan d'export, demande, Extended JSON relaxed ;
+  `exports-de-l-administration.ts` : état publié, route du manifeste, adresse, jeton du moteur, relais ; `export-csv.ts` : les
+  huit règles ; `refus.ts` : qui exporte) ; `src/etat-publie/droits-effectifs.ts` (`MODULES_DU_PREFIXE`, `modulesDuDroit`) ;
+  `EtatPublieModule` exporte `LectureEtatPublie` ; `EXPORT_C13_DELAI_MS` (configuration, validation) ; `contrat/copies/instance/`
+  à `contrats-instance-v1.1` (`ORIGINE.json`) ; `test/utils/rs256.ts` signe aussi un jeton d'identité de service ; README
+  (« L'export par l'Administration »).
+- **Auth** : `table-d-acces-cabinet.ts` (`instance:donnees:exporter` à l'associé), `table-d-acces-distributeur.ts` (ajout à
+  l'annexe B, au DG) ; tests de la table du cabinet, du distributeur, de la résolution et du jeton signé.
+- **BFF** : inchangé (D-1131-6).
+
+### Preuves
+
+- **Catalogue, Node 25** : `src/administration` **38/38** (export d'`instance` : objets, ordre, filtre, essai sans adresses,
+  schéma `export-c13-reponse@1` rejoué ; refus de la demande avant toute lecture ; relais vers un vrai serveur HTTP : route
+  déclarée, jeton du moteur, demande relayée, sept états ouverts, CSV à l'octet, refus du module relayés, cinq réponses hors
+  contrat, 500, 401 qui fait oublier le jeton, sans adresse, sans jeton, route `POST`, injoignable, délai) ; `export-csv` : les
+  **huit cas du contrat à l'octet** ; `droits-effectifs` 6/6 (la règle comparée à celle d'auth dans le checkout voisin) ; e2e
+  `administration-exports` **12/12** par la vraie chaîne de gardes (RS256/JWKS) ; suite complète **1 849 passés / 1 850**, trois
+  suites rouges connues (binding de Confluent) ; `tsc`, lint des fichiers touchés.
+- **Catalogue, Node 24, étage `verification` complet** (archive de `3dca258`, Node v24.22.3) : **111/111 suites, 1 867 passés**
+  (1 sauté), lint 0, build 0. Il rejoue aussi **`12c4c84`** (STORY-1137 : la garde du Dockerfile des jeux dans le checkout seulement
+  — verte dans l'image) et `app-cablage.invariant` (`AppModule` monté avec le module neuf).
+- **Mutations catalogue 17/17 tuées sur assertion** (sept réécrites au second tour : la première forme rougissait au
+  compilateur, variable devenue inutilisée) : préfixe seul, `instance:*` filtré, essai avec adresses, sans filtre
+  d'organisation, organisation inconnue exportée, `NON_INSTALLE` ouvert, `instance` appelé en HTTP, sans jeton du moteur,
+  autre organisation admise, refus non relayés, jeton gardé après 401, droit non exigé, moteur d'une autre organisation,
+  moteur partout, formules non neutralisées, délai lu comme injoignable, tout en 502.
+- **Auth, Node 25** : 23 suites par chemin **409/409** ; `test/auth.e2e-spec.ts` **13/13** (jeton signé de l'associé :
+  quatre droits fiscaux et `instance:donnees:exporter`) ; complète **1 469 passés / 1 470**, quatre suites rouges connues
+  (binding de Confluent) ; lint ; **mutations 3/3** (associé sans l'export, collaborateur qui exporte, `DIST_ADMIN` au lieu du DG).
+- **Pile `grp-b-recette` neuve, volumes neufs, images reconstruites après la fusion** (catalogue `4d01a70`, auth `c6b8e2b`,
+  dossier `2f6e058`, notification `749b3cd`, paiement `64b5838`, BFF `7ac4db4`, recette `7999caf` ; kyc `9cef9cb`, balance
+  `4f75f4e`, bilan `7f96163` depuis l'archive de leur `origin/dev` par une surcouche non versionnée, leurs checkouts n'étant pas
+  à B ou pas sur `dev`) : `modules-dans-l-essai` **4/4** (non-régression de 1137) et un cas **ad hoc, non versionné** (ajouté
+  à la suite pour la passe, retiré ensuite) qui joue la preuve sur le vrai backend, avec l'associée d'un essai entrée par son
+  lien :
+  - son jeton porte `["fiscalite:declaration:preparer", "…valider", "…deposer", "…regler", "instance:donnees:exporter"]` ;
+  - `GET /api/v1/administration/{org}/exports/balance` sur le catalogue de l'essai : **200**, `export-c13-reponse@1` de
+    `balance-essai` (appelé sous le jeton du moteur), `balances` 2 documents du jeu, rien d'une autre organisation ;
+  - `…/exports/instance` : **200**, `organisation` 1, `naissances` 1, `offre` 1, `droits` 2, `installations` 3,
+    `plans-installation` 1, `essai` 1 (sans l'adresse du commercial), le reste 0 ; `GET /api/v1/instance/instance/{org}/export`
+    par le membre : **200** ;
+  - `…/exports/stock` : **403 `MODULE_NON_INSTALLE`** ; l'organisation d'un autre essai : **403 `ORGANISATION_HORS_JETON`**.
+  - Verrou **13:34 → 14:06** (une passe : l'étage `verification`, les fusions, la pile ; une première construction coupée par
+    `ECONNRESET` de npm, relancée), `down -v`, aucun conteneur, volume ni réseau `grp-b` restant.
+- **`ESSAI_TERMINE` sur la pile** : non joué (il faut avancer l'horloge de 30 jours) ; prouvé par les unitaires (sept états
+  ouverts) et par la matrice (l'export ouvert partout sauf `NON_INSTALLE`, `etat-publie.contrat.spec`).
+
+### Décisions ajoutées à la livraison
+
+- **D-1131-9 — La preuve sur pile est un cas ad hoc, non versionné.** Écrire un cas de recette d'export est une story de la
+  recette (dépôt hors de ce n° 13) ; le cas a été joué tel quel dans `modules-dans-l-essai` (qui fait naître l'associée) puis
+  retiré. À versionner avec la recette des archives ou de la fin d'essai (D-1131-8).
+- **D-1131-10 — Aucun message à A n'était requis par un contrat changé** ; la ligne « → A » du journal dit ce qui est
+  débloqué (l'écran d'export de la coque `instance`), avec la route, les codes et la forme (types : `instance-c13.openapi.json`
+  et `export-c13-reponse.schema.json` de `prospera-plateforme@contrats-instance-v1.1`).
 
 ## Hors de cette story
 
