@@ -267,9 +267,28 @@
    suites de minuterie hors du diff, vertes seules 3/3, 95), 4182 tests ; e2e 15/15, 413 ; conformité 33/33, 223 ; mutations
    34/34 ; pile `grp-c` saine. Verrou pris deux fois (12:40 → 13:13, 13:14 → 13:19), rendu. D-343-1 → 9 dans la fiche.
    **D prévenu** (le montant à régler, `annulation`, `rs256.ts`) ; **B prévenu**.
-25. **Suivante : STORY-344** (les pénalités et majorations comme un risque : elle lit le retard des règlements **non
-   annulés** ; elle sert la demande `automatisation` de D, 561, si elle touche le paquet — au plus tard elle ; FE-097 de A
-   juste après elle, dans une PR à part de balance-service).
+25. ✅ **STORY-344 DONE (27/11)** : balance-service **#177** (`a931877` sur `dev`, le paquet) et fiscal **#95** (`535e190` sur
+   `dev`, rebasée sur `997e29a` de D — la 561), annonce #1044 avant le code. **`GET /obligations/{id}/risque-de-penalites`**
+   (`?aLa=` : aujourd'hui, ou un jour futur pour prioriser ; jamais passé) : **un risque estimé, jamais une dette**
+   (`nature: RISQUE_ESTIME`, avertissement, `chemins` vers le montant à régler). Retard de paiement : la pénalité de **LPF
+   Art. 115** (10 % le premier mois, + 1 % par mois commencé, minimum 1 000 F) sur le reste du montant à régler et sur chaque
+   quittance **non annulée** réglée après la date limite de son canal ; retard de déclaration (premier dépôt scellé après
+   l'échéance **applicable**, ou non déposée) : les **paliers 30 / 40 / 80 %** de l'**Art. 121**, tous montrés, aucun retenu
+   (la gravité est un fait de l'Administration : H5 du PRD répondue par le texte), ou l'amende de l'**Art. 113, 5)** sur un
+   déclaré nul ; nommés sans chiffre : Art. 113, 1) (DSF, segment non lu), Art. 153 (retenue d'IRPP, sanction pénale) ;
+   chaque règle citée mot pour mot ; réserves nommées. Paquet : bloc `penalites`, garde **R14**, empreinte
+   **`c2915555…0937c`** ; **← D (561) servie** : `automatisation` déclarée au schéma, sans instance. Domaine neuf
+   `domain/penalites` (garde AST : 0 et 1 seuls nombres, aucun article, aucun code d'obligation). Montant à régler, ordre,
+   rapprochement, calendrier et cycle inchangés ; aucune migration. Node 24 (base rebasée) : fiscal 282/283 suites, 4372 ;
+   e2e 16/16, 426 ; conformité 33/33, 223 avant le rebase, et après lui 33/34 sous la charge (la mesure de temps de 315, hors
+   du diff, verte seule) ; balance 300/302, 5892 ; e2e 38/38, 2324 ; mutations 28/28 et 12/12 ; pile `grp-c` saine. Verrou
+   pris quatre fois, rendu. D-344-1 → 12 dans la fiche. **B prévenu** (recopie) ; **D prévenu** (servie, la `source` d'une
+   instance pour R4).
+   **🏁 EPIC-033 fini** (340 → 344 : le montant à régler, l'ordre produit jamais exécuté, le rapprochement, « déposée » ≠
+   « payée », les pénalités comme un risque) ; `fiscalite_epics` : `done`.
+26. **Suivantes, dans cet ordre** : la **demande FE-097 de A** (PR à part de `balance-service`, décision de la session de
+   groupe, le point 1 d'abord), puis **STORY-350** (avec **FE-158** de A en tête, PR à part de la comptabilité), puis
+   **STORY-566**.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -715,6 +734,14 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← D (2026-11-27, STORY-561) : déclarer la rubrique `automatisation` au schéma du paquet fiscal** — ✅ **servie par
+  STORY-344** (balance-service #177, `a931877`) : `paquet-fiscal.schema.json` déclare la rubrique racine **facultative**
+  `automatisation` (`required: ["connecteurs"]` ; chaque connecteur : `code` en minuscules et tirets, `version`, `canal`,
+  `obligations`, `portail.adresse` en `http(s)://`, `conditionsUtilisation { texte, releveLe, source }`, `rythme` en
+  entiers, `marqueurs`, `parcours[]` aux gestes `S_AUTHENTIFIER | OUVRIR | SAISIR | SOUMETTRE`, `repriseHumaine`, `suivi`
+  réservé à 562) ; **aucune instance** au paquet Togo. ⚠ Une instance future doit porter une **`source`** (au connecteur, par
+  exemple) qui couvre ses valeurs numériques : le balayage R4 vaut pour tout le paquet (prouvé par la spec). Message envoyé à D.
+
 - **← B (27/11, ordre « k ») : le manifeste `declarations` à aligner dans sa prochaine version** — **notée** : ses codes
   `declarations:*` deviendront ceux que le fiscal vérifie (`fiscalite:declaration:preparer`, `valider`, `deposer`,
   `regler`) à la prochaine version du manifeste (avec Q-D-34 et le texte du coffre de 560), puis « → B » pour la recopie
@@ -849,6 +876,11 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **FUSIONNÉ (2026-11-27, prospera-fiscal-service#95, `dev` `535e190`, rebasée sur `origin/dev` `997e29a` de D — la 561 —
+  juste avant la fusion ; head `f58cb3d`, arbre identique)** — conforme à l'annonce. Communs : le contrat OpenAPI (la route
+  et ses DTO), la copie du paquet (`c2915555`, bloc `penalites`). Aucun fichier de D, aucune migration, aucune classe
+  instanciée par `DepotsModule` ne change. **→ D** : rien à faire pour un rebase ; toute la suite verte en Node 24 sur la base
+  rebasée (e2e de D comprises) ; prévenu par message.
 - **ANNONCÉ (2026-11-27, STORY-344, avant le code)** — branche `MNV-344` de `prospera-fiscal-service`, partie d'`origin/dev`
   `57c7504`. **Aucune migration, aucune collection, aucune écriture.** Touchés parmi les communs : **le contrat OpenAPI**
   (la route `GET /obligations/{id}/risque-de-penalites` et ses DTO, « ⚠ Contrats ») et **la copie du paquet**
@@ -1123,6 +1155,11 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-27 (STORY-344), PUBLIÉ** (fiscal #95, `535e190` ; balance-service #177, `a931877`) — conforme à l'annonce (#1044),
+  sans écart de contrat. **→ A** : types à régénérer depuis l'OpenAPI vivant (`RisqueDePenalitesDto`,
+  `RisqueDePenalitesQueryDto`) quand un écran montrera le risque — toujours sous l'étiquette « risque estimé », jamais à la
+  place du montant à régler. **→ B** : nouvelle empreinte du paquet, `c29155550f66b25f90f806dbc24f23fda453dbd8e9f6ec69e2904fb800d0937c`
+  (balance `a931877`, recopie permanente). **→ D** : `automatisation` déclarée au schéma (servie).
 - **2026-11-27 (STORY-344), ANNONCÉ avant le code** — **l'estimation des pénalités et majorations, comme un risque**
   (`prospera-fiscal-service`, REST ; source du paquet fiscal Togo dans `balance-service`). Fiche : `stories/STORY-344.md`
   (D-344-1 → 12). Consommateurs : l'écran (A) ; la copie du paquet de `dossier-service` (B, recopie permanente). Aucun
