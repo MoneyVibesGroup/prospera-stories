@@ -8278,7 +8278,8 @@ sprints:
         epic: "EPIC-033"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-344.md"
+        status: "in_progress"  # 🚧 2026-11-27 — groupe C, lot 7 (n° 16 du fiscal, PLAN-LOT-7-2026-11-24.md §3 ; finit EPIC-033) — fiche écrite juste avant le code (D-344-1 → 12) ; contrat et communs annoncés (journal de C) : GET /obligations/{id}/risque-de-penalites, un risque estimé jamais une dette (LPF Art. 115 : 10 % puis + 1 % par mois commencé, minimum 1 000 F ; Art. 121 : paliers 30 / 40 / 80 %, tous montrés, aucun retenu ; Art. 113, 5) : 50 000 F sur un déclaré nul ; Art. 113, 1) et 153 nommés sans chiffre) ; bloc penalites au paquet fiscal Togo (balance-service), garde R14 ; ← D (561) : rubrique automatisation déclarée au schéma, sans instance ; aucune migration.
         assigned_to: null
       - story_id: "STORY-345"
         title: "Base de rémunération par BÉNÉFICIAIRE et par période (salarié, dirigeant, associé)"
