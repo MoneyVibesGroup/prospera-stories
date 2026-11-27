@@ -2110,6 +2110,16 @@
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-27, STORY-561) : déclarer la rubrique `automatisation` au schéma du paquet fiscal — ouverte, non
+  bloquante.** Le connecteur de dépôt (561) lit, dans le paquet de l'obligation, une rubrique racine **facultative**
+  `automatisation` (forme : `stories/STORY-561.md`, « Le contrat du bloc ») : des connecteurs, chacun avec son `code`
+  (le canal au coffre de 560), le `canal` et les `obligations` du catalogue qu'il sert, l'adresse du portail, ses
+  conditions d'utilisation (texte, date de relevé, source), son rythme, ses marqueurs et son parcours. Le schéma de
+  `balance-service` ne refuse pas une rubrique racine inconnue ; la demande est de la **déclarer** (patron des autres
+  rubriques), sans l'exiger. ⛔ **Aucune instance au paquet Togo** : rien n'est relevé sur dimana ni sur le GUDEF (le
+  relevé est un geste de 1102). D valide lui-même le bloc à la lecture et teste contre un double du paquet : rien ne
+  l'attend. Quand C l'aura déclarée, une recopie du paquet n'est pas nécessaire tant qu'aucune instance n'existe.
+
 - **→ C (2026-11-27, STORY-337) : information, non bloquante — relier chaque obligation du catalogue du paquet à ses
   comptes, si le PO le veut (Q-D-35).** Le rapprochement des pièces lit les comptes que le chemin nomme (le moteur, depuis
   `tva.declaration.comptes`) : seule la TVA en a. Le paquet publie d'autres comptes (`provisions.comptes`, les comptes
@@ -2746,6 +2756,20 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-27, STORY-561, avant le code)** — branche `MNV-561` de `prospera-fiscal-service`, partie
+  d'`origin/dev` `680164e`. **Aucune migration** : deux collections neuves de D, `parcours_connecteur` et
+  `conditions_connecteur`, dont les index uniques sont posés par Mongoose au démarrage (patron d'`engagements_depot`).
+  Ni `app.module.ts` (le module neuf `connecteur-depot`, dossier de D, est importé par `DepotsModule`, déjà monté), ni
+  `package.json` (D-561-1 : le pilote HTTP emploie le `fetch` de Node, aucune dépendance), ni `read-models/`, ni
+  `config/`, ni copie du paquet (D-561-2 : les tests emploient un double du paquet ; le bloc réel est une demande à C),
+  ni manifeste `declarations`. Touchés parmi les communs : **le contrat OpenAPI** (« ⚠ Contrats ») et
+  **`src/garde-minuteries.spec.ts`** (une ligne à la liste fermée de 318 : le délai déclaré entre deux actions sur un
+  portail, une attente bornée, jamais un travail planifié, D-561-7). **Aucun fichier de C** ; les fournisseurs de C en
+  lecture de 336 (D-336-4) ne changent pas ; `paquetDeLObligation` et `PaquetsService` (C) sont employés tels quels,
+  comme en 336. Dossiers neufs de D : `domain|application|adapters|modules/connecteur-depot`, `ports/connecteur-depot.ts`,
+  `ports/pilote-de-portail.ts`, `ports/registre-parcours-connecteur.ts`. La garde D-560-2 reste verte : seul le module
+  `connecteur-depot` importe le coffre.
+
 - **FUSIONNÉ (2026-11-27, prospera-fiscal-service#90, `dev` `680164e`, rebasée sur `origin/dev` `481a8f4` (341 de C, qui touchait aussi le contrat OpenAPI : aucun conflit) avant la fusion ; head `2da41dc`), conforme à l'annonce ;
   ANNONCÉ (2026-11-27, STORY-337, avant le code)** — branche `MNV-337` de `prospera-fiscal-service`, partie
   d'`origin/dev` `dae6a10`. **Aucune migration**, aucune collection, aucun index, aucune écriture ; ni `app.module.ts` (le
@@ -2905,6 +2929,24 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-27, STORY-561, avant le code) — le connecteur de dépôt automatisé, derrière le port AD-12**
+  (`prospera-fiscal-service`, modules `depots` et `connecteur-depot`, neuf). Fiche : `stories/STORY-561.md`
+  (« Réalignement du 2026-11-27 », D-561-1 → 13, la table du repli, le contrat du bloc). **Ajouts seuls** :
+  - `POST /api/v1/depots-declaration` : la réponse gagne `chemin { suivi: ASSISTE | AUTOMATISE, raison, issue, etape,
+    details }` ; `mode` gagne la valeur `AUTOMATISE` (aussi dans `GET /depots-declaration/{depotId}` et dans les
+    engagements du dossier de contrôle). Sans bloc `automatisation` au paquet, la réponse est celle d'aujourd'hui, plus
+    `chemin { suivi: ASSISTE, raison: AUCUN_CONNECTEUR }`.
+  - Routes neuves : `GET /api/v1/connecteurs-depot/declarations/{obligationId}` (le connecteur déclaré, son état, ses
+    conditions et leur empreinte, l'acceptation, l'état du coffre) ; `POST …/declarations/{obligationId}/conditions`
+    `{ empreinte }` (droit `deposer` ; 409 `CONDITIONS_PERIMEES`, 422 `AUTOMATISATION_INCOMPLETE`, 404
+    `AUCUN_CONNECTEUR`) ; `GET /api/v1/connecteurs-depot/depots/{depotId}/parcours` ; `GET /api/v1/connecteurs-depot/sante`.
+  - **Donnée lue neuve** : la rubrique racine facultative `automatisation` du paquet fiscal (forme dans la fiche).
+    **→ C** : la déclarer au schéma du paquet (« Demandes aux autres groupes »).
+  - **Appels sortants** : vers l'adresse de portail que le paquet déclare, et seulement elle (`https` ; D-561-10). Au lot
+    7, aucune n'est déclarée : aucun appel ne part.
+  - **→ A (plus tard)** : l'écran du dépôt lit `chemin` (la raison du repli, l'étape atteinte) ; l'écran du connecteur
+    affiche les conditions avant l'activation. Types à régénérer depuis l'OpenAPI vivant.
 
 - **PUBLIÉ (2026-11-27, STORY-337 : prospera-fiscal-service#90, `dev` `680164e`) sans écart ; ANNONCÉ (2026-11-27,
   STORY-337, avant le code, prospera-stories#1029, `main` 5d45088) — le rapprochement des pièces justificatives**
@@ -4310,6 +4352,11 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-36 (2026-11-27, STORY-561) — le connecteur doit-il piloter un navigateur ?** Au lot 7, il parle HTTP au
+  portail (D-561-1). Si le relevé du premier dépôt réel (1102) montre que dimana ou le GUDEF n'acceptent qu'un
+  navigateur, un pilote de navigateur se branchera derrière le même port, avec le même bloc en donnée (et une dépendance
+  lourde à l'image). **Choix par défaut** : HTTP, tant que le relevé ne dit pas le contraire.
 
 - **Q-D-35 (2026-11-27, STORY-337) — Quels comptes rapprocher pour une obligation dont le moteur ne nomme pas les
   comptes ?** Seule la TVA a ses comptes nommés aujourd'hui (`443`, `445`, par le moteur). **Choix par défaut**
