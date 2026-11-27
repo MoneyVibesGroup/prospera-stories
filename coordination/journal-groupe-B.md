@@ -2516,6 +2516,24 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-27, STORY-1133 (n° 15) — l'interface de l'agent publiée, annoncé AVANT le code** (`prospera-plateforme`,
+  `centrale-service`, `agent-instance` ; fiche `stories/STORY-1133.md`, D-1133-1 → 13). Lu par **B** seul ; **→ C, D** :
+  information, aucun contrat que vous lisez ne change (aucun de vos dépôts n'épingle les vecteurs : recherche dans la
+  fiche) ; **→ A** : information (Dev A bâtira `sauvegardes/` et `support/` sur ce contrat ; aucun écran débloqué).
+  - **Vecteurs v2** (`prospera-plateforme/vecteurs/`, étiquette **`vecteurs-v2`**) : clés de test neuves
+    `centrale-test-2026-2036` et `ci-test-2026-2036` (racine `racine-test-2026` inchangée, validité 2026-01-01 →
+    2036-01-01) ; `centrale-pretendue-production` recertifiée sur la même période ; `centrale-test-2025` gardée (expirée
+    exprès) ; `centrale-test-2026` et `ci-test-2026` retirées. Mêmes 16 vecteurs et verdicts, octets neufs. Garde des 60
+    jours (plateforme, centrale, agent).
+  - **`contrats/agent/`** (neuf, étiquette **`contrats-agent-v1`**) : `contact-requete@1` (le corps de `POST
+    /api/centrale/v1/contacts`, à l'identique de 1132), `contact-reponse@1`, `agent-executeur.openapi.json` 1.0.0 (`GET
+    /heure`, `/etat` + `relais` facultatif, `/decision`, `/health`), `contact.cas.json`.
+  - **Centrale** : contact inchangé (même corps, mêmes codes), validé par la copie du contrat publié.
+  - **Agent** : l'exécuteur de la plateforme consomme `paiement.abonnement.echeance.encaissee` (groupe
+    `agent.relais-paiement`, seulement si `AGENT_RELAIS_KAFKA`) ; `charge-contact.json` gagne `faitsDePaiement`
+    (facultatif) ; acquittements par `<echange>/acquittements/`. Un agent sur site ne change pas.
+  - **Inchangés** : paiement (le fait gagne le consommateur que l'AD-17 nomme déjà), contrat d'état publié, licence.
+
 - **2026-11-27, STORY-1132 (n° 14) — LIVRÉ** (centrale-service #2, `75977de` sur `dev`) : conforme à l'annonce
   ci-dessous, sans écart. **→ D, A** : information seulement ; aucun contrat que vous lisez ne change.
 
