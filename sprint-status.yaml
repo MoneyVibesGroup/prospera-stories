@@ -2271,15 +2271,19 @@ reserved_ranges:
       coupée, gel à +31 j sans rien fermer du travail quotidien, révocation par fichier, gel levé au retour, jumeau vu en
       bifurcation). D-1134-1 → 14. Suivante : STORY-1135. NON SLOTTÉE.
   - range: "STORY-1135"
-    status: "in_progress"
+    status: "done"
     owner: "Groupe B, lot 7, n° 17 — mettre à jour sans peur (EPIC-151), premier incrément : essayer, promouvoir, revenir ; manifeste de version signé par la CI, plan enregistré de l'agent (essai à côté du réel, migrer, santé, réel dans la fenêtre du DSI, retour automatique), rien en gel ni en recul local (agent-instance, centrale-service, prospera-plateforme contrats-agent-v1.2)"
     source_doc: "prospera-stories/stories/STORY-1135.md"
     reserved_on: "2026-11-25"
     note: >
-      Fiche écrite le 2026-11-27 juste avant le code ; contrat annoncé avant le code (journal de B, « ⚠ Contrats ») :
-      contrats-agent-v1.2 (manifeste-version@1 signé ci et diffusé, contact-requete miseAJour, contact-reponse manifestes,
-      GET /promotion) ; @prospera/signature 0.2.0 ; routes d'opérateur de simulation de la centrale. Interrupteurs et
-      config de l'état publié nommés pour plus tard (D-1135-11, 12). D-1135-1 → 16. NON SLOTTÉE.
+      🏁 DONE le 2026-11-27 — prospera-plateforme #46 (dev fe278b6, étiquette contrats-agent-v1.2), centrale-service #6
+      (010bdca), agent-instance #5 (b40d965, agent-0.4.0) ; contrat annoncé avant le code (stories #1067, main 2c74384).
+      Manifeste de version signé par la CI, diffusé ; plan enregistré de l'agent sur docker compose (essai à côté du
+      réel, migrer, santé, réel dans la fenêtre du DSI, pas deux promotions en 7 jours sauf correctif, retour
+      automatique, AVEC_PERTE ⇒ arrêt) ; rien en gel ni en recul local ; GET /promotion ; la centrale publie, vise,
+      rend le manifeste, garde le rapport. Node 25 : plateforme 731/731, centrale 100/100, agent 139/139 ; mutations 9/9,
+      10/10, 35/35 ; Node 24 vert ; pile grp-b 33/33 (échouer et revenir, réussir et promouvoir, refus en gel).
+      Interrupteurs et config de l'état publié nommés pour plus tard (D-1135-11, 12). D-1135-1 → 16. NON SLOTTÉE.
   - range: "STORY-1136"
     status: "done"
     owner: "Groupe B, lot 7, n° 18 — l'avoir émis réduit la Créance de sa facture : paiement consomme facturation.avoir.emis@1 (← D, STORY-1066, D-1066-13 (3), D-979-14 ; la remplaçante de STORY-1116, D-L7B-3) (prospera-paiement-service)"

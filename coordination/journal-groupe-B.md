@@ -511,8 +511,25 @@
     touché. Node 25 : `src/modules/portefeuille` 7/7 suites, 136 tests ; lint des fichiers touchés, `nest build` 0 ; mutation
     (ancienne empreinte) 13 rouges ; `registre-pays.coherence` rouge à l'identique sur `dev` (piège connu). Sans Docker,
     verrou non pris. Recopie permanente pour le lot 8 (D-L7B-16).
-  - **Suivante : STORY-1135** (n° 17 : mettre à jour sans peur, premier incrément, EPIC-151 ; elle juge `METTRE_A_JOUR` par
-    la matrice de `contrats-agent-v1.1`).
+  - **17 — STORY-1135 (27/11) — faite** (premier incrément d'EPIC-151) : **mettre à jour sans peur — essayer, promouvoir,
+    revenir**. **plateforme #46** (`fe278b6`, étiquette **`contrats-agent-v1.2`**), **centrale #6** (`010bdca`), **agent #5**
+    (`b40d965`, `agent-0.4.0`) ; contrat annoncé avant le code (stories #1067, `2c74384`). Une version = un manifeste signé
+    par une clé de CI, diffusé (`manifeste-version@1`) ; la centrale le vérifie et le publie, vise une cible et la fenêtre du
+    DSI (`fenetreDSI` dans l'état voulu), rend le manifeste au contact qui porte `miseAJour` et garde son rapport (routes
+    d'opérateur de simulation) ; l'agent joue un **plan enregistré** par `docker compose` (essai à côté du réel, migrer en
+    conteneur dédié, santé, réel dans la fenêtre du DSI, pas deux promotions en 7 jours sauf correctif, interrupteurs
+    allumés, retour automatique aux empreintes de la précédente, `AVEC_PERTE` ⇒ arrêt et alerte), **rien en gel ni en recul
+    local** (matrice de 1134), `GET /promotion`. Node 25 : plateforme 731/731, centrale 100/100, agent 139/139 ; mutations
+    9/9, 10/10, 35/35 ; Node 24 vert ; pile `grp-b` **33/33** (1.2.0 malade dans le réel ⇒ revenue à 1.0.0 saine ; 1.1.0
+    promue ; 1.3.0 bloquée `MISE_A_JOUR_FERMEE` en gel, le réel inchangé). Verrou 19:34 → 19:51, 20:13 → 20:14. Fiche
+    D-1135-1 → 16. **Interrupteurs et `config` de l'état publié** : nommés pour plus tard (D-1135-11 : sur site, aucun
+    interrupteur ne reste éteint ; la source est la partie A avec la variante plateforme ; D-1135-12 : `config` attend un
+    consommateur) ; **`migrer` du module `instance`** : pas servie (D-1135-6, le `migrer` de l'agent est le point d'entrée de
+    l'image). Reste nommé (fiche) : CI de publication et `cosign`, tirage des images, retour choisi par le DSI, commandes
+    d'AD-37, sauvegarde avant promotion, verrou côté partie A, variante plateforme. Rituel : aucune demande neuve à B chez A,
+    C et D. Écart : `@prospera/signature` reste en 0.1.0 (épinglée par `point-de-decision`).
+  - **Lot 7 de B fini (27/11), lot 8 en attente du lancement par l'utilisateur** (`PLAN-LOT-8-2026-11-27.md` : un groupe qui
+    a fini son lot 7 s'arrête et attend). Les n° 1 → 18 et les demandes « a » → « l » sont faites.
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -2598,6 +2615,10 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, STORY-1135 (n° 17) — LIVRÉ** (plateforme #46, `fe278b6`, étiquette `contrats-agent-v1.2` ; centrale #6,
+  `010bdca` ; agent #5, `b40d965`) : conforme à l'annonce ci-dessous, un écart — **`@prospera/signature` garde la version
+  0.1.0** (épinglée à l'octet par `point-de-decision` ; le type du manifeste est un ajout). Aucun lecteur hors de B.
 
 - **2026-11-27, STORY-1135 (n° 17) — mettre à jour sans peur, annoncé AVANT le code** (`prospera-plateforme` étiquette
   neuve **`contrats-agent-v1.2`**, `centrale-service`, `agent-instance` ; fiche `stories/STORY-1135.md`, D-1135-1 → 16).
@@ -4876,6 +4897,20 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **`TaskStop` sur une preuve lancée en arrière-plan ne tue pas son `bash`** (STORY-1135) : la passe arrêtée a continué,
+  une seconde est partie, et les deux ont visé la même centrale en même temps (résultats mêlés, journal brouillé). Avant de
+  relancer une preuve : `ps -ef | grep preuve`, `kill` des PID restants, `down -v`, puis une seule passe. Même famille que le
+  piège de 1127 (boucle d'attente du verrou).
+- **Ne pas changer la version d'un paquet de la plateforme que `point-de-decision` épingle** (STORY-1135) :
+  `@prospera/signature` y est épinglée `"0.1.0"` ; passée en 0.2.0, `npm ci` des images cherche 0.1.0 sur le registre public
+  (404) et l'image ne se construit plus, alors que les tests locaux (liens de l'espace de travail) restent verts. Un ajout
+  garde la version ; l'étiquette date la copie.
+- **Un exécuteur root écrit le volume d'échange en root** (STORY-1135) : le contact (`node`) reçoit `EACCES` au premier
+  dépôt et s'arrête. Pour le socket Docker : `group_add: ["0"]` (socket `rw-rw----` de groupe 0 sur Docker Desktop), jamais
+  `user: "0"`.
+- **Git Bash réécrit le chemin passé à `docker run --entrypoint ls … /usr/local/…`** (« C:/Program Files/Git/usr/… ») :
+  `MSYS_NO_PATHCONV=1` devant (rappel de §1.7, payé encore).
 
 - **L'agent comparait le numéro d'une heure de référence sans regarder sa clé** (STORY-1134) : AD-7 dit « croît par clé » ;
   une clé renouvelée de la centrale repart de 1, et toutes ses heures auraient été refusées `HEURE_ANTERIEURE`. Tout compteur
