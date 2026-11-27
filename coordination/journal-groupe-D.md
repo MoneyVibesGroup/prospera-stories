@@ -763,6 +763,15 @@
   - **Suivante : STORY-337** (le rapprochement des pièces justificatives, à la granularité annoncée ; il lit la route de
     338 de C, servie : comptabilite #21, `dev` 58803f5, et remplit `rapprochementPieces`).
 
+- **STORY-337** 🚧 — le rapprochement des pièces justificatives, à la granularité annoncée : `rapprochementPieces` de
+  chaque obligation du dossier de contrôle (336) n'est plus `null`. Fiche et annonce avant le code (D-337-1 → 11,
+  ⚠ Contrats, ⚠ Communs, → C information, Q-D-35). Plan §4, n° 14. Code : branche `MNV-337` de
+  `prospera-fiscal-service` (en cours).
+  - **Diagnostic** (fiche) : aucun rapprochement des pièces n'existait ; les comptes de la TVA sont déjà nommés par le
+    chemin (329 : l'étape `balance`, depuis `tva.declaration.comptes` du paquet : `443`, `445`), la route de 338 existe
+    côté comptabilité, le journal du chemin porte la pièce de chaque ligne des cahiers ; personne ne les assemblait ni ne
+    chiffrait la part non documentée.
+
 ### Lot 6 (ouvert le 2026-11-24)
 
 - **Plan** : `PLAN-LOT-6-2026-11-23.md` §6 : **STORY-1065 → 1071** (le reste de la plage 1030 → 1079 de D), quatre stories
@@ -2081,6 +2090,13 @@
 
 ## Demandes aux autres groupes
 
+- **→ C (2026-11-27, STORY-337) : information, non bloquante — relier chaque obligation du catalogue du paquet à ses
+  comptes, si le PO le veut (Q-D-35).** Le rapprochement des pièces lit les comptes que le chemin nomme (le moteur, depuis
+  `tva.declaration.comptes`) : seule la TVA en a. Le paquet publie d'autres comptes (`provisions.comptes`, les comptes
+  de la TPU, `taxes.types[].compteComptable`), mais aucune entrée de `catalogueObligations` ne désigne les siens ; D ne
+  les relie pas dans le code (D-337-2). Si le PO répond oui à Q-D-35, une référence par entrée (par exemple `comptes: {
+  ref: "provisions.comptes" }`) suffira, et 337 la lira.
+
 - **→ C (2026-11-27, STORY-336) : information, non bloquante — exporter, si C le préfère,
   `HistoriqueObligationsService` et `RegistreValidationsClient` depuis `ObligationsModule` — répondue par C (27/11) : pas
   d'export pour l'instant, accord ci-dessous (« Réponses »).** Le dossier de contrôle lit le
@@ -2710,6 +2726,16 @@
 > que dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion.
 > Une seule migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-27, STORY-337, avant le code)** — branche `MNV-337` de `prospera-fiscal-service`, partie
+  d'`origin/dev` `dae6a10`. **Aucune migration**, aucune collection, aucun index, aucune écriture ; ni `app.module.ts` (le
+  cas d'usage entre dans `DepotsModule`, fichier de D, déjà monté), ni `config/` (`COMPTABILITE_SERVICE_URL` est lue par
+  un fournisseur de `DepotsModule`, patron du coffre de 560 et des jetons de 335), ni `package.json`, ni `read-models/`
+  (le schéma `ExerciceDossier` est **enregistré en lecture** dans `DepotsModule`, comme `IdentityUser` en 336), ni copie
+  du paquet, ni manifeste `declarations`. Touchés parmi les communs : **le contrat OpenAPI** (`rapprochementPieces` typé)
+  et **`.env.example`** (`COMPTABILITE_SERVICE_URL`, commentée). **Aucun fichier de C** ; les fournisseurs de C en lecture
+  de 336 (D-336-4) ne changent pas. Aucune minuterie neuve (garde de 318 : le délai de l'appel est un `AbortSignal`, comme
+  les autres amonts).
+
 - **FUSIONNÉ (2026-11-27, prospera-fiscal-service#89, `dev` `dae6a10`, partie d'`origin/dev` `efd0992`, à jour au
   moment de la fusion (aucun rebase nécessaire) ; head `63b08fd`, arbre identique), conforme à l'annonce ;
   ANNONCÉ (2026-11-27, suite de STORY-335, avant le code)** — branche `MNV-335-suite` de `prospera-fiscal-service`,
@@ -2858,6 +2884,21 @@
   **→ C** : rien à faire ; un rebase de C après la fusion ne rencontre que ces lignes.
 
 ## ⚠ Contrats
+
+- **ANNONCÉ (2026-11-27, STORY-337, avant le code) — le rapprochement des pièces justificatives**
+  (`prospera-fiscal-service`, module `depots`). Fiche : `stories/STORY-337.md` (D-337-1 → 11, section « Contrat »).
+  - **Champ changé** : `GET /api/v1/dossiers-controle` — `obligations[].rapprochementPieces` passe de `null` à `{
+    granularite: PIECE | COMPTE_PERIODE, raison, codeAmont, message, statut: DOCUMENTE | PARTIELLEMENT_DOCUMENTE |
+    NON_DOCUMENTE | AUCUNE_ECRITURE | NON_CHIFFRE, source: COMPTABILITE | PROVENANCE_DE_LA_BALANCE | null, exerciceId,
+    periode, devise, comptes: [{ compte, grandeurs, statut, mouvements, documente, aNouveaux, nonDocumente, pieces }] }`,
+    toujours présent ; raisons du repli : `EXERCICE_TENU_AUX_CAHIERS`, `EXERCICE_NON_TENU_ICI` (de 338),
+    `COMPTES_NON_PUBLIES`, `PERIODE_NON_DATEE`, `EXERCICE_INCONNU`, `COMPTABILITE_REFUSEE`, `COMPTABILITE_INTROUVABLE`,
+    `COMPTABILITE_INDISPONIBLE`, `DEMANDE_NON_SERVIE`, `REPONSE_INVALIDE`. Refus inchangés : aucun refus de la
+    comptabilité ne remonte.
+  - **Appel sortant neuf** : `GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/pieces/justification` de
+    `comptabilite-service` (338, C), jeton du membre. **→ C** : rien à faire ; un changement de cette route se dit à D.
+  - **→ A (plus tard)** : l'écran du dossier de contrôle lit `rapprochementPieces` ; types à régénérer depuis l'OpenAPI
+    vivant (`RapprochementPiecesDto`).
 
 - **PUBLIÉ (2026-11-27, suite de STORY-335 : prospera-fiscal-service#89, `dev` `dae6a10`) sans écart ; ANNONCÉ
   (2026-11-27, suite de STORY-335, avant le code, prospera-stories#1023, `main` ed59786) — la copie des pièces du dépôt
@@ -4247,6 +4288,11 @@
   - La suite de conformité (six cas) et le registre des consommateurs arrivent avec **STORY-1037**, avec un ticket à C.
 
 ## Questions à l'utilisateur ou au PO
+
+- **Q-D-35 (2026-11-27, STORY-337) — Quels comptes rapprocher pour une obligation dont le moteur ne nomme pas les
+  comptes ?** Seule la TVA a ses comptes nommés aujourd'hui (`443`, `445`, par le moteur). **Choix par défaut**
+  (D-337-2) : rien n'est inventé ; ces obligations rendent `COMPTE_PERIODE` / `COMPTES_NON_PUBLIES`. Si oui : C relie
+  chaque entrée du catalogue du paquet à ses comptes, et 337 les lit (→ C, « Demandes »).
 
 - **Q-D-34 (2026-11-27, suite de STORY-335) — Le manifeste `declarations` doit-il publier ses faits ?** Son `publie`
   (C5) ne porte ni `fiscal.depot.piece-archivee` (suite de 335) ni `fiscal.obligation.alerte-echeance` (318) ; il n'a pas
