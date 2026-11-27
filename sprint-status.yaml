@@ -2181,6 +2181,14 @@ reserved_ranges:
       B, n° 2. NON SLOTTÉE.
   # ── LOT 7 DE B (2026-11-25) : STORY-1119 → 1137, réservées par la session de groupe (D-L7B-1) ; fiches écrites
   #    juste avant de coder.
+  - range: "STORY-1131"
+    status: "in-progress"
+    owner: "Groupe B, lot 7, n° 13 — les restes d'EPIC-145, 146, 147, premier incrément : l'Administration exporte, module par module, dans tout état (ESSAI_TERMINE compris) ; l'export C13 du module instance servi (D-1128-9) ; droitsEffectifs par le module qui ouvre le droit (D-979-47) ; instance:donnees:exporter à l'associé et au DG (platform-catalog-service, auth-service)"
+    source_doc: "prospera-stories/stories/STORY-1131.md"
+    reserved_on: "2026-11-25"
+    note: >
+      Fiche écrite le 2026-11-27 juste avant le code ; contrat annoncé avant la fusion (« ⚠ Contrats »). D-1131-1 → 8.
+      NON SLOTTÉE.
   - range: "STORY-1137"
     status: "done"
     owner: "Groupe B, lot 7, n° 12 bis — les modules s'ouvrent dans l'essai (ticket de STORY-1116, D-L7B-4) : les jeux des verticales dans l'image du catalogue, l'ouverture d'un essai installe par le moteur les modules de l'ordre, la garde de dossier-service sans KYC dans l'essai (Q-D-17), la recette lève dossier, balance et bilan dans l'espace d'essai (platform-catalog-service, admin-panel, dossier-service, prospera-recette)"

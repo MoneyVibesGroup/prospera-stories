@@ -2433,6 +2433,32 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-27, STORY-1131 (n° 13) — l'export par l'Administration, annoncé AVANT la fusion** (`platform-catalog-service`,
+  `prospera-auth-service`, branches `MNV-1131` ; fiche `stories/STORY-1131.md`, D-1131-1 → 8). Lu par **A** (coque `instance` :
+  écran d'export, fin d'essai ; types générés depuis l'OpenAPI du catalogue), par **C** et **D** (vos routes d'export C13 sont
+  appelées par la partie A, sous le jeton du moteur, rien ne change chez vous).
+  - **Catalogue, route neuve** : `GET /api/v1/administration/{organisationId}/exports/{module}` (public
+    `/api/instance/v1/administration/…`), `format` (`json` | `csv`) et `objet` relayés ; réservée au membre de l'organisation
+    qui détient `instance:donnees:exporter` ; tout état publié sauf `NON_INSTALLE` (`ESSAI_TERMINE`, `LECTURE_SEULE`,
+    `SUSPENDU` compris) ; le module est appelé à SA route `routesInstance.export`, à son adresse `INSTALLATION_SERVICES`, sous
+    le jeton du moteur ; JSON vérifié (`export-c13-reponse@1`, même module, même organisation) ; CSV à l'octet ; ses refus
+    400/403/422 relayés tels quels ; sinon 403 `ORGANISATION_HORS_JETON` | `DROIT_EXPORT_REQUIS` | `MODULE_NON_INSTALLE`, 404
+    `ORGANISATION_INCONNUE` | `MODULE_INCONNU`, 503 `HORLOGE_INDISPONIBLE`, 503/502 `EXPORT_INDISPONIBLE` (`details.raison`
+    nommée) ; `Cache-Control: no-store`. `EXPORT_C13_DELAI_MS` (60 s par défaut).
+  - **Catalogue, route déclarée depuis 953, enfin servie** : `GET /api/v1/instance/instance/{organisationId}/export` (C13 du
+    module `instance`, forme de `instance-c13` 1.1.0) : organisation, naissances, offre, droits, installations, plans,
+    essai (sans adresses), mises en service, interceptions, effacements ; au moteur limité à l'organisation et au détenteur
+    du droit ; 403 `INSTANCE_NOT_ENTITLED` pour une organisation inconnue de l'espace. `import`, `effacement` d'`instance` :
+    jamais appelés (D-1131-2) ; `sante`, `migrer` → STORY-1133.
+  - **Catalogue, `droitsEffectifs`** (comportement, forme inchangée ; contrat d'état publié 1.1.0 intact) : `fiscalite:*` est
+    effectif quand `declarations` OU `fiscalite` est ouvert (règle `MODULES_DU_PREFIXE` d'auth ; D-979-47 réglé côté
+    catalogue). **→ A** : un cabinet qui n'ouvre que `declarations` voit désormais ses droits fiscaux.
+  - **Catalogue, copies** : `contrat/copies/instance/` à `contrats-instance-v1.1` (`d68a468`).
+  - **Auth** : `instance:donnees:exporter` (déjà au jeton) attribué par défaut à `CAB_ASSOCIE` et `DIST_DG` ; jeton de
+    l'associé : ses quatre droits fiscaux et ce code. Catalogue de tenant, borne, `moi-droits`, `identity.droits.changed@1`
+    inchangés.
+  - **Inchangés** : le contrat d'état publié (gel 1.1.0), le manifeste `instance` 1.1.0, les topics, la garde partagée, le BFF.
+
 - **2026-11-27, septième suite de STORY-979 (ordre « k ») — LIVRÉ** (auth #52, `d037506` sur `dev`) : conforme à
   l'annonce ci-dessous, sans écart. **→ C** : rien à faire (le code est le vôtre, à l'octet). **→ A** : le catalogue de
   composition d'un rôle offre un code de plus sous `declarations` ; aucun type ne change.
