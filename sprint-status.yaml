@@ -8190,7 +8190,8 @@ sprints:
         epic: "EPIC-033"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        source_doc: "prospera-stories/stories/STORY-340.md"
+        status: "in-progress"  # 🚧 2026-11-27 — groupe C, lot 7 (n° 12 du fiscal, PLAN-LOT-7-2026-11-24.md §3) — fiche écrite juste avant le code (D-340-1 → 12) ; contrat et communs annoncés (journal de C) : GET /obligations/{id}/montant-a-regler (la référence de la version scellée, les imputations du paquet — acomptes payés, report de la déclaration —, le déjà réglé, jamais un dû négatif, l'excédent restitué, chaque déduction tracée et citée) ; paquet fiscal Togo : reglement (R13) ; module reglement neuf ; aucune migration.
         assigned_to: null
       - story_id: "STORY-341"
         title: "Ordre de règlement produit, jamais exécuté"

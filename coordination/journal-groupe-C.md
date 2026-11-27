@@ -201,7 +201,11 @@
    brouillard né d'une facture, dans sa transaction (schéma de B à l'octet ; sujet neuf au registre). Manifeste `comptabilite`
    **0.6.0**. Comptabilité Node 24 : unitaires 71/71 suites, 1057 ; socle 16/17 suites, 342/343 ; la seule rouge, la course de STORY-970 « une clôture au milieu de dix lettrages » (409 au lieu de 201 sous la charge de la suite entière), est verte deux fois sur deux jouée seule (29/29) ; mutations 23/23 et 3/3 MongoDB ;
    pile `grp-c` saine. Verrou pris deux fois (00:05 → 00:30, 00:57 → 01:08). D-338-1 → 15 dans la fiche. **B et D prévenus** (SendMessage).
-21. **Suivante : STORY-340** (le montant à régler, net d'acomptes, de crédits et de retenues ; fiscal).
+21. 🚧 **STORY-340 en cours (27/11)** (le montant à régler, net d'acomptes, de crédits et de retenues ; fiscal et la source
+   du paquet dans balance-service ; ouvre EPIC-033) : fiche écrite, contrat et communs annoncés avant le code (ci-dessous).
+   Rituel : aucune demande neuve à C chez B et D ; chez A, **FE-097** (27/11, registre des immobilisations de
+   balance-service, non bloquante) est notée dans « Réponses » ; la demande de D (349 → 331, l'organisme de la retenue
+   d'IRPP, « au plus tard 340 ») est déjà servie par 339.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -737,6 +741,18 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **ANNONCÉ (2026-11-27, STORY-340, avant le code)** — branche `MNV-340` de `prospera-fiscal-service`, partie de
+  `origin/dev` `ffd6f2a` (et `MNV-340` de `balance-service`, de `origin/dev` `61997fd`, pour la source du paquet). **Aucune
+  migration**, aucune collection, aucune écriture ; ni `package.json`, ni `read-models/`, ni manifeste `declarations`.
+  Touchés parmi les communs : **`src/app.module.ts`** (import de `ReglementModule`, module neuf du dossier `reglement` que
+  D-L7-1 réserve à C) ; **le contrat OpenAPI** (une route neuve, `GET /obligations/{id}/montant-a-regler` : « ⚠ Contrats ») ;
+  **la copie du paquet** (`test/fixtures/paquet-fiscal/paquet-fiscal-togo-2026.json`, recopiée à l'octet de balance-service :
+  bloc neuf `reglement`). Tout le reste dans des dossiers de C (`domain/reglement`, `application/reglement`,
+  `modules/reglement`, neufs ; `domain/obligations/bases-legales.ts`, la citation factorisée ; la garde AST de 321, étendue
+  au règlement). `ObligationsModule` n'est pas modifié. **→ D** : rien à faire pour un rebase ; 565 pourra importer
+  `ReglementModule` (il n'importe ni `RemunerationModule` ni `AccusesDepotModule`) ; la suite de D est jouée en entier avant
+  le push ; D prévenu par message (empreinte).
+
 - **FUSIONNÉ (2026-11-26, prospera-fiscal-service#84, `dev` `c459960`, rebasée sur `origin/dev` `74b33ec`, sans conflit)** —
   conforme à l'annonce : le contrat OpenAPI (`EtapeDetailDto.basesLegales`), la copie du paquet (`62563b3c…4415`, de
   balance-service #173 `61997fd`) et l'attente D-349-4 de `obligations-sociales.spec.ts` (le canal de `RETENUE_IRPP` sur la
@@ -910,6 +926,30 @@ seulement.
   clés, plus celles de l'IRPP et de la CNSS (voir « ⚠ Contrats »).
 
 ## ⚠ Contrats
+
+- **2026-11-27 (STORY-340), ANNONCÉ avant le code** — **le montant à régler, net d'acomptes, de crédits et de retenues**
+  (`prospera-fiscal-service`, REST ; source du paquet fiscal Togo dans `balance-service`). Fiche : `stories/STORY-340.md`
+  (D-340-1 → 12). Consommateurs : l'ordre de règlement (341, C) ; le dépôt automatisé (565, D) ; l'écran (A) ; la copie du
+  paquet de `dossier-service` (B). **Ajouts seuls** : une route de lecture, un bloc neuf du paquet ; aucun droit, aucun
+  événement, aucune collection ; aucun champ existant ne change ; manifeste inchangé ; aucune route de `balance-service` ne
+  change.
+  - **`GET /api/v1/obligations/{id}/montant-a-regler`** (rôles `TENANT_ADMIN`, `TENANT_USER`, accès fiscal, portée de
+    l'obligation ; `404 OBLIGATION_INTROUVABLE`) ⇒ `{ obligationId, dossierId, redevableId, taxe, periode, luLe, statut:
+    DEPOSEE | AVANT_DEPOT | INDISPONIBLE, motif, message, complet, version { numero, nature, scellee, versionId }, reference
+    { montant, origine: VERSION_SCELLEE | DECLARE | CALCULE, chemin } | null, regle, imputations[{ code, nature: ACOMPTE |
+    CREDIT_IMPOT | RETENUE | REPORT_ANTERIEUR, libelle, mode: DEDUITE | DANS_LE_DECLARE, montant, motif, message,
+    provenances[{ obligationId, taxe, periode, statut, paye, chemin }], report { champ, version } | null, baseLegale }],
+    dejaRegle, aRegler (entier ≥ 0 | null), excedents[{ code, montant, traitement, libelle, baseLegale, motif }], manques[{
+    code, message, obligationId, periode }], paquet, corpus }`. Jamais un dû négatif : l'excédent est rendu comme tel
+    (`EXCEDENT_D_ACOMPTES`, `CREDIT_DE_TVA_A_REPORTER`, `TROP_VERSE`). Manques nommés : `PAQUET_NON_LISIBLE`,
+    `IMPUTATIONS_NON_DECLAREES_AU_PAQUET`, `IMPUTATION_NON_LISIBLE`, `ACOMPTE_SANS_PAIEMENT_ENREGISTRE`.
+  - **Paquet fiscal Togo 2026** : bloc neuf **`reglement.obligations.<CODE>`** `{ libelle, livre, article, millesime,
+    imputations[{ code, nature, libelle, source { type: PAIEMENTS_D_OBLIGATIONS, obligation } | { type: REPORT_DECLARE,
+    champ }, livre, article, millesime }], excedent { code, traitement, libelle, source?, livre, article, millesime } | null }`
+    — `TPU` (acomptes `TPU_ACOMPTE`, excédent remboursé sous déduction, LPF Art. 57), `TVA` (crédit antérieur dans le
+    déclaré, crédit à reporter, CGI Art. 204 ; LPF Art. 60), `IS_ACOMPTE` (LPF Art. 55), `TPU_ACOMPTE` (LPF Art. 57), `RSH`
+    (LPF Art. 99), `RETENUE_IRPP` (LPF Art. 27) ; garde **R13**. Le moteur de balance-service ne le lit pas. Nouvelle
+    empreinte au « Livré ».
 
 - **2026-11-27 (STORY-338), PUBLIÉ** (comptabilite #21, `58803f5`) — conforme à l'annonce (#1007), avec deux précisions
   (fiche, D-338-13, D-338-14) : un 403 de la GED se dit **422 `PIECE_GED_NON_CONSULTABLE`** (`details.codeAmont`) ; la
