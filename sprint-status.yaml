@@ -2322,6 +2322,12 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-1124.md"
     reserved_on: "2026-11-25"
     note: >
+      🏁 SUITE « j » DONE le 2026-11-27 (groupe B, lot 7, D-L7B-14 ; fiche, « Suite du 2026-11-27 (bis) », D-1124-27 → 36 ;
+      suite de la demande de D après fiscal #89) — document-service #43 (dev f6c00d6) ; annonce stories #1037 (main c82795a).
+      fiscal.depot.piece-archivee (dae6a10) et comptabilite.facture.desinscrite (58803f5) publiés à l'octet des copies de la
+      GED ; manifeste ged 1.11.0 (commentaires) ; un échec du groupe ged.fiscal attend 1 → 30 s (D-1124-34). Pile grp-b neuve
+      avec le vrai fiscal, jeton né dans la pile : 32/32. Node 24 : unitaires 121/121 suites, 1 450 passés (5 ignorés), e2e 17/17 suites, 224/224 ; mutations 6/6, 5/5.
+      Avant :
       🏁 SUITE « h » DONE le 2026-11-27 (groupe B, lot 7, D-L7B-12 ; fiche, « Suite du 2026-11-27 », D-1124-13 → 26 ;
       demande de D, STORY-335, servie) — document-service #42 (dev 8f9040d), catalogue #88 (dev e528afc, ged 1.11.0 et
       comptabilite 0.6.0 de « i ») ; contrat annoncé avant la fusion (stories #1014, main dc05d12 ; #1018). Forme (1) :

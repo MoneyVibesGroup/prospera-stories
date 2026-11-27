@@ -1,7 +1,8 @@
 # STORY-1124 : Le circuit sans trou — la réception et ses boîtes d'un seul geste, les mouvements d'une boîte verrouillés, la facture désinscrite retirée du fonds
 
-Status: done — **suite « j » en cours le 2026-11-27** (← D, après fiscal #89 : les deux faits proposés publiés,
-l'aller-retour GED ↔ fiscal joué ; « Suite du 2026-11-27 (bis) », D-1124-27 → 33). **Suite « h » livrée le 2026-11-27** : les pièces du dépôt d'une déclaration au fonds du client (← D,
+Status: done — **suite « j » livrée le 2026-11-27** (← D, après fiscal #89 : les deux faits proposés publiés,
+l'aller-retour GED ↔ vrai fiscal joué, 32/32 ; « Suite du 2026-11-27 (bis) », D-1124-27 → 36) : document-service **#43**
+(`f6c00d6` sur `dev`). **Suite « h » livrée le 2026-11-27** : les pièces du dépôt d'une déclaration au fonds du client (← D,
 STORY-335 ; « Suite du 2026-11-27 », D-1124-13 → 26) : document-service **#42** (`8f9040d` sur `dev`), catalogue **#88**
 (`e528afc`, `ged` 1.11.0). **Livrée le 2026-11-26** : document-service **#38** (`b18d3ad` sur `dev`), catalogue **#82** (`9674aeb`,
 `ged` 1.9.0) ; voir « Livraison ». Fiche écrite le 2026-11-26 par la session du groupe B juste avant de la coder (lot 7, n° 6 de B,
@@ -497,8 +498,9 @@ n'a jamais été joué : la preuve de « h » doublait la route (D-1124-24).
   journal chaîné et le fait dans l'outbox, une transaction), `kafka/events/piece-archivee-events.ts`,
   `kafka/outbox/outbox-relay.*` (relais BullMQ sur Redis), `domain/depot/pieces-depot-service.ts` (le jeton de
   service, la route) ; la surcouche `prospera-recette/docker-compose.fiscal.yml` (STORY-901).
-- [ ] Annonce (cette PR de docs, avant le code) ; PR de code fusionnée en rebase ; aller-retour sur pile `grp-b` neuve ;
-  PR de docs finale (« Réponses » → D, information à C).
+- [x] Annonce avant le code (stories #1037, `main` `c82795a`) ; aller-retour sur pile `grp-b` neuve, 32/32 ; PR de code
+  fusionnée en rebase : document-service **#43** (`f6c00d6` sur `dev`) ; PR de docs finale (« Réponses » → D, information
+  à C).
 
 ### Les octets, vérifiés
 
@@ -557,3 +559,66 @@ l'identique, empreinte = `X-Empreinte-Sha256` ; le rejeu du fait (même message,
 refuse un mauvais jeton (401 `JETON_DE_SERVICE_REQUIS`) et la GED au mauvais jeton n'écrit rien (message relu, `ged.fiscal`
 bloqué), puis range au bon ; un objet altéré dans le bucket du fiscal → 502 `FICHIER_ARCHIVE_ALTERE` → attente
 `ORIGINAL_ALTERE` ; une pièce inconnue → 404 `PIECE_INTROUVABLE`. Puis l'étage `verification` (Node 24) de la GED.
+
+### Livré (27/11)
+
+- **document-service #43**, trois commits sur `dev` (fusionnée en rebase ; dernier : `f6c00d6`) : `contrat/ORIGINE-DES-SCHEMAS.json`
+  (les deux origines au producteur, à son commit) ; gardes des deux faits et de `comptabilite.facture.inscrite` ; commentaires
+  de `piece-fiscale.ts`, `facture-desinscrite.ts`, du consommateur des factures ; manifeste `ged` 1.11.0 recopié depuis
+  `prospera-stories@c82795a` (`4b34ac5f…7191`, `sources-des-manifestes.ts`) ; **`pieces-fiscales-consumer.bootstrap.ts`**
+  (D-1124-34). Aucun schéma, aucune route, aucun droit, aucun fait publié ne change ; le catalogue n'est pas touché (D-1124-30).
+
+### Écarts décidés au code
+
+- **D-1124-34 — Un échec du groupe `ged.fiscal` attend avant d'être relu.** L'aller-retour l'a montré : le client de Confluent
+  relit un message aussitôt que son traitement lève, et la supervision ne retarde que les démarrages. Une GED au mauvais jeton
+  a appelé le vrai fiscal **162 fois en 111 s** (401, puis **429** de son limiteur, 100 par minute et par adresse). Le
+  consommateur attend désormais, à chaque échec consécutif, 1 s, puis 2, 4… 30 s au plus, **avant** de lever (le message reste
+  relu, rien ne se perd, le groupe passe toujours « bloqué » au troisième échec) ; un message traité remet le compte à zéro ;
+  l'arrêt du module coupe l'attente. Sur la pile : **7 appels en 66 s**. Seul ce consommateur appelle un service à chaque
+  message ; ceux des factures ne lisent que Mongo.
+- **D-1124-35 — Le dépôt par le code du fiscal, confirmé.** `amorce.cjs` (preuve, hors dépôt) ouvre le contexte Nest de
+  l'`AppModule` compilé du fiscal dans son image, avec Kafka et Redis injoignables pour ce seul processus : il n'écrit que dans
+  Mongo et MinIO, par `RegistreLivrablesArchives.archiver` et `RegistreAccusesDepot.consigner` ; le relais du service publie.
+  Le fait arrive sur le topic avec la clé `orgId` et les en-têtes `eventId`, `schemaVersion` (`schemaVersion:1`), la ligne
+  d'outbox passe `SENT`.
+- **D-1124-36 — Le limiteur du fiscal sur la route de service : une information à D, pas un défaut bloquant.** La route
+  `/api/v1/service/…` passe sous le limiteur global du fiscal (100 requêtes par minute et par adresse) : une reprise de plus de
+  cent attentes d'un même dossier (l'ouverture d'un fonds après une longue panne) recevrait des 429, que la GED traite comme une
+  source indisponible (l'attente reste `SOURCE_INDISPONIBLE`, reprise au fait suivant). Demande non bloquante à D (journal de
+  B) : exempter la route de service du limiteur par adresse, ou lui donner sa limite.
+
+### Preuves
+
+- **Pile `grp-b` neuve, le vrai fiscal** (image de `prospera-fiscal-service` depuis `git -c core.autocrlf=false archive
+  origin/dev`, `6cd99ee`, qui porte `dae6a10` ; son Mongo 8.0 authentifié `rs-fiscal` monté par ses scripts ; Redis à lui ;
+  MinIO, bucket `fiscal-depots` créé à son démarrage ; aucun Postgres) ; la GED depuis l'archive de la branche (Mongo 7 `rs0`,
+  Kafka 3.9, Redis, Karapace 6.2, doublure d'auth) ; **jeton de service de 48 caractères tiré dans le volume de la pile**,
+  lu au démarrage par les deux services — **32/32** :
+  le fiscal sain (Mongo, audit, Kafka, Redis) ; **Karapace** : le schéma du fiscal et la copie de la GED, un seul schéma (id 1,
+  une version) ; un **vrai classeur** (gabarit DSF des fixtures du fiscal, 5 535 188 octets) archivé par le fiscal → outbox
+  `SENT` → topic (clé `orgId`, en-têtes `eventId`, `schemaVersion:1`) → la GED range **`DECLARATION_FISCALE`** au fonds de la
+  période (`ARC-2026-ALPHA-00001`), empreinte = celle du fiscal, **contenu relu à l'octet** ; la route au vrai jeton : 200,
+  `X-Empreinte-Sha256` = les octets, `application/octet-stream`, `no-store` ; un accusé PDF → **`ACCUSE_DEPOT`**, avec sa
+  lecture ; **rejeu** : le relais du fiscal republie le même fait (ligne d'outbox remise `PENDING`), puis le même message trois
+  fois, un témoin rangé après : **une copie, un rattachement** ; un objet **altéré** dans le bucket du fiscal : la route rend
+  **502 `FICHIER_ARCHIVE_ALTERE`**, la GED attend **`ORIGINAL_ALTERE`**, aucune copie ; **404 `PIECE_INTROUVABLE`** pour une
+  pièce inconnue et pour un livrable demandé comme accusé ; **401 `JETON_DE_SERVICE_REQUIS`** sans jeton, au mauvais jeton
+  (aucun octet servi) et au jeton d'un membre ; **la GED au mauvais jeton** (redémarrée) : rien d'écrit, `/health` 503 nomme
+  `ged.fiscal`, **7 appels en 66 s** (D-1124-34) ; au bon jeton (redémarrée), le message relu est rangé (version 2 du livrable).
+  Journaux : les erreurs sont celles voulues (502, 401, santé 503 pendant la panne). Mémoire de la pile ≤ 2,0 Gio.
+- Première passe (avant le correctif, 12:26 → 12:40) : 26/26 puis coupée par son délai avant le 502 et le 404 ; elle a montré
+  les 162 appels.
+- Node 25 (poste), par chemin : `pieces-fiscales-consumer.bootstrap.spec.ts` 3/3 ; `factures.service.spec.ts`,
+  `piece-fiscale.spec.ts`, `socle/manifestes` 37/37 ; `cabinet/`, `socle/manifestes`, `kafka/` 423/424 avant la correction
+  d'`ORIGINE` (voir « Pièges ») ; lint des fichiers touchés.
+- **Node 24** (étage `verification`, archive de la branche) : unitaires 121/121 suites, 1 450 passés (5 ignorés) ; e2e 17/17 suites, 224/224.
+- **Mutations** : origines 6/6 (fiscal retombé en proposition, sans commit, autre chemin ; désinscrite retombée en proposition,
+  au nom de la GED ; inscrite au nom de la GED) ; attente 5/5 (aucune attente, compte jamais remis à zéro, aucun plafond, délai
+  constant, arrêt qui ne coupe pas l'attente).
+- Verrou : 10:17 → 12:26 (passe figée, voir « Pièges »), 12:26 → 12:40, 13:19 → 13:34, 14:06 → 14:11 (Node 24).
+
+### Nommé pour plus tard
+
+- L'enregistrement de `fiscal.depot.piece-archivee` au registre de la plateforme : au producteur (D), comme ses autres faits.
+- `VALIDATION_CLIENT` émise par le fiscal (D-335-14, D) : la GED la rattache déjà (« h »).
