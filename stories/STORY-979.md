@@ -1,8 +1,8 @@
 # STORY-979 : les droits de la facture et des archives du cabinet au catalogue de tenant d'auth
 
-Status: done (rouverte et refermée cinq fois pour ses suites : « Suite du 2026-11-24 », « Suite du 2026-11-24
-(soir) », « Suite du 2026-11-25 », « Quatrième suite (2026-11-25) » et « Cinquième suite (2026-11-26) », en fin de
-fiche)
+Status: in-progress (septième suite, « Septième suite (2026-11-27) », en fin de fiche ; rouverte et refermée six fois
+pour ses suites : « Suite du 2026-11-24 », « Suite du 2026-11-24 (soir) », « Suite du 2026-11-25 », « Quatrième suite
+(2026-11-25) », « Cinquième suite (2026-11-26) » et « Sixième suite (2026-11-27) »)
 
 **Complexité :** faible (huit droits neufs au catalogue de tenant, hors du jeton ; un rôle du socle neuf ; une ligne
 d'ajout à l'annexe B ; la copie des manifestes du catalogue ; aucun champ, aucune route, aucun topic)
@@ -670,3 +670,73 @@ groupe avec « h » (D-L7B-13, ordre « i ») : aucun identifiant neuf.
   identique) ; annonce avant la fusion : stories #1018 (`20b7791`). `manifestes:garde` verte (48) contre `main` ;
   `src/modules/catalog/manifeste` 71/71 (Node 25). Sans Docker pour cette copie (le verrou de « h » n'a servi qu'à « h »).
 - **Pour la suite** : un catalogue déjà semé reçoit les deux versions à son prochain démarrage (D-979-13).
+
+
+## Septième suite (2026-11-27) : le droit `fiscalite:declaration:regler`
+
+**Demande servie :** C, « → B (2026-11-27, STORY-342) : attribuer le droit `fiscalite:declaration:regler` chez
+auth-service » (journal de C, « Demandes aux autres groupes », `main` `dec9891` ; annonce de C : stories #1031 ; code
+fusionné : fiscal #93, `dev` `6cd99ee`). Placée par la session de groupe en **ordre « k »**, en tête après STORY-1137 et
+avant la demande « j », parce qu'elle bloque C (D-L7B-15) : sans ce droit, `POST /api/v1/obligations/{id}/reglements`
+refuse `403 DROIT_FISCAL_REFUSE` à tout le monde. Aucun identifiant neuf : branches `MNV-979-regler` (auth), docs
+`docs-k-regler`.
+**Sources lues :** la demande de C, mot pour mot ; `origin/dev` du fiscal `6cd99ee`, lu sans y toucher
+(`src/common/rbac/droits-fiscalite.ts` : `DroitFiscal.REGLER = 'fiscalite:declaration:regler'`, quatrième de
+`DROITS_FISCAUX` ; `src/common/guards/droits-fiscaux.guard.ts` : la garde décide sur `user.perms` ;
+`src/modules/droits-hors-du-jeton/` : la double lecture de STORY-919 compare, sans décider, et ne lit que `droits` et
+`droitsPlateforme` de `/moi/droits`) ; `origin/dev` d'auth `e9c32c1` (STORY-1121 : `droits-hors-jeton.ts`,
+`table-d-acces-cabinet.ts`, `tenant-system-roles.ts`, leurs tests ; `borne-du-jeton.ts`) ; l'ADR « droits hors du
+jeton » (§ Décision, point 5) ; `manifestes/declarations.manifest.ts` à `main` ; `src/etat-publie/droits-effectifs.ts` du
+catalogue (`origin/dev`).
+
+**Ce qui existait déjà (relu avant le code) :** aucun `regler` dans auth (`git grep` sur `origin/dev`) ; les trois
+autres droits fiscaux sont **dans le jeton** (`TenantPermission`, STORY-902) ; le catalogue de tenant compte 167 codes (24
+du jeton + 143 hors du jeton) ; la borne du jeton est à 17 + 24 = 41 ≤ 44. Aucun dépôt de B ne recopie les codes de
+tenant (catalogue, BFF, recette, dossier, kyc, GED : `git grep` vide), donc aucune recopie ne s'ensuit.
+
+| Exigence (de C) | Fait |
+|---|---|
+| (1) `TenantPermission.FISCALITE_DECLARATION_REGLER = 'fiscalite:declaration:regler'`, libellé « Rapprocher le règlement d'une déclaration fiscale » | une entrée de l'enum, après `DEPOSER` ; le libellé ; code identique à l'octet à `DroitFiscal.REGLER` |
+| (2) table d'accès du cabinet : `CAB_ASSOCIE` et `CAB_COLLABORATEUR` | `[P.FISCALITE_DECLARATION_REGLER, TOUS]` ; jamais `CAB_ARCHIVISTE` ; les deux rôles du socle en dérivent |
+| (3) le manifeste `declarations` (codes `declarations:*` ≠ ceux du service) : à noter pour sa prochaine version | noté (D-979-47, « Pour la suite », journal de B → C) ; rien de changé |
+| Que la garde fiscale le voie | **dans le jeton** (D-979-44) : `perms[]` d'un jeton signé de collaborateur le porte (e2e) |
+
+### Décisions (prises par défaut, contestables)
+
+- **D-979-43 — Une septième suite de 979, pas une story neuve.** Même nature que les suites de 979 (un droit attribué
+  par la table d'accès du cabinet, comme les `ged:*` et ceux de 1121) ; la demande n'est pas une story du plan (§1.1).
+  L'entrée du tracker est rouverte puis refermée ; la marque haute ne bouge pas.
+- **D-979-44 — Dans le jeton, par exception à STORY-960.** La règle de 960 (« un droit neuf entre hors du jeton ») vaut
+  pour un service qui lit `/moi/droits`. Le fiscal ne le fait pas encore : sa garde décide sur `perms[]` du jeton
+  (`droitsFiscauxDe`), la double lecture de STORY-919 ne fait que comparer, et elle ne lit que `droits` et
+  `droitsPlateforme`, jamais `droitsHorsJeton`. Hors du jeton (le geste de 1121), la route refuserait donc à tous, pour
+  toujours. L'ADR (Décision, point 5) garde `perms[]` « tant qu'un consommateur le lit » : le fiscal en est un, et ses
+  trois autres droits y sont déjà. Borne : **17 + 25 = 42 ≤ 44** (deux places restent) ; le jeton de l'associé porte
+  quatre droits, celui du collaborateur deux, celui de l'archiviste aucun. Le commentaire de l'enum et le test qui fige les
+  codes du jeton nomment cette exception. Le jour où le fiscal décidera sur la résolution (étape 3 achevée chez C), le code
+  reste dans `droits` de `/moi/droits` : rien ne bougera chez lui.
+- **D-979-45 — L'associé et le collaborateur, à la lettre de C.** PRD fiscalité §8 : la collaboratrice rapproche ;
+  l'associé garde seul `valider` et `deposer`. L'archiviste ne lit rien d'autre que les archives (table d'accès du cabinet, 979) : il ne
+  l'a pas. Le cabinet peut le retirer au collaborateur par surcharge (STORY-167). Libellé : celui que C propose, à
+  l'apostrophe droite (le fiscal écrit l'apostrophe typographique dans son propre libellé : les libellés ne se comparent
+  pas entre services, seuls les codes).
+- **D-979-46 — Le module qui ouvre le droit ne change pas.** `MODULES_DU_PREFIXE` : `fiscalite:*` est ouvert par
+  `declarations` (affiché) ou l'ancien `fiscalite` (STORY-902), exactement `FISCAL_MODULE_CODES` du fiscal. Le catalogue
+  de composition d'un rôle offre le code neuf sous `declarations` (test).
+- **D-979-47 — Le manifeste `declarations` n'est pas touché** (choix par défaut de C). Il porte
+  `declarations:reglement:preparer` et sept autres codes `declarations:*`, que le fiscal ne vérifie pas (il vérifie
+  `fiscalite:declaration:*`) : écart antérieur à 342, à corriger par C dans la prochaine version du manifeste (avec Q-D-34
+  et le texte du coffre de 560), puis recopié au catalogue par B. Le même écart a une conséquence chez B, notée pour ce
+  jour-là : `filtrerDroitsEffectifs` du catalogue garde un droit par son **préfixe** (`fiscalite`), et un cabinet n'ouvre
+  que `declarations` : les droits `fiscalite:*` n'apparaissent donc pas dans `droitsEffectifs` de l'état publié (la coque
+  ne les affiche pas). La garde du fiscal n'en dépend pas.
+- **D-979-48 — Aucun contrat ne change de forme.** Les claims du jeton gardent leur forme (`perms[]` gagne une valeur) ;
+  `moi-droits` reste en 1.1.0 (`droits` gagne une valeur pour l'associé et le collaborateur) ; `identity.droits.changed@1`
+  ne porte aucun droit. Le socle des rôles est réaligné au démarrage d'auth (`tenant-roles-seed.service.ts`) : aucune
+  migration. Un membre reçoit le droit à l'émission de son prochain jeton (connexion ou rafraîchissement) ; d'ici là, la
+  double lecture du fiscal peut journaliser un écart attendu (le `dv` ne bouge pas : le socle change, pas le membre).
+  Annoncé dans « ⚠ Contrats » avant la fusion.
+- **D-979-49 — Sans Docker.** Aucun module Nest, aucune dépendance, aucun Dockerfile ne change. La preuve « un vrai
+  jeton » est faite sans pile : `test/auth.e2e-spec.ts` signe le jeton par la vraie chaîne (`AuthService`,
+  `TokenService`, le vrai `TenantRolesService` sur le socle livré) et le décode. Une pile n'ajouterait que le fiscal, dont
+  la garde est déjà prouvée par C avec ce code dans `perms[]` (fiscal #93). Verrou non pris.

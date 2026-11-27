@@ -2116,11 +2116,15 @@ reserved_ranges:
       mutations rouges ; lint, tsc, build. Sans Docker (D-978-11) : la preuve de bout en bout est celle de la recette
       croisée complète de 1080. Lot 4 de B, n° 11 (EPIC-145). NON SLOTTÉE.
   - range: "STORY-979"
-    status: "done"
+    status: "in-progress"
     owner: "Groupe B, lot 6 — les droits de la facture et des archives du cabinet au catalogue de tenant d'auth, hors du jeton : facturation:parametres:modifier au DIST_DAF seul (demande de D, STORY-1065, D-1065-13) ; les sept ged:* du cabinet et le rôle neuf CAB_ARCHIVISTE (demande de C, STORY-1087, PRD des services du cabinet §2.3) ; recopie des manifestes au catalogue (facturation ; ged 1.1.0 après la fusion de C) (prospera-auth-service, prospera-platform-catalog-service)"
     source_doc: "prospera-stories/stories/STORY-979.md"
     reserved_on: "2026-11-24"
     note: >
+      🔧 SEPTIÈME SUITE IN-PROGRESS le 2026-11-27 (fiche, « Septième suite (2026-11-27) », D-979-43 → 49 ; lot 7 de B, ordre
+      « k », D-L7B-15 ; demande de C, STORY-342) — fiscalite:declaration:regler au catalogue de tenant d'auth, DANS le jeton
+      (la garde fiscale décide sur perms[]), à CAB_ASSOCIE et CAB_COLLABORATEUR ; branche MNV-979-regler ; annonce avant la
+      fusion. Avant :
       🏁 SIXIÈME SUITE DONE le 2026-11-27 (fiche, « Sixième suite (2026-11-27) », D-979-41 → 42 ; lot 7 de B, ordre « i »,
       D-L7B-13 ; demande de C, STORY-338, servie) — catalogue #88 (dev e528afc) : comptabilite 0.6.0 recopié avec ged 1.11.0
       (« h ») depuis prospera-stories@c926f55 ; annonce stories #1018. Avant :

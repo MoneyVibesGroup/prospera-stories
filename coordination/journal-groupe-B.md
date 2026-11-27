@@ -63,6 +63,7 @@
   | i | STORY-979 (6ᵉ suite) | recopie `comptabilite` 0.6.0 au catalogue, avec « h » (← C, STORY-338 ; D-L7B-13) |
   | 12 | STORY-1130 | effacer le dossier de démonstration à la fin d'un essai |
   | 12 bis | STORY-1137 | les modules s'ouvrent dans l'essai (ticket de 1116) |
+  | k | STORY-979 (7ᵉ suite) | le droit `fiscalite:declaration:regler` chez auth (← C, STORY-342 ; D-L7B-15) |
   | j | STORY-1124 (2ᵉ suite) | les faits proposés publiés, l'aller-retour GED ↔ fiscal joué (← D, après fiscal #89 ; D-L7B-14) |
   | 13 | STORY-1131 | les restes d'EPIC-145, 146, 147 |
   | 14 | STORY-1132 | la licence signée, premier incrément |
@@ -152,6 +153,16 @@
   pile. **Deuxième suite de STORY-1124** (la story de « h ») ; aucun identifiant neuf ; commits `MNV-1124(ged): …` ;
   décisions D-1124-27 → 33 dans sa fiche (« Suite du 2026-11-27 (bis) »). « k » (droit `regler`, `auth-service`) est servie
   à part, par une autre sous-session.
+
+- **D-L7B-15 — ordre « k » : la demande de C placée en tête, après STORY-1137, avant la demande « j »** (27/11, session
+  de groupe ; §1.1 ; D-L7B-14 est celui de « j ») : « → B (2026-11-27, STORY-342) : attribuer le
+  droit `fiscalite:declaration:regler` chez auth-service » (journal de C, « Demandes aux autres groupes », `main`
+  `dec9891` ; annonce #1031 ; code fusionné : fiscal #93, `dev` `6cd99ee`). **Elle bloque C** : tant qu'auth ne l'émet pas,
+  `POST /api/v1/obligations/{id}/reglements` refuse `403 DROIT_FISCAL_REFUSE` à tout le monde. Petite, sans Docker, dans
+  auth (dépôt de B). **Septième suite de STORY-979** (la story des droits du cabinet au catalogue de tenant : `ged:*`,
+  puis le même geste que STORY-1121) ; aucun identifiant neuf ; commits `MNV-979(auth): …` ; décisions D-979-43 → 49 dans
+  sa fiche (« Septième suite (2026-11-27) »). Le point (3) de C (le manifeste `declarations`) est noté, pas fait (choix
+  par défaut de C).
 
 - **Avancement** :
   - **a — troisième suite de STORY-979 (25/11) — faite** : `facturation` 1.2.0 et `paiement` 1.1.0 recopiés au
@@ -2391,6 +2402,23 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, septième suite de STORY-979 (ordre « k », D-L7B-15) — le droit `fiscalite:declaration:regler`, annoncé
+  AVANT la fusion** (`prospera-auth-service`, branche `MNV-979-regler` ; fiche `stories/STORY-979.md`, « Septième suite
+  (2026-11-27) », D-979-43 → 49). Lu par **C** (fiscal : `POST /api/v1/obligations/{id}/reglements`, FR-F48), par la
+  console (composition d'un rôle) et par **A** (types).
+  - **Catalogue de tenant** : `fiscalite:declaration:regler`, libellé « Rapprocher le règlement d'une déclaration
+    fiscale », **DANS le jeton** (`TenantPermission.FISCALITE_DECLARATION_REGLER`, 25ᵉ code de `perms[]`, seule exception à
+    la règle de STORY-960 : la garde fiscale décide sur `perms[]`) ; ouvert par le module `declarations` (ou l'ancien
+    `fiscalite`). Catalogue 168 codes (25 + 143) ; borne 17 + 25 = 42 ≤ 44.
+  - **Table d'accès du cabinet** : à `CAB_ASSOCIE` et `CAB_COLLABORATEUR` (rôles par défaut du vertical : tout membre
+    d'un cabinet le reçoit sans geste), jamais à `CAB_ARCHIVISTE` ; surchargeable par le cabinet (STORY-167). Le jeton du
+    collaborateur porte `["fiscalite:declaration:preparer", "fiscalite:declaration:regler"]`, celui de l'associé les quatre
+    droits fiscaux.
+  - **Formes inchangées** : claims du jeton, `moi-droits` 1.1.0 (`droits` gagne la valeur), `identity.droits.changed@1`.
+    Socle réaligné au démarrage d'auth, aucune migration ; le droit arrive avec le prochain jeton du membre.
+  - **Pas fait (choix par défaut de C)** : le manifeste `declarations` garde ses codes `declarations:*` (écart antérieur,
+    à la prochaine version de C) ; aucune recopie au catalogue.
 
 - **2026-11-27, deuxième suite de STORY-1124 (ordre « j », D-L7B-14) — les deux faits proposés sont PUBLIÉS, annoncé
   AVANT la fusion** (`document-service`, GitHub `prospera-ocr-service`, branche `MNV-1124-j` ; fiche `stories/STORY-1124.md`,
