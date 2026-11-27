@@ -235,10 +235,27 @@
    rendu. D-341-1 → 12 dans la fiche. **B prévenu** (recopie) ; **D prévenu** (empreinte, `OrdreDeReglementService` pour 565).
    **FE-158 de A est placée en tête de STORY-350** ; **FE-097 de A, dans une PR à part de balance-service juste après
    STORY-344** (décisions de la session de groupe du 27/11, « Réponses »).
-23. 🚧 **STORY-342 en cours (27/11)** — le rapprochement du règlement, et le refus d'une imputation incohérente. Fiche
-   `stories/STORY-342.md` (D-342-1 → 14), contrat et communs annoncés ci-dessous avant le code ; droit neuf
-   `fiscalite:declaration:regler` (**→ B** : l'attribuer, « Demandes ») ; paquet : `reglement.canaux`, `reglement.quittance`
-   (LPF Art. 460, 462) et la caisse de la TVA et du solde de TPU (Art. 460, D-342-12).
+23. ✅ **STORY-342 DONE (27/11)** : balance-service **#176** (`4f75f4e` sur `dev`, le paquet) et fiscal **#93** (`6cd99ee` sur
+   `dev`, rebasée sur `680164e` de D — la 337 — avant les preuves), annonce #1031 avant le code.
+   **`POST /obligations/{id}/reglements`** (droit neuf **`fiscalite:declaration:regler`**, qu'aucun autre n'implique) : la
+   quittance que le cabinet reporte (référence, LPF Art. 462 ; montant ; date jamais future ; canal du paquet, Art. 460 ;
+   imputation taxe / période / NIF) est confrontée à l'ordre de l'obligation et au **reste** (le dû net de 340, moins les
+   règlements déjà rapprochés) ; **`409 IMPUTATION_INCOHERENTE`** nomme ensemble `AUTRE_TAXE`, `AUTRE_PERIODE`,
+   `AUTRE_REDEVABLE`, `MONTANT_SUPERIEUR_AU_RESTE` — rien d'écrit, jamais réimputé ; refus de l'ordre (non déposée,
+   indisponible, incomplet, redevable, NIF) ; une quittance par dossier, un rang par obligation (deux index uniques) ;
+   **signalés** : reste à régler, réglé après la date limite (plus trois jours pour le télépaiement), réserve du canal
+   (chèque, Art. 461 ; obligations cautionnées, Art. 463). Collection immuable `reglements_rapproches`, acte au journal chaîné
+   dans la même transaction, aucune migration ; `GET …/reglements`. Ni le payé du triplet ni le cycle ne bougent ; **le montant
+   à régler compte les règlements rapprochés** (le plus grand du payé et du rapproché ; leur écart, un manque) et l'ordre
+   suit. Paquet : `reglement.canaux`, `reglement.quittance`, la TVA et le solde de TPU payables « à la caisse de l’Office »
+   (Art. 460 : la question de 341 répondue par le texte) ; empreinte **`4959061a…e3e2`**. Node 24 : fiscal unitaires 270/271
+   (1 ignorée) suites, 4130 ; e2e 15/15, 409 ; conformité 33/33, 216 ; balance 300/302, 5846 ; e2e 38/38, 2324 ; mutations
+   36/36 (fiscal) et 10/10 (R13) ; pile `grp-c` saine. Verrou pris une fois (08:59 → 09:22), rendu. D-342-1 → 14 dans la
+   fiche. **B prévenu** (le droit à attribuer, ouvert ; recopie) ; **D prévenu** (empreinte, le montant net du rapproché,
+   `RapprochementReglementService`).
+24. **Suivante : STORY-343** (« déposée » ≠ « payée » : elle lit les règlements rapprochés ; à poser avec elle :
+   `montant-paye` et les transitions de paiement sous `regler` une fois B servi, l'annulation motivée d'un rapprochement, et
+   l'acompte réglé par quittance lu comme payé par la TPU — D-342-9, D-342-14).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -515,7 +532,13 @@ seulement.
   (`fiscalite:declaration:*`) — écart antérieur à 342 ; **choix par défaut** : le noter à la prochaine version du manifeste
   (avec Q-D-34 et le texte du coffre de 560), sans retarder (1) et (2). Prévenu par message.
 
-- **→ B (2026-11-27, STORY-341) : recopier le paquet fiscal Togo 2026 dans `dossier-service`** — ouverte, sans urgence.
+- **→ B (2026-11-27, STORY-342) : recopier le paquet fiscal Togo 2026 dans `dossier-service`** — demande permanente de B
+  (27/11), signalée par message. Source : balance-service `dev` `4f75f4e` (#176),
+  `src/modules/referentiel/assets/paquet-fiscal-togo-2026.json`, sha256
+  **`4959061a28feb884a7efbc77f6249a80b95e6023bba0adc4104075db1a96e3e2`** (LF) ; elle remplace `6eebc02f` (341).
+  `reglement.canaux`, `reglement.quittance`, la caisse de la TVA et du solde de TPU ; rien de ce que `dossier-service` lit
+  ne change.
+- **→ B (2026-11-27, STORY-341) : recopier le paquet fiscal Togo 2026 dans `dossier-service`** — remplacée par la ligne du dessus (342).
   Source : balance-service `dev` `53e1595` (#175), `src/modules/referentiel/assets/paquet-fiscal-togo-2026.json`, sha256
   **`6eebc02f6712feece1913bd62303955ce9741ff1ac5fc58cfe34ab3f15e7baa7`** (LF) ; elle remplace `d620df8b` (340). `reglement.obligations.<CODE>.versement` et `reglement.ordre` ; rien de ce
   que `dossier-service` lit ne change. Prévenu par message.
@@ -804,6 +827,12 @@ seulement.
 > dans une PR qui le dit, rebasée sur `origin/dev` juste avant la fusion, et annoncée ici **avant** la fusion. Une seule
 > migration en vol sur le service.
 
+- **FUSIONNÉ (2026-11-27, prospera-fiscal-service#93, `dev` `6cd99ee`, rebasée sur `origin/dev` `680164e` de D — la 337 —
+  avant les preuves, sans conflit)** — conforme à l'annonce, un écart : la garde FR-F47 n'a pas eu à changer (la route ne
+  paie pas, son nom non plus). Communs : `src/common/rbac/droits-fiscalite.ts` et sa spec, le contrat OpenAPI (deux routes),
+  la copie du paquet (`4959061a…e3e2`, de balance-service #176 `4f75f4e`), `src/app.module.invariant.spec.ts`. Aucun fichier
+  de D, aucune migration, aucune classe instanciée par `DepotsModule` ne change. **→ D** : rien à faire pour un rebase ; toute
+  la suite verte en Node 24 sur le commit rebasé ; prévenu par message.
 - **ANNONCÉ (2026-11-27, STORY-342, avant le code)** — branche `MNV-342` de `prospera-fiscal-service`, partie d'`origin/dev`
   `481a8f4` (et `MNV-342` de `balance-service`, d'`origin/dev` `53e1595`, pour la source du paquet). **Aucune migration** : la
   collection neuve `reglements_rapproches` (dossier de C) a ses deux index uniques posés par Mongoose au démarrage (patron de
@@ -1033,6 +1062,11 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-27 (STORY-342), PUBLIÉ** (fiscal #93, `6cd99ee` ; balance-service #176, `4f75f4e`) — conforme à l'annonce (#1031),
+  sans écart de contrat ; l'organisme s'écrit « caisse de l’Office » (l'apostrophe du corpus). **→ A** : types à régénérer
+  depuis l'OpenAPI vivant (`RapprocherReglementDto`, `ReglementRapprocheDto`, `ReglementsDeLObligationDto`, `rapproche` du
+  montant à régler) quand un écran rapprochera. **→ B** : le droit `regler` à attribuer, la recopie du paquet
+  (« Demandes »). **→ D** : `RapprochementReglementService` exporté ; l'ordre que 565 transporte est net du rapproché.
 - **2026-11-27 (STORY-342), ANNONCÉ avant le code** — **le rapprochement du règlement, et le refus d'une imputation
   incohérente** (`prospera-fiscal-service`, REST ; source du paquet fiscal Togo dans `balance-service`). Fiche :
   `stories/STORY-342.md` (D-342-1 → 14). Consommateurs : 343 (« déposée » ≠ « payée ») ; 344 (le retard) ; 565 (D : l'ordre

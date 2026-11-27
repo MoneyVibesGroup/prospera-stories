@@ -1,6 +1,6 @@
 # STORY-342 : Le rapprochement du règlement, et le refus d'une imputation incohérente
 
-Status: in-progress — écrite le 2026-11-27 par la session du groupe C juste avant de la coder (lot 7, n° 14 du fiscal,
+Status: done — **livrée le 2026-11-27** : balance-service **#176** (`4f75f4e` sur `dev`) et prospera-fiscal-service **#93** (`6cd99ee` sur `dev`) ; voir « Livraison ». Écrite le 2026-11-27 par la session du groupe C juste avant de la coder (lot 7, n° 14 du fiscal,
 `PLAN-LOT-7-2026-11-24.md` §3) ; contrat et communs annoncés avant le code (« ⚠ Contrats » et « ⚠ Communs » du journal de
 C). Il n'existait pas de fiche : les critères viennent de `epics-fiscalite-2026-08-03.md` (EPIC-033, STORY-342), du PRD
 fiscalité (FR-F48, FR-F59, §3.3 « Le règlement n'est pas le dépôt », §8 étape 7) et de la fiche STORY-565 de D (AC-6 :
@@ -159,7 +159,8 @@ spec (le droit neuf) ; **le contrat OpenAPI** (deux routes) ; **la copie du paqu
 n'est pas touché (la route porte son droit). Tout le reste dans des dossiers de C : `domain/reglement`,
 `application/reglement`, `modules/reglement`, `adapters/mongo` (le schéma et le registre neufs),
 `domain/obligations/historique.ts` (le libellé de l'acte), `domain/redevables/garde-identifiant-fiscal.spec.ts` (deux
-porteurs du NIF de la quittance), la garde FR-F47 (une route de consignation de plus, avec sa raison),
+porteurs du NIF de la quittance), la garde FR-F47 (**inchangée** : la route qui rapproche ne paie pas et son nom ne le
+laisse pas croire ; le témoin de 565 passe sans modification),
 `test/obligations.e2e-spec.ts`, un double en mémoire et une suite de conformité neufs. **`MontantAReglerService`** gagne une
 dépendance (le registre des règlements, fourni dans `ReglementModule`) ; **`deLObligation` et `lire` gardent leur
 signature** ; `OrdreDeReglementService` garde son constructeur et sa signature. Aucune classe instanciée par `DepotsModule`
@@ -224,15 +225,17 @@ ne change. Ni `app.module.ts`, ni `package.json`, ni `read-models/`, ni `config/
   le neutralise ; la pièce reste) : avec 343. (2) La quittance numérisée rangée à la GED (B) et sa référence. (3) Une
   quittance qui couvre **plusieurs** obligations (une quittance, une obligation, ici). (4) « Déposée » / « payée » au
   calendrier (343) ; les pénalités (344) ; l'écran (A) ; le transport (565, D). (5) Le passage de `montant-paye` et des
-  transitions de paiement sous `regler` (D-342-9).
+  transitions de paiement sous `regler` (D-342-9). (6) Un acompte réglé par une quittance rapprochée **sans** payé saisi
+  n'est pas encore lu comme payé par la TPU qui l'impute (340 lit le payé des acomptes) : le solde reste « incomplet » —
+  jamais faux ; à poser avec 343.
 
 ## Preuves attendues
 
 Unitaires (Node 24, `-w 2`) : le rapprochement pur (chaque motif, tous ensemble, le reste, le partiel, la date limite et le
 délai du canal, la réserve citée, la normalisation de la référence et du NIF, aucune clé bancaire), le montant à régler
 avec ce qui est rapproché (le plus grand, jamais la somme ; le manque ; le trop-versé ; l'ordre), le service (portée, refus
-de l'ordre, quittance déjà rapprochée, concurrence, le droit), le contrôleur, le droit neuf (indépendant), la garde FR-F47 (la
-route de consignation nommée), la garde AD-21 étendue, l'invariant d'`AppModule` ; balance-service : R13 étendue (le paquet
+de l'ordre, quittance déjà rapprochée, concurrence, le droit), le contrôleur, le droit neuf (indépendant), la garde FR-F47
+(inchangée, verte), la garde AD-21 étendue, l'invariant d'`AppModule` ; balance-service : R13 étendue (le paquet
 Togo la passe, chaque faute refusée), l'artefact régénéré et réépinglé ; conformité MongoDB (une transaction : le règlement et
 son acte ; les deux index ; l'immuabilité ; vingt rapprochements simultanés ne dépassent pas le reste) ; e2e (un acompte d'IS
 réglé : 201, l'ordre en `RIEN_A_REGLER`, le montant à régler à 0 ; chaque motif d'incohérence, puis les quatre ensemble, rien
@@ -241,8 +244,42 @@ sans le droit `regler` : 403 ; `preparer` seul : 403 ; avant le dépôt : 409 ; 
 et rapproché différents : l'ordre en `MONTANT_A_REGLER_INCOMPLET`) ; toute la suite du fiscal, celles de D comprises ;
 mutations sur la logique neuve ; `docker compose up` du fiscal, sain (le module change de fournisseurs).
 
+## Livraison (2026-11-27)
+
+- **Paquet** : balance-service **#176** (`MNV-342`, `9c7a077` poussé, rejoué `4f75f4e` sur `dev`) : `reglement.canaux` (sept
+  modes de LPF Art. 460, réserves Art. 461 et 463, délai de trois jours du télépaiement), `reglement.quittance` (Art. 462),
+  `TVA.versement` et `TPU.versement` « caisse de l’Office » (Art. 460, l'apostrophe du corpus, pour que l'organisme se lise
+  mot pour mot dans l'article), garde **R13** étendue, schéma, `_meta.revision` ; artefact régénéré, empreinte
+  **`4959061a28feb884a7efbc77f6249a80b95e6023bba0adc4104075db1a96e3e2`**, réépinglée (registre, spec, e2e). Le test de 340
+  « aucun nombre au bloc » admet le seul délai d'un canal.
+- **Fiscal** : **#93** (`MNV-342`, `add9b44` poussé, rejoué `6cd99ee` sur `dev`, sur `680164e` de D — la 337, fichiers
+  disjoints ; rebasé **avant** les preuves). Fichiers : `domain/reglement/reglement-rapproche.ts` (la règle pure),
+  `application/reglement/rapprochement-reglement.service.ts`, `redevable-du-reglement.ts` (le redevable de 341, factorisé),
+  `OrdreDeReglementService.depuis` (constructeur et `deLObligation` inchangés), `MontantAReglerService` (une dépendance de
+  plus : le registre des règlements ; `lire` rend aussi `reglements`), `montant-a-regler.ts` (`rapproche`, le plus grand
+  des deux, le manque), `ordre-de-reglement.ts` (`dejaRegle`), le port, le schéma et le registre Mongo, la route et la
+  lecture, les DTO, `ReglementModule` (+ `HabilitationsModule`, la collection, l'export), le droit `regler`, le libellé de
+  l'acte (329), la garde AD-21 (deux porteurs), l'invariant d'`AppModule`, la copie du paquet, le double en mémoire, la
+  suite de conformité, les e2e. **Écart à l'annonce** : la garde FR-F47 n'a pas eu à nommer la route (ni son chemin ni son
+  nom ne paient) — elle passe **sans modification**, ce qui la garde intacte comme témoin de 565.
+- **Preuves** (Node 24, étage `verification`, archive LF de `0363f48`, arbre identique au commit poussé ; verrou pris une
+  fois, 08:59 → 09:22, script autonome, rendu par son `trap`) : unitaires **270/271 (1 ignorée) suites, 4130 tests** ; e2e
+  **15/15, 409** ; conformité MongoDB (jeu de répliques) **33/33, 216** (dont `reglements.conformite-spec.ts` : deux index,
+  vingt rapprochements parallèles du même rang → un seul, tout ou rien sur une panne du journal, immuable et strict) ;
+  `nest build` vert, le corpus dans `dist/` ; balance-service unitaires **300/302 (2 ignorées), 5846** ; e2e **38/38,
+  2324** ; **pile `grp-c`** fiscal + balance saine (santé `ok` des deux ; `…/reglements` GET et POST en 401 sans jeton ;
+  six routes du règlement et du cycle montées ; `ReglementModule` et `HabilitationsModule` initialisés ; les neuf « Error: »
+  sont l'« Unknown topic or partition » connu d'une pile neuve ; aucun redémarrage). Aucun conteneur, volume ni réseau
+  `grp-c` restant.
+- **Mutations** : fiscal **36/36** tuées (domaine 28, montant et ordre 6, service 5, route 1 — huit réécrites après un rouge
+  de compilation, toutes tuées ensuite sur l'assertion) ; balance-service **R13 10/10**.
+- **B prévenu** (le droit `regler` à attribuer ; recopie du paquet de `dossier-service` : `dev` `4f75f4e`, sha256
+  `4959061a…e3e2`) ; **D prévenu** (empreinte ; le montant à régler net des règlements rapprochés, que 565 transportera ;
+  `RapprochementReglementService` pour la section du règlement du dossier de contrôle).
+
 ## Progress Tracking
 
 | Date | Événement |
 |---|---|
 | 2026-11-27 | Fiche écrite, contrat et communs annoncés avant le code. |
+| 2026-11-27 | **DONE.** Paquet : balance-service #176 (`4f75f4e`) ; code : fiscal #93 (`6cd99ee`). Preuves : voir « Livraison ». B et D prévenus. |
