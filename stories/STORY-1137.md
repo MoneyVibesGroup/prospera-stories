@@ -1,6 +1,8 @@
 # STORY-1137 : Les modules s'ouvrent dans l'essai — le jeu du métier dans l'image du catalogue, l'ouverture installe par le moteur, la garde du dossier sans KYC dans l'essai
 
-Status: in-progress — fiche écrite le 2026-11-27 par la sous-session du groupe B juste avant de coder (lot 7, « 12 bis » de B,
+Status: done — **livrée le 2026-11-27** : prospera-dossier-service **#61** (`2f6e058` sur `dev`), platform-catalog-service
+**#90** (`be072bc`, `3454f13`, `12c4c84`), prospera-admin-panel-service **#47** (`7ac4db4`), prospera-recette **#38** (`e83c737`,
+`7999caf`) ; voir « Livraison ». Fiche écrite le 2026-11-27 par la sous-session du groupe B juste avant de coder (lot 7, « 12 bis » de B,
 D-L7B-4 ; identifiant réservé D-L7B-1). Source : `tickets/TICKET-BACKEND-modules-ouverts-dans-l-essai.md` (part de B), né de
 STORY-1116 (D-1116-1). **Bloque la démo du 15/01** (« chaque client testable par le prospect », avec des données).
 
@@ -131,3 +133,79 @@ seulement), `prospera-plateforme` (jeux aux étiquettes `jeu-cabinet-v1`, `jeu-g
 - Les jeux des autres verticales sur la pile (D : `reseau`, `commande`, `terrain`, `assureur-fictif` dans l'essai).
 - L'effacement d'un essai jusqu'au certificat avec ses modules (STORY-1131 ou le certificat d'essai), l'export pendant
   `ESSAI_TERMINE`.
+
+## Livraison (2026-11-27)
+
+### Ce qui a été livré
+
+- **`dossier-service` #61** (`2f6e058`) : `kycExigeDansLEspace` (lu une fois de `kafka.espace`) ; sur une instance d'essai,
+  `DossierAccessGuard` saute le seul palier KYC sans lire le read-model ; e-mail vérifié et organisation inchangés ; fail-closed
+  sans configuration lisible. e2e `acces-kyc` montée pour les deux espaces.
+- **Catalogue #90** : (1) les cinq jeux publiés copiés dans `contrat/copies/jeux-demonstration/` (LF, `-text`, `ORIGINE.json` :
+  étiquette, commit, sha256 de chaque fichier ; le générateur n'est pas copié), l'image les porte (`Dockerfile` inchangé : il
+  copiait déjà le dossier entier) ; (2) `src/essai/installation-a-l-ouverture.ts` (`InstallationALOuverture` : `valider`,
+  `installer`, `reprendre` ; règles pures `demandeCanonique`, `memeDemande`, `decisionDInstallation`, `cleDuPlanDeLEssai`),
+  `EssaiProspect.installation` (schéma déclaré, référentiels inscrits comme objet libre voulu), `OrdreDOuvertureDto.installation`,
+  `essaiPublie` ; `PlansService.reprendre(planId, { attendre })` ; `validerLesReferentiels` exportée ;
+  `InstallationModule` exporte la lecture du catalogue, l'offre et les plans ; `essai-prospect.openapi.json` **1.3.0**.
+- **BFF #47** (`7ac4db4`) : `EssaiInstallationRequestDto`, `installationDeLOrdre` (recopie `{ code, version }`, 400
+  `REFERENTIELS_INVALIDES` au bord), `EssaiInstallationDto` projetée, trois codes relayés (`MODULE_INCONNU`,
+  `REFERENTIELS_HORS_DEMANDE`, `REFERENTIELS_INVALIDES`).
+- **Recette #38** : `dossier-essai`, `balance-essai`, `bilan-essai` au profil, `INSTALLATION_SERVICES` et `SOCLE_SERVICES` du
+  catalogue de l'essai, gardes étendues ; `src/modules-dans-l-essai.ts` (`installationDuCabinet`, `dossierDeDemonstration`,
+  `fuitesCroisees`) ; `recette/modules-dans-l-essai.recette.ts` (4 tests) ; README.
+
+### Preuves
+
+- **dossier, Node 25** : `src/modules/acces` 53/53, e2e `acces-kyc` 14/14 ; lint, `tsc` ; **mutations 6/6**. **Node 24** (étage
+  `verification`, archive de la branche) : **120/120 suites, 1 955/1 955**, lint 0, build 0.
+- **Catalogue, Node 25** : complète **1 802/1 804** (3 suites rouges connues du poste : `app-cablage`, `kafka-producer`,
+  `outbox-relay` ; la garde des chemins `Mixed` a rougi sur `installation.referentiels`, inscrit comme objet libre voulu) ; e2e
+  `essais-console` 17/17 ; **mutations 23/23** (règles pures, offre résolue, clef, attente, panne non avalée, ordre
+  installation → jeu → invitation, rejeu, essai signé, publication). **Node 24** (`a8058cb`) : 1 821/1 822, le seul rouge (le
+  `Dockerfile` absent de l'étage `verification`) corrigé par `1010526` (la garde se joue dans le checkout seulement), lint 0, build 0.
+- **BFF, Node 25** : unitaires **759/759**, e2e **309/309** (contrat OpenAPI compris), lint, build ; **mutations 15/15**.
+- **Recette** : `npm test` **195/195** (19 suites), `npm run verifier` vert ; **mutations 9/9** (dont trois sur le profil : une
+  adresse du réel posée sur un module de l'essai rougit la garde AD-15).
+- **Pile `grp-b-recette` neuve**, volumes neufs, images depuis les archives :
+  - passe 1 (04:25, branches) : rouge au `beforeAll` — le référentiel posté sous `/api/v1/admin/referentiels` au lieu de
+    `/api/v1/catalog/admin/referentiels` (défaut de la recette, `99cea2d`) ; la passe s'est ensuite figée sur son relevé de
+    mémoire (`Start-Job`, piège) jusqu'à 08:19 : verrou tenu à tort, coupée et rendue à 08:23 à la demande de la session de groupe ;
+  - passe 2 (08:35 → 08:44, branches, une commande Docker = un `timeout`) : **`modules-dans-l-essai` 4/4** ; Node 24 de dossier ;
+  - passe 3 (08:48 → 08:58, **après la fusion, tout depuis `origin/dev`** : auth `e9c32c1`, kyc `9cef9cb`, catalogue `12c4c84`,
+    notification `749b3cd`, paiement `64b5838`, dossier `2f6e058`, balance `53e1595`, bilan `7f96163`, BFF `7ac4db4`, recette
+    `7999caf`) : **`modules-dans-l-essai` 4/4** et **`cinq-essais` 6/6** (non-régression de l'ouverture à blanc).
+  - **Ce que la pile a montré** : cinq ouvertures lancées au même instant par la console, avec le jeu et `balance`, `bilan` :
+    chacune `201`, `installation.statut` `TERMINE`, six vérifications `VERT`, `OUVRIR` fait pour les deux modules, droits
+    `moteur:<plan>` au catalogue de l'essai, jeu `IMPORTE`, invitation `ENVOYEE` ; le réel ne connaît aucune des cinq
+    organisations ; l'ordre rejoué rend le même plan (200), une autre installation rend `409 ESSAI_DIVERGENT`. Chaque
+    administratrice entre par son lien et lit **sans KYC** son dossier de démonstration (`DÉMO NÉGOCE TOGO SARL`), ses
+    **deux balances** et le référentiel de son bilan ; **60 lectures croisées** (20 couples × dossier, balances, bilan) : toutes
+    `403` ou `404`, aucun portefeuille ne porte le dossier d'un autre.
+  - **Temps** (`MESURES-1137`, passe 3) : ouverture avec installation et import **5,6 → 6,5 s** (médiane 6,4 s ; passe 2 : médiane
+    10,4 s, images froides) ; entrée par le lien **1,5 → 2,2 s** ; lecture des trois modules **0,39 → 0,46 s**.
+  - **Mémoire** (relevé toutes les ~8 s ; VM 7,6 Gio) : la pile au plus **4,0 Gio** (passe 2) et **3,6 Gio** (passe 3), 21
+    conteneurs ; l'espace d'essai ≈ **1,5 Gio**, dont les trois modules ≈ **0,7 Gio** (bilan 235, balance 250, dossier 130 Mio).
+    **La pile tient**, ≈ 3,6 Gio de marge.
+  - `down -v` à chaque fin, aucun conteneur `grp-b-*` restant, verrou rendu (passes 2 et 3 : 08:44, 08:58).
+
+### Décisions prises au code
+
+- **D-1137-14 — Une panne n'est pas un refus** : un refus du moteur (exception HTTP portant un code) devient `REFUSEE` et l'essai
+  s'ouvre ; toute autre panne (base, réseau) remonte, l'ordre échoue après la création de l'essai, et l'ordre rejoué installe
+  (l'essai n'a pas encore d'installation). `PLAN_TERMINE` à la reprise vaut `TERMINE`.
+- **D-1137-15 — Les référentiels de l'ordre sont gardés** (objet libre voulu du schéma, garde `schemas-sans-chemin-mixed`) mais
+  **jamais publiés** : la console les a envoyés ; `essaiPublie` et le BFF rendent `demandes`, `modules`, `statut`, `planId`, `code`.
+- **D-1137-16 — Le statut des refus du BFF** : `REFERENTIELS_INVALIDES` est jugé au bord par le BFF lui-même (le même code que le
+  catalogue), avant la naissance ; les deux codes 400 du catalogue traversent aussi.
+
+### Ce qui reste (et à qui)
+
+- **A** : la console des essais (AP-57) peut envoyer `installation` (« Installer balance et bilan », `syscohada-revise@2.3`) et
+  montrer `installation.statut` ; types à régénérer depuis l'OpenAPI du BFF (`EssaiInstallationDto`, `EssaiInstallationRequestDto`).
+- **Exploitation** : déposer le référentiel au catalogue de l'essai (comme au réel) ; poser `INSTALLATION_SERVICES` et
+  `SOCLE_SERVICES` de l'essai (`.env.essai.example`).
+- **B** : la question D-1137-3 (relayer l'offre et les plans à l'essai) ; l'effacement d'un essai avec ses modules jusqu'au
+  certificat (STORY-1131 ou le certificat d'essai : la pile pose déjà `SOCLE_SERVICES`).
+- **D, C** : les jeux de leurs verticales sur la pile (`reseau`, `commande`, `terrain`, `assureur-fictif` dans l'essai) — à placer
+  si la démo les exige.
