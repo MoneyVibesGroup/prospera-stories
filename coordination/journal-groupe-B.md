@@ -2498,6 +2498,23 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
 
 ## ⚠ Contrats
 
+- **2026-11-27, STORY-1132 (n° 14) — la licence signée, premier incrément, annoncé AVANT le code** (`centrale-service`,
+  branche `MNV-1132` ; fiche `stories/STORY-1132.md`, D-1132-1 → 13). Lu par **B** seul (l'agent de la plateforme le
+  parlera, STORY-1133) ; **→ D** : information (vos faits d'abonnement sont lus tels quels, rien ne change chez vous) ;
+  **→ A** : information (les « licences émises » de la console viendront sur une route authentifiée, plus tard).
+  - **Centrale, `POST /api/centrale/v1/contacts`** (profil de simulation, comme depuis 955) : section **facultative**
+    `faitsDePaiement` (≤ 50 : `{ eventId, topic, valeur }` ; `topic` en liste fermée, `paiement.abonnement.echeance.encaissee`
+    seul ; `valeur` = le message du bus tel que paiement l'a publié) ; portée par l'instance de rôle `PLATEFORME` seule, sinon
+    `403 FAITS_DE_PAIEMENT_HORS_PLATEFORME` (rien d'appliqué) ; réponse : `faitsDePaiement[]` = un acquittement par fait
+    (`eventId`, `issue` `APPLIQUE` | `SANS_EFFET` | `SANS_INSTANCE_SUR_SITE` | `ILLISIBLE`, `dejaVu`, `motif`, `instanceId`,
+    `modules[] { code, issue OUVERT | PROLONGE | INCHANGE | PERPETUEL | HORS_INCREMENT }`, `ecarts` `PACKS_NON_RESOLUS`) ;
+    corps borné à 128 Kio. Sans la section : réponse de 955 à l'octet.
+  - **Centrale, semis du parc** : `organisationId` (unique) et `role` (`SITE` | `PLATEFORME`) facultatifs par instance.
+  - **La licence `licence@1`** : inchangée ; un module ouvert par un paiement : `ABONNEMENT`, `droits: []`, `preavisJusquau`
+    = fin de la période payée + 30 jours (maximum, jamais raccourci) ; `miseAJour` avance jusqu'à la fin de la période payée.
+  - **Inchangés** : contrat d'état publié (gel 1.1.0), faits et manifeste de paiement, auth, vecteurs de la plateforme, jeu
+    croisé r1 → r3, agent.
+
 - **2026-11-27, deuxième suite de STORY-1124 (ordre « j ») — LIVRÉ** (document-service #43, `f6c00d6` sur `dev`) : conforme
   à l'annonce ci-dessous, sans écart de contrat. Un comportement change, sans forme neuve : un échec du groupe `ged.fiscal`
   attend 1 s → 30 s avant d'être relu (D-1124-34). **→ A, C, D** : rien à faire.
