@@ -1,6 +1,8 @@
 # STORY-1134 : L'instance garde la confiance, coupée de Money Vibes — premier incrément
 
-Status: in-progress — fiche écrite le 2026-11-27 par une sous-session du groupe B juste avant de coder (lot 7, n° 16 de B,
+Status: done — **livrée le 2026-11-27** : prospera-plateforme **#45** (`ed51833`, étiquette `contrats-agent-v1.1`),
+centrale-service **#5** (`205e71b`), agent-instance **#4** (`7d7c087`) ; voir « Livraison ». Fiche écrite le 2026-11-27
+par une sous-session du groupe B juste avant de coder (lot 7, n° 16 de B,
 `coordination/PLAN-LOT-7-GROUPE-B-2026-11-25.md` §1, deuxième partie, ligne 16 ; identifiant réservé D-L7B-1).
 **Date du plan : 15/01** (« prérequis de la licence et des mises à jour »).
 
@@ -180,6 +182,60 @@ matrice) ; aucun contrat de C ou de D ; **→ A** : information (aucun écran d�
 - L'**alerte de J+7** à la centrale, le parc (dernier contact, niveau d'ancrage, anomalies) dans la console (EPIC-148, A).
 - La partie A sur site qui lit `numeroHeureReference` (désormais par clé) et fait tomber l'échéance de la licence sur
   l'horloge scellée (EPIC-148/150).
+- La plateforme (AD-19 : niveau `PLATEFORME`, « jamais en `GEL` ») : son agent applique aujourd'hui la même matrice ;
+  l'exemption est une configuration à poser avec son profil (AD-43) — en pratique son contact avec la centrale ne se tait pas.
 - La **suite d'attaques** jouée en recette (fin d'EPIC-149 : + 10 ans, recul de 40 jours, sauvegarde de six mois, jumeau,
   magasin restauré sous son miroir, licence rejouée, clé révoquée, fichier modifié) : cet incrément les prouve en unitaires et
   sur la pile de l'agent ; la recette croisée vient avec le montage.
+
+## Livraison (2026-11-27)
+
+Contrat annoncé avant le code (prospera-stories **#1058**, `main` `f53e359`), livré sans écart de contrat.
+
+| PR | Poussé → sur `dev` | Ce qu'elle porte |
+|---|---|---|
+| prospera-plateforme **#45** | `89068a2` → **`ed51833`** (étiquette **`contrats-agent-v1.1`**) | `contact-requete@1` + `confiance`, `contact-reponse@1` + `certificats`, `contact.openapi.json` 1.1.0 (`409 CONFIANCE_EN_ANOMALIE`), `agent-executeur.openapi.json` 1.1.0 (`GET /confiance`, `POST /simulation/horloge`), `etats-de-confiance.json` (neuf) ; source `scripts/contrats-agent.ts` ; tests ; README |
+| centrale-service **#5** | `ed341ad` → **`205e71b`** | copie à `contrats-agent-v1.1` ; `src/temoin.ts` (jugement pur) ; tables `temoins`, `anomalies_de_confiance` ; le contact jugé avant tout, `409` sur anomalie, `certificats` rendus aux agents ≥ 0.3.0 ; `test/temoin.test.ts` ; README |
+| agent-instance **#4** | `5168ea2` → **`7d7c087`** | `agent-0.3.0` ; `src/executeur/confiance.ts`, `miroir.ts`, `cles.ts` ; `appliquer.ts` (recul local, certificats appris, heure par clé, dernier contact, seuil, contact consommé, heure réinitialisée) ; `horloge-scellee.ts` (numéros par clé, reprise du miroir, avance en simulation) ; `depot.ts` (tri urgences → certificats → états voulus, `confiance` dans la charge) ; `http.ts` (`/confiance`, `/simulation/horloge`) ; `contact.ts` (certificats déposés, code du refus) ; compose (volume du miroir) ; Dockerfile (`/miroir`) ; tests `confiance`, `miroir`, `cles` ; README |
+
+Chaque PR : rebasée sur `origin/dev` juste avant la fusion, `mergedAt` non nul, `headRefOid` = SHA poussé, diff vide entre la
+branche et `dev` après le rejeu.
+
+### Preuves
+
+- **Plateforme** (Node 25) : `npm test` **709/709** (697 avant), `typecheck` vert ; mutations **9/9** sur la source du contrat
+  (case du gel, recul local, travail quotidien, raison, seuil, états de la confiance, motif d'empreinte, 409, borne des
+  certificats), chacune régénérée puis jugée.
+- **Centrale** (Node 25) : **89/89** (74 avant), `typecheck` ; mutations **10/10** (recul, précédente, même compteur, recul local
+  déclaré, lacune sanctionnée, anomalie oubliée, non ouverte, témoin non gardé, certificats à tous, sans certificats).
+- **Agent** (Node 25) : **103/103** (78 avant), `typecheck` ; mutations **30/30** (bornes 7 j et 30 j, primauté du recul,
+  contact jamais neuf, compteur, aléa, précédente, dernier contact, seuil, contact non consommé, licence en recul, heure par
+  clé ×2, heure réinitialisée, certificats appris, horloge du miroir, miroir qui recule, non repris, recul non gardé, miroir
+  d'une autre instance, urgence rejouée, sans réinitialisation, autre environnement ×2, certificat échu, révoqué, en conflit,
+  ordre du dépôt, simulation hors test, certificat redéposé).
+- **Node 24** (`docker build --target verification`, archives des branches à l'étiquette) : agent et centrale verts.
+- **Pile `grp-b`** (archives des branches : agent `5168ea2`, centrale `ed341ad` ; centrale, exécuteur avec miroir, contact) :
+  **21/21** —
+  - premier contact : licence n° 2, `/confiance` `NORMAL`, compteur 2, miroir `A_JOUR` ; le témoin garde le couple, aucune
+    anomalie ;
+  - **la centrale coupée** (`stop`) : le contact dit `CENTRALE_INJOIGNABLE` ; `POST /simulation/horloge` +8 j ⇒ `SILENCE` ;
+    +23 j (31 j) ⇒ **`GEL`** (`gelLe` au 30ᵉ jour ; `INSTALLER` et `METTRE_A_JOUR` fermés, les six autres ouverts) ;
+    `/decision` de `bilan` (ouvert) et de `fiscalite` (`MODULE_HORS_LICENCE`) **identiques** à avant la coupure ; transition
+    `SILENCE → GEL` au journal ;
+  - un état voulu déjà vu, redéposé : toujours `GEL`, dernier contact inchangé ;
+  - **le fichier d'urgence du vecteur, déposé hors ligne** : `centrale-test-2025` révoquée sans aucun appel ; le gel tient ;
+  - **la centrale rétablie** (`start`) : au premier contact, **`NORMAL`** (dernier contact = révision 2), l'heure de référence a
+    corrigé l'horloge **en arrière** (31 jours) jusqu'à l'heure réelle ; `GEL → NORMAL` au journal ; aucune anomalie (le
+    compteur a suivi la coupure) ;
+  - **jumeau de VM** (magasin, échange et miroir copiés, second exécuteur et second contact lancés) : la centrale voit la
+    **`BIFURCATION`** (compteur 4 reçu deux fois, deux empreintes) ; ensuite les deux contacts reçoivent `409
+    CONFIANCE_EN_ANOMALIE` (aucune licence) ; le travail quotidien continue (`bilan` ouvert).
+- **Verrou Docker** : 18:41:35 → 18:45:12 (une passe, Node 24 compris), `down -v`, volumes du jumeau supprimés : aucun
+  conteneur ni volume `grp-b` restant.
+
+### Écarts à la fiche
+
+- Aucun écart au contrat annoncé. Trouvé en codant (et corrigé, D-1134-9) : l'agent comparait le numéro d'une heure de
+  référence sans regarder sa clé — la rotation de la clé de la centrale aurait été refusée `HEURE_ANTERIEURE`.
+- `GET /confiance` lit le contact préparé sans en préparer un neuf (sauf s'il n'y en a aucun) : une lecture ne fait pas
+  avancer le compteur.
