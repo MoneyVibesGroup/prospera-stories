@@ -286,9 +286,24 @@
    instance pour R4).
    **🏁 EPIC-033 fini** (340 → 344 : le montant à régler, l'ordre produit jamais exécuté, le rapprochement, « déposée » ≠
    « payée », les pénalités comme un risque) ; `fiscalite_epics` : `done`.
-26. **Suivantes, dans cet ordre** : la **demande FE-097 de A** (PR à part de `balance-service`, décision de la session de
-   groupe, le point 1 d'abord), puis **STORY-350** (avec **FE-158** de A en tête, PR à part de la comptabilité), puis
-   **STORY-566**.
+26. ✅ **Demande FE-097 de A servie (27/11)**, PR à part après 344 (décision de la session de groupe) : balance-service
+   **#178** (`8884bf3` sur `dev`), annonce #1054 avant le code ; aucun identifiant neuf (pas de fiche STORY : la demande de
+   A et ce journal font foi, D-FE097-1 → 6 au « ⚠ Contrats »). **(1)** la liste du registre accepte un exercice du dossier
+   (`exercice`, ou `exerciceDebut` + `exerciceFin`) et chaque bien porte sa **`situation`** — les colonnes de la note 3
+   (`partDansLExercice` sur le plan de `planDe`, une seule dérivation : brut, amortissements, dotation, cumul, net) ou
+   `HORS_EXERCICE`, `ANNULEE`, `INCALCULABLE` et son motif, sans faire tomber la page ; **(5)** `GET
+   …/immobilisations/propositions?compte&date` : les contreparties déjà déclarées au registre pour le compte, les comptes
+   « Amortissement… » du même poste d'actif de la table de passage (245100 → AN → 2845), aucune dotation proposée par le
+   référentiel (M3 de 528) ; **(4) en partie** : la durée et le mode du dernier bien du compte. **Non servis, nommés** :
+   durées usuelles (`DUREES_USUELLES_NON_SOURCEES`, CGI Art. 100 sans table), non amortissable (`PERIMETRE_DU_REGISTRE`,
+   M9 de 526), mise en service en lot (`UN_MOUVEMENT_PAR_REQUETE`, D-526-3) ; question au PO (« Questions »). Aucun
+   événement, aucune écriture, aucune migration, aucun module neuf (pas de pile `grp-c` à lever, §1.5). Node 24 (image
+   `verification`, arbre identique au commit fusionné) : balance unitaires 301/303 suites (2 ignorées), 5931 ; e2e 38/38,
+   2336 ; `nest build` vert ; mutations 33/33 tuées (quatre rougissaient d'abord par compilation, réécrites et tuées par les
+   tests). Verrou pris une fois (16:10 → 16:21), rendu. Aucune session de A joignable : **A prévenu par ce journal**
+   (« Réponses », « ⚠ Contrats »).
+27. **Suivante : STORY-350**, avec **FE-158 de A en tête**, dans une PR à part de `prospera-comptabilite-service`, avant
+   350 (décision de la session de groupe du 27/11) ; puis **STORY-566**.
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -747,11 +762,30 @@ seulement.
   `regler`) à la prochaine version du manifeste (avec Q-D-34 et le texte du coffre de 560), puis « → B » pour la recopie
   au catalogue. Aucune story du lot 7 ne la porte encore.
 
-- **← A (27/11, FE-097, `prospera-balance-service`, registre des immobilisations)** : (1) la liste sans cumul, net ni dotation ;
-  (2) « non amortissable » au contrat ; (3) la mise en service en lot ; (4) les durées usuelles par catégorie ; (5) les comptes
-  d'amortissement et de dotation proposés — **notée, non bloquante** (l'écran tient sans). **Placée par la session de groupe
-  (27/11) dans une PR à part de `balance-service`, juste après STORY-344** (fin d'EPIC-033), le point 1 d'abord, avant 350.
-  (Avant : à placer ; c'était la proposition de C.)
+- **← A (27/11, FE-097, `prospera-balance-service`, registre des immobilisations)** — ✅ **servie (27/11), en partie et
+  nommée** : balance-service **#178** (`8884bf3` sur `dev`), PR à part après 344 (décision de la session de groupe), annonce
+  #1054. Contrat au « ⚠ Contrats » (2026-11-27, ← A, FE-097). Point par point :
+  1. **servi** — `GET …/immobilisations?exercice=2025` (ou `exerciceDebut` + `exerciceFin`, un exercice du dossier) : chaque
+     bien porte `situation { exercice, statut, brut, amortissements, valeurNetteCloture, motif?, motifPlan? }` ; le cumul est
+     `amortissements.cloture`, la dotation `amortissements.dotations`, le net `valeurNetteCloture` — les chiffres que la
+     publication des dotations range à la note 3. Plus besoin de `GET …/{id}/plan` bien par bien.
+  2. **non servi**, `PERIMETRE_DU_REGISTRE` : STORY-526 (M9) a borné le registre à ce qui s'amortit ; y admettre un terrain
+     touche le plan, la publication et la note 3 (une story). Question au PO (« Questions », choix par défaut : l'écran garde
+     le terrain hors du registre, comme aujourd'hui).
+  3. **non servi**, `UN_MOUVEMENT_PAR_REQUETE` : une écriture = un document, sans transaction (D-526-3) ; l'écran garde sa
+     boucle et son refus ligne par ligne (validés le 27/11).
+  4. **en partie** : `GET …/immobilisations/propositions?compte&date` rend `dernierBienDuCompte { dureeUtiliteMois, mode, … }`
+     (le dernier bien du même compte, tout le registre, pas seulement la page lue). Les durées **usuelles** par catégorie ne
+     sont pas servies, `DUREES_USUELLES_NON_SOURCEES` (CGI Art. 100 : « d'après les usages de chaque nature d'industrie… »,
+     sans table ; aucun référentiel du dépôt n'en porte). Question au PO.
+  5. **servi dans la mesure du sourcé** — la même route : `compteAmortissement[]` (le registre d'abord, puis la table de
+     passage : les comptes « Amortissement… » du même poste d'actif, ex. 245100 → 2845 au poste AN) et `compteDotation[]`
+     (**le registre seulement** : aucun référentiel ne dit sur quel compte de charge un amortissement se dote, M3 de 528 —
+     la déduction « 681 » de l'écran n'a pas de source au dépôt). Rien n'est appliqué : l'acquisition exige toujours ses deux
+     contreparties.
+  **→ A** : types à régénérer depuis l'OpenAPI vivant (`SituationExerciceDto`, `PropositionsAcquisitionDto`,
+  `PropositionCompteDto`, `DernierBienDuCompteDto`, `ListerImmobilisationsQueryDto`, `PropositionsAcquisitionQueryDto`).
+  (Avant : placée par la session de groupe dans une PR à part après 344, le point 1 d'abord.)
 
 - **← D (2026-11-26, STORY-334, D-334-8) : ouvrir `DEPOSEE → A_DEPOSER` sur un rejet consigné** — ✅ **servie en tête de
   STORY-338, PR à part** : fiscal **#86** (`ffd6f2a` sur `dev`, sur `69d7e65` de D). Dans `revenir`, de `DEPOSEE` vers
@@ -1155,6 +1189,12 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-27 (← A, FE-097), PUBLIÉ** (balance-service #178, `8884bf3`) — conforme à l'annonce (#1054), sans écart de
+  contrat. Précisions : la borne d'une page est jugée sur « biens en service à la clôture × exercices du dossier commencés au
+  plus tard à la clôture » (20 000) ; les propositions du registre se lisent sur les **20** dernières acquisitions du compte
+  ; un compte de la table n'est proposé que si le plan le porte sous ce numéro exact avec un libellé « Amortissement… » en
+  tête (le plan le déclare, rien n'est codé du numéro). **→ A** : types à régénérer depuis l'OpenAPI vivant
+  (`SituationExerciceDto`, `PropositionsAcquisitionDto`, `PropositionCompteDto`, `DernierBienDuCompteDto`).
 - **2026-11-27 (← A, FE-097), ANNONCÉ avant le code** — **le registre des immobilisations lu pour l'écran de A**
   (`prospera-balance-service`, REST ; PR à part, après STORY-344, décision de la session de groupe). Pas de fiche STORY
   (aucun identifiant neuf au lot 7) : la demande de A (`frontend-stories/FE-097.md`, « Écarts backend ») et ce journal font
@@ -2080,6 +2120,15 @@ seulement.
 
 ## Questions à l'utilisateur ou au PO
 
+- **❓ 2026-11-27 — FE-097 de A (D-FE097-4, D-FE097-5) : le terrain et les durées usuelles.** (a) Le registre des
+  immobilisations doit-il tenir les biens **non amortissables** (terrains, sauf gisements et terrains agricoles, que le plan
+  amortit en 282) ? STORY-526 (M9) les a exclus ; les admettre change le plan (527), la publication des dotations et la
+  note 3 (528) — une story à placer. **Choix par défaut** : non au lot 7 ; l'écran de A garde le terrain hors du registre.
+  (b) Une **table de durées usuelles** par catégorie de bien : le CGI (Art. 100) renvoie aux « usages de chaque nature
+  d'industrie, de commerce ou d'exploitation », sans table, et aucun référentiel du dépôt n'en porte. **Choix par défaut** :
+  aucune table ; la durée proposée est celle du dernier bien du même compte au registre (servie), comme la maquette validée
+  le 27/11 (« sans table d'usages pour l'instant ») ; une table sourcée (texte ou décision du PO) entrerait au référentiel.
+
 - **2026-11-27 — STORY-342 (D-342-12) : réponse trouvée au texte pour la question du dessous.** LPF Art. 460 : « Les
   impôts et taxes visés par la législation fiscale sont payables à la caisse de l'Office » — règle générale de toutes les
   impositions ; 342 l'inscrit au paquet pour la TVA et le solde de TPU (« caisse de l'Office », cité), et l'ordre ne porte
@@ -2253,6 +2302,10 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(FE-097 de A, 27/11) une propriété `@ApiPropertyOptional({ type: XDto, description })` se publie en `allOf: [{ $ref }]`**,
+  pas en `$ref` direct : un test du contrat qui lit `.$ref` reçoit `undefined`. Lire `p.$ref ?? p.allOf?.[0].$ref` (le patron
+  `refDe` de `openapi-contract.e2e-spec.ts`).
 
 - **(STORY-340, 27/11) `git reset --soft origin/dev` pour réunir ses commits, après un `fetch` qui a avancé `dev`** : le commit
   « réuni » contenait l'**inverse** des commits de D fusionnés entre-temps (335 : 38 fichiers, 3 055 suppressions). Réunir sur
