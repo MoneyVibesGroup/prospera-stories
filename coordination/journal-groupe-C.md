@@ -1155,6 +1155,51 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-27 (← A, FE-097), ANNONCÉ avant le code** — **le registre des immobilisations lu pour l'écran de A**
+  (`prospera-balance-service`, REST ; PR à part, après STORY-344, décision de la session de groupe). Pas de fiche STORY
+  (aucun identifiant neuf au lot 7) : la demande de A (`frontend-stories/FE-097.md`, « Écarts backend ») et ce journal font
+  foi ; décisions D-FE097-1 → 6 ci-dessous. Consommateur : l'écran du registre (A, FE-097, puis FE-098). Aucun événement,
+  aucune écriture, aucune migration, aucun module ni dépendance neufs ; aucun champ existant ne change ni ne disparaît ; le
+  plan (527) et la publication des dotations (528) sont inchangés.
+  - **(1) servi (D-FE097-1)** — `GET /api/v1/dossiers/{dossierId}/immobilisations` accepte, facultatifs, les paramètres
+    d'exercice de la publication des dotations (`exercice` = année civile, ou `exerciceDebut` + `exerciceFin`) ; sans eux, la
+    réponse est inchangée. Avec eux, chaque immobilisation de la page gagne **`situation`** `{ exercice { debut, fin },
+    statut: DANS_L_EXERCICE | HORS_EXERCICE | ANNULEE | INCALCULABLE, motif?, motifPlan?, brut? { ouverture, entrees,
+    sorties, cloture }, amortissements? { ouverture, dotations, sorties, cloture }, valeurNetteCloture? }` — les colonnes
+    mêmes de la note 3 que publie 528 (`partDansLExercice`, une seule dérivation, sur les exercices réels du dossier) : le
+    cumul est `amortissements.cloture`, la dotation de l'exercice `amortissements.dotations`, le net `valeurNetteCloture` =
+    `brut.cloture − amortissements.cloture`. Un bien incalculable (réévalué, plan interrompu) ne fait pas tomber la page : il
+    dit son motif. Refus : `400 EXERCICE_INDETERMINE` ; `409 EXERCICE_INCONNU_DU_DOSSIER` (des bornes libres ne sont pas un
+    exercice du dossier) ; `409 PLAN_INCALCULABLE` (`EXERCICES_TROP_NOMBREUX`) ; `409 REGISTRE_TROP_VOLUMINEUX`
+    (`LIGNES_DE_PLAN` : les plans de la page dépasseraient 20 000 lignes ; réduire `limite`). Lecture ouverte sur un
+    exercice clos.
+  - **(5) servi, dans la mesure de ce qui est sourcé (D-FE097-2, 3)** — **`GET
+    /api/v1/dossiers/{dossierId}/immobilisations/propositions?compte=…&date=AAAA-MM-JJ`** (lecture) ⇒ `200 { compte, date,
+    referentiel { code, version }, compteAmortissement: [Proposition], compteDotation: [Proposition], dernierBienDuCompte {
+    immobilisationId, designation, dateAcquisition, dureeUtiliteMois, mode } | null }`, `Proposition { compte, libelle?,
+    origine: REGISTRE | TABLE_DE_PASSAGE, immobilisationId?, poste? }`. Deux sources seulement : **le registre du dossier**
+    (les contreparties que le cabinet a déclarées sur ses dernières acquisitions non annulées du même compte, les plus
+    récentes d'abord) et, pour l'amortissement seul, **la table de passage du référentiel du dossier** (les comptes `28…` du
+    poste du bilan qui porte le compte, choisi au plus long préfixe : 245100 → poste AN → 2845 au SYSCOHADA révisé 2.3).
+    Chaque proposition est un compte de détail du plan du dossier à la date ; aucune n'est appliquée : l'acquisition exige
+    toujours ses deux contreparties (D-528-1). **Aucun compte de dotation n'est proposé par le référentiel** : aucun ne déclare
+    sur quel compte de charge un amortissement se dote (M3 de 528 ; la table range 681 et 691 au poste RL sans lien avec un
+    poste du bilan) ; seul le registre en propose. Refus : `400` de forme ; `400 COMPTE_HORS_PLAN_DU_DOSSIER` ; les refus de
+    paramétrage du référentiel.
+  - **(4) servi en partie (D-FE097-4)** : `dernierBienDuCompte` porte la durée et le mode du dernier bien du même compte (ce
+    que l'écran cherchait page par page). **Les durées usuelles par catégorie ne sont pas servies**, motif
+    **`DUREES_USUELLES_NON_SOURCEES`** : le CGI (Art. 100) admet les amortissements « dans la limite généralement admise
+    d'après les usages de chaque nature d'industrie, de commerce ou d'exploitation », sans table, et aucun référentiel du
+    dépôt n'en porte. Contenu au PO (« Questions ») ; la maquette validée le 27/11 dit déjà « sans table d'usages pour
+    l'instant ».
+  - **(2) non servi (D-FE097-5)**, motif **`PERIMETRE_DU_REGISTRE`** : STORY-526 a borné le registre à ce qui s'amortit
+    (« Hors périmètre » : les non amortissables, M9) ; y admettre un terrain change le plan (527), la publication des
+    dotations et la note 3 (528, qui écrivent une balance) — une story, pas un ajout de contrat dans une PR à part. Question
+    au PO (« Questions »).
+  - **(3) non servi (D-FE097-6)**, motif **`UN_MOUVEMENT_PAR_REQUETE`** : le registre écrit un document par requête, sans
+    transaction (D-526-3) ; une route en lot serait une transaction neuve ou la boucle de l'écran déplacée sur le serveur,
+    avec le même refus partiel ligne par ligne. L'écran garde sa boucle (validée le 27/11).
+
 - **2026-11-27 (STORY-344), PUBLIÉ** (fiscal #95, `535e190` ; balance-service #177, `a931877`) — conforme à l'annonce (#1044),
   sans écart de contrat. **→ A** : types à régénérer depuis l'OpenAPI vivant (`RisqueDePenalitesDto`,
   `RisqueDePenalitesQueryDto`) quand un écran montrera le risque — toujours sous l'étiquette « risque estimé », jamais à la
