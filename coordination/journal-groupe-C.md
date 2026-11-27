@@ -187,8 +187,21 @@
    crédit de TVA (Art. 204) ; empreinte **`62563b3c…4415`**. Node 24 : fiscal unitaires 248 suites, 3724 ; e2e 14/14, 356 ;
    conformité 29/29, 183 ; balance 300/300, 5784 ; e2e 38/38, 2324 ; mutations 27/27 et 9/9 ; pile `grp-c` saine. Verrou pris
    une fois (21:43 → 21:57). D-339-1 → 11 dans la fiche. **B prévenu** (recopie) ; **D prévenu** (organisme, empreinte).
-20. **Suivante : STORY-338** (la liaison écriture ↔ pièce, `prospera-comptabilite-service` ; avec elle, la demande de B
-   STORY-1124 placée en 338).
+20. ✅ **STORY-338 DONE (27/11)** : prospera-comptabilite-service **#21** (`58803f5` sur `dev`), annonce #1007 avant le
+   code ; **en tête, PR à part, ← D D-334-8 servie** (D a fusionné MNV-334, #82, pendant 338 ; annonce #1011) : fiscal **#86**
+   (`ffd6f2a`), `DEPOSEE → A_DEPOSER` sur un rejet consigné (**409 `REJET_REQUIS`** sinon), la version n intacte, le pointeur
+   n + 1 `RETRANSMISSION` ; fiscal Node 24 : unitaires 250 suites (1 ignorée), 3759 ; e2e 14/14, 361 ; conformité 30/30, 190 ; mutations 8/8 et 2/2
+   MongoDB ; pile `grp-c` saine. **338** : une écriture, brouillard ou validée (jamais réécrite), reçoit des **pièces rattachées**
+   (`liaisons_pieces`, ajout seul, à toute l'écriture ou à certaines lignes) — une pièce du dossier (`document-service`, comme à
+   la saisie) ou **une version du fonds d'archives de la GED** (la métadonnée de STORY-1119 : même dossier, `CONSERVEE`,
+   empreinte) ; doublon refusé sous la concurrence ; retrait motivé ; **les deux sens** (`…/ecritures/{id}/pieces`,
+   `…/pieces/{pieceId}/ecritures`) ; **la justification par compte et période** pour 337 (`…/pieces/justification` : validées
+   seules, `documente` / `aNouveaux` / `nonDocumente`, les pièces et leurs montants ; `granularite: COMPTE_PERIODE` et sa raison
+   quand l'exercice n'est pas tenu au journal). **← B 1124 servie** : `comptabilite.facture.desinscrite` v1 à l'abandon d'un
+   brouillard né d'une facture, dans sa transaction (schéma de B à l'octet ; sujet neuf au registre). Manifeste `comptabilite`
+   **0.6.0**. Comptabilité Node 24 : unitaires 71/71 suites, 1057 ; socle 16/17 suites, 342/343 ; la seule rouge, la course de STORY-970 « une clôture au milieu de dix lettrages » (409 au lieu de 201 sous la charge de la suite entière), est verte deux fois sur deux jouée seule (29/29) ; mutations 23/23 et 3/3 MongoDB ;
+   pile `grp-c` saine. Verrou pris deux fois (00:05 → 00:30, 00:57 → 01:08). D-338-1 → 15 dans la fiche. **B et D prévenus** (SendMessage).
+21. **Suivante : STORY-340** (le montant à régler, net d'acomptes, de crédits et de retenues ; fiscal).
 
 ### Lot 6 (depuis le 2026-11-23) — `PLAN-LOT-6-2026-11-23.md` §4
 
@@ -453,6 +466,15 @@ seulement.
 
 ## Demandes aux autres groupes
 
+- **→ B (2026-11-27, STORY-338) : recopier au catalogue le manifeste `comptabilite` 0.6.0** — ouverte. Code fusionné :
+  prospera-comptabilite-service #21 (`58803f5`) ; source `manifestes/comptabilite.manifest.ts` (`prospera-stories@0acfd14`,
+  #1007) : `publie` + `comptabilite.facture.desinscrite`, trois routes de lecture neuves (`…/ecritures/{ecritureId}/pieces`,
+  `…/pieces/{pieceId}/ecritures`, `…/pieces/justification`) ; droits inchangés. Prévenu par message.
+- **→ D (2026-11-27, STORY-338), information pour STORY-337** : la liaison écriture ↔ pièce est servie (comptabilité
+  #21). Lire `GET /api/v1/dossiers/{dossierId}/exercices/{exerciceId}/pieces/justification?comptes=&du=&au=` avec le
+  jeton du membre ; `granularite: PIECE` (pièces et montants par compte) ou `COMPTE_PERIODE` + `raison` ; retomber aussi sur
+  le compte × période sur 403 `COMPTABILITE_NOT_ENTITLED`, 404, 5xx et délai. Détail : `stories/STORY-338.md`. Prévenu par
+  message.
 - **→ B (2026-11-26, STORY-324) : la pièce de validation du client dans la GED (`document-service`)** — **information,
   non bloquante**. Depuis fiscal #74 (`060c85c`), le cabinet range l'accord du client (document signé, courriel, capture) dans
   sa GED par `POST /api/v1/ged/cabinet/pieces` (inchangé) ; le fiscal n'en garde que la référence (`gedPieceId`,
@@ -593,6 +615,16 @@ seulement.
 
 ## Réponses aux demandes reçues
 
+- **← D (2026-11-26, STORY-334, D-334-8) : ouvrir `DEPOSEE → A_DEPOSER` sur un rejet consigné** — ✅ **servie en tête de
+  STORY-338, PR à part** : fiscal **#86** (`ffd6f2a` sur `dev`, sur `69d7e65` de D). Dans `revenir`, de `DEPOSEE` vers
+  `A_DEPOSER` seulement : `verifierRejetAuRetour(await rejets.rejetDe(orgId, id, versionCourante.numero), { obligationId, numero })` ;
+  la version n scellée intacte, le pointeur `{ numero: n + 1, nature: 'RETRANSMISSION', versionId: null, rectificative: null }`
+  posé dans la comparaison-échange (état et pointeur) ; l'acte `OBLIGATION_RETOUR_ARRIERE` cite `rejetId` ; motif toujours
+  exigé ; le dépôt suivant scelle la n + 1. `NATURES_VERSION` gagne `RETRANSMISSION` (votre `RetransmissionDto` le rend ; sa
+  description « quand le retour du cycle sera ouvert (C) » est à mettre à jour chez vous). Les doublures de C passent
+  `PreuvesDeRejet` (par défaut : aucun rejet). Prévenu par message.
+- **← A (25/11, FE-158)** : toujours ouverte (D-338-12) — elle n'entre pas dans 338 ; aucune autre story de C au lot 7 n'ouvre la
+  comptabilité : à placer par la session de groupe.
 - **← D (2026-11-26, STORY-333, D-333-3) : brancher la garde `ACCUSE_REQUIS` dans `CycleObligationsService.transitionner`** —
   ✅ **servie en tête de STORY-339, PR à part** : fiscal **#83** (`74b33ec` sur `dev`, sur `fc317a1` de D). À `vers ===
   'ACCUSE_RECU'`, après les gardes d'état et les anomalies : `verifierAccuseAuRecu(await preuves.accuseDe(orgId, id,
@@ -615,7 +647,12 @@ seulement.
 - **← B (2026-11-26, STORY-1124) : publier `comptabilite.facture.desinscrite@1` depuis `prospera-comptabilite-service`**
   (dans la transaction de `BrouillardService.abandonner`, par l'outbox, si `surAbandon` trouve la pièce qui portait
   `inscription.ecritureId` ; schéma au journal de B et dans `prospera-ocr-service/contrat/consommes/`, à reprendre tel quel)
-  — **notée, placée en STORY-338**, la prochaine story de C dans la comptabilité (c'est le D-1100-3 que C avait nommé).
+  — ✅ **servie par STORY-338** : prospera-comptabilite-service #21 (`58803f5` sur `dev`). `BrouillardService.abandonner`
+  publie `comptabilite.facture.desinscrite` v1 par l'outbox, dans la transaction de l'abandon, seulement si `surAbandon` trouve
+  la pièce du lot qui portait `inscription.ecritureId` ; clé `organisationId`, en-têtes posés par le relais ; schéma
+  `contrat/schemas/comptabilite.facture.desinscrite.v1.json`, **copie à l'octet** du vôtre (sha256 `86a50e6f…2ecf`, gardée par
+  un test) ; sujet neuf au registre. Prévenu par message (session `moneyvibes-apps-be`). À votre charge : la recopie du
+  manifeste `comptabilite` 0.6.0 au catalogue (« Demandes » ci-dessous).
 
 - **← D (2026-11-25, STORY-348) : la date de collecte des cotisations sociales au paquet fiscal Togo** — ✅ **servie par
   STORY-317** : balance-service #171 (`44be0c1` sur `dev`), source `scripts/referentiels/sources/paquet-fiscal-togo-2026.json`,
@@ -874,6 +911,11 @@ seulement.
 
 ## ⚠ Contrats
 
+- **2026-11-27 (STORY-338), PUBLIÉ** (comptabilite #21, `58803f5`) — conforme à l'annonce (#1007), avec deux précisions
+  (fiche, D-338-13, D-338-14) : un 403 de la GED se dit **422 `PIECE_GED_NON_CONSULTABLE`** (`details.codeAmont`) ; la
+  justification sans liaison rend **`periode: null`**. **→ B** : recopie du manifeste `comptabilite` 0.6.0 ; le fait
+  `desinscrite` est sur Kafka. **→ D (337)** : la route de la justification est servie.
+- **2026-11-27 (← D, D-334-8), PUBLIÉ** (fiscal #86, `ffd6f2a`) — conforme à l'annonce (#1011), sans écart.
 - **2026-11-26 (← D, D-334-8, servie en tête de STORY-338), ANNONCÉ avant la fusion** — **« Déposée » revient à « À déposer »
   sur un rejet consigné** (`prospera-fiscal-service`, REST ; PR à part, branche `MNV-334-rejet-requis`). **Ajouts seuls** :
   `POST /api/v1/obligations/{id}/retour` admet `vers: A_DEPOSER` depuis `DEPOSEE`, et seulement depuis lui : sans rejet
@@ -1752,6 +1794,17 @@ coup ») ; détail dans `stories/STORY-980.md`, « Décisions retenues par défa
   le KYC de la compagnie à chaque requête, comme dans `assurance-service`, il le dit.
 
 ## Pièges rencontrés
+
+- **(STORY-338, 27/11) un banc de conformité qui réemploie une taxe déjà déposée par un autre cas** : `obligation('TVA')` du banc
+  des versions retrouve l'obligation que le premier cas a déjà scellée en version 1 ; un dépôt de plus rejoue le numéro 1
+  (`E11000 version_de_l_obligation`). Prendre une taxe qu'aucun autre cas n'emploie (`IRCM`).
+- **(STORY-338)** comptabilité : `src/module.manifest.spec.ts` compare la copie au checkout PARTAGÉ `prospera-stories` (379
+  commits de retard sur ce poste) : il rougit sous Node 25 en local ; dans l'image (sans `prospera-stories`), il est ignoré.
+  Vérifier la copie par `git show origin/main:manifestes/… | cmp` depuis le worktree `_wt-c-stories`.
+- **(STORY-338)** la suite du socle de la comptabilité sous la charge : la course « une clôture au milieu de dix lettrages »
+  (`cloture.socle-spec.ts`, STORY-970) a rendu 409 au lieu de 201 dans la suite entière ; jouée seule, elle passe (29/29, deux fois) : une course sensible à la charge, pas une régression ; la rejouer seule avant de conclure.
+- **(STORY-338)** une mutation qui retire une ligne rend un paramètre inutilisé (`TS6133`) ou laisse un type nullable : la
+  réécrire en condition fausse (`numero < 0`, `dossierId === ''`) plutôt que de supprimer la ligne.
 
 - **(STORY-339, 26/11) un `… &` lancé par l'outil Bash survit à l'appel, et une deuxième campagne de mutations sur le même
   checkout lit comme « original » le fichier que la première a muté** : à la restauration, la mutation serait réécrite pour de
