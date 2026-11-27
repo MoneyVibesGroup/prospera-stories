@@ -451,8 +451,21 @@
     la plateforme expire le **2027-01-01** (la centrale de simulation refuse alors de démarrer, et les tests qui vérifient
     une licence après cette date rougissent) : publier de nouveaux vecteurs dans `prospera-plateforme` (part « moteur » de
     B) avant le 08/01. Rituel : aucune demande neuve à B chez A, C et D.
-  - **Suivante : STORY-1133** (n° 15 : l'interface de l'agent publiée), précédée si la session de groupe le décide des
-    nouveaux vecteurs de test de la plateforme (ci-dessus).
+  - **15 — STORY-1133 (27/11) — faite** : **l'interface de l'agent publiée**, et des vecteurs de test qui n'expirent plus en
+    silence. **Vecteurs d'abord** (bloquant de 1132) : **plateforme #43** (`b98d1d0`, étiquette **`vecteurs-v2`** : clés de
+    test `centrale-test-2026-2036`, `ci-test-2026-2036`, 2026-01-01 → 2036-01-01, générées par le script, validité longue et
+    fixe, D-1133-1), **centrale #3** (`a790a46`), **agent #2** (`5998597`) ; **garde des 60 jours** dans les trois dépôts (heure
+    du système, exprès ; hors la clé d'un vecteur `CLE_HORS_VALIDITE`). Seuls centrale et agent épinglent ces vecteurs (recherche
+    sur tout le poste et les dépôts non clonés) : aucune demande à C ni D. **Puis l'interface** : **plateforme #44** (`c481f00`,
+    étiquette **`contrats-agent-v1`** : `contrats/agent/`, le contact et les routes de l'exécuteur), **centrale #4** (`9942cf1`,
+    le contact jugé par la copie du contrat), **agent #3** (`ea634af`, **le relais réel** : l'exécuteur de la plateforme consomme
+    `paiement.abonnement.echeance.encaissee`, le contact relaie, les acquittements reviennent par le volume) ; contrat annoncé
+    avant le code (stories #1051, `e791a31`). Node 25 : plateforme 697/697, centrale 74/74, agent 78/78 ; mutations 7/7, 8/8,
+    5/5, 4/4, 5/5, 23/23 ; Node 24 (étage `verification`) ; pile `grp-b --profile relais` **9/9** : un fait produit par le code de
+    paiement, publié sur Kafka, est acquitté en 15 s et ouvre `fiscalite` sur site en 29 s (licence n° 16), rejeu sans effet.
+    Verrou 15:31 → 15:36. Fiche D-1133-1 → 13. `sante` et `migrer` d'`instance` : pas ici (D-1133-11 : `migrer` → STORY-1135,
+    `sante` → la supervision d'EPIC-148). Rituel : aucune demande neuve à B chez A, C et D.
+  - **Suivante : STORY-1134** (n° 16 : l'instance garde la confiance, coupée de Money Vibes, EPIC-149).
 
 ### Lot 6 (ouvert le 2026-11-24)
 
@@ -2515,6 +2528,12 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les droits `reprise:*` n'entrent au catalogue de tenant qu'à ce moment (D-949-1).
 
 ## ⚠ Contrats
+
+- **2026-11-27, STORY-1133 (n° 15) — LIVRÉ** (plateforme #43 `b98d1d0` `vecteurs-v2`, #44 `c481f00` `contrats-agent-v1` ;
+  centrale #3 `a790a46`, #4 `9942cf1` ; agent #2 `5998597`, #3 `ea634af`) : conforme à l'annonce ci-dessous, sans écart.
+  **→ C, D** : information seulement, aucun contrat que vous lisez ne change. **→ A** : information (Dev A bâtira
+  `sauvegardes/` et `support/` sur `contrats-agent-v1` et le volume d'échange décrit au README de l'agent) ; aucun écran
+  débloqué.
 
 - **2026-11-27, STORY-1136 (n° 18) — l'avoir émis réduit la Créance de sa facture, annoncé AVANT la fusion du code**
   (`prospera-paiement-service`, branche `MNV-1136` ; fiche `stories/STORY-1136.md`, D-1136-1 → 11). Lu par **D**
@@ -4745,6 +4764,14 @@ STORY-1073 le 24/11, **sont rendus à B le 25/11** (passation ci-dessous).
   les réglages GitHub du dépôt.
 
 ## Pièges rencontrés
+
+- **Une copie faite depuis une BRANCHE de la plateforme fait rougir « copié à une étiquette »** (STORY-1133) : c'est
+  voulu pour éprouver un contrat avant de le figer (`ETIQUETTE=origin/MNV-<n> npm run plateforme:copier`), mais il faut
+  recopier à l'étiquette avant la fusion, puis rejouer le test.
+- **Un relais Kafka relit un offset pas encore validé après un redémarrage** (STORY-1133, pile) : l'exécuteur de la
+  plateforme a relu l'offset 2 ; le dédoublonnage par `eventId` dans le magasin (pas l'offset) est ce qui tient.
+- **Le journal de l'agent commence par `HORLOGE_INITIALISEE`** : un test qui lit « la première entrée » doit filtrer par
+  type d'événement.
 
 - **La clé de test `centrale-test-2026` expire le 2027-01-01** (STORY-1132) : un test qui vérifie une licence ou un état
   voulu à une heure de 2027 rougit (`CLE_EXPIREE`) alors que la dérivation est juste. Les tests de 1132 gardent l'heure de
