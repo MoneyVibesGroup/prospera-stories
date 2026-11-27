@@ -847,6 +847,15 @@ ni `prospera-auth-service` : tous deux sont cédés à B (voir Passations).
   serveur ne publie que le code) ; (5) `EXERCICE_NON_OUVERT` dès la sonde `GET …/lots` (aujourd'hui 200, le refus tombe au
   dépôt). À placer au lot 7 de C quand l'utilisateur l'ouvre.
 - → B (25/11, AP-55) — ✅ **close (26/11)** : autoriser `Idempotency-Key` dans le CORS du BFF `admin-panel`, servi par admin-panel #44 (`0dfcf43`, `MNV-917`).
+- → C (27/11, FE-097, `prospera-balance-service`, registre des immobilisations) — **ouverte, non bloquante** (la maquette est
+  validée et l'écran tient sans ; envoyée sur consigne de l'utilisateur, « envoie cela à C ») : (1) la liste `GET …/immobilisations`
+  ne porte ni l'amortissement cumulé, ni le net, ni la dotation de l'exercice : l'écran doit appeler `GET …/{id}/plan` bien par
+  bien (15 appels sur le dossier de démo) ; (2) le registre ne sait pas dire qu'un terrain ne s'amortit pas (durée obligatoire,
+  valeur résiduelle < valeur d'origine) : un indicateur « non amortissable » au contrat ; (3) pas de route de mise en service en
+  lot : l'écran boucle, un appel par bien, et dit un refus partiel ligne par ligne ; (4) aucune durée usuelle par catégorie de
+  bien (route chez C, contenu à fixer par le PO) ; (5) `compteAmortissement` et `compteDotation` sont obligatoires à
+  l'acquisition et jamais proposés : l'écran les déduit (28 + suffixe du compte, 681). Détail dans `frontend-stories/FE-097.md`,
+  « Écarts backend ». À placer au lot 7 de C quand il l'ouvre, avant le code de FE-097 si possible (le point 1 surtout).
 ## Questions à l'utilisateur ou au PO
 
 - **Parcours réel du dossier de financement (2026-11-21), avec le choix retenu par défaut** (aucune ne bloque l'écriture des fiches) :
